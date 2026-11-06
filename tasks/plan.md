@@ -37,7 +37,7 @@ T1 scaffold
 
 ### Phase 1: Playable slice
 - [x] T1: Scaffold project
-- [ ] T2: Core rules for a kana run
+- [x] T2: Core rules for a kana run
 - [ ] T3: Playable kana run on laptop
 - [ ] T4: Touch controls and GitHub Pages deploy
 

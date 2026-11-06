@@ -28,9 +28,9 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 - `run.ts`: builds 20 rows from a seed. Prompts are chosen uniformly for now, with 2 options for rows 1–10 and 3 options after that. Distractors are random and never the correct romaji.
 
 **Acceptance criteria:**
-- [ ] Scoring matches the spec table at every streak boundary (1, 2, 3, 4, 5, 7, 8) and the +150 cap. A wrong answer applies `max(5, ceil(30%))` with a floor of 0.
-- [ ] The same seed gives an identical run, and different seeds give different runs.
-- [ ] No row has a duplicate option or a distractor equal to the answer.
+- [x] Scoring matches the spec table at every streak boundary (1, 2, 3, 4, 5, 7, 8) and the +150 cap. A wrong answer applies `max(5, ceil(30%))` with a floor of 0.
+- [x] The same seed gives an identical run, and different seeds give different runs.
+- [x] No row has a duplicate option or a distractor equal to the answer.
 
 **Verification:** `npm test -- core`
 **Dependencies:** T1
