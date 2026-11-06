@@ -220,7 +220,7 @@ export function applyWrong(army: number): GateResult {
 12. A request with another user's session (or none) cannot read or write the progress row. This is checked manually against RLS.
 
 ## Out of Scope (v1)
-Maths gates, English→kanji gates, sound/TTS, multi-user, sign-up flow, password reset UI, realtime sync, vocabulary (multi-kanji words), enemies or obstacles between gates, multiplayer, leaderboards, accounts, backend, 3D art, native app.
+Maths gates, English→kanji gates, sound/TTS, multi-user, sign-up flow, password reset UI, realtime sync, vocabulary (multi-kanji words), enemies or obstacles between gates, multiplayer, leaderboards, any backend beyond the Supabase progress table, 3D art, native app.
 
 ## Open Questions
 1. ~~Hosting~~: resolved, public repo on GitHub Pages.
