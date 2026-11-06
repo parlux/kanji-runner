@@ -1,9 +1,12 @@
+import { crowdWidth } from "../core/crowd";
 import { gateOpenings, rowPosition, type RunState } from "../core/sim";
 import { VIEW_DISTANCE } from "../core/tuning";
 import type { Scene } from "./scenes";
 
 const FONT = `"Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic", system-ui, sans-serif`;
 const MAX_DRAWN_SOLDIERS = 200;
+/** How long (in track distance) a clip-loss pop-up stays up. */
+const CLIP_POPUP_DIST = 0.8;
 const COLORS = {
   bg: "#111",
   track: "#1d2230",
@@ -134,7 +137,23 @@ function renderRun(ctx: Ctx, w: number, h: number, run: RunState): void {
     );
   }
 
-  renderArmy(ctx, run.x * w, armyY, run.army);
+  const radius = (crowdWidth(run.army) * w) / 2;
+  renderArmy(ctx, run.x * w, armyY, radius, run.army);
+  if (run.lastClip) {
+    const t = (run.dist - run.lastClip.dist) / CLIP_POPUP_DIST;
+    if (t < 1) {
+      ctx.globalAlpha = 1 - t;
+      text(
+        ctx,
+        `−${run.lastClip.loss}`,
+        run.x * w,
+        armyY - radius * 0.6 - 24 - 30 * t,
+        26,
+        COLORS.bad,
+      );
+      ctx.globalAlpha = 1;
+    }
+  }
 
   // HUD
   text(
@@ -149,14 +168,22 @@ function renderRun(ctx: Ctx, w: number, h: number, run: RunState): void {
     text(ctx, `streak ${run.streak}`, w - 60, 24, 16, COLORS.good);
 }
 
-function renderArmy(ctx: Ctx, cx: number, cy: number, army: number): void {
+/** A blob of up to 200 dots filling a squashed disc of the crowd's width. */
+function renderArmy(
+  ctx: Ctx,
+  cx: number,
+  cy: number,
+  radius: number,
+  army: number,
+): void {
   const n = Math.min(army, MAX_DRAWN_SOLDIERS);
-  const r = 4;
+  // dot size shrinks as the blob fills up, within readable limits
+  const r = Math.max(2, Math.min(5, radius / Math.sqrt(Math.max(n, 1)) / 1.1));
   ctx.fillStyle = COLORS.soldier;
   ctx.beginPath();
   for (let k = 0; k < n; k++) {
-    // sunflower packing, squashed for a top-down-ish look
-    const dist = 6 * Math.sqrt(k);
+    // sunflower packing scaled to the crowd radius, squashed for a top-down-ish look
+    const dist = (radius - r) * Math.sqrt((k + 0.5) / n);
     const angle = k * 2.39996;
     const x = cx + dist * Math.cos(angle);
     const y = cy + dist * Math.sin(angle) * 0.6;
@@ -164,6 +191,5 @@ function renderArmy(ctx: Ctx, cx: number, cy: number, army: number): void {
     ctx.arc(x, y, r, 0, Math.PI * 2);
   }
   ctx.fill();
-  const radius = 6 * Math.sqrt(n) * 0.6;
-  text(ctx, String(army), cx, cy + radius + 22, 22);
+  text(ctx, String(army), cx, cy + radius * 0.6 + 22, 22);
 }

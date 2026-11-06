@@ -48,7 +48,7 @@ T1 scaffold ─ T2 core rules ─ T3 lane slice (done)
 
 ### Phase 1b: Crowd runner rework
 - [x] R1: Continuous steering through wall gates
-- [ ] R2: Crowd width and wall clipping
+- [x] R2: Crowd width and wall clipping
 - [ ] R3: Track layout and hazards
 - [ ] R4: Drag steering and GitHub Pages deploy
 
