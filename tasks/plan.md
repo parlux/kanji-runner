@@ -1,49 +1,65 @@
 # Implementation Plan: Kanji Runner
 
-Spec: `SPEC.md` (approved 2026-11-07). Tasks: `tasks/todo.md`.
+Spec: `SPEC.md` (revision 2, approved 2026-11-07). Tasks: `tasks/todo.md`. Rework rationale: `docs/ideas/crowd-runner-rework.md`.
 
 ## Overview
 Build the game in vertical slices:
-1. A playable kana-only run on the laptop, deployed to GitHub Pages so the feel can be tested on the phone early.
-2. Real kanji data plus the learning loop (review boxes, levels).
-3. The boss and polish.
-4. Supabase sync last. It's optional by design, so everything before it works without it.
+1. ~~A playable kana-only run~~ (done). The playtest showed lane picking felt like timed flash cards.
+2. **Rework (Phase 1b):** continuous steering, crowd width and hazards, then drag + deploy, then a phone feel test, then squad charges. The rework is proven fun on kana before anything is built on top of it.
+3. Real kanji data plus the learning loop (review boxes, levels).
+4. The boss, the balance bot and polish.
+5. Supabase sync last. It's optional by design, so everything before it works without it.
 
 ## Architecture Decisions
-- **Pure core, thin shell.** `src/core` holds every rule as a pure function: `(state, input, rng) → state`. `src/game` only renders and turns input into lane changes. This makes the rules TDD-able and keeps the balance simulation fast.
-- **One `Progress` type is the contract.** Storage, merge, run building and sync all read and write the same versioned `Progress` shape, defined once in `src/core/types.ts` during Task 5.
+- **Pure core, thin shell.** `src/core` holds every rule as a pure function: `(state, input, rng) → state`. `src/game` only renders and turns input into a steering target. This makes the rules TDD-able and lets the balance bot drive the real sim.
+- **Continuous position, not lanes.** `RunState` holds the crowd centre `x` and a `targetX`. Every choice (gate opening, squad) is "nearest to `x` at the decision point". One rule serves both question shapes.
+- **Track is data.** `track.ts` turns a seed into a list of beats (question, hazard, calm stretch). `sim.ts` only consumes beats, so layouts are property-testable without running the game.
+- **Clipping is separate from answers.** Clip losses go straight to the army count and never touch the streak, results or SRS. This keeps the practice signal clean.
+- **Renderer reads a view model.** `viewOf(state)` hides squad correctness until resolution. That makes the honesty rule testable instead of a promise.
+- **One `Progress` type is the contract.** Storage, merge, run building and sync all read and write the same versioned `Progress` shape, defined once in `src/core/types.ts` during Task 7.
 - **Generated data is committed.** The data pipeline is dev-only, so the runtime and CI never download EDRDG files.
 - **Fixed-timestep loop.** The simulation runs on a fixed step, decoupled from rendering, so speed and timing are the same at any frame rate.
-- **Kana data is hand-written** (`src/data/kana.json`, about 140 entries). It needs no pipeline, which unblocks the first playable slice.
 
 ## Dependency Graph
 ```
-T1 scaffold
- ├─ T2 core rules (rng, scoring, kana data, simple run builder)
- │   └─ T3 playable kana slice (loop, render, input, scenes)
- │       └─ T4 touch + Pages deploy ──────────────┐
- ├─ T5 data pipeline (kanji.json) [parallel-safe] │
- │   └─ T6 kanji gates + distractors              │
- │       └─ T7 SRS + local storage                │
- │           └─ T8 progression + placement        │
- │               └─ T9 boss + balance sim         │
- │                   └─ T10 summary + polish      │
- └─ T11 merge (pure) [parallel-safe after T7 types]
-     └─ T12 sync module + schema
-         └─ T13 login UI + wiring ◄────────────────┘ (needs deployed site + Supabase setup)
+T1 scaffold ─ T2 core rules ─ T3 lane slice (done)
+                                 └─ R1 continuous steering + wall gates
+                                     └─ R2 crowd width + clipping
+                                         └─ R3 track layout + hazards
+                                             └─ R4 drag + Pages deploy ──────────┐
+                                                 └─ ◆ Checkpoint A: feel test    │
+                                                     └─ R5 squad charges         │
+                                                         └─ ◆ Checkpoint A2      │
+ T5 data pipeline [parallel-safe, needs only T1]                                 │
+  └─ T6 kanji gates + distractors (after A2)                                     │
+      └─ T7 SRS + local storage                                                  │
+          ├─ T8 progression + placement                                          │
+          ├─ T9 boss + balance bot (needs R5) ─ T10 summary + polish             │
+          └─ T11 merge [parallel-safe] ─ T12 sync module ─ T13 login + wiring ◄──┘
 ```
 
 ## Task List
 
-### Phase 1: Playable slice
+### Phase 1: Playable slice (done)
 - [x] T1: Scaffold project
 - [x] T2: Core rules for a kana run
-- [ ] T3: Playable kana run on laptop
-- [ ] T4: Touch controls and GitHub Pages deploy
+- [x] T3: Playable kana run on laptop (lane model, now replaced)
+- ~~T4~~: superseded by R4
 
-### Checkpoint A: playtest on laptop and phone
-- [ ] Tests, lint and build pass
-- [ ] Owner plays it on the laptop and the phone and confirms speed, lane feel and readability before we build on top
+### Phase 1b: Crowd runner rework
+- [ ] R1: Continuous steering through wall gates
+- [ ] R2: Crowd width and wall clipping
+- [ ] R3: Track layout and hazards
+- [ ] R4: Drag steering and GitHub Pages deploy
+
+### Checkpoint A: feel test on the phone (spec criterion 16)
+- [ ] Feels like a crowd runner, prompts readable while steering, fun with known answers
+- [ ] **Go/no-go:** if the feel is wrong, revisit the idea doc before R5
+
+- [ ] R5: Squad charges
+
+### Checkpoint A2: squads
+- [ ] Squads are fun and give nothing away. Runs with squads beat runs without.
 
 ### Phase 2: Learning loop
 - [ ] T5: Kanji data pipeline
@@ -56,11 +72,11 @@ T1 scaffold
 - [ ] Kanji level 2 unlocks via placement and via the 80% rule
 
 ### Phase 3: Boss and polish
-- [ ] T9: Boss sizing, clash and balance simulation
+- [ ] T9: Boss sizing, clash and balance bot
 - [ ] T10: Summary screen, streak feedback and attribution
 
 ### Checkpoint C: v1 local complete
-- [ ] Spec success criteria 1–9 met
+- [ ] Spec success criteria 1–12 and 16 met
 - [ ] Owner playtest
 
 ### Phase 4: Sync
@@ -69,23 +85,27 @@ T1 scaffold
 - [ ] T13: Login form and sync wiring
 
 ### Checkpoint D: complete
-- [ ] Spec success criteria 10–12 met (cross-device check, RLS check)
+- [ ] Spec success criteria 13–15 met (deployed, cross-device check, RLS check)
 
 ## Risks and Mitigations
 | Risk | Impact | Mitigation |
 |---|---|---|
-| The game isn't fun at the spec's speed and timing | High | Playable slice first (T3), then Checkpoint A playtest. All timing lives in `tuning.ts`. |
-| KANJIDIC glosses are long or odd (e.g. "Chinese numeral one") | Med | T5 picks the shortest clean gloss and writes a report of the questionable ones. `order-overrides.json` gets a sibling gloss-overrides map. |
-| Balance thresholds are hard to hit | Med | The simulation is a unit test, so `K` and the caps get tuned quickly against it. |
+| Drag steering feels bad on the phone | High | R4 comes before squads, and Checkpoint A is a go/no-go. `DRAG_GAIN`, `STEER_MAX_SPEED` and easing live in `tuning.ts`. |
+| Reading prompts while dodging is too much | High | Calm stretch before every question. Lengthen `CALM_DISTANCE` at Checkpoint A rather than slowing the whole run. |
+| Still not fun when the answers are known | High | Checkpoint A tests it explicitly with all-easy runs. If it fails, the problem is the track, not the quiz: revisit the idea doc before R5. |
+| Replacing lanes breaks `sim.test.ts` (151 lines) | Med | R1 rewrites the lane tests as position tests in the same task. Scoring and run-builder tests are unaffected. |
+| R3 is too large | Med | Split saws into their own task if blocks + layout already fill a session. |
+| Squad answers leak through visuals | Med | View-model honesty test (R5) plus the owner check at Checkpoint A2. |
+| Balance thresholds are hard to hit with clipping | Med | The bot drives the real sim. Tune `K`, `EXPECTED_SURVIVAL` and the hazard widths against it. |
+| KANJIDIC glosses are long or odd (e.g. "Chinese numeral one") | Med | T5 picks the shortest clean gloss and writes a report of the questionable ones. A gloss-overrides map backs it up. |
 | Japanese glyphs render badly on Android without a webfont | Low | Check at Checkpoint A on the real phone. A subset webfont is the fallback (ask first). |
 | Supabase free project pauses | Low | Local-first design: sync failure only changes the status label. |
-| Repo still private, so Pages won't deploy | Blocks T4 | Owner runs `gh repo edit … --visibility public` before T4. |
-| The `browser-test` skill isn't available in this session | Low | Manual browser checks by the owner at the checkpoints. |
+| Repo still private, so Pages won't deploy | Blocks R4 | Owner runs `gh repo edit … --visibility public` before R4. |
 
 ## Parallelization
-- T5 (data pipeline) depends only on T1. It can run alongside T2–T4.
+- T5 (data pipeline) depends only on T1. It can run alongside the rework.
 - T11 (merge) depends only on the `Progress` type from T7.
-- Everything else is sequential.
+- R1–R5 are strictly sequential: each one changes `sim.ts`.
 
 ## Open Questions
-- None blocking. Before T4 the owner must make the repo public and enable Pages. Before T13 the owner must do the Supabase setup (spec, "One-time manual setup").
+- None blocking. Before R4 the owner must make the repo public and enable Pages. Before T13 the owner must do the Supabase setup (spec, "One-time manual setup").

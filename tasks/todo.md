@@ -1,79 +1,114 @@
 # Tasks: Kanji Runner
 
-Plan: `tasks/plan.md`. Spec: `SPEC.md`.
+Plan: `tasks/plan.md`. Spec: `SPEC.md` (revision 2).
 Every task: `npm test && npm run lint && npm run build` pass before it is checked off.
 
-## Phase 1: Playable slice
+## Phase 1: Playable slice (done)
 
-### Task 1: Scaffold project
-**Description:** Set up Vite + TS (strict) + Vitest + ESLint/Prettier with the spec's npm scripts, an `index.html` with a full-screen canvas, `.gitignore` (including `.env.local`), and `.env.example`.
+- [x] **Task 1: Scaffold project.** Vite + strict TS + Vitest + ESLint/Prettier, full-screen canvas, `base: /number-runner/`.
+- [x] **Task 2: Core rules for a kana run.** `rng`, `tuning`, `scoring`, `kana.json`, seeded `run.ts`.
+- [x] **Task 3: Playable kana run on laptop.** Fixed-step loop, canvas renderer, lanes, scenes. Owner playtested it: lane picking felt like timed flash cards, which led to spec revision 2. Its lane model is replaced by R1.
+- ~~Task 4: Touch controls and GitHub Pages deploy~~. Superseded by R4 (drag replaces tap/swipe; the deploy part moves there unchanged).
 
-**Acceptance criteria:**
-- [x] All spec commands exist. `npm test` runs one trivial test.
-- [x] `npm run dev` shows a blank, resizable canvas filling the viewport.
-- [x] Vite `base` is `/number-runner/` for builds.
+## Phase 1b: Crowd runner rework
 
-**Verification:** `npm test`, `npm run lint`, `npm run build`. Open the dev server.
-
-**Dependencies:** None
-**Files:** `package.json`, `tsconfig.json`, `vite.config.ts`, `eslint.config.js`, `index.html`, `src/main.ts`, `.gitignore`, `.env.example`
-**Scope:** M (config-heavy, low risk)
-
-### Task 2: Core rules for a kana run
-**Description:** TDD the pure pieces a kana-only run needs:
-- `rng.ts`: a seeded PRNG.
-- `tuning.ts`: all tuning constants.
-- `scoring.ts`: the streak/payoff curve, the cap and the wrong-answer penalty.
-- `kana.json`: hand-written hiragana and katakana (with dakuten) mapped to romaji.
-- `run.ts`: builds 20 rows from a seed. Prompts are chosen uniformly for now, with 2 options for rows 1–10 and 3 options after that. Distractors are random and never the correct romaji.
+### Task R1: Continuous steering through wall gates
+**Description:** Replace the lane index with a continuous crowd position.
+- `RunState` gets `x` (crowd centre) and `targetX` in place of `lane`. `steer` becomes `setTarget` / `nudgeTarget`.
+- `stepRun` moves `x` towards `targetX` at most `STEER_MAX_SPEED`, with light easing, and clamps it to the track.
+- Gate rows become walls: the opening layout comes from `GATE_OPENING_2` / `GATE_OPENING_3`. The answer is the opening nearest `x` when the crowd reaches the wall. There is no clipping yet; the crowd is a point.
+- Input: holding ←/→ moves the target continuously (keydown/keyup state, not single presses).
+- Render: the crowd at `x`, and walls with labelled openings instead of lane bands.
 
 **Acceptance criteria:**
-- [x] Scoring matches the spec table at every streak boundary (1, 2, 3, 4, 5, 7, 8) and the +150 cap. A wrong answer applies `max(5, ceil(30%))` with a floor of 0.
-- [x] The same seed gives an identical run, and different seeds give different runs.
-- [x] No row has a duplicate option or a distractor equal to the answer.
+- [ ] The crowd never moves faster than `STEER_MAX_SPEED`, and never leaves [0, 1] (tested).
+- [ ] The chosen answer is the opening nearest the crowd centre, including when the centre is on solid wall (tested).
+- [ ] Holding ← or → glides the crowd smoothly in the browser, with no lane snapping.
 
-**Verification:** `npm test -- core`
-**Dependencies:** T1
-**Files:** `src/core/{rng,tuning,scoring,run,types}.ts`, `src/data/kana.json`, `tests/core/*.test.ts`
+**Verification:** `npm test -- sim`. Manual laptop run.
+**Dependencies:** T3
+**Files:** `src/core/{sim,tuning}.ts`, `src/game/{input,render}.ts`, `tests/core/sim.test.ts`
 **Scope:** M
 
-### Task 3: Playable kana run on laptop
+### Task R2: Crowd width and wall clipping
 **Description:**
-- A fixed-timestep loop.
-- A canvas renderer: track, lanes, gate rows with the prompt banner and options, the army as up to 200 circles with a count label.
-- Keyboard input: ←/→ to change lane, Enter/Space to start, P to pause.
-- Scenes: start → run → a basic end screen showing army, accuracy and seed.
-- Speed ramps from 1.0× to 1.6×. When a row passes the army, the lane's option is resolved through `scoring.ts`.
+- `crowd.ts`: `crowdWidth(army)` and `clipLoss(army, x, w, solids)` per the spec.
+- At a wall, clip losses are applied first, then the answer is scored on the remaining army. Clipping never changes the streak or results.
+- Render the crowd as a blob of up to 200 dots spread over its width, plus a loss pop-up when soldiers are clipped.
 
 **Acceptance criteria:**
-- [ ] A full 20-row kana run plays start to finish with arrow keys only. An army of 0 ends the run.
-- [x] Row lead time is about 3.0 s at the start and about 1.8 s at the end (tuning values).
-- [x] Runs at 60 fps on the laptop (devtools performance check).
+- [ ] Width follows `clamp(0.06, 0.3·√army, 0.30)`. Clip loss is `ceil(army × overlap / w)`, and 0 with no overlap (tested at the edges).
+- [ ] A max-width crowd fits a 2-answer opening without loss and clips a centred 3-answer opening (tested).
+- [ ] Clipping leaves the streak and the per-question results untouched (tested).
 
-**Verification:** Tests, lint and build pass. Manual playthrough in the browser.
-**Dependencies:** T2
-**Files:** `src/game/{loop,render,input,scenes}.ts`, `src/main.ts`
+**Verification:** `npm test -- crowd sim`. Manual: grow the army and watch it get harder to thread.
+**Dependencies:** R1
+**Files:** `src/core/{crowd,sim,tuning}.ts`, `src/game/render.ts`, `tests/core/crowd.test.ts`
 **Scope:** M
 
-### Task 4: Touch controls and GitHub Pages deploy
+### Task R3: Track layout and hazards
 **Description:**
-- Touch input: tap the left or right half, or swipe.
-- Layout for a portrait phone viewport, with `touch-action: none` and no zoom or scroll.
-- A GitHub Actions workflow that builds and deploys to Pages on push to `main`.
+- `track.ts` builds the beat layout from the seed: 14 questions (2 answers for 1–7, 3 after), 1–2 hazard beats between questions, and a calm stretch of `CALM_DISTANCE` before each question.
+- Hazards: block (static, 0.15–0.35 wide) and saw (0.10 wide, sweeping). Every hazard beat leaves a gap ≥ `CROWD_MAX_W` at all times.
+- `sim.ts` applies hazard clipping as the crowd passes each hazard. The army reaching 0 ends the run.
+- Tuning: `ROWS_PER_RUN = 14`, `TWO_OPTION_ROWS = 7`, `MAX_SPEED_MUL = 1.3`. Spacing is set so a run takes about 2–3 minutes.
+- Render blocks and moving saws.
 
 **Acceptance criteria:**
-- [ ] A full run is playable with touch only in a narrow mobile viewport.
+- [ ] Property test over 1,000 seeds: every hazard beat leaves a passable gap ≥ `CROWD_MAX_W` (for saws, at every point of their sweep), and no hazard falls inside a calm stretch.
+- [ ] Same seed → identical track; different seeds → different tracks.
+- [ ] A full run plays start to finish on the laptop with hazards between the questions.
+
+**Verification:** `npm test -- track sim`. Manual laptop run.
+**Dependencies:** R2
+**Files:** `src/core/{track,sim,run,tuning}.ts`, `src/game/render.ts`, `tests/core/track.test.ts`
+**Scope:** M–L (the largest rework task; split saws into their own task if it runs long)
+
+### Task R4: Drag steering and GitHub Pages deploy
+**Description:**
+- Relative drag: pointer movement × `DRAG_GAIN` moves the target. Touching doesn't jump the crowd.
+- A portrait phone layout with `touch-action: none` and no zoom or scroll. Tap to start and pause.
+- A GitHub Actions workflow that builds and deploys to Pages on push to `main` (carried over from the old T4).
+
+**Acceptance criteria:**
+- [ ] A full run is playable with drag only in a narrow mobile viewport.
+- [ ] Touching down without moving doesn't move the crowd.
 - [ ] Push to `main` deploys, and the site loads at `https://parlux.github.io/number-runner/`.
 
 **Verification:** Mobile viewport emulation. The Actions run is green. Open the site on the phone.
-**Dependencies:** T3. **Owner must make the repo public and enable Pages (source: GitHub Actions) first.**
-**Files:** `src/game/input.ts`, `index.html`, `.github/workflows/deploy.yml`
-**Scope:** S
+**Dependencies:** R3. **Owner must make the repo public and enable Pages (source: GitHub Actions) first.**
+**Files:** `src/game/input.ts`, `src/main.ts`, `index.html`, `.github/workflows/deploy.yml`
+**Scope:** S–M
 
-### Checkpoint A
+### Checkpoint A: feel test (spec criterion 16)
 - [ ] Tests, lint and build pass
-- [ ] Owner playtests on laptop and phone: speed, readability, Japanese font rendering
-- [ ] Adjust `tuning.ts` from feedback before Phase 2
+- [ ] Owner plays on the phone: it feels like a crowd runner, not flash cards
+- [ ] Owner: prompts are readable while steering (if not, lengthen `CALM_DISTANCE`)
+- [ ] Owner: still fun when the answers are known (play some all-easy runs)
+- [ ] Adjust `tuning.ts` from feedback. **If the feel is wrong, stop and revisit the idea doc before R5.**
+
+### Task R5: Squad charges
+**Description:**
+- `track.ts` marks questions 4, 8 and 12 as squad charges, with a charge line `CHARGE_LINE_DISTANCE` before the squads. Squads never occur in the 3 warm-ups.
+- `sim.ts`: crossing the charge line locks steering and fixes the choice (the squad nearest `x`). At contact the charge resolves:
+  - correct: streak reward + `SQUAD_DEFECT_GAIN`;
+  - wrong: `applyWrongCharge` = `max(8, ceil(50%))`, streak reset.
+- A view model (`viewOf(state)`) exposes squads without any correctness data until resolution. The renderer uses only the view model.
+- Render identical squads, the charge line, the locked state and a short contact animation.
+
+**Acceptance criteria:**
+- [ ] Steering input after the charge line has no effect until contact (tested).
+- [ ] Before resolution, the view model for every squad in a charge is identical except for its answer label and position (tested over many seeds).
+- [ ] Scoring: the wrong-charge penalty and the defect gain match the spec at the boundaries (tested).
+
+**Verification:** `npm test -- sim scoring track`. Manual: three charges per run on laptop and phone.
+**Dependencies:** R4 (and Checkpoint A passed)
+**Files:** `src/core/{track,sim,scoring,tuning}.ts`, `src/game/render.ts`, `tests/core/squad.test.ts`
+**Scope:** M
+
+### Checkpoint A2: squads
+- [ ] Owner: squad charges are fun, and their answers can't be told apart before contact
+- [ ] Owner: runs with squads beat runs without (temporarily toggle them off in `tuning.ts` to compare)
 
 ## Phase 2: Learning loop
 
@@ -111,7 +146,7 @@ Base rewards are 3, 5 and 8 for kana, meaning and reading.
 - [ ] Meaning and reading gates render correctly in game, with the okurigana greyed.
 
 **Verification:** `npm test -- distractors`. Manual run with kanji unlocked via a dev flag.
-**Dependencies:** T2, T5
+**Dependencies:** T5, Checkpoint A2
 **Files:** `src/core/{distractors,run,types}.ts`, `src/game/render.ts`, `tests/core/distractors.test.ts`
 **Scope:** M
 
@@ -126,7 +161,7 @@ Base rewards are 3, 5 and 8 for kana, meaning and reading.
 
 **Acceptance criteria:**
 - [ ] Tests cover: correct moves the box up by 1 (max 5), wrong sets it to 0, and weight is `2^(5−box)`, so box 0 is 32× box 5.
-- [ ] Never more than 4 new items per run. Warm-ups are the strongest known items (kana when no kanji is unlocked).
+- [ ] Never more than 4 new items per run. Each run picks 14 prompts. Warm-ups are the strongest known items (kana when no kanji is unlocked) and are always wall gates.
 - [ ] Progress survives a reload. A corrupt localStorage value resets to defaults without throwing.
 
 **Verification:** `npm test -- srs storage run`. Manual: play, reload, see the progress persisted.
@@ -159,25 +194,25 @@ Base rewards are 3, 5 and 8 for kana, meaning and reading.
 
 ### Task 9: Boss sizing, clash and balance simulation
 **Description:**
-- `boss.ts`: expected army is the median of N simulated 80%-accuracy passes over the run's actual gates. Boss size is `round(K × expected)`.
+- `boss.ts`: expected army is the median of N simulated 80%-accuracy passes over the run's actual questions (including squad shapes), × `EXPECTED_SURVIVAL` (0.85). Boss size is `round(K × expected)`.
 - The clash ticks both sides down until one reaches 0. A tie is a loss.
 - Render the boss scene with an animated clash.
-- Add the balance simulation test.
+- Balance bot: drives the real `sim.ts` with accuracy `p` and steering skill `s`. With `s = 1` it steers through the gap centres; with lower `s` it adds a seeded aim offset, so it clips some of the time.
 
 **Acceptance criteria:**
-- [ ] Over 1,000 seeded runs: 100% accuracy always wins, 50% wins less than 10% of the time, 80% wins 40–70% of the time.
-- [ ] A tie is a loss. The review boxes update regardless of the boss outcome.
-- [ ] The boss scene plays after row 20 and leads to the summary.
+- [ ] Over 1,000 seeded runs with `s = 1`: 100% accuracy always wins, 50% wins less than 10% of the time, 80% wins 40–70% of the time.
+- [ ] With `p = 1, s = 0.5`, the bot wins at least 50% of the time.
+- [ ] A tie is a loss. The review boxes update regardless of the boss outcome. The boss scene plays after question 14 and leads to the summary.
 
-**Verification:** `npm test -- boss`. Manual run to the boss.
-**Dependencies:** T7
-**Files:** `src/core/{boss,tuning}.ts`, `src/game/{scenes,render}.ts`, `tests/core/boss.test.ts`
+**Verification:** `npm test -- boss balance`. Manual run to the boss.
+**Dependencies:** T7, R5
+**Files:** `src/core/{boss,tuning}.ts`, `src/game/{scenes,render}.ts`, `tests/core/{boss,balance}.test.ts`
 **Scope:** M
 
 ### Task 10: Summary screen, streak feedback and attribution
 **Description:**
 - The summary lists every missed item with its correct answer (both readings for reading gates), plus army, accuracy, boss result and seed.
-- An in-run streak indicator and gain/loss pop-ups (+10, ×2, −30%).
+- An in-run streak indicator and gain/loss pop-ups (+10, ×2, −30%) for answers. Clipping losses are already shown (R2).
 - EDRDG CC BY-SA 4.0 attribution in an about line and in the README.
 
 **Acceptance criteria:**
@@ -191,7 +226,7 @@ Base rewards are 3, 5 and 8 for kana, meaning and reading.
 **Scope:** S–M
 
 ### Checkpoint C
-- [ ] Spec success criteria 1–9 met
+- [ ] Spec success criteria 1–12 and 16 met
 - [ ] Owner playtest on the deployed site
 
 ## Phase 4: Sync
@@ -237,10 +272,10 @@ Base rewards are 3, 5 and 8 for kana, meaning and reading.
 - [ ] With the network off, play is unaffected, the status shows `offline`, and the next online sync catches up.
 
 **Verification:** Manual cross-device test. Manual RLS check with curl, with no session and with the anon key only (spec criterion 12).
-**Dependencies:** T12, T4. **Owner must complete the Supabase setup first** (spec, "One-time manual setup", steps 2–4).
+**Dependencies:** T12, R4. **Owner must complete the Supabase setup first** (spec, "One-time manual setup", steps 2–4).
 **Files:** `src/sync/login.ts`, `src/game/scenes.ts`, `src/main.ts`, `.github/workflows/deploy.yml`
 **Scope:** M
 
 ### Checkpoint D
-- [ ] Spec success criteria 10–12 met
+- [ ] Spec success criteria 13–15 met
 - [ ] All tasks checked. v1 done.
