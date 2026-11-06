@@ -47,8 +47,8 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 
 **Acceptance criteria:**
 - [ ] A full 20-row kana run plays start to finish with arrow keys only. An army of 0 ends the run.
-- [ ] Row lead time is about 3.0 s at the start and about 1.8 s at the end (tuning values).
-- [ ] Runs at 60 fps on the laptop (devtools performance check).
+- [x] Row lead time is about 3.0 s at the start and about 1.8 s at the end (tuning values).
+- [x] Runs at 60 fps on the laptop (devtools performance check).
 
 **Verification:** Tests, lint and build pass. Manual playthrough in the browser.
 **Dependencies:** T2
