@@ -36,3 +36,12 @@ export const GATE_OPENING_3 = 0.26;
 export const CROWD_MIN_W = 0.06;
 export const CROWD_K = 0.03;
 export const CROWD_MAX_W = 0.3;
+
+// Track layout (R3). See track.ts.
+/** Hazard-free stretch before each question, starting when its prompt appears. */
+export const CALM_DISTANCE = 3.0;
+/** Distance between a question and the next hazard, and between hazards. */
+export const HAZARD_SPACING = 4.5;
+/** Static block width range. */
+export const BLOCK_MIN_W = 0.15;
+export const BLOCK_MAX_W = 0.35;
