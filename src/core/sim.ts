@@ -1,3 +1,4 @@
+import { clipLoss, crowdWidth, type Span } from "./crowd";
 import { applyCorrect, applyWrong } from "./scoring";
 import {
   BASE_REWARD,
@@ -29,6 +30,8 @@ export type RunState = {
   streak: number;
   /** Per resolved row: was it answered correctly. */
   results: boolean[];
+  /** Most recent clipping loss and the distance it happened at, for feedback. */
+  lastClip: { loss: number; dist: number } | null;
   status: RunStatus;
 };
 
@@ -56,6 +59,7 @@ export function createRunState(rows: GateRow[]): RunState {
     army: STARTING_ARMY,
     streak: 0,
     results: [],
+    lastClip: null,
     status: "running",
   };
 }
@@ -82,11 +86,22 @@ export function nearestOpening(n: number, x: number): number {
   return best;
 }
 
-const clamp01 = (v: number): number => Math.min(1, Math.max(0, v));
+/** Solid parts of an n-answer wall: everything that isn't an opening. */
+export function wallSolids(n: number): Span[] {
+  const o = gateOpenings(n);
+  return [...o, { left: 1, right: 1 }].map((r, i) => ({
+    left: i === 0 ? 0 : (o[i - 1] as Opening).right,
+    right: r.left,
+  }));
+}
+
+/** Keeps a crowd of width w fully on the track. */
+const clampOnTrack = (v: number, w: number): number =>
+  Math.min(1 - w / 2, Math.max(w / 2, v));
 
 export function setTarget(s: RunState, targetX: number): RunState {
   if (s.status !== "running") return s;
-  return { ...s, targetX: clamp01(targetX) };
+  return { ...s, targetX: clampOnTrack(targetX, crowdWidth(s.army)) };
 }
 
 export function nudgeTarget(s: RunState, dx: number): RunState {
@@ -94,7 +109,7 @@ export function nudgeTarget(s: RunState, dx: number): RunState {
 }
 
 /** Eased move towards the target, never faster than STEER_MAX_SPEED. */
-function steerStep(x: number, targetX: number, dt: number): number {
+function steerStep(x: number, targetX: number, w: number, dt: number): number {
   const v = Math.max(
     -STEER_MAX_SPEED,
     Math.min(STEER_MAX_SPEED, (targetX - x) / STEER_EASE),
@@ -102,13 +117,15 @@ function steerStep(x: number, targetX: number, dt: number): number {
   const dx = v * dt;
   // never overshoot the target
   const step = Math.abs(dx) > Math.abs(targetX - x) ? targetX - x : dx;
-  return clamp01(x + step);
+  return clampOnTrack(x + step, w);
 }
 
 export function stepRun(s: RunState, dt: number): RunState {
   if (s.status !== "running") return s;
   let next = { ...s };
-  next.x = steerStep(s.x, s.targetX, dt);
+  const w = crowdWidth(s.army);
+  next.targetX = clampOnTrack(s.targetX, w);
+  next.x = steerStep(s.x, next.targetX, w, dt);
   next.dist += BASE_SPEED * speedMul(s.dist, s.rows.length) * dt;
   while (next.status === "running" && next.dist >= rowPosition(next.next)) {
     next = resolveRow(next);
@@ -119,10 +136,17 @@ export function stepRun(s: RunState, dt: number): RunState {
 function resolveRow(s: RunState): RunState {
   const row = s.rows[s.next];
   if (!row) return { ...s, status: "finished" };
-  const correct = nearestOpening(row.options.length, s.x) === row.answerIndex;
-  const { army, streak } = correct
-    ? applyCorrect(s.army, s.streak, BASE_REWARD[row.type])
-    : applyWrong(s.army);
+  const n = row.options.length;
+  // clipping first, then the answer is scored on what is left
+  const clip = clipLoss(s.army, s.x, crowdWidth(s.army), wallSolids(n));
+  const remaining = s.army - clip;
+  const correct = nearestOpening(n, s.x) === row.answerIndex;
+  const scored = correct
+    ? applyCorrect(remaining, s.streak, BASE_REWARD[row.type])
+    : applyWrong(remaining);
+  // a crowd clipped to nothing stays dead, but the answer still counts
+  const army = remaining > 0 ? scored.army : 0;
+  const streak = scored.streak;
   const nextIndex = s.next + 1;
   const status =
     army <= 0 ? "dead" : nextIndex >= s.rows.length ? "finished" : "running";
@@ -132,6 +156,7 @@ function resolveRow(s: RunState): RunState {
     streak,
     next: nextIndex,
     results: [...s.results, correct],
+    lastClip: clip > 0 ? { loss: clip, dist: s.dist } : s.lastClip,
     status,
   };
 }
