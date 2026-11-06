@@ -1,31 +1,26 @@
 import { buildKanaRun } from "../core/run";
 import { KANA } from "../core/kana";
-import { createRunState, steer, stepRun, type RunState } from "../core/sim";
+import {
+  createRunState,
+  nudgeTarget,
+  stepRun,
+  type RunState,
+} from "../core/sim";
+import { STEER_MAX_SPEED } from "../core/tuning";
 import type { Action } from "./input";
-
-/** Army's horizontal slide speed, in track widths per second. */
-const ARMY_SLIDE_SPEED = 4;
 
 export type Scene =
   | { kind: "start" }
-  | {
-      kind: "run";
-      seed: number;
-      run: RunState;
-      paused: boolean;
-      /** Army centre as a fraction of track width (visual only). */
-      armyX: number;
-    }
+  | { kind: "run"; seed: number; run: RunState; paused: boolean }
   | { kind: "end"; seed: number; run: RunState };
 
-export function laneCenter(run: RunState): number {
-  const lanes = run.rows[run.next]?.options.length ?? 1;
-  return (run.lane + 0.5) / lanes;
-}
-
 function newRun(seed: number): Scene {
-  const run = createRunState(buildKanaRun(seed, KANA));
-  return { kind: "run", seed, run, paused: false, armyX: laneCenter(run) };
+  return {
+    kind: "run",
+    seed,
+    run: createRunState(buildKanaRun(seed, KANA)),
+    paused: false,
+  };
 }
 
 export function handleAction(
@@ -38,21 +33,17 @@ export function handleAction(
     case "end":
       return action === "confirm" ? newRun(newSeed()) : scene;
     case "run":
-      if (action === "pause") return { ...scene, paused: !scene.paused };
-      if (scene.paused) return scene;
-      if (action === "left") return { ...scene, run: steer(scene.run, -1) };
-      if (action === "right") return { ...scene, run: steer(scene.run, 1) };
-      return scene;
+      return action === "pause" ? { ...scene, paused: !scene.paused } : scene;
   }
 }
 
-export function updateScene(scene: Scene, dt: number): Scene {
+/** `steer` is the held axis (-1, 0 or 1); holding moves the target at STEER_MAX_SPEED. */
+export function updateScene(scene: Scene, dt: number, steer: number): Scene {
   if (scene.kind !== "run" || scene.paused) return scene;
-  const run = stepRun(scene.run, dt);
+  let run = steer
+    ? nudgeTarget(scene.run, steer * STEER_MAX_SPEED * dt)
+    : scene.run;
+  run = stepRun(run, dt);
   if (run.status !== "running") return { kind: "end", seed: scene.seed, run };
-  const target = laneCenter(run);
-  const max = ARMY_SLIDE_SPEED * dt;
-  const armyX =
-    scene.armyX + Math.max(-max, Math.min(max, target - scene.armyX));
-  return { ...scene, run, armyX };
+  return { ...scene, run };
 }

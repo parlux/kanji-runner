@@ -21,9 +21,9 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 - Render: the crowd at `x`, and walls with labelled openings instead of lane bands.
 
 **Acceptance criteria:**
-- [ ] The crowd never moves faster than `STEER_MAX_SPEED`, and never leaves [0, 1] (tested).
-- [ ] The chosen answer is the opening nearest the crowd centre, including when the centre is on solid wall (tested).
-- [ ] Holding ← or → glides the crowd smoothly in the browser, with no lane snapping.
+- [x] The crowd never moves faster than `STEER_MAX_SPEED`, and never leaves [0, 1] (tested).
+- [x] The chosen answer is the opening nearest the crowd centre, including when the centre is on solid wall (tested).
+- [x] Holding ← or → glides the crowd smoothly in the browser, with no lane snapping.
 
 **Verification:** `npm test -- sim`. Manual laptop run.
 **Dependencies:** T3

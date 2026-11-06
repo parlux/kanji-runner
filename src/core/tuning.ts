@@ -21,3 +21,13 @@ export const ROW_SPACING = 4.5;
 export const BASE_SPEED = 1.0;
 /** Speed multiplier reached by the last row (ramps linearly from 1.0×). */
 export const MAX_SPEED_MUL = 1.6;
+
+// Steering. The track is 1.0 wide; x runs from 0 (left) to 1 (right).
+/** Fastest the crowd (and a held key's target) can move, in track widths per second. */
+export const STEER_MAX_SPEED = 1.2;
+/** Easing time constant: the crowd closes the gap to its target at gap / STEER_EASE per second, capped. */
+export const STEER_EASE = 0.08;
+
+/** Wall-gate opening widths for 2- and 3-answer gates. */
+export const GATE_OPENING_2 = 0.36;
+export const GATE_OPENING_3 = 0.26;

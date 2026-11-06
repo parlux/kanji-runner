@@ -1,9 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
   createRunState,
+  gateOpenings,
+  nearestOpening,
+  nudgeTarget,
   rowPosition,
-  steer,
+  setTarget,
   stepRun,
+  type Opening,
   type RunState,
 } from "../../src/core/sim";
 import { buildKanaRun } from "../../src/core/run";
@@ -11,6 +15,7 @@ import { KANA } from "../../src/core/kana";
 import {
   ROWS_PER_RUN,
   STARTING_ARMY,
+  STEER_MAX_SPEED,
   VIEW_DISTANCE,
 } from "../../src/core/tuning";
 
@@ -23,12 +28,15 @@ function runToNextRow(s: RunState): RunState {
   return s;
 }
 
-/** Puts the army in the given lane (from lane 0). */
-function goToLane(s: RunState, lane: number): RunState {
-  while (s.lane > 0) s = steer(s, -1);
-  for (let i = 0; i < lane; i++) s = steer(s, 1);
-  return s;
+/** Places the crowd (and its target) at the centre of opening i of the next row. */
+function goToOpening(s: RunState, i: number): RunState {
+  const n = s.rows[s.next]?.options.length ?? 2;
+  const x = gateOpenings(n)[i]?.centre ?? 0.5;
+  return { ...s, x, targetX: x };
 }
+
+/** Indexes an openings array without undefined. */
+const at = (o: Opening[], i: number): Opening => o[i] as Opening;
 
 function fresh(seed = 1): RunState {
   return createRunState(buildKanaRun(seed, KANA));
@@ -57,7 +65,7 @@ describe("lead time", () => {
     const reach: number[] = [];
     while (s.status === "running") {
       // keep the army alive: always pick the answer
-      s = goToLane(s, s.rows[s.next]?.answerIndex ?? 0);
+      s = goToOpening(s, s.rows[s.next]?.answerIndex ?? 0);
       for (let i = 0; i < s.rows.length; i++) {
         if (appear[i] === undefined && rowPosition(i) - s.dist <= VIEW_DISTANCE)
           appear[i] = t;
@@ -85,35 +93,110 @@ describe("lead time", () => {
   });
 });
 
-describe("steer", () => {
-  it("clamps to the lanes of the next row", () => {
+describe("gateOpenings", () => {
+  it.each([2, 3])(
+    "%i openings are equal width with equal solid between and at the edges",
+    (n) => {
+      const o = gateOpenings(n);
+      expect(o).toHaveLength(n);
+      const solids = [
+        at(o, 0).left,
+        ...o.slice(1).map((r, i) => r.left - at(o, i).right),
+        1 - at(o, n - 1).right,
+      ];
+      for (const g of solids) expect(g).toBeCloseTo(solids[0] as number, 9);
+      expect(at(o, 0).right - at(o, 0).left).toBeCloseTo(
+        n === 2 ? 0.36 : 0.26,
+        9,
+      );
+    },
+  );
+});
+
+describe("nearestOpening", () => {
+  it("picks the opening the centre is inside", () => {
+    const o = gateOpenings(3);
+    o.forEach((r, i) => {
+      expect(nearestOpening(3, r.left + 0.001)).toBe(i);
+      expect(nearestOpening(3, r.right - 0.001)).toBe(i);
+    });
+  });
+
+  it("picks the nearest opening when the centre is on solid wall", () => {
+    const o = gateOpenings(2);
+    const [a, b] = [at(o, 0), at(o, 1)];
+    expect(nearestOpening(2, 0)).toBe(0);
+    expect(nearestOpening(2, 1)).toBe(1);
+    expect(nearestOpening(2, a.right + 0.01)).toBe(0);
+    expect(nearestOpening(2, b.left - 0.01)).toBe(1);
+    expect(nearestOpening(3, 0.01)).toBe(0);
+    expect(nearestOpening(3, 0.99)).toBe(2);
+  });
+});
+
+describe("steering", () => {
+  it("never moves faster than STEER_MAX_SPEED", () => {
+    let s = setTarget(fresh(), 1);
+    for (let i = 0; i < 60; i++) {
+      const before = s.x;
+      s = stepRun(s, DT);
+      expect(Math.abs(s.x - before)).toBeLessThanOrEqual(
+        STEER_MAX_SPEED * DT + 1e-12,
+      );
+    }
+  });
+
+  it("reaches the target without overshooting", () => {
+    let s = setTarget(fresh(), 0.9);
+    for (let i = 0; i < 120; i++) {
+      s = stepRun(s, DT);
+      expect(s.x).toBeLessThanOrEqual(0.9 + 1e-12);
+    }
+    expect(s.x).toBeCloseTo(0.9, 3);
+  });
+
+  it("eases: slower near the target than far from it", () => {
+    let s = { ...setTarget(fresh(), 0.52), x: 0.5 };
+    const near = stepRun(s, DT).x - s.x;
+    s = { ...setTarget(fresh(), 1), x: 0.5 };
+    const far = stepRun(s, DT).x - s.x;
+    expect(near).toBeLessThan(far);
+  });
+
+  it("keeps the target and the crowd within [0, 1]", () => {
     let s = fresh();
-    const lanes = s.rows[0]?.options.length ?? 0;
-    for (let i = 0; i < 5; i++) s = steer(s, 1);
-    expect(s.lane).toBe(lanes - 1);
-    for (let i = 0; i < 5; i++) s = steer(s, -1);
-    expect(s.lane).toBe(0);
+    s = nudgeTarget(s, 5);
+    expect(s.targetX).toBe(1);
+    s = nudgeTarget(s, -5);
+    expect(s.targetX).toBe(0);
+    s = setTarget({ ...fresh(), x: 0.01 }, -3);
+    for (let i = 0; i < 30; i++) {
+      s = stepRun(s, DT);
+      expect(s.x).toBeGreaterThanOrEqual(0);
+      expect(s.x).toBeLessThanOrEqual(1);
+    }
   });
 
   it("does nothing once the run is over", () => {
     const s: RunState = { ...fresh(), status: "dead" };
-    expect(steer(s, 1)).toBe(s);
+    expect(setTarget(s, 1)).toBe(s);
+    expect(nudgeTarget(s, 0.1)).toBe(s);
   });
 });
 
 describe("row resolution", () => {
-  it("a correct lane grows the army and the streak", () => {
+  it("a correct opening grows the army and the streak", () => {
     let s = fresh();
-    s = goToLane(s, s.rows[0]?.answerIndex ?? 0);
+    s = goToOpening(s, s.rows[0]?.answerIndex ?? 0);
     s = runToNextRow(s);
     expect(s.army).toBe(STARTING_ARMY + 3);
     expect(s.streak).toBe(1);
     expect(s.results).toEqual([true]);
   });
 
-  it("a wrong lane costs army and resets the streak, and 0 ends the run", () => {
+  it("a wrong opening costs army and resets the streak, and 0 ends the run", () => {
     let s = fresh();
-    s = goToLane(s, 1 - (s.rows[0]?.answerIndex ?? 0));
+    s = goToOpening(s, 1 - (s.rows[0]?.answerIndex ?? 0));
     s = runToNextRow(s);
     expect(s.army).toBe(0);
     expect(s.streak).toBe(0);
@@ -121,22 +204,18 @@ describe("row resolution", () => {
     expect(s.status).toBe("dead");
   });
 
-  it("keeps the lane on the same side when lanes go from 2 to 3", () => {
+  it("scores the opening nearest the crowd even when it is on solid wall", () => {
     let s = fresh();
-    for (let i = 0; i < 9; i++) {
-      s = goToLane(s, s.rows[s.next]?.answerIndex ?? 0);
-      s = runToNextRow(s);
-    }
-    s = goToLane(s, 1); // right lane of row 10 (2 lanes)
-    s = runToNextRow(s);
-    expect(s.rows[s.next]?.options).toHaveLength(3);
-    expect(s.lane).toBe(2);
+    const answer = s.rows[0]?.answerIndex ?? 0;
+    const x = answer === 0 ? 0.01 : 0.99; // solid wall at the edge
+    s = runToNextRow({ ...s, x, targetX: x });
+    expect(s.results).toEqual([true]);
   });
 
   it("finishes after all rows with 100% accuracy", () => {
     let s = fresh();
     while (s.status === "running") {
-      s = goToLane(s, s.rows[s.next]?.answerIndex ?? 0);
+      s = goToOpening(s, s.rows[s.next]?.answerIndex ?? 0);
       s = runToNextRow(s);
     }
     expect(s.status).toBe("finished");

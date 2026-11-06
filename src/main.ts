@@ -22,13 +22,13 @@ resize();
 const newSeed = (): number => Math.floor(Math.random() * 2 ** 31);
 let scene: Scene = { kind: "start" };
 
-bindKeys((action) => {
+const steerAxis = bindKeys((action) => {
   scene = handleAction(scene, action, newSeed);
 });
 
 startLoop(
   (dt) => {
-    scene = updateScene(scene, dt);
+    scene = updateScene(scene, dt, steerAxis());
   },
   () => render(ctx, window.innerWidth, window.innerHeight, scene),
 );
