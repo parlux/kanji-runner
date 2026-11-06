@@ -9,9 +9,9 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 **Description:** Set up Vite + TS (strict) + Vitest + ESLint/Prettier with the spec's npm scripts, an `index.html` with a full-screen canvas, `.gitignore` (including `.env.local`), and `.env.example`.
 
 **Acceptance criteria:**
-- [ ] All spec commands exist. `npm test` runs one trivial test.
-- [ ] `npm run dev` shows a blank, resizable canvas filling the viewport.
-- [ ] Vite `base` is `/number-runner/` for builds.
+- [x] All spec commands exist. `npm test` runs one trivial test.
+- [x] `npm run dev` shows a blank, resizable canvas filling the viewport.
+- [x] Vite `base` is `/number-runner/` for builds.
 
 **Verification:** `npm test`, `npm run lint`, `npm run build`. Open the dev server.
 
