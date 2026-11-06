@@ -267,6 +267,7 @@ export function clipLoss(army: number, x: number, w: number, solids: Span[]): nu
 ## Out of Scope (v1)
 Maths gates, English→kanji gates, sound/TTS, multi-user, sign-up flow, password reset UI, realtime sync, vocabulary (multi-kanji words), multiplayer, leaderboards, any backend beyond the Supabase progress table, 3D art, native app.
 Also deferred from the rework (see `docs/ideas/crowd-runner-rework.md`): splitting the crowd across gates; stage chains / long-session structure; more hazard types or enemy variety; tap-left/right touch controls; the boss as a big squad charge; art, sound and juice beyond simple feedback.
+Future enhancement idea (owner, 2026-11-07, after R2): shooting or another mechanism that lets the player widen gaps. Clipping works, but big crowds feel forced to lose units with no way to prevent it. To refine or discuss later.
 
 ## Open Questions
 1. ~~Hosting~~: resolved, public repo on GitHub Pages.
