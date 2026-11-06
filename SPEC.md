@@ -154,7 +154,7 @@ All distances are in track units. The track is 1.0 wide; `x` runs from 0 (left e
 - Dev-only data build: Node 22 script (`tsx`) that downloads KANJIDIC2 and KRADFILE (EDRDG, CC BY-SA 4.0) and emits compact JSON into `src/data/`. The generated JSON is committed, so the app needs no network at runtime.
 - Storage: `localStorage`, key `kanji-runner:v1`, with a versioned schema and a migration hook.
 - Sync: `@supabase/supabase-js` v2 (the only runtime dependency), on the Supabase free tier.
-- Hosting: GitHub Pages, deployed by a GitHub Actions workflow on push to `main`. Vite `base` is `/number-runner/`. The Supabase URL and anon key come from repo Actions variables.
+- Hosting: GitHub Pages, deployed by a GitHub Actions workflow on push to `main`. Vite `base` is `/kanji-runner/`. The Supabase URL and anon key come from repo Actions variables.
 
 ## Commands
 ```

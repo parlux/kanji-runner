@@ -5,7 +5,7 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 
 ## Phase 1: Playable slice (done)
 
-- [x] **Task 1: Scaffold project.** Vite + strict TS + Vitest + ESLint/Prettier, full-screen canvas, `base: /number-runner/`.
+- [x] **Task 1: Scaffold project.** Vite + strict TS + Vitest + ESLint/Prettier, full-screen canvas, `base: /kanji-runner/`.
 - [x] **Task 2: Core rules for a kana run.** `rng`, `tuning`, `scoring`, `kana.json`, seeded `run.ts`.
 - [x] **Task 3: Playable kana run on laptop.** Fixed-step loop, canvas renderer, lanes, scenes. Owner playtested it: lane picking felt like timed flash cards, which led to spec revision 2. Its lane model is replaced by R1.
 - ~~Task 4: Touch controls and GitHub Pages deploy~~. Superseded by R4 (drag replaces tap/swipe; the deploy part moves there unchanged).
@@ -73,7 +73,7 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 **Acceptance criteria:**
 - [ ] A full run is playable with drag only in a narrow mobile viewport.
 - [ ] Touching down without moving doesn't move the crowd.
-- [ ] Push to `main` deploys, and the site loads at `https://parlux.github.io/number-runner/`.
+- [ ] Push to `main` deploys, and the site loads at `https://parlux.github.io/kanji-runner/`.
 
 **Verification:** Mobile viewport emulation. The Actions run is green. Open the site on the phone.
 **Dependencies:** R3. **Owner must make the repo public and enable Pages (source: GitHub Actions) first.**
