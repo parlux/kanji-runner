@@ -36,7 +36,7 @@ describe("buildKanaRun", () => {
         expect(row.options.filter((o) => o === row.answer)).toHaveLength(1);
       }
     }
-  });
+  }, 20_000); // 10k rows of expect() calls; slow under load
 
   it("answer is the prompt's romaji", () => {
     const byChar = new Map(KANA.map((k) => [k.char, k.romaji]));
