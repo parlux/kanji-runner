@@ -31,3 +31,8 @@ export const STEER_EASE = 0.08;
 /** Wall-gate opening widths for 2- and 3-answer gates. */
 export const GATE_OPENING_2 = 0.36;
 export const GATE_OPENING_3 = 0.26;
+
+// Crowd width: w = clamp(CROWD_MIN_W, CROWD_K × √army, CROWD_MAX_W). Max width is reached at 100 soldiers.
+export const CROWD_MIN_W = 0.06;
+export const CROWD_K = 0.03;
+export const CROWD_MAX_W = 0.3;

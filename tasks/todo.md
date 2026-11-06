@@ -37,7 +37,7 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 - Render the crowd as a blob of up to 200 dots spread over its width, plus a loss pop-up when soldiers are clipped.
 
 **Acceptance criteria:**
-- [ ] Width follows `clamp(0.06, 0.3·√army, 0.30)`. Clip loss is `ceil(army × overlap / w)`, and 0 with no overlap (tested at the edges).
+- [ ] Width follows `clamp(0.06, 0.03·√army, 0.30)`. Clip loss is `ceil(army × overlap / w)`, and 0 with no overlap (tested at the edges).
 - [ ] A max-width crowd fits a 2-answer opening without loss and clips a centred 3-answer opening (tested).
 - [ ] Clipping leaves the streak and the per-question results untouched (tested).
 

@@ -81,7 +81,7 @@ A browser "crowd runner". The player steers an army down a track full of hazards
 ### Track, crowd and steering
 All distances are in track units. The track is 1.0 wide; `x` runs from 0 (left edge) to 1 (right edge).
 
-- **Crowd:** a blob with a centre `x` and a width `w = clamp(CROWD_MIN_W, CROWD_K × √army, CROWD_MAX_W)`, starting at 0.06 / 0.3 / 0.30. Up to 200 dots are drawn inside it. The crowd is always kept fully on the track.
+- **Crowd:** a blob with a centre `x` and a width `w = clamp(CROWD_MIN_W, CROWD_K × √army, CROWD_MAX_W)`, starting at 0.06 / 0.03 / 0.30. Up to 200 dots are drawn inside it. The crowd is always kept fully on the track.
 - **Steering:** input sets a target `x`. The crowd moves towards it at most `STEER_MAX_SPEED` (start: 1.2 track widths per second), with light easing so it feels weighty, not snappy.
   - Laptop: holding ← or → moves the target at `STEER_MAX_SPEED`.
   - Phone: relative drag. The target moves by the horizontal finger movement × `DRAG_GAIN` (start: 1.5 × screen width → track width). Touching doesn't jump the crowd to the finger.
