@@ -50,14 +50,21 @@ export function render(ctx: Ctx, w: number, h: number, scene: Scene): void {
     ctx.fillStyle = "rgba(0,0,0,0.6)";
     ctx.fillRect(0, 0, w, h);
     text(ctx, "Paused", w / 2, h / 2 - 20, 40);
-    text(ctx, "P to resume", w / 2, h / 2 + 24, 20, COLORS.dim);
+    text(ctx, "Tap or P to resume", w / 2, h / 2 + 24, 20, COLORS.dim);
   }
 }
 
 function renderStart(ctx: Ctx, w: number, h: number): void {
   text(ctx, "Kanji Runner", w / 2, h * 0.35, Math.min(64, w / 8));
-  text(ctx, "Enter or Space to start", w / 2, h * 0.5, 22);
-  text(ctx, "←/→ steer · P pause", w / 2, h * 0.5 + 36, 18, COLORS.dim);
+  text(ctx, "Tap or Enter to start", w / 2, h * 0.5, 22);
+  text(
+    ctx,
+    "Drag or ←/→ steer · tap or P pause",
+    w / 2,
+    h * 0.5 + 36,
+    18,
+    COLORS.dim,
+  );
 }
 
 function renderEnd(
@@ -89,7 +96,7 @@ function renderEnd(
     22,
   );
   text(ctx, `Seed ${seed}`, w / 2, h * 0.42 + 76, 18, COLORS.dim);
-  text(ctx, "Enter or Space to play again", w / 2, h * 0.7, 20);
+  text(ctx, "Tap or Enter to play again", w / 2, h * 0.7, 20);
 }
 
 function renderRun(ctx: Ctx, w: number, h: number, run: RunState): void {
