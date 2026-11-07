@@ -171,9 +171,9 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 - Render identical squads, the charge line and the locked state. After the lock, the charge plays as a short firefight: the correct squad stops fighting and joins, a wrong one fires back. Squads aren't fire targets before the lock.
 
 **Acceptance criteria:**
-- [ ] Steering input after the charge line has no effect until contact (tested).
-- [ ] Before resolution, the view model for every squad in a charge is identical except for its answer label and position (tested over many seeds).
-- [ ] Scoring: the wrong-charge penalty and the defect gain match the spec at the boundaries (tested).
+- [x] Steering input after the charge line has no effect until contact (tested).
+- [x] Before resolution, the view model for every squad in a charge is identical except for its answer label and position (tested over many seeds).
+- [x] Scoring: the wrong-charge penalty and the defect gain match the spec at the boundaries (tested).
 
 **Verification:** `npm test -- sim scoring track`. Manual: three charges per run on laptop and phone.
 **Dependencies:** S2 (and Checkpoint A passed)

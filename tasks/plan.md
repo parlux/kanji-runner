@@ -63,7 +63,7 @@ T1 scaffold ─ T2 core rules ─ T3 lane slice (done)
 - [x] Feels like a crowd runner, right answers feel like power, prompts readable while steering and firing, fun with known answers
 - [x] **Go/no-go:** passed 2026-11-07; if the feel is wrong, revisit the idea doc before R5
 
-- [ ] R5: Squad charges
+- [x] R5: Squad charges
 
 ### Checkpoint A2: squads
 - [ ] Squads are fun and give nothing away. Runs with squads beat runs without.
