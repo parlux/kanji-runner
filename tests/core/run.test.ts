@@ -5,7 +5,7 @@ import { KANJI } from "../../src/core/kanji";
 import { KANA } from "../../src/core/kana";
 import { defaultProgress } from "../../src/core/srs";
 import { ROWS_PER_RUN, TWO_OPTION_ROWS } from "../../src/core/tuning";
-import type { KanjiItem, Progress } from "../../src/core/types";
+import type { GateRow, KanjiItem, Progress } from "../../src/core/types";
 
 describe("kana data", () => {
   it("has 71 hiragana and 71 katakana with romaji", () => {
@@ -86,7 +86,7 @@ describe("buildRun rows", () => {
 describe("missedItems", () => {
   const kanji = KANJI.filter((k) => k.on && k.kun).slice(0, 3);
   const k0 = kanji[0] as KanjiItem;
-  const rows = [
+  const rows: GateRow[] = [
     {
       type: "kana",
       prompt: "あ",
@@ -115,17 +115,17 @@ describe("missedItems", () => {
       answerIndex: 1,
       answer: "i",
     },
-  ] as const;
+  ];
 
   it("lists every wrong gate with its answer, in order", () => {
-    const m = missedItems([...rows], [false, true, false, false], [3], kanji);
+    const m = missedItems(rows, [false, true, false, false], [3], kanji);
     expect(m.map((x) => x.q)).toEqual([1, 3, 4]);
     expect(m[0]).toMatchObject({ prompt: "あ", answers: ["a"], charge: false });
     expect(m[2]).toMatchObject({ prompt: "い", answers: ["i"], charge: true });
   });
 
   it("gives both readings for a reading gate", () => {
-    const [m] = missedItems([...rows], [true, true, false], [], kanji);
+    const [m] = missedItems(rows, [true, true, false], [], kanji);
     expect(m?.answers).toEqual([
       k0.on,
       showReading(k0.kun as KanjiItem["kun"] & object),
@@ -133,6 +133,6 @@ describe("missedItems", () => {
   });
 
   it("is empty for a clean run and ignores unanswered rows", () => {
-    expect(missedItems([...rows], [true, true], [], kanji)).toEqual([]);
+    expect(missedItems(rows, [true, true], [], kanji)).toEqual([]);
   });
 });
