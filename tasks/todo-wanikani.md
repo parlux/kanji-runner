@@ -44,9 +44,9 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 - Inject `fetch`, the store and the clock for tests.
 
 **Acceptance criteria:**
-- [ ] Mocked tests: success, pagination, 401 → `invalid`, 429 and network error → `offline` with the cache used, malformed body → `offline`. No exceptions.
-- [ ] Requests go only to `https://api.wanikani.com/v2/`, with the token only in the `Authorization` header (tested).
-- [ ] The throttle skips a refetch within 5 minutes (tested).
+- [x] Mocked tests: success, pagination, 401 → `invalid`, 429 and network error → `offline` with the cache used, malformed body → `offline`. No exceptions.
+- [x] Requests go only to `https://api.wanikani.com/v2/`, with the token only in the `Authorization` header (tested).
+- [x] The throttle skips a refetch within 5 minutes (tested).
 
 **Verification:** `npm test -- wanikani`
 **Dependencies:** W2
