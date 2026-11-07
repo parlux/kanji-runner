@@ -1,6 +1,6 @@
 # Tasks: Kanji Runner
 
-Plan: `tasks/plan.md`. Spec: `SPEC.md` (revision 2).
+Plan: `tasks/plan.md`. Spec: `SPEC.md` (revision 3).
 Every task: `npm test && npm run lint && npm run build` pass before it is checked off.
 
 ## Phase 1: Playable slice (done)
@@ -57,7 +57,7 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 **Acceptance criteria:**
 - [x] Property test over 1,000 seeds: every hazard beat leaves a passable gap ≥ `CROWD_MAX_W` (for saws, at every point of their sweep), and no hazard falls inside a calm stretch.
 - [x] Same seed → identical track; different seeds → different tracks.
-- [ ] A full run plays start to finish on the laptop with hazards between the questions.
+- [x] A full run plays start to finish with hazards between the questions (owner, on the phone).
 
 **Verification:** `npm test -- track sim`. Manual laptop run.
 **Dependencies:** R2
@@ -71,19 +71,57 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 - A GitHub Actions workflow that builds and deploys to Pages on push to `main` (carried over from the old T4).
 
 **Acceptance criteria:**
-- [ ] A full run is playable with drag only in a narrow mobile viewport.
+- [x] A full run is playable with drag only (owner, on the phone).
 - [x] Touching down without moving doesn't move the crowd.
-- [ ] Push to `main` deploys, and the site loads at `https://parlux.github.io/kanji-runner/`.
+- [x] Push to `main` deploys, and the site loads at `https://parlux.github.io/kanji-runner/`.
 
 **Verification:** Mobile viewport emulation. The Actions run is green. Open the site on the phone.
 **Dependencies:** R3. **Owner must make the repo public and enable Pages (source: GitHub Actions) first.**
 **Files:** `src/game/input.ts`, `src/main.ts`, `index.html`, `.github/workflows/deploy.yml`
 **Scope:** S–M
 
+### Task S1: Auto-fire and breakable blocks
+**Description:** (spec: Shooting)
+- `fire.ts`: `firepower(army)`, `expectedArmy(rows)` (deterministic 80% pass: every 5th answer wrong, no clipping), and `pickTarget(...)` (nearest shootable threat ahead within `FIRE_RANGE` whose span overlaps the crowd).
+- `track.ts`/`sim.ts`: blocks get hit points `BLOCK_HP_K × expectedArmy(q)`. Each step, `sim.ts` applies `firepower × dt` to the target. A block at 0 is shattered and no longer clips.
+- Tuning: `FIRE_PER_SOLDIER`, `FIRE_RANGE`, `BLOCK_HP_K`.
+- Render: a stream of bullets from the crowd to its target, a hit flash, a shatter burst, and a block that shows its damage. Nothing drawn over the prompt or the labels.
+
+**Acceptance criteria:**
+- [ ] Damage per second is `FIRE_PER_SOLDIER × army`, and goes only to the nearest overlapping block in range (tested).
+- [ ] A block shatters exactly when its damage reaches its hit points, and a shattered block never clips; an intact one clips as before (tested).
+- [ ] Walls and saws take no damage, and shooting never changes streak or results (tested).
+- [ ] `expectedArmy` is deterministic per run and never decreases after a correct answer (tested).
+- [ ] In the browser, a strong army visibly shreds blocks, and a 5-soldier army barely dents them.
+
+**Verification:** `npm test -- fire sim track`. Phone-sized browser check.
+**Dependencies:** R4
+**Files:** `src/core/{fire,track,sim,tuning}.ts`, `src/game/render.ts`, `tests/core/fire.test.ts`
+**Scope:** M
+
+### Task S2: Enemy packs
+**Description:** (spec: Shooting)
+- `track.ts`: some hazard beats become enemy packs (none before question 2), with strength `max(3, ENEMY_K × expectedArmy(q))`. Block and saw gap rules are unchanged.
+- `sim.ts`: packs approach at `ENEMY_SPEED` on top of the scroll and drift towards the crowd at `ENEMY_STEER_SPEED`. They are shootable targets: each `ENEMY_HP` of damage kills one enemy, and the pack narrows (`crowdWidth`). On contact, overlapping spans cost `ENEMY_DAMAGE` per survivor; a miss costs nothing.
+- Tuning: `ENEMY_K`, `ENEMY_SPEED`, `ENEMY_STEER_SPEED`, `ENEMY_HP`, `ENEMY_DAMAGE`.
+- Render: the pack as a blob of enemy dots with its count, kills popping off, and the contact loss pop-up.
+
+**Acceptance criteria:**
+- [ ] Contact costs one soldier per surviving enemy only when spans overlap; a pack shot to 0 costs nothing (tested).
+- [ ] Packs never appear in calm stretches or before question 2, and the track stays deterministic per seed (property test over 1,000 seeds).
+- [ ] Enemy losses never change streak or results, and an army reaching 0 ends the run (tested).
+- [ ] Bot check: with perfect steering, 100% accuracy never dies before the last question, and 50% accuracy dies before it in at least half of 200 seeded runs.
+
+**Verification:** `npm test -- fire sim track`. Phone-sized browser check, then push and the owner plays on the phone.
+**Dependencies:** S1
+**Files:** `src/core/{track,sim,fire,tuning}.ts`, `src/game/render.ts`, `tests/core/{fire,track,sim}.test.ts`
+**Scope:** M
+
 ### Checkpoint A: feel test (spec criterion 16)
 - [ ] Tests, lint and build pass
 - [ ] Owner plays on the phone: it feels like a crowd runner, not flash cards
-- [ ] Owner: prompts are readable while steering (if not, lengthen `CALM_DISTANCE`)
+- [ ] Owner: right answers feel like power, and a weak run gets overrun
+- [ ] Owner: prompts are readable while steering and firing (if not, quieten effects near questions, or lengthen `CALM_DISTANCE`)
 - [ ] Owner: still fun when the answers are known (play some all-easy runs)
 - [ ] Adjust `tuning.ts` from feedback. **If the feel is wrong, stop and revisit the idea doc before R5.**
 
@@ -94,7 +132,7 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
   - correct: streak reward + `SQUAD_DEFECT_GAIN`;
   - wrong: `applyWrongCharge` = `max(8, ceil(50%))`, streak reset.
 - A view model (`viewOf(state)`) exposes squads without any correctness data until resolution. The renderer uses only the view model.
-- Render identical squads, the charge line, the locked state and a short contact animation.
+- Render identical squads, the charge line and the locked state. After the lock, the charge plays as a short firefight: the correct squad stops fighting and joins, a wrong one fires back. Squads aren't fire targets before the lock.
 
 **Acceptance criteria:**
 - [ ] Steering input after the charge line has no effect until contact (tested).
@@ -102,7 +140,7 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 - [ ] Scoring: the wrong-charge penalty and the defect gain match the spec at the boundaries (tested).
 
 **Verification:** `npm test -- sim scoring track`. Manual: three charges per run on laptop and phone.
-**Dependencies:** R4 (and Checkpoint A passed)
+**Dependencies:** S2 (and Checkpoint A passed)
 **Files:** `src/core/{track,sim,scoring,tuning}.ts`, `src/game/render.ts`, `tests/core/squad.test.ts`
 **Scope:** M
 

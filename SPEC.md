@@ -2,7 +2,8 @@
 
 Source of intent: `docs/intent/kanji-runner.md` (confirmed 2026-11-07).
 Gameplay rework: `docs/ideas/crowd-runner-rework.md` (Direction C, confirmed 2026-11-07).
-Status: APPROVED revision 2, 2026-11-07. Revision 2 replaces lane picking with a physical track (see Track, crowd and steering).
+Shooting: `docs/ideas/shooting.md` (confirmed 2026-11-07).
+Status: APPROVED revision 3, 2026-11-07. Revision 2 replaced lane picking with a physical track (see Track, crowd and steering). Revision 3 adds auto-fire, breakable blocks and enemy packs (see Shooting).
 
 ### Changes from intent
 | Date | Change | Reason |
@@ -10,10 +11,11 @@ Status: APPROVED revision 2, 2026-11-07. Revision 2 replaces lane picking with a
 | 2026-11-07 | Repo is public; hosted on GitHub Pages | Free hosting for phone play. |
 | 2026-11-07 | Optional Supabase (free tier) sync with a single email/password login. Reverses the intent's "no accounts, no backend". | Share progress between laptop and phone. localStorage stays the primary store, so the game works offline and while the Supabase project is paused. |
 | 2026-11-07 | Continuous steering, crowd width, hazards between questions, and squad-charge questions. Replaces discrete lanes with full-width gates. Run is 14 questions instead of 20. | First playtest: lane picking felt like "time-pressured flash cards", not a crowd runner. The game needs to be fun even when the answers are known. |
+| 2026-11-07 | The army auto-fires. Firepower grows with army size. Blocks become breakable, and enemy packs are added as a shootable threat. Base speed 1.3×. | Phone playtest after R4: the owner wants right answers to feel like power, and an under-powered army to be overrun early. Spectacle is the main pull. |
 
 ## Objective
 
-A browser "crowd runner". The player steers an army down a track full of hazards. At **question beats**, a **prompt character** (kana or kanji) appears with 2–3 answers. Most questions are **wall gates**: openings in a wall, one per answer. Some are **squad charges**: enemy squads, one per answer. Choosing the correct answer grows the army. A wrong answer shrinks it and breaks the streak. Between questions, the army must dodge hazards, and a bigger army is wider and harder to steer. The run ends in a boss clash decided by army size.
+A browser "crowd runner". The player steers an army down a track full of hazards. At **question beats**, a **prompt character** (kana or kanji) appears with 2–3 answers. Most questions are **wall gates**: openings in a wall, one per answer. Some are **squad charges**: enemy squads, one per answer. Choosing the correct answer grows the army. A wrong answer shrinks it and breaks the streak. Between questions, the army must dodge hazards, and a bigger army is wider and harder to steer. The army fires ahead automatically, and its firepower grows with its size, so right answers are what let it blast through blocks and incoming enemy packs. The run ends in a boss clash decided by army size.
 
 **User:** the project owner only. They are a returning Japanese learner: kana is rusty, and most kanji are forgotten after earlier WaniKani study. Typical play: on a phone, several runs back to back (5–15 min).
 
@@ -25,6 +27,7 @@ A browser "crowd runner". The player steers an army down a track full of hazards
 - As the player, I start a run with one keypress or tap. Each run is different.
 - As the player, I steer smoothly by holding ←/→ on a laptop, or by dragging anywhere on a phone.
 - As the player, I dodge hazards between questions. Soldiers that touch a hazard are lost.
+- As the player, my army fires ahead on its own. The more soldiers I have, the harder it hits, so a strong run smashes blocks and enemy packs, and a weak one gets overrun.
 - As the player, I see a prompt (e.g. `水`) and must steer through the opening labelled with the correct answer (`water` / `fire` / `tree`).
 - As the player, sometimes the answers stand above enemy squads. I charge one, and once I'm committed I can't change my mind.
 - As the player, a correct streak escalates my reward and a wrong pick costs me, so accuracy matters.
@@ -63,6 +66,7 @@ A browser "crowd runner". The player steers an army down a track full of hazards
 **Squad honesty rules** (the answer must never leak):
 - All squads in a charge look identical until contact: same count shown, same formation, same animation. The renderer gets no correctness data for squads until the charge resolves.
 - Steering is locked from the charge line until contact, so there is no touch-and-retry.
+- **Firefight presentation:** after the lock, the charge plays out as a short firefight with the chosen squad. A correct squad stops fighting and joins you; a wrong one fires back. Scoring is unchanged (see Streak and payoff). Before the lock, squads aren't shootable targets, so fire can't reveal anything about them.
 
 ### Streak and payoff
 - Streak = consecutive correct answers in this run, across both shapes.
@@ -90,13 +94,27 @@ All distances are in track units. The track is 1.0 wide; `x` runs from 0 (left e
   - at a wall gate, are applied first, then the answer is scored on the remaining army.
 - **Wall gates:** openings are `GATE_OPENING_2` (0.36) wide for 2 answers and `GATE_OPENING_3` (0.26) wide for 3, spread evenly with solid wall between and at the edges. The largest crowd (0.30) fits a 2-answer opening but clips a 3-answer one. This is deliberate: a big army is harder to manage.
 - **Hazards** (between questions only):
-  - **Block:** a static solid, 0.15–0.35 wide.
-  - **Saw:** 0.10 wide, sweeping side to side at a set speed and range.
+  - **Block:** a static solid, 0.15–0.35 wide. Breakable by fire (see Shooting).
+  - **Saw:** 0.10 wide, sweeping side to side at a set speed and range. Can't be shot.
+  - **Enemy pack:** a counted group running at the army (see Shooting).
 - **Beat layout** (generated by `track.ts` from the seed):
   - 14 question beats. Between consecutive questions there are 1–2 hazard beats (seeded).
   - Before each question there is a **calm stretch** of `CALM_DISTANCE` with no hazards, starting when the prompt appears. This leaves time to read the prompt and recall the answer.
-  - Hazard layouts must always leave a gap wide enough for the current maximum crowd width (0.30), so a skilled player never takes forced losses.
-- **Speed:** ramps linearly from 1.0× to **1.3×** over the run. Spacing is tuned so that a run (14 questions plus boss) takes about 2–3 minutes.
+  - Block and saw layouts must always leave a gap wide enough for the current maximum crowd width (0.30), so a skilled player never takes forced losses from them. Enemy packs are the exception by design: they are a firepower check, not a steering one.
+  - Enemy packs take some of the hazard beats (none before question 2), so the run length doesn't change.
+- **Speed:** `BASE_SPEED` 1.3 track units per second, ramping linearly by up to **1.3×** over the run. A run to the last question takes about 80 seconds, plus the boss.
+
+### Shooting
+The army fires straight ahead all the time. There is no fire button: steering is aiming.
+
+- **Firepower:** `FIRE_PER_SOLDIER × army` damage per second (start: 1). Correct answers grow the army, so they grow the fire. There is no separate streak or power-up bonus.
+- **Targeting:** all fire goes to the nearest shootable threat ahead, within `FIRE_RANGE` (start: 2.0 track units), whose span overlaps the crowd's span. Nothing else takes damage.
+- **What can be shot:** blocks and enemy packs. Walls and saws can't: the question is never bypassed, and dodging still matters.
+- **Expected army:** `expectedArmy(q)` is the army after question `q` in a deterministic 80%-accuracy pass over the run's actual questions (every 5th answer wrong, no clipping). Threat strength follows it, so strong players stay challenged and weak players fall behind. The boss (T9) may reuse it.
+- **Breakable block:** hit points `BLOCK_HP_K × expectedArmy(q)` for a block before question `q + 1`. At 0 it shatters and no longer clips. A block with hit points left clips exactly as before.
+- **Enemy pack:** a counted group, `ENEMY_K × expectedArmy(q)` strong (at least 3), drawn like the army with its own width from `crowdWidth`. It runs towards the army at `ENEMY_SPEED` on top of the scroll, and drifts towards the crowd's centre at `ENEMY_STEER_SPEED`, so it can be partly dodged but mainly has to be shot. Each `ENEMY_HP` of damage kills one enemy, and the pack narrows as it shrinks. On contact, if its span overlaps the crowd's, the army loses one soldier per surviving enemy (`ENEMY_DAMAGE`, start: 1) and the pack is gone. If it misses, it is gone with no loss.
+- **Rules shared with clipping:** shooting losses never change the streak, the results or the SRS. An army reaching 0 ends the run.
+- **Feedback:** bullets, hit flashes and a shatter or burst when a threat dies. Fire and effects must not cover the prompt or the answer labels.
 
 ### Run shape
 - 14 question beats with hazards between them, then the boss.
@@ -192,6 +210,7 @@ src/core/               → PURE game logic, no DOM. Fully unit-tested.
   run.ts                → builds a run's questions from seed + SRS state
   track.ts              → beat layout: question shapes, hazards, calm stretches
   crowd.ts              → crowd width, steering motion, overlap losses
+  fire.ts               → firepower, targeting, expected army, threat strength
   sim.ts                → steps the run: movement, clipping, question resolution, charge lock
   srs.ts                → Leitner updates, selection weights
   progression.ts        → levels, unlock rule, placement
@@ -232,9 +251,10 @@ export function clipLoss(army: number, x: number, w: number, solids: Span[]): nu
 
 ## Testing Strategy
 - **Unit tests (Vitest)** cover everything in `src/core` and `src/storage`: scoring curve and both wrong penalties, crowd width, clip loss, steering speed limit, charge-line lock, wall-gate and squad resolution, SRS box transitions and weights, new-item cap, unlock rule, placement, distractor validity (no correct answer among distractors, no duplicates), run and track determinism per seed, and storage migration and corrupt-data recovery.
-- **Track property tests:** over 1,000 seeds, every hazard beat leaves a gap ≥ `CROWD_MAX_W`; no hazard falls inside a calm stretch; squads only appear at questions 4, 8 and 12.
+- **Shooting tests:** damage per second is `FIRE_PER_SOLDIER × army`; fire reaches only the nearest overlapping shootable threat in range; a block shatters exactly when its damage reaches its hit points, then stops clipping; walls and saws take no damage; enemy contact costs one soldier per survivor only when spans overlap; shooting losses never change streak or results.
+- **Track property tests:** over 1,000 seeds, every block and saw beat leaves a gap ≥ `CROWD_MAX_W`; no hazard falls inside a calm stretch; squads only appear at questions 4, 8 and 12.
 - **Honesty tests:** the squad view model is identical for every squad in a charge (no correctness, size or position tell). Clipping never changes streak or SRS.
-- **Balance simulation test:** a scripted bot with accuracy `p` and a "steering" factor `s` (the fraction of avoidable clipping it avoids) plays 1,000 seeded runs. With `s = 1`: 100% accuracy always beats the boss, 50% accuracy wins less than 10% of the time, and 80% accuracy wins 40–70% of the time. With `p = 1, s = 0.5`: wins at least 50% of the time.
+- **Balance simulation test:** a scripted bot with accuracy `p` and a "steering" factor `s` (the fraction of avoidable clipping it avoids) plays 1,000 seeded runs. With `s = 1`: 100% accuracy always beats the boss, 50% accuracy wins less than 10% of the time, and 80% accuracy wins 40–70% of the time. With `p = 1, s = 0.5`: wins at least 50% of the time. Shooting adds one more check: with `s = 1`, a 50%-accuracy bot dies before the boss in at least half of its runs, and a 100%-accuracy bot never does.
 - **Merge tests:** the merge is commutative, idempotent, and never loses an item present on either side. The later `lastSeen` wins.
 - **Sync tests:** `src/sync` runs against a mocked Supabase client. They cover offline, paused (network error), expired session, and first sync with no remote row.
 - **Data test:** generated JSON passes a schema check. Every kanji has at least one meaning and at least one reading. Every level has 30 items, except the last.
@@ -251,7 +271,7 @@ export function clipLoss(army: number, x: number, w: number, solids: Span[]): nu
 2. A full run (14 questions, hazards, 3 squad charges, boss) is playable with ←/→ only, and with drag only, at 60 fps on the laptop.
 3. Steering is continuous: the crowd moves smoothly at a capped speed, and there is no lane snapping.
 4. Two consecutive runs with different seeds have different questions and track layouts. The same seed and the same state reproduce the same run.
-5. A skilled player can always avoid every hazard (track property test), and a bigger army is measurably harder to keep whole (3-answer walls clip a max-size crowd).
+5. A skilled player can always avoid every block and saw (track property test), and a bigger army is measurably harder to keep whole (3-answer walls clip a max-size crowd).
 6. Squad charges can't be read before commit, and can't be retried after the charge line (honesty tests).
 7. After answering an item wrong, its box is 0 and its selection weight is 32× that of a box-5 item. Tests verify this.
 8. Progress (boxes, unlocked level, stats) survives a page reload. Corrupt storage resets without crashing.
@@ -262,12 +282,12 @@ export function clipLoss(army: number, x: number, w: number, solids: Span[]): nu
 13. The game is live on GitHub Pages and playable on a phone.
 14. Progress from a run on the laptop shows up on the phone after login, and the reverse. With the network off, play still works and syncs later.
 15. A request with another user's session (or none) cannot read or write the progress row. This is checked manually against RLS.
-16. **Feel checkpoint (owner):** after the steering + hazards slice, the owner confirms on the phone that it feels like a crowd runner, and that prompts are readable while steering.
+16. **Feel checkpoint (owner):** after the steering, hazards and shooting slices, the owner confirms on the phone that it feels like a crowd runner, that right answers feel like power, and that prompts are readable while steering and firing.
 
 ## Out of Scope (v1)
 Maths gates, English→kanji gates, sound/TTS, multi-user, sign-up flow, password reset UI, realtime sync, vocabulary (multi-kanji words), multiplayer, leaderboards, any backend beyond the Supabase progress table, 3D art, native app.
-Also deferred from the rework (see `docs/ideas/crowd-runner-rework.md`): splitting the crowd across gates; stage chains / long-session structure; more hazard types or enemy variety; tap-left/right touch controls; the boss as a big squad charge; art, sound and juice beyond simple feedback.
-Future enhancement idea (owner, 2026-11-07, after R2): shooting or another mechanism that lets the player widen gaps. Clipping works, but big crowds feel forced to lose units with no way to prevent it. To refine or discuss later.
+Also deferred from the rework (see `docs/ideas/crowd-runner-rework.md`): splitting the crowd across gates; stage chains / long-session structure; more hazard types or enemy variety beyond the one enemy pack; tap-left/right touch controls; the boss as a big squad charge; art, sound and juice beyond simple feedback.
+Deferred from shooting (see `docs/ideas/shooting.md`): a streak bonus to firepower; a fire button or ammo; breakable walls or saws; shooting answer panels; upgrades and pickups; the boss as a shootout (comes with T9).
 
 ## Open Questions
 1. ~~Hosting~~: resolved, public repo on GitHub Pages.
@@ -276,5 +296,6 @@ Future enhancement idea (owner, 2026-11-07, after R2): shooting or another mecha
 4. ~~Ordering~~: resolved. Use grade + frequency + the component pass, with an override file kept in reserve. No WaniKani-derived data.
 5. ~~Reading gates~~: resolved. Accept any main reading, with no label (see Gate types). A labelled on/kun gate type may come later.
 6. ~~Rework open questions~~: resolved in `docs/ideas/crowd-runner-rework.md` (blob crowd, 1.3× speed, 14 questions, unchanged boss).
+7. ~~Shooting open questions~~: resolved in `docs/ideas/shooting.md` (before R5, packs replace some hazard beats, one soldier per surviving enemy).
 
 None remaining. All new numbers are starting values in `tuning.ts`, to be tuned at the feel checkpoint.
