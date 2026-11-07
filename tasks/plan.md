@@ -73,7 +73,7 @@ T1 scaffold ─ T2 core rules ─ T3 lane slice (done)
 - [x] S7: Shooting an opening grows it
 
 ### Checkpoint A3: pace, squads and gates
-- [ ] No dead time, squads clear and honest, gate growth feels good, charge penalty fair.
+- [x] Passed 2026-11-07: no dead time, squads clear and honest, gate growth feels good, charge penalty fair.
 
 ### Phase 2: Learning loop
 - [ ] T5: Kanji data pipeline

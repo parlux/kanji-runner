@@ -236,12 +236,13 @@ Squads are cool but hard to read ("can't tell if it's too fast or just too hard 
 **Scope:** M
 
 ### Checkpoint A3: pace, squads and gates (replaces A2)
-- [ ] Owner: no long stretches with nothing to do; answering while partly distracted feels good
-- [ ] Owner: squad charges are clear to read, fun, and can't be told apart before contact
-- [ ] Owner: growing an opening feels good, and a late change of mind isn't too harsh
-- [ ] Owner: a wrong charge (−50%) isn't too punishing (bot: missing only the 3 charges died early in 162/200 runs at R5)
+- [x] Owner: no long stretches with nothing to do; answering while partly distracted feels good
+- [x] Owner: squad charges are clear to read, fun, and can't be told apart before contact
+- [x] Owner: growing an opening feels good, and a late change of mind isn't too harsh
+- [x] Owner: a wrong charge (−50%) isn't too punishing (bot: missing only the 3 charges died early in 162/200 runs at R5)
 
 ## Phase 2: Learning loop
+- [x] Passed, 2026-11-07 (owner: "All good, checkpoint approved").
 
 ### Task 5: Kanji data pipeline
 **Description:** `scripts/build-data.ts` (run with tsx) downloads KANJIDIC2 and KRADFILE into a gitignored cache and keeps only Jōyō kanji. It orders them by grade, then frequency, then the component pass, then `order-overrides.json`. For each kanji it picks:
