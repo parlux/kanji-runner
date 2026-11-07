@@ -1,7 +1,15 @@
 import { bindDrag, bindKeys, type Action } from "./game/input";
 import { startLoop } from "./game/loop";
 import { render } from "./game/render";
-import { devLevel, handleAction, updateScene, type Scene } from "./game/scenes";
+import {
+  afterStep,
+  createSession,
+  devLevel,
+  handleAction,
+  updateScene,
+  type Scene,
+} from "./game/scenes";
+import { loadProgress, saveProgress } from "./storage/storage";
 
 const canvas = document.querySelector<HTMLCanvasElement>("#game");
 if (!canvas) throw new Error("Missing #game canvas");
@@ -21,10 +29,13 @@ resize();
 
 const newSeed = (): number => Math.floor(Math.random() * 2 ** 31);
 let scene: Scene = { kind: "start" };
-const level = devLevel(window.location.search);
+let session = createSession(
+  loadProgress(localStorage),
+  devLevel(window.location.search),
+);
 
 const act = (action: Action): void => {
-  scene = handleAction(scene, action, newSeed, level);
+  scene = handleAction(scene, action, newSeed, session);
 };
 const steerAxis = bindKeys(act);
 // a tap starts a run from the start/end screens, and pauses or resumes a run
@@ -34,7 +45,13 @@ const takeDrag = bindDrag(canvas, () =>
 
 startLoop(
   (dt) => {
-    scene = updateScene(scene, dt, steerAxis(), takeDrag());
+    const next = updateScene(scene, dt, steerAxis(), takeDrag());
+    const settled = afterStep(session, scene, next, Date.now());
+    // save after every run
+    if (settled !== session && session.persist)
+      saveProgress(localStorage, settled.progress);
+    session = settled;
+    scene = next;
   },
   () => render(ctx, window.innerWidth, window.innerHeight, scene),
 );

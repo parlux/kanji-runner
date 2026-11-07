@@ -8,9 +8,8 @@ import {
   type Opening,
 } from "../../src/core/gates";
 import { clipLoss, crowdWidth } from "../../src/core/crowd";
-import { KANA } from "../../src/core/kana";
 import { createRng } from "../../src/core/rng";
-import { buildKanaRun } from "../../src/core/run";
+import { kanaRun } from "./kana-run";
 import {
   createRunState,
   rowOpenings,
@@ -187,7 +186,7 @@ describe("gate growth in a run", () => {
     squads = false,
   ): RunState {
     const track = buildTrack(1, ROWS_PER_RUN, squads);
-    const s = createRunState(buildKanaRun(1, KANA), { ...track, hazards: [] });
+    const s = createRunState(kanaRun(1), { ...track, hazards: [] });
     const x = at(rowOpenings(s, q), pick).centre;
     return {
       ...s,
@@ -206,9 +205,7 @@ describe("gate growth in a run", () => {
     return s;
   }
 
-  const firstThree = buildKanaRun(1, KANA).findIndex(
-    (r) => r.options.length === 3,
-  );
+  const firstThree = kanaRun(1).findIndex((r) => r.options.length === 3);
 
   it("grows the opening nearest the crowd once the wall is in range, and only then", () => {
     let s = before(firstThree, 100, 1);
@@ -267,7 +264,7 @@ describe("gate growth in a run", () => {
     }
   });
 
-  const answer = (buildKanaRun(1, KANA)[firstThree] as GateRow).answerIndex;
+  const answer = (kanaRun(1)[firstThree] as GateRow).answerIndex;
 
   it("a max-size crowd that shoots its opening early passes a 3-answer wall without loss", () => {
     const s = before(firstThree, 100, answer);

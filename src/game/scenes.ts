@@ -1,4 +1,4 @@
-import { buildKanaRun, buildKanjiRun } from "../core/run";
+import { buildRun } from "../core/run";
 import { KANA } from "../core/kana";
 import { KANJI } from "../core/kanji";
 import {
@@ -8,7 +8,9 @@ import {
   type RunState,
 } from "../core/sim";
 import { buildTrack } from "../core/track";
+import { recordRun } from "../core/srs";
 import { ROWS_PER_RUN, STEER_MAX_SPEED } from "../core/tuning";
+import type { KanaItem, Progress } from "../core/types";
 import type { Action } from "./input";
 
 export type Scene =
@@ -25,17 +27,61 @@ export function devLevel(search: string): number | null {
   return Number.isInteger(n) && n >= 2 ? n : null;
 }
 
-function newRun(seed: number, level: number | null): Scene {
+/** What runs are built from this page load, and whether results are saved. */
+export type Session = {
+  progress: Progress;
+  kana: readonly KanaItem[];
+  persist: boolean;
+};
+
+/**
+ * A normal session plays and saves the stored progress. A dev `?level=N`
+ * session is a sandbox: kanji only, levels 2..N unlocked, SRS updates kept in
+ * memory for the page's lifetime but never saved, so real progress is untouched.
+ */
+export function createSession(stored: Progress, level: number | null): Session {
+  return level === null
+    ? { progress: stored, kana: KANA, persist: true }
+    : {
+        progress: { ...stored, unlockedLevel: level },
+        kana: [],
+        persist: false,
+      };
+}
+
+function newRun(seed: number, session: Session): Scene {
   return {
     kind: "run",
     seed,
     run: createRunState(
-      level === null
-        ? buildKanaRun(seed, KANA)
-        : buildKanjiRun(seed, KANJI, level),
+      buildRun(seed, session.progress, session.kana, KANJI),
       buildTrack(seed, ROWS_PER_RUN),
     ),
     paused: false,
+  };
+}
+
+/**
+ * The session after one update step: if `prev → next` just ended a run, its
+ * answers go into the SRS and the run stats. Otherwise the same session.
+ */
+export function afterStep(
+  session: Session,
+  prev: Scene,
+  next: Scene,
+  now: number,
+): Session {
+  if (prev.kind !== "run" || next.kind !== "end") return session;
+  const { rows, results, status } = next.run;
+  return {
+    ...session,
+    progress: recordRun(
+      session.progress,
+      rows,
+      results,
+      status === "finished",
+      now,
+    ),
   };
 }
 
@@ -43,12 +89,12 @@ export function handleAction(
   scene: Scene,
   action: Action,
   newSeed: () => number,
-  level: number | null = null,
+  session: Session,
 ): Scene {
   switch (scene.kind) {
     case "start":
     case "end":
-      return action === "confirm" ? newRun(newSeed(), level) : scene;
+      return action === "confirm" ? newRun(newSeed(), session) : scene;
     case "run":
       return action === "pause" ? { ...scene, paused: !scene.paused } : scene;
   }

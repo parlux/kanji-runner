@@ -7,8 +7,7 @@ import {
   pickTarget,
   type Threat,
 } from "../../src/core/fire";
-import { buildKanaRun } from "../../src/core/run";
-import { KANA } from "../../src/core/kana";
+import { kanaRun } from "./kana-run";
 import type { Block, Pack, Saw, Track } from "../../src/core/track";
 import {
   BLOCK_HP_K,
@@ -45,7 +44,7 @@ describe("firepower", () => {
 
 describe("expectedArmy", () => {
   it("starts at STARTING_ARMY and has one entry per answer", () => {
-    const rows = buildKanaRun(1, KANA);
+    const rows = kanaRun(1);
     const e = expectedArmy(rows);
     expect(e[0]).toBe(STARTING_ARMY);
     expect(e).toHaveLength(rows.length + 1);
@@ -53,14 +52,12 @@ describe("expectedArmy", () => {
 
   it("is deterministic per run", () => {
     for (let seed = 0; seed < 50; seed++)
-      expect(expectedArmy(buildKanaRun(seed, KANA))).toEqual(
-        expectedArmy(buildKanaRun(seed, KANA)),
-      );
+      expect(expectedArmy(kanaRun(seed))).toEqual(expectedArmy(kanaRun(seed)));
   });
 
   it("drops only on every 5th answer, and never after a correct one", () => {
     for (let seed = 0; seed < 50; seed++) {
-      const e = expectedArmy(buildKanaRun(seed, KANA));
+      const e = expectedArmy(kanaRun(seed));
       for (let q = 1; q < e.length; q++) {
         const prev = e[q - 1] as number;
         const cur = e[q] as number;

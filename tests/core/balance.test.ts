@@ -10,8 +10,7 @@ import {
   stepRun,
   type RunState,
 } from "../../src/core/sim";
-import { buildKanaRun } from "../../src/core/run";
-import { KANA } from "../../src/core/kana";
+import { kanaRun } from "./kana-run";
 import { buildTrack, hazardSpan } from "../../src/core/track";
 import { BASE_SPEED, FIRE_RANGE, ROWS_PER_RUN } from "../../src/core/tuning";
 
@@ -42,10 +41,7 @@ function botRun(
   wrong: (q: number) => boolean,
   squads?: boolean,
 ): RunState {
-  let s = createRunState(
-    buildKanaRun(seed, KANA),
-    buildTrack(seed, ROWS_PER_RUN, squads),
-  );
+  let s = createRunState(kanaRun(seed), buildTrack(seed, ROWS_PER_RUN, squads));
   while (s.status === "running") {
     const h = s.track.hazards[s.nextHazard];
     const rowAt = s.track.questions[s.next] ?? Infinity;

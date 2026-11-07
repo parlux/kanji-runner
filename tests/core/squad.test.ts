@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { expectedArmy } from "../../src/core/fire";
-import { KANA } from "../../src/core/kana";
 import { createRng } from "../../src/core/rng";
-import { buildKanaRun } from "../../src/core/run";
+import { kanaRun } from "./kana-run";
 import {
   applyCorrect,
   applyCorrectCharge,
@@ -76,7 +75,7 @@ function beforeCharge(
   ahead = 1e-6,
 ): RunState {
   const track = { ...buildTrack(seed, ROWS_PER_RUN), hazards: [] };
-  const s = createRunState(buildKanaRun(seed, KANA), track);
+  const s = createRunState(kanaRun(seed), track);
   return {
     ...s,
     army,
@@ -107,7 +106,7 @@ describe("choosing at a charge", () => {
   it("steering works right up to contact", () => {
     for (const seed of [1, 2, 3, 4, 5]) {
       for (const q of [3, 7, 11]) {
-        const n = buildKanaRun(seed, KANA)[q]?.options.length ?? 2;
+        const n = kanaRun(seed)[q]?.options.length ?? 2;
         const mids = squadCentres(gateOpenings(n));
         // start lined up on the first squad, switch to its neighbour late
         const s = beforeCharge(seed, q, mids[0], 20, 0.8);
@@ -202,7 +201,7 @@ describe("charge resolution", () => {
 
 describe("expectedArmy with charges", () => {
   it("scores charge questions as charges", () => {
-    const rows = buildKanaRun(1, KANA);
+    const rows = kanaRun(1);
     const plain = expectedArmy(rows);
     const withCharges = expectedArmy(rows, [3]);
     expect(withCharges[3]).toBe(plain[3]);
@@ -219,7 +218,7 @@ describe("squad view honesty", () => {
     let checked = 0;
     for (let seed = 0; seed < 300; seed++) {
       const track = buildTrack(seed, ROWS_PER_RUN);
-      let s = createRunState(buildKanaRun(seed, KANA), track);
+      let s = createRunState(kanaRun(seed), track);
       const rng = createRng(seed);
       while (s.status === "running") {
         if (rng() < 0.05) s = setTarget(s, rng());

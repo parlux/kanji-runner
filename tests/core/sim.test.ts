@@ -16,8 +16,7 @@ import {
 } from "../../src/core/sim";
 import { crowdWidth } from "../../src/core/crowd";
 import { firepower } from "../../src/core/fire";
-import { buildKanaRun } from "../../src/core/run";
-import { KANA } from "../../src/core/kana";
+import { kanaRun } from "./kana-run";
 import {
   buildTrack,
   hazardSpan,
@@ -62,7 +61,7 @@ const at = (o: Opening[], i: number): Opening => o[i] as Opening;
 function fresh(seed = 1, hazards = false): RunState {
   const track = buildTrack(seed, ROWS_PER_RUN, false);
   return createRunState(
-    buildKanaRun(seed, KANA),
+    kanaRun(seed),
     hazards ? track : { ...track, hazards: [] },
   );
 }
@@ -469,7 +468,7 @@ describe("shooting", () => {
     hp: number[],
     army = 20,
   ): RunState {
-    const s = createRunState(buildKanaRun(1, KANA), {
+    const s = createRunState(kanaRun(1), {
       questions: [100],
       hazards,
       charges: [],
