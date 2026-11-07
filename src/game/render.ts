@@ -1,15 +1,23 @@
 import { crowdWidth } from "../core/crowd";
 import {
   crateReward,
+  fireLimit,
   gateOpenings,
   hazardPos,
   isShattered,
   packSpan,
   packSurvivors,
+  viewOf,
+  type ChargeView,
   type RunState,
 } from "../core/sim";
-import { hazardSpan } from "../core/track";
-import { FIRE_RANGE, SAW_W, VIEW_DISTANCE } from "../core/tuning";
+import { hazardSpan, isCharge } from "../core/track";
+import {
+  CHARGE_LINE_DISTANCE,
+  FIRE_RANGE,
+  SAW_W,
+  VIEW_DISTANCE,
+} from "../core/tuning";
 import type { Scene } from "./scenes";
 
 const FONT = `"Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic", system-ui, sans-serif`;
@@ -22,6 +30,8 @@ const ANSWER_FEEDBACK_DIST = 1.0;
 const SHATTER_DIST = 0.6;
 /** How long (in track distance) a crate's "+N" and its recruits running in last. */
 const CRATE_POPUP_DIST = 0.8;
+/** Fraction of the charge (line to contact) both sides fire before the chosen squad's outcome shows. */
+const CHARGE_REVEAL = 0.35;
 const COLORS = {
   bg: "#111",
   track: "#1d2230",
@@ -40,6 +50,9 @@ const COLORS = {
   crateDark: "#4a3220",
   hazardEdge: "#ff8a7a",
   goodFill: "rgba(95, 211, 141, 0.35)",
+  chargeLine: "#ffb347",
+  banner: "rgba(20, 24, 36, 0.85)",
+  enemyBullet: "#ff9bbd",
   bullet: "#fff3b0",
   badFill: "rgba(255, 107, 107, 0.35)",
 };
@@ -215,7 +228,11 @@ function renderRun(ctx: Ctx, w: number, h: number, run: RunState): void {
 
   // fire goes under the walls, so it never covers a prompt or an answer label
   const radius = (crowdWidth(run.army) * w) / 2;
-  renderFire(ctx, w, run, armyY, radius, depthY);
+  // squads are drawn only from the view model, never from the rows
+  const view = viewOf(run);
+  const active = view.charges.find((c) => c.locked);
+  if (active) renderFirefight(ctx, w, run, active, armyY, radius, depthY);
+  else renderFire(ctx, w, run, armyY, radius, depthY);
 
   // visible walls, far ones first
   for (let i = run.rows.length - 1; i >= 0; i--) {
@@ -223,7 +240,7 @@ function renderRun(ctx: Ctx, w: number, h: number, run: RunState): void {
     if (ahead < -behind) break;
     if (ahead > farthest) continue;
     const row = run.rows[i];
-    if (!row) continue;
+    if (!row || isCharge(run.track, i)) continue;
     const y = depthY(ahead);
     const scale = Math.max(0.3, 1 - 0.5 * (ahead / VIEW_DISTANCE));
     const wallH = 56 * scale;
@@ -250,6 +267,11 @@ function renderRun(ctx: Ctx, w: number, h: number, run: RunState): void {
       text(ctx, row.options[j] ?? "", o.centre * w, y - wallH / 2, 30 * scale);
     });
     text(ctx, row.prompt, w / 2, y - wallH - 30 * scale, 44 * scale);
+  }
+
+  for (const c of view.charges) {
+    if (c.line - run.dist < -behind || c.line - run.dist > farthest) continue;
+    renderCharge(ctx, w, run, c, armyY, depthY);
   }
 
   renderCrateRecruits(ctx, w, run, armyY, radius, depthY);
@@ -356,10 +378,8 @@ function renderFire(
   const sy = armyY - radius * 0.4;
   if (i === null || !(target?.kind === "block" || target?.kind === "pack")) {
     const ey = depthY(FIRE_RANGE);
-    // bullets stop at the next wall, so they never reach its prompt
-    const wallY = depthY(
-      (run.track.questions[run.next] ?? Infinity) - run.dist,
-    );
+    // bullets stop at the next wall or charge line, so they never reach a prompt or a squad
+    const wallY = depthY(fireLimit(run) - run.dist);
     ctx.fillStyle = COLORS.bullet;
     for (let l = 0; l < lanes; l++) {
       for (let k = 0; k < 8; k++) {
@@ -432,6 +452,125 @@ function renderFire(
         );
       }
       ctx.globalAlpha = 1;
+    }
+  }
+}
+
+/** How far through a locked charge the army is: 0 at the line, 1 at contact. */
+function chargeProgress(run: RunState, c: ChargeView): number {
+  const t = (run.dist - (c.lockDist ?? run.dist)) / CHARGE_LINE_DISTANCE;
+  return Math.min(1, Math.max(0, t));
+}
+
+/**
+ * A charge: the line, then identical squads under their answer banners, and
+ * the prompt above them. After the lock the chosen squad is outlined; once the
+ * firefight shows its outcome, a joining squad turns friendly and runs in.
+ */
+function renderCharge(
+  ctx: Ctx,
+  w: number,
+  run: RunState,
+  c: ChargeView,
+  armyY: number,
+  depthY: (ahead: number) => number,
+): void {
+  // the charge line: dashed until it locks, then solid
+  const ly = depthY(c.line - run.dist);
+  const committed = c.locked || c.resolved;
+  ctx.strokeStyle = COLORS.chargeLine;
+  ctx.globalAlpha = committed ? 1 : 0.8;
+  ctx.lineWidth = committed ? 4 : 3;
+  ctx.setLineDash(committed ? [] : [14, 10]);
+  ctx.beginPath();
+  ctx.moveTo(0, ly);
+  ctx.lineTo(w, ly);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.globalAlpha = 1;
+  if (c.locked) {
+    const pulse = 0.75 + 0.25 * Math.sin(run.dist * 20);
+    ctx.globalAlpha = pulse;
+    text(ctx, "LOCKED", w / 2, armyY + 58, 16, COLORS.chargeLine);
+    ctx.globalAlpha = 1;
+  }
+  if (c.resolved) return;
+
+  const ahead = c.pos - run.dist;
+  const y = depthY(ahead);
+  const scale = Math.max(0.3, 1 - 0.5 * (ahead / VIEW_DISTANCE));
+  const t = chargeProgress(run, c);
+  const shown = c.locked && t >= CHARGE_REVEAL;
+  const bannerH = 40 * scale;
+  const bannerY = y - 44 * scale - bannerH;
+  c.squads.forEach((q) => {
+    const r = (crowdWidth(q.count) * w * scale) / 2;
+    let cx = q.x * w;
+    let color = COLORS.enemy;
+    if (shown && q.outcome === "join") {
+      // the defectors turn friendly and run for the army
+      const u = (t - CHARGE_REVEAL) / (1 - CHARGE_REVEAL);
+      color = COLORS.soldier;
+      cx += (run.x * w - cx) * 0.6 * u;
+    }
+    renderArmy(ctx, cx, y, r, q.count, color, scale);
+    // answer banner, outlined once chosen
+    const bw = Math.max(60 * scale, r * 2 + 16 * scale);
+    ctx.fillStyle = COLORS.banner;
+    ctx.fillRect(q.x * w - bw / 2, bannerY, bw, bannerH);
+    if (q.chosen) {
+      ctx.strokeStyle = COLORS.chargeLine;
+      ctx.lineWidth = 3;
+      ctx.strokeRect(q.x * w - bw / 2, bannerY, bw, bannerH);
+    }
+    text(ctx, q.label, q.x * w, bannerY + bannerH / 2, 30 * scale);
+  });
+  text(ctx, c.prompt, w / 2, bannerY - 30 * scale, 44 * scale);
+}
+
+/**
+ * The firefight after a lock: both sides fire at first; then a joining squad
+ * stops (and the army with it), while a fighting squad keeps firing back.
+ */
+function renderFirefight(
+  ctx: Ctx,
+  w: number,
+  run: RunState,
+  c: ChargeView,
+  armyY: number,
+  radius: number,
+  depthY: (ahead: number) => number,
+): void {
+  const q = c.squads.find((s) => s.chosen);
+  if (!q) return;
+  const t = chargeProgress(run, c);
+  const fighting = t < CHARGE_REVEAL || q.outcome === "fight";
+  if (!fighting) return;
+  const sx = run.x * w;
+  const sy = armyY - radius * 0.4;
+  const tx = q.x * w;
+  const ty = depthY(c.pos - run.dist);
+  const lanes = Math.min(5, 1 + Math.floor(Math.sqrt(run.army) / 3));
+  ctx.fillStyle = COLORS.bullet;
+  for (let l = 0; l < lanes; l++) {
+    const ox = (lanes > 1 ? l / (lanes - 1) - 0.5 : 0) * radius;
+    for (let k = 0; k < 6; k++) {
+      const u = (k / 6 + run.dist * 3 + l * 0.37) % 1;
+      ctx.beginPath();
+      ctx.arc(sx + ox + (tx - sx - ox) * u, sy + (ty - sy) * u, 2.5, 0, 7);
+      ctx.fill();
+    }
+  }
+  // return fire from the squad
+  ctx.fillStyle = COLORS.enemyBullet;
+  const back = t < CHARGE_REVEAL ? 2 : 4;
+  for (let l = 0; l < back; l++) {
+    const ox = (back > 1 ? l / (back - 1) - 0.5 : 0) * 16;
+    for (let k = 0; k < 5; k++) {
+      const u = (k / 5 + run.dist * 2.6 + l * 0.29) % 1;
+      ctx.beginPath();
+      ctx.arc(tx + ox + (sx - tx - ox) * u, ty + (sy - ty) * u, 2.5, 0, 7);
+      ctx.fill();
     }
   }
 }
