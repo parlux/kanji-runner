@@ -23,6 +23,15 @@ export function startLayout(w: number, h: number) {
   };
 }
 
+/** The end screen's "Study" button, above the continue hint. */
+export function studyButton(w: number, h: number): Rect {
+  const bw = Math.min(200, w - 48);
+  return { x: (w - bw) / 2, y: h - 104, w: bw, h: 44 };
+}
+
+/** Whether a tap at (x, y) hits `r`. */
+export const hits = (r: Rect, x: number, y: number): boolean => inside(r, x, y);
+
 /** The start screen's sync label, or null when sync is not configured. */
 export function syncLabel(status: SyncStatus): string | null {
   switch (status) {

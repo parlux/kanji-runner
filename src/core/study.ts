@@ -72,3 +72,7 @@ export function studyCards(
   }
   return out;
 }
+
+/** Whether the end screen offers "Study": always after a loss, after a win only if something was missed. */
+export const canStudy = (missed: number, won: boolean): boolean =>
+  !won || missed > 0;

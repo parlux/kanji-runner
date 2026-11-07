@@ -12,9 +12,9 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 - A pure view-model function (missed items → cards) in `src/core`, so the content is tested. A `mnemonic` field on the card is left optional for W5.
 
 **Acceptance criteria:**
-- [ ] The cards match `missedItems` for the run: same items, same order, correct answers (tested).
-- [ ] Studying never changes `Progress` (tested).
-- [ ] Readable at 390×844, with long readings and many components (screenshots).
+- [x] The cards match `missedItems` for the run: same items, same order, correct answers (tested).
+- [x] Studying never changes `Progress` (tested).
+- [x] Readable at 390×844, with long readings and many components (screenshots).
 
 **Verification:** `npm test -- study`. Browser check at 390×844.
 **Dependencies:** v1 done

@@ -1,7 +1,11 @@
 import { createDrag } from "./drag";
 
-/** `left`/`right`/`back`/`place` drive the start screen's placement picker. */
-export type Action = "confirm" | "pause" | "left" | "right" | "back" | "place";
+/**
+ * `left`/`right`/`back`/`place` drive the start screen's placement picker;
+ * `study` opens the study screen from the end screen.
+ */
+export type Action =
+  "confirm" | "pause" | "left" | "right" | "back" | "place" | "study";
 
 const KEYS: Record<string, Action> = {
   Enter: "confirm",
@@ -9,6 +13,8 @@ const KEYS: Record<string, Action> = {
   p: "pause",
   P: "pause",
   Escape: "back",
+  s: "study",
+  S: "study",
 };
 
 /**

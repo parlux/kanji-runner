@@ -11,7 +11,12 @@ import {
   updateScene,
   type Scene,
 } from "./game/scenes";
-import { startTap, syncTap } from "./game/start";
+import { hits, startTap, studyButton, syncTap } from "./game/start";
+import { openStudy, studyOpen } from "./game/study";
+import { KANA } from "./core/kana";
+import { KANJI } from "./core/kanji";
+import { missedItems } from "./core/run";
+import { canStudy, studyCards } from "./core/study";
 import { loadProgress, saveProgress } from "./storage/storage";
 import { openLogin } from "./sync/login";
 import { createSyncFromEnv } from "./sync/sync";
@@ -49,7 +54,27 @@ const adopt = (p: Progress): void => {
 };
 void sync.pull().then(adopt);
 
+// the study screen (end screen only) lists what the last run missed
+const studyAvailable = (): boolean => {
+  if (scene.kind !== "end") return false;
+  const { run, boss } = scene;
+  const missed = missedItems(run.rows, run.results, run.track.charges, KANJI);
+  return canStudy(missed.length, boss?.won ?? false);
+};
+const study = (): void => {
+  if (scene.kind !== "end" || !studyAvailable()) return;
+  const { run } = scene;
+  const missed = missedItems(run.rows, run.results, run.track.charges, KANJI);
+  // Play again: end -> start -> run, the same as confirming twice
+  openStudy(studyCards(missed, KANJI, KANA), () => {
+    act("confirm");
+    act("confirm");
+  });
+};
+
 const act = (action: Action): void => {
+  if (studyOpen()) return;
+  if (action === "study") return study();
   const next = handleAction(scene, action, newSeed, session);
   // placement changes progress: save it right away
   if (next.session !== session && session.persist)
@@ -63,7 +88,13 @@ const steerAxis = bindKeys(act);
 const takeDrag = bindDrag(canvas, (x, y) => {
   if (scene.kind === "run") return act("pause");
   if (scene.kind === "boss") return;
-  if (scene.kind === "end") return act("confirm");
+  if (scene.kind === "end") {
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    return studyAvailable() && hits(studyButton(w, h), x, y)
+      ? act("study")
+      : act("confirm");
+  }
   const w = window.innerWidth;
   const h = window.innerHeight;
   if (scene.pick === undefined && syncTap(sync.status(), w, h, x, y)) {

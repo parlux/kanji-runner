@@ -1,0 +1,112 @@
+import type { StudyCard } from "../core/study";
+
+const CSS = `
+.kr-study { position: fixed; inset: 0; display: flex; flex-direction: column;
+  align-items: center; background: #111; color: #f2f2f2; z-index: 10;
+  font: 16px system-ui, sans-serif; outline: none; }
+.kr-study > * { box-sizing: border-box; width: 100%; max-width: 480px; }
+.kr-study h2 { margin: 0; padding: 14px 16px 8px; font-size: 22px; font-weight: 600; }
+.kr-study .cards { flex: 1; min-height: 0; overflow-y: auto; padding: 4px 16px 12px;
+  display: flex; flex-direction: column; gap: 12px; -webkit-overflow-scrolling: touch; }
+.kr-study .card { display: flex; gap: 14px; padding: 14px; background: #1d2230;
+  border: 1px solid #5a6478; }
+.kr-study .big { flex: none; width: 76px; font-size: 56px; line-height: 1.1;
+  text-align: center; }
+.kr-study .info { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 6px;
+  overflow-wrap: anywhere; }
+.kr-study .meaning { font-size: 18px; font-weight: 600; }
+.kr-study .row { font-size: 15px; color: #9aa3b5; }
+.kr-study .row b { color: #5fd38d; font-weight: 600; }
+.kr-study .parts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
+.kr-study .part { padding: 2px 8px; font-size: 20px; background: #111;
+  border: 1px solid #5a6478; }
+.kr-study .empty { color: #9aa3b5; padding: 8px 0; }
+.kr-study footer { display: flex; gap: 12px; padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); }
+.kr-study button { flex: 1; font: inherit; padding: 12px; color: #f2f2f2;
+  background: #111; border: 1px solid #8892a8; cursor: pointer; }
+.kr-study button.primary { background: #2f6b48; }
+`;
+
+let open: HTMLElement | null = null;
+
+/** Whether the study screen is up; the game ignores taps and keys meanwhile. */
+export const studyOpen = (): boolean => open !== null;
+
+function el<K extends keyof HTMLElementTagNameMap>(
+  tag: K,
+  className = "",
+  ...children: (Node | string)[]
+): HTMLElementTagNameMap[K] {
+  const node = document.createElement(tag);
+  node.className = className;
+  node.append(...children);
+  return node;
+}
+
+function line(label: string, value: string): HTMLElement {
+  return el("div", "row", `${label} `, el("b", "", value));
+}
+
+function cardEl(c: StudyCard): HTMLElement {
+  const info = el("div", "info");
+  if (c.kind === "kana") {
+    info.append(el("div", "meaning", c.romaji), el("div", "row", c.script));
+  } else {
+    info.append(el("div", "meaning", c.meanings.join(", ")));
+    if (c.on) info.append(line("on", c.on));
+    if (c.kun) info.append(line("kun", c.kun));
+    if (c.components.length > 0) {
+      const parts = el("div", "parts");
+      parts.append(...c.components.map((p) => el("span", "part", p)));
+      info.append(el("div", "row", "parts"), parts);
+    }
+  }
+  return el("div", "card", el("div", "big", c.char), info);
+}
+
+/**
+ * Opens the study screen over the canvas: one scrollable card per missed item.
+ * "Play again" closes it and calls `onPlay`; Escape or "Back" just closes it.
+ * Does nothing if already open.
+ */
+export function openStudy(cards: readonly StudyCard[], onPlay: () => void) {
+  if (open) return;
+  if (!document.getElementById("kr-study-css")) {
+    const style = el("style", "", CSS);
+    style.id = "kr-study-css";
+    document.head.append(style);
+  }
+  const overlay = el("div", "kr-study");
+  overlay.tabIndex = -1;
+  const close = () => {
+    overlay.remove();
+    open = null;
+  };
+  const play = () => {
+    close();
+    onPlay();
+  };
+  // keep keys away from the game's key bindings (Enter would be swallowed)
+  overlay.addEventListener("keydown", (e) => {
+    e.stopPropagation();
+    if (e.key === "Escape") close();
+  });
+
+  const list = el("div", "cards");
+  if (cards.length === 0) list.append(el("div", "empty", "Nothing missed."));
+  else list.append(...cards.map(cardEl));
+  const back = el("button", "", "Back");
+  back.type = "button";
+  back.onclick = close;
+  const again = el("button", "primary", "Play again");
+  again.type = "button";
+  again.onclick = play;
+  overlay.append(
+    el("h2", "", `Study (${cards.length})`),
+    list,
+    el("footer", "", back, again),
+  );
+  document.body.append(overlay);
+  open = overlay;
+  again.focus();
+}

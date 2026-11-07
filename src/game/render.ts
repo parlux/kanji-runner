@@ -30,7 +30,8 @@ import {
 } from "../core/progression";
 import type { BossResult, Scene, Session } from "./scenes";
 import type { SyncStatus } from "../sync/sync";
-import { startLayout, syncLabel, type Rect } from "./start";
+import { canStudy } from "../core/study";
+import { startLayout, studyButton, syncLabel, type Rect } from "./start";
 
 const FONT = `"Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic", system-ui, sans-serif`;
 const MAX_DRAWN_SOLDIERS = 200;
@@ -459,7 +460,8 @@ function renderEnd(
 
   const misses = missedItems(run.rows, run.results, run.track.charges, KANJI);
   const top = 204;
-  const bottom = h - 56;
+  const study = canStudy(misses.length, won);
+  const bottom = study ? h - 116 : h - 56;
   if (misses.length === 0) {
     text(ctx, "No misses!", w / 2, top + 40, 28, COLORS.good);
   } else {
@@ -493,6 +495,15 @@ function renderEnd(
         ctx.fillText("charge", w - 12, y);
       }
     });
+  }
+  if (study) {
+    const r = studyButton(w, h);
+    ctx.strokeStyle = COLORS.wallEdge;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.roundRect(r.x + 0.5, r.y + 0.5, r.w - 1, r.h - 1, 8);
+    ctx.stroke();
+    text(ctx, "Study (S)", r.x + r.w / 2, r.y + r.h / 2, 20);
   }
   text(ctx, "Tap or Enter to continue", w / 2, h - 28, 20);
 }
