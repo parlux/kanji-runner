@@ -68,7 +68,7 @@ T1 scaffold ─ T2 core rules ─ T3 lane slice (done)
 ### Checkpoint A2: squads (feedback taken, replaced by A3)
 - [x] Owner played 2026-11-07: squads cool but hard to read, too much dead time, shooting should grow gates. See `docs/ideas/pace-and-gates.md`.
 
-- [ ] S5: Tighter pacing
+- [x] S5: Tighter pacing
 - [ ] S6: Squad charges read like walls
 - [ ] S7: Shooting an opening grows it
 

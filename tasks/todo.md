@@ -189,10 +189,10 @@ Squads are cool but hard to read ("can't tell if it's too fast or just too hard 
 - Keep fire from ever reaching past the next wall (already enforced by `fireLimit`).
 
 **Acceptance criteria:**
-- [ ] No stretch longer than ~2 s (at base speed) without a hazard, wall or squad in reach of the fire or within steering distance, except the calm stretch (measured over many seeds; tested).
-- [ ] Existing track property tests still hold (gaps ≥ `CROWD_MAX_W`, nothing in the calm stretch, determinism), and the skilled-player test still dodges every block and saw.
-- [ ] A run to the last question takes 50–70 s (tested), and the bot check still holds.
-- [ ] Prompts stay readable with hazards on screen (phone-sized screenshots).
+- [x] No stretch longer than ~2 s (at base speed) without a hazard, wall or squad in reach of the fire or within steering distance, except the calm stretch (measured over many seeds; tested).
+- [x] Existing track property tests still hold (gaps ≥ `CROWD_MAX_W`, nothing in the calm stretch, determinism), and the skilled-player test still dodges every block and saw.
+- [x] A run to the last question takes 50–70 s (tested), and the bot check still holds.
+- [x] Prompts stay readable with hazards on screen (phone-sized screenshots).
 
 **Verification:** `npm test`. Phone-sized browser check.
 **Dependencies:** R5
