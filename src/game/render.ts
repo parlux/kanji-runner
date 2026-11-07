@@ -25,8 +25,12 @@ const ANSWER_FEEDBACK_DIST = 1.0;
 const SHATTER_DIST = 0.6;
 /** How long (in track distance) a crate's "+N" and its recruits running in last. */
 const CRATE_POPUP_DIST = 0.8;
-/** Fraction of the charge (line to contact) both sides fire before the chosen squad's outcome shows. */
-const CHARGE_REVEAL = 0.35;
+/** How long (in track distance) a charge's firefight plays after contact. */
+const FIREFIGHT_DIST = 1.2;
+/** Fraction of the firefight both sides fire before the chosen squad's outcome shows. */
+const FIREFIGHT_REVEAL = 0.2;
+/** How long (in track distance) the squads not run into take to fall back after contact. */
+const SQUAD_FADE_DIST = 0.3;
 const COLORS = {
   bg: "#111",
   track: "#1d2230",
@@ -225,11 +229,10 @@ function renderRun(ctx: Ctx, w: number, h: number, run: RunState): void {
   const radius = (crowdWidth(run.army) * w) / 2;
   // squads are drawn only from the view model, never from the rows
   const view = viewOf(run);
-  const active = view.charges.find(
-    (c) => c.contactDist !== null && run.dist - c.contactDist < 1,
+  const fight = view.charges.find(
+    (c) => c.contactDist !== null && run.dist - c.contactDist < FIREFIGHT_DIST,
   );
-  if (active) renderFirefight(ctx, w, run, active, armyY, radius, depthY);
-  else renderFire(ctx, w, run, armyY, radius, depthY);
+  if (!fight) renderFire(ctx, w, run, armyY, radius, depthY);
 
   // visible walls, far ones first
   for (let i = run.rows.length - 1; i >= 0; i--) {
@@ -237,7 +240,7 @@ function renderRun(ctx: Ctx, w: number, h: number, run: RunState): void {
     if (ahead < -behind) break;
     if (ahead > farthest) continue;
     const row = run.rows[i];
-    if (!row || isCharge(run.track, i)) continue;
+    if (!row) continue;
     const y = depthY(ahead);
     const scale = Math.max(0.3, 1 - 0.5 * (ahead / VIEW_DISTANCE));
     const wallH = 56 * scale;
@@ -263,13 +266,17 @@ function renderRun(ctx: Ctx, w: number, h: number, run: RunState): void {
       ctx.fillRect(left, y - wallH, width, wallH);
       text(ctx, row.options[j] ?? "", o.centre * w, y - wallH / 2, 30 * scale);
     });
-    text(ctx, row.prompt, w / 2, y - wallH - 30 * scale, 44 * scale);
+    // a charge is the same wall with a squad standing beyond each opening
+    const charge = isCharge(run.track, i)
+      ? view.charges.find((c) => c.row === i)
+      : undefined;
+    const squadsH = charge
+      ? renderSquads(ctx, w, run, charge, y - wallH, scale)
+      : 0;
+    text(ctx, row.prompt, w / 2, y - wallH - squadsH - 30 * scale, 44 * scale);
   }
 
-  for (const c of view.charges) {
-    if (c.pos - run.dist < -behind || c.pos - run.dist > farthest) continue;
-    renderCharge(ctx, w, run, c, depthY);
-  }
+  if (fight) renderFirefight(ctx, w, run, fight, armyY, radius);
 
   renderCrateRecruits(ctx, w, run, armyY, radius, depthY);
   renderArmy(ctx, run.x * w, armyY, radius, run.army);
@@ -375,7 +382,7 @@ function renderFire(
   const sy = armyY - radius * 0.4;
   if (i === null || !(target?.kind === "block" || target?.kind === "pack")) {
     const ey = depthY(FIRE_RANGE);
-    // bullets stop at the next wall or charge line, so they never reach a prompt or a squad
+    // bullets stop at the next wall, so they never reach a prompt or a squad
     const wallY = depthY(fireLimit(run) - run.dist);
     ctx.fillStyle = COLORS.bullet;
     for (let l = 0; l < lanes; l++) {
@@ -453,61 +460,78 @@ function renderFire(
   }
 }
 
-/** How far through the firefight the army is: 0 at contact, 1 when it ends. */
-function chargeProgress(run: RunState, c: ChargeView): number {
-  const t = (run.dist - (c.contactDist ?? run.dist)) / 1;
+/** How far through its firefight a charge is: 0 at contact, 1 when it ends. */
+function firefightProgress(run: RunState, c: ChargeView): number {
+  const t = (run.dist - (c.contactDist ?? run.dist)) / FIREFIGHT_DIST;
   return Math.min(1, Math.max(0, t));
 }
 
+/** Squads are drawn this much larger than a crowd their size, so they read at a distance. */
+const SQUAD_DRAW_K = 1.4;
+
+/** Radius on screen of a squad at the given scale. */
+const squadRadius = (w: number, count: number, scale: number): number =>
+  (SQUAD_DRAW_K * crowdWidth(count) * w * scale) / 2;
+
+/** How far (px) the squad run into steps back from the wall as the firefight starts. */
+const FIREFIGHT_STEP_BACK = 60;
+
+/** Gap between a wall's top edge and the bottom of the squads beyond it. */
+const SQUAD_GAP = 6;
+
+/** Where a squad standing beyond a wall whose top edge is at `top` is centred. */
+const squadY = (top: number, r: number, scale: number): number =>
+  top - SQUAD_GAP * scale - r * 0.6;
+
 /**
- * A charge: the line, then identical squads under their answer banners, and
- * the prompt above them. After the lock the chosen squad is outlined; once the
- * firefight shows its outcome, a joining squad turns friendly and runs in.
+ * Identical squads standing just beyond a charge's openings, one per answer,
+ * with their (shared) count above them. Returns the height they take above
+ * the wall. After contact the squad run into is drawn by the firefight
+ * instead, and the others fall back.
  */
-function renderCharge(
+function renderSquads(
   ctx: Ctx,
   w: number,
   run: RunState,
   c: ChargeView,
-  depthY: (ahead: number) => number,
-): void {
-  if (c.resolved) return;
+  top: number,
+  scale: number,
+): number {
+  const count = c.squads[0]?.count ?? 0;
+  const r = squadRadius(w, count, scale);
+  const height = SQUAD_GAP * scale + r * 1.2 + 26 * scale;
+  const fade = c.resolved
+    ? 1 - Math.min(1, (run.dist - c.pos) / SQUAD_FADE_DIST)
+    : 1;
+  if (fade <= 0) return height;
+  ctx.globalAlpha = fade;
+  for (const q of c.squads) {
+    if (q.chosen) continue;
+    renderSquad(ctx, q.x * w, squadY(top, r, scale), r, q.count, scale);
+  }
+  ctx.globalAlpha = 1;
+  return height;
+}
 
-  const ahead = c.pos - run.dist;
-  const y = depthY(ahead);
-  const scale = Math.max(0.3, 1 - 0.5 * (ahead / VIEW_DISTANCE));
-  const t = chargeProgress(run, c);
-  const shown = t >= CHARGE_REVEAL;
-  const bannerH = 40 * scale;
-  const bannerY = y - 44 * scale - bannerH;
-  c.squads.forEach((q) => {
-    const r = (crowdWidth(q.count) * w * scale) / 2;
-    let cx = q.x * w;
-    let color = COLORS.enemy;
-    if (shown && q.outcome === "join") {
-      // the defectors turn friendly and run for the army
-      const u = (t - CHARGE_REVEAL) / (1 - CHARGE_REVEAL);
-      color = COLORS.soldier;
-      cx += (run.x * w - cx) * 0.6 * u;
-    }
-    renderArmy(ctx, cx, y, r, q.count, color, scale);
-    // answer banner, outlined once chosen
-    const bw = Math.max(60 * scale, r * 2 + 16 * scale);
-    ctx.fillStyle = COLORS.banner;
-    ctx.fillRect(q.x * w - bw / 2, bannerY, bw, bannerH);
-    if (q.chosen) {
-      ctx.strokeStyle = COLORS.chargeLine;
-      ctx.lineWidth = 3;
-      ctx.strokeRect(q.x * w - bw / 2, bannerY, bw, bannerH);
-    }
-    text(ctx, q.label, q.x * w, bannerY + bannerH / 2, 30 * scale);
-  });
-  text(ctx, c.prompt, w / 2, bannerY - 30 * scale, 44 * scale);
+/** A squad: enemy dots with its count above them (so it never covers a label below). */
+function renderSquad(
+  ctx: Ctx,
+  cx: number,
+  cy: number,
+  r: number,
+  count: number,
+  scale: number,
+  color = COLORS.enemy,
+): void {
+  renderDots(ctx, cx, cy, r, count, color);
+  text(ctx, String(count), cx, cy - r * 0.6 - 12 * scale, 20 * scale, color);
 }
 
 /**
- * The firefight after a lock: both sides fire at first; then a joining squad
- * stops (and the army with it), while a fighting squad keeps firing back.
+ * The firefight at contact, played beyond the wall so it never sits under the
+ * army: the squad run into holds where it stood as the army comes through,
+ * both sides fire, then a correct squad turns friendly and runs into the army
+ * while a wrong one keeps firing back until it breaks.
  */
 function renderFirefight(
   ctx: Ctx,
@@ -516,40 +540,72 @@ function renderFirefight(
   c: ChargeView,
   armyY: number,
   radius: number,
-  depthY: (ahead: number) => number,
 ): void {
   const q = c.squads.find((s) => s.chosen);
   if (!q) return;
-  const t = chargeProgress(run, c);
-  const fighting = t < CHARGE_REVEAL || q.outcome === "fight";
-  if (!fighting) return;
+  const t = firefightProgress(run, c);
+  const revealed = t >= FIREFIGHT_REVEAL;
+  const joins = revealed && q.outcome === "join";
+  const u = revealed ? (t - FIREFIGHT_REVEAL) / (1 - FIREFIGHT_REVEAL) : 0;
+  // where the squad stood at contact (scale 1, wall top at armyY - 56)
+  const r = squadRadius(w, q.count, 1);
+  const homeX = q.x * w;
+  const homeY =
+    squadY(armyY - 56, r, 1) - FIREFIGHT_STEP_BACK * Math.min(1, t / 0.15);
   const sx = run.x * w;
-  const sy = armyY - radius * 0.4;
-  const tx = q.x * w;
-  const ty = depthY(c.pos - run.dist);
+  const sy = armyY - radius * 0.6;
+  if (joins) {
+    // the defectors run into the army and merge with it
+    const k = Math.min(1, u * 1.4);
+    const cx = homeX + (sx - homeX) * k;
+    const cy = homeY + (armyY - homeY) * k;
+    ctx.globalAlpha = 1 - k * 0.8;
+    renderSquad(ctx, cx, cy, r * (1 - 0.4 * k), q.count, 1, COLORS.soldier);
+    ctx.globalAlpha = 1 - u;
+    text(ctx, "JOINS YOU", homeX, homeY - r - 30, 18, COLORS.good);
+    ctx.globalAlpha = 1;
+    return;
+  }
+  // both sides fire; a fighting squad thins out as it is shot to pieces
+  const fade = q.outcome === "fight" ? 1 - u : 1;
   const lanes = Math.min(5, 1 + Math.floor(Math.sqrt(run.army) / 3));
   ctx.fillStyle = COLORS.bullet;
   for (let l = 0; l < lanes; l++) {
     const ox = (lanes > 1 ? l / (lanes - 1) - 0.5 : 0) * radius;
     for (let k = 0; k < 6; k++) {
-      const u = (k / 6 + run.dist * 3 + l * 0.37) % 1;
+      const v = (k / 6 + run.dist * 3 + l * 0.37) % 1;
       ctx.beginPath();
-      ctx.arc(sx + ox + (tx - sx - ox) * u, sy + (ty - sy) * u, 2.5, 0, 7);
+      ctx.arc(
+        sx + ox + (homeX - sx - ox) * v,
+        sy + (homeY - sy) * v,
+        2.5,
+        0,
+        7,
+      );
       ctx.fill();
     }
   }
-  // return fire from the squad
+  ctx.globalAlpha = fade;
   ctx.fillStyle = COLORS.enemyBullet;
-  const back = t < CHARGE_REVEAL ? 2 : 4;
+  const back = revealed ? 4 : 2;
   for (let l = 0; l < back; l++) {
-    const ox = (back > 1 ? l / (back - 1) - 0.5 : 0) * 16;
+    const ox = (back > 1 ? l / (back - 1) - 0.5 : 0) * r;
     for (let k = 0; k < 5; k++) {
-      const u = (k / 5 + run.dist * 2.6 + l * 0.29) % 1;
+      const v = (k / 5 + run.dist * 2.6 + l * 0.29) % 1;
       ctx.beginPath();
-      ctx.arc(tx + ox + (sx - tx - ox) * u, ty + (sy - ty) * u, 2.5, 0, 7);
+      ctx.arc(
+        homeX + ox + (sx - homeX - ox) * v,
+        homeY + (sy - homeY) * v,
+        3,
+        0,
+        7,
+      );
       ctx.fill();
     }
   }
+  renderSquad(ctx, homeX, homeY, r, q.count, 1);
+  if (revealed) text(ctx, "FIGHTS BACK", homeX, homeY - r - 30, 18, COLORS.bad);
+  ctx.globalAlpha = 1;
 }
 
 /** A crate's last position on screen when it shattered. */
@@ -681,6 +737,19 @@ function renderArmy(
   color = COLORS.soldier,
   scale = 1,
 ): void {
+  renderDots(ctx, cx, cy, radius, army, color);
+  text(ctx, String(army), cx, cy + radius * 0.6 + 22 * scale, 22 * scale);
+}
+
+/** Up to MAX_DRAWN_SOLDIERS dots packed into a squashed disc. */
+function renderDots(
+  ctx: Ctx,
+  cx: number,
+  cy: number,
+  radius: number,
+  army: number,
+  color: string,
+): void {
   const n = Math.min(army, MAX_DRAWN_SOLDIERS);
   // dot size shrinks as the blob fills up, within readable limits
   const r = Math.max(2, Math.min(5, radius / Math.sqrt(Math.max(n, 1)) / 1.1));
@@ -696,7 +765,6 @@ function renderArmy(
     ctx.arc(x, y, r, 0, Math.PI * 2);
   }
   ctx.fill();
-  text(ctx, String(army), cx, cy + radius * 0.6 + 22 * scale, 22 * scale);
 }
 
 /** A spinning toothed disc of radius r. */
