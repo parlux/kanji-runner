@@ -132,12 +132,24 @@ export function normGloss(g: string): string {
     .trim();
 }
 
-/** Kanji → primary gloss. Never a kanji sharing any gloss with the prompt. */
+/** Rank of a distractor kanji: `similar` first, then by shared component. */
+const SIMILAR_RANK = -1;
+const confusableRank = (
+  item: KanjiItem,
+  k: KanjiItem,
+  similar: readonly string[],
+): number => (similar.includes(k.char) ? SIMILAR_RANK : componentRank(item, k));
+
+/**
+ * Kanji → primary gloss. Never a kanji sharing any gloss with the prompt.
+ * `similar` kanji (WaniKani mode) come first, then shared components.
+ */
 export function meaningRow(
   rng: Rng,
   item: KanjiItem,
   pool: readonly KanjiItem[],
   count: number,
+  similar: readonly string[] = [],
 ): GateRow {
   const own = facts(item).glosses;
   const candidates: Candidate[] = [];
@@ -146,7 +158,7 @@ export function meaningRow(
     candidates.push({
       label: k.glosses[0] as string,
       key: facts(k).primaryKey,
-      rank: componentRank(item, k),
+      rank: confusableRank(item, k, similar),
     });
   }
   return row(
@@ -185,7 +197,8 @@ export function shownReading(k: KanjiItem, turn: number): Reading {
 /**
  * Kanji → kana reading. Distractors are other kanji's main readings, never
  * any reading of the prompt, within ±1 kana of the shown reading's length
- * (wider only if the pool runs short). Kanji sharing a component come first.
+ * (wider only if the pool runs short). `similar` kanji (WaniKani mode) come
+ * first, then kanji sharing a component.
  */
 export function readingRow(
   rng: Rng,
@@ -193,6 +206,7 @@ export function readingRow(
   pool: readonly KanjiItem[],
   count: number,
   shown: Reading,
+  similar: readonly string[] = [],
 ): GateRow {
   const answer = showReading(shown);
   const len = plainReading(answer).length;
@@ -200,7 +214,7 @@ export function readingRow(
   const all: Candidate[] = [];
   for (const k of pool) {
     if (k.char === item.char) continue;
-    const rank = componentRank(item, k);
+    const rank = confusableRank(item, k, similar);
     for (const r of facts(k).readings)
       if (!own.has(r.key)) all.push({ ...r, rank });
   }

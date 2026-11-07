@@ -116,7 +116,9 @@ export function buildPoolRun(
   return select(rng, pool).map((e, i) => {
     const count = optionCount(i);
     if (e.type === "kana") return kanaRow(rng, e.item, pool.kana, count);
-    if (e.type === "meaning") return meaningRow(rng, e.item, pool.kanji, count);
+    const similar = pool.similar(e.item.char);
+    if (e.type === "meaning")
+      return meaningRow(rng, e.item, pool.kanji, count, similar);
     const turn = (progress.items[e.key]?.seen ?? 0) + (asked.get(e.key) ?? 0);
     asked.set(e.key, (asked.get(e.key) ?? 0) + 1);
     return readingRow(
@@ -125,6 +127,7 @@ export function buildPoolRun(
       pool.kanji,
       count,
       shownReading(e.item, turn),
+      similar,
     );
   });
 }
