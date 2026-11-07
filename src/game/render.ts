@@ -72,6 +72,101 @@ function fitSize(ctx: Ctx, s: string, size: number, maxWidth: number): number {
   return width > maxWidth ? (size * maxWidth) / width : size;
 }
 
+/** Below this an answer label wraps to two lines rather than shrinking further. */
+const LABEL_FLOOR_PX = 14;
+
+/** A label split into runs: kun'yomi okurigana あ(げる) is greyed. */
+function labelRuns(s: string): { s: string; color: string }[] {
+  const m = /^(.*?)(\(.+\))$/.exec(s);
+  if (!m) return [{ s, color: COLORS.text }];
+  return [
+    { s: m[1] as string, color: COLORS.text },
+    { s: m[2] as string, color: COLORS.dim },
+  ].filter((r) => r.s);
+}
+
+const LATIN = /[a-z]/i;
+const KANA = /[぀-ゟ]/;
+
+/**
+ * Ways to put a label on two lines: at a space or hyphen, or before
+ * okurigana brackets; with `inWord`, also inside a word (at least 3
+ * letters each side, hyphenated) or between kana outside the brackets.
+ */
+function labelSplits(s: string, inWord: boolean): [string, string][] {
+  const out: [string, string][] = [];
+  const bracket = s.indexOf("(");
+  for (let i = 1; i < s.length; i++) {
+    const prev = s[i - 1] as string;
+    const c = s[i] as string;
+    if (prev === " " || prev === "-" || c === "(")
+      out.push([s.slice(0, i).trimEnd(), s.slice(i)]);
+    else if (!inWord) continue;
+    else if (LATIN.test(prev) && LATIN.test(c)) {
+      if (i >= 3 && s.length - i >= 3)
+        out.push([`${s.slice(0, i)}-`, s.slice(i)]);
+    } else if (KANA.test(prev) && KANA.test(c) && (bracket < 0 || i < bracket))
+      out.push([s.slice(0, i), s.slice(i)]);
+  }
+  return out;
+}
+
+/**
+ * Lines and font size for an answer label in an opening `maxWidth` px wide:
+ * one line at `size` if it fits, else shrunk to fit. If that would go below
+ * LABEL_FLOOR_PX, the two-line split that allows the largest size, trying
+ * natural breaks first and breaking inside a word only if those still fall
+ * below the floor.
+ */
+function labelLayout(
+  ctx: Ctx,
+  s: string,
+  size: number,
+  maxWidth: number,
+): { lines: string[]; size: number } {
+  let best = { lines: [s], size: fitSize(ctx, s, size, maxWidth) };
+  for (const inWord of [false, true]) {
+    if (best.size >= LABEL_FLOOR_PX) break;
+    for (const [a, b] of labelSplits(s, inWord)) {
+      const two = Math.min(
+        fitSize(ctx, a, size, maxWidth),
+        fitSize(ctx, b, size, maxWidth),
+        // two lines must still fit in the wall's height
+        size * 0.78,
+      );
+      if (two > best.size) best = { lines: [a, b], size: two };
+    }
+  }
+  return best;
+}
+
+/** An answer label centred on (x, y), on one or two lines, okurigana greyed. */
+function drawLabel(
+  ctx: Ctx,
+  s: string,
+  x: number,
+  y: number,
+  size: number,
+  maxWidth: number,
+): void {
+  const { lines, size: px } = labelLayout(ctx, s, size, maxWidth);
+  const lineH = px * 1.1;
+  lines.forEach((line, n) => {
+    const ly = y + (n - (lines.length - 1) / 2) * lineH;
+    const runs = labelRuns(line);
+    ctx.font = `${Math.round(px)}px ${FONT}`;
+    const widths = runs.map((r) => ctx.measureText(r.s).width);
+    let left = x - widths.reduce((a, b) => a + b, 0) / 2;
+    ctx.textAlign = "left";
+    ctx.textBaseline = "middle";
+    runs.forEach((r, k) => {
+      ctx.fillStyle = r.color;
+      ctx.fillText(r.s, left, ly);
+      left += widths[k] as number;
+    });
+  });
+}
+
 function text(
   ctx: Ctx,
   s: string,
@@ -295,14 +390,15 @@ function renderRun(ctx: Ctx, w: number, h: number, run: RunState): void {
       // once, so none covers the army or its pop-ups
       if (labelAlpha <= 0 || (passed && answered?.choice === j)) return;
       const label = row.options[j] ?? "";
-      const size = fitSize(
+      ctx.globalAlpha = labelAlpha;
+      drawLabel(
         ctx,
         label,
+        o.centre * w,
+        y - wallH / 2,
         Math.max(LABEL_MIN_PX, 30 * scale),
         width - 6,
       );
-      ctx.globalAlpha = labelAlpha;
-      text(ctx, label, o.centre * w, y - wallH / 2, size);
       ctx.globalAlpha = 1;
     });
     // a charge is the same wall with a squad standing beyond each opening
