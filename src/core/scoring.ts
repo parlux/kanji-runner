@@ -9,18 +9,32 @@ import {
 
 export type GateResult = { army: number; streak: number };
 
+/** How a correct answer at this streak (the count including it) pays. */
+export type StreakTier = "base" | "double-base" | "double" | "triple";
+
+export function streakTier(streak: number): StreakTier {
+  return streak >= 8
+    ? "triple"
+    : streak >= 5
+      ? "double"
+      : streak >= 3
+        ? "double-base"
+        : "base";
+}
+
 export function applyCorrect(
   army: number,
   streak: number,
   base: number,
 ): GateResult {
   const next = streak + 1;
+  const tier = streakTier(next);
   const gain =
-    next >= 8
+    tier === "triple"
       ? Math.min(army * 2, MAX_MULTIPLY_GAIN)
-      : next >= 5
+      : tier === "double"
         ? Math.min(army, MAX_MULTIPLY_GAIN)
-        : next >= 3
+        : tier === "double-base"
           ? base * 2
           : base;
   return { army: army + gain, streak: next };

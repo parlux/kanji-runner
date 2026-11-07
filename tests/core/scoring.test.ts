@@ -4,6 +4,7 @@ import {
   applyCorrectCharge,
   applyWrong,
   applyWrongCharge,
+  streakTier,
 } from "../../src/core/scoring";
 import { SQUAD_DEFECT_GAIN } from "../../src/core/tuning";
 
@@ -71,5 +72,21 @@ describe("applyCorrectCharge", () => {
 
   it("adds the defectors on top of the +150 cap", () => {
     expect(applyCorrectCharge(400, 4, 3)).toEqual({ army: 560, streak: 5 });
+  });
+});
+
+describe("streakTier", () => {
+  it("follows the payoff table", () => {
+    const t = [1, 2, 3, 4, 5, 7, 8, 12].map(streakTier);
+    expect(t).toEqual([
+      "base",
+      "base",
+      "double-base",
+      "double-base",
+      "double",
+      "double",
+      "triple",
+      "triple",
+    ]);
   });
 });

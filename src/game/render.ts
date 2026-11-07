@@ -12,6 +12,7 @@ import {
   type ChargeView,
   type RunState,
 } from "../core/sim";
+import { streakTier, type StreakTier } from "../core/scoring";
 import { hazardSpan, isCharge } from "../core/track";
 import {
   CLASH_APPROACH_SECONDS,
@@ -73,6 +74,14 @@ const COLORS = {
 };
 
 type Ctx = CanvasRenderingContext2D;
+
+/** How a streak tier is named in pop-ups and on the HUD. */
+const TIER_POPUP: Record<StreakTier, string> = {
+  base: "",
+  "double-base": "2× base",
+  double: "×2",
+  triple: "×3",
+};
 
 /** Smallest a question prompt is drawn (px), however far away its wall is. */
 const PROMPT_MIN_PX = 34;
@@ -690,14 +699,17 @@ function renderRun(ctx: Ctx, w: number, h: number, run: RunState): void {
       ctx.stroke();
       ctx.globalAlpha = 1 - t;
       const sign = a.change >= 0 ? "+" : "−";
-      text(
-        ctx,
-        `${sign}${Math.abs(a.change)}`,
-        run.x * w + radius + 28,
-        armyY - 10 - 24 * t,
-        24,
-        color,
-      );
+      const px = Math.min(run.x * w + radius + 28, w - 36);
+      const py = armyY - 10 - 24 * t;
+      text(ctx, `${sign}${Math.abs(a.change)}`, px, py, 24, color);
+      // what caused it: the streak's multiplier, or the share lost
+      const before = run.army - a.change;
+      const tag = a.correct
+        ? TIER_POPUP[streakTier(run.streak)]
+        : before > 0
+          ? `−${Math.round((-a.change / before) * 100)}%`
+          : "";
+      if (tag) text(ctx, tag, px, py + 22, 18, color);
       ctx.globalAlpha = 1;
     }
   }
@@ -711,8 +723,14 @@ function renderRun(ctx: Ctx, w: number, h: number, run: RunState): void {
     16,
     COLORS.dim,
   );
-  if (run.streak > 0)
+  if (run.streak > 0) {
+    // the streak, and what the next right answer pays
+    const tier = streakTier(run.streak + 1);
+    const hot = tier !== "base";
     text(ctx, `streak ${run.streak}`, w - 60, 24, 16, COLORS.good);
+    if (hot)
+      text(ctx, `next ${TIER_POPUP[tier]}`, w - 60, 44, 16, COLORS.chargeLine);
+  }
 }
 
 /** Enemies popping off a pack under fire: dots flung outwards that fade. */
