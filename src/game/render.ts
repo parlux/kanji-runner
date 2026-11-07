@@ -1,5 +1,5 @@
 import { crowdWidth } from "../core/crowd";
-import { gateOpenings, type RunState } from "../core/sim";
+import { gateOpenings, isShattered, type RunState } from "../core/sim";
 import { hazardSpan } from "../core/track";
 import { SAW_W, VIEW_DISTANCE } from "../core/tuning";
 import type { Scene } from "./scenes";
@@ -10,6 +10,8 @@ const MAX_DRAWN_SOLDIERS = 200;
 const CLIP_POPUP_DIST = 0.8;
 /** How long (in track distance) answer feedback stays up. */
 const ANSWER_FEEDBACK_DIST = 1.0;
+/** How long (in track distance) a shatter burst lasts. */
+const SHATTER_DIST = 0.6;
 const COLORS = {
   bg: "#111",
   track: "#1d2230",
@@ -24,6 +26,8 @@ const COLORS = {
   hazard: "#c24b4b",
   hazardEdge: "#ff8a7a",
   goodFill: "rgba(95, 211, 141, 0.35)",
+  bullet: "#fff3b0",
+  damaged: "#6e2a2a",
   badFill: "rgba(255, 107, 107, 0.35)",
 };
 
@@ -128,11 +132,33 @@ function renderRun(ctx: Ctx, w: number, h: number, run: RunState): void {
     const y = depthY(ahead);
     const scale = Math.max(0.3, 1 - 0.5 * (ahead / VIEW_DISTANCE));
     if (h.kind === "block") {
+      if (isShattered(run, i)) continue;
       const blockH = 34 * scale;
+      const bw = (h.right - h.left) * w;
+      const hp = run.hp[i] ?? 0;
+      const dmg = run.damage[i] ?? 0;
       ctx.fillStyle = COLORS.hazard;
-      ctx.fillRect(h.left * w, y - blockH, (h.right - h.left) * w, blockH);
+      ctx.fillRect(h.left * w, y - blockH, bw, blockH);
+      // damage eats the block from the top down
+      if (hp > 0 && dmg > 0) {
+        ctx.fillStyle = COLORS.damaged;
+        ctx.fillRect(h.left * w, y - blockH, bw, blockH * (dmg / hp));
+      }
       ctx.fillStyle = COLORS.hazardEdge;
-      ctx.fillRect(h.left * w, y - 3, (h.right - h.left) * w, 3);
+      ctx.fillRect(h.left * w, y - 3, bw, 3);
+      // a hit block flashes
+      if (run.target === i && Math.floor(run.dist * 40) % 2 === 0) {
+        ctx.fillStyle = "rgba(255,255,255,0.25)";
+        ctx.fillRect(h.left * w, y - blockH, bw, blockH);
+      }
+      if (hp > 0)
+        text(
+          ctx,
+          String(Math.ceil(hp - dmg)),
+          ((h.left + h.right) / 2) * w,
+          y - blockH / 2,
+          18 * scale,
+        );
     } else {
       // its sweep rail, then the saw where it is now
       const { left, right } = hazardSpan(h, run.dist);
@@ -191,6 +217,7 @@ function renderRun(ctx: Ctx, w: number, h: number, run: RunState): void {
   }
 
   const radius = (crowdWidth(run.army) * w) / 2;
+  renderFire(ctx, w, run, armyY, radius, depthY);
   renderArmy(ctx, run.x * w, armyY, radius, run.army);
   if (run.lastClip) {
     const t = (run.dist - run.lastClip.dist) / CLIP_POPUP_DIST;
@@ -245,6 +272,70 @@ function renderRun(ctx: Ctx, w: number, h: number, run: RunState): void {
   );
   if (run.streak > 0)
     text(ctx, `streak ${run.streak}`, w - 60, 24, 16, COLORS.good);
+}
+
+/** A bullet stream from the crowd to its target, and a burst where a block shattered. */
+function renderFire(
+  ctx: Ctx,
+  w: number,
+  run: RunState,
+  armyY: number,
+  radius: number,
+  depthY: (ahead: number) => number,
+): void {
+  const target = run.target === null ? null : run.track.hazards[run.target];
+  if (target?.kind === "block") {
+    const cw = crowdWidth(run.army);
+    // aim at the middle of where the crowd and the block overlap
+    const left = Math.max(target.left, run.x - cw / 2);
+    const right = Math.min(target.right, run.x + cw / 2);
+    const tx = ((left + right) / 2) * w;
+    const ty = depthY(target.pos - run.dist) - 6;
+    const lanes = Math.min(5, 1 + Math.floor(Math.sqrt(run.army) / 3));
+    ctx.fillStyle = COLORS.bullet;
+    for (let l = 0; l < lanes; l++) {
+      const sx = run.x * w + (lanes > 1 ? l / (lanes - 1) - 0.5 : 0) * radius;
+      const sy = armyY - radius * 0.4;
+      for (let k = 0; k < 6; k++) {
+        const t = (k / 6 + run.dist * 3 + l * 0.37) % 1;
+        ctx.beginPath();
+        ctx.arc(sx + (tx - sx) * t, sy + (ty - sy) * t, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+    // hit flash at the impact point
+    ctx.globalAlpha = 0.6 + 0.4 * Math.sin(run.dist * 80);
+    ctx.fillStyle = "#fff";
+    ctx.beginPath();
+    ctx.arc(tx, ty, 6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+
+  const sh = run.lastShatter;
+  const block = sh ? run.track.hazards[sh.index] : undefined;
+  if (sh && block?.kind === "block") {
+    const t = (run.dist - sh.dist) / SHATTER_DIST;
+    if (t >= 0 && t < 1) {
+      const cx = ((block.left + block.right) / 2) * w;
+      const cy = depthY(block.pos - run.dist) - 17;
+      const spread = ((block.right - block.left) * w) / 2 + 40 * t;
+      ctx.globalAlpha = 1 - t;
+      ctx.fillStyle = COLORS.hazardEdge;
+      for (let k = 0; k < 14; k++) {
+        const a = k * 2.39996 + sh.index;
+        const r = spread * (0.4 + (0.6 * ((k * 7) % 5)) / 4);
+        const size = 6 * (1 - t) + 2;
+        ctx.fillRect(
+          cx + r * Math.cos(a) - size / 2,
+          cy + r * Math.sin(a) * 0.6 - size / 2,
+          size,
+          size,
+        );
+      }
+      ctx.globalAlpha = 1;
+    }
+  }
 }
 
 /** A blob of up to 200 dots filling a squashed disc of the crowd's width. */

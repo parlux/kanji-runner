@@ -88,11 +88,11 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 - Render: a stream of bullets from the crowd to its target, a hit flash, a shatter burst, and a block that shows its damage. Nothing drawn over the prompt or the labels.
 
 **Acceptance criteria:**
-- [ ] Damage per second is `FIRE_PER_SOLDIER × army`, and goes only to the nearest overlapping block in range (tested).
-- [ ] A block shatters exactly when its damage reaches its hit points, and a shattered block never clips; an intact one clips as before (tested).
-- [ ] Walls and saws take no damage, and shooting never changes streak or results (tested).
-- [ ] `expectedArmy` is deterministic per run and never decreases after a correct answer (tested).
-- [ ] In the browser, a strong army visibly shreds blocks, and a 5-soldier army barely dents them.
+- [x] Damage per second is `FIRE_PER_SOLDIER × army`, and goes only to the nearest overlapping block in range (tested).
+- [x] A block shatters exactly when its damage reaches its hit points, and a shattered block never clips; an intact one clips as before (tested).
+- [x] Walls and saws take no damage, and shooting never changes streak or results (tested).
+- [x] `expectedArmy` is deterministic per run and never decreases after a correct answer (tested).
+- [x] In the browser, a strong army visibly shreds blocks, and a 5-soldier army barely dents them.
 
 **Verification:** `npm test -- fire sim track`. Phone-sized browser check.
 **Dependencies:** R4
