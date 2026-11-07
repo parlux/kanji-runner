@@ -1,3 +1,4 @@
+import { applyUnlock } from "../core/progression";
 import { buildRun } from "../core/run";
 import { KANA } from "../core/kana";
 import { KANJI } from "../core/kanji";
@@ -63,7 +64,8 @@ function newRun(seed: number, session: Session): Scene {
 
 /**
  * The session after one update step: if `prev → next` just ended a run, its
- * answers go into the SRS and the run stats. Otherwise the same session.
+ * answers go into the SRS and the run stats, then the unlock rule runs.
+ * Otherwise the same session.
  */
 export function afterStep(
   session: Session,
@@ -75,12 +77,10 @@ export function afterStep(
   const { rows, results, status } = next.run;
   return {
     ...session,
-    progress: recordRun(
-      session.progress,
-      rows,
-      results,
-      status === "finished",
-      now,
+    progress: applyUnlock(
+      recordRun(session.progress, rows, results, status === "finished", now),
+      session.kana,
+      KANJI,
     ),
   };
 }

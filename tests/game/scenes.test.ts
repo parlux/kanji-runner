@@ -1,4 +1,7 @@
 import { describe, expect, it } from "vitest";
+import { KANA } from "../../src/core/kana";
+import { KANJI } from "../../src/core/kanji";
+import { levelKeys } from "../../src/core/progression";
 import { defaultProgress } from "../../src/core/srs";
 import {
   afterStep,
@@ -73,5 +76,34 @@ describe("afterStep", () => {
   it("changes nothing on any other step", () => {
     expect(afterStep(session, run, run, 1)).toBe(session);
     expect(afterStep(session, { kind: "start" }, run, 1)).toBe(session);
+  });
+
+  it("unlocks the next level when a run brings it to 80%", () => {
+    // 23/30 of Kanji 1 learned; the run's answers push one more to box 2
+    const progress = { ...defaultProgress(), unlockedLevel: 2 };
+    const keys = levelKeys(2, KANA, KANJI);
+    keys.forEach((k, i) => {
+      progress.items[k] = {
+        box: i < 23 ? 2 : 1,
+        seen: 1,
+        correct: 1,
+        wrong: 0,
+        lastSeen: 1,
+      };
+    });
+    const s = { ...createSession(progress, null), progress };
+    const row = {
+      type: "meaning" as const,
+      prompt: (keys[29] as string).split(":")[0] as string,
+      options: ["a", "b"],
+      answerIndex: 0,
+      answer: "a",
+    };
+    const ended: Scene = {
+      kind: "end",
+      seed: 7,
+      run: { ...run.run, rows: [row], results: [true], status: "finished" },
+    };
+    expect(afterStep(s, run, ended, 5).progress.unlockedLevel).toBe(3);
   });
 });
