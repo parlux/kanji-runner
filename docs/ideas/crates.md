@@ -28,4 +28,4 @@ Out: everything below.
 - **Collecting the drop by walking through it:** an instant reward is simpler; revisit if crates feel too easy.
 
 ## Open Questions
-- Show the reward on the crate (e.g. "+6"), or only its hit points? Start with hit points only.
+- ~~Show the reward on the crate (e.g. "+6"), or only its hit points?~~ Resolved at Checkpoint A (2026-11-07): show both, so the owner can tell whether a crate is worth attacking.

@@ -139,11 +139,27 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 - [x] Tests, lint and build pass
 - [x] Owner plays on the phone: it feels like a crowd runner, not flash cards ("feeling pretty good", 2026-11-07)
 - [x] Owner: right answers feel like power
-- [ ] Owner: a weak run gets overrun
+- [x] Owner: a weak run gets overrun
 - [x] Owner: prompts are readable while steering and firing
-- [ ] Owner: still fun when the answers are known (play some all-easy runs)
-- [ ] Owner: S3 (always-on fire, crates) plays well on the phone
+- [x] Owner: still fun when the answers are known (play some all-easy runs). Owner: "yes, I think we can refine to make it more fun" (follow-up below)
+- [x] Owner: S3 (always-on fire, crates) plays well on the phone
 - [x] Adjust `tuning.ts` from feedback: `BASE_SPEED` 1.3 → 1.6 (scrolling too slow). **If the feel is wrong, stop and revisit the idea doc before R5.**
+- [x] Passed, 2026-11-07. Follow-ups: S4 below (fire range too short, leaving stretches with nothing to do; show each crate's reward). Open: refine the all-easy runs to make them more fun.
+
+### Task S4: Longer fire range and crate rewards shown
+**Description:** From Checkpoint A feedback.
+- Tuning: raise `FIRE_RANGE` (2.0 → 2.8) so there is less time with nothing in reach.
+- Render: each crate shows the recruits it pays (`+N`) as well as its hit points.
+
+**Acceptance criteria:**
+- [ ] Bot check still holds with the longer range: 100% accuracy never dies early, 50% dies early in at least half of 200 runs.
+- [ ] Every crate shows its hit points and its `+N` reward, readable on the phone.
+- [ ] Fire still stops at the next wall and never covers a prompt.
+
+**Verification:** `npm test`. Phone-sized browser check, then push and the owner plays on the phone.
+**Dependencies:** S3
+**Files:** `src/core/tuning.ts`, `src/game/render.ts`
+**Scope:** S
 
 ### Task R5: Squad charges
 **Description:**
