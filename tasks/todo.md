@@ -350,9 +350,9 @@ Placement to Katakana gives Kanji 1, but runs are still mostly basic hiragana: 1
 - Balance bot: drives the real `sim.ts` with accuracy `p` and steering skill `s`. With `s = 1` it steers through the gap centres; with lower `s` it adds a seeded aim offset, so it clips some of the time.
 
 **Acceptance criteria:**
-- [ ] Over 1,000 seeded runs with `s = 1`: 100% accuracy always wins, 50% wins less than 10% of the time, 80% wins 40–70% of the time.
-- [ ] With `p = 1, s = 0.5`, the bot wins at least 50% of the time.
-- [ ] A tie is a loss. The review boxes update regardless of the boss outcome. The boss scene plays after question 14 and leads to the summary.
+- [x] Over 1,000 seeded runs with `s = 1`: 100% accuracy always wins, 50% wins less than 10% of the time, 80% wins 40–70% of the time. (`BOSS_K` 1.5, `EXPECTED_SURVIVAL` 0.85, `BOSS_PASSES` 31; 1,000 seeds: 100% wins 1000/1000; 50% wins 4.3% (dies early 88.4%); 80% wins 53.6% (dies early 35.3%). At K 1.0: 6.3% and 58.5%. `npm test` runs 200 seeds; `BALANCE_RUNS=1000 npm test -- balance` runs the full 1,000, ~2 min.)
+- [x] With `p = 1, s = 0.5`, the bot wins at least 50% of the time. (100%, 0 early deaths, median army/boss 13.5 vs 18.9 at s = 1; aim offset up to (1 − s) × 0.3 per beat. s = 0: wins 85.4%, dies early 14.6%.)
+- [x] A tie is a loss. The review boxes update regardless of the boss outcome. The boss scene plays after question 14 and leads to the summary. (Tested in `boss.test.ts` and `scenes.test.ts`; for now the boss leads to the end screen with the result, the full summary is Task 10.)
 
 **Verification:** `npm test -- boss balance`. Manual run to the boss.
 **Dependencies:** T7, R5
