@@ -1,4 +1,11 @@
-import { kanaRow, meaningRow, readingRow, shownReading } from "./distractors";
+import {
+  kanaRow,
+  mainReadings,
+  meaningRow,
+  readingRow,
+  shownReading,
+  showReading,
+} from "./distractors";
 import { createRng, shuffle, type Rng } from "./rng";
 import { itemKey, READING_UNLOCK_BOX, weight } from "./srs";
 import {
@@ -137,4 +144,44 @@ export function buildRun(
       shownReading(e.item, turn),
     );
   });
+}
+
+/** A gate the run answered wrongly, for the summary. */
+export type Missed = {
+  /** Question number, 1-based. */
+  q: number;
+  type: GateRow["type"];
+  prompt: string;
+  /** The correct answer; for a reading gate, every main reading (on'yomi, then kun'yomi). */
+  answers: string[];
+  /** A wrong squad charge rather than a wall gate. */
+  charge: boolean;
+};
+
+/**
+ * Every wrongly answered gate, in order, with its correct answer. A reading
+ * gate lists both readings. `charges` are the squad-charge row indexes.
+ */
+export function missedItems(
+  rows: readonly GateRow[],
+  results: readonly boolean[],
+  charges: readonly number[],
+  kanji: readonly KanjiItem[],
+): Missed[] {
+  const out: Missed[] = [];
+  results.forEach((ok, i) => {
+    const row = rows[i];
+    if (ok || !row) return;
+    const k =
+      row.type === "reading" ? kanji.find((x) => x.char === row.prompt) : null;
+    const all = k ? mainReadings(k).map(showReading) : [];
+    out.push({
+      q: i + 1,
+      type: row.type,
+      prompt: row.prompt,
+      answers: all.length > 0 ? all : [row.answer],
+      charge: charges.includes(i),
+    });
+  });
+  return out;
 }

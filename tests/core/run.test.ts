@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { buildRun } from "../../src/core/run";
+import { buildRun, missedItems } from "../../src/core/run";
+import { showReading } from "../../src/core/distractors";
 import { KANJI } from "../../src/core/kanji";
 import { KANA } from "../../src/core/kana";
 import { defaultProgress } from "../../src/core/srs";
 import { ROWS_PER_RUN, TWO_OPTION_ROWS } from "../../src/core/tuning";
-import type { Progress } from "../../src/core/types";
+import type { KanjiItem, Progress } from "../../src/core/types";
 
 describe("kana data", () => {
   it("has 71 hiragana and 71 katakana with romaji", () => {
@@ -79,5 +80,59 @@ describe("buildRun rows", () => {
         types.add(row.type);
       }
     expect(types).toEqual(new Set(["meaning", "reading"]));
+  });
+});
+
+describe("missedItems", () => {
+  const kanji = KANJI.filter((k) => k.on && k.kun).slice(0, 3);
+  const k0 = kanji[0] as KanjiItem;
+  const rows = [
+    {
+      type: "kana",
+      prompt: "あ",
+      options: ["a", "i"],
+      answerIndex: 0,
+      answer: "a",
+    },
+    {
+      type: "meaning",
+      prompt: k0.char,
+      options: ["x", "y"],
+      answerIndex: 1,
+      answer: k0.glosses[0] as string,
+    },
+    {
+      type: "reading",
+      prompt: k0.char,
+      options: ["x", "y"],
+      answerIndex: 0,
+      answer: "x",
+    },
+    {
+      type: "kana",
+      prompt: "い",
+      options: ["a", "i"],
+      answerIndex: 1,
+      answer: "i",
+    },
+  ] as const;
+
+  it("lists every wrong gate with its answer, in order", () => {
+    const m = missedItems([...rows], [false, true, false, false], [3], kanji);
+    expect(m.map((x) => x.q)).toEqual([1, 3, 4]);
+    expect(m[0]).toMatchObject({ prompt: "あ", answers: ["a"], charge: false });
+    expect(m[2]).toMatchObject({ prompt: "い", answers: ["i"], charge: true });
+  });
+
+  it("gives both readings for a reading gate", () => {
+    const [m] = missedItems([...rows], [true, true, false], [], kanji);
+    expect(m?.answers).toEqual([
+      k0.on,
+      showReading(k0.kun as KanjiItem["kun"] & object),
+    ]);
+  });
+
+  it("is empty for a clean run and ignores unanswered rows", () => {
+    expect(missedItems([...rows], [true, true], [], kanji)).toEqual([]);
   });
 });
