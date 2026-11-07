@@ -56,7 +56,7 @@ T1 scaffold ─ T2 core rules ─ T3 lane slice (done)
 - [x] R4: Drag steering and GitHub Pages deploy
 - [x] S1: Auto-fire and breakable blocks
 - [x] S2: Enemy packs
-- [ ] S3: Always-on fire and supply crates (Checkpoint A feedback)
+- [x] S3: Always-on fire and supply crates (Checkpoint A feedback)
 
 ### Checkpoint A: feel test on the phone (spec criterion 16)
 - [ ] Feels like a crowd runner, right answers feel like power, prompts readable while steering and firing, fun with known answers

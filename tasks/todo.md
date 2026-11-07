@@ -125,10 +125,10 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 - Balance bot: shoots a crate when it can break it in time, otherwise dodges.
 
 **Acceptance criteria:**
-- [ ] A shattered crate adds `round(CRATE_REWARD_K × hp)` exactly once; an unbroken one adds nothing and clips as before (tested).
-- [ ] Crate rewards never change streak or results (tested).
-- [ ] Bot check still holds: 100% accuracy never dies early, 50% dies early in at least half of 200 runs.
-- [ ] In the browser, fire is always visible and ends at the range line, below the prompts.
+- [x] A shattered crate adds `round(CRATE_REWARD_K × hp)` exactly once; an unbroken one adds nothing and clips as before (tested).
+- [x] Crate rewards never change streak or results (tested).
+- [x] Bot check still holds: 100% accuracy never dies early, 50% dies early in at least half of 200 runs.
+- [x] In the browser, fire is always visible and ends at the range line, below the prompts.
 
 **Verification:** `npm test -- fire sim balance`. Phone-sized browser check, then push and the owner plays on the phone.
 **Dependencies:** S2
