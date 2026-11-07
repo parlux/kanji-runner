@@ -26,6 +26,8 @@ export const ROWS_PER_RUN = 14;
 export const WARM_UPS = 3;
 /** Most never-seen items introduced per run, taken in progression order. */
 export const MAX_NEW_PER_RUN = 4;
+/** WaniKani mode: a kanji due for review on WaniKani is drawn this many times as often. */
+export const WK_DUE_BOOST = 4;
 /** Rows 1..N have 2 options; later rows have 3. */
 export const TWO_OPTION_ROWS = 7;
 

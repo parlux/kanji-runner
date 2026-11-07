@@ -60,10 +60,10 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 - Distractors: in WaniKani mode, drawn from the taught pool with `similar` ranked first.
 
 **Acceptance criteria:**
-- [ ] Seeded box mapping, a real record overriding it, and the reading-gate rule with seeded boxes (tested).
-- [ ] Over 1,000 seeds, due kanji are picked measurably more often than non-due kanji with the same box (tested).
-- [ ] The v1 distractor validity property passes over a synthetic WaniKani list, and `similar` kanji come first (tested).
-- [ ] Built-in mode: every existing test passes unchanged, and the same seed gives the same run as before (tested).
+- [x] Seeded box mapping, a real record overriding it, and the reading-gate rule with seeded boxes (tested).
+- [x] Over 1,000 seeds, due kanji are picked measurably more often than non-due kanji with the same box (tested).
+- [x] The v1 distractor validity property passes over a synthetic WaniKani list, and `similar` kanji come first (tested).
+- [x] Built-in mode: every existing test passes unchanged, and the same seed gives the same run as before (tested).
 
 **Verification:** `npm test`
 **Dependencies:** W2
