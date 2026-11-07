@@ -1,5 +1,11 @@
 import { clipLoss, crowdWidth, type Span } from "./crowd";
 import {
+  gateOpenings,
+  nearestOpening,
+  wallSolids,
+  type Opening,
+} from "./gates";
+import {
   expectedArmy,
   firepower,
   hazardHp,
@@ -20,8 +26,6 @@ import {
   ENEMY_HP,
   ENEMY_SPEED,
   ENEMY_STEER_SPEED,
-  GATE_OPENING_2,
-  GATE_OPENING_3,
   MAX_SPEED_MUL,
   STARTING_ARMY,
   STEER_EASE,
@@ -34,6 +38,8 @@ import type { GateRow } from "./types";
 
 /** A moving enemy pack: its current track position and centre. */
 export type PackState = { pos: number; x: number };
+
+export { gateOpenings, nearestOpening, wallSolids, type Opening };
 
 export type RunStatus = "running" | "finished" | "dead";
 
@@ -115,40 +121,9 @@ export function createRunState(rows: GateRow[], track: Track): RunState {
   };
 }
 
-export type Opening = { left: number; right: number; centre: number };
-
-/** Openings of an n-answer wall, spread evenly with equal solid wall between and at the edges. */
-export function gateOpenings(n: number): Opening[] {
-  const w = n <= 2 ? GATE_OPENING_2 : GATE_OPENING_3;
-  const gap = (1 - n * w) / (n + 1);
-  return Array.from({ length: n }, (_, i) => {
-    const left = gap + i * (w + gap);
-    return { left, right: left + w, centre: left + w / 2 };
-  });
-}
-
-/** Index of the opening nearest x (openings share a width, so nearest centre). */
-export function nearestOpening(n: number, x: number): number {
-  let best = 0;
-  gateOpenings(n).forEach((o, i, all) => {
-    const b = all[best] as Opening;
-    if (Math.abs(o.centre - x) < Math.abs(b.centre - x)) best = i;
-  });
-  return best;
-}
-
-/** Solid parts of an n-answer wall: everything that isn't an opening. */
-export function wallSolids(n: number): Span[] {
-  const o = gateOpenings(n);
-  return [...o, { left: 1, right: 1 }].map((r, i) => ({
-    left: i === 0 ? 0 : (o[i - 1] as Opening).right,
-    right: r.left,
-  }));
-}
-
-/** Squads stand where a wall's openings would be: one per answer, evenly spread. */
-export function squadCentres(n: number): number[] {
-  return gateOpenings(n).map((o) => o.centre);
+/** Squads stand in a wall's openings: one per answer, at each opening's centre. */
+export function squadCentres(openings: readonly Opening[]): number[] {
+  return openings.map((o) => o.centre);
 }
 
 export type SquadView = {
@@ -187,17 +162,19 @@ export function viewOf(s: RunState): RunView {
     const row = s.rows[q];
     if (!row) return [];
     const answer = q === s.next - 1 ? s.lastAnswer : null;
-    const squads = squadCentres(row.options.length).map((x, j): SquadView => {
-      const chosen = answer?.choice === j;
-      return {
-        label: row.options[j] ?? "",
-        x,
-        count: SQUAD_DEFECT_GAIN,
-        chosen,
-        outcome:
-          answer?.choice === j ? (answer.correct ? "join" : "fight") : null,
-      };
-    });
+    const squads = squadCentres(gateOpenings(row.options.length)).map(
+      (x, j): SquadView => {
+        const chosen = answer?.choice === j;
+        return {
+          label: row.options[j] ?? "",
+          x,
+          count: SQUAD_DEFECT_GAIN,
+          chosen,
+          outcome:
+            answer?.choice === j ? (answer.correct ? "join" : "fight") : null,
+        };
+      },
+    );
     return [
       {
         row: q,
@@ -397,9 +374,14 @@ function resolveRow(s: RunState): RunState {
   const n = row.options.length;
   const charge = isCharge(s.track, s.next);
   // clipping first, then the answer is scored on what is left
-  const clip = clipLoss(s.army, s.x, crowdWidth(s.army), wallSolids(n));
+  const clip = clipLoss(
+    s.army,
+    s.x,
+    crowdWidth(s.army),
+    wallSolids(gateOpenings(n)),
+  );
   const remaining = s.army - clip;
-  const choice = nearestOpening(n, s.x);
+  const choice = nearestOpening(gateOpenings(n), s.x);
   const correct = choice === row.answerIndex;
   const base = BASE_REWARD[row.type];
   const scored = correct

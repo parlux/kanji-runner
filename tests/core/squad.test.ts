@@ -98,7 +98,7 @@ describe("choosing at a charge", () => {
   it("the choice is the opening nearest the crowd's centre at contact", () => {
     expect(toContact(beforeCharge(1, 3, 0.3)).lastAnswer?.choice).toBe(0);
     expect(toContact(beforeCharge(1, 3, 0.7)).lastAnswer?.choice).toBe(1);
-    const mids = squadCentres(3);
+    const mids = squadCentres(gateOpenings(3));
     mids.forEach((x, j) =>
       expect(toContact(beforeCharge(1, 7, x)).lastAnswer?.choice).toBe(j),
     );
@@ -108,7 +108,7 @@ describe("choosing at a charge", () => {
     for (const seed of [1, 2, 3, 4, 5]) {
       for (const q of [3, 7, 11]) {
         const n = buildKanaRun(seed, KANA)[q]?.options.length ?? 2;
-        const mids = squadCentres(n);
+        const mids = squadCentres(gateOpenings(n));
         // start lined up on the first squad, switch to its neighbour late
         const s = beforeCharge(seed, q, mids[0], 20, 0.8);
         const after = toContact(s, (r) => setTarget(r, mids[1] as number));
@@ -133,7 +133,7 @@ describe("choosing at a charge", () => {
     };
     // a quarter of the crowd hangs over the wall beside the right answer
     const x = row.answerIndex === 0 ? o.right - w / 4 : o.left + w / 4;
-    const clip = clipLoss(army, x, w, wallSolids(3));
+    const clip = clipLoss(army, x, w, wallSolids(gateOpenings(3)));
     expect(clip).toBeGreaterThan(0);
     const after = toContact({ ...beforeCharge(1, 7, x, army), streak: 1 });
     expect(after.lastClip?.loss).toBe(clip);
@@ -159,7 +159,7 @@ describe("charge resolution", () => {
     const n = row?.options.length ?? 2;
     const answer = row?.answerIndex ?? 0;
     const idx = pick === "right" ? answer : (answer + 1) % n;
-    const x = squadCentres(n)[idx] as number;
+    const x = squadCentres(gateOpenings(n))[idx] as number;
     const s = { ...beforeCharge(1, q, x, army), streak };
     return {
       before: s,

@@ -43,6 +43,26 @@ export const DRAG_GAIN = 1.5;
 export const GATE_OPENING_2 = 0.36;
 export const GATE_OPENING_3 = 0.26;
 
+// Gate growth (S7). See gates.ts and sim.ts.
+/**
+ * Track widths an opening widens per point of damage. The wall is in range
+ * for FIRE_RANGE / speed ≈ 1.75 s (1.35 s at the end of the run), so a full
+ * army (100, 100 damage/s) widens by 0.13–0.17 (reaching the cap at 3
+ * answers), while 20 soldiers manage about 0.03 and the starting 5 under 0.01.
+ * A max-width crowd (0.30) clears a 3-answer opening after 40 damage.
+ */
+export const GATE_GROW_PER_DAMAGE = 0.001;
+/** Widest an opening can grow. At 2 answers the other is left at 0.22, which clips a max-width crowd. */
+export const GATE_MAX_W = 0.5;
+/**
+ * Narrowest the other openings can be pushed: 70 px on a 390 px phone,
+ * room for a short label at LABEL_MIN_PX. At 3 answers this caps the grown
+ * opening at 0.78 − 2 × 0.18 = 0.42.
+ */
+export const GATE_MIN_W = 0.18;
+/** Solid wall always left at each track edge, so an edge opening still reads as an opening. */
+export const GATE_EDGE_MIN = 0.02;
+
 // Crowd width: w = clamp(CROWD_MIN_W, CROWD_K × √army, CROWD_MAX_W). Max width is reached at 100 soldiers.
 export const CROWD_MIN_W = 0.06;
 export const CROWD_K = 0.03;

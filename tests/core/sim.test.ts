@@ -147,20 +147,20 @@ describe("nearestOpening", () => {
   it("picks the opening the centre is inside", () => {
     const o = gateOpenings(3);
     o.forEach((r, i) => {
-      expect(nearestOpening(3, r.left + 0.001)).toBe(i);
-      expect(nearestOpening(3, r.right - 0.001)).toBe(i);
+      expect(nearestOpening(gateOpenings(3), r.left + 0.001)).toBe(i);
+      expect(nearestOpening(gateOpenings(3), r.right - 0.001)).toBe(i);
     });
   });
 
   it("picks the nearest opening when the centre is on solid wall", () => {
     const o = gateOpenings(2);
     const [a, b] = [at(o, 0), at(o, 1)];
-    expect(nearestOpening(2, 0)).toBe(0);
-    expect(nearestOpening(2, 1)).toBe(1);
-    expect(nearestOpening(2, a.right + 0.01)).toBe(0);
-    expect(nearestOpening(2, b.left - 0.01)).toBe(1);
-    expect(nearestOpening(3, 0.01)).toBe(0);
-    expect(nearestOpening(3, 0.99)).toBe(2);
+    expect(nearestOpening(gateOpenings(2), 0)).toBe(0);
+    expect(nearestOpening(gateOpenings(2), 1)).toBe(1);
+    expect(nearestOpening(gateOpenings(2), a.right + 0.01)).toBe(0);
+    expect(nearestOpening(gateOpenings(2), b.left - 0.01)).toBe(1);
+    expect(nearestOpening(gateOpenings(3), 0.01)).toBe(0);
+    expect(nearestOpening(gateOpenings(3), 0.99)).toBe(2);
   });
 });
 
@@ -288,7 +288,7 @@ describe("wall clipping", () => {
 
   it("wall solids are the complement of the openings", () => {
     for (const n of [2, 3]) {
-      const solids = wallSolids(n);
+      const solids = wallSolids(gateOpenings(n));
       const open = gateOpenings(n);
       expect(solids).toHaveLength(n + 1);
       expect(at(open, 0).left).toBeCloseTo((solids[0] as Opening).right, 12);
