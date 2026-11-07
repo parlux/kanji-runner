@@ -7,6 +7,7 @@ import { defaultProgress } from "../../src/core/srs";
 import { CLASH_SECONDS } from "../../src/core/tuning";
 import { STEP } from "../../src/game/loop";
 import {
+  adoptProgress,
   afterStep,
   createSession,
   devLevel,
@@ -16,7 +17,12 @@ import {
   type Session,
 } from "../../src/game/scenes";
 import type { Action } from "../../src/game/input";
-import { startLayout, startTap } from "../../src/game/start";
+import {
+  startLayout,
+  startTap,
+  syncLabel,
+  syncTap,
+} from "../../src/game/start";
 
 describe("dev level flag", () => {
   it("reads ?level=N for N ≥ 2 and ignores anything else", () => {
@@ -312,5 +318,60 @@ describe("boss", () => {
     const end = updateScene({ ...boss, t: 99 }, STEP, 0);
     expect(end.kind).toBe("end");
     expect(afterStep(after, boss, end, 2)).toBe(after);
+  });
+});
+
+describe("sync label", () => {
+  const W = 390;
+  const H = 844;
+  const r = startLayout(W, H).sync;
+  const [x, y] = [r.x + r.w / 2, r.y + r.h / 2];
+
+  it("names each status, and is hidden when sync is disabled", () => {
+    expect(syncLabel("synced")).toBe("Synced");
+    expect(syncLabel("offline")).toBe("Offline");
+    expect(syncLabel("login")).toBe("Log in");
+    expect(syncLabel("disabled")).toBeNull();
+  });
+
+  it("a tap on the label hits it unless sync is disabled", () => {
+    expect(syncTap("login", W, H, x, y)).toBe(true);
+    expect(syncTap("disabled", W, H, x, y)).toBe(false);
+    expect(syncTap("login", W, H, W / 2, H / 2)).toBe(false);
+  });
+
+  it("sits clear of the placement button and inside the screen", () => {
+    const p = startLayout(W, H).place;
+    expect(r.y + r.h).toBeLessThan(p.y);
+    expect(r.x).toBeGreaterThanOrEqual(0);
+    expect(r.x + r.w).toBeLessThanOrEqual(W);
+  });
+});
+
+describe("adopting synced progress", () => {
+  it("merges, so a run recorded while a sync was in flight is kept", () => {
+    const session = createSession(defaultProgress(), null);
+    const local = {
+      ...session,
+      progress: {
+        ...session.progress,
+        items: { a: { box: 2, seen: 3, correct: 2, wrong: 1, lastSeen: 200 } },
+      },
+    };
+    const remote = {
+      ...defaultProgress(),
+      unlockedLevel: 3,
+      items: { b: { box: 1, seen: 1, correct: 1, wrong: 0, lastSeen: 100 } },
+    };
+    const next = adoptProgress(local, remote);
+    expect(next.progress.unlockedLevel).toBe(3);
+    expect(Object.keys(next.progress.items).sort()).toEqual(["a", "b"]);
+  });
+
+  it("leaves a dev session alone", () => {
+    const dev = createSession(defaultProgress(), 4);
+    expect(adoptProgress(dev, { ...defaultProgress(), unlockedLevel: 9 })).toBe(
+      dev,
+    );
   });
 });

@@ -1,5 +1,6 @@
 import { bossSize, bossWon } from "../core/boss";
 import { applyUnlock, maxLevel, place } from "../core/progression";
+import { mergeProgress } from "../core/merge";
 import { buildRun } from "../core/run";
 import { KANA } from "../core/kana";
 import { KANJI } from "../core/kanji";
@@ -65,6 +66,15 @@ export function createSession(stored: Progress, level: number | null): Session {
         persist: false,
         unlocked: null,
       };
+}
+
+/**
+ * The session with synced progress merged in. Merging (not replacing) keeps a
+ * run that finished while the sync was in flight. A dev session never syncs.
+ */
+export function adoptProgress(session: Session, synced: Progress): Session {
+  if (!session.persist) return session;
+  return { ...session, progress: mergeProgress(session.progress, synced) };
 }
 
 function newRun(seed: number, session: Session): Scene {

@@ -29,7 +29,8 @@ import {
   UNLOCK_SHARE,
 } from "../core/progression";
 import type { BossResult, Scene, Session } from "./scenes";
-import { startLayout, type Rect } from "./start";
+import type { SyncStatus } from "../sync/sync";
+import { startLayout, syncLabel, type Rect } from "./start";
 
 const FONT = `"Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic", system-ui, sans-serif`;
 const MAX_DRAWN_SOLDIERS = 200;
@@ -212,11 +213,12 @@ export function render(
   h: number,
   scene: Scene,
   session: Session,
+  sync: SyncStatus = "disabled",
 ): void {
   ctx.fillStyle = COLORS.bg;
   ctx.fillRect(0, 0, w, h);
   if (scene.kind === "start")
-    return renderStart(ctx, w, h, session, scene.pick);
+    return renderStart(ctx, w, h, session, scene.pick, sync);
   if (scene.kind === "end")
     return renderEnd(ctx, w, h, scene.run, scene.seed, scene.boss, session);
   if (scene.kind === "boss")
@@ -237,8 +239,10 @@ function renderStart(
   h: number,
   session: Session,
   pick: number | undefined,
+  sync: SyncStatus,
 ): void {
   if (pick !== undefined) return renderPicker(ctx, w, h, session, pick);
+  renderSyncLabel(ctx, w, h, sync);
   text(ctx, "Kanji Runner", w / 2, h * 0.22, Math.min(64, w / 8));
   renderLevel(ctx, w, h * 0.36, session);
   unlockedNote(ctx, w, h * 0.455, session, 24);
@@ -271,6 +275,40 @@ function renderStart(
     COLORS.dim,
   );
   text(ctx, "© EDRDG, CC BY-SA 4.0 · edrdg.org", w / 2, h - 26, 12, COLORS.dim);
+}
+
+const SYNC_DOT: Record<SyncStatus, string> = {
+  synced: COLORS.good,
+  offline: COLORS.dim,
+  login: COLORS.chargeLine,
+  disabled: COLORS.dim,
+};
+
+/** A small pill, top right: a status dot and Synced / Offline / Log in. */
+function renderSyncLabel(
+  ctx: Ctx,
+  w: number,
+  h: number,
+  status: SyncStatus,
+): void {
+  const label = syncLabel(status);
+  if (label === null) return;
+  const r = startLayout(w, h).sync;
+  ctx.strokeStyle = COLORS.wall;
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.roundRect(r.x + 0.5, r.y + 0.5, r.w - 1, r.h - 1, r.h / 2);
+  ctx.stroke();
+  const cy = r.y + r.h / 2;
+  ctx.fillStyle = SYNC_DOT[status];
+  ctx.beginPath();
+  ctx.arc(r.x + 20, cy, 5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.font = `15px ${FONT}`;
+  ctx.fillStyle = status === "login" ? COLORS.text : COLORS.dim;
+  ctx.textAlign = "left";
+  ctx.textBaseline = "middle";
+  ctx.fillText(label, r.x + 34, cy);
 }
 
 /** "Kanji 2 unlocked!" after a run that unlocked a level. */

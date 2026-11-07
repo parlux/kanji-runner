@@ -1,3 +1,4 @@
+import type { SyncStatus } from "../sync/sync";
 import type { Action } from "./input";
 
 export type Rect = { x: number; y: number; w: number; h: number };
@@ -17,7 +18,23 @@ export function startLayout(w: number, h: number) {
     plus: { x: x + bw - step, y: pickY - step / 2, w: step, h: step },
     apply: { x, y: h * 0.55, w: bw, h: 52 },
     cancel: { x, y: h * 0.55 + 64, w: bw, h: 44 },
+    /** The sync status label, top right; opens login or retries. */
+    sync: { x: w - 124, y: 12, w: 112, h: 36 },
   };
+}
+
+/** The start screen's sync label, or null when sync is not configured. */
+export function syncLabel(status: SyncStatus): string | null {
+  switch (status) {
+    case "synced":
+      return "Synced";
+    case "offline":
+      return "Offline";
+    case "login":
+      return "Log in";
+    case "disabled":
+      return null;
+  }
 }
 
 const inside = (r: Rect, x: number, y: number): boolean =>
@@ -42,4 +59,15 @@ export function startTap(
   if (inside(l.apply, x, y)) return "confirm";
   if (inside(l.cancel, x, y)) return "back";
   return null;
+}
+
+/** Whether a start screen tap (picker closed) hits the sync label. */
+export function syncTap(
+  status: SyncStatus,
+  w: number,
+  h: number,
+  x: number,
+  y: number,
+): boolean {
+  return syncLabel(status) !== null && inside(startLayout(w, h).sync, x, y);
 }
