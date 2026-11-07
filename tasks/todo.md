@@ -253,9 +253,9 @@ Squads are cool but hard to read ("can't tell if it's too fast or just too hard 
 It also emits `confusables.json` (the kana look-alikes list plus a component index) and a report of questionable glosses.
 
 **Acceptance criteria:**
-- [ ] `npm run data:build` regenerates `src/data/kanji.json` deterministically, and the raw files are not committed.
-- [ ] Data test: every kanji has at least one gloss and at least one reading, there are no katakana readings, and every level has 30 kanji except the last.
-- [ ] The first 30 kanji look sensible on manual review (一 二 三 人 口 山 …), and every component comes before the kanji it appears in.
+- [x] `npm run data:build` regenerates `src/data/kanji.json` deterministically, and the raw files are not committed.
+- [x] Data test: every kanji has at least one gloss and at least one reading, there are no katakana readings, and every level has 30 kanji except the last.
+- [x] The first 30 kanji look sensible on manual review (一 二 三 人 口 山 …), and every component comes before the kanji it appears in.
 
 **Verification:** `npm run data:build && npm test -- data`. Read the gloss report.
 **Dependencies:** T1 (parallel-safe with T2–T4)
