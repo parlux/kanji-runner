@@ -422,7 +422,7 @@ Placement to Katakana gives Kanji 1, but runs are still mostly basic hiragana: 1
 - [ ] A run on the laptop appears on the phone after reload, and the reverse.
 - [ ] With the network off, play is unaffected, the status shows `offline`, and the next online sync catches up.
 
-**Verification:** Manual cross-device test. Manual RLS check with curl, with no session and with the anon key only (spec criterion 12).
+**Verification:** Manual cross-device test. Manual RLS check with curl, with no session and with the publishable key only (spec criterion 12).
 **Dependencies:** T12, R4. **Owner must complete the Supabase setup first** (spec, "One-time manual setup", steps 2–4).
 **Files:** `src/sync/login.ts`, `src/game/scenes.ts`, `src/main.ts`, `.github/workflows/deploy.yml`
 **Scope:** M
