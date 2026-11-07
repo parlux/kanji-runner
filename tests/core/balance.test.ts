@@ -3,8 +3,8 @@ import { crowdWidth } from "../../src/core/crowd";
 import { firepower } from "../../src/core/fire";
 import {
   createRunState,
-  gateOpenings,
   hazardPos,
+  rowOpenings,
   setTarget,
   speedMul,
   stepRun,
@@ -68,7 +68,8 @@ function botRun(
       const n = row?.options.length ?? 2;
       const answer = row?.answerIndex ?? 0;
       const pick = wrong(s.next) ? (answer + 1) % n : answer;
-      s = setTarget(s, gateOpenings(n)[pick]?.centre ?? 0.5);
+      // its opening as it is now: lined up, the bot shoots it wider
+      s = setTarget(s, rowOpenings(s, s.next)[pick]?.centre ?? 0.5);
     }
     s = stepRun(s, DT);
   }
