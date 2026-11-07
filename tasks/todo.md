@@ -292,9 +292,9 @@ Base rewards are 3, 5 and 8 for kana, meaning and reading.
 - The game saves after every run.
 
 **Acceptance criteria:**
-- [ ] Tests cover: correct moves the box up by 1 (max 5), wrong sets it to 0, and weight is `2^(5−box)`, so box 0 is 32× box 5.
-- [ ] Never more than 4 new items per run. Each run picks 14 prompts. Warm-ups are the strongest known items (kana when no kanji is unlocked) and are always wall gates.
-- [ ] Progress survives a reload. A corrupt localStorage value resets to defaults without throwing.
+- [x] Tests cover: correct moves the box up by 1 (max 5), wrong sets it to 0, and weight is `2^(5−box)`, so box 0 is 32× box 5.
+- [x] Never more than 4 new items per run. Each run picks 14 prompts. Warm-ups are the strongest known items (kana when no kanji is unlocked) and are always wall gates.
+- [x] Progress survives a reload. A corrupt localStorage value resets to defaults without throwing.
 
 **Verification:** `npm test -- srs storage run`. Manual: play, reload, see the progress persisted.
 **Dependencies:** T6
