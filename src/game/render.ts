@@ -201,7 +201,8 @@ export function render(
   ctx.fillRect(0, 0, w, h);
   if (scene.kind === "start")
     return renderStart(ctx, w, h, session, scene.pick);
-  if (scene.kind === "end") return renderEnd(ctx, w, h, scene.run, scene.seed);
+  if (scene.kind === "end")
+    return renderEnd(ctx, w, h, scene.run, scene.seed, session);
   renderRun(ctx, w, h, scene.run);
   if (scene.paused) {
     ctx.fillStyle = "rgba(0,0,0,0.6)";
@@ -222,6 +223,7 @@ function renderStart(
   if (pick !== undefined) return renderPicker(ctx, w, h, session, pick);
   text(ctx, "Kanji Runner", w / 2, h * 0.22, Math.min(64, w / 8));
   renderLevel(ctx, w, h * 0.36, session);
+  unlockedNote(ctx, w, h * 0.45, session);
   text(ctx, "Tap or Enter to start", w / 2, h * 0.5, 22);
   text(
     ctx,
@@ -241,6 +243,13 @@ function renderStart(
     14,
     COLORS.dim,
   );
+}
+
+/** "Kanji 2 unlocked!" after a run that unlocked a level. */
+function unlockedNote(ctx: Ctx, w: number, y: number, session: Session): void {
+  if (session.unlocked === null) return;
+  const msg = `${levelName(session.unlocked)} unlocked!`;
+  text(ctx, msg, w / 2, y, fitSize(ctx, msg, 30, w - 48), COLORS.good);
 }
 
 function button(
@@ -344,6 +353,7 @@ function renderEnd(
   h: number,
   run: RunState,
   seed: number,
+  session: Session,
 ): void {
   const correct = run.results.filter(Boolean).length;
   const accuracy = run.results.length
@@ -367,7 +377,8 @@ function renderEnd(
     22,
   );
   text(ctx, `Seed ${seed}`, w / 2, h * 0.42 + 76, 18, COLORS.dim);
-  text(ctx, "Tap or Enter to play again", w / 2, h * 0.7, 20);
+  unlockedNote(ctx, w, h * 0.58, session);
+  text(ctx, "Tap or Enter to continue", w / 2, h * 0.7, 20);
 }
 
 function renderRun(ctx: Ctx, w: number, h: number, run: RunState): void {

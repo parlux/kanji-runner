@@ -44,7 +44,7 @@ const act = (action: Action): void => {
   session = next.session;
 };
 const steerAxis = bindKeys(act);
-// a tap pauses or resumes a run, starts one from the end screen, and on the
+// a tap pauses or resumes a run, leaves the end screen for the start screen, and on the
 // start screen hits the placement controls or else starts a run
 const takeDrag = bindDrag(canvas, (x, y) => {
   if (scene.kind === "run") return act("pause");

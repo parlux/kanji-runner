@@ -34,6 +34,8 @@ export type Session = {
   progress: Progress;
   kana: readonly KanaItem[];
   persist: boolean;
+  /** The level the last run unlocked, shown until the next run starts. */
+  unlocked: number | null;
 };
 
 /**
@@ -43,11 +45,12 @@ export type Session = {
  */
 export function createSession(stored: Progress, level: number | null): Session {
   return level === null
-    ? { progress: stored, kana: KANA, persist: true }
+    ? { progress: stored, kana: KANA, persist: true, unlocked: null }
     : {
         progress: { ...stored, unlockedLevel: level },
         kana: [],
         persist: false,
+        unlocked: null,
       };
 }
 
@@ -76,13 +79,16 @@ export function afterStep(
 ): Session {
   if (prev.kind !== "run" || next.kind !== "end") return session;
   const { rows, results, status } = next.run;
+  const progress = applyUnlock(
+    recordRun(session.progress, rows, results, status === "finished", now),
+    session.kana,
+    KANJI,
+  );
+  const gained = progress.unlockedLevel > session.progress.unlockedLevel;
   return {
     ...session,
-    progress: applyUnlock(
-      recordRun(session.progress, rows, results, status === "finished", now),
-      session.kana,
-      KANJI,
-    ),
+    progress,
+    unlocked: gained ? progress.unlockedLevel : null,
   };
 }
 
@@ -99,8 +105,10 @@ function startAction(
 ): { scene: Scene; session: Session } {
   const { pick } = scene;
   if (pick === undefined) {
-    if (action === "confirm")
-      return { scene: newRun(newSeed(), session), session };
+    if (action === "confirm") {
+      const next = { ...session, unlocked: null };
+      return { scene: newRun(newSeed(), next), session: next };
+    }
     if (action === "left" || action === "right" || action === "place")
       return {
         scene: { kind: "start", pick: session.progress.unlockedLevel - 1 },
@@ -146,7 +154,7 @@ export function handleAction(
       return startAction(scene, action, newSeed, session);
     case "end":
       return {
-        scene: action === "confirm" ? newRun(newSeed(), session) : scene,
+        scene: action === "confirm" ? { kind: "start" } : scene,
         session,
       };
     case "run":

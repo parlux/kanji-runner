@@ -112,7 +112,54 @@ describe("afterStep", () => {
       seed: 7,
       run: { ...run.run, rows: [row], results: [true], status: "finished" },
     };
-    expect(afterStep(s, run, ended, 5).progress.unlockedLevel).toBe(3);
+    const after = afterStep(s, run, ended, 5);
+    expect(after.progress.unlockedLevel).toBe(3);
+    expect(after.unlocked).toBe(3);
+    // the next step on the same session reports no new unlock
+    expect(afterStep(after, run, ended, 6).unlocked).toBeNull();
+    // starting the next run clears the message
+    const start = handleAction({ kind: "start" }, "confirm", () => 1, after);
+    expect(start.session.unlocked).toBeNull();
+  });
+
+  it("reports no unlock when the level does not change", () => {
+    const ended: Scene = {
+      kind: "end",
+      seed: 7,
+      run: { ...run.run, results: [true], status: "dead" },
+    };
+    expect(afterStep(session, run, ended, 1).unlocked).toBeNull();
+  });
+});
+
+describe("end screen", () => {
+  const session = createSession(defaultProgress(), null);
+  const end = (): Scene => {
+    const run = handleAction(
+      { kind: "start" },
+      "confirm",
+      () => 7,
+      session,
+    ).scene;
+    if (run.kind !== "run") throw new Error("no run");
+    return { kind: "end", seed: 7, run: run.run };
+  };
+
+  it("confirm (Enter or tap) returns to the start screen, not a new run", () => {
+    const r = handleAction(end(), "confirm", () => 1, session);
+    expect(r.scene).toEqual({ kind: "start" });
+    expect(r.session).toBe(session);
+  });
+
+  it("other actions leave the end screen alone", () => {
+    const e = end();
+    expect(handleAction(e, "left", () => 1, session).scene).toBe(e);
+  });
+
+  it("a tap and then a tap again starts the next run", () => {
+    const first = handleAction(end(), "confirm", () => 1, session);
+    const second = handleAction(first.scene, "confirm", () => 1, first.session);
+    expect(second.scene.kind).toBe("run");
   });
 });
 
