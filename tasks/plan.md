@@ -101,7 +101,7 @@ T1 scaffold ─ T2 core rules ─ T3 lane slice (done)
 | Replacing lanes breaks `sim.test.ts` (151 lines) | Med | R1 rewrites the lane tests as position tests in the same task. Scoring and run-builder tests are unaffected. |
 | Fire and effects make prompts hard to read | High | The spec bans effects over the prompt and labels. Checkpoint A checks it on the phone. Quieten effects during calm stretches if needed. |
 | Snowball: a big army flattens everything and the run gets boring | High | Threat strength follows `expectedArmy` (80%-accuracy pass), not the player's actual army. The balance bot checks that 50% accuracy dies early and 100% doesn't. |
-| Too much on screen in ~80 s (walls, blocks, saws, enemies) | Med | Enemy packs take existing hazard beats instead of adding more. Thin them at Checkpoint A. |
+| Too much on screen in ~65 s (walls, blocks, saws, enemies) | Med | Enemy packs take existing hazard beats instead of adding more. Thin them at Checkpoint A. |
 | R3 is too large | Med | Split saws into their own task if blocks + layout already fill a session. |
 | Squad answers leak through visuals | Med | View-model honesty test (R5) plus the owner check at Checkpoint A2. |
 | Balance thresholds are hard to hit with clipping | Med | The bot drives the real sim. Tune `K`, `EXPECTED_SURVIVAL` and the hazard widths against it. |

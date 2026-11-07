@@ -102,7 +102,7 @@ All distances are in track units. The track is 1.0 wide; `x` runs from 0 (left e
   - Before each question there is a **calm stretch** of `CALM_DISTANCE` with no hazards, starting when the prompt appears. This leaves time to read the prompt and recall the answer.
   - Block and saw layouts must always leave a gap wide enough for the current maximum crowd width (0.30), so a skilled player never takes forced losses from them. Enemy packs are the exception by design: they are a firepower check, not a steering one.
   - Enemy packs take some of the hazard beats (none before question 2), so the run length doesn't change.
-- **Speed:** `BASE_SPEED` 1.3 track units per second, ramping linearly by up to **1.3×** over the run. A run to the last question takes about 80 seconds, plus the boss.
+- **Speed:** `BASE_SPEED` 1.6 track units per second, ramping linearly by up to **1.3×** over the run. A run to the last question takes about 65 seconds, plus the boss.
 
 ### Shooting
 The army fires straight ahead all the time. There is no fire button: steering is aiming.
