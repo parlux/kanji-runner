@@ -21,6 +21,11 @@ export const WRONG_CHARGE_PCT_LOSS = 0.5;
 export const BASE_REWARD = { kana: 3, meaning: 5, reading: 8 } as const;
 
 export const ROWS_PER_RUN = 14;
+// Item selection (SRS). See run.ts.
+/** The first N questions are warm-ups: the strongest known items, always wall gates. */
+export const WARM_UPS = 3;
+/** Most never-seen items introduced per run, taken in progression order. */
+export const MAX_NEW_PER_RUN = 4;
 /** Rows 1..N have 2 options; later rows have 3. */
 export const TWO_OPTION_ROWS = 7;
 
