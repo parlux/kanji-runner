@@ -21,6 +21,7 @@ import {
   VIEW_DISTANCE,
 } from "../core/tuning";
 import { KANJI } from "../core/kanji";
+import { missedItems } from "../core/run";
 import {
   levelName,
   levelProgress,
@@ -389,30 +390,62 @@ function renderEnd(
     ctx,
     title,
     w / 2,
-    h * 0.3,
-    fitSize(ctx, title, Math.min(48, w / 9), w - 32),
+    38,
+    fitSize(ctx, title, Math.min(40, w / 9), w - 32),
     won ? COLORS.good : COLORS.bad,
   );
-  const sizes = boss
-    ? `Army ${run.army} vs boss ${boss.size}`
-    : `Army ${run.army}`;
-  text(ctx, sizes, w / 2, h * 0.42, fitSize(ctx, sizes, 28, w - 32));
   const note = !boss
     ? "The boss was never reached"
     : run.army === boss.size
       ? "A tie is a loss"
       : null;
-  if (note) text(ctx, note, w / 2, h * 0.36, 18, COLORS.dim);
-  text(
-    ctx,
-    `Accuracy ${accuracy}% (${correct}/${run.results.length})`,
-    w / 2,
-    h * 0.42 + 40,
-    22,
-  );
-  text(ctx, `Seed ${seed}`, w / 2, h * 0.42 + 76, 18, COLORS.dim);
-  unlockedNote(ctx, w, h * 0.58, session);
-  text(ctx, "Tap or Enter to continue", w / 2, h * 0.7, 20);
+  if (note) text(ctx, note, w / 2, 70, 16, COLORS.dim);
+  const sizes = boss
+    ? `Army ${run.army} vs boss ${boss.size}`
+    : `Army ${run.army}`;
+  text(ctx, sizes, w / 2, 104, fitSize(ctx, sizes, 26, w - 32));
+  const stats = `Accuracy ${accuracy}% (${correct}/${run.results.length}) · Seed ${seed}`;
+  text(ctx, stats, w / 2, 134, fitSize(ctx, stats, 18, w - 32), COLORS.dim);
+  unlockedNote(ctx, w, 164, session, 22);
+
+  const misses = missedItems(run.rows, run.results, run.track.charges, KANJI);
+  const top = 196;
+  const bottom = h - 56;
+  if (misses.length === 0) {
+    text(ctx, "No misses!", w / 2, top + 40, 28, COLORS.good);
+  } else {
+    ctx.textAlign = "left";
+    ctx.font = `16px ${FONT}`;
+    ctx.fillStyle = COLORS.dim;
+    ctx.textBaseline = "middle";
+    ctx.fillText(`Missed (${misses.length})`, 16, top);
+    const rowH = Math.min(52, (bottom - top - 16) / misses.length);
+    const size = Math.min(28, rowH * 0.7);
+    const small = Math.max(12, Math.min(16, rowH * 0.4));
+    const answerX = 96;
+    const answerW = w - answerX - 64;
+    misses.forEach((m, i) => {
+      const y = top + 16 + rowH * (i + 0.5);
+      ctx.textAlign = "left";
+      ctx.fillStyle = COLORS.dim;
+      ctx.font = `${Math.round(small)}px ${FONT}`;
+      ctx.fillText(String(m.q), 16, y);
+      ctx.fillStyle = COLORS.text;
+      ctx.font = `${Math.round(size)}px ${FONT}`;
+      ctx.fillText(m.prompt, 44, y);
+      const answer = m.answers.join(" · ");
+      ctx.fillStyle = COLORS.good;
+      ctx.font = `${Math.round(fitSize(ctx, answer, size * 0.85, answerW))}px ${FONT}`;
+      ctx.fillText(answer, answerX, y);
+      if (m.charge) {
+        ctx.textAlign = "right";
+        ctx.fillStyle = COLORS.chargeLine;
+        ctx.font = `${Math.round(small)}px ${FONT}`;
+        ctx.fillText("charge", w - 12, y);
+      }
+    });
+  }
+  text(ctx, "Tap or Enter to continue", w / 2, h - 28, 20);
 }
 
 /** A cheap deterministic pseudo-random number in [0, 1), for flicker. */
