@@ -56,7 +56,7 @@ export const SAW_CHANCE = 1 / 3;
 /** Damage per second per soldier. */
 export const FIRE_PER_SOLDIER = 1;
 /** How far ahead (track units) the army can hit a threat. */
-export const FIRE_RANGE = 2.0;
+export const FIRE_RANGE = 2.8;
 /** Block hit points = BLOCK_HP_K × the expected army at that point of the run. */
 export const BLOCK_HP_K = 1.0;
 /** Supply crates (S3): a shattered block adds round(CRATE_REWARD_K × its hit points) soldiers. */
