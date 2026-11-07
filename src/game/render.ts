@@ -21,6 +21,8 @@ const MAX_DRAWN_SOLDIERS = 200;
 const CLIP_POPUP_DIST = 0.8;
 /** How long (in track distance) answer feedback stays up. */
 const ANSWER_FEEDBACK_DIST = 1.0;
+/** How far (in track distance) past a wall its answer labels take to fade out. */
+const PASSED_LABEL_FADE_DIST = 0.15;
 /** How long (in track distance) a shatter burst lasts. */
 const SHATTER_DIST = 0.6;
 /** How long (in track distance) a crate's "+N" and its recruits running in last. */
@@ -257,6 +259,10 @@ function renderRun(ctx: Ctx, w: number, h: number, run: RunState): void {
     const scale = Math.max(0.3, 1 - 0.5 * (ahead / VIEW_DISTANCE));
     const wallH = 56 * scale;
     const openings = rowOpenings(run, i);
+    const passed = i < run.next;
+    const labelAlpha = passed
+      ? 1 - Math.min(1, Math.max(0, -ahead) / PASSED_LABEL_FADE_DIST)
+      : 1;
     // solid wall across the track, then openings cut into it
     ctx.fillStyle = COLORS.wall;
     ctx.fillRect(0, y - wallH, w, wallH);
@@ -276,6 +282,18 @@ function renderRun(ctx: Ctx, w: number, h: number, run: RunState): void {
             : COLORS.badFill
           : COLORS.opening;
       ctx.fillRect(left, y - wallH, width, wallH);
+      // the opening being shot glows at both edges as they are pushed apart
+      if (i === run.next && run.gateTarget === j) {
+        const edge = Math.max(2, 4 * scale);
+        ctx.globalAlpha = 0.6 + 0.4 * Math.sin(run.dist * 80);
+        ctx.fillStyle = COLORS.bullet;
+        ctx.fillRect(left - edge, y - wallH, edge, wallH);
+        ctx.fillRect(left + width, y - wallH, edge, wallH);
+        ctx.globalAlpha = 1;
+      }
+      // a passed wall's labels fade quickly, and the one run through goes at
+      // once, so none covers the army or its pop-ups
+      if (labelAlpha <= 0 || (passed && answered?.choice === j)) return;
       const label = row.options[j] ?? "";
       const size = fitSize(
         ctx,
@@ -283,7 +301,9 @@ function renderRun(ctx: Ctx, w: number, h: number, run: RunState): void {
         Math.max(LABEL_MIN_PX, 30 * scale),
         width - 6,
       );
+      ctx.globalAlpha = labelAlpha;
       text(ctx, label, o.centre * w, y - wallH / 2, size);
+      ctx.globalAlpha = 1;
     });
     // a charge is the same wall with a squad standing beyond each opening
     const charge = isCharge(run.track, i)
@@ -292,6 +312,8 @@ function renderRun(ctx: Ctx, w: number, h: number, run: RunState): void {
     const squadsH = charge
       ? renderSquads(ctx, w, run, charge, y - wallH, scale)
       : 0;
+    // a passed wall's prompt is gone: it would sit over the army and its pop-ups
+    if (passed) continue;
     // never too small to read at first sight; it grows upwards, clear of the labels and squads
     const promptSize = Math.max(PROMPT_MIN_PX, 44 * scale);
     const promptY = y - wallH - squadsH - 8 * scale - promptSize / 2;
@@ -402,7 +424,38 @@ function renderFire(
   const laneX = (l: number): number =>
     run.x * w + (lanes > 1 ? l / (lanes - 1) - 0.5 : 0) * radius;
   const sy = armyY - radius * 0.4;
-  if (i === null || !(target?.kind === "block" || target?.kind === "pack")) {
+  const gate =
+    run.gateTarget === null
+      ? undefined
+      : rowOpenings(run, run.next)[run.gateTarget];
+  if (gate) {
+    // the opening being shot: the stream splits onto its two edges at the wall's foot
+    const ty = depthY(fireLimit(run) - run.dist) - 2;
+    const edges = [gate.left * w, gate.right * w];
+    ctx.fillStyle = COLORS.bullet;
+    for (let l = 0; l < Math.max(2, lanes); l++) {
+      const sx = laneX(l % lanes);
+      const tx = edges[l % 2] as number;
+      for (let k = 0; k < 6; k++) {
+        const t = (k / 6 + run.dist * 3 + l * 0.37) % 1;
+        ctx.beginPath();
+        ctx.arc(sx + (tx - sx) * t, sy + (ty - sy) * t, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+    // hit flashes where the edges are being pushed
+    ctx.globalAlpha = 0.6 + 0.4 * Math.sin(run.dist * 80);
+    ctx.fillStyle = "#fff";
+    for (const tx of edges) {
+      ctx.beginPath();
+      ctx.arc(tx, ty, 6, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  } else if (
+    i === null ||
+    !(target?.kind === "block" || target?.kind === "pack")
+  ) {
     const ey = depthY(FIRE_RANGE);
     // bullets stop at the next wall, so they never reach a prompt or a squad
     const wallY = depthY(fireLimit(run) - run.dist);
