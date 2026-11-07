@@ -1,0 +1,10682 @@
+[
+  {
+    "char": "亜",
+    "grade": 8,
+    "freq": 1509
+  },
+  {
+    "char": "哀",
+    "grade": 8,
+    "freq": 1715
+  },
+  {
+    "char": "愛",
+    "grade": 4,
+    "freq": 640
+  },
+  {
+    "char": "挨",
+    "grade": 8,
+    "freq": 2258
+  },
+  {
+    "char": "悪",
+    "grade": 3,
+    "freq": 530
+  },
+  {
+    "char": "握",
+    "grade": 8,
+    "freq": 1003
+  },
+  {
+    "char": "圧",
+    "grade": 5,
+    "freq": 718
+  },
+  {
+    "char": "扱",
+    "grade": 8,
+    "freq": 1057
+  },
+  {
+    "char": "宛",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "安",
+    "grade": 3,
+    "freq": 144
+  },
+  {
+    "char": "暗",
+    "grade": 3,
+    "freq": 1040
+  },
+  {
+    "char": "案",
+    "grade": 4,
+    "freq": 206
+  },
+  {
+    "char": "闇",
+    "grade": 8,
+    "freq": 1969
+  },
+  {
+    "char": "以",
+    "grade": 4,
+    "freq": 126
+  },
+  {
+    "char": "位",
+    "grade": 4,
+    "freq": 276
+  },
+  {
+    "char": "依",
+    "grade": 8,
+    "freq": 906
+  },
+  {
+    "char": "偉",
+    "grade": 8,
+    "freq": 1639
+  },
+  {
+    "char": "囲",
+    "grade": 5,
+    "freq": 771
+  },
+  {
+    "char": "委",
+    "grade": 3,
+    "freq": 187
+  },
+  {
+    "char": "威",
+    "grade": 8,
+    "freq": 1103
+  },
+  {
+    "char": "尉",
+    "grade": 8,
+    "freq": 2007
+  },
+  {
+    "char": "意",
+    "grade": 3,
+    "freq": 99
+  },
+  {
+    "char": "慰",
+    "grade": 8,
+    "freq": 1158
+  },
+  {
+    "char": "易",
+    "grade": 5,
+    "freq": 571
+  },
+  {
+    "char": "椅",
+    "grade": 8,
+    "freq": 2245
+  },
+  {
+    "char": "為",
+    "grade": 8,
+    "freq": 831
+  },
+  {
+    "char": "畏",
+    "grade": 8,
+    "freq": 2389
+  },
+  {
+    "char": "異",
+    "grade": 6,
+    "freq": 631
+  },
+  {
+    "char": "移",
+    "grade": 5,
+    "freq": 448
+  },
+  {
+    "char": "維",
+    "grade": 8,
+    "freq": 643
+  },
+  {
+    "char": "緯",
+    "grade": 8,
+    "freq": 1430
+  },
+  {
+    "char": "胃",
+    "grade": 6,
+    "freq": 1647
+  },
+  {
+    "char": "萎",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "衣",
+    "grade": 4,
+    "freq": 1214
+  },
+  {
+    "char": "違",
+    "grade": 8,
+    "freq": 344
+  },
+  {
+    "char": "遺",
+    "grade": 6,
+    "freq": 647
+  },
+  {
+    "char": "医",
+    "grade": 3,
+    "freq": 437
+  },
+  {
+    "char": "井",
+    "grade": 4,
+    "freq": 339
+  },
+  {
+    "char": "域",
+    "grade": 6,
+    "freq": 396
+  },
+  {
+    "char": "育",
+    "grade": 3,
+    "freq": 369
+  },
+  {
+    "char": "一",
+    "grade": 1,
+    "freq": 2
+  },
+  {
+    "char": "壱",
+    "grade": 8,
+    "freq": 2351
+  },
+  {
+    "char": "逸",
+    "grade": 8,
+    "freq": 1524
+  },
+  {
+    "char": "稲",
+    "grade": 8,
+    "freq": 1038
+  },
+  {
+    "char": "茨",
+    "grade": 4,
+    "freq": 1203
+  },
+  {
+    "char": "芋",
+    "grade": 8,
+    "freq": 2418
+  },
+  {
+    "char": "印",
+    "grade": 4,
+    "freq": 682
+  },
+  {
+    "char": "咽",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "員",
+    "grade": 3,
+    "freq": 54
+  },
+  {
+    "char": "因",
+    "grade": 5,
+    "freq": 636
+  },
+  {
+    "char": "姻",
+    "grade": 8,
+    "freq": 1985
+  },
+  {
+    "char": "引",
+    "grade": 2,
+    "freq": 218
+  },
+  {
+    "char": "飲",
+    "grade": 3,
+    "freq": 969
+  },
+  {
+    "char": "淫",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "院",
+    "grade": 3,
+    "freq": 150
+  },
+  {
+    "char": "陰",
+    "grade": 8,
+    "freq": 1393
+  },
+  {
+    "char": "隠",
+    "grade": 8,
+    "freq": 1089
+  },
+  {
+    "char": "韻",
+    "grade": 8,
+    "freq": 2148
+  },
+  {
+    "char": "右",
+    "grade": 1,
+    "freq": 602
+  },
+  {
+    "char": "宇",
+    "grade": 6,
+    "freq": 883
+  },
+  {
+    "char": "羽",
+    "grade": 2,
+    "freq": 748
+  },
+  {
+    "char": "雨",
+    "grade": 1,
+    "freq": 950
+  },
+  {
+    "char": "臼",
+    "grade": 8,
+    "freq": 2048
+  },
+  {
+    "char": "渦",
+    "grade": 8,
+    "freq": 1789
+  },
+  {
+    "char": "唄",
+    "grade": 8,
+    "freq": 2051
+  },
+  {
+    "char": "浦",
+    "grade": 8,
+    "freq": 977
+  },
+  {
+    "char": "運",
+    "grade": 3,
+    "freq": 255
+  },
+  {
+    "char": "雲",
+    "grade": 2,
+    "freq": 1256
+  },
+  {
+    "char": "餌",
+    "grade": 8,
+    "freq": 2277
+  },
+  {
+    "char": "営",
+    "grade": 5,
+    "freq": 303
+  },
+  {
+    "char": "影",
+    "grade": 8,
+    "freq": 464
+  },
+  {
+    "char": "映",
+    "grade": 6,
+    "freq": 404
+  },
+  {
+    "char": "栄",
+    "grade": 4,
+    "freq": 920
+  },
+  {
+    "char": "永",
+    "grade": 5,
+    "freq": 846
+  },
+  {
+    "char": "泳",
+    "grade": 3,
+    "freq": 1223
+  },
+  {
+    "char": "英",
+    "grade": 4,
+    "freq": 430
+  },
+  {
+    "char": "衛",
+    "grade": 5,
+    "freq": 400
+  },
+  {
+    "char": "詠",
+    "grade": 8,
+    "freq": 2000
+  },
+  {
+    "char": "鋭",
+    "grade": 8,
+    "freq": 1395
+  },
+  {
+    "char": "液",
+    "grade": 5,
+    "freq": 1210
+  },
+  {
+    "char": "疫",
+    "grade": 8,
+    "freq": 1661
+  },
+  {
+    "char": "益",
+    "grade": 5,
+    "freq": 674
+  },
+  {
+    "char": "駅",
+    "grade": 3,
+    "freq": 724
+  },
+  {
+    "char": "悦",
+    "grade": 8,
+    "freq": 1762
+  },
+  {
+    "char": "謁",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "越",
+    "grade": 8,
+    "freq": 897
+  },
+  {
+    "char": "閲",
+    "grade": 8,
+    "freq": 1855
+  },
+  {
+    "char": "円",
+    "grade": 1,
+    "freq": 69
+  },
+  {
+    "char": "園",
+    "grade": 2,
+    "freq": 628
+  },
+  {
+    "char": "宴",
+    "grade": 8,
+    "freq": 1675
+  },
+  {
+    "char": "延",
+    "grade": 6,
+    "freq": 747
+  },
+  {
+    "char": "怨",
+    "grade": 8,
+    "freq": 2137
+  },
+  {
+    "char": "援",
+    "grade": 8,
+    "freq": 312
+  },
+  {
+    "char": "沿",
+    "grade": 6,
+    "freq": 1121
+  },
+  {
+    "char": "演",
+    "grade": 5,
+    "freq": 267
+  },
+  {
+    "char": "炎",
+    "grade": 8,
+    "freq": 1242
+  },
+  {
+    "char": "煙",
+    "grade": 8,
+    "freq": 1290
+  },
+  {
+    "char": "猿",
+    "grade": 8,
+    "freq": 1772
+  },
+  {
+    "char": "縁",
+    "grade": 8,
+    "freq": 1291
+  },
+  {
+    "char": "艶",
+    "grade": 8,
+    "freq": 2207
+  },
+  {
+    "char": "遠",
+    "grade": 2,
+    "freq": 887
+  },
+  {
+    "char": "鉛",
+    "grade": 8,
+    "freq": 1710
+  },
+  {
+    "char": "塩",
+    "grade": 4,
+    "freq": 1148
+  },
+  {
+    "char": "汚",
+    "grade": 8,
+    "freq": 908
+  },
+  {
+    "char": "凹",
+    "grade": 8,
+    "freq": 2206
+  },
+  {
+    "char": "央",
+    "grade": 3,
+    "freq": 582
+  },
+  {
+    "char": "奥",
+    "grade": 8,
+    "freq": 1018
+  },
+  {
+    "char": "往",
+    "grade": 5,
+    "freq": 1421
+  },
+  {
+    "char": "応",
+    "grade": 5,
+    "freq": 266
+  },
+  {
+    "char": "押",
+    "grade": 8,
+    "freq": 789
+  },
+  {
+    "char": "旺",
+    "grade": 8,
+    "freq": 2342
+  },
+  {
+    "char": "横",
+    "grade": 3,
+    "freq": 480
+  },
+  {
+    "char": "欧",
+    "grade": 8,
+    "freq": 421
+  },
+  {
+    "char": "殴",
+    "grade": 8,
+    "freq": 1622
+  },
+  {
+    "char": "王",
+    "grade": 1,
+    "freq": 684
+  },
+  {
+    "char": "翁",
+    "grade": 8,
+    "freq": 2064
+  },
+  {
+    "char": "黄",
+    "grade": 2,
+    "freq": 1240
+  },
+  {
+    "char": "岡",
+    "grade": 4,
+    "freq": 463
+  },
+  {
+    "char": "沖",
+    "grade": 4,
+    "freq": 929
+  },
+  {
+    "char": "億",
+    "grade": 4,
+    "freq": 716
+  },
+  {
+    "char": "屋",
+    "grade": 3,
+    "freq": 616
+  },
+  {
+    "char": "憶",
+    "grade": 8,
+    "freq": 1324
+  },
+  {
+    "char": "臆",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "乙",
+    "grade": 8,
+    "freq": 1841
+  },
+  {
+    "char": "俺",
+    "grade": 8,
+    "freq": 1946
+  },
+  {
+    "char": "卸",
+    "grade": 8,
+    "freq": 1520
+  },
+  {
+    "char": "恩",
+    "grade": 6,
+    "freq": 1418
+  },
+  {
+    "char": "温",
+    "grade": 3,
+    "freq": 838
+  },
+  {
+    "char": "穏",
+    "grade": 8,
+    "freq": 1535
+  },
+  {
+    "char": "音",
+    "grade": 1,
+    "freq": 491
+  },
+  {
+    "char": "下",
+    "grade": 1,
+    "freq": 97
+  },
+  {
+    "char": "化",
+    "grade": 3,
+    "freq": 89
+  },
+  {
+    "char": "仮",
+    "grade": 5,
+    "freq": 1039
+  },
+  {
+    "char": "何",
+    "grade": 2,
+    "freq": 340
+  },
+  {
+    "char": "価",
+    "grade": 5,
+    "freq": 250
+  },
+  {
+    "char": "佳",
+    "grade": 8,
+    "freq": 1643
+  },
+  {
+    "char": "加",
+    "grade": 4,
+    "freq": 130
+  },
+  {
+    "char": "可",
+    "grade": 5,
+    "freq": 314
+  },
+  {
+    "char": "夏",
+    "grade": 2,
+    "freq": 659
+  },
+  {
+    "char": "嫁",
+    "grade": 8,
+    "freq": 1581
+  },
+  {
+    "char": "家",
+    "grade": 2,
+    "freq": 133
+  },
+  {
+    "char": "寡",
+    "grade": 8,
+    "freq": 2035
+  },
+  {
+    "char": "科",
+    "grade": 2,
+    "freq": 531
+  },
+  {
+    "char": "暇",
+    "grade": 8,
+    "freq": 1386
+  },
+  {
+    "char": "果",
+    "grade": 4,
+    "freq": 258
+  },
+  {
+    "char": "架",
+    "grade": 8,
+    "freq": 1555
+  },
+  {
+    "char": "歌",
+    "grade": 2,
+    "freq": 519
+  },
+  {
+    "char": "河",
+    "grade": 5,
+    "freq": 663
+  },
+  {
+    "char": "火",
+    "grade": 1,
+    "freq": 574
+  },
+  {
+    "char": "禍",
+    "grade": 8,
+    "freq": 2010
+  },
+  {
+    "char": "稼",
+    "grade": 8,
+    "freq": 1264
+  },
+  {
+    "char": "箇",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "花",
+    "grade": 1,
+    "freq": 578
+  },
+  {
+    "char": "苛",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "荷",
+    "grade": 3,
+    "freq": 1230
+  },
+  {
+    "char": "華",
+    "grade": 8,
+    "freq": 1085
+  },
+  {
+    "char": "菓",
+    "grade": 8,
+    "freq": 1719
+  },
+  {
+    "char": "課",
+    "grade": 4,
+    "freq": 455
+  },
+  {
+    "char": "貨",
+    "grade": 4,
+    "freq": 822
+  },
+  {
+    "char": "過",
+    "grade": 5,
+    "freq": 285
+  },
+  {
+    "char": "蚊",
+    "grade": 8,
+    "freq": 2121
+  },
+  {
+    "char": "我",
+    "grade": 6,
+    "freq": 829
+  },
+  {
+    "char": "牙",
+    "grade": 8,
+    "freq": 2067
+  },
+  {
+    "char": "画",
+    "grade": 2,
+    "freq": 199
+  },
+  {
+    "char": "芽",
+    "grade": 4,
+    "freq": 1691
+  },
+  {
+    "char": "賀",
+    "grade": 4,
+    "freq": 1056
+  },
+  {
+    "char": "雅",
+    "grade": 8,
+    "freq": 1192
+  },
+  {
+    "char": "餓",
+    "grade": 8,
+    "freq": 1754
+  },
+  {
+    "char": "介",
+    "grade": 8,
+    "freq": 617
+  },
+  {
+    "char": "会",
+    "grade": 2,
+    "freq": 4
+  },
+  {
+    "char": "解",
+    "grade": 5,
+    "freq": 176
+  },
+  {
+    "char": "回",
+    "grade": 2,
+    "freq": 50
+  },
+  {
+    "char": "塊",
+    "grade": 8,
+    "freq": 1800
+  },
+  {
+    "char": "壊",
+    "grade": 8,
+    "freq": 727
+  },
+  {
+    "char": "快",
+    "grade": 5,
+    "freq": 1074
+  },
+  {
+    "char": "怪",
+    "grade": 8,
+    "freq": 1634
+  },
+  {
+    "char": "悔",
+    "grade": 8,
+    "freq": 1460
+  },
+  {
+    "char": "懐",
+    "grade": 8,
+    "freq": 1493
+  },
+  {
+    "char": "戒",
+    "grade": 8,
+    "freq": 1062
+  },
+  {
+    "char": "拐",
+    "grade": 8,
+    "freq": 1498
+  },
+  {
+    "char": "改",
+    "grade": 4,
+    "freq": 147
+  },
+  {
+    "char": "械",
+    "grade": 4,
+    "freq": 1321
+  },
+  {
+    "char": "海",
+    "grade": 2,
+    "freq": 200
+  },
+  {
+    "char": "灰",
+    "grade": 6,
+    "freq": 1717
+  },
+  {
+    "char": "界",
+    "grade": 3,
+    "freq": 158
+  },
+  {
+    "char": "皆",
+    "grade": 8,
+    "freq": 1267
+  },
+  {
+    "char": "絵",
+    "grade": 2,
+    "freq": 895
+  },
+  {
+    "char": "開",
+    "grade": 3,
+    "freq": 59
+  },
+  {
+    "char": "階",
+    "grade": 3,
+    "freq": 513
+  },
+  {
+    "char": "貝",
+    "grade": 1,
+    "freq": 1787
+  },
+  {
+    "char": "劾",
+    "grade": 8,
+    "freq": 2085
+  },
+  {
+    "char": "外",
+    "grade": 2,
+    "freq": 81
+  },
+  {
+    "char": "害",
+    "grade": 4,
+    "freq": 358
+  },
+  {
+    "char": "崖",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "慨",
+    "grade": 8,
+    "freq": 1875
+  },
+  {
+    "char": "概",
+    "grade": 8,
+    "freq": 1335
+  },
+  {
+    "char": "涯",
+    "grade": 8,
+    "freq": 1525
+  },
+  {
+    "char": "蓋",
+    "grade": 8,
+    "freq": 2388
+  },
+  {
+    "char": "街",
+    "grade": 4,
+    "freq": 891
+  },
+  {
+    "char": "該",
+    "grade": 8,
+    "freq": 1648
+  },
+  {
+    "char": "骸",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "垣",
+    "grade": 8,
+    "freq": 1539
+  },
+  {
+    "char": "柿",
+    "grade": 8,
+    "freq": 1745
+  },
+  {
+    "char": "嚇",
+    "grade": 8,
+    "freq": 2141
+  },
+  {
+    "char": "各",
+    "grade": 4,
+    "freq": 243
+  },
+  {
+    "char": "拡",
+    "grade": 6,
+    "freq": 611
+  },
+  {
+    "char": "格",
+    "grade": 5,
+    "freq": 281
+  },
+  {
+    "char": "核",
+    "grade": 8,
+    "freq": 475
+  },
+  {
+    "char": "殻",
+    "grade": 8,
+    "freq": 1892
+  },
+  {
+    "char": "獲",
+    "grade": 8,
+    "freq": 964
+  },
+  {
+    "char": "確",
+    "grade": 5,
+    "freq": 252
+  },
+  {
+    "char": "穫",
+    "grade": 8,
+    "freq": 1642
+  },
+  {
+    "char": "覚",
+    "grade": 4,
+    "freq": 710
+  },
+  {
+    "char": "角",
+    "grade": 2,
+    "freq": 805
+  },
+  {
+    "char": "較",
+    "grade": 8,
+    "freq": 1172
+  },
+  {
+    "char": "郭",
+    "grade": 8,
+    "freq": 1670
+  },
+  {
+    "char": "閣",
+    "grade": 6,
+    "freq": 444
+  },
+  {
+    "char": "隔",
+    "grade": 8,
+    "freq": 1382
+  },
+  {
+    "char": "革",
+    "grade": 6,
+    "freq": 249
+  },
+  {
+    "char": "学",
+    "grade": 1,
+    "freq": 63
+  },
+  {
+    "char": "岳",
+    "grade": 8,
+    "freq": 1334
+  },
+  {
+    "char": "楽",
+    "grade": 2,
+    "freq": 373
+  },
+  {
+    "char": "額",
+    "grade": 5,
+    "freq": 407
+  },
+  {
+    "char": "顎",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "掛",
+    "grade": 8,
+    "freq": 1027
+  },
+  {
+    "char": "潟",
+    "grade": 4,
+    "freq": 1204
+  },
+  {
+    "char": "割",
+    "grade": 6,
+    "freq": 318
+  },
+  {
+    "char": "喝",
+    "grade": 8,
+    "freq": 1858
+  },
+  {
+    "char": "括",
+    "grade": 8,
+    "freq": 1026
+  },
+  {
+    "char": "活",
+    "grade": 2,
+    "freq": 171
+  },
+  {
+    "char": "渇",
+    "grade": 8,
+    "freq": 1944
+  },
+  {
+    "char": "滑",
+    "grade": 8,
+    "freq": 1238
+  },
+  {
+    "char": "葛",
+    "grade": 8,
+    "freq": 1547
+  },
+  {
+    "char": "褐",
+    "grade": 8,
+    "freq": 2186
+  },
+  {
+    "char": "轄",
+    "grade": 8,
+    "freq": 1771
+  },
+  {
+    "char": "且",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "株",
+    "grade": 6,
+    "freq": 432
+  },
+  {
+    "char": "釜",
+    "grade": 8,
+    "freq": 1761
+  },
+  {
+    "char": "鎌",
+    "grade": 8,
+    "freq": 1587
+  },
+  {
+    "char": "刈",
+    "grade": 8,
+    "freq": 1738
+  },
+  {
+    "char": "瓦",
+    "grade": 8,
+    "freq": 1850
+  },
+  {
+    "char": "乾",
+    "grade": 8,
+    "freq": 1453
+  },
+  {
+    "char": "冠",
+    "grade": 8,
+    "freq": 1503
+  },
+  {
+    "char": "寒",
+    "grade": 3,
+    "freq": 1456
+  },
+  {
+    "char": "刊",
+    "grade": 5,
+    "freq": 855
+  },
+  {
+    "char": "勘",
+    "grade": 8,
+    "freq": 1494
+  },
+  {
+    "char": "勧",
+    "grade": 8,
+    "freq": 1068
+  },
+  {
+    "char": "巻",
+    "grade": 6,
+    "freq": 944
+  },
+  {
+    "char": "喚",
+    "grade": 8,
+    "freq": 1120
+  },
+  {
+    "char": "堪",
+    "grade": 8,
+    "freq": 1953
+  },
+  {
+    "char": "完",
+    "grade": 4,
+    "freq": 595
+  },
+  {
+    "char": "官",
+    "grade": 4,
+    "freq": 230
+  },
+  {
+    "char": "寛",
+    "grade": 8,
+    "freq": 1377
+  },
+  {
+    "char": "干",
+    "grade": 6,
+    "freq": 1349
+  },
+  {
+    "char": "幹",
+    "grade": 5,
+    "freq": 364
+  },
+  {
+    "char": "患",
+    "grade": 8,
+    "freq": 796
+  },
+  {
+    "char": "感",
+    "grade": 3,
+    "freq": 233
+  },
+  {
+    "char": "慣",
+    "grade": 5,
+    "freq": 1177
+  },
+  {
+    "char": "憾",
+    "grade": 8,
+    "freq": 1682
+  },
+  {
+    "char": "換",
+    "grade": 8,
+    "freq": 687
+  },
+  {
+    "char": "敢",
+    "grade": 8,
+    "freq": 1859
+  },
+  {
+    "char": "棺",
+    "grade": 8,
+    "freq": 2161
+  },
+  {
+    "char": "款",
+    "grade": 8,
+    "freq": 1854
+  },
+  {
+    "char": "歓",
+    "grade": 8,
+    "freq": 1065
+  },
+  {
+    "char": "汗",
+    "grade": 8,
+    "freq": 1502
+  },
+  {
+    "char": "漢",
+    "grade": 3,
+    "freq": 1487
+  },
+  {
+    "char": "環",
+    "grade": 8,
+    "freq": 409
+  },
+  {
+    "char": "甘",
+    "grade": 8,
+    "freq": 1248
+  },
+  {
+    "char": "監",
+    "grade": 8,
+    "freq": 408
+  },
+  {
+    "char": "看",
+    "grade": 6,
+    "freq": 1060
+  },
+  {
+    "char": "管",
+    "grade": 4,
+    "freq": 517
+  },
+  {
+    "char": "簡",
+    "grade": 6,
+    "freq": 983
+  },
+  {
+    "char": "緩",
+    "grade": 8,
+    "freq": 933
+  },
+  {
+    "char": "缶",
+    "grade": 8,
+    "freq": 1543
+  },
+  {
+    "char": "肝",
+    "grade": 8,
+    "freq": 1118
+  },
+  {
+    "char": "艦",
+    "grade": 8,
+    "freq": 1363
+  },
+  {
+    "char": "観",
+    "grade": 4,
+    "freq": 476
+  },
+  {
+    "char": "貫",
+    "grade": 8,
+    "freq": 1156
+  },
+  {
+    "char": "還",
+    "grade": 8,
+    "freq": 910
+  },
+  {
+    "char": "鑑",
+    "grade": 8,
+    "freq": 1391
+  },
+  {
+    "char": "間",
+    "grade": 2,
+    "freq": 33
+  },
+  {
+    "char": "閑",
+    "grade": 8,
+    "freq": 1994
+  },
+  {
+    "char": "関",
+    "grade": 4,
+    "freq": 70
+  },
+  {
+    "char": "陥",
+    "grade": 8,
+    "freq": 1154
+  },
+  {
+    "char": "韓",
+    "grade": 8,
+    "freq": 445
+  },
+  {
+    "char": "館",
+    "grade": 3,
+    "freq": 613
+  },
+  {
+    "char": "丸",
+    "grade": 2,
+    "freq": 542
+  },
+  {
+    "char": "含",
+    "grade": 8,
+    "freq": 466
+  },
+  {
+    "char": "岸",
+    "grade": 3,
+    "freq": 556
+  },
+  {
+    "char": "玩",
+    "grade": 8,
+    "freq": 2216
+  },
+  {
+    "char": "眼",
+    "grade": 5,
+    "freq": 1527
+  },
+  {
+    "char": "岩",
+    "grade": 2,
+    "freq": 787
+  },
+  {
+    "char": "頑",
+    "grade": 8,
+    "freq": 1247
+  },
+  {
+    "char": "顔",
+    "grade": 2,
+    "freq": 676
+  },
+  {
+    "char": "願",
+    "grade": 4,
+    "freq": 894
+  },
+  {
+    "char": "企",
+    "grade": 8,
+    "freq": 278
+  },
+  {
+    "char": "伎",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "危",
+    "grade": 6,
+    "freq": 606
+  },
+  {
+    "char": "喜",
+    "grade": 5,
+    "freq": 769
+  },
+  {
+    "char": "器",
+    "grade": 4,
+    "freq": 525
+  },
+  {
+    "char": "基",
+    "grade": 5,
+    "freq": 241
+  },
+  {
+    "char": "奇",
+    "grade": 8,
+    "freq": 1367
+  },
+  {
+    "char": "寄",
+    "grade": 5,
+    "freq": 673
+  },
+  {
+    "char": "岐",
+    "grade": 4,
+    "freq": 1428
+  },
+  {
+    "char": "希",
+    "grade": 4,
+    "freq": 896
+  },
+  {
+    "char": "幾",
+    "grade": 8,
+    "freq": 1725
+  },
+  {
+    "char": "忌",
+    "grade": 8,
+    "freq": 1882
+  },
+  {
+    "char": "揮",
+    "grade": 6,
+    "freq": 946
+  },
+  {
+    "char": "机",
+    "grade": 6,
+    "freq": 1671
+  },
+  {
+    "char": "旗",
+    "grade": 4,
+    "freq": 1190
+  },
+  {
+    "char": "既",
+    "grade": 8,
+    "freq": 1081
+  },
+  {
+    "char": "期",
+    "grade": 3,
+    "freq": 117
+  },
+  {
+    "char": "棋",
+    "grade": 8,
+    "freq": 1311
+  },
+  {
+    "char": "棄",
+    "grade": 8,
+    "freq": 901
+  },
+  {
+    "char": "機",
+    "grade": 4,
+    "freq": 127
+  },
+  {
+    "char": "帰",
+    "grade": 2,
+    "freq": 504
+  },
+  {
+    "char": "気",
+    "grade": 1,
+    "freq": 113
+  },
+  {
+    "char": "汽",
+    "grade": 2,
+    "freq": 2020
+  },
+  {
+    "char": "畿",
+    "grade": 8,
+    "freq": 1683
+  },
+  {
+    "char": "祈",
+    "grade": 8,
+    "freq": 1462
+  },
+  {
+    "char": "季",
+    "grade": 4,
+    "freq": 842
+  },
+  {
+    "char": "紀",
+    "grade": 5,
+    "freq": 780
+  },
+  {
+    "char": "規",
+    "grade": 5,
+    "freq": 349
+  },
+  {
+    "char": "記",
+    "grade": 2,
+    "freq": 149
+  },
+  {
+    "char": "貴",
+    "grade": 6,
+    "freq": 970
+  },
+  {
+    "char": "起",
+    "grade": 3,
+    "freq": 374
+  },
+  {
+    "char": "軌",
+    "grade": 8,
+    "freq": 1480
+  },
+  {
+    "char": "輝",
+    "grade": 8,
+    "freq": 1259
+  },
+  {
+    "char": "飢",
+    "grade": 8,
+    "freq": 1659
+  },
+  {
+    "char": "騎",
+    "grade": 8,
+    "freq": 1696
+  },
+  {
+    "char": "鬼",
+    "grade": 8,
+    "freq": 1557
+  },
+  {
+    "char": "亀",
+    "grade": 8,
+    "freq": 1353
+  },
+  {
+    "char": "偽",
+    "grade": 8,
+    "freq": 1171
+  },
+  {
+    "char": "儀",
+    "grade": 8,
+    "freq": 739
+  },
+  {
+    "char": "宜",
+    "grade": 8,
+    "freq": 1766
+  },
+  {
+    "char": "戯",
+    "grade": 8,
+    "freq": 1880
+  },
+  {
+    "char": "技",
+    "grade": 5,
+    "freq": 434
+  },
+  {
+    "char": "擬",
+    "grade": 8,
+    "freq": 1990
+  },
+  {
+    "char": "欺",
+    "grade": 8,
+    "freq": 1541
+  },
+  {
+    "char": "犠",
+    "grade": 8,
+    "freq": 1189
+  },
+  {
+    "char": "疑",
+    "grade": 6,
+    "freq": 283
+  },
+  {
+    "char": "義",
+    "grade": 5,
+    "freq": 415
+  },
+  {
+    "char": "議",
+    "grade": 4,
+    "freq": 25
+  },
+  {
+    "char": "菊",
+    "grade": 8,
+    "freq": 1287
+  },
+  {
+    "char": "吉",
+    "grade": 8,
+    "freq": 711
+  },
+  {
+    "char": "喫",
+    "grade": 8,
+    "freq": 1347
+  },
+  {
+    "char": "詰",
+    "grade": 8,
+    "freq": 1020
+  },
+  {
+    "char": "却",
+    "grade": 8,
+    "freq": 959
+  },
+  {
+    "char": "客",
+    "grade": 3,
+    "freq": 557
+  },
+  {
+    "char": "脚",
+    "grade": 8,
+    "freq": 1228
+  },
+  {
+    "char": "虐",
+    "grade": 8,
+    "freq": 1464
+  },
+  {
+    "char": "逆",
+    "grade": 5,
+    "freq": 683
+  },
+  {
+    "char": "丘",
+    "grade": 8,
+    "freq": 1405
+  },
+  {
+    "char": "久",
+    "grade": 5,
+    "freq": 688
+  },
+  {
+    "char": "休",
+    "grade": 1,
+    "freq": 642
+  },
+  {
+    "char": "及",
+    "grade": 8,
+    "freq": 544
+  },
+  {
+    "char": "吸",
+    "grade": 6,
+    "freq": 1054
+  },
+  {
+    "char": "宮",
+    "grade": 3,
+    "freq": 367
+  },
+  {
+    "char": "弓",
+    "grade": 2,
+    "freq": 1802
+  },
+  {
+    "char": "急",
+    "grade": 3,
+    "freq": 309
+  },
+  {
+    "char": "救",
+    "grade": 5,
+    "freq": 799
+  },
+  {
+    "char": "朽",
+    "grade": 8,
+    "freq": 1891
+  },
+  {
+    "char": "求",
+    "grade": 4,
+    "freq": 220
+  },
+  {
+    "char": "泣",
+    "grade": 4,
+    "freq": 1380
+  },
+  {
+    "char": "球",
+    "grade": 3,
+    "freq": 302
+  },
+  {
+    "char": "究",
+    "grade": 3,
+    "freq": 368
+  },
+  {
+    "char": "窮",
+    "grade": 8,
+    "freq": 1756
+  },
+  {
+    "char": "級",
+    "grade": 3,
+    "freq": 785
+  },
+  {
+    "char": "糾",
+    "grade": 8,
+    "freq": 1820
+  },
+  {
+    "char": "給",
+    "grade": 4,
+    "freq": 615
+  },
+  {
+    "char": "旧",
+    "grade": 5,
+    "freq": 549
+  },
+  {
+    "char": "牛",
+    "grade": 2,
+    "freq": 1202
+  },
+  {
+    "char": "去",
+    "grade": 3,
+    "freq": 440
+  },
+  {
+    "char": "居",
+    "grade": 5,
+    "freq": 836
+  },
+  {
+    "char": "巨",
+    "grade": 8,
+    "freq": 892
+  },
+  {
+    "char": "拒",
+    "grade": 8,
+    "freq": 863
+  },
+  {
+    "char": "拠",
+    "grade": 8,
+    "freq": 858
+  },
+  {
+    "char": "挙",
+    "grade": 4,
+    "freq": 257
+  },
+  {
+    "char": "虚",
+    "grade": 8,
+    "freq": 1454
+  },
+  {
+    "char": "許",
+    "grade": 5,
+    "freq": 720
+  },
+  {
+    "char": "距",
+    "grade": 8,
+    "freq": 1191
+  },
+  {
+    "char": "漁",
+    "grade": 4,
+    "freq": 1094
+  },
+  {
+    "char": "魚",
+    "grade": 2,
+    "freq": 1208
+  },
+  {
+    "char": "享",
+    "grade": 8,
+    "freq": 1893
+  },
+  {
+    "char": "京",
+    "grade": 2,
+    "freq": 74
+  },
+  {
+    "char": "供",
+    "grade": 6,
+    "freq": 313
+  },
+  {
+    "char": "競",
+    "grade": 4,
+    "freq": 610
+  },
+  {
+    "char": "共",
+    "grade": 4,
+    "freq": 174
+  },
+  {
+    "char": "凶",
+    "grade": 8,
+    "freq": 1673
+  },
+  {
+    "char": "協",
+    "grade": 4,
+    "freq": 121
+  },
+  {
+    "char": "叫",
+    "grade": 8,
+    "freq": 1426
+  },
+  {
+    "char": "境",
+    "grade": 5,
+    "freq": 346
+  },
+  {
+    "char": "峡",
+    "grade": 8,
+    "freq": 1833
+  },
+  {
+    "char": "強",
+    "grade": 2,
+    "freq": 112
+  },
+  {
+    "char": "恐",
+    "grade": 8,
+    "freq": 878
+  },
+  {
+    "char": "恭",
+    "grade": 8,
+    "freq": 1737
+  },
+  {
+    "char": "挟",
+    "grade": 8,
+    "freq": 1870
+  },
+  {
+    "char": "教",
+    "grade": 2,
+    "freq": 166
+  },
+  {
+    "char": "橋",
+    "grade": 3,
+    "freq": 553
+  },
+  {
+    "char": "況",
+    "grade": 8,
+    "freq": 490
+  },
+  {
+    "char": "狂",
+    "grade": 8,
+    "freq": 1425
+  },
+  {
+    "char": "狭",
+    "grade": 8,
+    "freq": 1346
+  },
+  {
+    "char": "矯",
+    "grade": 8,
+    "freq": 2105
+  },
+  {
+    "char": "胸",
+    "grade": 6,
+    "freq": 1144
+  },
+  {
+    "char": "脅",
+    "grade": 8,
+    "freq": 1183
+  },
+  {
+    "char": "興",
+    "grade": 5,
+    "freq": 734
+  },
+  {
+    "char": "郷",
+    "grade": 6,
+    "freq": 1077
+  },
+  {
+    "char": "鏡",
+    "grade": 4,
+    "freq": 1506
+  },
+  {
+    "char": "響",
+    "grade": 8,
+    "freq": 502
+  },
+  {
+    "char": "驚",
+    "grade": 8,
+    "freq": 1141
+  },
+  {
+    "char": "仰",
+    "grade": 8,
+    "freq": 1573
+  },
+  {
+    "char": "凝",
+    "grade": 8,
+    "freq": 1712
+  },
+  {
+    "char": "暁",
+    "grade": 8,
+    "freq": 1924
+  },
+  {
+    "char": "業",
+    "grade": 3,
+    "freq": 43
+  },
+  {
+    "char": "局",
+    "grade": 3,
+    "freq": 286
+  },
+  {
+    "char": "曲",
+    "grade": 3,
+    "freq": 810
+  },
+  {
+    "char": "極",
+    "grade": 4,
+    "freq": 460
+  },
+  {
+    "char": "玉",
+    "grade": 1,
+    "freq": 737
+  },
+  {
+    "char": "僅",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "勤",
+    "grade": 6,
+    "freq": 830
+  },
+  {
+    "char": "均",
+    "grade": 5,
+    "freq": 715
+  },
+  {
+    "char": "巾",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "錦",
+    "grade": 8,
+    "freq": 1440
+  },
+  {
+    "char": "斤",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "琴",
+    "grade": 8,
+    "freq": 1591
+  },
+  {
+    "char": "禁",
+    "grade": 5,
+    "freq": 681
+  },
+  {
+    "char": "筋",
+    "grade": 6,
+    "freq": 744
+  },
+  {
+    "char": "緊",
+    "grade": 8,
+    "freq": 677
+  },
+  {
+    "char": "菌",
+    "grade": 8,
+    "freq": 1586
+  },
+  {
+    "char": "襟",
+    "grade": 8,
+    "freq": 2030
+  },
+  {
+    "char": "謹",
+    "grade": 8,
+    "freq": 2068
+  },
+  {
+    "char": "近",
+    "grade": 2,
+    "freq": 194
+  },
+  {
+    "char": "金",
+    "grade": 1,
+    "freq": 53
+  },
+  {
+    "char": "吟",
+    "grade": 8,
+    "freq": 1956
+  },
+  {
+    "char": "銀",
+    "grade": 3,
+    "freq": 395
+  },
+  {
+    "char": "九",
+    "grade": 1,
+    "freq": 55
+  },
+  {
+    "char": "句",
+    "grade": 5,
+    "freq": 1244
+  },
+  {
+    "char": "区",
+    "grade": 3,
+    "freq": 137
+  },
+  {
+    "char": "苦",
+    "grade": 3,
+    "freq": 623
+  },
+  {
+    "char": "駆",
+    "grade": 8,
+    "freq": 1033
+  },
+  {
+    "char": "駒",
+    "grade": 8,
+    "freq": 1452
+  },
+  {
+    "char": "具",
+    "grade": 3,
+    "freq": 629
+  },
+  {
+    "char": "愚",
+    "grade": 8,
+    "freq": 1551
+  },
+  {
+    "char": "虞",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "空",
+    "grade": 1,
+    "freq": 304
+  },
+  {
+    "char": "偶",
+    "grade": 8,
+    "freq": 1602
+  },
+  {
+    "char": "遇",
+    "grade": 8,
+    "freq": 1343
+  },
+  {
+    "char": "隅",
+    "grade": 8,
+    "freq": 1601
+  },
+  {
+    "char": "串",
+    "grade": 8,
+    "freq": 2139
+  },
+  {
+    "char": "屈",
+    "grade": 8,
+    "freq": 1434
+  },
+  {
+    "char": "掘",
+    "grade": 8,
+    "freq": 1257
+  },
+  {
+    "char": "窟",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "靴",
+    "grade": 8,
+    "freq": 1561
+  },
+  {
+    "char": "熊",
+    "grade": 4,
+    "freq": 1105
+  },
+  {
+    "char": "繰",
+    "grade": 8,
+    "freq": 872
+  },
+  {
+    "char": "桑",
+    "grade": 8,
+    "freq": 1650
+  },
+  {
+    "char": "勲",
+    "grade": 8,
+    "freq": 1513
+  },
+  {
+    "char": "君",
+    "grade": 3,
+    "freq": 947
+  },
+  {
+    "char": "薫",
+    "grade": 8,
+    "freq": 1849
+  },
+  {
+    "char": "訓",
+    "grade": 4,
+    "freq": 1134
+  },
+  {
+    "char": "群",
+    "grade": 4,
+    "freq": 1012
+  },
+  {
+    "char": "軍",
+    "grade": 4,
+    "freq": 189
+  },
+  {
+    "char": "郡",
+    "grade": 4,
+    "freq": 965
+  },
+  {
+    "char": "係",
+    "grade": 3,
+    "freq": 232
+  },
+  {
+    "char": "傾",
+    "grade": 8,
+    "freq": 938
+  },
+  {
+    "char": "刑",
+    "grade": 8,
+    "freq": 864
+  },
+  {
+    "char": "兄",
+    "grade": 2,
+    "freq": 1219
+  },
+  {
+    "char": "啓",
+    "grade": 8,
+    "freq": 1403
+  },
+  {
+    "char": "型",
+    "grade": 5,
+    "freq": 482
+  },
+  {
+    "char": "契",
+    "grade": 8,
+    "freq": 898
+  },
+  {
+    "char": "形",
+    "grade": 2,
+    "freq": 418
+  },
+  {
+    "char": "径",
+    "grade": 4,
+    "freq": 1435
+  },
+  {
+    "char": "恵",
+    "grade": 8,
+    "freq": 925
+  },
+  {
+    "char": "慶",
+    "grade": 8,
+    "freq": 1300
+  },
+  {
+    "char": "憩",
+    "grade": 8,
+    "freq": 1731
+  },
+  {
+    "char": "掲",
+    "grade": 8,
+    "freq": 899
+  },
+  {
+    "char": "携",
+    "grade": 8,
+    "freq": 1017
+  },
+  {
+    "char": "敬",
+    "grade": 6,
+    "freq": 1078
+  },
+  {
+    "char": "景",
+    "grade": 4,
+    "freq": 419
+  },
+  {
+    "char": "渓",
+    "grade": 8,
+    "freq": 2063
+  },
+  {
+    "char": "稽",
+    "grade": 8,
+    "freq": 2372
+  },
+  {
+    "char": "系",
+    "grade": 6,
+    "freq": 567
+  },
+  {
+    "char": "経",
+    "grade": 5,
+    "freq": 79
+  },
+  {
+    "char": "継",
+    "grade": 8,
+    "freq": 743
+  },
+  {
+    "char": "茎",
+    "grade": 8,
+    "freq": 2013
+  },
+  {
+    "char": "蛍",
+    "grade": 8,
+    "freq": 2031
+  },
+  {
+    "char": "計",
+    "grade": 2,
+    "freq": 228
+  },
+  {
+    "char": "詣",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "警",
+    "grade": 6,
+    "freq": 366
+  },
+  {
+    "char": "軽",
+    "grade": 3,
+    "freq": 790
+  },
+  {
+    "char": "鶏",
+    "grade": 8,
+    "freq": 1901
+  },
+  {
+    "char": "芸",
+    "grade": 4,
+    "freq": 719
+  },
+  {
+    "char": "迎",
+    "grade": 8,
+    "freq": 625
+  },
+  {
+    "char": "鯨",
+    "grade": 8,
+    "freq": 1486
+  },
+  {
+    "char": "劇",
+    "grade": 6,
+    "freq": 662
+  },
+  {
+    "char": "撃",
+    "grade": 8,
+    "freq": 473
+  },
+  {
+    "char": "激",
+    "grade": 6,
+    "freq": 560
+  },
+  {
+    "char": "隙",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "桁",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "傑",
+    "grade": 8,
+    "freq": 1926
+  },
+  {
+    "char": "欠",
+    "grade": 4,
+    "freq": 860
+  },
+  {
+    "char": "決",
+    "grade": 3,
+    "freq": 71
+  },
+  {
+    "char": "潔",
+    "grade": 5,
+    "freq": 1595
+  },
+  {
+    "char": "穴",
+    "grade": 6,
+    "freq": 1366
+  },
+  {
+    "char": "結",
+    "grade": 4,
+    "freq": 162
+  },
+  {
+    "char": "血",
+    "grade": 3,
+    "freq": 832
+  },
+  {
+    "char": "月",
+    "grade": 1,
+    "freq": 23
+  },
+  {
+    "char": "件",
+    "grade": 5,
+    "freq": 212
+  },
+  {
+    "char": "倹",
+    "grade": 8,
+    "freq": 2479
+  },
+  {
+    "char": "健",
+    "grade": 4,
+    "freq": 572
+  },
+  {
+    "char": "兼",
+    "grade": 8,
+    "freq": 1164
+  },
+  {
+    "char": "券",
+    "grade": 6,
+    "freq": 583
+  },
+  {
+    "char": "剣",
+    "grade": 8,
+    "freq": 1305
+  },
+  {
+    "char": "圏",
+    "grade": 8,
+    "freq": 1216
+  },
+  {
+    "char": "堅",
+    "grade": 8,
+    "freq": 1049
+  },
+  {
+    "char": "嫌",
+    "grade": 8,
+    "freq": 1207
+  },
+  {
+    "char": "建",
+    "grade": 4,
+    "freq": 300
+  },
+  {
+    "char": "憲",
+    "grade": 6,
+    "freq": 551
+  },
+  {
+    "char": "懸",
+    "grade": 8,
+    "freq": 889
+  },
+  {
+    "char": "拳",
+    "grade": 8,
+    "freq": 1935
+  },
+  {
+    "char": "検",
+    "grade": 5,
+    "freq": 290
+  },
+  {
+    "char": "権",
+    "grade": 6,
+    "freq": 156
+  },
+  {
+    "char": "犬",
+    "grade": 1,
+    "freq": 1326
+  },
+  {
+    "char": "献",
+    "grade": 8,
+    "freq": 637
+  },
+  {
+    "char": "研",
+    "grade": 3,
+    "freq": 336
+  },
+  {
+    "char": "絹",
+    "grade": 6,
+    "freq": 1916
+  },
+  {
+    "char": "県",
+    "grade": 3,
+    "freq": 140
+  },
+  {
+    "char": "肩",
+    "grade": 8,
+    "freq": 1215
+  },
+  {
+    "char": "見",
+    "grade": 1,
+    "freq": 22
+  },
+  {
+    "char": "謙",
+    "grade": 8,
+    "freq": 1582
+  },
+  {
+    "char": "賢",
+    "grade": 8,
+    "freq": 1159
+  },
+  {
+    "char": "軒",
+    "grade": 8,
+    "freq": 1416
+  },
+  {
+    "char": "遣",
+    "grade": 8,
+    "freq": 664
+  },
+  {
+    "char": "鍵",
+    "grade": 8,
+    "freq": 2029
+  },
+  {
+    "char": "険",
+    "grade": 5,
+    "freq": 707
+  },
+  {
+    "char": "顕",
+    "grade": 8,
+    "freq": 1536
+  },
+  {
+    "char": "験",
+    "grade": 4,
+    "freq": 410
+  },
+  {
+    "char": "元",
+    "grade": 2,
+    "freq": 192
+  },
+  {
+    "char": "原",
+    "grade": 2,
+    "freq": 172
+  },
+  {
+    "char": "厳",
+    "grade": 6,
+    "freq": 638
+  },
+  {
+    "char": "幻",
+    "grade": 8,
+    "freq": 1564
+  },
+  {
+    "char": "弦",
+    "grade": 8,
+    "freq": 1773
+  },
+  {
+    "char": "減",
+    "grade": 5,
+    "freq": 261
+  },
+  {
+    "char": "源",
+    "grade": 6,
+    "freq": 738
+  },
+  {
+    "char": "玄",
+    "grade": 8,
+    "freq": 1409
+  },
+  {
+    "char": "現",
+    "grade": 5,
+    "freq": 85
+  },
+  {
+    "char": "舷",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "言",
+    "grade": 2,
+    "freq": 83
+  },
+  {
+    "char": "限",
+    "grade": 5,
+    "freq": 405
+  },
+  {
+    "char": "個",
+    "grade": 5,
+    "freq": 451
+  },
+  {
+    "char": "古",
+    "grade": 2,
+    "freq": 509
+  },
+  {
+    "char": "呼",
+    "grade": 6,
+    "freq": 498
+  },
+  {
+    "char": "固",
+    "grade": 4,
+    "freq": 750
+  },
+  {
+    "char": "孤",
+    "grade": 8,
+    "freq": 1239
+  },
+  {
+    "char": "己",
+    "grade": 6,
+    "freq": 1098
+  },
+  {
+    "char": "庫",
+    "grade": 3,
+    "freq": 852
+  },
+  {
+    "char": "弧",
+    "grade": 8,
+    "freq": 2371
+  },
+  {
+    "char": "戸",
+    "grade": 2,
+    "freq": 575
+  },
+  {
+    "char": "故",
+    "grade": 5,
+    "freq": 612
+  },
+  {
+    "char": "枯",
+    "grade": 8,
+    "freq": 1749
+  },
+  {
+    "char": "湖",
+    "grade": 3,
+    "freq": 1344
+  },
+  {
+    "char": "股",
+    "grade": 8,
+    "freq": 2212
+  },
+  {
+    "char": "虎",
+    "grade": 8,
+    "freq": 1653
+  },
+  {
+    "char": "誇",
+    "grade": 8,
+    "freq": 1272
+  },
+  {
+    "char": "雇",
+    "grade": 8,
+    "freq": 975
+  },
+  {
+    "char": "顧",
+    "grade": 8,
+    "freq": 1058
+  },
+  {
+    "char": "鼓",
+    "grade": 8,
+    "freq": 1795
+  },
+  {
+    "char": "五",
+    "grade": 1,
+    "freq": 31
+  },
+  {
+    "char": "互",
+    "grade": 8,
+    "freq": 914
+  },
+  {
+    "char": "午",
+    "grade": 2,
+    "freq": 154
+  },
+  {
+    "char": "呉",
+    "grade": 8,
+    "freq": 1729
+  },
+  {
+    "char": "娯",
+    "grade": 8,
+    "freq": 1827
+  },
+  {
+    "char": "後",
+    "grade": 2,
+    "freq": 26
+  },
+  {
+    "char": "御",
+    "grade": 8,
+    "freq": 1087
+  },
+  {
+    "char": "悟",
+    "grade": 8,
+    "freq": 1411
+  },
+  {
+    "char": "碁",
+    "grade": 8,
+    "freq": 1609
+  },
+  {
+    "char": "語",
+    "grade": 2,
+    "freq": 301
+  },
+  {
+    "char": "誤",
+    "grade": 6,
+    "freq": 1150
+  },
+  {
+    "char": "護",
+    "grade": 5,
+    "freq": 351
+  },
+  {
+    "char": "乞",
+    "grade": 8,
+    "freq": 2478
+  },
+  {
+    "char": "交",
+    "grade": 2,
+    "freq": 178
+  },
+  {
+    "char": "侯",
+    "grade": 8,
+    "freq": 2363
+  },
+  {
+    "char": "候",
+    "grade": 4,
+    "freq": 510
+  },
+  {
+    "char": "光",
+    "grade": 2,
+    "freq": 527
+  },
+  {
+    "char": "公",
+    "grade": 2,
+    "freq": 118
+  },
+  {
+    "char": "功",
+    "grade": 4,
+    "freq": 857
+  },
+  {
+    "char": "効",
+    "grade": 5,
+    "freq": 538
+  },
+  {
+    "char": "勾",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "厚",
+    "grade": 5,
+    "freq": 768
+  },
+  {
+    "char": "口",
+    "grade": 1,
+    "freq": 284
+  },
+  {
+    "char": "向",
+    "grade": 3,
+    "freq": 182
+  },
+  {
+    "char": "后",
+    "grade": 6,
+    "freq": 1583
+  },
+  {
+    "char": "喉",
+    "grade": 8,
+    "freq": 2390
+  },
+  {
+    "char": "坑",
+    "grade": 8,
+    "freq": 2040
+  },
+  {
+    "char": "好",
+    "grade": 4,
+    "freq": 423
+  },
+  {
+    "char": "孔",
+    "grade": 8,
+    "freq": 2052
+  },
+  {
+    "char": "孝",
+    "grade": 6,
+    "freq": 1030
+  },
+  {
+    "char": "工",
+    "grade": 2,
+    "freq": 299
+  },
+  {
+    "char": "巧",
+    "grade": 8,
+    "freq": 1537
+  },
+  {
+    "char": "幸",
+    "grade": 3,
+    "freq": 786
+  },
+  {
+    "char": "広",
+    "grade": 2,
+    "freq": 263
+  },
+  {
+    "char": "康",
+    "grade": 4,
+    "freq": 760
+  },
+  {
+    "char": "恒",
+    "grade": 8,
+    "freq": 1314
+  },
+  {
+    "char": "慌",
+    "grade": 8,
+    "freq": 1826
+  },
+  {
+    "char": "抗",
+    "grade": 8,
+    "freq": 666
+  },
+  {
+    "char": "拘",
+    "grade": 8,
+    "freq": 1336
+  },
+  {
+    "char": "控",
+    "grade": 8,
+    "freq": 1000
+  },
+  {
+    "char": "攻",
+    "grade": 8,
+    "freq": 532
+  },
+  {
+    "char": "更",
+    "grade": 8,
+    "freq": 861
+  },
+  {
+    "char": "校",
+    "grade": 1,
+    "freq": 294
+  },
+  {
+    "char": "梗",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "構",
+    "grade": 5,
+    "freq": 316
+  },
+  {
+    "char": "江",
+    "grade": 8,
+    "freq": 704
+  },
+  {
+    "char": "洪",
+    "grade": 8,
+    "freq": 1778
+  },
+  {
+    "char": "港",
+    "grade": 3,
+    "freq": 495
+  },
+  {
+    "char": "溝",
+    "grade": 8,
+    "freq": 1736
+  },
+  {
+    "char": "甲",
+    "grade": 8,
+    "freq": 1073
+  },
+  {
+    "char": "皇",
+    "grade": 6,
+    "freq": 721
+  },
+  {
+    "char": "硬",
+    "grade": 8,
+    "freq": 1101
+  },
+  {
+    "char": "稿",
+    "grade": 8,
+    "freq": 1400
+  },
+  {
+    "char": "紅",
+    "grade": 6,
+    "freq": 1299
+  },
+  {
+    "char": "絞",
+    "grade": 8,
+    "freq": 1288
+  },
+  {
+    "char": "綱",
+    "grade": 8,
+    "freq": 1053
+  },
+  {
+    "char": "耕",
+    "grade": 5,
+    "freq": 1568
+  },
+  {
+    "char": "考",
+    "grade": 2,
+    "freq": 196
+  },
+  {
+    "char": "肯",
+    "grade": 8,
+    "freq": 1813
+  },
+  {
+    "char": "航",
+    "grade": 5,
+    "freq": 665
+  },
+  {
+    "char": "荒",
+    "grade": 8,
+    "freq": 1099
+  },
+  {
+    "char": "行",
+    "grade": 2,
+    "freq": 20
+  },
+  {
+    "char": "衡",
+    "grade": 8,
+    "freq": 1847
+  },
+  {
+    "char": "講",
+    "grade": 5,
+    "freq": 653
+  },
+  {
+    "char": "貢",
+    "grade": 8,
+    "freq": 956
+  },
+  {
+    "char": "購",
+    "grade": 8,
+    "freq": 945
+  },
+  {
+    "char": "郊",
+    "grade": 8,
+    "freq": 1304
+  },
+  {
+    "char": "酵",
+    "grade": 8,
+    "freq": 1862
+  },
+  {
+    "char": "鉱",
+    "grade": 5,
+    "freq": 1376
+  },
+  {
+    "char": "鋼",
+    "grade": 6,
+    "freq": 1246
+  },
+  {
+    "char": "降",
+    "grade": 6,
+    "freq": 596
+  },
+  {
+    "char": "項",
+    "grade": 8,
+    "freq": 884
+  },
+  {
+    "char": "香",
+    "grade": 4,
+    "freq": 859
+  },
+  {
+    "char": "高",
+    "grade": 2,
+    "freq": 65
+  },
+  {
+    "char": "剛",
+    "grade": 8,
+    "freq": 1576
+  },
+  {
+    "char": "号",
+    "grade": 3,
+    "freq": 585
+  },
+  {
+    "char": "合",
+    "grade": 2,
+    "freq": 41
+  },
+  {
+    "char": "拷",
+    "grade": 8,
+    "freq": 2057
+  },
+  {
+    "char": "豪",
+    "grade": 8,
+    "freq": 1104
+  },
+  {
+    "char": "克",
+    "grade": 8,
+    "freq": 1333
+  },
+  {
+    "char": "刻",
+    "grade": 6,
+    "freq": 866
+  },
+  {
+    "char": "告",
+    "grade": 5,
+    "freq": 188
+  },
+  {
+    "char": "国",
+    "grade": 2,
+    "freq": 3
+  },
+  {
+    "char": "穀",
+    "grade": 6,
+    "freq": 1744
+  },
+  {
+    "char": "酷",
+    "grade": 8,
+    "freq": 1596
+  },
+  {
+    "char": "黒",
+    "grade": 2,
+    "freq": 573
+  },
+  {
+    "char": "獄",
+    "grade": 8,
+    "freq": 1529
+  },
+  {
+    "char": "腰",
+    "grade": 8,
+    "freq": 1306
+  },
+  {
+    "char": "骨",
+    "grade": 6,
+    "freq": 936
+  },
+  {
+    "char": "込",
+    "grade": 8,
+    "freq": 675
+  },
+  {
+    "char": "頃",
+    "grade": 8,
+    "freq": 2015
+  },
+  {
+    "char": "今",
+    "grade": 2,
+    "freq": 49
+  },
+  {
+    "char": "困",
+    "grade": 6,
+    "freq": 843
+  },
+  {
+    "char": "墾",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "婚",
+    "grade": 8,
+    "freq": 767
+  },
+  {
+    "char": "恨",
+    "grade": 8,
+    "freq": 1877
+  },
+  {
+    "char": "懇",
+    "grade": 8,
+    "freq": 1135
+  },
+  {
+    "char": "昆",
+    "grade": 8,
+    "freq": 1688
+  },
+  {
+    "char": "根",
+    "grade": 3,
+    "freq": 620
+  },
+  {
+    "char": "混",
+    "grade": 5,
+    "freq": 824
+  },
+  {
+    "char": "痕",
+    "grade": 8,
+    "freq": 1958
+  },
+  {
+    "char": "紺",
+    "grade": 8,
+    "freq": 1825
+  },
+  {
+    "char": "魂",
+    "grade": 8,
+    "freq": 1748
+  },
+  {
+    "char": "佐",
+    "grade": 4,
+    "freq": 474
+  },
+  {
+    "char": "唆",
+    "grade": 8,
+    "freq": 1278
+  },
+  {
+    "char": "左",
+    "grade": 1,
+    "freq": 630
+  },
+  {
+    "char": "差",
+    "grade": 4,
+    "freq": 449
+  },
+  {
+    "char": "査",
+    "grade": 5,
+    "freq": 184
+  },
+  {
+    "char": "沙",
+    "grade": 8,
+    "freq": 1897
+  },
+  {
+    "char": "砂",
+    "grade": 6,
+    "freq": 1146
+  },
+  {
+    "char": "詐",
+    "grade": 8,
+    "freq": 1511
+  },
+  {
+    "char": "鎖",
+    "grade": 8,
+    "freq": 1250
+  },
+  {
+    "char": "座",
+    "grade": 6,
+    "freq": 588
+  },
+  {
+    "char": "挫",
+    "grade": 8,
+    "freq": 1869
+  },
+  {
+    "char": "債",
+    "grade": 8,
+    "freq": 728
+  },
+  {
+    "char": "催",
+    "grade": 8,
+    "freq": 536
+  },
+  {
+    "char": "再",
+    "grade": 5,
+    "freq": 275
+  },
+  {
+    "char": "最",
+    "grade": 4,
+    "freq": 82
+  },
+  {
+    "char": "塞",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "妻",
+    "grade": 5,
+    "freq": 691
+  },
+  {
+    "char": "宰",
+    "grade": 8,
+    "freq": 1597
+  },
+  {
+    "char": "彩",
+    "grade": 8,
+    "freq": 1251
+  },
+  {
+    "char": "才",
+    "grade": 2,
+    "freq": 1497
+  },
+  {
+    "char": "採",
+    "grade": 5,
+    "freq": 607
+  },
+  {
+    "char": "栽",
+    "grade": 8,
+    "freq": 1496
+  },
+  {
+    "char": "歳",
+    "grade": 8,
+    "freq": 269
+  },
+  {
+    "char": "済",
+    "grade": 6,
+    "freq": 168
+  },
+  {
+    "char": "災",
+    "grade": 5,
+    "freq": 976
+  },
+  {
+    "char": "采",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "砕",
+    "grade": 8,
+    "freq": 1579
+  },
+  {
+    "char": "祭",
+    "grade": 3,
+    "freq": 1124
+  },
+  {
+    "char": "斎",
+    "grade": 8,
+    "freq": 1155
+  },
+  {
+    "char": "細",
+    "grade": 2,
+    "freq": 537
+  },
+  {
+    "char": "菜",
+    "grade": 4,
+    "freq": 1327
+  },
+  {
+    "char": "裁",
+    "grade": 6,
+    "freq": 297
+  },
+  {
+    "char": "載",
+    "grade": 8,
+    "freq": 825
+  },
+  {
+    "char": "際",
+    "grade": 5,
+    "freq": 183
+  },
+  {
+    "char": "剤",
+    "grade": 8,
+    "freq": 1151
+  },
+  {
+    "char": "在",
+    "grade": 5,
+    "freq": 211
+  },
+  {
+    "char": "材",
+    "grade": 4,
+    "freq": 565
+  },
+  {
+    "char": "罪",
+    "grade": 5,
+    "freq": 732
+  },
+  {
+    "char": "財",
+    "grade": 5,
+    "freq": 494
+  },
+  {
+    "char": "坂",
+    "grade": 3,
+    "freq": 865
+  },
+  {
+    "char": "阪",
+    "grade": 4,
+    "freq": 503
+  },
+  {
+    "char": "咲",
+    "grade": 8,
+    "freq": 1534
+  },
+  {
+    "char": "崎",
+    "grade": 4,
+    "freq": 533
+  },
+  {
+    "char": "埼",
+    "grade": 4,
+    "freq": 971
+  },
+  {
+    "char": "作",
+    "grade": 2,
+    "freq": 103
+  },
+  {
+    "char": "削",
+    "grade": 8,
+    "freq": 814
+  },
+  {
+    "char": "搾",
+    "grade": 8,
+    "freq": 2046
+  },
+  {
+    "char": "昨",
+    "grade": 4,
+    "freq": 226
+  },
+  {
+    "char": "柵",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "策",
+    "grade": 6,
+    "freq": 209
+  },
+  {
+    "char": "索",
+    "grade": 8,
+    "freq": 1127
+  },
+  {
+    "char": "錯",
+    "grade": 8,
+    "freq": 1740
+  },
+  {
+    "char": "桜",
+    "grade": 5,
+    "freq": 1237
+  },
+  {
+    "char": "冊",
+    "grade": 6,
+    "freq": 1313
+  },
+  {
+    "char": "刷",
+    "grade": 4,
+    "freq": 1352
+  },
+  {
+    "char": "察",
+    "grade": 4,
+    "freq": 477
+  },
+  {
+    "char": "拶",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "撮",
+    "grade": 8,
+    "freq": 1023
+  },
+  {
+    "char": "擦",
+    "grade": 8,
+    "freq": 1485
+  },
+  {
+    "char": "札",
+    "grade": 4,
+    "freq": 921
+  },
+  {
+    "char": "殺",
+    "grade": 5,
+    "freq": 581
+  },
+  {
+    "char": "雑",
+    "grade": 5,
+    "freq": 839
+  },
+  {
+    "char": "皿",
+    "grade": 3,
+    "freq": 1812
+  },
+  {
+    "char": "三",
+    "grade": 1,
+    "freq": 14
+  },
+  {
+    "char": "傘",
+    "grade": 8,
+    "freq": 1694
+  },
+  {
+    "char": "参",
+    "grade": 4,
+    "freq": 201
+  },
+  {
+    "char": "山",
+    "grade": 1,
+    "freq": 131
+  },
+  {
+    "char": "惨",
+    "grade": 8,
+    "freq": 1463
+  },
+  {
+    "char": "散",
+    "grade": 4,
+    "freq": 758
+  },
+  {
+    "char": "桟",
+    "grade": 8,
+    "freq": 2093
+  },
+  {
+    "char": "産",
+    "grade": 4,
+    "freq": 161
+  },
+  {
+    "char": "算",
+    "grade": 2,
+    "freq": 361
+  },
+  {
+    "char": "蚕",
+    "grade": 6,
+    "freq": 2272
+  },
+  {
+    "char": "賛",
+    "grade": 5,
+    "freq": 868
+  },
+  {
+    "char": "酸",
+    "grade": 5,
+    "freq": 1218
+  },
+  {
+    "char": "斬",
+    "grade": 8,
+    "freq": 2132
+  },
+  {
+    "char": "暫",
+    "grade": 8,
+    "freq": 1112
+  },
+  {
+    "char": "残",
+    "grade": 4,
+    "freq": 380
+  },
+  {
+    "char": "仕",
+    "grade": 3,
+    "freq": 439
+  },
+  {
+    "char": "伺",
+    "grade": 8,
+    "freq": 2209
+  },
+  {
+    "char": "使",
+    "grade": 3,
+    "freq": 219
+  },
+  {
+    "char": "刺",
+    "grade": 8,
+    "freq": 1031
+  },
+  {
+    "char": "司",
+    "grade": 4,
+    "freq": 759
+  },
+  {
+    "char": "史",
+    "grade": 5,
+    "freq": 511
+  },
+  {
+    "char": "嗣",
+    "grade": 8,
+    "freq": 2310
+  },
+  {
+    "char": "四",
+    "grade": 1,
+    "freq": 47
+  },
+  {
+    "char": "士",
+    "grade": 5,
+    "freq": 526
+  },
+  {
+    "char": "始",
+    "grade": 3,
+    "freq": 244
+  },
+  {
+    "char": "姉",
+    "grade": 2,
+    "freq": 1473
+  },
+  {
+    "char": "姿",
+    "grade": 6,
+    "freq": 441
+  },
+  {
+    "char": "子",
+    "grade": 1,
+    "freq": 72
+  },
+  {
+    "char": "市",
+    "grade": 2,
+    "freq": 42
+  },
+  {
+    "char": "師",
+    "grade": 5,
+    "freq": 563
+  },
+  {
+    "char": "志",
+    "grade": 5,
+    "freq": 823
+  },
+  {
+    "char": "思",
+    "grade": 2,
+    "freq": 132
+  },
+  {
+    "char": "指",
+    "grade": 3,
+    "freq": 155
+  },
+  {
+    "char": "支",
+    "grade": 5,
+    "freq": 159
+  },
+  {
+    "char": "施",
+    "grade": 8,
+    "freq": 323
+  },
+  {
+    "char": "旨",
+    "grade": 8,
+    "freq": 1166
+  },
+  {
+    "char": "枝",
+    "grade": 5,
+    "freq": 1401
+  },
+  {
+    "char": "止",
+    "grade": 2,
+    "freq": 310
+  },
+  {
+    "char": "死",
+    "grade": 3,
+    "freq": 229
+  },
+  {
+    "char": "氏",
+    "grade": 4,
+    "freq": 84
+  },
+  {
+    "char": "祉",
+    "grade": 8,
+    "freq": 1063
+  },
+  {
+    "char": "私",
+    "grade": 6,
+    "freq": 242
+  },
+  {
+    "char": "糸",
+    "grade": 1,
+    "freq": 1488
+  },
+  {
+    "char": "紙",
+    "grade": 2,
+    "freq": 559
+  },
+  {
+    "char": "紫",
+    "grade": 8,
+    "freq": 1516
+  },
+  {
+    "char": "肢",
+    "grade": 8,
+    "freq": 2289
+  },
+  {
+    "char": "脂",
+    "grade": 8,
+    "freq": 1548
+  },
+  {
+    "char": "至",
+    "grade": 6,
+    "freq": 996
+  },
+  {
+    "char": "視",
+    "grade": 6,
+    "freq": 362
+  },
+  {
+    "char": "詞",
+    "grade": 6,
+    "freq": 1636
+  },
+  {
+    "char": "詩",
+    "grade": 3,
+    "freq": 1196
+  },
+  {
+    "char": "試",
+    "grade": 4,
+    "freq": 392
+  },
+  {
+    "char": "誌",
+    "grade": 6,
+    "freq": 851
+  },
+  {
+    "char": "諮",
+    "grade": 8,
+    "freq": 1345
+  },
+  {
+    "char": "資",
+    "grade": 5,
+    "freq": 179
+  },
+  {
+    "char": "賜",
+    "grade": 8,
+    "freq": 2190
+  },
+  {
+    "char": "雌",
+    "grade": 8,
+    "freq": 1951
+  },
+  {
+    "char": "飼",
+    "grade": 5,
+    "freq": 1392
+  },
+  {
+    "char": "歯",
+    "grade": 3,
+    "freq": 1106
+  },
+  {
+    "char": "事",
+    "grade": 3,
+    "freq": 18
+  },
+  {
+    "char": "似",
+    "grade": 5,
+    "freq": 923
+  },
+  {
+    "char": "侍",
+    "grade": 8,
+    "freq": 1939
+  },
+  {
+    "char": "児",
+    "grade": 4,
+    "freq": 679
+  },
+  {
+    "char": "字",
+    "grade": 1,
+    "freq": 485
+  },
+  {
+    "char": "寺",
+    "grade": 2,
+    "freq": 879
+  },
+  {
+    "char": "慈",
+    "grade": 8,
+    "freq": 1811
+  },
+  {
+    "char": "持",
+    "grade": 3,
+    "freq": 119
+  },
+  {
+    "char": "時",
+    "grade": 2,
+    "freq": 16
+  },
+  {
+    "char": "次",
+    "grade": 3,
+    "freq": 222
+  },
+  {
+    "char": "滋",
+    "grade": 4,
+    "freq": 1563
+  },
+  {
+    "char": "治",
+    "grade": 4,
+    "freq": 109
+  },
+  {
+    "char": "璽",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "磁",
+    "grade": 6,
+    "freq": 1686
+  },
+  {
+    "char": "示",
+    "grade": 5,
+    "freq": 237
+  },
+  {
+    "char": "耳",
+    "grade": 1,
+    "freq": 1328
+  },
+  {
+    "char": "自",
+    "grade": 2,
+    "freq": 19
+  },
+  {
+    "char": "辞",
+    "grade": 4,
+    "freq": 633
+  },
+  {
+    "char": "鹿",
+    "grade": 4,
+    "freq": 957
+  },
+  {
+    "char": "式",
+    "grade": 3,
+    "freq": 251
+  },
+  {
+    "char": "識",
+    "grade": 5,
+    "freq": 496
+  },
+  {
+    "char": "軸",
+    "grade": 8,
+    "freq": 1261
+  },
+  {
+    "char": "七",
+    "grade": 1,
+    "freq": 115
+  },
+  {
+    "char": "執",
+    "grade": 8,
+    "freq": 800
+  },
+  {
+    "char": "失",
+    "grade": 4,
+    "freq": 447
+  },
+  {
+    "char": "嫉",
+    "grade": 8,
+    "freq": 2317
+  },
+  {
+    "char": "室",
+    "grade": 2,
+    "freq": 550
+  },
+  {
+    "char": "湿",
+    "grade": 8,
+    "freq": 1517
+  },
+  {
+    "char": "漆",
+    "grade": 8,
+    "freq": 1971
+  },
+  {
+    "char": "疾",
+    "grade": 8,
+    "freq": 1577
+  },
+  {
+    "char": "質",
+    "grade": 5,
+    "freq": 389
+  },
+  {
+    "char": "実",
+    "grade": 3,
+    "freq": 68
+  },
+  {
+    "char": "芝",
+    "grade": 8,
+    "freq": 1052
+  },
+  {
+    "char": "舎",
+    "grade": 5,
+    "freq": 1170
+  },
+  {
+    "char": "写",
+    "grade": 3,
+    "freq": 453
+  },
+  {
+    "char": "射",
+    "grade": 6,
+    "freq": 937
+  },
+  {
+    "char": "捨",
+    "grade": 6,
+    "freq": 1266
+  },
+  {
+    "char": "赦",
+    "grade": 8,
+    "freq": 1868
+  },
+  {
+    "char": "斜",
+    "grade": 8,
+    "freq": 1504
+  },
+  {
+    "char": "煮",
+    "grade": 8,
+    "freq": 1565
+  },
+  {
+    "char": "社",
+    "grade": 2,
+    "freq": 21
+  },
+  {
+    "char": "者",
+    "grade": 3,
+    "freq": 38
+  },
+  {
+    "char": "謝",
+    "grade": 5,
+    "freq": 1028
+  },
+  {
+    "char": "車",
+    "grade": 1,
+    "freq": 333
+  },
+  {
+    "char": "遮",
+    "grade": 8,
+    "freq": 1865
+  },
+  {
+    "char": "蛇",
+    "grade": 8,
+    "freq": 1721
+  },
+  {
+    "char": "邪",
+    "grade": 8,
+    "freq": 1612
+  },
+  {
+    "char": "借",
+    "grade": 4,
+    "freq": 932
+  },
+  {
+    "char": "尺",
+    "grade": 6,
+    "freq": 1940
+  },
+  {
+    "char": "爵",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "酌",
+    "grade": 8,
+    "freq": 2271
+  },
+  {
+    "char": "釈",
+    "grade": 8,
+    "freq": 1097
+  },
+  {
+    "char": "若",
+    "grade": 6,
+    "freq": 458
+  },
+  {
+    "char": "寂",
+    "grade": 8,
+    "freq": 1599
+  },
+  {
+    "char": "弱",
+    "grade": 2,
+    "freq": 958
+  },
+  {
+    "char": "主",
+    "grade": 3,
+    "freq": 95
+  },
+  {
+    "char": "取",
+    "grade": 3,
+    "freq": 122
+  },
+  {
+    "char": "守",
+    "grade": 3,
+    "freq": 457
+  },
+  {
+    "char": "手",
+    "grade": 1,
+    "freq": 60
+  },
+  {
+    "char": "朱",
+    "grade": 8,
+    "freq": 1788
+  },
+  {
+    "char": "殊",
+    "grade": 8,
+    "freq": 1361
+  },
+  {
+    "char": "狩",
+    "grade": 8,
+    "freq": 1785
+  },
+  {
+    "char": "珠",
+    "grade": 8,
+    "freq": 1711
+  },
+  {
+    "char": "種",
+    "grade": 4,
+    "freq": 461
+  },
+  {
+    "char": "腫",
+    "grade": 8,
+    "freq": 2145
+  },
+  {
+    "char": "趣",
+    "grade": 8,
+    "freq": 1153
+  },
+  {
+    "char": "酒",
+    "grade": 3,
+    "freq": 1006
+  },
+  {
+    "char": "首",
+    "grade": 2,
+    "freq": 98
+  },
+  {
+    "char": "儒",
+    "grade": 8,
+    "freq": 2162
+  },
+  {
+    "char": "受",
+    "grade": 3,
+    "freq": 136
+  },
+  {
+    "char": "呪",
+    "grade": 8,
+    "freq": 2131
+  },
+  {
+    "char": "寿",
+    "grade": 8,
+    "freq": 1245
+  },
+  {
+    "char": "授",
+    "grade": 5,
+    "freq": 535
+  },
+  {
+    "char": "樹",
+    "grade": 6,
+    "freq": 988
+  },
+  {
+    "char": "需",
+    "grade": 8,
+    "freq": 935
+  },
+  {
+    "char": "囚",
+    "grade": 8,
+    "freq": 2107
+  },
+  {
+    "char": "収",
+    "grade": 6,
+    "freq": 337
+  },
+  {
+    "char": "周",
+    "grade": 4,
+    "freq": 562
+  },
+  {
+    "char": "宗",
+    "grade": 6,
+    "freq": 997
+  },
+  {
+    "char": "就",
+    "grade": 6,
+    "freq": 624
+  },
+  {
+    "char": "州",
+    "grade": 3,
+    "freq": 386
+  },
+  {
+    "char": "修",
+    "grade": 5,
+    "freq": 603
+  },
+  {
+    "char": "愁",
+    "grade": 8,
+    "freq": 2171
+  },
+  {
+    "char": "拾",
+    "grade": 3,
+    "freq": 1479
+  },
+  {
+    "char": "秀",
+    "grade": 8,
+    "freq": 848
+  },
+  {
+    "char": "秋",
+    "grade": 2,
+    "freq": 635
+  },
+  {
+    "char": "終",
+    "grade": 3,
+    "freq": 256
+  },
+  {
+    "char": "習",
+    "grade": 3,
+    "freq": 706
+  },
+  {
+    "char": "臭",
+    "grade": 8,
+    "freq": 1760
+  },
+  {
+    "char": "舟",
+    "grade": 8,
+    "freq": 1786
+  },
+  {
+    "char": "衆",
+    "grade": 6,
+    "freq": 450
+  },
+  {
+    "char": "襲",
+    "grade": 8,
+    "freq": 1130
+  },
+  {
+    "char": "蹴",
+    "grade": 8,
+    "freq": 2377
+  },
+  {
+    "char": "週",
+    "grade": 2,
+    "freq": 540
+  },
+  {
+    "char": "酬",
+    "grade": 8,
+    "freq": 1515
+  },
+  {
+    "char": "集",
+    "grade": 3,
+    "freq": 210
+  },
+  {
+    "char": "醜",
+    "grade": 8,
+    "freq": 2074
+  },
+  {
+    "char": "住",
+    "grade": 3,
+    "freq": 270
+  },
+  {
+    "char": "充",
+    "grade": 8,
+    "freq": 949
+  },
+  {
+    "char": "十",
+    "grade": 1,
+    "freq": 8
+  },
+  {
+    "char": "従",
+    "grade": 6,
+    "freq": 601
+  },
+  {
+    "char": "柔",
+    "grade": 8,
+    "freq": 1187
+  },
+  {
+    "char": "汁",
+    "grade": 8,
+    "freq": 1843
+  },
+  {
+    "char": "渋",
+    "grade": 8,
+    "freq": 1011
+  },
+  {
+    "char": "獣",
+    "grade": 8,
+    "freq": 1714
+  },
+  {
+    "char": "縦",
+    "grade": 6,
+    "freq": 1258
+  },
+  {
+    "char": "重",
+    "grade": 3,
+    "freq": 193
+  },
+  {
+    "char": "銃",
+    "grade": 8,
+    "freq": 1013
+  },
+  {
+    "char": "叔",
+    "grade": 8,
+    "freq": 1950
+  },
+  {
+    "char": "宿",
+    "grade": 3,
+    "freq": 701
+  },
+  {
+    "char": "淑",
+    "grade": 8,
+    "freq": 1922
+  },
+  {
+    "char": "祝",
+    "grade": 4,
+    "freq": 1184
+  },
+  {
+    "char": "縮",
+    "grade": 6,
+    "freq": 909
+  },
+  {
+    "char": "粛",
+    "grade": 8,
+    "freq": 1549
+  },
+  {
+    "char": "塾",
+    "grade": 8,
+    "freq": 1297
+  },
+  {
+    "char": "熟",
+    "grade": 6,
+    "freq": 1415
+  },
+  {
+    "char": "出",
+    "grade": 1,
+    "freq": 13
+  },
+  {
+    "char": "術",
+    "grade": 5,
+    "freq": 350
+  },
+  {
+    "char": "述",
+    "grade": 5,
+    "freq": 379
+  },
+  {
+    "char": "俊",
+    "grade": 8,
+    "freq": 1007
+  },
+  {
+    "char": "春",
+    "grade": 2,
+    "freq": 579
+  },
+  {
+    "char": "瞬",
+    "grade": 8,
+    "freq": 1265
+  },
+  {
+    "char": "准",
+    "grade": 8,
+    "freq": 1441
+  },
+  {
+    "char": "循",
+    "grade": 8,
+    "freq": 1699
+  },
+  {
+    "char": "旬",
+    "grade": 8,
+    "freq": 1162
+  },
+  {
+    "char": "殉",
+    "grade": 8,
+    "freq": 2080
+  },
+  {
+    "char": "準",
+    "grade": 5,
+    "freq": 425
+  },
+  {
+    "char": "潤",
+    "grade": 8,
+    "freq": 1644
+  },
+  {
+    "char": "盾",
+    "grade": 8,
+    "freq": 1476
+  },
+  {
+    "char": "純",
+    "grade": 6,
+    "freq": 1044
+  },
+  {
+    "char": "巡",
+    "grade": 8,
+    "freq": 1262
+  },
+  {
+    "char": "遵",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "順",
+    "grade": 4,
+    "freq": 779
+  },
+  {
+    "char": "処",
+    "grade": 6,
+    "freq": 547
+  },
+  {
+    "char": "初",
+    "grade": 4,
+    "freq": 152
+  },
+  {
+    "char": "所",
+    "grade": 3,
+    "freq": 221
+  },
+  {
+    "char": "暑",
+    "grade": 3,
+    "freq": 1442
+  },
+  {
+    "char": "庶",
+    "grade": 8,
+    "freq": 1558
+  },
+  {
+    "char": "緒",
+    "grade": 8,
+    "freq": 952
+  },
+  {
+    "char": "署",
+    "grade": 6,
+    "freq": 725
+  },
+  {
+    "char": "書",
+    "grade": 2,
+    "freq": 169
+  },
+  {
+    "char": "諸",
+    "grade": 6,
+    "freq": 658
+  },
+  {
+    "char": "助",
+    "grade": 3,
+    "freq": 397
+  },
+  {
+    "char": "叙",
+    "grade": 8,
+    "freq": 1954
+  },
+  {
+    "char": "女",
+    "grade": 1,
+    "freq": 151
+  },
+  {
+    "char": "序",
+    "grade": 5,
+    "freq": 1160
+  },
+  {
+    "char": "徐",
+    "grade": 8,
+    "freq": 1470
+  },
+  {
+    "char": "除",
+    "grade": 6,
+    "freq": 594
+  },
+  {
+    "char": "傷",
+    "grade": 6,
+    "freq": 845
+  },
+  {
+    "char": "償",
+    "grade": 8,
+    "freq": 854
+  },
+  {
+    "char": "勝",
+    "grade": 3,
+    "freq": 185
+  },
+  {
+    "char": "匠",
+    "grade": 8,
+    "freq": 1718
+  },
+  {
+    "char": "升",
+    "grade": 8,
+    "freq": 2077
+  },
+  {
+    "char": "召",
+    "grade": 8,
+    "freq": 1540
+  },
+  {
+    "char": "商",
+    "grade": 3,
+    "freq": 413
+  },
+  {
+    "char": "唱",
+    "grade": 4,
+    "freq": 1123
+  },
+  {
+    "char": "奨",
+    "grade": 8,
+    "freq": 1445
+  },
+  {
+    "char": "宵",
+    "grade": 8,
+    "freq": 2262
+  },
+  {
+    "char": "将",
+    "grade": 6,
+    "freq": 634
+  },
+  {
+    "char": "小",
+    "grade": 1,
+    "freq": 114
+  },
+  {
+    "char": "少",
+    "grade": 2,
+    "freq": 287
+  },
+  {
+    "char": "尚",
+    "grade": 8,
+    "freq": 1531
+  },
+  {
+    "char": "床",
+    "grade": 8,
+    "freq": 1175
+  },
+  {
+    "char": "彰",
+    "grade": 8,
+    "freq": 1310
+  },
+  {
+    "char": "承",
+    "grade": 6,
+    "freq": 775
+  },
+  {
+    "char": "抄",
+    "grade": 8,
+    "freq": 2328
+  },
+  {
+    "char": "招",
+    "grade": 5,
+    "freq": 840
+  },
+  {
+    "char": "掌",
+    "grade": 8,
+    "freq": 1757
+  },
+  {
+    "char": "昇",
+    "grade": 8,
+    "freq": 826
+  },
+  {
+    "char": "昭",
+    "grade": 3,
+    "freq": 697
+  },
+  {
+    "char": "晶",
+    "grade": 8,
+    "freq": 1613
+  },
+  {
+    "char": "松",
+    "grade": 4,
+    "freq": 471
+  },
+  {
+    "char": "沼",
+    "grade": 8,
+    "freq": 1467
+  },
+  {
+    "char": "消",
+    "grade": 3,
+    "freq": 345
+  },
+  {
+    "char": "渉",
+    "grade": 8,
+    "freq": 499
+  },
+  {
+    "char": "焼",
+    "grade": 4,
+    "freq": 982
+  },
+  {
+    "char": "焦",
+    "grade": 8,
+    "freq": 973
+  },
+  {
+    "char": "照",
+    "grade": 4,
+    "freq": 1004
+  },
+  {
+    "char": "症",
+    "grade": 8,
+    "freq": 1111
+  },
+  {
+    "char": "省",
+    "grade": 4,
+    "freq": 548
+  },
+  {
+    "char": "硝",
+    "grade": 8,
+    "freq": 2154
+  },
+  {
+    "char": "礁",
+    "grade": 8,
+    "freq": 1977
+  },
+  {
+    "char": "祥",
+    "grade": 8,
+    "freq": 1273
+  },
+  {
+    "char": "称",
+    "grade": 8,
+    "freq": 985
+  },
+  {
+    "char": "章",
+    "grade": 3,
+    "freq": 990
+  },
+  {
+    "char": "笑",
+    "grade": 4,
+    "freq": 913
+  },
+  {
+    "char": "粧",
+    "grade": 8,
+    "freq": 1545
+  },
+  {
+    "char": "紹",
+    "grade": 8,
+    "freq": 963
+  },
+  {
+    "char": "肖",
+    "grade": 8,
+    "freq": 1889
+  },
+  {
+    "char": "衝",
+    "grade": 8,
+    "freq": 972
+  },
+  {
+    "char": "訟",
+    "grade": 8,
+    "freq": 1061
+  },
+  {
+    "char": "証",
+    "grade": 5,
+    "freq": 306
+  },
+  {
+    "char": "詔",
+    "grade": 8,
+    "freq": 2239
+  },
+  {
+    "char": "詳",
+    "grade": 8,
+    "freq": 1178
+  },
+  {
+    "char": "象",
+    "grade": 5,
+    "freq": 394
+  },
+  {
+    "char": "賞",
+    "grade": 5,
+    "freq": 426
+  },
+  {
+    "char": "鐘",
+    "grade": 8,
+    "freq": 1681
+  },
+  {
+    "char": "障",
+    "grade": 6,
+    "freq": 742
+  },
+  {
+    "char": "上",
+    "grade": 1,
+    "freq": 35
+  },
+  {
+    "char": "丈",
+    "grade": 8,
+    "freq": 1375
+  },
+  {
+    "char": "乗",
+    "grade": 3,
+    "freq": 377
+  },
+  {
+    "char": "冗",
+    "grade": 8,
+    "freq": 1782
+  },
+  {
+    "char": "剰",
+    "grade": 8,
+    "freq": 1448
+  },
+  {
+    "char": "城",
+    "grade": 4,
+    "freq": 795
+  },
+  {
+    "char": "場",
+    "grade": 2,
+    "freq": 52
+  },
+  {
+    "char": "壌",
+    "grade": 8,
+    "freq": 1407
+  },
+  {
+    "char": "嬢",
+    "grade": 8,
+    "freq": 2059
+  },
+  {
+    "char": "常",
+    "grade": 5,
+    "freq": 293
+  },
+  {
+    "char": "情",
+    "grade": 5,
+    "freq": 235
+  },
+  {
+    "char": "条",
+    "grade": 5,
+    "freq": 363
+  },
+  {
+    "char": "浄",
+    "grade": 8,
+    "freq": 1383
+  },
+  {
+    "char": "状",
+    "grade": 5,
+    "freq": 298
+  },
+  {
+    "char": "畳",
+    "grade": 8,
+    "freq": 1665
+  },
+  {
+    "char": "蒸",
+    "grade": 6,
+    "freq": 1552
+  },
+  {
+    "char": "譲",
+    "grade": 8,
+    "freq": 984
+  },
+  {
+    "char": "醸",
+    "grade": 8,
+    "freq": 1838
+  },
+  {
+    "char": "錠",
+    "grade": 8,
+    "freq": 1934
+  },
+  {
+    "char": "嘱",
+    "grade": 8,
+    "freq": 1903
+  },
+  {
+    "char": "飾",
+    "grade": 8,
+    "freq": 1193
+  },
+  {
+    "char": "拭",
+    "grade": 8,
+    "freq": 2421
+  },
+  {
+    "char": "植",
+    "grade": 3,
+    "freq": 699
+  },
+  {
+    "char": "殖",
+    "grade": 8,
+    "freq": 1362
+  },
+  {
+    "char": "織",
+    "grade": 5,
+    "freq": 608
+  },
+  {
+    "char": "職",
+    "grade": 5,
+    "freq": 305
+  },
+  {
+    "char": "色",
+    "grade": 2,
+    "freq": 621
+  },
+  {
+    "char": "触",
+    "grade": 8,
+    "freq": 904
+  },
+  {
+    "char": "食",
+    "grade": 2,
+    "freq": 328
+  },
+  {
+    "char": "辱",
+    "grade": 8,
+    "freq": 1769
+  },
+  {
+    "char": "尻",
+    "grade": 8,
+    "freq": 1692
+  },
+  {
+    "char": "伸",
+    "grade": 8,
+    "freq": 730
+  },
+  {
+    "char": "信",
+    "grade": 4,
+    "freq": 208
+  },
+  {
+    "char": "侵",
+    "grade": 8,
+    "freq": 1025
+  },
+  {
+    "char": "唇",
+    "grade": 8,
+    "freq": 1992
+  },
+  {
+    "char": "娠",
+    "grade": 8,
+    "freq": 1623
+  },
+  {
+    "char": "寝",
+    "grade": 8,
+    "freq": 1034
+  },
+  {
+    "char": "審",
+    "grade": 8,
+    "freq": 412
+  },
+  {
+    "char": "心",
+    "grade": 2,
+    "freq": 157
+  },
+  {
+    "char": "慎",
+    "grade": 8,
+    "freq": 999
+  },
+  {
+    "char": "振",
+    "grade": 8,
+    "freq": 614
+  },
+  {
+    "char": "新",
+    "grade": 2,
+    "freq": 51
+  },
+  {
+    "char": "森",
+    "grade": 1,
+    "freq": 609
+  },
+  {
+    "char": "浸",
+    "grade": 8,
+    "freq": 1447
+  },
+  {
+    "char": "深",
+    "grade": 3,
+    "freq": 484
+  },
+  {
+    "char": "申",
+    "grade": 3,
+    "freq": 492
+  },
+  {
+    "char": "真",
+    "grade": 3,
+    "freq": 279
+  },
+  {
+    "char": "神",
+    "grade": 3,
+    "freq": 347
+  },
+  {
+    "char": "紳",
+    "grade": 8,
+    "freq": 1790
+  },
+  {
+    "char": "臣",
+    "grade": 4,
+    "freq": 1249
+  },
+  {
+    "char": "芯",
+    "grade": 8,
+    "freq": 2202
+  },
+  {
+    "char": "薪",
+    "grade": 8,
+    "freq": 2182
+  },
+  {
+    "char": "親",
+    "grade": 2,
+    "freq": 406
+  },
+  {
+    "char": "診",
+    "grade": 8,
+    "freq": 1019
+  },
+  {
+    "char": "身",
+    "grade": 3,
+    "freq": 320
+  },
+  {
+    "char": "辛",
+    "grade": 8,
+    "freq": 1607
+  },
+  {
+    "char": "進",
+    "grade": 3,
+    "freq": 142
+  },
+  {
+    "char": "針",
+    "grade": 6,
+    "freq": 505
+  },
+  {
+    "char": "震",
+    "grade": 8,
+    "freq": 893
+  },
+  {
+    "char": "人",
+    "grade": 1,
+    "freq": 5
+  },
+  {
+    "char": "仁",
+    "grade": 6,
+    "freq": 1332
+  },
+  {
+    "char": "刃",
+    "grade": 8,
+    "freq": 1763
+  },
+  {
+    "char": "尋",
+    "grade": 8,
+    "freq": 1398
+  },
+  {
+    "char": "甚",
+    "grade": 8,
+    "freq": 1961
+  },
+  {
+    "char": "尽",
+    "grade": 8,
+    "freq": 1234
+  },
+  {
+    "char": "腎",
+    "grade": 8,
+    "freq": 1755
+  },
+  {
+    "char": "迅",
+    "grade": 8,
+    "freq": 1888
+  },
+  {
+    "char": "陣",
+    "grade": 8,
+    "freq": 828
+  },
+  {
+    "char": "須",
+    "grade": 8,
+    "freq": 1339
+  },
+  {
+    "char": "酢",
+    "grade": 8,
+    "freq": 1955
+  },
+  {
+    "char": "図",
+    "grade": 2,
+    "freq": 539
+  },
+  {
+    "char": "吹",
+    "grade": 8,
+    "freq": 1133
+  },
+  {
+    "char": "垂",
+    "grade": 6,
+    "freq": 1720
+  },
+  {
+    "char": "帥",
+    "grade": 8,
+    "freq": 2016
+  },
+  {
+    "char": "推",
+    "grade": 6,
+    "freq": 507
+  },
+  {
+    "char": "水",
+    "grade": 1,
+    "freq": 223
+  },
+  {
+    "char": "炊",
+    "grade": 8,
+    "freq": 1777
+  },
+  {
+    "char": "睡",
+    "grade": 8,
+    "freq": 1739
+  },
+  {
+    "char": "粋",
+    "grade": 8,
+    "freq": 1768
+  },
+  {
+    "char": "衰",
+    "grade": 8,
+    "freq": 1432
+  },
+  {
+    "char": "遂",
+    "grade": 8,
+    "freq": 1423
+  },
+  {
+    "char": "酔",
+    "grade": 8,
+    "freq": 1640
+  },
+  {
+    "char": "随",
+    "grade": 8,
+    "freq": 1396
+  },
+  {
+    "char": "髄",
+    "grade": 8,
+    "freq": 1652
+  },
+  {
+    "char": "崇",
+    "grade": 8,
+    "freq": 1970
+  },
+  {
+    "char": "数",
+    "grade": 2,
+    "freq": 148
+  },
+  {
+    "char": "枢",
+    "grade": 8,
+    "freq": 1791
+  },
+  {
+    "char": "据",
+    "grade": 8,
+    "freq": 1468
+  },
+  {
+    "char": "杉",
+    "grade": 8,
+    "freq": 1095
+  },
+  {
+    "char": "裾",
+    "grade": 8,
+    "freq": 2334
+  },
+  {
+    "char": "澄",
+    "grade": 8,
+    "freq": 1722
+  },
+  {
+    "char": "寸",
+    "grade": 6,
+    "freq": 1669
+  },
+  {
+    "char": "世",
+    "grade": 3,
+    "freq": 135
+  },
+  {
+    "char": "瀬",
+    "grade": 8,
+    "freq": 1152
+  },
+  {
+    "char": "畝",
+    "grade": 8,
+    "freq": 2327
+  },
+  {
+    "char": "是",
+    "grade": 8,
+    "freq": 1045
+  },
+  {
+    "char": "凄",
+    "grade": 8,
+    "freq": 2313
+  },
+  {
+    "char": "制",
+    "grade": 5,
+    "freq": 108
+  },
+  {
+    "char": "勢",
+    "grade": 5,
+    "freq": 260
+  },
+  {
+    "char": "姓",
+    "grade": 8,
+    "freq": 1628
+  },
+  {
+    "char": "征",
+    "grade": 8,
+    "freq": 1578
+  },
+  {
+    "char": "性",
+    "grade": 5,
+    "freq": 104
+  },
+  {
+    "char": "成",
+    "grade": 4,
+    "freq": 116
+  },
+  {
+    "char": "政",
+    "grade": 5,
+    "freq": 17
+  },
+  {
+    "char": "整",
+    "grade": 3,
+    "freq": 478
+  },
+  {
+    "char": "星",
+    "grade": 2,
+    "freq": 844
+  },
+  {
+    "char": "晴",
+    "grade": 2,
+    "freq": 1022
+  },
+  {
+    "char": "正",
+    "grade": 1,
+    "freq": 143
+  },
+  {
+    "char": "清",
+    "grade": 4,
+    "freq": 705
+  },
+  {
+    "char": "牲",
+    "grade": 8,
+    "freq": 1274
+  },
+  {
+    "char": "生",
+    "grade": 1,
+    "freq": 29
+  },
+  {
+    "char": "盛",
+    "grade": 6,
+    "freq": 712
+  },
+  {
+    "char": "精",
+    "grade": 5,
+    "freq": 752
+  },
+  {
+    "char": "聖",
+    "grade": 6,
+    "freq": 1165
+  },
+  {
+    "char": "声",
+    "grade": 2,
+    "freq": 388
+  },
+  {
+    "char": "製",
+    "grade": 5,
+    "freq": 488
+  },
+  {
+    "char": "西",
+    "grade": 2,
+    "freq": 259
+  },
+  {
+    "char": "誠",
+    "grade": 6,
+    "freq": 1128
+  },
+  {
+    "char": "誓",
+    "grade": 8,
+    "freq": 1567
+  },
+  {
+    "char": "請",
+    "grade": 8,
+    "freq": 524
+  },
+  {
+    "char": "逝",
+    "grade": 8,
+    "freq": 2018
+  },
+  {
+    "char": "醒",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "青",
+    "grade": 1,
+    "freq": 589
+  },
+  {
+    "char": "静",
+    "grade": 4,
+    "freq": 764
+  },
+  {
+    "char": "斉",
+    "grade": 8,
+    "freq": 1209
+  },
+  {
+    "char": "税",
+    "grade": 5,
+    "freq": 289
+  },
+  {
+    "char": "隻",
+    "grade": 8,
+    "freq": 1546
+  },
+  {
+    "char": "席",
+    "grade": 4,
+    "freq": 370
+  },
+  {
+    "char": "惜",
+    "grade": 8,
+    "freq": 1641
+  },
+  {
+    "char": "戚",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "斥",
+    "grade": 8,
+    "freq": 2231
+  },
+  {
+    "char": "昔",
+    "grade": 3,
+    "freq": 1197
+  },
+  {
+    "char": "析",
+    "grade": 8,
+    "freq": 980
+  },
+  {
+    "char": "石",
+    "grade": 1,
+    "freq": 342
+  },
+  {
+    "char": "積",
+    "grade": 4,
+    "freq": 541
+  },
+  {
+    "char": "籍",
+    "grade": 8,
+    "freq": 907
+  },
+  {
+    "char": "績",
+    "grade": 5,
+    "freq": 820
+  },
+  {
+    "char": "脊",
+    "grade": 8,
+    "freq": 2299
+  },
+  {
+    "char": "責",
+    "grade": 5,
+    "freq": 598
+  },
+  {
+    "char": "赤",
+    "grade": 1,
+    "freq": 584
+  },
+  {
+    "char": "跡",
+    "grade": 8,
+    "freq": 953
+  },
+  {
+    "char": "切",
+    "grade": 2,
+    "freq": 324
+  },
+  {
+    "char": "拙",
+    "grade": 8,
+    "freq": 1938
+  },
+  {
+    "char": "接",
+    "grade": 5,
+    "freq": 523
+  },
+  {
+    "char": "摂",
+    "grade": 8,
+    "freq": 1779
+  },
+  {
+    "char": "折",
+    "grade": 4,
+    "freq": 962
+  },
+  {
+    "char": "設",
+    "grade": 5,
+    "freq": 145
+  },
+  {
+    "char": "窃",
+    "grade": 8,
+    "freq": 1871
+  },
+  {
+    "char": "節",
+    "grade": 4,
+    "freq": 934
+  },
+  {
+    "char": "説",
+    "grade": 4,
+    "freq": 326
+  },
+  {
+    "char": "雪",
+    "grade": 2,
+    "freq": 1131
+  },
+  {
+    "char": "絶",
+    "grade": 5,
+    "freq": 784
+  },
+  {
+    "char": "舌",
+    "grade": 6,
+    "freq": 1830
+  },
+  {
+    "char": "仙",
+    "grade": 8,
+    "freq": 1157
+  },
+  {
+    "char": "先",
+    "grade": 1,
+    "freq": 173
+  },
+  {
+    "char": "千",
+    "grade": 1,
+    "freq": 195
+  },
+  {
+    "char": "占",
+    "grade": 8,
+    "freq": 694
+  },
+  {
+    "char": "宣",
+    "grade": 6,
+    "freq": 695
+  },
+  {
+    "char": "専",
+    "grade": 6,
+    "freq": 506
+  },
+  {
+    "char": "川",
+    "grade": 1,
+    "freq": 181
+  },
+  {
+    "char": "戦",
+    "grade": 4,
+    "freq": 78
+  },
+  {
+    "char": "扇",
+    "grade": 8,
+    "freq": 1805
+  },
+  {
+    "char": "栓",
+    "grade": 8,
+    "freq": 2199
+  },
+  {
+    "char": "泉",
+    "grade": 6,
+    "freq": 1086
+  },
+  {
+    "char": "浅",
+    "grade": 4,
+    "freq": 1253
+  },
+  {
+    "char": "洗",
+    "grade": 6,
+    "freq": 1168
+  },
+  {
+    "char": "染",
+    "grade": 6,
+    "freq": 837
+  },
+  {
+    "char": "潜",
+    "grade": 8,
+    "freq": 1329
+  },
+  {
+    "char": "煎",
+    "grade": 8,
+    "freq": 2458
+  },
+  {
+    "char": "旋",
+    "grade": 8,
+    "freq": 1801
+  },
+  {
+    "char": "線",
+    "grade": 2,
+    "freq": 382
+  },
+  {
+    "char": "繊",
+    "grade": 8,
+    "freq": 1451
+  },
+  {
+    "char": "羨",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "腺",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "船",
+    "grade": 2,
+    "freq": 713
+  },
+  {
+    "char": "薦",
+    "grade": 8,
+    "freq": 1082
+  },
+  {
+    "char": "詮",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "践",
+    "grade": 8,
+    "freq": 1570
+  },
+  {
+    "char": "選",
+    "grade": 4,
+    "freq": 57
+  },
+  {
+    "char": "遷",
+    "grade": 8,
+    "freq": 1937
+  },
+  {
+    "char": "銭",
+    "grade": 6,
+    "freq": 1008
+  },
+  {
+    "char": "鮮",
+    "grade": 8,
+    "freq": 355
+  },
+  {
+    "char": "前",
+    "grade": 2,
+    "freq": 27
+  },
+  {
+    "char": "善",
+    "grade": 6,
+    "freq": 765
+  },
+  {
+    "char": "漸",
+    "grade": 8,
+    "freq": 2115
+  },
+  {
+    "char": "然",
+    "grade": 4,
+    "freq": 401
+  },
+  {
+    "char": "全",
+    "grade": 3,
+    "freq": 75
+  },
+  {
+    "char": "禅",
+    "grade": 8,
+    "freq": 1902
+  },
+  {
+    "char": "繕",
+    "grade": 8,
+    "freq": 2195
+  },
+  {
+    "char": "膳",
+    "grade": 8,
+    "freq": 2120
+  },
+  {
+    "char": "塑",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "措",
+    "grade": 8,
+    "freq": 818
+  },
+  {
+    "char": "曽",
+    "grade": 8,
+    "freq": 1320
+  },
+  {
+    "char": "狙",
+    "grade": 8,
+    "freq": 745
+  },
+  {
+    "char": "疎",
+    "grade": 8,
+    "freq": 1572
+  },
+  {
+    "char": "礎",
+    "grade": 8,
+    "freq": 1224
+  },
+  {
+    "char": "祖",
+    "grade": 5,
+    "freq": 1226
+  },
+  {
+    "char": "租",
+    "grade": 8,
+    "freq": 2089
+  },
+  {
+    "char": "粗",
+    "grade": 8,
+    "freq": 1689
+  },
+  {
+    "char": "素",
+    "grade": 5,
+    "freq": 660
+  },
+  {
+    "char": "組",
+    "grade": 2,
+    "freq": 204
+  },
+  {
+    "char": "訴",
+    "grade": 8,
+    "freq": 427
+  },
+  {
+    "char": "阻",
+    "grade": 8,
+    "freq": 1280
+  },
+  {
+    "char": "遡",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "僧",
+    "grade": 8,
+    "freq": 1724
+  },
+  {
+    "char": "創",
+    "grade": 6,
+    "freq": 741
+  },
+  {
+    "char": "双",
+    "grade": 8,
+    "freq": 1029
+  },
+  {
+    "char": "倉",
+    "grade": 4,
+    "freq": 1114
+  },
+  {
+    "char": "喪",
+    "grade": 8,
+    "freq": 885
+  },
+  {
+    "char": "壮",
+    "grade": 8,
+    "freq": 1657
+  },
+  {
+    "char": "奏",
+    "grade": 6,
+    "freq": 1067
+  },
+  {
+    "char": "爽",
+    "grade": 8,
+    "freq": 2333
+  },
+  {
+    "char": "層",
+    "grade": 6,
+    "freq": 801
+  },
+  {
+    "char": "想",
+    "grade": 3,
+    "freq": 381
+  },
+  {
+    "char": "捜",
+    "grade": 8,
+    "freq": 592
+  },
+  {
+    "char": "掃",
+    "grade": 8,
+    "freq": 1255
+  },
+  {
+    "char": "挿",
+    "grade": 8,
+    "freq": 1908
+  },
+  {
+    "char": "操",
+    "grade": 6,
+    "freq": 1016
+  },
+  {
+    "char": "早",
+    "grade": 1,
+    "freq": 402
+  },
+  {
+    "char": "曹",
+    "grade": 8,
+    "freq": 1998
+  },
+  {
+    "char": "巣",
+    "grade": 4,
+    "freq": 1588
+  },
+  {
+    "char": "槽",
+    "grade": 8,
+    "freq": 1809
+  },
+  {
+    "char": "燥",
+    "grade": 8,
+    "freq": 1819
+  },
+  {
+    "char": "争",
+    "grade": 4,
+    "freq": 271
+  },
+  {
+    "char": "痩",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "相",
+    "grade": 3,
+    "freq": 45
+  },
+  {
+    "char": "窓",
+    "grade": 6,
+    "freq": 1186
+  },
+  {
+    "char": "総",
+    "grade": 5,
+    "freq": 129
+  },
+  {
+    "char": "草",
+    "grade": 1,
+    "freq": 967
+  },
+  {
+    "char": "荘",
+    "grade": 8,
+    "freq": 1489
+  },
+  {
+    "char": "葬",
+    "grade": 8,
+    "freq": 754
+  },
+  {
+    "char": "藻",
+    "grade": 8,
+    "freq": 2124
+  },
+  {
+    "char": "装",
+    "grade": 6,
+    "freq": 657
+  },
+  {
+    "char": "走",
+    "grade": 2,
+    "freq": 626
+  },
+  {
+    "char": "送",
+    "grade": 3,
+    "freq": 311
+  },
+  {
+    "char": "遭",
+    "grade": 8,
+    "freq": 1554
+  },
+  {
+    "char": "霜",
+    "grade": 8,
+    "freq": 2151
+  },
+  {
+    "char": "騒",
+    "grade": 8,
+    "freq": 1069
+  },
+  {
+    "char": "像",
+    "grade": 5,
+    "freq": 856
+  },
+  {
+    "char": "増",
+    "grade": 5,
+    "freq": 231
+  },
+  {
+    "char": "憎",
+    "grade": 8,
+    "freq": 1808
+  },
+  {
+    "char": "臓",
+    "grade": 6,
+    "freq": 991
+  },
+  {
+    "char": "蔵",
+    "grade": 6,
+    "freq": 468
+  },
+  {
+    "char": "贈",
+    "grade": 8,
+    "freq": 1001
+  },
+  {
+    "char": "造",
+    "grade": 5,
+    "freq": 429
+  },
+  {
+    "char": "促",
+    "grade": 8,
+    "freq": 998
+  },
+  {
+    "char": "側",
+    "grade": 4,
+    "freq": 216
+  },
+  {
+    "char": "則",
+    "grade": 5,
+    "freq": 753
+  },
+  {
+    "char": "即",
+    "grade": 8,
+    "freq": 1167
+  },
+  {
+    "char": "息",
+    "grade": 3,
+    "freq": 882
+  },
+  {
+    "char": "捉",
+    "grade": 8,
+    "freq": 1976
+  },
+  {
+    "char": "束",
+    "grade": 4,
+    "freq": 918
+  },
+  {
+    "char": "測",
+    "grade": 5,
+    "freq": 761
+  },
+  {
+    "char": "足",
+    "grade": 1,
+    "freq": 343
+  },
+  {
+    "char": "速",
+    "grade": 3,
+    "freq": 576
+  },
+  {
+    "char": "俗",
+    "grade": 8,
+    "freq": 1610
+  },
+  {
+    "char": "属",
+    "grade": 5,
+    "freq": 912
+  },
+  {
+    "char": "賊",
+    "grade": 8,
+    "freq": 2045
+  },
+  {
+    "char": "族",
+    "grade": 3,
+    "freq": 393
+  },
+  {
+    "char": "続",
+    "grade": 4,
+    "freq": 141
+  },
+  {
+    "char": "卒",
+    "grade": 4,
+    "freq": 772
+  },
+  {
+    "char": "袖",
+    "grade": 8,
+    "freq": 1960
+  },
+  {
+    "char": "存",
+    "grade": 6,
+    "freq": 577
+  },
+  {
+    "char": "孫",
+    "grade": 4,
+    "freq": 1388
+  },
+  {
+    "char": "尊",
+    "grade": 6,
+    "freq": 1181
+  },
+  {
+    "char": "損",
+    "grade": 5,
+    "freq": 807
+  },
+  {
+    "char": "村",
+    "grade": 1,
+    "freq": 253
+  },
+  {
+    "char": "遜",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "他",
+    "grade": 3,
+    "freq": 543
+  },
+  {
+    "char": "多",
+    "grade": 2,
+    "freq": 139
+  },
+  {
+    "char": "太",
+    "grade": 2,
+    "freq": 552
+  },
+  {
+    "char": "汰",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "唾",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "堕",
+    "grade": 8,
+    "freq": 2087
+  },
+  {
+    "char": "妥",
+    "grade": 8,
+    "freq": 1102
+  },
+  {
+    "char": "惰",
+    "grade": 8,
+    "freq": 2336
+  },
+  {
+    "char": "打",
+    "grade": 3,
+    "freq": 239
+  },
+  {
+    "char": "駄",
+    "grade": 8,
+    "freq": 1500
+  },
+  {
+    "char": "体",
+    "grade": 2,
+    "freq": 88
+  },
+  {
+    "char": "堆",
+    "grade": 8,
+    "freq": 2184
+  },
+  {
+    "char": "対",
+    "grade": 3,
+    "freq": 34
+  },
+  {
+    "char": "耐",
+    "grade": 8,
+    "freq": 1295
+  },
+  {
+    "char": "帯",
+    "grade": 4,
+    "freq": 746
+  },
+  {
+    "char": "待",
+    "grade": 3,
+    "freq": 391
+  },
+  {
+    "char": "怠",
+    "grade": 8,
+    "freq": 1703
+  },
+  {
+    "char": "態",
+    "grade": 5,
+    "freq": 353
+  },
+  {
+    "char": "戴",
+    "grade": 8,
+    "freq": 2332
+  },
+  {
+    "char": "替",
+    "grade": 8,
+    "freq": 979
+  },
+  {
+    "char": "泰",
+    "grade": 8,
+    "freq": 1281
+  },
+  {
+    "char": "滞",
+    "grade": 8,
+    "freq": 1107
+  },
+  {
+    "char": "胎",
+    "grade": 8,
+    "freq": 1861
+  },
+  {
+    "char": "袋",
+    "grade": 8,
+    "freq": 1125
+  },
+  {
+    "char": "貸",
+    "grade": 5,
+    "freq": 995
+  },
+  {
+    "char": "退",
+    "grade": 6,
+    "freq": 424
+  },
+  {
+    "char": "逮",
+    "grade": 8,
+    "freq": 766
+  },
+  {
+    "char": "隊",
+    "grade": 4,
+    "freq": 605
+  },
+  {
+    "char": "代",
+    "grade": 3,
+    "freq": 66
+  },
+  {
+    "char": "台",
+    "grade": 2,
+    "freq": 262
+  },
+  {
+    "char": "大",
+    "grade": 1,
+    "freq": 7
+  },
+  {
+    "char": "第",
+    "grade": 3,
+    "freq": 160
+  },
+  {
+    "char": "題",
+    "grade": 3,
+    "freq": 96
+  },
+  {
+    "char": "滝",
+    "grade": 8,
+    "freq": 1478
+  },
+  {
+    "char": "卓",
+    "grade": 8,
+    "freq": 1348
+  },
+  {
+    "char": "宅",
+    "grade": 6,
+    "freq": 357
+  },
+  {
+    "char": "択",
+    "grade": 8,
+    "freq": 847
+  },
+  {
+    "char": "拓",
+    "grade": 8,
+    "freq": 1526
+  },
+  {
+    "char": "沢",
+    "grade": 8,
+    "freq": 296
+  },
+  {
+    "char": "濯",
+    "grade": 8,
+    "freq": 1698
+  },
+  {
+    "char": "託",
+    "grade": 8,
+    "freq": 1021
+  },
+  {
+    "char": "濁",
+    "grade": 8,
+    "freq": 1883
+  },
+  {
+    "char": "諾",
+    "grade": 8,
+    "freq": 1490
+  },
+  {
+    "char": "但",
+    "grade": 8,
+    "freq": 2404
+  },
+  {
+    "char": "達",
+    "grade": 4,
+    "freq": 500
+  },
+  {
+    "char": "奪",
+    "grade": 8,
+    "freq": 974
+  },
+  {
+    "char": "脱",
+    "grade": 8,
+    "freq": 782
+  },
+  {
+    "char": "棚",
+    "grade": 8,
+    "freq": 1594
+  },
+  {
+    "char": "谷",
+    "grade": 2,
+    "freq": 508
+  },
+  {
+    "char": "誰",
+    "grade": 8,
+    "freq": 1933
+  },
+  {
+    "char": "丹",
+    "grade": 8,
+    "freq": 1402
+  },
+  {
+    "char": "単",
+    "grade": 4,
+    "freq": 586
+  },
+  {
+    "char": "嘆",
+    "grade": 8,
+    "freq": 1584
+  },
+  {
+    "char": "担",
+    "grade": 6,
+    "freq": 422
+  },
+  {
+    "char": "探",
+    "grade": 6,
+    "freq": 930
+  },
+  {
+    "char": "旦",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "淡",
+    "grade": 8,
+    "freq": 1436
+  },
+  {
+    "char": "炭",
+    "grade": 3,
+    "freq": 1307
+  },
+  {
+    "char": "短",
+    "grade": 3,
+    "freq": 689
+  },
+  {
+    "char": "端",
+    "grade": 8,
+    "freq": 960
+  },
+  {
+    "char": "綻",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "胆",
+    "grade": 8,
+    "freq": 1449
+  },
+  {
+    "char": "誕",
+    "grade": 6,
+    "freq": 1024
+  },
+  {
+    "char": "鍛",
+    "grade": 8,
+    "freq": 1793
+  },
+  {
+    "char": "団",
+    "grade": 5,
+    "freq": 213
+  },
+  {
+    "char": "壇",
+    "grade": 8,
+    "freq": 1512
+  },
+  {
+    "char": "弾",
+    "grade": 8,
+    "freq": 853
+  },
+  {
+    "char": "断",
+    "grade": 5,
+    "freq": 338
+  },
+  {
+    "char": "暖",
+    "grade": 6,
+    "freq": 1371
+  },
+  {
+    "char": "段",
+    "grade": 6,
+    "freq": 479
+  },
+  {
+    "char": "男",
+    "grade": 1,
+    "freq": 240
+  },
+  {
+    "char": "談",
+    "grade": 3,
+    "freq": 272
+  },
+  {
+    "char": "値",
+    "grade": 6,
+    "freq": 518
+  },
+  {
+    "char": "知",
+    "grade": 2,
+    "freq": 205
+  },
+  {
+    "char": "地",
+    "grade": 2,
+    "freq": 40
+  },
+  {
+    "char": "恥",
+    "grade": 8,
+    "freq": 1575
+  },
+  {
+    "char": "池",
+    "grade": 2,
+    "freq": 827
+  },
+  {
+    "char": "痴",
+    "grade": 8,
+    "freq": 1663
+  },
+  {
+    "char": "稚",
+    "grade": 8,
+    "freq": 1560
+  },
+  {
+    "char": "置",
+    "grade": 4,
+    "freq": 277
+  },
+  {
+    "char": "致",
+    "grade": 8,
+    "freq": 870
+  },
+  {
+    "char": "遅",
+    "grade": 8,
+    "freq": 833
+  },
+  {
+    "char": "築",
+    "grade": 5,
+    "freq": 821
+  },
+  {
+    "char": "畜",
+    "grade": 8,
+    "freq": 1824
+  },
+  {
+    "char": "竹",
+    "grade": 1,
+    "freq": 593
+  },
+  {
+    "char": "蓄",
+    "grade": 8,
+    "freq": 1260
+  },
+  {
+    "char": "逐",
+    "grade": 8,
+    "freq": 2230
+  },
+  {
+    "char": "秩",
+    "grade": 8,
+    "freq": 1275
+  },
+  {
+    "char": "窒",
+    "grade": 8,
+    "freq": 1776
+  },
+  {
+    "char": "茶",
+    "grade": 2,
+    "freq": 1116
+  },
+  {
+    "char": "嫡",
+    "grade": 8,
+    "freq": 2130
+  },
+  {
+    "char": "着",
+    "grade": 3,
+    "freq": 376
+  },
+  {
+    "char": "中",
+    "grade": 1,
+    "freq": 11
+  },
+  {
+    "char": "仲",
+    "grade": 4,
+    "freq": 919
+  },
+  {
+    "char": "宙",
+    "grade": 6,
+    "freq": 1005
+  },
+  {
+    "char": "忠",
+    "grade": 6,
+    "freq": 1113
+  },
+  {
+    "char": "抽",
+    "grade": 8,
+    "freq": 1437
+  },
+  {
+    "char": "昼",
+    "grade": 2,
+    "freq": 1115
+  },
+  {
+    "char": "柱",
+    "grade": 3,
+    "freq": 1119
+  },
+  {
+    "char": "注",
+    "grade": 3,
+    "freq": 497
+  },
+  {
+    "char": "虫",
+    "grade": 1,
+    "freq": 1351
+  },
+  {
+    "char": "衷",
+    "grade": 8,
+    "freq": 2229
+  },
+  {
+    "char": "酎",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "鋳",
+    "grade": 8,
+    "freq": 2005
+  },
+  {
+    "char": "駐",
+    "grade": 8,
+    "freq": 955
+  },
+  {
+    "char": "著",
+    "grade": 6,
+    "freq": 849
+  },
+  {
+    "char": "貯",
+    "grade": 5,
+    "freq": 1100
+  },
+  {
+    "char": "丁",
+    "grade": 3,
+    "freq": 1312
+  },
+  {
+    "char": "兆",
+    "grade": 4,
+    "freq": 1174
+  },
+  {
+    "char": "帳",
+    "grade": 3,
+    "freq": 1459
+  },
+  {
+    "char": "庁",
+    "grade": 6,
+    "freq": 793
+  },
+  {
+    "char": "弔",
+    "grade": 8,
+    "freq": 1840
+  },
+  {
+    "char": "張",
+    "grade": 5,
+    "freq": 403
+  },
+  {
+    "char": "彫",
+    "grade": 8,
+    "freq": 1533
+  },
+  {
+    "char": "徴",
+    "grade": 8,
+    "freq": 850
+  },
+  {
+    "char": "懲",
+    "grade": 8,
+    "freq": 1303
+  },
+  {
+    "char": "挑",
+    "grade": 8,
+    "freq": 989
+  },
+  {
+    "char": "朝",
+    "grade": 2,
+    "freq": 248
+  },
+  {
+    "char": "潮",
+    "grade": 6,
+    "freq": 1231
+  },
+  {
+    "char": "町",
+    "grade": 1,
+    "freq": 292
+  },
+  {
+    "char": "眺",
+    "grade": 8,
+    "freq": 1726
+  },
+  {
+    "char": "聴",
+    "grade": 8,
+    "freq": 781
+  },
+  {
+    "char": "腸",
+    "grade": 6,
+    "freq": 1807
+  },
+  {
+    "char": "調",
+    "grade": 3,
+    "freq": 87
+  },
+  {
+    "char": "超",
+    "grade": 8,
+    "freq": 597
+  },
+  {
+    "char": "跳",
+    "grade": 8,
+    "freq": 1716
+  },
+  {
+    "char": "長",
+    "grade": 2,
+    "freq": 12
+  },
+  {
+    "char": "頂",
+    "grade": 6,
+    "freq": 1350
+  },
+  {
+    "char": "鳥",
+    "grade": 2,
+    "freq": 1043
+  },
+  {
+    "char": "勅",
+    "grade": 8,
+    "freq": 2157
+  },
+  {
+    "char": "捗",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "直",
+    "grade": 2,
+    "freq": 246
+  },
+  {
+    "char": "朕",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "沈",
+    "grade": 8,
+    "freq": 1271
+  },
+  {
+    "char": "珍",
+    "grade": 8,
+    "freq": 1330
+  },
+  {
+    "char": "賃",
+    "grade": 6,
+    "freq": 961
+  },
+  {
+    "char": "鎮",
+    "grade": 8,
+    "freq": 1617
+  },
+  {
+    "char": "陳",
+    "grade": 8,
+    "freq": 1323
+  },
+  {
+    "char": "津",
+    "grade": 8,
+    "freq": 1036
+  },
+  {
+    "char": "墜",
+    "grade": 8,
+    "freq": 1466
+  },
+  {
+    "char": "椎",
+    "grade": 8,
+    "freq": 1911
+  },
+  {
+    "char": "追",
+    "grade": 3,
+    "freq": 411
+  },
+  {
+    "char": "痛",
+    "grade": 6,
+    "freq": 903
+  },
+  {
+    "char": "通",
+    "grade": 2,
+    "freq": 80
+  },
+  {
+    "char": "塚",
+    "grade": 8,
+    "freq": 869
+  },
+  {
+    "char": "漬",
+    "grade": 8,
+    "freq": 1818
+  },
+  {
+    "char": "潰",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "坪",
+    "grade": 8,
+    "freq": 1823
+  },
+  {
+    "char": "爪",
+    "grade": 8,
+    "freq": 2025
+  },
+  {
+    "char": "釣",
+    "grade": 8,
+    "freq": 1542
+  },
+  {
+    "char": "鶴",
+    "grade": 8,
+    "freq": 1369
+  },
+  {
+    "char": "亭",
+    "grade": 8,
+    "freq": 1627
+  },
+  {
+    "char": "低",
+    "grade": 4,
+    "freq": 435
+  },
+  {
+    "char": "停",
+    "grade": 5,
+    "freq": 733
+  },
+  {
+    "char": "偵",
+    "grade": 8,
+    "freq": 1857
+  },
+  {
+    "char": "貞",
+    "grade": 8,
+    "freq": 1389
+  },
+  {
+    "char": "呈",
+    "grade": 8,
+    "freq": 1571
+  },
+  {
+    "char": "堤",
+    "grade": 8,
+    "freq": 1658
+  },
+  {
+    "char": "定",
+    "grade": 3,
+    "freq": 48
+  },
+  {
+    "char": "帝",
+    "grade": 8,
+    "freq": 1276
+  },
+  {
+    "char": "底",
+    "grade": 4,
+    "freq": 867
+  },
+  {
+    "char": "庭",
+    "grade": 3,
+    "freq": 816
+  },
+  {
+    "char": "廷",
+    "grade": 8,
+    "freq": 1439
+  },
+  {
+    "char": "弟",
+    "grade": 2,
+    "freq": 1161
+  },
+  {
+    "char": "抵",
+    "grade": 8,
+    "freq": 1182
+  },
+  {
+    "char": "提",
+    "grade": 5,
+    "freq": 254
+  },
+  {
+    "char": "程",
+    "grade": 5,
+    "freq": 514
+  },
+  {
+    "char": "締",
+    "grade": 8,
+    "freq": 797
+  },
+  {
+    "char": "艇",
+    "grade": 8,
+    "freq": 1433
+  },
+  {
+    "char": "訂",
+    "grade": 8,
+    "freq": 1690
+  },
+  {
+    "char": "諦",
+    "grade": 8,
+    "freq": 2457
+  },
+  {
+    "char": "逓",
+    "grade": 8,
+    "freq": 1957
+  },
+  {
+    "char": "邸",
+    "grade": 8,
+    "freq": 905
+  },
+  {
+    "char": "泥",
+    "grade": 8,
+    "freq": 1589
+  },
+  {
+    "char": "摘",
+    "grade": 8,
+    "freq": 564
+  },
+  {
+    "char": "敵",
+    "grade": 6,
+    "freq": 1205
+  },
+  {
+    "char": "滴",
+    "grade": 8,
+    "freq": 2019
+  },
+  {
+    "char": "的",
+    "grade": 4,
+    "freq": 105
+  },
+  {
+    "char": "笛",
+    "grade": 3,
+    "freq": 1928
+  },
+  {
+    "char": "適",
+    "grade": 5,
+    "freq": 670
+  },
+  {
+    "char": "溺",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "哲",
+    "grade": 8,
+    "freq": 1093
+  },
+  {
+    "char": "徹",
+    "grade": 8,
+    "freq": 968
+  },
+  {
+    "char": "撤",
+    "grade": 8,
+    "freq": 811
+  },
+  {
+    "char": "迭",
+    "grade": 8,
+    "freq": 1907
+  },
+  {
+    "char": "鉄",
+    "grade": 3,
+    "freq": 672
+  },
+  {
+    "char": "典",
+    "grade": 4,
+    "freq": 1055
+  },
+  {
+    "char": "天",
+    "grade": 1,
+    "freq": 512
+  },
+  {
+    "char": "展",
+    "grade": 6,
+    "freq": 352
+  },
+  {
+    "char": "店",
+    "grade": 2,
+    "freq": 378
+  },
+  {
+    "char": "添",
+    "grade": 8,
+    "freq": 1501
+  },
+  {
+    "char": "貼",
+    "grade": 8,
+    "freq": 2444
+  },
+  {
+    "char": "転",
+    "grade": 3,
+    "freq": 327
+  },
+  {
+    "char": "点",
+    "grade": 2,
+    "freq": 165
+  },
+  {
+    "char": "伝",
+    "grade": 4,
+    "freq": 416
+  },
+  {
+    "char": "殿",
+    "grade": 8,
+    "freq": 1199
+  },
+  {
+    "char": "田",
+    "grade": 1,
+    "freq": 90
+  },
+  {
+    "char": "電",
+    "grade": 2,
+    "freq": 268
+  },
+  {
+    "char": "吐",
+    "grade": 8,
+    "freq": 1674
+  },
+  {
+    "char": "塗",
+    "grade": 8,
+    "freq": 1414
+  },
+  {
+    "char": "妬",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "徒",
+    "grade": 4,
+    "freq": 817
+  },
+  {
+    "char": "斗",
+    "grade": 8,
+    "freq": 1885
+  },
+  {
+    "char": "渡",
+    "grade": 8,
+    "freq": 446
+  },
+  {
+    "char": "登",
+    "grade": 3,
+    "freq": 566
+  },
+  {
+    "char": "賭",
+    "grade": 8,
+    "freq": 1989
+  },
+  {
+    "char": "途",
+    "grade": 8,
+    "freq": 717
+  },
+  {
+    "char": "都",
+    "grade": 3,
+    "freq": 123
+  },
+  {
+    "char": "努",
+    "grade": 4,
+    "freq": 749
+  },
+  {
+    "char": "度",
+    "grade": 3,
+    "freq": 110
+  },
+  {
+    "char": "土",
+    "grade": 1,
+    "freq": 307
+  },
+  {
+    "char": "奴",
+    "grade": 8,
+    "freq": 1932
+  },
+  {
+    "char": "怒",
+    "grade": 8,
+    "freq": 1221
+  },
+  {
+    "char": "倒",
+    "grade": 8,
+    "freq": 791
+  },
+  {
+    "char": "党",
+    "grade": 6,
+    "freq": 39
+  },
+  {
+    "char": "冬",
+    "grade": 2,
+    "freq": 1090
+  },
+  {
+    "char": "凍",
+    "grade": 8,
+    "freq": 1284
+  },
+  {
+    "char": "刀",
+    "grade": 2,
+    "freq": 1794
+  },
+  {
+    "char": "唐",
+    "grade": 8,
+    "freq": 1727
+  },
+  {
+    "char": "塔",
+    "grade": 8,
+    "freq": 1708
+  },
+  {
+    "char": "島",
+    "grade": 3,
+    "freq": 245
+  },
+  {
+    "char": "悼",
+    "grade": 8,
+    "freq": 1645
+  },
+  {
+    "char": "投",
+    "grade": 3,
+    "freq": 236
+  },
+  {
+    "char": "搭",
+    "grade": 8,
+    "freq": 1472
+  },
+  {
+    "char": "東",
+    "grade": 2,
+    "freq": 37
+  },
+  {
+    "char": "桃",
+    "grade": 8,
+    "freq": 1784
+  },
+  {
+    "char": "棟",
+    "grade": 8,
+    "freq": 1406
+  },
+  {
+    "char": "盗",
+    "grade": 8,
+    "freq": 1051
+  },
+  {
+    "char": "湯",
+    "grade": 3,
+    "freq": 1356
+  },
+  {
+    "char": "灯",
+    "grade": 4,
+    "freq": 1605
+  },
+  {
+    "char": "当",
+    "grade": 2,
+    "freq": 91
+  },
+  {
+    "char": "痘",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "等",
+    "grade": 3,
+    "freq": 798
+  },
+  {
+    "char": "答",
+    "grade": 2,
+    "freq": 486
+  },
+  {
+    "char": "筒",
+    "grade": 8,
+    "freq": 1631
+  },
+  {
+    "char": "糖",
+    "grade": 6,
+    "freq": 1471
+  },
+  {
+    "char": "統",
+    "grade": 5,
+    "freq": 125
+  },
+  {
+    "char": "到",
+    "grade": 8,
+    "freq": 1032
+  },
+  {
+    "char": "藤",
+    "grade": 8,
+    "freq": 291
+  },
+  {
+    "char": "討",
+    "grade": 6,
+    "freq": 528
+  },
+  {
+    "char": "謄",
+    "grade": 8,
+    "freq": 2295
+  },
+  {
+    "char": "豆",
+    "grade": 3,
+    "freq": 1422
+  },
+  {
+    "char": "踏",
+    "grade": 8,
+    "freq": 723
+  },
+  {
+    "char": "逃",
+    "grade": 8,
+    "freq": 931
+  },
+  {
+    "char": "透",
+    "grade": 8,
+    "freq": 1035
+  },
+  {
+    "char": "陶",
+    "grade": 8,
+    "freq": 1680
+  },
+  {
+    "char": "頭",
+    "grade": 2,
+    "freq": 433
+  },
+  {
+    "char": "騰",
+    "grade": 8,
+    "freq": 1420
+  },
+  {
+    "char": "闘",
+    "grade": 8,
+    "freq": 751
+  },
+  {
+    "char": "働",
+    "grade": 4,
+    "freq": 417
+  },
+  {
+    "char": "動",
+    "grade": 3,
+    "freq": 73
+  },
+  {
+    "char": "同",
+    "grade": 2,
+    "freq": 15
+  },
+  {
+    "char": "堂",
+    "grade": 5,
+    "freq": 1010
+  },
+  {
+    "char": "導",
+    "grade": 5,
+    "freq": 354
+  },
+  {
+    "char": "憧",
+    "grade": 8,
+    "freq": 2259
+  },
+  {
+    "char": "洞",
+    "grade": 8,
+    "freq": 1618
+  },
+  {
+    "char": "瞳",
+    "grade": 8,
+    "freq": 2069
+  },
+  {
+    "char": "童",
+    "grade": 3,
+    "freq": 1138
+  },
+  {
+    "char": "胴",
+    "grade": 8,
+    "freq": 1904
+  },
+  {
+    "char": "道",
+    "grade": 2,
+    "freq": 207
+  },
+  {
+    "char": "銅",
+    "grade": 5,
+    "freq": 1505
+  },
+  {
+    "char": "峠",
+    "grade": 8,
+    "freq": 1941
+  },
+  {
+    "char": "匿",
+    "grade": 8,
+    "freq": 2024
+  },
+  {
+    "char": "得",
+    "grade": 5,
+    "freq": 175
+  },
+  {
+    "char": "徳",
+    "grade": 4,
+    "freq": 1091
+  },
+  {
+    "char": "特",
+    "grade": 4,
+    "freq": 234
+  },
+  {
+    "char": "督",
+    "grade": 8,
+    "freq": 534
+  },
+  {
+    "char": "篤",
+    "grade": 8,
+    "freq": 1942
+  },
+  {
+    "char": "毒",
+    "grade": 5,
+    "freq": 1419
+  },
+  {
+    "char": "独",
+    "grade": 5,
+    "freq": 365
+  },
+  {
+    "char": "読",
+    "grade": 2,
+    "freq": 618
+  },
+  {
+    "char": "栃",
+    "grade": 4,
+    "freq": 1427
+  },
+  {
+    "char": "凸",
+    "grade": 8,
+    "freq": 2143
+  },
+  {
+    "char": "突",
+    "grade": 8,
+    "freq": 521
+  },
+  {
+    "char": "届",
+    "grade": 6,
+    "freq": 939
+  },
+  {
+    "char": "屯",
+    "grade": 8,
+    "freq": 1980
+  },
+  {
+    "char": "豚",
+    "grade": 8,
+    "freq": 1864
+  },
+  {
+    "char": "頓",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "曇",
+    "grade": 8,
+    "freq": 1899
+  },
+  {
+    "char": "鈍",
+    "grade": 8,
+    "freq": 1574
+  },
+  {
+    "char": "奈",
+    "grade": 4,
+    "freq": 841
+  },
+  {
+    "char": "那",
+    "grade": 8,
+    "freq": 1621
+  },
+  {
+    "char": "内",
+    "grade": 2,
+    "freq": 44
+  },
+  {
+    "char": "謎",
+    "grade": 8,
+    "freq": 2021
+  },
+  {
+    "char": "鍋",
+    "grade": 8,
+    "freq": 1810
+  },
+  {
+    "char": "縄",
+    "grade": 4,
+    "freq": 1075
+  },
+  {
+    "char": "南",
+    "grade": 2,
+    "freq": 341
+  },
+  {
+    "char": "軟",
+    "grade": 8,
+    "freq": 1269
+  },
+  {
+    "char": "難",
+    "grade": 6,
+    "freq": 330
+  },
+  {
+    "char": "二",
+    "grade": 1,
+    "freq": 9
+  },
+  {
+    "char": "尼",
+    "grade": 8,
+    "freq": 1844
+  },
+  {
+    "char": "弐",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "匂",
+    "grade": 8,
+    "freq": 2213
+  },
+  {
+    "char": "肉",
+    "grade": 2,
+    "freq": 986
+  },
+  {
+    "char": "虹",
+    "grade": 8,
+    "freq": 2110
+  },
+  {
+    "char": "日",
+    "grade": 1,
+    "freq": 1
+  },
+  {
+    "char": "乳",
+    "grade": 6,
+    "freq": 1289
+  },
+  {
+    "char": "入",
+    "grade": 1,
+    "freq": 56
+  },
+  {
+    "char": "如",
+    "grade": 8,
+    "freq": 1704
+  },
+  {
+    "char": "尿",
+    "grade": 8,
+    "freq": 1672
+  },
+  {
+    "char": "任",
+    "grade": 5,
+    "freq": 217
+  },
+  {
+    "char": "妊",
+    "grade": 8,
+    "freq": 1413
+  },
+  {
+    "char": "忍",
+    "grade": 8,
+    "freq": 1700
+  },
+  {
+    "char": "認",
+    "grade": 6,
+    "freq": 198
+  },
+  {
+    "char": "寧",
+    "grade": 8,
+    "freq": 1697
+  },
+  {
+    "char": "猫",
+    "grade": 8,
+    "freq": 1702
+  },
+  {
+    "char": "熱",
+    "grade": 4,
+    "freq": 700
+  },
+  {
+    "char": "年",
+    "grade": 1,
+    "freq": 6
+  },
+  {
+    "char": "念",
+    "grade": 4,
+    "freq": 390
+  },
+  {
+    "char": "捻",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "燃",
+    "grade": 5,
+    "freq": 948
+  },
+  {
+    "char": "粘",
+    "grade": 8,
+    "freq": 1410
+  },
+  {
+    "char": "悩",
+    "grade": 8,
+    "freq": 1084
+  },
+  {
+    "char": "濃",
+    "grade": 8,
+    "freq": 1200
+  },
+  {
+    "char": "納",
+    "grade": 6,
+    "freq": 987
+  },
+  {
+    "char": "能",
+    "grade": 5,
+    "freq": 273
+  },
+  {
+    "char": "脳",
+    "grade": 6,
+    "freq": 459
+  },
+  {
+    "char": "農",
+    "grade": 3,
+    "freq": 385
+  },
+  {
+    "char": "把",
+    "grade": 8,
+    "freq": 1569
+  },
+  {
+    "char": "覇",
+    "grade": 8,
+    "freq": 1173
+  },
+  {
+    "char": "波",
+    "grade": 3,
+    "freq": 740
+  },
+  {
+    "char": "派",
+    "grade": 6,
+    "freq": 164
+  },
+  {
+    "char": "破",
+    "grade": 5,
+    "freq": 590
+  },
+  {
+    "char": "婆",
+    "grade": 8,
+    "freq": 2435
+  },
+  {
+    "char": "罵",
+    "grade": 8,
+    "freq": 2467
+  },
+  {
+    "char": "馬",
+    "grade": 2,
+    "freq": 639
+  },
+  {
+    "char": "俳",
+    "grade": 6,
+    "freq": 1137
+  },
+  {
+    "char": "廃",
+    "grade": 8,
+    "freq": 698
+  },
+  {
+    "char": "拝",
+    "grade": 6,
+    "freq": 1443
+  },
+  {
+    "char": "排",
+    "grade": 8,
+    "freq": 1047
+  },
+  {
+    "char": "敗",
+    "grade": 4,
+    "freq": 516
+  },
+  {
+    "char": "杯",
+    "grade": 8,
+    "freq": 1235
+  },
+  {
+    "char": "背",
+    "grade": 6,
+    "freq": 696
+  },
+  {
+    "char": "肺",
+    "grade": 6,
+    "freq": 1387
+  },
+  {
+    "char": "輩",
+    "grade": 8,
+    "freq": 1365
+  },
+  {
+    "char": "配",
+    "grade": 3,
+    "freq": 359
+  },
+  {
+    "char": "倍",
+    "grade": 3,
+    "freq": 714
+  },
+  {
+    "char": "培",
+    "grade": 8,
+    "freq": 1431
+  },
+  {
+    "char": "媒",
+    "grade": 8,
+    "freq": 1900
+  },
+  {
+    "char": "梅",
+    "grade": 4,
+    "freq": 1232
+  },
+  {
+    "char": "買",
+    "grade": 2,
+    "freq": 520
+  },
+  {
+    "char": "売",
+    "grade": 2,
+    "freq": 202
+  },
+  {
+    "char": "賠",
+    "grade": 8,
+    "freq": 1243
+  },
+  {
+    "char": "陪",
+    "grade": 8,
+    "freq": 1917
+  },
+  {
+    "char": "伯",
+    "grade": 8,
+    "freq": 1741
+  },
+  {
+    "char": "博",
+    "grade": 4,
+    "freq": 794
+  },
+  {
+    "char": "拍",
+    "grade": 8,
+    "freq": 1373
+  },
+  {
+    "char": "泊",
+    "grade": 8,
+    "freq": 1233
+  },
+  {
+    "char": "白",
+    "grade": 1,
+    "freq": 483
+  },
+  {
+    "char": "舶",
+    "grade": 8,
+    "freq": 1753
+  },
+  {
+    "char": "薄",
+    "grade": 8,
+    "freq": 1009
+  },
+  {
+    "char": "迫",
+    "grade": 8,
+    "freq": 773
+  },
+  {
+    "char": "漠",
+    "grade": 8,
+    "freq": 1611
+  },
+  {
+    "char": "爆",
+    "grade": 8,
+    "freq": 735
+  },
+  {
+    "char": "縛",
+    "grade": 8,
+    "freq": 1764
+  },
+  {
+    "char": "麦",
+    "grade": 2,
+    "freq": 1615
+  },
+  {
+    "char": "箱",
+    "grade": 3,
+    "freq": 1357
+  },
+  {
+    "char": "箸",
+    "grade": 8,
+    "freq": 2156
+  },
+  {
+    "char": "肌",
+    "grade": 8,
+    "freq": 1559
+  },
+  {
+    "char": "畑",
+    "grade": 3,
+    "freq": 1176
+  },
+  {
+    "char": "八",
+    "grade": 1,
+    "freq": 92
+  },
+  {
+    "char": "鉢",
+    "grade": 8,
+    "freq": 1890
+  },
+  {
+    "char": "発",
+    "grade": 3,
+    "freq": 32
+  },
+  {
+    "char": "髪",
+    "grade": 8,
+    "freq": 1474
+  },
+  {
+    "char": "伐",
+    "grade": 8,
+    "freq": 1816
+  },
+  {
+    "char": "罰",
+    "grade": 8,
+    "freq": 1220
+  },
+  {
+    "char": "抜",
+    "grade": 8,
+    "freq": 726
+  },
+  {
+    "char": "閥",
+    "grade": 8,
+    "freq": 1072
+  },
+  {
+    "char": "伴",
+    "grade": 8,
+    "freq": 886
+  },
+  {
+    "char": "判",
+    "grade": 5,
+    "freq": 197
+  },
+  {
+    "char": "半",
+    "grade": 2,
+    "freq": 224
+  },
+  {
+    "char": "反",
+    "grade": 3,
+    "freq": 191
+  },
+  {
+    "char": "帆",
+    "grade": 8,
+    "freq": 1923
+  },
+  {
+    "char": "搬",
+    "grade": 8,
+    "freq": 1664
+  },
+  {
+    "char": "斑",
+    "grade": 8,
+    "freq": 2165
+  },
+  {
+    "char": "板",
+    "grade": 3,
+    "freq": 926
+  },
+  {
+    "char": "氾",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "汎",
+    "grade": 8,
+    "freq": 2014
+  },
+  {
+    "char": "版",
+    "grade": 5,
+    "freq": 802
+  },
+  {
+    "char": "犯",
+    "grade": 5,
+    "freq": 874
+  },
+  {
+    "char": "班",
+    "grade": 6,
+    "freq": 1592
+  },
+  {
+    "char": "畔",
+    "grade": 8,
+    "freq": 2049
+  },
+  {
+    "char": "繁",
+    "grade": 8,
+    "freq": 1198
+  },
+  {
+    "char": "般",
+    "grade": 8,
+    "freq": 649
+  },
+  {
+    "char": "藩",
+    "grade": 8,
+    "freq": 1896
+  },
+  {
+    "char": "販",
+    "grade": 8,
+    "freq": 627
+  },
+  {
+    "char": "範",
+    "grade": 8,
+    "freq": 1088
+  },
+  {
+    "char": "煩",
+    "grade": 8,
+    "freq": 2081
+  },
+  {
+    "char": "頒",
+    "grade": 8,
+    "freq": 2287
+  },
+  {
+    "char": "飯",
+    "grade": 4,
+    "freq": 1046
+  },
+  {
+    "char": "晩",
+    "grade": 6,
+    "freq": 1424
+  },
+  {
+    "char": "番",
+    "grade": 2,
+    "freq": 348
+  },
+  {
+    "char": "盤",
+    "grade": 8,
+    "freq": 881
+  },
+  {
+    "char": "蛮",
+    "grade": 8,
+    "freq": 2339
+  },
+  {
+    "char": "卑",
+    "grade": 8,
+    "freq": 2003
+  },
+  {
+    "char": "否",
+    "grade": 6,
+    "freq": 561
+  },
+  {
+    "char": "妃",
+    "grade": 8,
+    "freq": 1752
+  },
+  {
+    "char": "彼",
+    "grade": 8,
+    "freq": 648
+  },
+  {
+    "char": "悲",
+    "grade": 3,
+    "freq": 1014
+  },
+  {
+    "char": "扉",
+    "grade": 8,
+    "freq": 1866
+  },
+  {
+    "char": "批",
+    "grade": 6,
+    "freq": 568
+  },
+  {
+    "char": "披",
+    "grade": 8,
+    "freq": 1438
+  },
+  {
+    "char": "比",
+    "grade": 5,
+    "freq": 329
+  },
+  {
+    "char": "泌",
+    "grade": 8,
+    "freq": 2112
+  },
+  {
+    "char": "疲",
+    "grade": 8,
+    "freq": 1263
+  },
+  {
+    "char": "皮",
+    "grade": 3,
+    "freq": 1092
+  },
+  {
+    "char": "碑",
+    "grade": 8,
+    "freq": 1792
+  },
+  {
+    "char": "秘",
+    "grade": 6,
+    "freq": 862
+  },
+  {
+    "char": "罷",
+    "grade": 8,
+    "freq": 2104
+  },
+  {
+    "char": "肥",
+    "grade": 5,
+    "freq": 1469
+  },
+  {
+    "char": "被",
+    "grade": 8,
+    "freq": 431
+  },
+  {
+    "char": "費",
+    "grade": 5,
+    "freq": 321
+  },
+  {
+    "char": "避",
+    "grade": 8,
+    "freq": 756
+  },
+  {
+    "char": "非",
+    "grade": 5,
+    "freq": 472
+  },
+  {
+    "char": "飛",
+    "grade": 4,
+    "freq": 580
+  },
+  {
+    "char": "備",
+    "grade": 5,
+    "freq": 356
+  },
+  {
+    "char": "尾",
+    "grade": 8,
+    "freq": 875
+  },
+  {
+    "char": "微",
+    "grade": 8,
+    "freq": 1108
+  },
+  {
+    "char": "眉",
+    "grade": 8,
+    "freq": 2177
+  },
+  {
+    "char": "美",
+    "grade": 3,
+    "freq": 462
+  },
+  {
+    "char": "鼻",
+    "grade": 3,
+    "freq": 1632
+  },
+  {
+    "char": "匹",
+    "grade": 8,
+    "freq": 1384
+  },
+  {
+    "char": "膝",
+    "grade": 8,
+    "freq": 2320
+  },
+  {
+    "char": "肘",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "必",
+    "grade": 4,
+    "freq": 265
+  },
+  {
+    "char": "筆",
+    "grade": 3,
+    "freq": 1132
+  },
+  {
+    "char": "姫",
+    "grade": 8,
+    "freq": 1566
+  },
+  {
+    "char": "媛",
+    "grade": 4,
+    "freq": 1735
+  },
+  {
+    "char": "百",
+    "grade": 1,
+    "freq": 163
+  },
+  {
+    "char": "俵",
+    "grade": 6,
+    "freq": 1481
+  },
+  {
+    "char": "標",
+    "grade": 4,
+    "freq": 686
+  },
+  {
+    "char": "氷",
+    "grade": 3,
+    "freq": 1450
+  },
+  {
+    "char": "漂",
+    "grade": 8,
+    "freq": 1492
+  },
+  {
+    "char": "票",
+    "grade": 4,
+    "freq": 489
+  },
+  {
+    "char": "表",
+    "grade": 3,
+    "freq": 77
+  },
+  {
+    "char": "評",
+    "grade": 5,
+    "freq": 454
+  },
+  {
+    "char": "描",
+    "grade": 8,
+    "freq": 876
+  },
+  {
+    "char": "病",
+    "grade": 3,
+    "freq": 384
+  },
+  {
+    "char": "秒",
+    "grade": 3,
+    "freq": 1015
+  },
+  {
+    "char": "苗",
+    "grade": 8,
+    "freq": 1713
+  },
+  {
+    "char": "品",
+    "grade": 3,
+    "freq": 225
+  },
+  {
+    "char": "浜",
+    "grade": 8,
+    "freq": 645
+  },
+  {
+    "char": "貧",
+    "grade": 5,
+    "freq": 1211
+  },
+  {
+    "char": "賓",
+    "grade": 8,
+    "freq": 1677
+  },
+  {
+    "char": "頻",
+    "grade": 8,
+    "freq": 1590
+  },
+  {
+    "char": "敏",
+    "grade": 8,
+    "freq": 1042
+  },
+  {
+    "char": "瓶",
+    "grade": 8,
+    "freq": 1528
+  },
+  {
+    "char": "不",
+    "grade": 4,
+    "freq": 101
+  },
+  {
+    "char": "付",
+    "grade": 4,
+    "freq": 322
+  },
+  {
+    "char": "夫",
+    "grade": 4,
+    "freq": 335
+  },
+  {
+    "char": "婦",
+    "grade": 5,
+    "freq": 671
+  },
+  {
+    "char": "富",
+    "grade": 4,
+    "freq": 644
+  },
+  {
+    "char": "布",
+    "grade": 5,
+    "freq": 877
+  },
+  {
+    "char": "府",
+    "grade": 4,
+    "freq": 170
+  },
+  {
+    "char": "怖",
+    "grade": 8,
+    "freq": 1325
+  },
+  {
+    "char": "扶",
+    "grade": 8,
+    "freq": 1879
+  },
+  {
+    "char": "敷",
+    "grade": 8,
+    "freq": 1212
+  },
+  {
+    "char": "普",
+    "grade": 8,
+    "freq": 757
+  },
+  {
+    "char": "浮",
+    "grade": 8,
+    "freq": 776
+  },
+  {
+    "char": "父",
+    "grade": 2,
+    "freq": 646
+  },
+  {
+    "char": "符",
+    "grade": 8,
+    "freq": 1798
+  },
+  {
+    "char": "腐",
+    "grade": 8,
+    "freq": 1225
+  },
+  {
+    "char": "膚",
+    "grade": 8,
+    "freq": 1679
+  },
+  {
+    "char": "譜",
+    "grade": 8,
+    "freq": 1919
+  },
+  {
+    "char": "負",
+    "grade": 3,
+    "freq": 443
+  },
+  {
+    "char": "賦",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "赴",
+    "grade": 8,
+    "freq": 1649
+  },
+  {
+    "char": "阜",
+    "grade": 4,
+    "freq": 1532
+  },
+  {
+    "char": "附",
+    "grade": 8,
+    "freq": 2396
+  },
+  {
+    "char": "侮",
+    "grade": 8,
+    "freq": 2004
+  },
+  {
+    "char": "武",
+    "grade": 5,
+    "freq": 387
+  },
+  {
+    "char": "舞",
+    "grade": 8,
+    "freq": 655
+  },
+  {
+    "char": "部",
+    "grade": 3,
+    "freq": 36
+  },
+  {
+    "char": "封",
+    "grade": 8,
+    "freq": 1143
+  },
+  {
+    "char": "風",
+    "grade": 2,
+    "freq": 558
+  },
+  {
+    "char": "伏",
+    "grade": 8,
+    "freq": 1604
+  },
+  {
+    "char": "副",
+    "grade": 4,
+    "freq": 360
+  },
+  {
+    "char": "復",
+    "grade": 5,
+    "freq": 438
+  },
+  {
+    "char": "幅",
+    "grade": 8,
+    "freq": 641
+  },
+  {
+    "char": "服",
+    "grade": 3,
+    "freq": 873
+  },
+  {
+    "char": "福",
+    "grade": 3,
+    "freq": 467
+  },
+  {
+    "char": "腹",
+    "grade": 6,
+    "freq": 1286
+  },
+  {
+    "char": "複",
+    "grade": 5,
+    "freq": 915
+  },
+  {
+    "char": "覆",
+    "grade": 8,
+    "freq": 1378
+  },
+  {
+    "char": "払",
+    "grade": 8,
+    "freq": 813
+  },
+  {
+    "char": "沸",
+    "grade": 8,
+    "freq": 1709
+  },
+  {
+    "char": "仏",
+    "grade": 5,
+    "freq": 819
+  },
+  {
+    "char": "物",
+    "grade": 3,
+    "freq": 215
+  },
+  {
+    "char": "分",
+    "grade": 2,
+    "freq": 24
+  },
+  {
+    "char": "噴",
+    "grade": 8,
+    "freq": 1270
+  },
+  {
+    "char": "墳",
+    "grade": 8,
+    "freq": 1822
+  },
+  {
+    "char": "憤",
+    "grade": 8,
+    "freq": 1863
+  },
+  {
+    "char": "奮",
+    "grade": 6,
+    "freq": 1521
+  },
+  {
+    "char": "粉",
+    "grade": 5,
+    "freq": 1484
+  },
+  {
+    "char": "紛",
+    "grade": 8,
+    "freq": 994
+  },
+  {
+    "char": "雰",
+    "grade": 8,
+    "freq": 1341
+  },
+  {
+    "char": "文",
+    "grade": 1,
+    "freq": 190
+  },
+  {
+    "char": "聞",
+    "grade": 2,
+    "freq": 319
+  },
+  {
+    "char": "丙",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "併",
+    "grade": 8,
+    "freq": 966
+  },
+  {
+    "char": "兵",
+    "grade": 4,
+    "freq": 522
+  },
+  {
+    "char": "塀",
+    "grade": 8,
+    "freq": 1991
+  },
+  {
+    "char": "幣",
+    "grade": 8,
+    "freq": 1803
+  },
+  {
+    "char": "平",
+    "grade": 3,
+    "freq": 128
+  },
+  {
+    "char": "弊",
+    "grade": 8,
+    "freq": 1750
+  },
+  {
+    "char": "柄",
+    "grade": 8,
+    "freq": 1140
+  },
+  {
+    "char": "並",
+    "grade": 6,
+    "freq": 599
+  },
+  {
+    "char": "蔽",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "閉",
+    "grade": 6,
+    "freq": 951
+  },
+  {
+    "char": "陛",
+    "grade": 6,
+    "freq": 1429
+  },
+  {
+    "char": "米",
+    "grade": 2,
+    "freq": 61
+  },
+  {
+    "char": "壁",
+    "grade": 8,
+    "freq": 1037
+  },
+  {
+    "char": "癖",
+    "grade": 8,
+    "freq": 1973
+  },
+  {
+    "char": "別",
+    "grade": 4,
+    "freq": 214
+  },
+  {
+    "char": "蔑",
+    "grade": 8,
+    "freq": 2483
+  },
+  {
+    "char": "偏",
+    "grade": 8,
+    "freq": 1340
+  },
+  {
+    "char": "変",
+    "grade": 4,
+    "freq": 238
+  },
+  {
+    "char": "片",
+    "grade": 6,
+    "freq": 1076
+  },
+  {
+    "char": "編",
+    "grade": 5,
+    "freq": 591
+  },
+  {
+    "char": "辺",
+    "grade": 4,
+    "freq": 428
+  },
+  {
+    "char": "返",
+    "grade": 3,
+    "freq": 685
+  },
+  {
+    "char": "遍",
+    "grade": 8,
+    "freq": 1845
+  },
+  {
+    "char": "便",
+    "grade": 4,
+    "freq": 729
+  },
+  {
+    "char": "勉",
+    "grade": 3,
+    "freq": 1066
+  },
+  {
+    "char": "弁",
+    "grade": 5,
+    "freq": 619
+  },
+  {
+    "char": "保",
+    "grade": 5,
+    "freq": 146
+  },
+  {
+    "char": "舗",
+    "grade": 8,
+    "freq": 1412
+  },
+  {
+    "char": "捕",
+    "grade": 8,
+    "freq": 604
+  },
+  {
+    "char": "歩",
+    "grade": 2,
+    "freq": 554
+  },
+  {
+    "char": "補",
+    "grade": 6,
+    "freq": 332
+  },
+  {
+    "char": "穂",
+    "grade": 8,
+    "freq": 1656
+  },
+  {
+    "char": "募",
+    "grade": 8,
+    "freq": 809
+  },
+  {
+    "char": "墓",
+    "grade": 5,
+    "freq": 1337
+  },
+  {
+    "char": "慕",
+    "grade": 8,
+    "freq": 2100
+  },
+  {
+    "char": "暮",
+    "grade": 6,
+    "freq": 978
+  },
+  {
+    "char": "母",
+    "grade": 2,
+    "freq": 570
+  },
+  {
+    "char": "簿",
+    "grade": 8,
+    "freq": 1358
+  },
+  {
+    "char": "倣",
+    "grade": 8,
+    "freq": 2454
+  },
+  {
+    "char": "俸",
+    "grade": 8,
+    "freq": 1834
+  },
+  {
+    "char": "包",
+    "grade": 4,
+    "freq": 954
+  },
+  {
+    "char": "報",
+    "grade": 5,
+    "freq": 167
+  },
+  {
+    "char": "奉",
+    "grade": 8,
+    "freq": 1624
+  },
+  {
+    "char": "宝",
+    "grade": 6,
+    "freq": 1139
+  },
+  {
+    "char": "峰",
+    "grade": 8,
+    "freq": 1836
+  },
+  {
+    "char": "崩",
+    "grade": 8,
+    "freq": 778
+  },
+  {
+    "char": "抱",
+    "grade": 8,
+    "freq": 871
+  },
+  {
+    "char": "放",
+    "grade": 3,
+    "freq": 288
+  },
+  {
+    "char": "方",
+    "grade": 2,
+    "freq": 46
+  },
+  {
+    "char": "法",
+    "grade": 4,
+    "freq": 100
+  },
+  {
+    "char": "泡",
+    "grade": 8,
+    "freq": 1872
+  },
+  {
+    "char": "砲",
+    "grade": 8,
+    "freq": 1268
+  },
+  {
+    "char": "縫",
+    "grade": 8,
+    "freq": 1723
+  },
+  {
+    "char": "胞",
+    "grade": 8,
+    "freq": 1379
+  },
+  {
+    "char": "芳",
+    "grade": 8,
+    "freq": 1302
+  },
+  {
+    "char": "蜂",
+    "grade": 8,
+    "freq": 2223
+  },
+  {
+    "char": "褒",
+    "grade": 8,
+    "freq": 2073
+  },
+  {
+    "char": "訪",
+    "grade": 6,
+    "freq": 372
+  },
+  {
+    "char": "豊",
+    "grade": 5,
+    "freq": 762
+  },
+  {
+    "char": "邦",
+    "grade": 8,
+    "freq": 654
+  },
+  {
+    "char": "飽",
+    "grade": 8,
+    "freq": 1780
+  },
+  {
+    "char": "乏",
+    "grade": 8,
+    "freq": 1646
+  },
+  {
+    "char": "亡",
+    "grade": 6,
+    "freq": 661
+  },
+  {
+    "char": "傍",
+    "grade": 8,
+    "freq": 1660
+  },
+  {
+    "char": "剖",
+    "grade": 8,
+    "freq": 1918
+  },
+  {
+    "char": "坊",
+    "grade": 8,
+    "freq": 1832
+  },
+  {
+    "char": "妨",
+    "grade": 8,
+    "freq": 1482
+  },
+  {
+    "char": "帽",
+    "grade": 8,
+    "freq": 1742
+  },
+  {
+    "char": "忘",
+    "grade": 6,
+    "freq": 1129
+  },
+  {
+    "char": "忙",
+    "grade": 8,
+    "freq": 1475
+  },
+  {
+    "char": "房",
+    "grade": 8,
+    "freq": 808
+  },
+  {
+    "char": "暴",
+    "grade": 5,
+    "freq": 692
+  },
+  {
+    "char": "望",
+    "grade": 4,
+    "freq": 470
+  },
+  {
+    "char": "某",
+    "grade": 8,
+    "freq": 2106
+  },
+  {
+    "char": "棒",
+    "grade": 6,
+    "freq": 1455
+  },
+  {
+    "char": "冒",
+    "grade": 8,
+    "freq": 1317
+  },
+  {
+    "char": "紡",
+    "grade": 8,
+    "freq": 1876
+  },
+  {
+    "char": "肪",
+    "grade": 8,
+    "freq": 1878
+  },
+  {
+    "char": "膨",
+    "grade": 8,
+    "freq": 1293
+  },
+  {
+    "char": "謀",
+    "grade": 8,
+    "freq": 1370
+  },
+  {
+    "char": "貌",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "貿",
+    "grade": 5,
+    "freq": 652
+  },
+  {
+    "char": "防",
+    "grade": 5,
+    "freq": 331
+  },
+  {
+    "char": "北",
+    "grade": 2,
+    "freq": 153
+  },
+  {
+    "char": "僕",
+    "grade": 8,
+    "freq": 1236
+  },
+  {
+    "char": "墨",
+    "grade": 8,
+    "freq": 1616
+  },
+  {
+    "char": "撲",
+    "grade": 8,
+    "freq": 1283
+  },
+  {
+    "char": "朴",
+    "grade": 8,
+    "freq": 1626
+  },
+  {
+    "char": "牧",
+    "grade": 4,
+    "freq": 1360
+  },
+  {
+    "char": "睦",
+    "grade": 8,
+    "freq": 1993
+  },
+  {
+    "char": "勃",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "没",
+    "grade": 8,
+    "freq": 1385
+  },
+  {
+    "char": "堀",
+    "grade": 8,
+    "freq": 1285
+  },
+  {
+    "char": "奔",
+    "grade": 8,
+    "freq": 1884
+  },
+  {
+    "char": "本",
+    "grade": 1,
+    "freq": 10
+  },
+  {
+    "char": "翻",
+    "grade": 8,
+    "freq": 1465
+  },
+  {
+    "char": "凡",
+    "grade": 8,
+    "freq": 1730
+  },
+  {
+    "char": "盆",
+    "grade": 8,
+    "freq": 1654
+  },
+  {
+    "char": "摩",
+    "grade": 8,
+    "freq": 1252
+  },
+  {
+    "char": "磨",
+    "grade": 8,
+    "freq": 1608
+  },
+  {
+    "char": "魔",
+    "grade": 8,
+    "freq": 1514
+  },
+  {
+    "char": "麻",
+    "grade": 8,
+    "freq": 1142
+  },
+  {
+    "char": "埋",
+    "grade": 8,
+    "freq": 1110
+  },
+  {
+    "char": "妹",
+    "grade": 2,
+    "freq": 1446
+  },
+  {
+    "char": "昧",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "枚",
+    "grade": 6,
+    "freq": 911
+  },
+  {
+    "char": "毎",
+    "grade": 2,
+    "freq": 436
+  },
+  {
+    "char": "幕",
+    "grade": 6,
+    "freq": 835
+  },
+  {
+    "char": "膜",
+    "grade": 8,
+    "freq": 1804
+  },
+  {
+    "char": "枕",
+    "grade": 8,
+    "freq": 2084
+  },
+  {
+    "char": "又",
+    "grade": 8,
+    "freq": 1874
+  },
+  {
+    "char": "抹",
+    "grade": 8,
+    "freq": 2006
+  },
+  {
+    "char": "末",
+    "grade": 4,
+    "freq": 456
+  },
+  {
+    "char": "繭",
+    "grade": 8,
+    "freq": 2495
+  },
+  {
+    "char": "万",
+    "grade": 2,
+    "freq": 375
+  },
+  {
+    "char": "慢",
+    "grade": 8,
+    "freq": 1368
+  },
+  {
+    "char": "満",
+    "grade": 4,
+    "freq": 515
+  },
+  {
+    "char": "漫",
+    "grade": 8,
+    "freq": 1408
+  },
+  {
+    "char": "味",
+    "grade": 3,
+    "freq": 442
+  },
+  {
+    "char": "未",
+    "grade": 4,
+    "freq": 650
+  },
+  {
+    "char": "魅",
+    "grade": 8,
+    "freq": 1206
+  },
+  {
+    "char": "岬",
+    "grade": 8,
+    "freq": 1972
+  },
+  {
+    "char": "密",
+    "grade": 6,
+    "freq": 815
+  },
+  {
+    "char": "蜜",
+    "grade": 8,
+    "freq": 2203
+  },
+  {
+    "char": "脈",
+    "grade": 5,
+    "freq": 1477
+  },
+  {
+    "char": "妙",
+    "grade": 8,
+    "freq": 1122
+  },
+  {
+    "char": "民",
+    "grade": 4,
+    "freq": 28
+  },
+  {
+    "char": "眠",
+    "grade": 8,
+    "freq": 1315
+  },
+  {
+    "char": "務",
+    "grade": 5,
+    "freq": 111
+  },
+  {
+    "char": "夢",
+    "grade": 5,
+    "freq": 943
+  },
+  {
+    "char": "無",
+    "grade": 4,
+    "freq": 274
+  },
+  {
+    "char": "矛",
+    "grade": 8,
+    "freq": 1538
+  },
+  {
+    "char": "霧",
+    "grade": 8,
+    "freq": 1747
+  },
+  {
+    "char": "婿",
+    "grade": 8,
+    "freq": 2099
+  },
+  {
+    "char": "娘",
+    "grade": 8,
+    "freq": 1145
+  },
+  {
+    "char": "冥",
+    "grade": 8,
+    "freq": 2349
+  },
+  {
+    "char": "名",
+    "grade": 1,
+    "freq": 177
+  },
+  {
+    "char": "命",
+    "grade": 3,
+    "freq": 465
+  },
+  {
+    "char": "明",
+    "grade": 2,
+    "freq": 67
+  },
+  {
+    "char": "盟",
+    "grade": 6,
+    "freq": 587
+  },
+  {
+    "char": "迷",
+    "grade": 5,
+    "freq": 942
+  },
+  {
+    "char": "銘",
+    "grade": 8,
+    "freq": 1394
+  },
+  {
+    "char": "鳴",
+    "grade": 2,
+    "freq": 1279
+  },
+  {
+    "char": "滅",
+    "grade": 8,
+    "freq": 1222
+  },
+  {
+    "char": "免",
+    "grade": 8,
+    "freq": 1080
+  },
+  {
+    "char": "綿",
+    "grade": 5,
+    "freq": 1495
+  },
+  {
+    "char": "面",
+    "grade": 3,
+    "freq": 186
+  },
+  {
+    "char": "麺",
+    "grade": 8,
+    "freq": 2331
+  },
+  {
+    "char": "模",
+    "grade": 6,
+    "freq": 668
+  },
+  {
+    "char": "茂",
+    "grade": 8,
+    "freq": 1188
+  },
+  {
+    "char": "妄",
+    "grade": 8,
+    "freq": 2264
+  },
+  {
+    "char": "毛",
+    "grade": 2,
+    "freq": 1179
+  },
+  {
+    "char": "猛",
+    "grade": 8,
+    "freq": 1301
+  },
+  {
+    "char": "盲",
+    "grade": 8,
+    "freq": 1767
+  },
+  {
+    "char": "網",
+    "grade": 8,
+    "freq": 1194
+  },
+  {
+    "char": "耗",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "木",
+    "grade": 1,
+    "freq": 317
+  },
+  {
+    "char": "黙",
+    "grade": 8,
+    "freq": 1338
+  },
+  {
+    "char": "目",
+    "grade": 1,
+    "freq": 76
+  },
+  {
+    "char": "餅",
+    "grade": 8,
+    "freq": 2152
+  },
+  {
+    "char": "戻",
+    "grade": 8,
+    "freq": 890
+  },
+  {
+    "char": "問",
+    "grade": 3,
+    "freq": 64
+  },
+  {
+    "char": "紋",
+    "grade": 8,
+    "freq": 1519
+  },
+  {
+    "char": "門",
+    "grade": 2,
+    "freq": 452
+  },
+  {
+    "char": "冶",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "夜",
+    "grade": 2,
+    "freq": 487
+  },
+  {
+    "char": "野",
+    "grade": 2,
+    "freq": 120
+  },
+  {
+    "char": "弥",
+    "grade": 8,
+    "freq": 1687
+  },
+  {
+    "char": "矢",
+    "grade": 2,
+    "freq": 1294
+  },
+  {
+    "char": "厄",
+    "grade": 8,
+    "freq": 2123
+  },
+  {
+    "char": "役",
+    "grade": 3,
+    "freq": 315
+  },
+  {
+    "char": "約",
+    "grade": 4,
+    "freq": 94
+  },
+  {
+    "char": "薬",
+    "grade": 3,
+    "freq": 702
+  },
+  {
+    "char": "訳",
+    "grade": 6,
+    "freq": 1050
+  },
+  {
+    "char": "躍",
+    "grade": 8,
+    "freq": 900
+  },
+  {
+    "char": "柳",
+    "grade": 8,
+    "freq": 1169
+  },
+  {
+    "char": "愉",
+    "grade": 8,
+    "freq": 1974
+  },
+  {
+    "char": "油",
+    "grade": 3,
+    "freq": 690
+  },
+  {
+    "char": "癒",
+    "grade": 8,
+    "freq": 1667
+  },
+  {
+    "char": "諭",
+    "grade": 8,
+    "freq": 1461
+  },
+  {
+    "char": "輸",
+    "grade": 5,
+    "freq": 371
+  },
+  {
+    "char": "唯",
+    "grade": 8,
+    "freq": 1292
+  },
+  {
+    "char": "優",
+    "grade": 6,
+    "freq": 334
+  },
+  {
+    "char": "勇",
+    "grade": 4,
+    "freq": 1319
+  },
+  {
+    "char": "友",
+    "grade": 2,
+    "freq": 622
+  },
+  {
+    "char": "幽",
+    "grade": 8,
+    "freq": 1996
+  },
+  {
+    "char": "悠",
+    "grade": 8,
+    "freq": 1921
+  },
+  {
+    "char": "憂",
+    "grade": 8,
+    "freq": 1625
+  },
+  {
+    "char": "有",
+    "grade": 3,
+    "freq": 282
+  },
+  {
+    "char": "湧",
+    "grade": 8,
+    "freq": 2070
+  },
+  {
+    "char": "猶",
+    "grade": 8,
+    "freq": 1799
+  },
+  {
+    "char": "由",
+    "grade": 3,
+    "freq": 325
+  },
+  {
+    "char": "裕",
+    "grade": 8,
+    "freq": 1048
+  },
+  {
+    "char": "誘",
+    "grade": 8,
+    "freq": 993
+  },
+  {
+    "char": "遊",
+    "grade": 3,
+    "freq": 941
+  },
+  {
+    "char": "郵",
+    "grade": 6,
+    "freq": 917
+  },
+  {
+    "char": "雄",
+    "grade": 8,
+    "freq": 669
+  },
+  {
+    "char": "融",
+    "grade": 8,
+    "freq": 481
+  },
+  {
+    "char": "夕",
+    "grade": 1,
+    "freq": 924
+  },
+  {
+    "char": "予",
+    "grade": 3,
+    "freq": 180
+  },
+  {
+    "char": "余",
+    "grade": 5,
+    "freq": 680
+  },
+  {
+    "char": "与",
+    "grade": 8,
+    "freq": 308
+  },
+  {
+    "char": "誉",
+    "grade": 8,
+    "freq": 1064
+  },
+  {
+    "char": "預",
+    "grade": 6,
+    "freq": 981
+  },
+  {
+    "char": "幼",
+    "grade": 6,
+    "freq": 1227
+  },
+  {
+    "char": "妖",
+    "grade": 8,
+    "freq": 1964
+  },
+  {
+    "char": "容",
+    "grade": 5,
+    "freq": 264
+  },
+  {
+    "char": "庸",
+    "grade": 8,
+    "freq": 2038
+  },
+  {
+    "char": "揚",
+    "grade": 8,
+    "freq": 1316
+  },
+  {
+    "char": "揺",
+    "grade": 8,
+    "freq": 1079
+  },
+  {
+    "char": "擁",
+    "grade": 8,
+    "freq": 1213
+  },
+  {
+    "char": "曜",
+    "grade": 2,
+    "freq": 940
+  },
+  {
+    "char": "様",
+    "grade": 3,
+    "freq": 493
+  },
+  {
+    "char": "洋",
+    "grade": 3,
+    "freq": 763
+  },
+  {
+    "char": "溶",
+    "grade": 8,
+    "freq": 1364
+  },
+  {
+    "char": "用",
+    "grade": 2,
+    "freq": 107
+  },
+  {
+    "char": "窯",
+    "grade": 8,
+    "freq": 2072
+  },
+  {
+    "char": "羊",
+    "grade": 3,
+    "freq": 1852
+  },
+  {
+    "char": "葉",
+    "grade": 3,
+    "freq": 414
+  },
+  {
+    "char": "要",
+    "grade": 4,
+    "freq": 106
+  },
+  {
+    "char": "謡",
+    "grade": 8,
+    "freq": 1580
+  },
+  {
+    "char": "踊",
+    "grade": 8,
+    "freq": 1308
+  },
+  {
+    "char": "陽",
+    "grade": 3,
+    "freq": 1071
+  },
+  {
+    "char": "養",
+    "grade": 4,
+    "freq": 888
+  },
+  {
+    "char": "抑",
+    "grade": 8,
+    "freq": 834
+  },
+  {
+    "char": "欲",
+    "grade": 6,
+    "freq": 902
+  },
+  {
+    "char": "沃",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "浴",
+    "grade": 4,
+    "freq": 1136
+  },
+  {
+    "char": "翌",
+    "grade": 6,
+    "freq": 1070
+  },
+  {
+    "char": "翼",
+    "grade": 8,
+    "freq": 1201
+  },
+  {
+    "char": "羅",
+    "grade": 8,
+    "freq": 1831
+  },
+  {
+    "char": "裸",
+    "grade": 8,
+    "freq": 1796
+  },
+  {
+    "char": "来",
+    "grade": 2,
+    "freq": 102
+  },
+  {
+    "char": "頼",
+    "grade": 8,
+    "freq": 708
+  },
+  {
+    "char": "雷",
+    "grade": 8,
+    "freq": 1491
+  },
+  {
+    "char": "絡",
+    "grade": 8,
+    "freq": 806
+  },
+  {
+    "char": "落",
+    "grade": 3,
+    "freq": 420
+  },
+  {
+    "char": "酪",
+    "grade": 8,
+    "freq": 2012
+  },
+  {
+    "char": "乱",
+    "grade": 6,
+    "freq": 755
+  },
+  {
+    "char": "卵",
+    "grade": 6,
+    "freq": 1342
+  },
+  {
+    "char": "嵐",
+    "grade": 8,
+    "freq": 1910
+  },
+  {
+    "char": "欄",
+    "grade": 8,
+    "freq": 1523
+  },
+  {
+    "char": "濫",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "藍",
+    "grade": 8,
+    "freq": 2043
+  },
+  {
+    "char": "覧",
+    "grade": 6,
+    "freq": 1510
+  },
+  {
+    "char": "利",
+    "grade": 4,
+    "freq": 203
+  },
+  {
+    "char": "吏",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "履",
+    "grade": 8,
+    "freq": 1619
+  },
+  {
+    "char": "梨",
+    "grade": 4,
+    "freq": 1331
+  },
+  {
+    "char": "理",
+    "grade": 2,
+    "freq": 86
+  },
+  {
+    "char": "璃",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "痢",
+    "grade": 8,
+    "freq": 2037
+  },
+  {
+    "char": "裏",
+    "grade": 6,
+    "freq": 812
+  },
+  {
+    "char": "里",
+    "grade": 2,
+    "freq": 1096
+  },
+  {
+    "char": "離",
+    "grade": 8,
+    "freq": 555
+  },
+  {
+    "char": "陸",
+    "grade": 4,
+    "freq": 736
+  },
+  {
+    "char": "律",
+    "grade": 6,
+    "freq": 992
+  },
+  {
+    "char": "率",
+    "grade": 5,
+    "freq": 383
+  },
+  {
+    "char": "立",
+    "grade": 1,
+    "freq": 58
+  },
+  {
+    "char": "略",
+    "grade": 5,
+    "freq": 774
+  },
+  {
+    "char": "流",
+    "grade": 3,
+    "freq": 280
+  },
+  {
+    "char": "留",
+    "grade": 5,
+    "freq": 731
+  },
+  {
+    "char": "硫",
+    "grade": 8,
+    "freq": 1867
+  },
+  {
+    "char": "粒",
+    "grade": 8,
+    "freq": 1635
+  },
+  {
+    "char": "隆",
+    "grade": 8,
+    "freq": 1109
+  },
+  {
+    "char": "竜",
+    "grade": 8,
+    "freq": 1195
+  },
+  {
+    "char": "侶",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "慮",
+    "grade": 8,
+    "freq": 916
+  },
+  {
+    "char": "旅",
+    "grade": 3,
+    "freq": 783
+  },
+  {
+    "char": "虜",
+    "grade": 8,
+    "freq": 1678
+  },
+  {
+    "char": "了",
+    "grade": 8,
+    "freq": 792
+  },
+  {
+    "char": "僚",
+    "grade": 8,
+    "freq": 709
+  },
+  {
+    "char": "両",
+    "grade": 3,
+    "freq": 247
+  },
+  {
+    "char": "寮",
+    "grade": 8,
+    "freq": 1705
+  },
+  {
+    "char": "料",
+    "grade": 4,
+    "freq": 295
+  },
+  {
+    "char": "涼",
+    "grade": 8,
+    "freq": 1783
+  },
+  {
+    "char": "猟",
+    "grade": 8,
+    "freq": 1851
+  },
+  {
+    "char": "療",
+    "grade": 8,
+    "freq": 600
+  },
+  {
+    "char": "瞭",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "糧",
+    "grade": 8,
+    "freq": 1354
+  },
+  {
+    "char": "良",
+    "grade": 4,
+    "freq": 501
+  },
+  {
+    "char": "量",
+    "grade": 4,
+    "freq": 469
+  },
+  {
+    "char": "陵",
+    "grade": 8,
+    "freq": 1746
+  },
+  {
+    "char": "領",
+    "grade": 5,
+    "freq": 138
+  },
+  {
+    "char": "力",
+    "grade": 1,
+    "freq": 62
+  },
+  {
+    "char": "緑",
+    "grade": 3,
+    "freq": 1180
+  },
+  {
+    "char": "倫",
+    "grade": 8,
+    "freq": 1322
+  },
+  {
+    "char": "厘",
+    "grade": 8,
+    "freq": 1835
+  },
+  {
+    "char": "林",
+    "grade": 1,
+    "freq": 656
+  },
+  {
+    "char": "臨",
+    "grade": 6,
+    "freq": 722
+  },
+  {
+    "char": "輪",
+    "grade": 4,
+    "freq": 693
+  },
+  {
+    "char": "隣",
+    "grade": 8,
+    "freq": 1083
+  },
+  {
+    "char": "瑠",
+    "grade": 8,
+    "freq": 2352
+  },
+  {
+    "char": "塁",
+    "grade": 8,
+    "freq": 651
+  },
+  {
+    "char": "涙",
+    "grade": 8,
+    "freq": 1381
+  },
+  {
+    "char": "累",
+    "grade": 8,
+    "freq": 1662
+  },
+  {
+    "char": "類",
+    "grade": 4,
+    "freq": 678
+  },
+  {
+    "char": "令",
+    "grade": 4,
+    "freq": 804
+  },
+  {
+    "char": "例",
+    "grade": 4,
+    "freq": 399
+  },
+  {
+    "char": "冷",
+    "grade": 4,
+    "freq": 667
+  },
+  {
+    "char": "励",
+    "grade": 8,
+    "freq": 1254
+  },
+  {
+    "char": "礼",
+    "grade": 3,
+    "freq": 1185
+  },
+  {
+    "char": "鈴",
+    "grade": 8,
+    "freq": 880
+  },
+  {
+    "char": "隷",
+    "grade": 8,
+    "freq": 2009
+  },
+  {
+    "char": "零",
+    "grade": 8,
+    "freq": 1217
+  },
+  {
+    "char": "霊",
+    "grade": 8,
+    "freq": 1458
+  },
+  {
+    "char": "麗",
+    "grade": 8,
+    "freq": 1758
+  },
+  {
+    "char": "齢",
+    "grade": 8,
+    "freq": 770
+  },
+  {
+    "char": "暦",
+    "grade": 8,
+    "freq": 1765
+  },
+  {
+    "char": "歴",
+    "grade": 5,
+    "freq": 632
+  },
+  {
+    "char": "列",
+    "grade": 3,
+    "freq": 927
+  },
+  {
+    "char": "劣",
+    "grade": 8,
+    "freq": 1620
+  },
+  {
+    "char": "烈",
+    "grade": 8,
+    "freq": 1397
+  },
+  {
+    "char": "裂",
+    "grade": 8,
+    "freq": 1041
+  },
+  {
+    "char": "廉",
+    "grade": 8,
+    "freq": 2066
+  },
+  {
+    "char": "恋",
+    "grade": 8,
+    "freq": 1296
+  },
+  {
+    "char": "練",
+    "grade": 3,
+    "freq": 788
+  },
+  {
+    "char": "連",
+    "grade": 4,
+    "freq": 30
+  },
+  {
+    "char": "錬",
+    "grade": 8,
+    "freq": 2221
+  },
+  {
+    "char": "呂",
+    "grade": 8,
+    "freq": 2055
+  },
+  {
+    "char": "炉",
+    "grade": 8,
+    "freq": 1359
+  },
+  {
+    "char": "賂",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "路",
+    "grade": 3,
+    "freq": 529
+  },
+  {
+    "char": "露",
+    "grade": 8,
+    "freq": 928
+  },
+  {
+    "char": "労",
+    "grade": 4,
+    "freq": 398
+  },
+  {
+    "char": "廊",
+    "grade": 8,
+    "freq": 1598
+  },
+  {
+    "char": "弄",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "朗",
+    "grade": 6,
+    "freq": 1374
+  },
+  {
+    "char": "楼",
+    "grade": 8,
+    "freq": 2173
+  },
+  {
+    "char": "浪",
+    "grade": 8,
+    "freq": 1508
+  },
+  {
+    "char": "漏",
+    "grade": 8,
+    "freq": 1298
+  },
+  {
+    "char": "老",
+    "grade": 4,
+    "freq": 803
+  },
+  {
+    "char": "郎",
+    "grade": 8,
+    "freq": 569
+  },
+  {
+    "char": "六",
+    "grade": 1,
+    "freq": 93
+  },
+  {
+    "char": "麓",
+    "grade": 8,
+    "freq": 2366
+  },
+  {
+    "char": "録",
+    "grade": 4,
+    "freq": 546
+  },
+  {
+    "char": "論",
+    "grade": 6,
+    "freq": 227
+  },
+  {
+    "char": "和",
+    "grade": 3,
+    "freq": 124
+  },
+  {
+    "char": "話",
+    "grade": 2,
+    "freq": 134
+  },
+  {
+    "char": "賄",
+    "grade": 8,
+    "freq": 1282
+  },
+  {
+    "char": "脇",
+    "grade": 8,
+    "freq": 1806
+  },
+  {
+    "char": "惑",
+    "grade": 8,
+    "freq": 777
+  },
+  {
+    "char": "枠",
+    "grade": 8,
+    "freq": 922
+  },
+  {
+    "char": "湾",
+    "grade": 8,
+    "freq": 545
+  },
+  {
+    "char": "腕",
+    "grade": 8,
+    "freq": 1163
+  },
+  {
+    "char": "丼",
+    "grade": 8,
+    "freq": 2088
+  },
+  {
+    "char": "傲",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "刹",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "哺",
+    "grade": 8,
+    "freq": 2461
+  },
+  {
+    "char": "喩",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "嗅",
+    "grade": 8,
+    "freq": 2480
+  },
+  {
+    "char": "嘲",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "毀",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "彙",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "恣",
+    "grade": 8,
+    "freq": 2325
+  },
+  {
+    "char": "惧",
+    "grade": 8,
+    "freq": 2097
+  },
+  {
+    "char": "慄",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "憬",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "拉",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "摯",
+    "grade": 8,
+    "freq": 2170
+  },
+  {
+    "char": "曖",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "楷",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "鬱",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "璧",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "瘍",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "箋",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "籠",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "緻",
+    "grade": 8,
+    "freq": 2460
+  },
+  {
+    "char": "羞",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "訃",
+    "grade": 8,
+    "freq": 2379
+  },
+  {
+    "char": "諧",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "貪",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "踪",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "辣",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "錮",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "塡",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "頰",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "𠮟",
+    "grade": 8,
+    "freq": null
+  },
+  {
+    "char": "剝",
+    "grade": 8,
+    "freq": null
+  }
+]
