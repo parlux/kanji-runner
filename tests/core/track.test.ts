@@ -1,18 +1,23 @@
 import { describe, expect, it } from "vitest";
 import {
   buildTrack,
+  chargeLine,
   hazardSpan,
+  isCharge,
   type Solid,
   type Track,
 } from "../../src/core/track";
 import {
+  BASE_SPEED,
   BLOCK_MAX_W,
   BLOCK_MIN_W,
   CALM_DISTANCE,
   CROWD_MAX_W,
   ENEMY_X_MARGIN,
+  FIRE_RANGE,
   SAW_RATE,
   SAW_W,
+  STEER_MAX_SPEED,
 } from "../../src/core/tuning";
 
 const QUESTIONS = 14;
@@ -32,6 +37,51 @@ function between(t: Track, i: number): Track["hazards"] {
   const [a, b] = [t.questions[i] as number, t.questions[i + 1] as number];
   return t.hazards.filter((h) => h.pos > a && h.pos < b);
 }
+
+/** Steering distance: how far the army travels (at base speed) while crossing the whole track. */
+const STEER_REACH = BASE_SPEED / STEER_MAX_SPEED;
+
+/**
+ * Longest stretch of track (in units) with nothing to do: no wall, charge or
+ * hazard within steering distance, and no block or pack within FIRE_RANGE
+ * short of the next question's fire limit. Calm stretches are excluded.
+ * Packs are taken at their start positions (they only come closer).
+ */
+function longestDeadStretch(t: Track, step = 0.01): number {
+  const last = t.questions.at(-1) ?? 0;
+  const limitAfter = (d: number): number => {
+    const q = t.questions.findIndex((p) => p > d);
+    if (q < 0) return Infinity;
+    return isCharge(t, q) ? chargeLine(t, q) : (t.questions[q] as number);
+  };
+  const busy = (d: number): boolean => {
+    if (t.questions.some((q) => d >= q - CALM_DISTANCE && d <= q)) return true;
+    if (t.questions.some((q) => q > d && q - d <= STEER_REACH)) return true;
+    const limit = limitAfter(d);
+    return t.hazards.some((h) => {
+      const ahead = h.pos - d;
+      if (ahead <= 0) return false;
+      if (ahead <= STEER_REACH) return true;
+      return h.kind !== "saw" && ahead <= FIRE_RANGE && h.pos < limit;
+    });
+  };
+  let longest = 0;
+  let run = 0;
+  for (let d = 0; d <= last; d += step) {
+    run = busy(d) ? 0 : run + step;
+    longest = Math.max(longest, run);
+  }
+  return longest;
+}
+
+describe("dead time", () => {
+  it("never leaves more than 2 s (at base speed) with nothing to do outside the calm stretches", () => {
+    const worst = Math.max(
+      ...TRACKS.slice(0, 200).map((t) => longestDeadStretch(t)),
+    );
+    expect(worst / BASE_SPEED).toBeLessThanOrEqual(2);
+  });
+});
 
 describe("buildTrack", () => {
   it("places the questions in ascending order, the first after a calm stretch", () => {
