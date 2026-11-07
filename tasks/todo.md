@@ -72,7 +72,7 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 
 **Acceptance criteria:**
 - [ ] A full run is playable with drag only in a narrow mobile viewport.
-- [ ] Touching down without moving doesn't move the crowd.
+- [x] Touching down without moving doesn't move the crowd.
 - [ ] Push to `main` deploys, and the site loads at `https://parlux.github.io/kanji-runner/`.
 
 **Verification:** Mobile viewport emulation. The Actions run is green. Open the site on the phone.
