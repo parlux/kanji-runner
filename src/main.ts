@@ -13,6 +13,7 @@ import {
 } from "./game/scenes";
 import { startTap, syncTap } from "./game/start";
 import { loadProgress, saveProgress } from "./storage/storage";
+import { openLogin } from "./sync/login";
 import { createSyncFromEnv } from "./sync/sync";
 
 const canvas = document.querySelector<HTMLCanvasElement>("#game");
@@ -66,7 +67,9 @@ const takeDrag = bindDrag(canvas, (x, y) => {
   const w = window.innerWidth;
   const h = window.innerHeight;
   if (scene.pick === undefined && syncTap(sync.status(), w, h, x, y)) {
+    // offline retries; log in opens the form; synced offers sign out
     if (sync.status() === "offline") void sync.pull().then(adopt);
+    else openLogin(sync, adopt);
     return;
   }
   const action = startTap(scene.pick !== undefined, w, h, x, y);
