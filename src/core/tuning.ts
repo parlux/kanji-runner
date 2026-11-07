@@ -59,6 +59,8 @@ export const FIRE_PER_SOLDIER = 1;
 export const FIRE_RANGE = 2.0;
 /** Block hit points = BLOCK_HP_K × the expected army at that point of the run. */
 export const BLOCK_HP_K = 1.0;
+/** Supply crates (S3): a shattered block adds round(CRATE_REWARD_K × its hit points) soldiers. */
+export const CRATE_REWARD_K = 0.3;
 
 // Enemy packs (S2). Shootable groups that run at the army. See track.ts and sim.ts.
 /** Chance a hazard beat after question 2 is an enemy pack. */

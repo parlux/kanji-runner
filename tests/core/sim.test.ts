@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  crateReward,
   createRunState,
   gateOpenings,
   isShattered,
@@ -26,6 +27,7 @@ import {
 } from "../../src/core/track";
 import {
   BASE_SPEED,
+  CRATE_REWARD_K,
   CROWD_MAX_W,
   ENEMY_DAMAGE,
   ENEMY_HP,
@@ -473,6 +475,7 @@ describe("shooting", () => {
     });
     return { ...s, hp, army };
   }
+  const pack = (pos: number, x = 0.5): Pack => ({ kind: "pack", pos, x });
   const stepFor = (s: RunState, secs: number): RunState => {
     for (let t = 0; t < Math.round(secs / DT); t++) s = stepRun(s, DT);
     return s;
@@ -520,6 +523,53 @@ describe("shooting", () => {
     expect(intact.status).toBe("dead");
   });
 
+  it("a shattered crate adds round(CRATE_REWARD_K × hp) exactly once", () => {
+    const hp = 40;
+    const s0 = { ...range([wide(0.5)], [hp]), damage: [hp - 0.01] };
+    const broke = stepRun(s0, DT);
+    expect(isShattered(broke, 0)).toBe(true);
+    expect(broke.army).toBe(20 + crateReward(hp));
+    expect(crateReward(hp)).toBe(Math.round(CRATE_REWARD_K * hp));
+    expect(broke.lastCrate).toEqual({
+      gain: crateReward(hp),
+      dist: broke.dist,
+    });
+    // passing it later pays nothing more and doesn't clip
+    const passed = stepFor(broke, 1);
+    expect(passed.nextHazard).toBe(1);
+    expect(passed.army).toBe(broke.army);
+  });
+
+  it("an unbroken crate adds nothing and clips as before", () => {
+    const s = stepFor(range([wide(0.5)], [1e9], 20), 1);
+    expect(s.lastCrate).toBe(null);
+    expect(s.army).toBe(0);
+  });
+
+  it("a pack shot to 0 pays no crate reward", () => {
+    const s0 = {
+      ...range([pack(1.5)], [7 * ENEMY_HP], 20),
+      damage: [7 * ENEMY_HP - 0.01],
+    };
+    const s = stepRun(s0, DT);
+    expect(packSurvivors(s, 0)).toBe(0);
+    expect(s.army).toBe(20);
+    expect(s.lastCrate).toBe(null);
+  });
+
+  it("crate rewards never change streak or results", () => {
+    let s = {
+      ...range([wide(0.5)], [40]),
+      damage: [39.99],
+      streak: 3,
+      results: [true, false],
+    };
+    s = stepFor(s, 1);
+    expect(s.lastCrate).not.toBe(null);
+    expect(s.streak).toBe(3);
+    expect(s.results).toEqual([true, false]);
+  });
+
   it("saws take no damage", () => {
     const sawAhead: Saw = { kind: "saw", pos: 1.5, mid: 0.5, amp: 0, phase: 0 };
     const s = stepFor(range([sawAhead], [0]), 0.5);
@@ -541,8 +591,6 @@ describe("shooting", () => {
     expect(s.streak).toBe(3);
     expect(s.results).toEqual([true, false]);
   });
-
-  const pack = (pos: number, x = 0.5): Pack => ({ kind: "pack", pos, x });
 
   it("a pack runs at the army ENEMY_SPEED faster than the scroll once visible", () => {
     const far = range([pack(VIEW_DISTANCE + 1)], [10 * ENEMY_HP]);

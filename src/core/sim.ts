@@ -10,6 +10,7 @@ import { applyCorrect, applyWrong } from "./scoring";
 import {
   BASE_REWARD,
   BASE_SPEED,
+  CRATE_REWARD_K,
   ENEMY_DAMAGE,
   ENEMY_HP,
   ENEMY_SPEED,
@@ -58,6 +59,8 @@ export type RunState = {
   target: number | null;
   /** Most recent shattered block and the distance it happened at, for feedback. */
   lastShatter: { index: number; dist: number } | null;
+  /** Most recent crate payout (recruits from a shattered block) and the distance it happened at, for feedback. */
+  lastCrate: { gain: number; dist: number } | null;
   /** Most recent clipping loss and the distance it happened at, for feedback. */
   lastClip: { loss: number; dist: number } | null;
   /** Most recent answer, for feedback: the opening chosen and the army change it caused (after clipping). */
@@ -99,6 +102,7 @@ export function createRunState(rows: GateRow[], track: Track): RunState {
     ),
     target: null,
     lastShatter: null,
+    lastCrate: null,
     lastClip: null,
     lastAnswer: null,
     status: "running",
@@ -188,7 +192,14 @@ function threats(s: RunState): (Threat | null)[] {
   });
 }
 
-/** All fire goes to the nearest shootable threat ahead; damage is capped at its hp. */
+/** Recruits a crate pays out when it shatters. */
+export const crateReward = (hp: number): number =>
+  Math.round(CRATE_REWARD_K * hp);
+
+/**
+ * All fire goes to the nearest shootable threat ahead; damage is capped at its hp.
+ * A block (supply crate) pays out once, on the step it shatters: it is never a target again.
+ */
 function fire(s: RunState, w: number, dt: number): RunState {
   const target = pickTarget(threats(s), s.nextHazard, s.dist, {
     left: s.x - w / 2,
@@ -199,11 +210,17 @@ function fire(s: RunState, w: number, dt: number): RunState {
   const damage = [...s.damage];
   damage[target] = Math.min(hp, (damage[target] ?? 0) + firepower(s.army) * dt);
   const shattered = damage[target] >= hp;
+  const gain =
+    shattered && s.track.hazards[target]?.kind === "block"
+      ? crateReward(hp)
+      : 0;
   return {
     ...s,
+    army: s.army + gain,
     damage,
     target,
     lastShatter: shattered ? { index: target, dist: s.dist } : s.lastShatter,
+    lastCrate: gain > 0 ? { gain, dist: s.dist } : s.lastCrate,
   };
 }
 
