@@ -7,7 +7,13 @@ import {
   showReading,
 } from "./distractors";
 import { createRng, shuffle, type Rng } from "./rng";
-import { itemKey, READING_UNLOCK_BOX, weight } from "./srs";
+import {
+  builtInPool,
+  builtInSelection,
+  type Entry,
+  type Pool,
+  type Selection,
+} from "./pool";
 import {
   MAX_NEW_PER_RUN,
   ROWS_PER_RUN,
@@ -18,38 +24,7 @@ import type { GateRow, KanaItem, KanjiItem, Progress } from "./types";
 
 const optionCount = (i: number): number => (i < TWO_OPTION_ROWS ? 2 : 3);
 
-/** Level 0 is hiragana, level 1 katakana. */
-export const kanaLevel = (k: KanaItem): number =>
-  k.script === "hiragana" ? 0 : 1;
-
-/** One askable item: a kana, or a kanji as a meaning or a reading gate. */
-export type Entry =
-  | { key: string; type: "kana"; item: KanaItem }
-  | { key: string; type: "meaning" | "reading"; item: KanjiItem };
-
-/**
- * Every unlocked item, in progression order: kana, then kanji by level. A
- * kanji's reading follows its meaning, once the meaning box is ≥ 3.
- */
-export function unlockedPool(
-  progress: Progress,
-  kana: readonly KanaItem[],
-  kanji: readonly KanjiItem[],
-): Entry[] {
-  const level = progress.unlockedLevel;
-  const out: Entry[] = [];
-  for (const k of kana)
-    if (kanaLevel(k) <= level)
-      out.push({ key: itemKey(k.char, "kana"), type: "kana", item: k });
-  for (const k of kanji) {
-    if (k.level > level) continue;
-    const key = itemKey(k.char, "meaning");
-    out.push({ key, type: "meaning", item: k });
-    if ((progress.items[key]?.box ?? 0) >= READING_UNLOCK_BOX)
-      out.push({ key: itemKey(k.char, "reading"), type: "reading", item: k });
-  }
-  return out;
-}
+export { kanaLevel, unlockedPool, type Entry } from "./pool";
 
 /** Up to `n` entries by weighted random choice, without repeats. */
 function weightedDraw(
@@ -82,19 +57,20 @@ export function selectEntries(
   pool: readonly Entry[],
   progress: Progress,
 ): Entry[] {
-  const record = (e: Entry) => progress.items[e.key];
-  const box = (e: Entry): number => record(e)?.box ?? 0;
-  const weightOf = (e: Entry): number => weight(box(e));
-  const known = pool.filter((e) => record(e));
-  const fresh = pool.filter((e) => !record(e)).slice(0, MAX_NEW_PER_RUN);
+  return select(rng, builtInSelection(progress, pool));
+}
+
+/** `selectEntries` for any mode's selection rules. */
+export function select(rng: Rng, sel: Selection): Entry[] {
+  const { box, weight: weightOf } = sel;
+  const known = sel.entries.filter(sel.known);
+  const fresh = sel.entries
+    .filter((e) => !sel.known(e))
+    .slice(0, MAX_NEW_PER_RUN);
   // Warm-ups come from the current level's known items once it has enough,
   // so placed lower levels don't fill them; else from all known items.
   // Stable sort after a shuffle: highest box first, ties in random order.
-  const current = known.filter(
-    (e) =>
-      (e.type === "kana" ? kanaLevel(e.item) : e.item.level) ===
-      progress.unlockedLevel,
-  );
+  const current = known.filter(sel.current);
   const warm = shuffle(rng, current.length >= WARM_UPS ? current : known)
     .sort((a, b) => box(b) - box(a))
     .slice(0, WARM_UPS);
@@ -114,9 +90,8 @@ export function selectEntries(
 }
 
 /**
- * A run built from the seed and SRS state: same seed and progress, same run.
- * Distractors draw on unlocked items plus the next level. A reading gate
- * shows the kanji's main readings in turn, by how often it has been asked.
+ * A Built-in run from the seed and SRS state: same seed and progress, same run.
+ * Distractors draw on unlocked items plus the next level.
  */
 export function buildRun(
   seed: number,
@@ -124,22 +99,30 @@ export function buildRun(
   kana: readonly KanaItem[],
   kanji: readonly KanjiItem[],
 ): GateRow[] {
+  return buildPoolRun(seed, progress, builtInPool(progress, kana, kanji));
+}
+
+/**
+ * A run from the seed, SRS state and a mode's pool (`pool.ts`). A reading
+ * gate shows the kanji's main readings in turn, by how often it has been asked.
+ */
+export function buildPoolRun(
+  seed: number,
+  progress: Progress,
+  pool: Pool,
+): GateRow[] {
   const rng = createRng(seed);
-  const pool = unlockedPool(progress, kana, kanji);
-  const next = progress.unlockedLevel + 1;
-  const kanaPool = kana.filter((k) => kanaLevel(k) <= next);
-  const kanjiPool = kanji.filter((k) => k.level <= next);
   const asked = new Map<string, number>();
-  return selectEntries(rng, pool, progress).map((e, i) => {
+  return select(rng, pool).map((e, i) => {
     const count = optionCount(i);
-    if (e.type === "kana") return kanaRow(rng, e.item, kanaPool, count);
-    if (e.type === "meaning") return meaningRow(rng, e.item, kanjiPool, count);
+    if (e.type === "kana") return kanaRow(rng, e.item, pool.kana, count);
+    if (e.type === "meaning") return meaningRow(rng, e.item, pool.kanji, count);
     const turn = (progress.items[e.key]?.seen ?? 0) + (asked.get(e.key) ?? 0);
     asked.set(e.key, (asked.get(e.key) ?? 0) + 1);
     return readingRow(
       rng,
       e.item,
-      kanjiPool,
+      pool.kanji,
       count,
       shownReading(e.item, turn),
     );

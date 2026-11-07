@@ -1,7 +1,8 @@
 import { bossSize, bossWon } from "../core/boss";
 import { applyUnlock, maxLevel, place } from "../core/progression";
 import { mergeProgress } from "../core/merge";
-import { buildRun } from "../core/run";
+import { builtInPool } from "../core/pool";
+import { buildPoolRun } from "../core/run";
 import { KANA } from "../core/kana";
 import { KANJI } from "../core/kanji";
 import {
@@ -82,7 +83,11 @@ function newRun(seed: number, session: Session): Scene {
     kind: "run",
     seed,
     run: createRunState(
-      buildRun(seed, session.progress, session.kana, KANJI),
+      buildPoolRun(
+        seed,
+        session.progress,
+        builtInPool(session.progress, session.kana, KANJI),
+      ),
       buildTrack(seed, ROWS_PER_RUN),
     ),
     paused: false,
