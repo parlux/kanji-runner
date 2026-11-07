@@ -34,3 +34,27 @@ export type KanjiItem = {
   /** KRADFILE elements, some of them kanji, some radicals such as ⺅. */
   components: string[];
 };
+
+/** SRS record for one item and gate type, keyed `char:type` (e.g. `水:meaning`). */
+export type ItemProgress = {
+  /** Leitner box 0–5. */
+  box: number;
+  seen: number;
+  correct: number;
+  wrong: number;
+  /** Epoch ms of the last answer. */
+  lastSeen: number;
+};
+
+/** Win = the run finished, loss = the army hit 0 (until the boss lands). */
+export type RunStats = { runs: number; wins: number; losses: number };
+
+/** Everything persisted: the one contract for storage, run building and sync. */
+export type Progress = {
+  version: 1;
+  /** 0 hiragana, 1 katakana, 2+ kanji levels. */
+  unlockedLevel: number;
+  /** Only items that have a record; a missing key is a new item. */
+  items: Record<string, ItemProgress>;
+  stats: RunStats;
+};
