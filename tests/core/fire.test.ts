@@ -5,10 +5,11 @@ import {
   hazardHp,
   packStrength,
   pickTarget,
+  type Threat,
 } from "../../src/core/fire";
 import { buildKanaRun } from "../../src/core/run";
 import { KANA } from "../../src/core/kana";
-import type { Block, Hazard, Pack, Saw, Track } from "../../src/core/track";
+import type { Block, Pack, Saw, Track } from "../../src/core/track";
 import {
   BLOCK_HP_K,
   ENEMY_HP,
@@ -34,7 +35,6 @@ const saw = (pos: number): Saw => ({
 });
 const pack = (pos: number): Pack => ({ kind: "pack", pos, x: 0.5 });
 const crowd = { left: 0.4, right: 0.6 };
-const all = (): boolean => true;
 
 describe("firepower", () => {
   it("is FIRE_PER_SOLDIER × army", () => {
@@ -95,32 +95,32 @@ describe("packStrength", () => {
 });
 
 describe("pickTarget", () => {
-  it("picks the nearest overlapping block in range", () => {
-    const hs: Hazard[] = [block(1, 0.5, 0.7), block(1.5, 0.3, 0.5)];
-    expect(pickTarget(hs, 0, 0, crowd, all)).toBe(0);
+  const t = (pos: number, left: number, right: number): Threat => ({
+    pos,
+    span: { left, right },
   });
 
-  it("skips blocks that don't overlap the crowd", () => {
-    const hs: Hazard[] = [block(1, 0, 0.4), block(1.5, 0.55, 0.9)];
-    expect(pickTarget(hs, 0, 0, crowd, all)).toBe(1);
+  it("picks the nearest overlapping threat in range", () => {
+    expect(pickTarget([t(1, 0.5, 0.7), t(1.5, 0.3, 0.5)], 0, 0, crowd)).toBe(0);
+    expect(pickTarget([t(1.5, 0.5, 0.7), t(1, 0.3, 0.5)], 0, 0, crowd)).toBe(1);
   });
 
-  it("ignores blocks beyond FIRE_RANGE and behind the crowd", () => {
-    expect(pickTarget([block(FIRE_RANGE + 0.01, 0, 1)], 0, 0, crowd, all)).toBe(
-      null,
-    );
-    expect(pickTarget([block(FIRE_RANGE, 0, 1)], 0, 0, crowd, all)).toBe(0);
-    expect(pickTarget([block(0.9, 0, 1)], 0, 1, crowd, all)).toBe(null);
+  it("skips threats that don't overlap the crowd", () => {
+    expect(pickTarget([t(1, 0, 0.4), t(1.5, 0.55, 0.9)], 0, 0, crowd)).toBe(1);
   });
 
-  it("never targets saws, or blocks that aren't shootable", () => {
-    expect(pickTarget([saw(1)], 0, 0, crowd, all)).toBe(null);
-    const hs: Hazard[] = [block(1, 0, 1), block(1.5, 0, 1)];
-    expect(pickTarget(hs, 0, 0, crowd, (i) => i !== 0)).toBe(1);
+  it("ignores threats beyond FIRE_RANGE and behind the crowd", () => {
+    expect(pickTarget([t(FIRE_RANGE + 0.01, 0, 1)], 0, 0, crowd)).toBe(null);
+    expect(pickTarget([t(FIRE_RANGE, 0, 1)], 0, 0, crowd)).toBe(0);
+    expect(pickTarget([t(0.9, 0, 1)], 0, 1, crowd)).toBe(null);
+  });
+
+  it("never targets null entries", () => {
+    expect(pickTarget([null, t(1.5, 0, 1)], 0, 0, crowd)).toBe(1);
+    expect(pickTarget([null], 0, 0, crowd)).toBe(null);
   });
 
   it("starts at `from`", () => {
-    const hs: Hazard[] = [block(1, 0, 1), block(1.5, 0, 1)];
-    expect(pickTarget(hs, 1, 0, crowd, all)).toBe(1);
+    expect(pickTarget([t(1, 0, 1), t(1.5, 0, 1)], 1, 0, crowd)).toBe(1);
   });
 });

@@ -1,9 +1,19 @@
 import { clipLoss, crowdWidth, type Span } from "./crowd";
-import { hazardHp, expectedArmy, firepower, pickTarget } from "./fire";
+import {
+  expectedArmy,
+  firepower,
+  hazardHp,
+  pickTarget,
+  type Threat,
+} from "./fire";
 import { applyCorrect, applyWrong } from "./scoring";
 import {
   BASE_REWARD,
   BASE_SPEED,
+  ENEMY_DAMAGE,
+  ENEMY_HP,
+  ENEMY_SPEED,
+  ENEMY_STEER_SPEED,
   GATE_OPENING_2,
   GATE_OPENING_3,
   MAX_SPEED_MUL,
@@ -14,6 +24,9 @@ import {
 } from "./tuning";
 import { hazardSpan, type Hazard, type Track } from "./track";
 import type { GateRow } from "./types";
+
+/** A moving enemy pack: its current track position and centre. */
+export type PackState = { pos: number; x: number };
 
 export type RunStatus = "running" | "finished" | "dead";
 
@@ -39,6 +52,8 @@ export type RunState = {
   hp: number[];
   /** Damage dealt so far per hazard; a block is shattered once this reaches its hp. */
   damage: number[];
+  /** Per hazard: where its enemy pack is now (null for blocks and saws). */
+  packs: (PackState | null)[];
   /** Hazard being fired at this step, if any. */
   target: number | null;
   /** Most recent shattered block and the distance it happened at, for feedback. */
@@ -79,6 +94,9 @@ export function createRunState(rows: GateRow[], track: Track): RunState {
     results: [],
     hp: hazardHp(track, expectedArmy(rows)),
     damage: track.hazards.map(() => 0),
+    packs: track.hazards.map((h) =>
+      h.kind === "pack" ? { pos: h.pos, x: h.x } : null,
+    ),
     target: null,
     lastShatter: null,
     lastClip: null,
@@ -123,15 +141,59 @@ export function isShattered(s: RunState, i: number): boolean {
   return hp > 0 && (s.damage[i] ?? 0) >= hp;
 }
 
-/** All fire goes to the nearest shootable block ahead; damage is capped at its hp. */
+/** Enemies left in pack i (0 once it is shot to nothing). */
+export function packSurvivors(s: RunState, i: number): number {
+  const left = ((s.hp[i] ?? 0) - (s.damage[i] ?? 0)) / ENEMY_HP;
+  return Math.max(0, Math.ceil(left - 1e-9));
+}
+
+/** Pack i's span: its centre ± half the width of a crowd its size. */
+export function packSpan(s: RunState, i: number): Span {
+  const x = s.packs[i]?.x ?? 0.5;
+  const w = crowdWidth(packSurvivors(s, i));
+  return { left: x - w / 2, right: x + w / 2 };
+}
+
+/** Where hazard i is now: packs move, everything else stays put. */
+export function hazardPos(s: RunState, i: number): number {
+  return s.packs[i]?.pos ?? s.track.hazards[i]?.pos ?? Infinity;
+}
+
+/** Visible packs run at the army and drift towards the crowd centre. */
+function movePacks(s: RunState, dt: number): RunState {
+  const packs = s.packs.map((p, i) => {
+    if (!p || i < s.nextHazard || p.pos - s.dist > VIEW_DISTANCE) return p;
+    const drift = Math.max(
+      -ENEMY_STEER_SPEED * dt,
+      Math.min(ENEMY_STEER_SPEED * dt, s.x - p.x),
+    );
+    const w = crowdWidth(packSurvivors(s, i));
+    return {
+      pos: p.pos - ENEMY_SPEED * dt,
+      x: clampOnTrack(p.x + drift, w),
+    };
+  });
+  return { ...s, packs };
+}
+
+/** What can be shot now: intact blocks and packs with enemies left. */
+function threats(s: RunState): (Threat | null)[] {
+  return s.track.hazards.map((h, i) => {
+    if ((s.hp[i] ?? 0) <= 0 || isShattered(s, i)) return null;
+    if (h.kind === "block")
+      return { pos: h.pos, span: { left: h.left, right: h.right } };
+    if (h.kind === "pack")
+      return { pos: hazardPos(s, i), span: packSpan(s, i) };
+    return null;
+  });
+}
+
+/** All fire goes to the nearest shootable threat ahead; damage is capped at its hp. */
 function fire(s: RunState, w: number, dt: number): RunState {
-  const target = pickTarget(
-    s.track.hazards,
-    s.nextHazard,
-    s.dist,
-    { left: s.x - w / 2, right: s.x + w / 2 },
-    (i) => (s.hp[i] ?? 0) > 0 && !isShattered(s, i),
-  );
+  const target = pickTarget(threats(s), s.nextHazard, s.dist, {
+    left: s.x - w / 2,
+    right: s.x + w / 2,
+  });
   if (target === null) return { ...s, target };
   const hp = s.hp[target] ?? 0;
   const damage = [...s.damage];
@@ -177,26 +239,42 @@ export function stepRun(s: RunState, dt: number): RunState {
   next.targetX = clampOnTrack(s.targetX, w);
   next.x = steerStep(s.x, next.targetX, w, dt);
   next.dist += BASE_SPEED * speedMul(s.dist, s.track) * dt;
+  next = movePacks(next, dt);
   next = fire(next, w, dt);
   // resolve everything passed this step, in track order
   for (;;) {
     if (next.status !== "running") return next;
     const hazard = next.track.hazards[next.nextHazard];
+    const pos = hazardPos(next, next.nextHazard);
     const rowPos = next.track.questions[next.next] ?? Infinity;
-    if (hazard && hazard.pos <= rowPos && hazard.pos <= next.dist)
+    if (hazard && pos <= rowPos && pos <= next.dist)
       next = passHazard(next, hazard);
     else if (rowPos <= next.dist) next = resolveRow(next);
     else return next;
   }
 }
 
-/** Clipping only: hazards never touch the streak or results. Shattered blocks don't clip. */
+/** Soldiers lost when pack i reaches the crowd: one per survivor if their spans overlap. */
+function contactLoss(s: RunState, i: number): number {
+  const w = crowdWidth(s.army);
+  const p = packSpan(s, i);
+  const overlap =
+    Math.min(s.x + w / 2, p.right) - Math.max(s.x - w / 2, p.left) > 0;
+  return overlap ? Math.min(s.army, ENEMY_DAMAGE * packSurvivors(s, i)) : 0;
+}
+
+/**
+ * Losses only: hazards never touch the streak or results. Shattered blocks
+ * don't clip, and a pack is gone after contact, hit or miss.
+ */
 function passHazard(s: RunState, h: Hazard): RunState {
-  // packs are inert until they move and fight (next slice)
+  const i = s.nextHazard;
   const clip =
-    h.kind === "pack" || isShattered(s, s.nextHazard)
-      ? 0
-      : clipLoss(s.army, s.x, crowdWidth(s.army), [hazardSpan(h, s.dist)]);
+    h.kind === "pack"
+      ? contactLoss(s, i)
+      : isShattered(s, i)
+        ? 0
+        : clipLoss(s.army, s.x, crowdWidth(s.army), [hazardSpan(h, s.dist)]);
   const army = s.army - clip;
   return {
     ...s,

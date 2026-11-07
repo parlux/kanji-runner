@@ -3,6 +3,8 @@ import {
   createRunState,
   gateOpenings,
   isShattered,
+  packSpan,
+  packSurvivors,
   wallSolids,
   nearestOpening,
   nudgeTarget,
@@ -19,11 +21,16 @@ import {
   buildTrack,
   hazardSpan,
   type Block,
+  type Pack,
   type Saw,
 } from "../../src/core/track";
 import {
   BASE_SPEED,
   CROWD_MAX_W,
+  ENEMY_DAMAGE,
+  ENEMY_HP,
+  ENEMY_SPEED,
+  ENEMY_STEER_SPEED,
   ROWS_PER_RUN,
   STARTING_ARMY,
   STEER_MAX_SPEED,
@@ -404,9 +411,11 @@ describe("hazards", () => {
     expect(stepRun(away, DT).lastClip).toBeNull();
   });
 
-  /** Steers to the answer at each question and to the widest gap at each hazard. */
+  /** Steers to the answer at each question and to the widest gap at each block or saw (packs removed). */
   function skilledRun(seed: number): { hazardLoss: number; time: number } {
-    let s = fresh(seed, true);
+    const withPacks = fresh(seed, true);
+    const hazards = withPacks.track.hazards.filter((h) => h.kind !== "pack");
+    let s = createRunState(withPacks.rows, { ...withPacks.track, hazards });
     let hazardLoss = 0;
     let time = 0;
     while (s.status === "running") {
@@ -453,7 +462,11 @@ describe("shooting", () => {
     right: 1,
   });
   /** One far-off question, the given hazards, and chosen hit points. */
-  function range(hazards: (Block | Saw)[], hp: number[], army = 20): RunState {
+  function range(
+    hazards: (Block | Saw | Pack)[],
+    hp: number[],
+    army = 20,
+  ): RunState {
     const s = createRunState(buildKanaRun(1, KANA), {
       questions: [100],
       hazards,
@@ -525,6 +538,91 @@ describe("shooting", () => {
     let s = { ...range([wide(0.5)], [1]), streak: 3, results: [true, false] };
     s = stepFor(s, 1);
     expect(isShattered(s, 0)).toBe(true);
+    expect(s.streak).toBe(3);
+    expect(s.results).toEqual([true, false]);
+  });
+
+  const pack = (pos: number, x = 0.5): Pack => ({ kind: "pack", pos, x });
+
+  it("a pack runs at the army ENEMY_SPEED faster than the scroll once visible", () => {
+    const far = range([pack(VIEW_DISTANCE + 1)], [10 * ENEMY_HP]);
+    expect(stepFor(far, 0.1).packs[0]?.pos).toBe(VIEW_DISTANCE + 1);
+    const near = range([pack(VIEW_DISTANCE - 0.1)], [10 * ENEMY_HP]);
+    const s = stepFor(near, 0.1);
+    expect(s.packs[0]?.pos).toBeCloseTo(
+      VIEW_DISTANCE - 0.1 - ENEMY_SPEED * 0.1,
+      6,
+    );
+  });
+
+  it("a pack drifts towards the crowd centre at most ENEMY_STEER_SPEED", () => {
+    const s0 = {
+      ...range([pack(2.5, 0.8)], [10 * ENEMY_HP]),
+      x: 0.2,
+      targetX: 0.2,
+    };
+    const s = stepFor(s0, 0.5);
+    expect(s.packs[0]?.x).toBeCloseTo(0.8 - ENEMY_STEER_SPEED * 0.5, 6);
+  });
+
+  it("fire kills one enemy per ENEMY_HP and the pack narrows", () => {
+    const s0 = range([pack(1.9)], [1e6 * ENEMY_HP], 20);
+    const s = stepFor(s0, 0.5);
+    expect(s.target).toBe(0);
+    expect(s.damage[0]).toBeCloseTo(firepower(20) * 0.5, 6);
+    const killed = Math.floor((s.damage[0] ?? 0) / ENEMY_HP);
+    expect(packSurvivors(s, 0)).toBe(1e6 - killed);
+    const wide = { ...s, damage: [0] };
+    const narrow = { ...s, damage: [(1e6 - 4) * ENEMY_HP] };
+    const width = (r: RunState): number =>
+      packSpan(r, 0).right - packSpan(r, 0).left;
+    expect(width(narrow)).toBeLessThan(width(wide));
+    expect(width(narrow)).toBeCloseTo(crowdWidth(4), 9);
+  });
+
+  it("contact costs ENEMY_DAMAGE per survivor when spans overlap, then the pack is gone", () => {
+    // 7 enemies, 3 of them already shot: 4 survivors reach the crowd
+    const s0 = {
+      ...range([pack(0.02)], [7 * ENEMY_HP], 20),
+      damage: [3 * ENEMY_HP],
+    };
+    const s = stepRun(s0, DT);
+    expect(s.nextHazard).toBe(1);
+    expect(s.army).toBe(20 - 4 * ENEMY_DAMAGE);
+    expect(s.lastClip?.loss).toBe(4 * ENEMY_DAMAGE);
+  });
+
+  it("a pack that misses the crowd costs nothing", () => {
+    const s0 = {
+      ...range([pack(0.02, 0.9)], [7 * ENEMY_HP], 20),
+      x: 0.1,
+      targetX: 0.1,
+    };
+    const s = stepRun(s0, DT);
+    expect(s.nextHazard).toBe(1);
+    expect(s.army).toBe(20);
+    expect(s.lastClip).toBe(null);
+  });
+
+  it("a pack shot to 0 costs nothing", () => {
+    const s0 = {
+      ...range([pack(0.02)], [7 * ENEMY_HP], 20),
+      damage: [7 * ENEMY_HP],
+    };
+    const s = stepRun(s0, DT);
+    expect(s.nextHazard).toBe(1);
+    expect(s.army).toBe(20);
+  });
+
+  it("enemy losses never change streak or results, and an army reaching 0 ends the run", () => {
+    const s0 = {
+      ...range([pack(0.02)], [50 * ENEMY_HP], 5),
+      streak: 3,
+      results: [true, false],
+    };
+    const s = stepRun(s0, DT);
+    expect(s.army).toBe(0);
+    expect(s.status).toBe("dead");
     expect(s.streak).toBe(3);
     expect(s.results).toEqual([true, false]);
   });

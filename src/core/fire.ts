@@ -1,6 +1,6 @@
 import type { Span } from "./crowd";
 import { applyCorrect, applyWrong } from "./scoring";
-import type { Hazard, Track } from "./track";
+import type { Track } from "./track";
 import {
   BASE_REWARD,
   BLOCK_HP_K,
@@ -56,23 +56,30 @@ export function hazardHp(track: Track, expected: readonly number[]): number[] {
   });
 }
 
+/** Where a shootable threat is now: its track position and its span across the track. */
+export type Threat = { pos: number; span: Span };
+
 /**
- * Index of the nearest shootable hazard at or after `from`, ahead of `dist`
- * within FIRE_RANGE, whose span overlaps the crowd's. Null if none.
+ * Index of the nearest threat at or after `from`, ahead of `dist` within
+ * FIRE_RANGE, whose span overlaps the crowd's. Null entries can't be shot.
  */
 export function pickTarget(
-  hazards: readonly Hazard[],
+  threats: readonly (Threat | null)[],
   from: number,
   dist: number,
   crowd: Span,
-  shootable: (i: number) => boolean,
 ): number | null {
-  for (let i = from; i < hazards.length; i++) {
-    const h = hazards[i] as Hazard;
-    if (h.pos - dist > FIRE_RANGE) return null;
-    if (h.pos < dist || h.kind !== "block" || !shootable(i)) continue;
-    if (Math.min(crowd.right, h.right) - Math.max(crowd.left, h.left) > 0)
-      return i;
+  let best: number | null = null;
+  let bestPos = Infinity;
+  for (let i = from; i < threats.length; i++) {
+    const t = threats[i];
+    if (!t || t.pos < dist || t.pos - dist > FIRE_RANGE || t.pos >= bestPos)
+      continue;
+    const { left, right } = t.span;
+    if (Math.min(crowd.right, right) - Math.max(crowd.left, left) > 0) {
+      best = i;
+      bestPos = t.pos;
+    }
   }
-  return null;
+  return best;
 }
