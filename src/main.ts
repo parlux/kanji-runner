@@ -1,7 +1,7 @@
 import { bindDrag, bindKeys, type Action } from "./game/input";
 import { startLoop } from "./game/loop";
 import { render } from "./game/render";
-import { handleAction, updateScene, type Scene } from "./game/scenes";
+import { devLevel, handleAction, updateScene, type Scene } from "./game/scenes";
 
 const canvas = document.querySelector<HTMLCanvasElement>("#game");
 if (!canvas) throw new Error("Missing #game canvas");
@@ -21,9 +21,10 @@ resize();
 
 const newSeed = (): number => Math.floor(Math.random() * 2 ** 31);
 let scene: Scene = { kind: "start" };
+const level = devLevel(window.location.search);
 
 const act = (action: Action): void => {
-  scene = handleAction(scene, action, newSeed);
+  scene = handleAction(scene, action, newSeed, level);
 };
 const steerAxis = bindKeys(act);
 // a tap starts a run from the start/end screens, and pauses or resumes a run

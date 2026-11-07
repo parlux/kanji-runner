@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { buildKanaRun } from "../../src/core/run";
+import { buildKanaRun, buildKanjiRun } from "../../src/core/run";
+import { KANJI } from "../../src/core/kanji";
 import { KANA } from "../../src/core/kana";
 import { ROWS_PER_RUN, TWO_OPTION_ROWS } from "../../src/core/tuning";
 
@@ -43,5 +44,29 @@ describe("buildKanaRun", () => {
     for (const row of buildKanaRun(5, KANA)) {
       expect(row.answer).toBe(byChar.get(row.prompt));
     }
+  });
+});
+
+describe("buildKanjiRun", () => {
+  it("asks only unlocked kanji, as meaning or reading gates, 2 options then 3", () => {
+    const rows = buildKanjiRun(7, KANJI, 3);
+    const unlocked = new Set(
+      KANJI.filter((k) => k.level <= 3).map((k) => k.char),
+    );
+    expect(rows).toHaveLength(ROWS_PER_RUN);
+    rows.forEach((row, i) => {
+      expect(unlocked.has(row.prompt)).toBe(true);
+      expect(["meaning", "reading"]).toContain(row.type);
+      expect(row.options).toHaveLength(i < TWO_OPTION_ROWS ? 2 : 3);
+    });
+    expect(new Set(rows.map((r) => r.prompt)).size).toBe(ROWS_PER_RUN);
+  });
+
+  it("mixes both gate types over a few runs, and is identical per seed", () => {
+    const types = new Set(
+      [1, 2, 3].flatMap((s) => buildKanjiRun(s, KANJI, 2).map((r) => r.type)),
+    );
+    expect(types).toEqual(new Set(["meaning", "reading"]));
+    expect(buildKanjiRun(9, KANJI, 5)).toEqual(buildKanjiRun(9, KANJI, 5));
   });
 });

@@ -1,5 +1,6 @@
-import { buildKanaRun } from "../core/run";
+import { buildKanaRun, buildKanjiRun } from "../core/run";
 import { KANA } from "../core/kana";
+import { KANJI } from "../core/kanji";
 import {
   createRunState,
   nudgeTarget,
@@ -15,12 +16,23 @@ export type Scene =
   | { kind: "run"; seed: number; run: RunState; paused: boolean }
   | { kind: "end"; seed: number; run: RunState };
 
-function newRun(seed: number): Scene {
+/**
+ * Dev flag `?level=N` (N ≥ 2): kanji levels 2..N count as unlocked, and runs
+ * ask meaning and reading gates. Null for normal kana runs.
+ */
+export function devLevel(search: string): number | null {
+  const n = Number(new URLSearchParams(search).get("level"));
+  return Number.isInteger(n) && n >= 2 ? n : null;
+}
+
+function newRun(seed: number, level: number | null): Scene {
   return {
     kind: "run",
     seed,
     run: createRunState(
-      buildKanaRun(seed, KANA),
+      level === null
+        ? buildKanaRun(seed, KANA)
+        : buildKanjiRun(seed, KANJI, level),
       buildTrack(seed, ROWS_PER_RUN),
     ),
     paused: false,
@@ -31,11 +43,12 @@ export function handleAction(
   scene: Scene,
   action: Action,
   newSeed: () => number,
+  level: number | null = null,
 ): Scene {
   switch (scene.kind) {
     case "start":
     case "end":
-      return action === "confirm" ? newRun(newSeed()) : scene;
+      return action === "confirm" ? newRun(newSeed(), level) : scene;
     case "run":
       return action === "pause" ? { ...scene, paused: !scene.paused } : scene;
   }
