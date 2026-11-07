@@ -2,8 +2,8 @@
 
 Source of intent: `docs/intent/kanji-runner.md` (confirmed 2026-11-07).
 Gameplay rework: `docs/ideas/crowd-runner-rework.md` (Direction C, confirmed 2026-11-07).
-Shooting: `docs/ideas/shooting.md` (confirmed 2026-11-07).
-Status: APPROVED revision 3, 2026-11-07. Revision 2 replaced lane picking with a physical track (see Track, crowd and steering). Revision 3 adds auto-fire, breakable blocks and enemy packs (see Shooting).
+Shooting: `docs/ideas/shooting.md` (confirmed 2026-11-07). Crates: `docs/ideas/crates.md` (confirmed 2026-11-07).
+Status: APPROVED revision 4, 2026-11-07. Revision 2 replaced lane picking with a physical track (see Track, crowd and steering). Revision 3 adds auto-fire, breakable blocks and enemy packs (see Shooting). Revision 4 (Checkpoint A feedback) makes fire always visible up to its range, turns blocks into supply crates, and raises `BASE_SPEED` to 1.6.
 
 ### Changes from intent
 | Date | Change | Reason |
@@ -111,10 +111,10 @@ The army fires straight ahead all the time. There is no fire button: steering is
 - **Targeting:** all fire goes to the nearest shootable threat ahead, within `FIRE_RANGE` (start: 2.0 track units), whose span overlaps the crowd's span. Nothing else takes damage.
 - **What can be shot:** blocks and enemy packs. Walls and saws can't: the question is never bypassed, and dodging still matters.
 - **Expected army:** `expectedArmy(q)` is the army after question `q` in a deterministic 80%-accuracy pass over the run's actual questions (every 5th answer wrong, no clipping). Threat strength follows it, so strong players stay challenged and weak players fall behind. The boss (T9) may reuse it.
-- **Breakable block:** hit points `BLOCK_HP_K × expectedArmy(q)` for a block before question `q + 1`. At 0 it shatters and no longer clips. A block with hit points left clips exactly as before.
+- **Supply crate (breakable block):** hit points `BLOCK_HP_K × expectedArmy(q)` for a block before question `q + 1`. At 0 it shatters, no longer clips, and adds `round(CRATE_REWARD_K × its hit points)` recruits to the army at once (start: 0.3). A crate with hit points left clips exactly as before. So a crate is a choice: line up and shoot it for recruits, risking a clip if it doesn't break in time, or dodge it.
 - **Enemy pack:** a counted group, `ENEMY_K × expectedArmy(q)` strong (at least 3), drawn like the army with its own width from `crowdWidth`. It runs towards the army at `ENEMY_SPEED` on top of the scroll, and drifts towards the crowd's centre at `ENEMY_STEER_SPEED`, so it can be partly dodged but mainly has to be shot. Each `ENEMY_HP` of damage kills one enemy, and the pack narrows as it shrinks. On contact, if its span overlaps the crowd's, the army loses one soldier per surviving enemy (`ENEMY_DAMAGE`, start: 1) and the pack is gone. If it misses, it is gone with no loss.
-- **Rules shared with clipping:** shooting losses never change the streak, the results or the SRS. An army reaching 0 ends the run.
-- **Feedback:** bullets, hit flashes and a shatter or burst when a threat dies. Fire and effects must not cover the prompt or the answer labels.
+- **Rules shared with clipping:** crate rewards and shooting losses never change the streak, the results or the SRS. An army reaching 0 ends the run.
+- **Feedback:** the army fires a constant stream straight ahead that fades out where `FIRE_RANGE` ends, so the reach is visible even with nothing to hit. Hit flashes, a shatter or burst when a threat dies, and a "+N" when a crate pays out. Fire and effects must not cover the prompt or the answer labels.
 
 ### Run shape
 - 14 question beats with hazards between them, then the boss.

@@ -1,6 +1,6 @@
 # Tasks: Kanji Runner
 
-Plan: `tasks/plan.md`. Spec: `SPEC.md` (revision 3).
+Plan: `tasks/plan.md`. Spec: `SPEC.md` (revision 4).
 Every task: `npm test && npm run lint && npm run build` pass before it is checked off.
 
 ## Phase 1: Playable slice (done)
@@ -117,13 +117,33 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 **Files:** `src/core/{track,sim,fire,tuning}.ts`, `src/game/render.ts`, `tests/core/{fire,track,sim}.test.ts`
 **Scope:** M
 
+### Task S3: Always-on fire and supply crates
+**Description:** (spec: Shooting; idea: `docs/ideas/crates.md`). From Checkpoint A feedback.
+- `sim.ts`: when a block shatters, add `round(CRATE_REWARD_K × its hit points)` to the army, once. Record it for feedback (`lastCrate`).
+- Tuning: `CRATE_REWARD_K` (start 0.3).
+- Render: a constant bullet stream straight ahead that fades out at `FIRE_RANGE`, with or without a target; a "+N" pop-up and recruits joining when a crate pays out; blocks drawn as crates.
+- Balance bot: shoots a crate when it can break it in time, otherwise dodges.
+
+**Acceptance criteria:**
+- [ ] A shattered crate adds `round(CRATE_REWARD_K × hp)` exactly once; an unbroken one adds nothing and clips as before (tested).
+- [ ] Crate rewards never change streak or results (tested).
+- [ ] Bot check still holds: 100% accuracy never dies early, 50% dies early in at least half of 200 runs.
+- [ ] In the browser, fire is always visible and ends at the range line, below the prompts.
+
+**Verification:** `npm test -- fire sim balance`. Phone-sized browser check, then push and the owner plays on the phone.
+**Dependencies:** S2
+**Files:** `src/core/{sim,tuning}.ts`, `src/game/render.ts`, `tests/core/{sim,balance}.test.ts`
+**Scope:** S–M
+
 ### Checkpoint A: feel test (spec criterion 16)
-- [ ] Tests, lint and build pass
-- [ ] Owner plays on the phone: it feels like a crowd runner, not flash cards
-- [ ] Owner: right answers feel like power, and a weak run gets overrun
-- [ ] Owner: prompts are readable while steering and firing (if not, quieten effects near questions, or lengthen `CALM_DISTANCE`)
+- [x] Tests, lint and build pass
+- [x] Owner plays on the phone: it feels like a crowd runner, not flash cards ("feeling pretty good", 2026-11-07)
+- [x] Owner: right answers feel like power
+- [ ] Owner: a weak run gets overrun
+- [x] Owner: prompts are readable while steering and firing
 - [ ] Owner: still fun when the answers are known (play some all-easy runs)
-- [ ] Adjust `tuning.ts` from feedback. **If the feel is wrong, stop and revisit the idea doc before R5.**
+- [ ] Owner: S3 (always-on fire, crates) plays well on the phone
+- [x] Adjust `tuning.ts` from feedback: `BASE_SPEED` 1.3 → 1.6 (scrolling too slow). **If the feel is wrong, stop and revisit the idea doc before R5.**
 
 ### Task R5: Squad charges
 **Description:**
