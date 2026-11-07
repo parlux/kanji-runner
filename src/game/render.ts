@@ -1,5 +1,12 @@
 import { crowdWidth } from "../core/crowd";
-import { gateOpenings, isShattered, type RunState } from "../core/sim";
+import {
+  gateOpenings,
+  hazardPos,
+  isShattered,
+  packSpan,
+  packSurvivors,
+  type RunState,
+} from "../core/sim";
 import { hazardSpan } from "../core/track";
 import { SAW_W, VIEW_DISTANCE } from "../core/tuning";
 import type { Scene } from "./scenes";
@@ -21,6 +28,7 @@ const COLORS = {
   text: "#f2f2f2",
   dim: "#9aa3b5",
   soldier: "#ffcf4a",
+  enemy: "#e0457b",
   good: "#5fd38d",
   bad: "#ff6b6b",
   hazard: "#c24b4b",
@@ -125,13 +133,21 @@ function renderRun(ctx: Ctx, w: number, h: number, run: RunState): void {
   const { hazards, questions } = run.track;
   for (let i = hazards.length - 1; i >= 0; i--) {
     const h = hazards[i];
-    if (!h || h.kind === "pack") continue;
-    const ahead = h.pos - run.dist;
+    if (!h) continue;
+    const ahead = hazardPos(run, i) - run.dist;
     if (ahead < -behind) break;
     if (ahead > farthest) continue;
     const y = depthY(ahead);
     const scale = Math.max(0.3, 1 - 0.5 * (ahead / VIEW_DISTANCE));
-    if (h.kind === "block") {
+    if (h.kind === "pack") {
+      // gone once it has met the crowd or been shot to nothing
+      if (i < run.nextHazard || isShattered(run, i)) continue;
+      const span = packSpan(run, i);
+      const cx = ((span.left + span.right) / 2) * w;
+      const r = (((span.right - span.left) * w) / 2) * scale;
+      renderArmy(ctx, cx, y, r, packSurvivors(run, i), COLORS.enemy, scale);
+      if (run.target === i) renderKills(ctx, cx, y, r, run.dist);
+    } else if (h.kind === "block") {
       if (isShattered(run, i)) continue;
       const blockH = 34 * scale;
       const bw = (h.right - h.left) * w;
@@ -275,6 +291,32 @@ function renderRun(ctx: Ctx, w: number, h: number, run: RunState): void {
 }
 
 /** A bullet stream from the crowd to its target, and a burst where a block shattered. */
+/** Enemies popping off a pack under fire: dots flung outwards that fade. */
+function renderKills(
+  ctx: Ctx,
+  cx: number,
+  cy: number,
+  r: number,
+  dist: number,
+): void {
+  ctx.fillStyle = COLORS.enemy;
+  for (let k = 0; k < 4; k++) {
+    const t = (dist * 2.5 + k / 4) % 1;
+    const a = k * 2.39996 + Math.floor(dist * 2.5) * 1.3;
+    ctx.globalAlpha = 1 - t;
+    ctx.beginPath();
+    ctx.arc(
+      cx + (r + 18 * t) * Math.cos(a),
+      cy + (r + 18 * t) * Math.sin(a) * 0.6 - 10 * t,
+      3,
+      0,
+      Math.PI * 2,
+    );
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+}
+
 function renderFire(
   ctx: Ctx,
   w: number,
@@ -283,14 +325,16 @@ function renderFire(
   radius: number,
   depthY: (ahead: number) => number,
 ): void {
-  const target = run.target === null ? null : run.track.hazards[run.target];
-  if (target?.kind === "block") {
+  const i = run.target;
+  const target = i === null ? undefined : run.track.hazards[i];
+  if (i !== null && (target?.kind === "block" || target?.kind === "pack")) {
     const cw = crowdWidth(run.army);
-    // aim at the middle of where the crowd and the block overlap
-    const left = Math.max(target.left, run.x - cw / 2);
-    const right = Math.min(target.right, run.x + cw / 2);
+    const span = target.kind === "block" ? target : packSpan(run, i);
+    // aim at the middle of where the crowd and the target overlap
+    const left = Math.max(span.left, run.x - cw / 2);
+    const right = Math.min(span.right, run.x + cw / 2);
     const tx = ((left + right) / 2) * w;
-    const ty = depthY(target.pos - run.dist) - 6;
+    const ty = depthY(hazardPos(run, i) - run.dist) - 6;
     const lanes = Math.min(5, 1 + Math.floor(Math.sqrt(run.army) / 3));
     ctx.fillStyle = COLORS.bullet;
     for (let l = 0; l < lanes; l++) {
@@ -313,15 +357,25 @@ function renderFire(
   }
 
   const sh = run.lastShatter;
-  const block = sh ? run.track.hazards[sh.index] : undefined;
-  if (sh && block?.kind === "block") {
+  const dead = sh ? run.track.hazards[sh.index] : undefined;
+  if (sh && (dead?.kind === "block" || dead?.kind === "pack")) {
     const t = (run.dist - sh.dist) / SHATTER_DIST;
     if (t >= 0 && t < 1) {
-      const cx = ((block.left + block.right) / 2) * w;
-      const cy = depthY(block.pos - run.dist) - 17;
-      const spread = ((block.right - block.left) * w) / 2 + 40 * t;
+      // a pack bursts from its centre; a block from its middle
+      const span =
+        dead.kind === "block"
+          ? dead
+          : {
+              left: run.packs[sh.index]?.x ?? 0.5,
+              right: run.packs[sh.index]?.x ?? 0.5,
+            };
+      const cx = ((span.left + span.right) / 2) * w;
+      const cy =
+        depthY(hazardPos(run, sh.index) - run.dist) -
+        (dead.kind === "block" ? 17 : 0);
+      const spread = ((span.right - span.left) * w) / 2 + 40 * t;
       ctx.globalAlpha = 1 - t;
-      ctx.fillStyle = COLORS.hazardEdge;
+      ctx.fillStyle = dead.kind === "block" ? COLORS.hazardEdge : COLORS.enemy;
       for (let k = 0; k < 14; k++) {
         const a = k * 2.39996 + sh.index;
         const r = spread * (0.4 + (0.6 * ((k * 7) % 5)) / 4);
@@ -345,11 +399,13 @@ function renderArmy(
   cy: number,
   radius: number,
   army: number,
+  color = COLORS.soldier,
+  scale = 1,
 ): void {
   const n = Math.min(army, MAX_DRAWN_SOLDIERS);
   // dot size shrinks as the blob fills up, within readable limits
   const r = Math.max(2, Math.min(5, radius / Math.sqrt(Math.max(n, 1)) / 1.1));
-  ctx.fillStyle = COLORS.soldier;
+  ctx.fillStyle = color;
   ctx.beginPath();
   for (let k = 0; k < n; k++) {
     // sunflower packing scaled to the crowd radius, squashed for a top-down-ish look
@@ -361,7 +417,7 @@ function renderArmy(
     ctx.arc(x, y, r, 0, Math.PI * 2);
   }
   ctx.fill();
-  text(ctx, String(army), cx, cy + radius * 0.6 + 22, 22);
+  text(ctx, String(army), cx, cy + radius * 0.6 + 22 * scale, 22 * scale);
 }
 
 /** A spinning toothed disc of radius r. */
