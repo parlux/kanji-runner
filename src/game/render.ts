@@ -369,14 +369,15 @@ function renderLevel(ctx: Ctx, w: number, y: number, session: Session): void {
     level >= maxLevel(KANJI)
       ? "last level"
       : p.learned >= p.needed
-        ? `${levelName(level + 1)} unlocks after your next run`
+        ? `${levelName(level + 1)} unlocks next run`
         : `${p.needed} needed for ${levelName(level + 1)}`;
+  const line = `${p.learned}/${p.total} learned · ${unlocks}`;
   text(
     ctx,
-    `${p.learned}/${p.total} learned · ${unlocks}`,
+    line,
     w / 2,
     by + bh + 20,
-    15,
+    fitSize(ctx, line, 15, w - 32),
     COLORS.dim,
   );
 }
@@ -409,7 +410,7 @@ function renderEnd(
     : run.army === boss.size
       ? "A tie is a loss"
       : null;
-  if (note) text(ctx, note, w / 2, 70, 16, COLORS.dim);
+  if (note) text(ctx, note, w / 2, 76, 16, COLORS.dim);
   const sizes = boss
     ? `Army ${run.army} vs boss ${boss.size}`
     : `Army ${run.army}`;
