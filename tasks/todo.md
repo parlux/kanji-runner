@@ -273,9 +273,9 @@ It also emits `confusables.json` (the kana look-alikes list plus a component ind
 Base rewards are 3, 5 and 8 for kana, meaning and reading.
 
 **Acceptance criteria:**
-- [ ] Property test over all items and many seeds: no option is ever a valid answer for the prompt, and there are no duplicates.
-- [ ] When a confusable exists in the pool, it is chosen over a random item (seeded test).
-- [ ] Meaning and reading gates render correctly in game, with the okurigana greyed.
+- [x] Property test over all items and many seeds: no option is ever a valid answer for the prompt, and there are no duplicates.
+- [x] When a confusable exists in the pool, it is chosen over a random item (seeded test).
+- [x] Meaning and reading gates render correctly in game, with the okurigana greyed.
 
 **Verification:** `npm test -- distractors`. Manual run with kanji unlocked via a dev flag.
 **Dependencies:** T5, Checkpoint A2
