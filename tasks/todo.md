@@ -308,9 +308,9 @@ Base rewards are 3, 5 and 8 for kana, meaning and reading.
 - The start screen shows the current level and its progress.
 
 **Acceptance criteria:**
-- [ ] Unlock happens at exactly 80% (tested at the boundary).
-- [ ] Placement to level N unlocks N+1 and never lowers an existing box.
-- [ ] The start screen shows the level, progress and the placement control, and it works with keyboard and touch.
+- [x] Unlock happens at exactly 80% (tested at the boundary).
+- [x] Placement to level N unlocks N+1 and never lowers an existing box.
+- [x] The start screen shows the level, progress and the placement control, and it works with keyboard and touch.
 
 **Verification:** `npm test -- progression`. Manual placement flow.
 **Dependencies:** T7
