@@ -326,7 +326,7 @@ Placement to Katakana gives Kanji 1, but runs are still mostly basic hiragana: 1
 - After a run, the end screen leads back to the start screen (level, progress, any newly unlocked level) instead of straight into the next run. Show a short "level unlocked" message when a run unlocks one.
 
 **Acceptance criteria:**
-- [ ] After placing to Katakana, kanji make up most of each run (report the share over 200 seeds, for the first run and after all 30 kanji are introduced), and kana still appear sometimes (tested).
+- [x] After placing to Katakana, kanji make up most of each run (report the share over 200 seeds, for the first run and after all 30 kanji are introduced), and kana still appear sometimes (tested). After all 30 are introduced: 69.6% kanji, kana in every run. The first run stays at 4/14 kanji because of the 4-new cap; owner accepted this at Checkpoint B (lessons are the better fix).
 - [x] Ending a run returns to the start screen with up-to-date level and progress, using keyboard or touch; a run that unlocks a level says so (tested, plus phone-sized screenshots).
 
 **Verification:** `npm test`. Phone-sized browser check.
@@ -335,9 +335,10 @@ Placement to Katakana gives Kanji 1, but runs are still mostly basic hiragana: 1
 **Scope:** S
 
 ### Checkpoint B
-- [ ] Tests, lint and build pass
-- [ ] Owner: missed characters come back noticeably more often, and progress survives a reload
-- [ ] Owner: placement skips kana, and kanji runs feel right
+- [x] Tests, lint and build pass
+- [x] Owner: missed characters come back noticeably more often, and progress survives a reload
+- [x] Owner: placement skips kana, and kanji runs feel right
+- [x] Passed, 2026-11-07 (owner: "I'm happy with Checkpoint B"). Follow-ups in `docs/ideas/study-and-kana-mix.md`: story-based lessons for new kanji (maybe WaniKani sync), readings shown after a correct meaning, kana modes.
 
 ## Phase 3: Boss and polish
 
