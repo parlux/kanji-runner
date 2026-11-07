@@ -107,10 +107,10 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 - Render: the pack as a blob of enemy dots with its count, kills popping off, and the contact loss pop-up.
 
 **Acceptance criteria:**
-- [ ] Contact costs one soldier per surviving enemy only when spans overlap; a pack shot to 0 costs nothing (tested).
-- [ ] Packs never appear in calm stretches or before question 2, and the track stays deterministic per seed (property test over 1,000 seeds).
-- [ ] Enemy losses never change streak or results, and an army reaching 0 ends the run (tested).
-- [ ] Bot check: with perfect steering, 100% accuracy never dies before the last question, and 50% accuracy dies before it in at least half of 200 seeded runs.
+- [x] Contact costs one soldier per surviving enemy only when spans overlap; a pack shot to 0 costs nothing (tested).
+- [x] Packs never appear in calm stretches or before question 2, and the track stays deterministic per seed (property test over 1,000 seeds).
+- [x] Enemy losses never change streak or results, and an army reaching 0 ends the run (tested).
+- [x] Bot check: with perfect steering, 100% accuracy never dies before the last question, and 50% accuracy dies before it in at least half of 200 seeded runs.
 
 **Verification:** `npm test -- fire sim track`. Phone-sized browser check, then push and the owner plays on the phone.
 **Dependencies:** S1

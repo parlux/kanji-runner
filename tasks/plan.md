@@ -54,8 +54,8 @@ T1 scaffold ─ T2 core rules ─ T3 lane slice (done)
 - [x] R2: Crowd width and wall clipping
 - [x] R3: Track layout and hazards
 - [x] R4: Drag steering and GitHub Pages deploy
-- [ ] S1: Auto-fire and breakable blocks
-- [ ] S2: Enemy packs
+- [x] S1: Auto-fire and breakable blocks
+- [x] S2: Enemy packs
 
 ### Checkpoint A: feel test on the phone (spec criterion 16)
 - [ ] Feels like a crowd runner, right answers feel like power, prompts readable while steering and firing, fun with known answers
