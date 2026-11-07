@@ -44,10 +44,11 @@ const act = (action: Action): void => {
   session = next.session;
 };
 const steerAxis = bindKeys(act);
-// a tap pauses or resumes a run, leaves the end screen for the start screen, and on the
-// start screen hits the placement controls or else starts a run
+// a tap pauses or resumes a run, does nothing during the boss clash, leaves the end screen
+// for the start screen, and on the start screen hits the placement controls or else starts a run
 const takeDrag = bindDrag(canvas, (x, y) => {
   if (scene.kind === "run") return act("pause");
+  if (scene.kind === "boss") return;
   if (scene.kind === "end") return act("confirm");
   const action = startTap(
     scene.pick !== undefined,

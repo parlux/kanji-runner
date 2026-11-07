@@ -44,7 +44,7 @@ export function recordRun(
   progress: Progress,
   rows: readonly GateRow[],
   results: readonly boolean[],
-  finished: boolean,
+  won: boolean,
   now: number,
 ): Progress {
   const items = { ...progress.items };
@@ -60,8 +60,8 @@ export function recordRun(
     items,
     stats: {
       runs: runs + 1,
-      wins: wins + (finished ? 1 : 0),
-      losses: losses + (finished ? 0 : 1),
+      wins: wins + (won ? 1 : 0),
+      losses: losses + (won ? 0 : 1),
     },
   };
 }

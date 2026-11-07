@@ -2,12 +2,16 @@ import { describe, expect, it } from "vitest";
 import { KANA } from "../../src/core/kana";
 import { KANJI } from "../../src/core/kanji";
 import { levelKeys } from "../../src/core/progression";
+import { bossSize } from "../../src/core/boss";
 import { defaultProgress } from "../../src/core/srs";
+import { CLASH_SECONDS } from "../../src/core/tuning";
+import { STEP } from "../../src/game/loop";
 import {
   afterStep,
   createSession,
   devLevel,
   handleAction,
+  updateScene,
   type Scene,
   type Session,
 } from "../../src/game/scenes";
@@ -66,6 +70,7 @@ describe("afterStep", () => {
     const ended: Scene = {
       kind: "end",
       seed: 7,
+      boss: null,
       run: { ...run.run, results: [true, false], status: "dead" },
     };
     const after = afterStep(session, run, ended, 99);
@@ -110,6 +115,7 @@ describe("afterStep", () => {
     const ended: Scene = {
       kind: "end",
       seed: 7,
+      boss: null,
       run: { ...run.run, rows: [row], results: [true], status: "finished" },
     };
     const after = afterStep(s, run, ended, 5);
@@ -126,6 +132,7 @@ describe("afterStep", () => {
     const ended: Scene = {
       kind: "end",
       seed: 7,
+      boss: null,
       run: { ...run.run, results: [true], status: "dead" },
     };
     expect(afterStep(session, run, ended, 1).unlocked).toBeNull();
@@ -142,7 +149,7 @@ describe("end screen", () => {
       session,
     ).scene;
     if (run.kind !== "run") throw new Error("no run");
-    return { kind: "end", seed: 7, run: run.run };
+    return { kind: "end", seed: 7, run: run.run, boss: null };
   };
 
   it("confirm (Enter or tap) returns to the start screen, not a new run", () => {
@@ -226,5 +233,84 @@ describe("start screen taps", () => {
     expect(startTap(true, W, H, ...mid(l.cancel))).toBe("back");
     expect(startTap(true, W, H, ...mid(l.place))).toBeNull();
     expect(startTap(true, W, H, 5, 5)).toBeNull();
+  });
+});
+
+describe("boss", () => {
+  const session = createSession(defaultProgress(), null);
+  const start = handleAction({ kind: "start" }, "confirm", () => 7, session);
+  if (start.scene.kind !== "run") throw new Error("no run");
+  const run = start.scene;
+  const rows = run.run.rows;
+  const allRight = rows.map(() => true);
+  // one step from the last wall: the next update finishes the run
+  const lastRow = run.run.track.questions.at(-1) ?? 0;
+  const almost: Scene = {
+    ...run,
+    run: {
+      ...run.run,
+      dist: lastRow - 1e-6,
+      next: rows.length - 1,
+      nextHazard: run.run.track.hazards.length,
+      results: allRight.slice(1),
+      army: 50,
+    },
+  };
+
+  it("plays after the last question, sized for this run and seed", () => {
+    const next = updateScene(almost, STEP, 0);
+    if (next.kind !== "boss") throw new Error(`got ${next.kind}`);
+    expect(next.t).toBe(0);
+    expect(next.boss).toBe(bossSize(rows, run.run.track.charges, 7));
+  });
+
+  it("leads to the end screen with the result once the clash is over", () => {
+    const boss: Scene = { kind: "boss", seed: 7, run: run.run, boss: 3, t: 0 };
+    let s: Scene = boss;
+    let steps = 0;
+    while (s.kind === "boss") {
+      s = updateScene(s, STEP, 0);
+      steps++;
+    }
+    expect(steps * STEP).toBeGreaterThanOrEqual(CLASH_SECONDS);
+    expect(s).toMatchObject({
+      kind: "end",
+      boss: { size: 3, won: run.run.army > 3 },
+    });
+  });
+
+  it("ignores input during the clash", () => {
+    const boss: Scene = { kind: "boss", seed: 7, run: run.run, boss: 3, t: 0 };
+    expect(handleAction(boss, "confirm", () => 1, session).scene).toBe(boss);
+  });
+
+  const reached = (
+    army: number,
+    size: number,
+  ): Extract<Scene, { kind: "boss" }> => ({
+    kind: "boss",
+    seed: 7,
+    run: { ...run.run, army, results: allRight, status: "finished" },
+    boss: size,
+    t: 0,
+  });
+
+  it("updates the review boxes whatever the outcome; only a boss win is a win", () => {
+    const win = afterStep(session, run, reached(60, 59), 1);
+    const loss = afterStep(session, run, reached(10, 59), 1);
+    const tie = afterStep(session, run, reached(59, 59), 1);
+    expect(win.progress.stats).toEqual({ runs: 1, wins: 1, losses: 0 });
+    expect(loss.progress.stats).toEqual({ runs: 1, wins: 0, losses: 1 });
+    expect(tie.progress.stats).toEqual({ runs: 1, wins: 0, losses: 1 });
+    expect(loss.progress.items).toEqual(win.progress.items);
+    expect(Object.keys(loss.progress.items).length).toBeGreaterThan(0);
+  });
+
+  it("records the run once: not again when the clash ends", () => {
+    const boss = reached(60, 59);
+    const after = afterStep(session, run, boss, 1);
+    const end = updateScene({ ...boss, t: 99 }, STEP, 0);
+    expect(end.kind).toBe("end");
+    expect(afterStep(after, boss, end, 2)).toBe(after);
   });
 });

@@ -132,3 +132,7 @@ export const BOSS_PASSES = 31;
 export const BOSS_PASS_ACCURACY = 0.8;
 /** The clash takes this long (s) whatever the sizes; both sides lose units at the same rate. */
 export const CLASH_SECONDS = 2.5;
+/** Before the clash, the two sides take this long (s) to close in. */
+export const CLASH_APPROACH_SECONDS = 0.6;
+/** The result stays up this long (s) after the clash before the end screen. */
+export const CLASH_HOLD_SECONDS = 1.2;

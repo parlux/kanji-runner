@@ -1,3 +1,4 @@
+import { clashAt } from "../core/boss";
 import { crowdWidth } from "../core/crowd";
 import {
   crateReward,
@@ -12,7 +13,12 @@ import {
   type RunState,
 } from "../core/sim";
 import { hazardSpan, isCharge } from "../core/track";
-import { FIRE_RANGE, SAW_W, VIEW_DISTANCE } from "../core/tuning";
+import {
+  CLASH_APPROACH_SECONDS,
+  FIRE_RANGE,
+  SAW_W,
+  VIEW_DISTANCE,
+} from "../core/tuning";
 import { KANJI } from "../core/kanji";
 import {
   levelName,
@@ -20,7 +26,7 @@ import {
   maxLevel,
   UNLOCK_SHARE,
 } from "../core/progression";
-import type { Scene, Session } from "./scenes";
+import type { BossResult, Scene, Session } from "./scenes";
 import { startLayout, type Rect } from "./start";
 
 const FONT = `"Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic", system-ui, sans-serif`;
@@ -202,7 +208,9 @@ export function render(
   if (scene.kind === "start")
     return renderStart(ctx, w, h, session, scene.pick);
   if (scene.kind === "end")
-    return renderEnd(ctx, w, h, scene.run, scene.seed, session);
+    return renderEnd(ctx, w, h, scene.run, scene.seed, scene.boss, session);
+  if (scene.kind === "boss")
+    return renderBoss(ctx, w, h, scene.run.army, scene.boss, scene.t);
   renderRun(ctx, w, h, scene.run);
   if (scene.paused) {
     ctx.fillStyle = "rgba(0,0,0,0.6)";
@@ -359,22 +367,33 @@ function renderEnd(
   h: number,
   run: RunState,
   seed: number,
+  boss: BossResult | null,
   session: Session,
 ): void {
   const correct = run.results.filter(Boolean).length;
   const accuracy = run.results.length
     ? Math.round((correct / run.results.length) * 100)
     : 0;
-  const won = run.status === "finished";
+  const won = boss?.won ?? false;
+  const title = !boss ? "Army wiped out" : won ? "Boss defeated!" : "Boss wins";
   text(
     ctx,
-    won ? "Run complete" : "Army wiped out",
+    title,
     w / 2,
     h * 0.3,
-    Math.min(48, w / 9),
+    fitSize(ctx, title, Math.min(48, w / 9), w - 32),
     won ? COLORS.good : COLORS.bad,
   );
-  text(ctx, `Army ${run.army}`, w / 2, h * 0.42, 28);
+  const sizes = boss
+    ? `Army ${run.army} vs boss ${boss.size}`
+    : `Army ${run.army}`;
+  text(ctx, sizes, w / 2, h * 0.42, fitSize(ctx, sizes, 28, w - 32));
+  const note = !boss
+    ? "The boss was never reached"
+    : run.army === boss.size
+      ? "A tie is a loss"
+      : null;
+  if (note) text(ctx, note, w / 2, h * 0.36, 18, COLORS.dim);
   text(
     ctx,
     `Accuracy ${accuracy}% (${correct}/${run.results.length})`,
@@ -385,6 +404,82 @@ function renderEnd(
   text(ctx, `Seed ${seed}`, w / 2, h * 0.42 + 76, 18, COLORS.dim);
   unlockedNote(ctx, w, h * 0.58, session);
   text(ctx, "Tap or Enter to continue", w / 2, h * 0.7, 20);
+}
+
+/** A cheap deterministic pseudo-random number in [0, 1), for flicker. */
+const hash01 = (v: number): number => {
+  const x = Math.sin(v) * 43758.5453;
+  return x - Math.floor(x);
+};
+
+/** Sparks flicker along the front while the clash runs. */
+const CLASH_SPARKS = 14;
+
+/**
+ * The boss clash: the boss blob above, the army below, meeting in the middle.
+ * Both counts tick down together (see clashAt) until one side is gone.
+ */
+function renderBoss(
+  ctx: Ctx,
+  w: number,
+  h: number,
+  army: number,
+  boss: number,
+  t: number,
+): void {
+  ctx.fillStyle = COLORS.track;
+  ctx.fillRect(0, 0, w, h);
+  const now = clashAt(army, boss, t - CLASH_APPROACH_SECONDS);
+  // the two sides close in before the clash starts
+  const meet = Math.min(1, t / CLASH_APPROACH_SECONDS);
+  const front = h * 0.5;
+  const ar = (crowdWidth(now.army) * w) / 2;
+  const br = (crowdWidth(now.boss) * w * 1.4) / 2;
+  const ay = front + 24 + ar * 0.6 + (1 - meet) * h * 0.14;
+  const by = front - 24 - br * 0.6 - (1 - meet) * h * 0.14;
+  text(ctx, "BOSS", w / 2, h * 0.08, 34, COLORS.enemy);
+  text(ctx, `${army} vs ${boss}`, w / 2, h * 0.08 + 34, 18, COLORS.dim);
+  if (now.boss > 0) renderDots(ctx, w / 2, by, br, now.boss, COLORS.enemy);
+  if (now.army > 0) renderDots(ctx, w / 2, ay, ar, now.army, COLORS.soldier);
+  outlinedText(ctx, String(now.boss), w / 2, by - br * 0.6 - 22, 30);
+  outlinedText(ctx, String(now.army), w / 2, ay + ar * 0.6 + 26, 30);
+  if (!now.done && meet >= 1) {
+    // flickering sparks where the two fronts meet, reshuffled 20× a second
+    const frame = Math.floor(t * 20);
+    const span = Math.max(ar, br) * 1.6;
+    ctx.strokeStyle = COLORS.bullet;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    for (let k = 0; k < CLASH_SPARKS; k++) {
+      const r = hash01(k * 12.9898 + frame * 78.233);
+      const r2 = hash01(k * 4.1414 + frame * 9.13 + 0.5);
+      const x = w / 2 + (r - 0.5) * span;
+      const y = front + (r2 - 0.5) * 36;
+      ctx.moveTo(x, y - 6);
+      ctx.lineTo(x + (r2 - 0.5) * 8, y + 6);
+    }
+    ctx.stroke();
+  }
+  if (now.done) {
+    const won = now.army > 0;
+    const msg = won
+      ? "Victory!"
+      : army === boss
+        ? "Tie: the boss holds"
+        : "Defeated";
+    ctx.fillStyle = COLORS.banner;
+    // above the clash, clear of the survivors
+    const by = h * 0.24;
+    ctx.fillRect(0, by - 36, w, 72);
+    text(
+      ctx,
+      msg,
+      w / 2,
+      by,
+      fitSize(ctx, msg, 40, w - 32),
+      won ? COLORS.good : COLORS.bad,
+    );
+  }
 }
 
 function renderRun(ctx: Ctx, w: number, h: number, run: RunState): void {
