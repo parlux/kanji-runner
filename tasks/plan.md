@@ -70,7 +70,7 @@ T1 scaffold ─ T2 core rules ─ T3 lane slice (done)
 
 - [x] S5: Tighter pacing
 - [x] S6: Squad charges read like walls
-- [ ] S7: Shooting an opening grows it
+- [x] S7: Shooting an opening grows it
 
 ### Checkpoint A3: pace, squads and gates
 - [ ] No dead time, squads clear and honest, gate growth feels good, charge penalty fair.

@@ -224,11 +224,11 @@ Squads are cool but hard to read ("can't tell if it's too fast or just too hard 
 - Render: openings at their current widths, the fire stream hitting the targeted opening's edges, labels centred in each opening.
 
 **Acceptance criteria:**
-- [ ] Growth matches the rule: total widening equals total narrowing until the caps; nothing drops below `GATE_MIN_W` or exceeds `GATE_MAX_W`; openings never overlap (tested, including property test over seeds and positions).
-- [ ] Growth never depends on correctness, and never changes streak or results (tested).
-- [ ] A max-size crowd that shoots its opening early passes a 3-answer wall without loss (tested); one that switches late to a narrowed opening clips.
-- [ ] Bot check still holds (bot shoots its chosen opening); report army numbers.
-- [ ] On the phone-sized screen, growth is visible and labels stay readable.
+- [x] Growth matches the rule: total widening equals total narrowing until the caps; nothing drops below `GATE_MIN_W` or exceeds `GATE_MAX_W`; openings never overlap (tested, including property test over seeds and positions).
+- [x] Growth never depends on correctness, and never changes streak or results (tested).
+- [x] A max-size crowd that shoots its opening early passes a 3-answer wall without loss (tested); one that switches late to a narrowed opening clips.
+- [x] Bot check still holds (bot shoots its chosen opening); report army numbers. (200 seeds: 100% 0 die early, median army 1553 (931 before S7); 80% 0, median 124 (113); 50% 200, median 0; missing only the 3 charges 140, median 0.)
+- [x] On the phone-sized screen, growth is visible and labels stay readable.
 
 **Verification:** `npm test`. Phone-sized browser check.
 **Dependencies:** S6
