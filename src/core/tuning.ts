@@ -7,13 +7,11 @@ export const MAX_MULTIPLY_GAIN = 150;
 export const WRONG_MIN_LOSS = 5;
 export const WRONG_PCT_LOSS = 0.3;
 
-// Squad charges (R5). See track.ts and sim.ts.
+// Squad charges (R5, S6): a wall gate with a squad in each opening. See track.ts and sim.ts.
 /** Temporary toggle for Checkpoint A2: false makes every question a wall gate. */
 export const SQUADS_ENABLED = true;
 /** Questions (1-based) that are squad charges. Never one of the 3 warm-ups. */
 export const SQUAD_QUESTIONS = [4, 8, 12] as const;
-/** The charge line sits this far before the squads; crossing it locks steering. */
-export const CHARGE_LINE_DISTANCE = 1.0;
 /** Soldiers a correct squad adds on top of the streak reward. Also the count every squad shows. */
 export const SQUAD_DEFECT_GAIN = 10;
 /** Wrong squad charge: lose max(WRONG_CHARGE_MIN_LOSS, ceil(WRONG_CHARGE_PCT_LOSS × army)). */
@@ -54,8 +52,7 @@ export const CROWD_MAX_W = 0.3;
 /**
  * Hazard-free stretch right before each wall. Shorter than VIEW_DISTANCE, so
  * the prompt appears while the last hazards are still being dodged (S5).
- * A squad charge's calm stretch is CHARGE_LINE_DISTANCE longer, so lining up
- * before its charge line keeps this much room.
+ * Squad charges get the same stretch as walls (S6).
  */
 export const CALM_DISTANCE = 1.2;
 /** Distance between a question and the next hazard, and between hazards. */

@@ -12,12 +12,7 @@ import {
   type RunState,
 } from "../core/sim";
 import { hazardSpan, isCharge } from "../core/track";
-import {
-  CHARGE_LINE_DISTANCE,
-  FIRE_RANGE,
-  SAW_W,
-  VIEW_DISTANCE,
-} from "../core/tuning";
+import { FIRE_RANGE, SAW_W, VIEW_DISTANCE } from "../core/tuning";
 import type { Scene } from "./scenes";
 
 const FONT = `"Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic", system-ui, sans-serif`;
@@ -230,7 +225,9 @@ function renderRun(ctx: Ctx, w: number, h: number, run: RunState): void {
   const radius = (crowdWidth(run.army) * w) / 2;
   // squads are drawn only from the view model, never from the rows
   const view = viewOf(run);
-  const active = view.charges.find((c) => c.locked);
+  const active = view.charges.find(
+    (c) => c.contactDist !== null && run.dist - c.contactDist < 1,
+  );
   if (active) renderFirefight(ctx, w, run, active, armyY, radius, depthY);
   else renderFire(ctx, w, run, armyY, radius, depthY);
 
@@ -270,8 +267,8 @@ function renderRun(ctx: Ctx, w: number, h: number, run: RunState): void {
   }
 
   for (const c of view.charges) {
-    if (c.line - run.dist < -behind || c.line - run.dist > farthest) continue;
-    renderCharge(ctx, w, run, c, armyY, depthY);
+    if (c.pos - run.dist < -behind || c.pos - run.dist > farthest) continue;
+    renderCharge(ctx, w, run, c, depthY);
   }
 
   renderCrateRecruits(ctx, w, run, armyY, radius, depthY);
@@ -456,9 +453,9 @@ function renderFire(
   }
 }
 
-/** How far through a locked charge the army is: 0 at the line, 1 at contact. */
+/** How far through the firefight the army is: 0 at contact, 1 when it ends. */
 function chargeProgress(run: RunState, c: ChargeView): number {
-  const t = (run.dist - (c.lockDist ?? run.dist)) / CHARGE_LINE_DISTANCE;
+  const t = (run.dist - (c.contactDist ?? run.dist)) / 1;
   return Math.min(1, Math.max(0, t));
 }
 
@@ -472,35 +469,15 @@ function renderCharge(
   w: number,
   run: RunState,
   c: ChargeView,
-  armyY: number,
   depthY: (ahead: number) => number,
 ): void {
-  // the charge line: dashed until it locks, then solid
-  const ly = depthY(c.line - run.dist);
-  const committed = c.locked || c.resolved;
-  ctx.strokeStyle = COLORS.chargeLine;
-  ctx.globalAlpha = committed ? 1 : 0.8;
-  ctx.lineWidth = committed ? 4 : 3;
-  ctx.setLineDash(committed ? [] : [14, 10]);
-  ctx.beginPath();
-  ctx.moveTo(0, ly);
-  ctx.lineTo(w, ly);
-  ctx.stroke();
-  ctx.setLineDash([]);
-  ctx.globalAlpha = 1;
-  if (c.locked) {
-    const pulse = 0.75 + 0.25 * Math.sin(run.dist * 20);
-    ctx.globalAlpha = pulse;
-    text(ctx, "LOCKED", w / 2, armyY + 58, 16, COLORS.chargeLine);
-    ctx.globalAlpha = 1;
-  }
   if (c.resolved) return;
 
   const ahead = c.pos - run.dist;
   const y = depthY(ahead);
   const scale = Math.max(0.3, 1 - 0.5 * (ahead / VIEW_DISTANCE));
   const t = chargeProgress(run, c);
-  const shown = c.locked && t >= CHARGE_REVEAL;
+  const shown = t >= CHARGE_REVEAL;
   const bannerH = 40 * scale;
   const bannerY = y - 44 * scale - bannerH;
   c.squads.forEach((q) => {

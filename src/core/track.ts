@@ -4,7 +4,6 @@ import {
   BLOCK_MAX_W,
   BLOCK_MIN_W,
   CALM_DISTANCE,
-  CHARGE_LINE_DISTANCE,
   ENEMY_CHANCE,
   ENEMY_X_MARGIN,
   HAZARD_SPACING,
@@ -74,11 +73,6 @@ export function isCharge(track: Track, q: number): boolean {
   return track.charges.includes(q);
 }
 
-/** Track position of question q's charge line (only meaningful for a charge). */
-export function chargeLine(track: Track, q: number): number {
-  return (track.questions[q] ?? Infinity) - CHARGE_LINE_DISTANCE;
-}
-
 /** Decorrelates the layout from the question content built from the same seed. */
 const TRACK_SALT = 0x9e3779b9;
 
@@ -86,9 +80,8 @@ const TRACK_SALT = 0x9e3779b9;
  * Seeded beat layout: the first question VIEW_DISTANCE in (a full reading time),
  * then HAZARDS_MIN–HAZARDS_MAX hazards HAZARD_SPACING apart, then a calm stretch
  * right before each next question. Enemy packs only appear after the second
- * question. Questions SQUAD_QUESTIONS are squad charges when `squads` is on;
- * their calm stretch is CHARGE_LINE_DISTANCE longer (on or off), so a full
- * CALM_DISTANCE stays before the charge line.
+ * question. Questions SQUAD_QUESTIONS are squad charges when `squads` is on,
+ * laid out exactly like walls.
  */
 export function buildTrack(
   seed: number,
@@ -96,12 +89,9 @@ export function buildTrack(
   squads = SQUADS_ENABLED,
 ): Track {
   const rng = createRng(seed ^ TRACK_SALT);
-  // the squad questions keep their longer calm stretch even with squads off,
-  // so the toggle never changes the layout
-  const squadQuestions = SQUAD_QUESTIONS.map((q) => q - 1).filter(
-    (q) => q < questionCount,
-  );
-  const charges = squads ? squadQuestions : [];
+  const charges = squads
+    ? SQUAD_QUESTIONS.map((q) => q - 1).filter((q) => q < questionCount)
+    : [];
   const questions: number[] = [];
   const hazards: Hazard[] = [];
   let pos = Math.max(VIEW_DISTANCE, CALM_DISTANCE);
@@ -113,9 +103,7 @@ export function buildTrack(
       pos += HAZARD_SPACING;
       hazards.push(makeHazard(rng, pos, q >= 1));
     }
-    pos +=
-      CALM_DISTANCE +
-      (squadQuestions.includes(q + 1) ? CHARGE_LINE_DISTANCE : 0);
+    pos += CALM_DISTANCE;
   }
   return { questions, hazards, charges };
 }

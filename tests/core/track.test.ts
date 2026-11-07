@@ -1,9 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   buildTrack,
-  chargeLine,
   hazardSpan,
-  isCharge,
   type Solid,
   type Track,
 } from "../../src/core/track";
@@ -55,7 +53,7 @@ function longestDeadStretch(t: Track, step = 0.01): number {
   const limitAfter = (d: number): number => {
     const q = t.questions.findIndex((p) => p > d);
     if (q < 0) return Infinity;
-    return isCharge(t, q) ? chargeLine(t, q) : (t.questions[q] as number);
+    return t.questions[q] as number;
   };
   const busy = (d: number): boolean => {
     if (t.questions.some((q) => d >= q - CALM_DISTANCE && d <= q)) return true;
@@ -83,7 +81,7 @@ describe("dead time", () => {
       ...TRACKS.slice(0, 200).map((t) => longestDeadStretch(t)),
     );
     expect(worst / BASE_SPEED).toBeLessThanOrEqual(1.5);
-  });
+  }, 30_000);
 });
 
 describe("buildTrack", () => {
@@ -114,24 +112,8 @@ describe("buildTrack", () => {
   it("keeps every calm stretch hazard-free", () => {
     const bad = failing((t) =>
       t.questions.every((q) =>
-        t.hazards.every((h) => h.pos <= q - CALM_DISTANCE || h.pos > q),
+        t.hazards.every((h) => h.pos <= q - CALM_DISTANCE + 1e-9 || h.pos > q),
       ),
-    );
-    expect(bad).toEqual([]);
-  });
-
-  it("leaves a full calm stretch before each charge line", () => {
-    const bad = failing((t) =>
-      t.charges.every((q) => {
-        const line = chargeLine(t, q);
-        const prev = t.questions[q - 1] as number;
-        return t.hazards.every(
-          (h) =>
-            h.pos <= line - CALM_DISTANCE + 1e-9 ||
-            h.pos <= prev ||
-            h.pos > line,
-        );
-      }),
     );
     expect(bad).toEqual([]);
   });

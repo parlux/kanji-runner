@@ -7,13 +7,12 @@ import {
   hazardPos,
   setTarget,
   speedMul,
-  squadCentres,
   stepRun,
   type RunState,
 } from "../../src/core/sim";
 import { buildKanaRun } from "../../src/core/run";
 import { KANA } from "../../src/core/kana";
-import { buildTrack, hazardSpan, isCharge } from "../../src/core/track";
+import { buildTrack, hazardSpan } from "../../src/core/track";
 import { BASE_SPEED, FIRE_RANGE, ROWS_PER_RUN } from "../../src/core/tuning";
 
 /** Safety margin: only go for a crate if the fire left would break it this many times over. */
@@ -34,8 +33,8 @@ const DT = 1 / 60;
 /**
  * Perfect steering: shoots a crate when it can break it in time (else dodges),
  * dodges saws through the widest gap, stays on each enemy pack to shoot it,
- * goes through the chosen opening at each wall, and lines up on the chosen
- * squad before each charge line (after it, steering is locked anyway).
+ * and goes through the chosen opening at each wall (a charge is a wall with
+ * a squad in each opening).
  * `wrong(q)` says whether question q is answered wrongly.
  */
 function botRun(
@@ -69,10 +68,7 @@ function botRun(
       const n = row?.options.length ?? 2;
       const answer = row?.answerIndex ?? 0;
       const pick = wrong(s.next) ? (answer + 1) % n : answer;
-      const x = isCharge(s.track, s.next)
-        ? squadCentres(n)[pick]
-        : gateOpenings(n)[pick]?.centre;
-      s = setTarget(s, x ?? 0.5);
+      s = setTarget(s, gateOpenings(n)[pick]?.centre ?? 0.5);
     }
     s = stepRun(s, DT);
   }

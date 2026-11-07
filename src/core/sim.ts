@@ -29,13 +29,7 @@ import {
   STEER_MAX_SPEED,
   VIEW_DISTANCE,
 } from "./tuning";
-import {
-  chargeLine,
-  hazardSpan,
-  isCharge,
-  type Hazard,
-  type Track,
-} from "./track";
+import { hazardSpan, isCharge, type Hazard, type Track } from "./track";
 import type { GateRow } from "./types";
 
 /** A moving enemy pack: its current track position and centre. */
@@ -75,11 +69,6 @@ export type RunState = {
   lastCrate: { gain: number; dist: number } | null;
   /** Most recent clipping loss and the distance it happened at, for feedback. */
   lastClip: { loss: number; dist: number } | null;
-  /**
-   * The squad charge the army is committed to: its row, the squad chosen at the
-   * charge line, and the distance of the lock. Active while `row === next`.
-   */
-  lock: { row: number; choice: number; dist: number } | null;
   /** Most recent answer, for feedback: the opening chosen and the army change it caused (after clipping). */
   lastAnswer: {
     correct: boolean;
@@ -121,7 +110,6 @@ export function createRunState(rows: GateRow[], track: Track): RunState {
     lastShatter: null,
     lastCrate: null,
     lastClip: null,
-    lock: null,
     lastAnswer: null,
     status: "running",
   };
@@ -163,35 +151,27 @@ export function squadCentres(n: number): number[] {
   return gateOpenings(n).map((o) => o.centre);
 }
 
-/** Is steering locked by a squad charge (between its line and contact)? */
-export function isLocked(s: RunState): boolean {
-  return s.lock !== null && s.lock.row === s.next;
-}
-
 export type SquadView = {
   label: string;
   /** Centre across the track. */
   x: number;
   /** Shown count: the same for every squad. */
   count: number;
-  /** The squad the army locked onto. False for every squad before the lock. */
+  /** The squad the army ran into. False for every squad before contact. */
   chosen: boolean;
-  /** Only for the chosen squad once locked: it joins (correct) or fights (wrong). */
+  /** Only for the chosen squad after contact: it joins (correct) or fights back (wrong). */
   outcome: "join" | "fight" | null;
 };
 
 export type ChargeView = {
   row: number;
-  /** Track position of the squads, and of the charge line before them. */
+  /** Track position of the wall the squads stand in. */
   pos: number;
-  line: number;
   prompt: string;
-  /** Steering is locked (line crossed, not yet in contact). */
-  locked: boolean;
   /** Contact has happened. */
   resolved: boolean;
-  /** Distance at which the lock happened, if it has. */
-  lockDist: number | null;
+  /** Distance at which contact happened, for the most recent answer only (else null). */
+  contactDist: number | null;
   squads: SquadView[];
 };
 
@@ -199,39 +179,32 @@ export type RunView = { charges: ChargeView[] };
 
 /**
  * What the renderer may know about squad charges. No correctness data until
- * the choice is fixed at the charge line, and then only for the chosen squad.
+ * contact, and then only for the squad the army ran into, while that charge
+ * is the most recent answer.
  */
 export function viewOf(s: RunState): RunView {
   const charges = s.track.charges.flatMap((q): ChargeView[] => {
     const row = s.rows[q];
     if (!row) return [];
-    const lock = s.lock?.row === q ? s.lock : null;
-    const chosenIndex = lock
-      ? lock.choice
-      : q < s.next
-        ? (s.lastAnswer?.choice ?? -1)
-        : -1;
-    // only a committed choice (locked or resolved) gets an outcome
-    const committed = lock !== null || q < s.next;
+    const answer = q === s.next - 1 ? s.lastAnswer : null;
     const squads = squadCentres(row.options.length).map((x, j): SquadView => {
-      const chosen = committed && j === chosenIndex;
+      const chosen = answer?.choice === j;
       return {
         label: row.options[j] ?? "",
         x,
         count: SQUAD_DEFECT_GAIN,
         chosen,
-        outcome: chosen ? (j === row.answerIndex ? "join" : "fight") : null,
+        outcome:
+          answer?.choice === j ? (answer.correct ? "join" : "fight") : null,
       };
     });
     return [
       {
         row: q,
         pos: s.track.questions[q] ?? Infinity,
-        line: chargeLine(s.track, q),
         prompt: row.prompt,
-        locked: lock !== null && q === s.next,
         resolved: q < s.next,
-        lockDist: lock?.dist ?? null,
+        contactDist: answer?.dist ?? null,
         squads,
       },
     ];
@@ -292,13 +265,11 @@ function threats(s: RunState): (Threat | null)[] {
 }
 
 /**
- * Fire never reaches past the next unresolved question: its wall, or a
- * charge's line, so nothing beyond it can be hit (or revealed).
+ * Fire never reaches past the next unresolved question's wall (a charge's
+ * too), so nothing beyond it can be hit (or revealed).
  */
 export function fireLimit(s: RunState): number {
-  return isCharge(s.track, s.next)
-    ? chargeLine(s.track, s.next)
-    : (s.track.questions[s.next] ?? Infinity);
+  return s.track.questions[s.next] ?? Infinity;
 }
 
 /** Recruits a crate pays out when it shatters. */
@@ -340,9 +311,9 @@ function fire(s: RunState, w: number, dt: number): RunState {
 const clampOnTrack = (v: number, w: number): number =>
   Math.min(1 - w / 2, Math.max(w / 2, v));
 
-/** Steering input. Ignored while a squad charge is locked. */
+/** Steering input. */
 export function setTarget(s: RunState, targetX: number): RunState {
-  if (s.status !== "running" || isLocked(s)) return s;
+  if (s.status !== "running") return s;
   return { ...s, targetX: clampOnTrack(targetX, crowdWidth(s.army)) };
 }
 
@@ -366,12 +337,7 @@ export function stepRun(s: RunState, dt: number): RunState {
   if (s.status !== "running") return s;
   let next = { ...s };
   const w = crowdWidth(s.army);
-  // a locked charge runs straight at the chosen squad
-  const locked = s.lock && isLocked(s) ? s.lock : null;
-  const lockedX = locked
-    ? squadCentres(s.rows[s.next]?.options.length ?? 2)[locked.choice]
-    : undefined;
-  next.targetX = clampOnTrack(lockedX ?? s.targetX, w);
+  next.targetX = clampOnTrack(s.targetX, w);
   next.x = steerStep(s.x, next.targetX, w, dt);
   next.dist += BASE_SPEED * speedMul(s.dist, s.track) * dt;
   next = movePacks(next, dt);
@@ -382,13 +348,8 @@ export function stepRun(s: RunState, dt: number): RunState {
     const hazard = next.track.hazards[next.nextHazard];
     const pos = hazardPos(next, next.nextHazard);
     const rowPos = next.track.questions[next.next] ?? Infinity;
-    const linePos =
-      isCharge(next.track, next.next) && !isLocked(next)
-        ? chargeLine(next.track, next.next)
-        : Infinity;
-    if (hazard && pos <= Math.min(rowPos, linePos) && pos <= next.dist)
+    if (hazard && pos <= rowPos && pos <= next.dist)
       next = passHazard(next, hazard);
-    else if (linePos <= next.dist) next = lockCharge(next);
     else if (rowPos <= next.dist) next = resolveRow(next);
     else return next;
   }
@@ -425,56 +386,25 @@ function passHazard(s: RunState, h: Hazard): RunState {
   };
 }
 
-/** Crossing the charge line: the squad nearest the crowd's centre is the answer, and steering locks. */
-function lockCharge(s: RunState): RunState {
-  const n = s.rows[s.next]?.options.length ?? 2;
-  const choice = nearestOpening(n, s.x);
-  return { ...s, lock: { row: s.next, choice, dist: s.dist } };
-}
-
-/** Contact with the chosen squad: no wall, so no clipping; the charge scores. */
-function resolveCharge(s: RunState): RunState {
-  const row = s.rows[s.next];
-  if (!row) return { ...s, status: "finished" };
-  const choice =
-    s.lock?.row === s.next
-      ? s.lock.choice
-      : nearestOpening(row.options.length, s.x);
-  const correct = choice === row.answerIndex;
-  const scored = correct
-    ? applyCorrectCharge(s.army, s.streak, BASE_REWARD[row.type])
-    : applyWrongCharge(s.army);
-  const nextIndex = s.next + 1;
-  const status =
-    scored.army <= 0
-      ? "dead"
-      : nextIndex >= s.rows.length
-        ? "finished"
-        : "running";
-  return {
-    ...s,
-    army: scored.army,
-    streak: scored.streak,
-    next: nextIndex,
-    results: [...s.results, correct],
-    lastAnswer: { correct, choice, change: scored.army - s.army, dist: s.dist },
-    status,
-  };
-}
-
+/**
+ * Contact with a wall, or a charge (a wall with a squad in each opening):
+ * the wall clips, the opening nearest the crowd's centre is the answer, and
+ * a charge scores as a charge.
+ */
 function resolveRow(s: RunState): RunState {
-  if (isCharge(s.track, s.next)) return resolveCharge(s);
   const row = s.rows[s.next];
   if (!row) return { ...s, status: "finished" };
   const n = row.options.length;
+  const charge = isCharge(s.track, s.next);
   // clipping first, then the answer is scored on what is left
   const clip = clipLoss(s.army, s.x, crowdWidth(s.army), wallSolids(n));
   const remaining = s.army - clip;
   const choice = nearestOpening(n, s.x);
   const correct = choice === row.answerIndex;
+  const base = BASE_REWARD[row.type];
   const scored = correct
-    ? applyCorrect(remaining, s.streak, BASE_REWARD[row.type])
-    : applyWrong(remaining);
+    ? (charge ? applyCorrectCharge : applyCorrect)(remaining, s.streak, base)
+    : (charge ? applyWrongCharge : applyWrong)(remaining);
   // a crowd clipped to nothing stays dead, but the answer still counts
   const army = remaining > 0 ? scored.army : 0;
   const streak = scored.streak;

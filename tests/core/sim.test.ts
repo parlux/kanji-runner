@@ -500,9 +500,9 @@ describe("shooting", () => {
     expect(s.damage[0]).toBe(0);
   });
 
-  it("never fires past a charge line, even within FIRE_RANGE", () => {
+  it("never fires past a charge's wall either, even within FIRE_RANGE", () => {
     const s0 = range([wide(1.9)], [1e9]);
-    const track = { ...s0.track, questions: [2.5, 100], charges: [0] };
+    const track = { ...s0.track, questions: [1.5, 100], charges: [0] };
     const s = stepFor({ ...s0, track }, 0.2);
     expect(s.target).toBeNull();
     expect(s.damage[0]).toBe(0);

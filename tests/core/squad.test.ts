@@ -8,25 +8,21 @@ import {
   applyCorrectCharge,
   applyWrongCharge,
 } from "../../src/core/scoring";
+import { clipLoss, crowdWidth } from "../../src/core/crowd";
 import {
   createRunState,
-  isLocked,
-  nudgeTarget,
+  gateOpenings,
   setTarget,
   squadCentres,
   stepRun,
   viewOf,
+  wallSolids,
   type ChargeView,
   type RunState,
   type SquadView,
 } from "../../src/core/sim";
-import { buildTrack, chargeLine, isCharge } from "../../src/core/track";
-import {
-  BASE_REWARD,
-  CALM_DISTANCE,
-  CHARGE_LINE_DISTANCE,
-  ROWS_PER_RUN,
-} from "../../src/core/tuning";
+import { buildTrack, isCharge } from "../../src/core/track";
+import { BASE_REWARD, ROWS_PER_RUN } from "../../src/core/tuning";
 import type { GateRow } from "../../src/core/types";
 
 const DT = 1 / 60;
@@ -42,18 +38,11 @@ describe("squad charges on the track", () => {
     expect(bad).toEqual([]);
   });
 
-  it("put the charge line CHARGE_LINE_DISTANCE before the squads, inside the calm stretch", () => {
-    expect(CHARGE_LINE_DISTANCE).toBeLessThan(CALM_DISTANCE);
+  it("are laid out exactly like walls", () => {
     const bad = SEEDS.filter((seed) => {
-      const t = buildTrack(seed, ROWS_PER_RUN);
-      return t.charges.some((q) => {
-        const line = chargeLine(t, q);
-        const pos = t.questions[q] as number;
-        return (
-          Math.abs(pos - line - CHARGE_LINE_DISTANCE) > 1e-12 ||
-          t.hazards.some((h) => h.pos >= line && h.pos <= pos)
-        );
-      });
+      const on = buildTrack(seed, ROWS_PER_RUN);
+      const off = buildTrack(seed, ROWS_PER_RUN, false);
+      return JSON.stringify({ ...on, charges: [] }) !== JSON.stringify(off);
     });
     expect(bad).toEqual([]);
   });
@@ -78,8 +67,14 @@ describe("squad charges on the track", () => {
   });
 });
 
-/** A seeded run without hazards, sitting just before charge `q`'s line with the crowd at x. */
-function beforeLine(seed: number, q = 3, x = 0.5, army = 40): RunState {
+/** A seeded run without hazards, sitting `ahead` before charge `q` with the crowd at x. */
+function beforeCharge(
+  seed: number,
+  q = 3,
+  x = 0.5,
+  army = 40,
+  ahead = 1e-6,
+): RunState {
   const track = { ...buildTrack(seed, ROWS_PER_RUN), hazards: [] };
   const s = createRunState(buildKanaRun(seed, KANA), track);
   return {
@@ -88,7 +83,7 @@ function beforeLine(seed: number, q = 3, x = 0.5, army = 40): RunState {
     next: q,
     x,
     targetX: x,
-    dist: chargeLine(track, q) - 1e-6,
+    dist: (track.questions[q] as number) - ahead,
   };
 }
 
@@ -99,54 +94,73 @@ function toContact(s: RunState, input = (r: RunState) => r): RunState {
   return s;
 }
 
-describe("charge lock", () => {
-  it("crossing the line locks onto the squad nearest the crowd's centre", () => {
-    const s = beforeLine(1, 3, 0.3);
-    expect(isLocked(s)).toBe(false);
-    const locked = stepRun(s, DT);
-    expect(isLocked(locked)).toBe(true);
-    expect(locked.lock?.choice).toBe(0);
-    expect(stepRun(beforeLine(1, 3, 0.7), DT).lock?.choice).toBe(1);
+describe("choosing at a charge", () => {
+  it("the choice is the opening nearest the crowd's centre at contact", () => {
+    expect(toContact(beforeCharge(1, 3, 0.3)).lastAnswer?.choice).toBe(0);
+    expect(toContact(beforeCharge(1, 3, 0.7)).lastAnswer?.choice).toBe(1);
+    const mids = squadCentres(3);
+    mids.forEach((x, j) =>
+      expect(toContact(beforeCharge(1, 7, x)).lastAnswer?.choice).toBe(j),
+    );
   });
 
-  it("steering input after the line has no effect until contact", () => {
+  it("steering works right up to contact", () => {
     for (const seed of [1, 2, 3, 4, 5]) {
       for (const q of [3, 7, 11]) {
-        const locked = stepRun(beforeLine(seed, q, 0.3), DT);
-        expect(isLocked(locked)).toBe(true);
-        const still = toContact(locked);
-        const rng = createRng(seed * 31 + q);
-        const steered = toContact(locked, (r) =>
-          rng() < 0.5 ? setTarget(r, rng()) : nudgeTarget(r, rng() - 0.5),
-        );
-        expect(steered).toEqual(still);
-        expect(still.lastAnswer?.choice).toBe(0);
-        expect(still.next).toBe(q + 1);
+        const n = buildKanaRun(seed, KANA)[q]?.options.length ?? 2;
+        const mids = squadCentres(n);
+        // start lined up on the first squad, switch to its neighbour late
+        const s = beforeCharge(seed, q, mids[0], 20, 0.8);
+        const after = toContact(s, (r) => setTarget(r, mids[1] as number));
+        expect(after.next).toBe(q + 1);
+        expect(after.lastAnswer?.choice).toBe(1);
+        expect(after.x).toBeCloseTo(mids[1] as number, 1);
+        // and one step before contact the target still moves
+        const almost = beforeCharge(seed, q, mids[0], 20, 0.05);
+        expect(setTarget(almost, 0.8).targetX).toBe(0.8);
       }
     }
   });
 
-  it("the locked army runs at its chosen squad", () => {
-    const s = toContact(stepRun(beforeLine(1, 7, 0.45), DT));
-    expect(s.x).toBeCloseTo(squadCentres(3)[1] as number, 3);
+  it("a charge clips exactly like a wall, then scores the rest as a charge", () => {
+    const army = 100;
+    const w = crowdWidth(army);
+    const probe = beforeCharge(1, 7);
+    const row = probe.rows[7] as GateRow;
+    const o = gateOpenings(3)[row.answerIndex] as {
+      left: number;
+      right: number;
+    };
+    // a quarter of the crowd hangs over the wall beside the right answer
+    const x = row.answerIndex === 0 ? o.right - w / 4 : o.left + w / 4;
+    const clip = clipLoss(army, x, w, wallSolids(3));
+    expect(clip).toBeGreaterThan(0);
+    const after = toContact({ ...beforeCharge(1, 7, x, army), streak: 1 });
+    expect(after.lastClip?.loss).toBe(clip);
+    expect(after.army).toBe(
+      applyCorrectCharge(army - clip, 1, BASE_REWARD[row.type]).army,
+    );
+    expect(after.lastAnswer).toMatchObject({ correct: true });
   });
 
-  it("steering works again after contact", () => {
-    const s = toContact(stepRun(beforeLine(1, 3, 0.3), DT));
-    expect(setTarget(s, 0.8).targetX).toBe(0.8);
+  it("a charge that clips the crowd to nothing ends the run", () => {
+    const after = toContact(beforeCharge(1, 3, 0.5, 3));
+    // the middle of a 2-answer wall is solid
+    expect(after.army).toBe(0);
+    expect(after.status).toBe("dead");
   });
 });
 
 describe("charge resolution", () => {
-  /** Locks onto the given squad of charge q and runs to contact. */
+  /** Runs into the given squad of charge q. */
   function charge(q: number, pick: "right" | "wrong", army = 40, streak = 2) {
-    const probe = beforeLine(1, q);
+    const probe = beforeCharge(1, q);
     const row = probe.rows[q];
     const n = row?.options.length ?? 2;
     const answer = row?.answerIndex ?? 0;
     const idx = pick === "right" ? answer : (answer + 1) % n;
     const x = squadCentres(n)[idx] as number;
-    const s = { ...beforeLine(1, q, x, army), streak };
+    const s = { ...beforeCharge(1, q, x, army), streak };
     return {
       before: s,
       after: toContact(s),
@@ -200,8 +214,9 @@ describe("expectedArmy with charges", () => {
 const look = (q: SquadView): SquadView => ({ ...q, label: "", x: 0 });
 
 describe("squad view honesty", () => {
-  it("before the lock, every squad in a charge looks the same apart from label and position (300 seeds)", () => {
+  it("before contact, every squad in a charge looks the same apart from label and position (300 seeds)", () => {
     const bad: string[] = [];
+    let checked = 0;
     for (let seed = 0; seed < 300; seed++) {
       const track = buildTrack(seed, ROWS_PER_RUN);
       let s = createRunState(buildKanaRun(seed, KANA), track);
@@ -209,41 +224,43 @@ describe("squad view honesty", () => {
       while (s.status === "running") {
         if (rng() < 0.05) s = setTarget(s, rng());
         for (const c of viewOf(s).charges) {
-          if (c.locked || c.resolved) continue;
+          if (c.resolved) continue;
+          checked++;
           const first = JSON.stringify(look(c.squads[0] as SquadView));
           const same = c.squads.every(
             (q) => JSON.stringify(look(q)) === first && !q.chosen && !q.outcome,
           );
-          if (!same || c.lockDist !== null) bad.push(`${seed}:${c.row}`);
+          if (!same || c.contactDist !== null) bad.push(`${seed}:${c.row}`);
         }
         s = stepRun(s, DT);
       }
     }
+    expect(checked).toBeGreaterThan(1000);
     expect(bad).toEqual([]);
   }, 60_000);
 
-  it("before the lock, the view doesn't change with which answer is correct", () => {
+  it("before contact, the view doesn't change with which answer is correct", () => {
     for (let seed = 0; seed < 50; seed++) {
-      const s = beforeLine(seed, 7);
-      const row = s.rows[7] as GateRow;
-      for (let a = 0; a < row.options.length; a++) {
-        const rows = [...s.rows];
-        rows[7] = { ...row, answerIndex: a, answer: row.options[a] ?? "" };
-        expect(viewOf({ ...s, rows })).toEqual(viewOf(s));
+      for (const ahead of [2, 0.5, 1e-6]) {
+        const s = beforeCharge(seed, 7, 0.5, 40, ahead);
+        const row = s.rows[7] as GateRow;
+        for (let a = 0; a < row.options.length; a++) {
+          const rows = [...s.rows];
+          rows[7] = { ...row, answerIndex: a, answer: row.options[a] ?? "" };
+          expect(viewOf({ ...s, rows })).toEqual(viewOf(s));
+        }
       }
     }
   });
 
-  it("after the lock, only the chosen squad shows an outcome", () => {
-    const s = stepRun(beforeLine(1, 7, 0.5), DT);
+  it("after contact, only the chosen squad shows an outcome", () => {
+    const s = toContact(beforeCharge(1, 7, 0.5));
     const c = viewOf(s).charges.find((v) => v.row === 7) as ChargeView;
-    expect(c.locked).toBe(true);
+    expect(c.resolved).toBe(true);
+    expect(c.contactDist).toBe(s.lastAnswer?.dist);
     const chosen = c.squads.filter((q) => q.chosen);
     expect(chosen).toHaveLength(1);
-    const answer = s.rows[7]?.answerIndex;
-    expect(chosen[0]?.outcome).toBe(
-      s.lock?.choice === answer ? "join" : "fight",
-    );
+    expect(chosen[0]?.outcome).toBe(s.lastAnswer?.correct ? "join" : "fight");
     const others = c.squads.filter((q) => !q.chosen).map(look);
     expect(others.every((o) => o.outcome === null)).toBe(true);
   });
