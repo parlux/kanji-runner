@@ -5,6 +5,7 @@ import { levelKeys } from "../../src/core/progression";
 import { bossSize } from "../../src/core/boss";
 import { defaultProgress } from "../../src/core/srs";
 import { CLASH_SECONDS } from "../../src/core/tuning";
+import { syntheticList } from "../core/wk-fixture";
 import { STEP } from "../../src/game/loop";
 import {
   adoptProgress,
@@ -39,6 +40,20 @@ describe("dev level flag", () => {
     expect(dev.progress.unlockedLevel).toBe(3);
     expect(stored.unlockedLevel).toBe(0);
     expect(createSession(stored, null).persist).toBe(true);
+  });
+
+  it("a WaniKani session asks only its taught kanji and has no placement", () => {
+    const start = { kind: "start" } as const;
+    const wk = syntheticList(30) as unknown as NonNullable<Session["wk"]>;
+    const session = { ...createSession(defaultProgress(), null), wk };
+    const chars = new Set(wk.kanji.map((k) => k.char));
+    const run = handleAction(start, "confirm", () => 5, session).scene;
+    if (run.kind !== "run") throw new Error("no run");
+    const kanjiRows = run.run.rows.filter((r) => r.type !== "kana");
+    expect(kanjiRows.length).toBeGreaterThan(0);
+    expect(kanjiRows.every((r) => chars.has(r.prompt))).toBe(true);
+    for (const a of ["place", "left", "right"] as const)
+      expect(handleAction(start, a, () => 1, session).scene).toEqual(start);
   });
 
   it("starts a kanji run when set, a kana run otherwise", () => {

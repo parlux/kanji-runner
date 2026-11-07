@@ -1,7 +1,7 @@
 import { bossSize, bossWon } from "../core/boss";
 import { applyUnlock, maxLevel, place } from "../core/progression";
 import { mergeProgress } from "../core/merge";
-import { builtInPool } from "../core/pool";
+import { builtInPool, wanikaniPool } from "../core/pool";
 import { buildPoolRun } from "../core/run";
 import { KANA } from "../core/kana";
 import { KANJI } from "../core/kanji";
@@ -21,6 +21,7 @@ import {
   STEER_MAX_SPEED,
 } from "../core/tuning";
 import type { KanaItem, Progress } from "../core/types";
+import type { WkList } from "../wanikani/parse";
 import type { Action } from "./input";
 
 export type Scene =
@@ -51,6 +52,8 @@ export type Session = {
   persist: boolean;
   /** The level the last run unlocked, shown until the next run starts. */
   unlocked: number | null;
+  /** The taught WaniKani kanji when runs use WaniKani mode, else null (Built-in). */
+  wk: WkList | null;
 };
 
 /**
@@ -60,12 +63,13 @@ export type Session = {
  */
 export function createSession(stored: Progress, level: number | null): Session {
   return level === null
-    ? { progress: stored, kana: KANA, persist: true, unlocked: null }
+    ? { progress: stored, kana: KANA, persist: true, unlocked: null, wk: null }
     : {
         progress: { ...stored, unlockedLevel: level },
         kana: [],
         persist: false,
         unlocked: null,
+        wk: null,
       };
 }
 
@@ -86,7 +90,9 @@ function newRun(seed: number, session: Session): Scene {
       buildPoolRun(
         seed,
         session.progress,
-        builtInPool(session.progress, session.kana, KANJI),
+        session.wk
+          ? wanikaniPool(session.progress, session.kana, session.wk)
+          : builtInPool(session.progress, session.kana, KANJI),
       ),
       buildTrack(seed, ROWS_PER_RUN),
     ),
@@ -141,7 +147,11 @@ function startAction(
       const next = { ...session, unlocked: null };
       return { scene: newRun(newSeed(), next), session: next };
     }
-    if (action === "left" || action === "right" || action === "place")
+    // placement is off in WaniKani mode: WaniKani's level gates the pool
+    if (
+      !session.wk &&
+      (action === "left" || action === "right" || action === "place")
+    )
       return {
         scene: { kind: "start", pick: session.progress.unlockedLevel - 1 },
         session,
