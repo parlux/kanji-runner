@@ -10,6 +10,9 @@ The owner tried `?level=3` and found it very hard ("my memory is hazy"). A run f
 - Task 10's summary (every missed item with its correct answer) may cover part of this. Check whether that is enough before adding anything.
 - Also check how new kanji are introduced: Task 7 caps new items at 4 per run, but a first sight of a kanji inside a run gives no time to learn it.
 
+## Show readings after a correct meaning
+Owner, 2026-11-07: when a meaning gate is answered right (水 → water), pop up the kanji's readings in hiragana (kun'yomi みず, on'yomi すい), so every meaning answer also reinforces the readings. Could fit with Task 10's answer pop-ups; must not cover the next prompt.
+
 ## Kana in later levels
 - Keep some kana scattered through later (kanji) levels, so they stay fresh.
   - Task 7's weighted selection over all unlocked items may already do this, because kana stay in the pool. Check how often kana show up once kanji are unlocked.
