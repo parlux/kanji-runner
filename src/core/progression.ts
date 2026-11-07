@@ -92,6 +92,7 @@ export function place(
   const top = maxLevel(kanji);
   const n = Math.max(-1, Math.min(level, top - 1));
   const items = { ...progress.items };
+  const unplaced = new Set<string>();
   for (let l = 0; l <= top; l++)
     for (const key of levelKeys(l, kana, kanji)) {
       const item = items[key];
@@ -106,7 +107,13 @@ export function place(
           };
         else if (item.box < LEARNED_BOX)
           items[key] = { ...item, box: LEARNED_BOX };
-      } else if (item?.seen === 0) delete items[key];
+      } else if (item?.seen === 0) unplaced.add(key);
     }
-  return { ...progress, unlockedLevel: n + 1, items };
+  return {
+    ...progress,
+    unlockedLevel: n + 1,
+    items: Object.fromEntries(
+      Object.entries(items).filter(([key]) => !unplaced.has(key)),
+    ),
+  };
 }
