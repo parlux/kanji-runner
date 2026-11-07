@@ -1,5 +1,6 @@
 import { crowdWidth } from "../core/crowd";
 import {
+  crateReward,
   gateOpenings,
   hazardPos,
   isShattered,
@@ -169,14 +170,27 @@ function renderRun(ctx: Ctx, w: number, h: number, run: RunState): void {
         ctx.fillStyle = "rgba(255,255,255,0.25)";
         ctx.fillRect(h.left * w, y - blockH, bw, blockH);
       }
-      if (hp > 0)
+      if (hp > 0) {
+        // hit points on the crate, the recruits it pays just above it
+        // (floors keep far crates readable on a phone)
+        const cx = ((h.left + h.right) / 2) * w;
         outlinedText(
           ctx,
           String(Math.ceil(hp - dmg)),
-          ((h.left + h.right) / 2) * w,
+          cx,
           y - blockH / 2,
-          18 * scale,
+          Math.max(12, 18 * scale),
         );
+        const rewardSize = Math.max(12, 17 * scale);
+        outlinedText(
+          ctx,
+          `+${crateReward(hp)}`,
+          cx,
+          y - blockH - rewardSize * 0.65,
+          rewardSize,
+          COLORS.good,
+        );
+      }
     } else {
       // its sweep rail, then the saw where it is now
       const { left, right } = hazardSpan(h, run.dist);
@@ -528,6 +542,7 @@ function outlinedText(
   x: number,
   y: number,
   size: number,
+  color = COLORS.text,
 ): void {
   ctx.font = `${Math.round(size)}px ${FONT}`;
   ctx.textAlign = "center";
@@ -536,7 +551,7 @@ function outlinedText(
   ctx.lineWidth = 3;
   ctx.lineJoin = "round";
   ctx.strokeText(s, x, y);
-  ctx.fillStyle = COLORS.text;
+  ctx.fillStyle = color;
   ctx.fillText(s, x, y);
 }
 

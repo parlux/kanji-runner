@@ -57,7 +57,7 @@ T1 scaffold ─ T2 core rules ─ T3 lane slice (done)
 - [x] S1: Auto-fire and breakable blocks
 - [x] S2: Enemy packs
 - [x] S3: Always-on fire and supply crates (Checkpoint A feedback)
-- [ ] S4: Longer fire range and crate rewards shown (Checkpoint A feedback)
+- [x] S4: Longer fire range and crate rewards shown (Checkpoint A feedback)
 
 ### Checkpoint A: feel test on the phone (spec criterion 16)
 - [x] Feels like a crowd runner, right answers feel like power, prompts readable while steering and firing, fun with known answers
