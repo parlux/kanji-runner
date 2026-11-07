@@ -21,6 +21,7 @@ import {
   UNLOCK_SHARE,
 } from "../core/progression";
 import type { Scene, Session } from "./scenes";
+import { startLayout, type Rect } from "./start";
 
 const FONT = `"Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic", system-ui, sans-serif`;
 const MAX_DRAWN_SOLDIERS = 200;
@@ -198,7 +199,8 @@ export function render(
 ): void {
   ctx.fillStyle = COLORS.bg;
   ctx.fillRect(0, 0, w, h);
-  if (scene.kind === "start") return renderStart(ctx, w, h, session);
+  if (scene.kind === "start")
+    return renderStart(ctx, w, h, session, scene.pick);
   if (scene.kind === "end") return renderEnd(ctx, w, h, scene.run, scene.seed);
   renderRun(ctx, w, h, scene.run);
   if (scene.paused) {
@@ -210,7 +212,14 @@ export function render(
   }
 }
 
-function renderStart(ctx: Ctx, w: number, h: number, session: Session): void {
+function renderStart(
+  ctx: Ctx,
+  w: number,
+  h: number,
+  session: Session,
+  pick: number | undefined,
+): void {
+  if (pick !== undefined) return renderPicker(ctx, w, h, session, pick);
   text(ctx, "Kanji Runner", w / 2, h * 0.22, Math.min(64, w / 8));
   renderLevel(ctx, w, h * 0.36, session);
   text(ctx, "Tap or Enter to start", w / 2, h * 0.5, 22);
@@ -220,6 +229,80 @@ function renderStart(ctx: Ctx, w: number, h: number, session: Session): void {
     w / 2,
     h * 0.5 + 36,
     18,
+    COLORS.dim,
+  );
+  const l = startLayout(w, h);
+  button(ctx, l.place, "I already know some…", 18);
+  text(
+    ctx,
+    "or ←/→ to choose a starting level",
+    w / 2,
+    l.place.y + l.place.h + 20,
+    14,
+    COLORS.dim,
+  );
+}
+
+function button(
+  ctx: Ctx,
+  r: Rect,
+  label: string,
+  size: number,
+  fill = COLORS.track,
+): void {
+  ctx.fillStyle = fill;
+  ctx.fillRect(r.x, r.y, r.w, r.h);
+  ctx.strokeStyle = COLORS.wallEdge;
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(r.x + 0.75, r.y + 0.75, r.w - 1.5, r.h - 1.5);
+  text(ctx, label, r.x + r.w / 2, r.y + r.h / 2, size);
+}
+
+/** "I already know up to …": −/+ to choose, Apply or Cancel. */
+function renderPicker(
+  ctx: Ctx,
+  w: number,
+  h: number,
+  session: Session,
+  pick: number,
+): void {
+  const l = startLayout(w, h);
+  ctx.fillStyle = COLORS.banner;
+  ctx.fillRect(l.panel.x, l.panel.y, l.panel.w, l.panel.h);
+  text(ctx, "I already know up to", w / 2, l.panel.y + 32, 20, COLORS.dim);
+  const name = pick < 0 ? "Nothing yet" : levelName(pick);
+  const cy = l.minus.y + l.minus.h / 2;
+  text(
+    ctx,
+    name,
+    w / 2,
+    cy,
+    fitSize(ctx, name, 30, l.plus.x - l.minus.x - l.minus.w - 8),
+  );
+  button(ctx, l.minus, "−", 32);
+  button(ctx, l.plus, "+", 32);
+  const unlocked = session.progress.unlockedLevel;
+  const target = pick + 1;
+  const note =
+    target < unlocked
+      ? `Lowers your level from ${levelName(unlocked)}`
+      : `Start at ${levelName(target)}`;
+  text(
+    ctx,
+    note,
+    w / 2,
+    cy + l.minus.h / 2 + 26,
+    16,
+    target < unlocked ? COLORS.chargeLine : COLORS.dim,
+  );
+  button(ctx, l.apply, "Apply", 22, "#2f6b48");
+  button(ctx, l.cancel, "Cancel", 18);
+  text(
+    ctx,
+    "←/→ choose · Enter apply · Esc cancel",
+    w / 2,
+    l.cancel.y + l.cancel.h + 28,
+    14,
     COLORS.dim,
   );
 }

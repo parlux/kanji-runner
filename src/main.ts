@@ -9,6 +9,7 @@ import {
   updateScene,
   type Scene,
 } from "./game/scenes";
+import { startTap } from "./game/start";
 import { loadProgress, saveProgress } from "./storage/storage";
 
 const canvas = document.querySelector<HTMLCanvasElement>("#game");
@@ -35,13 +36,28 @@ let session = createSession(
 );
 
 const act = (action: Action): void => {
-  scene = handleAction(scene, action, newSeed, session);
+  const next = handleAction(scene, action, newSeed, session);
+  // placement changes progress: save it right away
+  if (next.session !== session && session.persist)
+    saveProgress(localStorage, next.session.progress);
+  scene = next.scene;
+  session = next.session;
 };
 const steerAxis = bindKeys(act);
-// a tap starts a run from the start/end screens, and pauses or resumes a run
-const takeDrag = bindDrag(canvas, () =>
-  act(scene.kind === "run" ? "pause" : "confirm"),
-);
+// a tap pauses or resumes a run, starts one from the end screen, and on the
+// start screen hits the placement controls or else starts a run
+const takeDrag = bindDrag(canvas, (x, y) => {
+  if (scene.kind === "run") return act("pause");
+  if (scene.kind === "end") return act("confirm");
+  const action = startTap(
+    scene.pick !== undefined,
+    window.innerWidth,
+    window.innerHeight,
+    x,
+    y,
+  );
+  if (action) act(action);
+});
 
 startLoop(
   (dt) => {

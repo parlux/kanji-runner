@@ -1,15 +1,20 @@
 import { createDrag } from "./drag";
 
-export type Action = "confirm" | "pause";
+/** `left`/`right`/`back`/`place` drive the start screen's placement picker. */
+export type Action = "confirm" | "pause" | "left" | "right" | "back" | "place";
 
 const KEYS: Record<string, Action> = {
   Enter: "confirm",
   " ": "confirm",
   p: "pause",
   P: "pause",
+  Escape: "back",
 };
 
-/** Binds keys. Returns the held steering axis: -1 (←), 0 or 1 (→). */
+/**
+ * Binds keys. Returns the held steering axis: -1 (←), 0 or 1 (→). ←/→ also
+ * fire `left`/`right` on every press and auto-repeat, for the start screen.
+ */
 export function bindKeys(onAction: (a: Action) => void): () => number {
   const held = { left: false, right: false };
   const setHeld = (key: string, down: boolean): boolean => {
@@ -19,7 +24,10 @@ export function bindKeys(onAction: (a: Action) => void): () => number {
     return true;
   };
   window.addEventListener("keydown", (e) => {
-    if (setHeld(e.key, true)) return e.preventDefault();
+    if (setHeld(e.key, true)) {
+      e.preventDefault();
+      return onAction(e.key === "ArrowLeft" ? "left" : "right");
+    }
     const action = KEYS[e.key];
     if (!action) return;
     e.preventDefault();
@@ -36,10 +44,14 @@ export function bindKeys(onAction: (a: Action) => void): () => number {
 }
 
 /**
- * Binds pointer drag on `el`. A tap fires `onTap`. Returns a function that takes
- * the target movement (track units) accumulated since its last call.
+ * Binds pointer drag on `el`. A tap fires `onTap` with its position in `el`.
+ * Returns a function that takes the target movement (track units)
+ * accumulated since its last call.
  */
-export function bindDrag(el: HTMLElement, onTap: () => void): () => number {
+export function bindDrag(
+  el: HTMLElement,
+  onTap: (x: number, y: number) => void,
+): () => number {
   const drag = createDrag(() => el.clientWidth);
   el.addEventListener("pointerdown", (e) => {
     el.setPointerCapture(e.pointerId);
@@ -47,7 +59,10 @@ export function bindDrag(el: HTMLElement, onTap: () => void): () => number {
   });
   el.addEventListener("pointermove", (e) => drag.move(e.pointerId, e.clientX));
   el.addEventListener("pointerup", (e) => {
-    if (drag.up(e.pointerId, e.clientX, e.clientY, e.timeStamp)) onTap();
+    if (drag.up(e.pointerId, e.clientX, e.clientY, e.timeStamp)) {
+      const r = el.getBoundingClientRect();
+      onTap(e.clientX - r.left, e.clientY - r.top);
+    }
   });
   el.addEventListener("pointercancel", (e) => drag.cancel(e.pointerId));
   return drag.take;

@@ -9,7 +9,10 @@ import {
   devLevel,
   handleAction,
   type Scene,
+  type Session,
 } from "../../src/game/scenes";
+import type { Action } from "../../src/game/input";
+import { startLayout, startTap } from "../../src/game/start";
 
 describe("dev level flag", () => {
   it("reads ?level=N for N ≥ 2 and ignores anything else", () => {
@@ -36,13 +39,13 @@ describe("dev level flag", () => {
       "confirm",
       () => 1,
       createSession(stored, 3),
-    );
+    ).scene;
     const kana = handleAction(
       start,
       "confirm",
       () => 1,
       createSession(stored, null),
-    );
+    ).scene;
     if (kanji.kind !== "run" || kana.kind !== "run") throw new Error("no run");
     expect(kanji.run.rows.every((r) => r.type !== "kana")).toBe(true);
     expect(kana.run.rows.every((r) => r.type === "kana")).toBe(true);
@@ -51,7 +54,12 @@ describe("dev level flag", () => {
 
 describe("afterStep", () => {
   const session = createSession(defaultProgress(), null);
-  const run = handleAction({ kind: "start" }, "confirm", () => 7, session);
+  const run = handleAction(
+    { kind: "start" },
+    "confirm",
+    () => 7,
+    session,
+  ).scene;
   if (run.kind !== "run") throw new Error("no run");
 
   it("records the run's answers when a run ends", () => {
@@ -105,5 +113,71 @@ describe("afterStep", () => {
       run: { ...run.run, rows: [row], results: [true], status: "finished" },
     };
     expect(afterStep(s, run, ended, 5).progress.unlockedLevel).toBe(3);
+  });
+});
+
+describe("placement picker", () => {
+  const fresh = createSession(defaultProgress(), null);
+  const act = (
+    scene: Scene,
+    session: Session,
+    ...actions: Action[]
+  ): { scene: Scene; session: Session } =>
+    actions.reduce((r, a) => handleAction(r.scene, a, () => 1, r.session), {
+      scene,
+      session,
+    });
+
+  it("opens at the current placement, moves, and applies on confirm", () => {
+    const opened = act({ kind: "start" }, fresh, "place");
+    expect(opened.scene).toEqual({ kind: "start", pick: -1 });
+    expect(opened.session).toBe(fresh);
+    const placed = act(opened.scene, fresh, "right", "right", "confirm");
+    expect(placed.scene).toEqual({ kind: "start" });
+    expect(placed.session.progress.unlockedLevel).toBe(2);
+    // the next run is a kanji level run
+    const run = act(placed.scene, placed.session, "confirm").scene;
+    if (run.kind !== "run") throw new Error("no run");
+    expect(run.run.rows.some((r) => r.type === "meaning")).toBe(true);
+  });
+
+  it("clamps the pick and cancels without changing progress", () => {
+    const low = act({ kind: "start", pick: -1 }, fresh, "left");
+    expect(low.scene).toEqual({ kind: "start", pick: -1 });
+    const high = act({ kind: "start", pick: 72 }, fresh, "right");
+    expect(high.scene).toEqual({ kind: "start", pick: 72 });
+    const back = act({ kind: "start", pick: 5 }, fresh, "back");
+    expect(back).toEqual({ scene: { kind: "start" }, session: fresh });
+  });
+
+  it("re-opens at the placed level, so re-picking lower is easy", () => {
+    const placed = act({ kind: "start" }, fresh, "place", "right", "confirm");
+    expect(placed.session.progress.unlockedLevel).toBe(1);
+    expect(act(placed.scene, placed.session, "left").scene).toEqual({
+      kind: "start",
+      pick: 0,
+    });
+  });
+});
+
+describe("start screen taps", () => {
+  const W = 390;
+  const H = 844;
+  const l = startLayout(W, H);
+  const mid = (r: { x: number; y: number; w: number; h: number }) =>
+    [r.x + r.w / 2, r.y + r.h / 2] as const;
+
+  it("the placement button opens the picker; elsewhere starts a run", () => {
+    expect(startTap(false, W, H, ...mid(l.place))).toBe("place");
+    expect(startTap(false, W, H, W / 2, H / 2)).toBe("confirm");
+  });
+
+  it("in the picker only its buttons act", () => {
+    expect(startTap(true, W, H, ...mid(l.minus))).toBe("left");
+    expect(startTap(true, W, H, ...mid(l.plus))).toBe("right");
+    expect(startTap(true, W, H, ...mid(l.apply))).toBe("confirm");
+    expect(startTap(true, W, H, ...mid(l.cancel))).toBe("back");
+    expect(startTap(true, W, H, ...mid(l.place))).toBeNull();
+    expect(startTap(true, W, H, 5, 5)).toBeNull();
   });
 });

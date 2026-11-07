@@ -1,4 +1,4 @@
-import { applyUnlock } from "../core/progression";
+import { applyUnlock, maxLevel, place } from "../core/progression";
 import { buildRun } from "../core/run";
 import { KANA } from "../core/kana";
 import { KANJI } from "../core/kanji";
@@ -15,7 +15,8 @@ import type { KanaItem, Progress } from "../core/types";
 import type { Action } from "./input";
 
 export type Scene =
-  | { kind: "start" }
+  /** `pick` is set while the placement picker is open: "I know up to level pick". */
+  | { kind: "start"; pick?: number }
   | { kind: "run"; seed: number; run: RunState; paused: boolean }
   | { kind: "end"; seed: number; run: RunState };
 
@@ -85,18 +86,74 @@ export function afterStep(
   };
 }
 
+/**
+ * The start screen: `confirm` starts a run; ←/→ or `place` open the placement
+ * picker at the current placement (unlocked level − 1, −1 = none). In the
+ * picker ←/→ change the pick, `confirm` applies it, `back` closes it.
+ */
+function startAction(
+  scene: Extract<Scene, { kind: "start" }>,
+  action: Action,
+  newSeed: () => number,
+  session: Session,
+): { scene: Scene; session: Session } {
+  const { pick } = scene;
+  if (pick === undefined) {
+    if (action === "confirm")
+      return { scene: newRun(newSeed(), session), session };
+    if (action === "left" || action === "right" || action === "place")
+      return {
+        scene: { kind: "start", pick: session.progress.unlockedLevel - 1 },
+        session,
+      };
+    return { scene, session };
+  }
+  const top = maxLevel(KANJI) - 1;
+  switch (action) {
+    case "left":
+    case "right": {
+      const next = pick + (action === "left" ? -1 : 1);
+      return {
+        scene: { kind: "start", pick: Math.max(-1, Math.min(top, next)) },
+        session,
+      };
+    }
+    case "confirm":
+    case "place":
+      return {
+        scene: { kind: "start" },
+        session: {
+          ...session,
+          progress: place(session.progress, pick, KANA, KANJI),
+        },
+      };
+    case "back":
+      return { scene: { kind: "start" }, session };
+    default:
+      return { scene, session };
+  }
+}
+
+/** The scene, and the session (placement changes progress), after an action. */
 export function handleAction(
   scene: Scene,
   action: Action,
   newSeed: () => number,
   session: Session,
-): Scene {
+): { scene: Scene; session: Session } {
   switch (scene.kind) {
     case "start":
+      return startAction(scene, action, newSeed, session);
     case "end":
-      return action === "confirm" ? newRun(newSeed(), session) : scene;
+      return {
+        scene: action === "confirm" ? newRun(newSeed(), session) : scene,
+        session,
+      };
     case "run":
-      return action === "pause" ? { ...scene, paused: !scene.paused } : scene;
+      return {
+        scene: action === "pause" ? { ...scene, paused: !scene.paused } : scene,
+        session,
+      };
   }
 }
 
