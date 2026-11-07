@@ -30,12 +30,13 @@ export type StudyCard =
 /**
  * One card per missed item, in the order first missed. An item missed on
  * several gates (e.g. meaning and reading) gets one card. Items not found in
- * the given lists are skipped.
+ * the given lists are skipped. `mnemonics` (WaniKani mode) are attached by character.
  */
 export function studyCards(
   missed: readonly Missed[],
   kanji: readonly KanjiItem[],
   kana: readonly KanaItem[],
+  mnemonics?: ReadonlyMap<string, Mnemonics>,
 ): StudyCard[] {
   const seen = new Set<string>();
   const out: StudyCard[] = [];
@@ -67,6 +68,9 @@ export function studyCards(
             : null,
           readings: k.readings,
           components: k.components,
+          ...(mnemonics?.get(k.char)
+            ? { mnemonics: mnemonics.get(k.char) }
+            : {}),
         });
     }
   }

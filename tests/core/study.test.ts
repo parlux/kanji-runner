@@ -60,6 +60,23 @@ describe("studyCards", () => {
     expect(cards.map((c) => c.char)).toEqual([k.char, other.char]);
   });
 
+  it("attaches mnemonics by character, kanji cards only", () => {
+    const chars = new Set(
+      missed.filter((m) => m.type !== "kana").map((m) => m.prompt),
+    );
+    const c0 = [...chars][0] as string;
+    const cards = studyCards(
+      missed,
+      KANJI,
+      KANA,
+      new Map([[c0, { meaning: "synthetic <em>m</em>" }]]),
+    );
+    for (const c of cards)
+      expect(c.kind === "kanji" ? c.mnemonics : undefined).toEqual(
+        c.char === c0 ? { meaning: "synthetic <em>m</em>" } : undefined,
+      );
+  });
+
   it("never changes progress", () => {
     const before = recordRun(progress, rows, results, false, 5);
     const snapshot = JSON.stringify(before);

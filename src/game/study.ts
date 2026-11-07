@@ -1,3 +1,4 @@
+import { mnemonicNodes } from "../core/mnemonic";
 import type { StudyCard } from "../core/study";
 
 const CSS = `
@@ -20,6 +21,16 @@ const CSS = `
 .kr-study .parts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
 .kr-study .part { padding: 2px 8px; font-size: 20px; background: #111;
   border: 1px solid #5a6478; }
+.kr-study .mn { font-size: 14px; line-height: 1.45; color: #cfd5e2; }
+.kr-study .mn h3 { margin: 0 0 2px; font-size: 12px; font-weight: 600;
+  color: #9aa3b5; text-transform: uppercase; letter-spacing: 0.04em; }
+.kr-study .mn p { margin: 0; white-space: pre-line; }
+.kr-study .mn-radical { color: #6cc4ff; font-weight: 600; }
+.kr-study .mn-kanji { color: #ff8ad0; font-weight: 600; }
+.kr-study .mn-reading { color: #c4a0ff; font-weight: 600; }
+.kr-study .mn-vocabulary { color: #ffc46b; font-weight: 600; }
+.kr-study .mn-ja { color: #5fd38d; }
+.kr-study .mn-em { font-style: italic; font-weight: 600; color: #fff; }
 .kr-study .empty { color: #9aa3b5; padding: 8px 0; }
 .kr-study footer { display: flex; gap: 12px; padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); }
 .kr-study button { flex: 1; font: inherit; padding: 12px; color: #f2f2f2;
@@ -61,7 +72,20 @@ function cardEl(c: StudyCard): HTMLElement {
       info.append(el("div", "row", "parts"), parts);
     }
   }
-  return el("div", "card", el("div", "big", c.char), info);
+  const card = el("div", "card", el("div", "big", c.char), info);
+  if (c.kind === "kanji" && c.mnemonics) {
+    const notes = [
+      ["Meaning mnemonic", c.mnemonics.meaning],
+      ["Reading mnemonic", c.mnemonics.reading],
+    ] as const;
+    for (const [title, text] of notes) {
+      if (!text) continue;
+      const body = el("p");
+      body.append(...mnemonicNodes(text));
+      info.append(el("div", "mn", el("h3", "", title), body));
+    }
+  }
+  return card;
 }
 
 /**
