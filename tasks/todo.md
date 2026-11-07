@@ -376,8 +376,9 @@ Placement to Katakana gives Kanji 1, but runs are still mostly basic hiragana: 1
 **Scope:** S–M
 
 ### Checkpoint C
-- [ ] Spec success criteria 1–12 and 16 met
-- [ ] Owner playtest on the deployed site
+- [x] Spec success criteria 1–12 and 16 met
+- [x] Owner playtest on the deployed site
+- [x] Passed, 2026-11-07 (owner: "Checkpoint approved").
 
 ## Phase 4: Sync
 
