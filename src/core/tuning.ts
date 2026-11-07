@@ -7,6 +7,19 @@ export const MAX_MULTIPLY_GAIN = 150;
 export const WRONG_MIN_LOSS = 5;
 export const WRONG_PCT_LOSS = 0.3;
 
+// Squad charges (R5). See track.ts and sim.ts.
+/** Temporary toggle for Checkpoint A2: false makes every question a wall gate. */
+export const SQUADS_ENABLED = true;
+/** Questions (1-based) that are squad charges. Never one of the 3 warm-ups. */
+export const SQUAD_QUESTIONS = [4, 8, 12] as const;
+/** The charge line sits this far before the squads; crossing it locks steering. */
+export const CHARGE_LINE_DISTANCE = 1.0;
+/** Soldiers a correct squad adds on top of the streak reward. Also the count every squad shows. */
+export const SQUAD_DEFECT_GAIN = 10;
+/** Wrong squad charge: lose max(WRONG_CHARGE_MIN_LOSS, ceil(WRONG_CHARGE_PCT_LOSS × army)). */
+export const WRONG_CHARGE_MIN_LOSS = 8;
+export const WRONG_CHARGE_PCT_LOSS = 0.5;
+
 export const BASE_REWARD = { kana: 3, meaning: 5, reading: 8 } as const;
 
 export const ROWS_PER_RUN = 14;

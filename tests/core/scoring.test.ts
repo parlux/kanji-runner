@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { applyCorrect, applyWrong } from "../../src/core/scoring";
+import {
+  applyCorrect,
+  applyCorrectCharge,
+  applyWrong,
+  applyWrongCharge,
+} from "../../src/core/scoring";
+import { SQUAD_DEFECT_GAIN } from "../../src/core/tuning";
 
 describe("applyCorrect", () => {
   // streak passed in is the streak before this answer
@@ -38,5 +44,32 @@ describe("applyWrong", () => {
 
   it("floors at 0", () => {
     expect(applyWrong(3)).toEqual({ army: 0, streak: 0 });
+  });
+});
+
+describe("applyWrongCharge", () => {
+  it.each([
+    [17, 17 - 9], // 50% of 17 rounds up to 9
+    [16, 8], // 50% = 8 = the minimum
+    [15, 15 - 8], // 50% rounds up to 8 = the minimum
+    [14, 14 - 8], // the minimum beats 50%
+    [100, 50],
+    [8, 0],
+    [3, 0], // floors at 0
+  ])("army %i → %i, streak reset", (army, after) => {
+    expect(applyWrongCharge(army)).toEqual({ army: after, streak: 0 });
+  });
+});
+
+describe("applyCorrectCharge", () => {
+  it("is the streak reward plus SQUAD_DEFECT_GAIN (10)", () => {
+    expect(SQUAD_DEFECT_GAIN).toBe(10);
+    expect(applyCorrectCharge(10, 0, 3)).toEqual({ army: 23, streak: 1 });
+    expect(applyCorrectCharge(10, 2, 3)).toEqual({ army: 26, streak: 3 });
+    expect(applyCorrectCharge(10, 4, 3)).toEqual({ army: 30, streak: 5 });
+  });
+
+  it("adds the defectors on top of the +150 cap", () => {
+    expect(applyCorrectCharge(400, 4, 3)).toEqual({ army: 560, streak: 5 });
   });
 });
