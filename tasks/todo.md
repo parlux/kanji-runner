@@ -206,10 +206,10 @@ Squads are cool but hard to read ("can't tell if it's too fast or just too hard 
 - `viewOf` still hides correctness until resolution; squads are never fire targets.
 
 **Acceptance criteria:**
-- [ ] Steering works right up to contact at a charge; the choice is the opening nearest the crowd at contact (tested).
-- [ ] Before resolution, every squad in a charge has an identical view except its label and position (tested over many seeds).
-- [ ] Charge scoring unchanged (existing boundary tests pass); clipping at a charge works as at a wall (tested).
-- [ ] On a phone-sized screen a charge reads like a wall with squads in it, and the firefight is readable.
+- [x] Steering works right up to contact at a charge; the choice is the opening nearest the crowd at contact (tested).
+- [x] Before resolution, every squad in a charge has an identical view except its label and position (tested over many seeds).
+- [x] Charge scoring unchanged (existing boundary tests pass); clipping at a charge works as at a wall (tested).
+- [x] On a phone-sized screen a charge reads like a wall with squads in it, and the firefight is readable.
 
 **Verification:** `npm test`. Phone-sized browser check.
 **Dependencies:** S5
