@@ -51,3 +51,11 @@ export const SAW_MIN_AMP = 0.15;
 export const SAW_MAX_AMP = 0.35;
 export const SAW_RATE = (2 * Math.PI) / 3;
 export const SAW_CHANCE = 1 / 3;
+
+// Shooting (S1). The army auto-fires at the nearest shootable threat ahead.
+/** Damage per second per soldier. */
+export const FIRE_PER_SOLDIER = 1;
+/** How far ahead (track units) the army can hit a threat. */
+export const FIRE_RANGE = 2.0;
+/** Block hit points = BLOCK_HP_K × the expected army at that point of the run. */
+export const BLOCK_HP_K = 1.0;
