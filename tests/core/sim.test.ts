@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   createRunState,
   gateOpenings,
+  isShattered,
   wallSolids,
   nearestOpening,
   nudgeTarget,
@@ -11,6 +12,7 @@ import {
   type RunState,
 } from "../../src/core/sim";
 import { crowdWidth } from "../../src/core/crowd";
+import { firepower } from "../../src/core/fire";
 import { buildKanaRun } from "../../src/core/run";
 import { KANA } from "../../src/core/kana";
 import {
@@ -441,4 +443,89 @@ describe("hazards", () => {
     expect(Math.min(...times)).toBeGreaterThan(70);
     expect(Math.max(...times)).toBeLessThan(110);
   }, 30_000);
+});
+
+describe("shooting", () => {
+  const wide = (pos: number): Block => ({
+    kind: "block",
+    pos,
+    left: 0,
+    right: 1,
+  });
+  /** One far-off question, the given hazards, and chosen hit points. */
+  function range(hazards: (Block | Saw)[], hp: number[], army = 20): RunState {
+    const s = createRunState(buildKanaRun(1, KANA), {
+      questions: [100],
+      hazards,
+    });
+    return { ...s, hp, army };
+  }
+  const stepFor = (s: RunState, secs: number): RunState => {
+    for (let t = 0; t < Math.round(secs / DT); t++) s = stepRun(s, DT);
+    return s;
+  };
+
+  it("deals firepower × time, only to the nearest overlapping block", () => {
+    let s = range([wide(1.9), wide(1.95)], [1e9, 1e9]);
+    s = stepFor(s, 0.5);
+    expect(s.damage[0]).toBeCloseTo(firepower(20) * 0.5, 6);
+    expect(s.damage[1]).toBe(0);
+    expect(s.target).toBe(0);
+  });
+
+  it("doesn't fire at blocks that don't overlap the crowd", () => {
+    const side: Block = { kind: "block", pos: 1.5, left: 0, right: 0.2 };
+    const s = stepFor(range([side], [1e9]), 0.5);
+    expect(s.damage[0]).toBe(0);
+    expect(s.target).toBe(null);
+  });
+
+  it("shatters a block exactly when damage reaches its hit points", () => {
+    const hp = 10;
+    const perStep = firepower(20) * DT;
+    const at = (damage: number): RunState => ({
+      ...range([wide(0.05)], [hp]),
+      damage: [damage],
+    });
+    const short = stepRun(at(hp - 2 * perStep), DT);
+    expect(isShattered(short, 0)).toBe(false);
+    const enough = stepRun(at(hp - 0.5 * perStep), DT);
+    expect(enough.damage[0]).toBe(hp);
+    expect(isShattered(enough, 0)).toBe(true);
+    expect(enough.lastShatter).toEqual({ index: 0, dist: enough.dist });
+  });
+
+  it("a shattered block never clips; an intact one clips as before", () => {
+    const shattered = stepFor(range([wide(0.5)], [1]), 1);
+    expect(isShattered(shattered, 0)).toBe(true);
+    expect(shattered.nextHazard).toBe(1);
+    expect(shattered.army).toBe(20);
+    expect(shattered.lastClip).toBe(null);
+
+    const intact = stepFor(range([wide(0.5)], [1e9]), 1);
+    expect(intact.army).toBe(0);
+    expect(intact.status).toBe("dead");
+  });
+
+  it("saws take no damage", () => {
+    const sawAhead: Saw = { kind: "saw", pos: 1.5, mid: 0.5, amp: 0, phase: 0 };
+    const s = stepFor(range([sawAhead], [0]), 0.5);
+    expect(s.damage[0]).toBe(0);
+    expect(s.target).toBe(null);
+  });
+
+  it("gives saws no hit points, and blocks some", () => {
+    const s = fresh(3, true);
+    s.track.hazards.forEach((h, i) =>
+      expect((s.hp[i] ?? 0) > 0).toBe(h.kind === "block"),
+    );
+  });
+
+  it("never changes streak or results", () => {
+    let s = { ...range([wide(0.5)], [1]), streak: 3, results: [true, false] };
+    s = stepFor(s, 1);
+    expect(isShattered(s, 0)).toBe(true);
+    expect(s.streak).toBe(3);
+    expect(s.results).toEqual([true, false]);
+  });
 });

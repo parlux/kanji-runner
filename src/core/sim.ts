@@ -1,4 +1,5 @@
 import { clipLoss, crowdWidth, type Span } from "./crowd";
+import { blockHp, expectedArmy, firepower, pickTarget } from "./fire";
 import { applyCorrect, applyWrong } from "./scoring";
 import {
   BASE_REWARD,
@@ -34,6 +35,14 @@ export type RunState = {
   streak: number;
   /** Per resolved row: was it answered correctly. */
   results: boolean[];
+  /** Hit points per hazard (0 = can't be shot). */
+  hp: number[];
+  /** Damage dealt so far per hazard; a block is shattered once this reaches its hp. */
+  damage: number[];
+  /** Hazard being fired at this step, if any. */
+  target: number | null;
+  /** Most recent shattered block and the distance it happened at, for feedback. */
+  lastShatter: { index: number; dist: number } | null;
   /** Most recent clipping loss and the distance it happened at, for feedback. */
   lastClip: { loss: number; dist: number } | null;
   /** Most recent answer, for feedback: the opening chosen and the army change it caused (after clipping). */
@@ -68,6 +77,10 @@ export function createRunState(rows: GateRow[], track: Track): RunState {
     army: STARTING_ARMY,
     streak: 0,
     results: [],
+    hp: blockHp(track, expectedArmy(rows)),
+    damage: track.hazards.map(() => 0),
+    target: null,
+    lastShatter: null,
     lastClip: null,
     lastAnswer: null,
     status: "running",
@@ -105,6 +118,33 @@ export function wallSolids(n: number): Span[] {
   }));
 }
 
+export function isShattered(s: RunState, i: number): boolean {
+  const hp = s.hp[i] ?? 0;
+  return hp > 0 && (s.damage[i] ?? 0) >= hp;
+}
+
+/** All fire goes to the nearest shootable block ahead; damage is capped at its hp. */
+function fire(s: RunState, w: number, dt: number): RunState {
+  const target = pickTarget(
+    s.track.hazards,
+    s.nextHazard,
+    s.dist,
+    { left: s.x - w / 2, right: s.x + w / 2 },
+    (i) => (s.hp[i] ?? 0) > 0 && !isShattered(s, i),
+  );
+  if (target === null) return { ...s, target };
+  const hp = s.hp[target] ?? 0;
+  const damage = [...s.damage];
+  damage[target] = Math.min(hp, (damage[target] ?? 0) + firepower(s.army) * dt);
+  const shattered = damage[target] >= hp;
+  return {
+    ...s,
+    damage,
+    target,
+    lastShatter: shattered ? { index: target, dist: s.dist } : s.lastShatter,
+  };
+}
+
 /** Keeps a crowd of width w fully on the track. */
 const clampOnTrack = (v: number, w: number): number =>
   Math.min(1 - w / 2, Math.max(w / 2, v));
@@ -137,6 +177,7 @@ export function stepRun(s: RunState, dt: number): RunState {
   next.targetX = clampOnTrack(s.targetX, w);
   next.x = steerStep(s.x, next.targetX, w, dt);
   next.dist += BASE_SPEED * speedMul(s.dist, s.track) * dt;
+  next = fire(next, w, dt);
   // resolve everything passed this step, in track order
   for (;;) {
     if (next.status !== "running") return next;
@@ -149,11 +190,11 @@ export function stepRun(s: RunState, dt: number): RunState {
   }
 }
 
-/** Clipping only: hazards never touch the streak or results. */
+/** Clipping only: hazards never touch the streak or results. Shattered blocks don't clip. */
 function passHazard(s: RunState, h: Hazard): RunState {
-  const clip = clipLoss(s.army, s.x, crowdWidth(s.army), [
-    hazardSpan(h, s.dist),
-  ]);
+  const clip = isShattered(s, s.nextHazard)
+    ? 0
+    : clipLoss(s.army, s.x, crowdWidth(s.army), [hazardSpan(h, s.dist)]);
   const army = s.army - clip;
   return {
     ...s,
