@@ -15,7 +15,7 @@ const CSS = `
   display: flex; flex-direction: column; gap: 12px; padding: 20px;
   background: #1d2230; border: 1px solid #5a6478; }
 .kr-wk h2 { margin: 0 0 4px; font-size: 22px; font-weight: 600; }
-.kr-wk p { margin: 0; color: #9aa3b5; font-size: 15px; line-height: 1.4; }
+.kr-wk p { margin: 0; overflow-wrap: anywhere; color: #9aa3b5; font-size: 15px; line-height: 1.4; }
 .kr-wk a { color: #6cc4ff; }
 .kr-wk label { display: flex; flex-direction: column; gap: 4px;
   font-size: 14px; color: #9aa3b5; }
@@ -95,7 +95,7 @@ export function openTokenForm(o: TokenFormOptions): void {
     el(
       "p",
       {},
-      "Practise the kanji you have learned. Create a read-only token (no permissions ticked) at ",
+      "Practise the kanji you have learned. How to get a read-only token: create one (no permissions ticked) at ",
       link,
       ". It stays on this device.",
     ),

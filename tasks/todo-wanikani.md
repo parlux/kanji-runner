@@ -82,10 +82,10 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 - Study cards show the meaning and reading mnemonics in WaniKani mode, with the safe tag-to-span rendering (pure function, tested), never `innerHTML` of raw API text.
 
 **Acceptance criteria:**
-- [ ] Mnemonic rendering: known tags styled, unknown tags stripped, script and `onerror` payloads inert (tested).
-- [ ] An invalid token shows `WaniKani token invalid` and reopens the form; offline uses the cache; play is never blocked (browser check with a mocked fetch).
+- [x] Mnemonic rendering: known tags styled, unknown tags stripped, script and `onerror` payloads inert (tested).
+- [x] An invalid token shows `WaniKani token invalid` and reopens the form; offline uses the cache; play is never blocked (browser check with a mocked fetch).
 - [ ] `dist/` and the repo contain no WaniKani content or token: grep for a phrase from one of the owner's mnemonics and for the token prefix (manual, by the orchestrator, using the local spike cache in the scratchpad).
-- [ ] Screens at 390×844: token form, WaniKani start screen, a study card with mnemonics (screenshots kept in the scratchpad, not committed, since they show WaniKani content).
+- [x] Screens at 390×844: token form, WaniKani start screen, a study card with mnemonics (screenshots kept in the scratchpad, not committed, since they show WaniKani content).
 
 **Verification:** `npm test`. Browser checks. Deploy green.
 **Dependencies:** W1, W3, W4
