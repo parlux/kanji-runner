@@ -1,5 +1,5 @@
 import { clipLoss, crowdWidth, type Span } from "./crowd";
-import { blockHp, expectedArmy, firepower, pickTarget } from "./fire";
+import { hazardHp, expectedArmy, firepower, pickTarget } from "./fire";
 import { applyCorrect, applyWrong } from "./scoring";
 import {
   BASE_REWARD,
@@ -77,7 +77,7 @@ export function createRunState(rows: GateRow[], track: Track): RunState {
     army: STARTING_ARMY,
     streak: 0,
     results: [],
-    hp: blockHp(track, expectedArmy(rows)),
+    hp: hazardHp(track, expectedArmy(rows)),
     damage: track.hazards.map(() => 0),
     target: null,
     lastShatter: null,
@@ -192,9 +192,11 @@ export function stepRun(s: RunState, dt: number): RunState {
 
 /** Clipping only: hazards never touch the streak or results. Shattered blocks don't clip. */
 function passHazard(s: RunState, h: Hazard): RunState {
-  const clip = isShattered(s, s.nextHazard)
-    ? 0
-    : clipLoss(s.army, s.x, crowdWidth(s.army), [hazardSpan(h, s.dist)]);
+  // packs are inert until they move and fight (next slice)
+  const clip =
+    h.kind === "pack" || isShattered(s, s.nextHazard)
+      ? 0
+      : clipLoss(s.army, s.x, crowdWidth(s.army), [hazardSpan(h, s.dist)]);
   const army = s.army - clip;
   return {
     ...s,

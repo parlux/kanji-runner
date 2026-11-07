@@ -59,3 +59,20 @@ export const FIRE_PER_SOLDIER = 1;
 export const FIRE_RANGE = 2.0;
 /** Block hit points = BLOCK_HP_K × the expected army at that point of the run. */
 export const BLOCK_HP_K = 1.0;
+
+// Enemy packs (S2). Shootable groups that run at the army. See track.ts and sim.ts.
+/** Chance a hazard beat after question 2 is an enemy pack. */
+export const ENEMY_CHANCE = 0.3;
+/** Pack strength = max(ENEMY_MIN, round(ENEMY_K × the expected army at that point)). */
+export const ENEMY_K = 0.6;
+export const ENEMY_MIN = 3;
+/** Extra approach speed on top of the scroll, in track units per second. */
+export const ENEMY_SPEED = 0.5;
+/** Sideways drift towards the crowd centre, in track widths per second. */
+export const ENEMY_STEER_SPEED = 0.15;
+/** Damage that kills one enemy. */
+export const ENEMY_HP = 1;
+/** Soldiers lost per surviving enemy on contact. */
+export const ENEMY_DAMAGE = 1;
+/** Pack start centres are drawn from [ENEMY_X_MARGIN, 1 − ENEMY_X_MARGIN]. */
+export const ENEMY_X_MARGIN = 0.2;

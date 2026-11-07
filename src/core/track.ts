@@ -4,6 +4,8 @@ import {
   BLOCK_MAX_W,
   BLOCK_MIN_W,
   CALM_DISTANCE,
+  ENEMY_CHANCE,
+  ENEMY_X_MARGIN,
   HAZARD_SPACING,
   SAW_CHANCE,
   SAW_MAX_AMP,
@@ -22,16 +24,25 @@ export type Saw = {
   amp: number;
   phase: number;
 };
-export type Hazard = Block | Saw;
+/** An enemy pack that starts at track position `pos`, centred on `x`. Its strength and movement live in the sim. */
+export type Pack = { kind: "pack"; pos: number; x: number };
+export type Solid = Block | Saw;
+export type Hazard = Solid | Pack;
 
-/** The solid part of a hazard when the crowd has travelled `dist`. */
-export function hazardSpan(h: Hazard, dist: number): Span {
+/** The solid part of a block or saw when the crowd has travelled `dist`. */
+export function hazardSpan(h: Solid, dist: number): Span {
   if (h.kind === "block") return { left: h.left, right: h.right };
   const c = h.mid + h.amp * Math.sin(h.phase + dist * SAW_RATE);
   return { left: c - SAW_W / 2, right: c + SAW_W / 2 };
 }
 
-function makeHazard(rng: Rng, pos: number): Hazard {
+function makeHazard(rng: Rng, pos: number, packs: boolean): Hazard {
+  if (packs && rng() < ENEMY_CHANCE)
+    return {
+      kind: "pack",
+      pos,
+      x: ENEMY_X_MARGIN + rng() * (1 - 2 * ENEMY_X_MARGIN),
+    };
   if (rng() < SAW_CHANCE) {
     const amp = SAW_MIN_AMP + rng() * (SAW_MAX_AMP - SAW_MIN_AMP);
     // keep the whole sweep on the track
@@ -57,6 +68,7 @@ const TRACK_SALT = 0x9e3779b9;
 /**
  * Seeded beat layout: the first question after a calm stretch, then 1–2 hazards
  * HAZARD_SPACING apart, then a calm stretch before each next question.
+ * Enemy packs only appear after the second question.
  */
 export function buildTrack(seed: number, questionCount: number): Track {
   const rng = createRng(seed ^ TRACK_SALT);
@@ -69,7 +81,7 @@ export function buildTrack(seed: number, questionCount: number): Track {
     const count = 1 + randInt(rng, 2);
     for (let j = 0; j < count; j++) {
       pos += HAZARD_SPACING;
-      hazards.push(makeHazard(rng, pos));
+      hazards.push(makeHazard(rng, pos, q >= 1));
     }
     pos += CALM_DISTANCE;
   }

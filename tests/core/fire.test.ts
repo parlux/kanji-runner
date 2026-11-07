@@ -1,15 +1,19 @@
 import { describe, expect, it } from "vitest";
 import {
-  blockHp,
   expectedArmy,
   firepower,
+  hazardHp,
+  packStrength,
   pickTarget,
 } from "../../src/core/fire";
 import { buildKanaRun } from "../../src/core/run";
 import { KANA } from "../../src/core/kana";
-import type { Block, Hazard, Saw, Track } from "../../src/core/track";
+import type { Block, Hazard, Pack, Saw, Track } from "../../src/core/track";
 import {
   BLOCK_HP_K,
+  ENEMY_HP,
+  ENEMY_K,
+  ENEMY_MIN,
   FIRE_PER_SOLDIER,
   FIRE_RANGE,
   STARTING_ARMY,
@@ -28,6 +32,7 @@ const saw = (pos: number): Saw => ({
   amp: 0,
   phase: 0,
 });
+const pack = (pos: number): Pack => ({ kind: "pack", pos, x: 0.5 });
 const crowd = { left: 0.4, right: 0.6 };
 const all = (): boolean => true;
 
@@ -66,17 +71,26 @@ describe("expectedArmy", () => {
   });
 });
 
-describe("blockHp", () => {
-  it("scales blocks by the expected army after the questions before them; saws get 0", () => {
+describe("hazardHp", () => {
+  it("scales blocks and packs by the expected army after the questions before them; saws get 0", () => {
     const track: Track = {
       questions: [3, 10, 20],
-      hazards: [block(5, 0, 0.3), saw(7), block(15, 0.5, 0.8)],
+      hazards: [block(5, 0, 0.3), saw(7), block(15, 0.5, 0.8), pack(17)],
     };
-    expect(blockHp(track, [5, 8, 11, 14])).toEqual([
+    expect(hazardHp(track, [5, 8, 11, 40])).toEqual([
       BLOCK_HP_K * 8,
       0,
       BLOCK_HP_K * 11,
+      ENEMY_HP * packStrength(11),
     ]);
+  });
+});
+
+describe("packStrength", () => {
+  it("is round(ENEMY_K × expected army), at least ENEMY_MIN", () => {
+    expect(packStrength(0)).toBe(ENEMY_MIN);
+    expect(packStrength(1000)).toBe(Math.round(ENEMY_K * 1000));
+    expect(ENEMY_MIN).toBe(3);
   });
 });
 

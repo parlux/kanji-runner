@@ -412,7 +412,7 @@ describe("hazards", () => {
     while (s.status === "running") {
       const h = s.track.hazards[s.nextHazard];
       const rowAt = s.track.questions[s.next] ?? Infinity;
-      if (h && h.pos < rowAt) {
+      if (h && h.kind !== "pack" && h.pos < rowAt) {
         // where the hazard will be when the crowd reaches it
         const { left, right } = hazardSpan(h, h.pos);
         const x = left > 1 - right ? left / 2 : (1 + right) / 2;
@@ -514,10 +514,10 @@ describe("shooting", () => {
     expect(s.target).toBe(null);
   });
 
-  it("gives saws no hit points, and blocks some", () => {
+  it("gives saws no hit points, and blocks and packs some", () => {
     const s = fresh(3, true);
     s.track.hazards.forEach((h, i) =>
-      expect((s.hp[i] ?? 0) > 0).toBe(h.kind === "block"),
+      expect((s.hp[i] ?? 0) > 0).toBe(h.kind !== "saw"),
     );
   });
 

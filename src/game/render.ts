@@ -125,7 +125,7 @@ function renderRun(ctx: Ctx, w: number, h: number, run: RunState): void {
   const { hazards, questions } = run.track;
   for (let i = hazards.length - 1; i >= 0; i--) {
     const h = hazards[i];
-    if (!h) continue;
+    if (!h || h.kind === "pack") continue;
     const ahead = h.pos - run.dist;
     if (ahead < -behind) break;
     if (ahead > farthest) continue;

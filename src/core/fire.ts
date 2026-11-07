@@ -4,6 +4,9 @@ import type { Hazard, Track } from "./track";
 import {
   BASE_REWARD,
   BLOCK_HP_K,
+  ENEMY_HP,
+  ENEMY_K,
+  ENEMY_MIN,
   FIRE_PER_SOLDIER,
   FIRE_RANGE,
   STARTING_ARMY,
@@ -35,12 +38,21 @@ export function expectedArmy(rows: readonly GateRow[]): number[] {
   return out;
 }
 
-/** Hit points per hazard: BLOCK_HP_K × expected army after the questions before it. Saws get 0 (unshootable). */
-export function blockHp(track: Track, expected: readonly number[]): number[] {
+/** Enemies in a pack met when the expected army is `expected`. */
+export function packStrength(expected: number): number {
+  return Math.max(ENEMY_MIN, Math.round(ENEMY_K * expected));
+}
+
+/**
+ * Hit points per hazard, from the expected army after the questions before it:
+ * blocks BLOCK_HP_K × that, packs ENEMY_HP per enemy. Saws get 0 (unshootable).
+ */
+export function hazardHp(track: Track, expected: readonly number[]): number[] {
   return track.hazards.map((h) => {
-    if (h.kind !== "block") return 0;
+    if (h.kind === "saw") return 0;
     const q = track.questions.filter((p) => p < h.pos).length;
-    return BLOCK_HP_K * (expected[Math.min(q, expected.length - 1)] ?? 0);
+    const e = expected[Math.min(q, expected.length - 1)] ?? 0;
+    return h.kind === "block" ? BLOCK_HP_K * e : ENEMY_HP * packStrength(e);
   });
 }
 
