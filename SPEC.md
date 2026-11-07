@@ -2,8 +2,8 @@
 
 Source of intent: `docs/intent/kanji-runner.md` (confirmed 2026-11-07).
 Gameplay rework: `docs/ideas/crowd-runner-rework.md` (Direction C, confirmed 2026-11-07).
-Shooting: `docs/ideas/shooting.md` (confirmed 2026-11-07). Crates: `docs/ideas/crates.md` (confirmed 2026-11-07).
-Status: APPROVED revision 5, 2026-11-07. Revision 2 replaced lane picking with a physical track (see Track, crowd and steering). Revision 3 adds auto-fire, breakable blocks and enemy packs (see Shooting). Revision 4 (Checkpoint A feedback) makes fire always visible up to its range, turns blocks into supply crates, and raises `BASE_SPEED` to 1.6. Revision 5 (Checkpoint A passed) raises `FIRE_RANGE` to 2.8 and shows each crate's reward.
+Shooting: `docs/ideas/shooting.md` (confirmed 2026-11-07). Crates: `docs/ideas/crates.md` (confirmed 2026-11-07). Pace and gates: `docs/ideas/pace-and-gates.md` (confirmed 2026-11-07).
+Status: APPROVED revision 6, 2026-11-07. Revision 2 replaced lane picking with a physical track (see Track, crowd and steering). Revision 3 adds auto-fire, breakable blocks and enemy packs (see Shooting). Revision 4 (Checkpoint A feedback) makes fire always visible up to its range, turns blocks into supply crates, and raises `BASE_SPEED` to 1.6. Revision 5 (Checkpoint A passed) raises `FIRE_RANGE` to 2.8 and shows each crate's reward. Revision 6 (Checkpoint A2 feedback) tightens the spacing so answers are chosen while partly distracted, makes squad charges read like walls with no lock, and lets fire grow the opening the crowd is lined up with.
 
 ### Changes from intent
 | Date | Change | Reason |
@@ -11,6 +11,7 @@ Status: APPROVED revision 5, 2026-11-07. Revision 2 replaced lane picking with a
 | 2026-11-07 | Repo is public; hosted on GitHub Pages | Free hosting for phone play. |
 | 2026-11-07 | Optional Supabase (free tier) sync with a single email/password login. Reverses the intent's "no accounts, no backend". | Share progress between laptop and phone. localStorage stays the primary store, so the game works offline and while the Supabase project is paused. |
 | 2026-11-07 | Continuous steering, crowd width, hazards between questions, and squad-charge questions. Replaces discrete lanes with full-width gates. Run is 14 questions instead of 20. | First playtest: lane picking felt like "time-pressured flash cards", not a crowd runner. The game needs to be fun even when the answers are known. |
+| 2026-11-07 | Tighter spacing; squad charges become walls with squads in the openings (no lock); fire grows the opening the crowd is lined up with. | Checkpoint A2: too much dead time, squad charges hard to read, and a big army should be able to keep its size. |
 | 2026-11-07 | The army auto-fires. Firepower grows with army size. Blocks become breakable, and enemy packs are added as a shootable threat. Base speed 1.3×. | Phone playtest after R4: the owner wants right answers to feel like power, and an under-powered army to be overrun early. Spectacle is the main pull. |
 
 ## Objective
@@ -29,7 +30,8 @@ A browser "crowd runner". The player steers an army down a track full of hazards
 - As the player, I dodge hazards between questions. Soldiers that touch a hazard are lost.
 - As the player, my army fires ahead on its own. The more soldiers I have, the harder it hits, so a strong run smashes blocks and enemy packs, and a weak one gets overrun.
 - As the player, I see a prompt (e.g. `水`) and must steer through the opening labelled with the correct answer (`water` / `fire` / `tree`).
-- As the player, sometimes the answers stand above enemy squads. I charge one, and once I'm committed I can't change my mind.
+- As the player, sometimes an enemy squad stands in each opening. I charge through one, and only find out at contact whether it joins me or fights back.
+- As the player, my fire widens the opening I'm lined up with and narrows the others, so committing early keeps a big army whole.
 - As the player, a correct streak escalates my reward and a wrong pick costs me, so accuracy matters.
 - As the player, characters I get wrong come back more often in later runs.
 - As the player, I start with kana, then move into kanji in a fixed progression. New kanji unlock as I master earlier ones.
@@ -57,16 +59,16 @@ A browser "crowd runner". The player steers an army down a track full of hazards
 ### Question shapes (how it is asked)
 | Shape | Where | How the answer is chosen |
 |---|---|---|
-| **Wall gate** | most questions | A wall spans the track with one opening per answer. The chosen answer is the opening nearest the crowd's centre when the crowd reaches the wall. |
-| **Squad charge** | questions 4, 8 and 12 | One enemy squad per answer, each under its answer banner. Crossing the **charge line** locks steering. The chosen answer is the squad nearest the crowd's centre at the moment of the lock. |
+| **Wall gate** | most questions | A wall spans the track with one opening per answer. The chosen answer is the opening the crowd's centre is nearest to (by distance to the opening's edges, since openings can differ in width) when the crowd reaches the wall. |
+| **Squad charge** | questions 4, 8 and 12 | A wall gate with an enemy squad standing in each opening: the same prompt, labels, reading time, clipping and gate growth as any wall. The chosen answer is chosen exactly as at a wall gate; the squad in that opening is the one you meet. There is no charge line and no steering lock. |
 
 - Both shapes shuffle answer positions every question.
 - Shape is independent of gate type: a squad charge can ask `kana`, `meaning` or `reading`.
 
 **Squad honesty rules** (the answer must never leak):
 - All squads in a charge look identical until contact: same count shown, same formation, same animation. The renderer gets no correctness data for squads until the charge resolves.
-- Steering is locked from the charge line until contact, so there is no touch-and-retry.
-- **Firefight presentation:** after the lock, the charge plays out as a short firefight with the chosen squad. A correct squad stops fighting and joins you; a wrong one fires back. Scoring is unchanged (see Streak and payoff). Before the lock, squads aren't shootable targets, so fire can't reveal anything about them.
+- Nothing before contact depends on correctness, so there is nothing to retry. Gate growth depends only on where the crowd is.
+- **Firefight presentation:** at contact the charge plays out as a short firefight with the chosen squad. A correct squad stops fighting and joins you; a wrong one fires back. Scoring is unchanged (see Streak and payoff). Squads are never fire targets, so fire can't reveal anything about them.
 
 ### Streak and payoff
 - Streak = consecutive correct answers in this run, across both shapes.
@@ -98,23 +100,24 @@ All distances are in track units. The track is 1.0 wide; `x` runs from 0 (left e
   - **Saw:** 0.10 wide, sweeping side to side at a set speed and range. Can't be shot.
   - **Enemy pack:** a counted group running at the army (see Shooting).
 - **Beat layout** (generated by `track.ts` from the seed):
-  - 14 question beats. Between consecutive questions there are 1–2 hazard beats (seeded).
-  - Before each question there is a **calm stretch** of `CALM_DISTANCE` with no hazards, starting when the prompt appears. This leaves time to read the prompt and recall the answer.
+  - 14 question beats. Between consecutive questions there are several hazard beats (seeded; count and spacing in `tuning.ts`).
+  - Before each question there is a short **calm stretch** of `CALM_DISTANCE` with no hazards, right before the wall. The prompt appears earlier, while the last hazards are still being dodged: the answer is chosen while partly distracted. There are no long empty stretches.
   - Block and saw layouts must always leave a gap wide enough for the current maximum crowd width (0.30), so a skilled player never takes forced losses from them. Enemy packs are the exception by design: they are a firepower check, not a steering one.
   - Enemy packs take some of the hazard beats (none before question 2), so the run length doesn't change.
-- **Speed:** `BASE_SPEED` 1.6 track units per second, ramping linearly by up to **1.3×** over the run. A run to the last question takes about 65 seconds, plus the boss.
+- **Speed:** `BASE_SPEED` 1.6 track units per second, ramping linearly by up to **1.3×** over the run. A run to the last question takes about 60 seconds, plus the boss.
 
 ### Shooting
 The army fires straight ahead all the time. There is no fire button: steering is aiming.
 
 - **Firepower:** `FIRE_PER_SOLDIER × army` damage per second (start: 1). Correct answers grow the army, so they grow the fire. There is no separate streak or power-up bonus.
 - **Targeting:** all fire goes to the nearest shootable threat ahead, within `FIRE_RANGE` (start: 2.8 track units), whose span overlaps the crowd's span. Nothing else takes damage.
-- **What can be shot:** blocks and enemy packs. Walls and saws can't: the question is never bypassed, and dodging still matters.
+- **What can be shot:** blocks and enemy packs, then wall openings (see Gate growth). Saws and squads can't, and a wall is never broken: the question is never bypassed, and dodging still matters.
+- **Gate growth:** when no block or pack is targeted and the next wall is within `FIRE_RANGE`, all fire goes to the opening nearest the crowd's centre. It widens about its centre at `GATE_GROW_PER_DAMAGE` track widths per point of damage, up to `GATE_MAX_W`; the other openings of that wall narrow by the same total, never below `GATE_MIN_W` (wide enough to read its label). Growth never depends on correctness. It lets a big army keep its size, and makes a late change of mind costly.
 - **Expected army:** `expectedArmy(q)` is the army after question `q` in a deterministic 80%-accuracy pass over the run's actual questions (every 5th answer wrong, no clipping). Threat strength follows it, so strong players stay challenged and weak players fall behind. The boss (T9) may reuse it.
 - **Supply crate (breakable block):** hit points `BLOCK_HP_K × expectedArmy(q)` for a block before question `q + 1`. At 0 it shatters, no longer clips, and adds `round(CRATE_REWARD_K × its hit points)` recruits to the army at once (start: 0.3). A crate with hit points left clips exactly as before. So a crate is a choice: line up and shoot it for recruits, risking a clip if it doesn't break in time, or dodge it.
 - **Enemy pack:** a counted group, `ENEMY_K × expectedArmy(q)` strong (at least 3), drawn like the army with its own width from `crowdWidth`. It runs towards the army at `ENEMY_SPEED` on top of the scroll, and drifts towards the crowd's centre at `ENEMY_STEER_SPEED`, so it can be partly dodged but mainly has to be shot. Each `ENEMY_HP` of damage kills one enemy, and the pack narrows as it shrinks. On contact, if its span overlaps the crowd's, the army loses one soldier per surviving enemy (`ENEMY_DAMAGE`, start: 1) and the pack is gone. If it misses, it is gone with no loss.
 - **Rules shared with clipping:** crate rewards and shooting losses never change the streak, the results or the SRS. An army reaching 0 ends the run.
-- **Feedback:** the army fires a constant stream straight ahead that fades out where `FIRE_RANGE` ends, so the reach is visible even with nothing to hit. Each crate shows its hit points and the recruits it pays (`+N`), so you can judge whether it is worth attacking. Hit flashes, a shatter or burst when a threat dies, and a "+N" when a crate pays out. Fire and effects must not cover the prompt or the answer labels.
+- **Feedback:** the army fires a constant stream straight ahead that fades out where `FIRE_RANGE` ends, or at the next wall, where it visibly pushes the targeted opening's edges apart, so the reach is visible even with nothing to hit. Each crate shows its hit points and the recruits it pays (`+N`), so you can judge whether it is worth attacking. Hit flashes, a shatter or burst when a threat dies, and a "+N" when a crate pays out. Fire and effects must not cover the prompt or the answer labels.
 
 ### Run shape
 - 14 question beats with hazards between them, then the boss.
@@ -211,7 +214,7 @@ src/core/               → PURE game logic, no DOM. Fully unit-tested.
   track.ts              → beat layout: question shapes, hazards, calm stretches
   crowd.ts              → crowd width, steering motion, overlap losses
   fire.ts               → firepower, targeting, expected army, threat strength
-  sim.ts                → steps the run: movement, clipping, question resolution, charge lock
+  sim.ts                → steps the run: movement, clipping, question resolution, gate growth
   srs.ts                → Leitner updates, selection weights
   progression.ts        → levels, unlock rule, placement
   distractors.ts        → answer generation
@@ -250,8 +253,8 @@ export function clipLoss(army: number, x: number, w: number, solids: Span[]): nu
 ```
 
 ## Testing Strategy
-- **Unit tests (Vitest)** cover everything in `src/core` and `src/storage`: scoring curve and both wrong penalties, crowd width, clip loss, steering speed limit, charge-line lock, wall-gate and squad resolution, SRS box transitions and weights, new-item cap, unlock rule, placement, distractor validity (no correct answer among distractors, no duplicates), run and track determinism per seed, and storage migration and corrupt-data recovery.
-- **Shooting tests:** damage per second is `FIRE_PER_SOLDIER × army`; fire reaches only the nearest overlapping shootable threat in range; a block shatters exactly when its damage reaches its hit points, then stops clipping; walls and saws take no damage; enemy contact costs one soldier per survivor only when spans overlap; shooting losses never change streak or results.
+- **Unit tests (Vitest)** cover everything in `src/core` and `src/storage`: scoring curve and both wrong penalties, crowd width, clip loss, steering speed limit, gate growth, wall-gate and squad resolution, SRS box transitions and weights, new-item cap, unlock rule, placement, distractor validity (no correct answer among distractors, no duplicates), run and track determinism per seed, and storage migration and corrupt-data recovery.
+- **Shooting tests:** damage per second is `FIRE_PER_SOLDIER × army`; fire reaches only the nearest overlapping shootable threat in range; a block shatters exactly when its damage reaches its hit points, then stops clipping; walls are never broken and only widen or narrow their openings by the gate-growth rule; saws and squads take no damage; enemy contact costs one soldier per survivor only when spans overlap; shooting losses never change streak or results.
 - **Track property tests:** over 1,000 seeds, every block and saw beat leaves a gap ≥ `CROWD_MAX_W`; no hazard falls inside a calm stretch; squads only appear at questions 4, 8 and 12.
 - **Honesty tests:** the squad view model is identical for every squad in a charge (no correctness, size or position tell). Clipping never changes streak or SRS.
 - **Balance simulation test:** a scripted bot with accuracy `p` and a "steering" factor `s` (the fraction of avoidable clipping it avoids) plays 1,000 seeded runs. With `s = 1`: 100% accuracy always beats the boss, 50% accuracy wins less than 10% of the time, and 80% accuracy wins 40–70% of the time. With `p = 1, s = 0.5`: wins at least 50% of the time. Shooting adds one more check: with `s = 1`, a 50%-accuracy bot dies before the boss in at least half of its runs, and a 100%-accuracy bot never does.
@@ -271,8 +274,8 @@ export function clipLoss(army: number, x: number, w: number, solids: Span[]): nu
 2. A full run (14 questions, hazards, 3 squad charges, boss) is playable with ←/→ only, and with drag only, at 60 fps on the laptop.
 3. Steering is continuous: the crowd moves smoothly at a capped speed, and there is no lane snapping.
 4. Two consecutive runs with different seeds have different questions and track layouts. The same seed and the same state reproduce the same run.
-5. A skilled player can always avoid every block and saw (track property test), and a bigger army is measurably harder to keep whole (3-answer walls clip a max-size crowd).
-6. Squad charges can't be read before commit, and can't be retried after the charge line (honesty tests).
+5. A skilled player can always avoid every block and saw (track property test), and a bigger army is measurably harder to keep whole (3-answer walls clip a max-size crowd that hasn't grown its opening).
+6. Squad charges can't be read before contact (honesty tests).
 7. After answering an item wrong, its box is 0 and its selection weight is 32× that of a box-5 item. Tests verify this.
 8. Progress (boxes, unlocked level, stats) survives a page reload. Corrupt storage resets without crashing.
 9. Kana levels unlock kanji level 2 under the 80% rule, or immediately via placement.

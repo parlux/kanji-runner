@@ -65,8 +65,15 @@ T1 scaffold ─ T2 core rules ─ T3 lane slice (done)
 
 - [x] R5: Squad charges
 
-### Checkpoint A2: squads
-- [ ] Squads are fun and give nothing away. Runs with squads beat runs without.
+### Checkpoint A2: squads (feedback taken, replaced by A3)
+- [x] Owner played 2026-11-07: squads cool but hard to read, too much dead time, shooting should grow gates. See `docs/ideas/pace-and-gates.md`.
+
+- [ ] S5: Tighter pacing
+- [ ] S6: Squad charges read like walls
+- [ ] S7: Shooting an opening grows it
+
+### Checkpoint A3: pace, squads and gates
+- [ ] No dead time, squads clear and honest, gate growth feels good, charge penalty fair.
 
 ### Phase 2: Learning loop
 - [ ] T5: Kanji data pipeline

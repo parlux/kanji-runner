@@ -180,9 +180,66 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 **Files:** `src/core/{track,sim,scoring,tuning}.ts`, `src/game/render.ts`, `tests/core/squad.test.ts`
 **Scope:** M
 
-### Checkpoint A2: squads
-- [ ] Owner: squad charges are fun, and their answers can't be told apart before contact
-- [ ] Owner: runs with squads beat runs without (temporarily toggle them off in `tuning.ts` to compare)
+### Checkpoint A2 feedback (owner, 2026-11-07)
+Squads are cool but hard to read ("can't tell if it's too fast or just too hard to figure out what I'm supposed to read and do"). Still too much dead time. Shooting an opening should grow it. Decisions in `docs/ideas/pace-and-gates.md`; spec revision 6. Tasks S5–S7 below, then Checkpoint A3 replaces A2.
+
+### Task S5: Tighter pacing
+**Description:** (spec: Track, Beat layout; idea: `docs/ideas/pace-and-gates.md` decision 1)
+- `track.ts`/`tuning.ts`: shrink `CALM_DISTANCE` (start ~1.2, right before the wall) and `HAZARD_SPACING` (start ~3.0), and raise the hazard beats per gap (e.g. 2–3), so the prompt appears while the last hazards are still being dodged. `BASE_SPEED` unchanged. Run to the last question about 60 s.
+- Keep fire from ever reaching past the next wall (already enforced by `fireLimit`).
+
+**Acceptance criteria:**
+- [ ] No stretch longer than ~2 s (at base speed) without a hazard, wall or squad in reach of the fire or within steering distance, except the calm stretch (measured over many seeds; tested).
+- [ ] Existing track property tests still hold (gaps ≥ `CROWD_MAX_W`, nothing in the calm stretch, determinism), and the skilled-player test still dodges every block and saw.
+- [ ] A run to the last question takes 50–70 s (tested), and the bot check still holds.
+- [ ] Prompts stay readable with hazards on screen (phone-sized screenshots).
+
+**Verification:** `npm test`. Phone-sized browser check.
+**Dependencies:** R5
+**Files:** `src/core/{track,tuning}.ts`, `tests/core/{track,sim,balance}.test.ts`
+**Scope:** S–M
+
+### Task S6: Squad charges read like walls
+**Description:** (spec: Question shapes, Squad honesty rules; idea decision 2)
+- A charge is a wall gate with a squad standing in each opening: same prompt size, labels, reading time and clipping as a wall. The answer is chosen exactly as at a wall gate, at contact.
+- Remove the charge line and the steering lock (`CHARGE_LINE_DISTANCE`, lock state, locked rendering). The firefight plays at contact: a correct squad joins, a wrong one fires back, then the run carries on.
+- `viewOf` still hides correctness until resolution; squads are never fire targets.
+
+**Acceptance criteria:**
+- [ ] Steering works right up to contact at a charge; the choice is the opening nearest the crowd at contact (tested).
+- [ ] Before resolution, every squad in a charge has an identical view except its label and position (tested over many seeds).
+- [ ] Charge scoring unchanged (existing boundary tests pass); clipping at a charge works as at a wall (tested).
+- [ ] On a phone-sized screen a charge reads like a wall with squads in it, and the firefight is readable.
+
+**Verification:** `npm test`. Phone-sized browser check.
+**Dependencies:** S5
+**Files:** `src/core/{sim,track,tuning}.ts`, `src/game/render.ts`, `tests/core/{squad,sim,track,balance}.test.ts`
+**Scope:** M
+
+### Task S7: Shooting an opening grows it
+**Description:** (spec: Shooting, Gate growth; idea decision 3)
+- `sim.ts`: per-row opening widths in state. When nothing else is targeted and the next wall (or charge) is within `FIRE_RANGE`, fire goes to the opening nearest the crowd's centre: it widens about its centre by `GATE_GROW_PER_DAMAGE` per damage point, up to `GATE_MAX_W`; the others narrow by the same total, never below `GATE_MIN_W`. Openings never overlap and stay on the track.
+- Choice at a wall: nearest opening by distance to its edges (0 inside it). Clipping uses the current openings.
+- Tuning: `GATE_GROW_PER_DAMAGE`, `GATE_MAX_W`, `GATE_MIN_W` (wide enough to read a label on the phone).
+- Render: openings at their current widths, the fire stream hitting the targeted opening's edges, labels centred in each opening.
+
+**Acceptance criteria:**
+- [ ] Growth matches the rule: total widening equals total narrowing until the caps; nothing drops below `GATE_MIN_W` or exceeds `GATE_MAX_W`; openings never overlap (tested, including property test over seeds and positions).
+- [ ] Growth never depends on correctness, and never changes streak or results (tested).
+- [ ] A max-size crowd that shoots its opening early passes a 3-answer wall without loss (tested); one that switches late to a narrowed opening clips.
+- [ ] Bot check still holds (bot shoots its chosen opening); report army numbers.
+- [ ] On the phone-sized screen, growth is visible and labels stay readable.
+
+**Verification:** `npm test`. Phone-sized browser check.
+**Dependencies:** S6
+**Files:** `src/core/{sim,fire,tuning}.ts`, `src/game/render.ts`, `tests/core/{gates,sim,balance}.test.ts`
+**Scope:** M
+
+### Checkpoint A3: pace, squads and gates (replaces A2)
+- [ ] Owner: no long stretches with nothing to do; answering while partly distracted feels good
+- [ ] Owner: squad charges are clear to read, fun, and can't be told apart before contact
+- [ ] Owner: growing an opening feels good, and a late change of mind isn't too harsh
+- [ ] Owner: a wrong charge (−50%) isn't too punishing (bot: missing only the 3 charges died early in 162/200 runs at R5)
 
 ## Phase 2: Learning loop
 
