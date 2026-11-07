@@ -8,6 +8,8 @@ const FONT = `"Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu 
 const MAX_DRAWN_SOLDIERS = 200;
 /** How long (in track distance) a clip-loss pop-up stays up. */
 const CLIP_POPUP_DIST = 0.8;
+/** How long (in track distance) answer feedback stays up. */
+const ANSWER_FEEDBACK_DIST = 1.0;
 const COLORS = {
   bg: "#111",
   track: "#1d2230",
@@ -21,6 +23,8 @@ const COLORS = {
   bad: "#ff6b6b",
   hazard: "#c24b4b",
   hazardEdge: "#ff8a7a",
+  goodFill: "rgba(95, 211, 141, 0.35)",
+  badFill: "rgba(255, 107, 107, 0.35)",
 };
 
 type Ctx = CanvasRenderingContext2D;
@@ -172,7 +176,14 @@ function renderRun(ctx: Ctx, w: number, h: number, run: RunState): void {
       const width = (o.right - o.left) * w;
       ctx.fillStyle = COLORS.track;
       ctx.fillRect(left, y - wallH, width, wallH);
-      ctx.fillStyle = COLORS.opening;
+      // the chosen opening of an answered wall turns green or red
+      const answered = i === run.next - 1 ? run.lastAnswer : null;
+      ctx.fillStyle =
+        answered?.choice === j
+          ? answered.correct
+            ? COLORS.goodFill
+            : COLORS.badFill
+          : COLORS.opening;
       ctx.fillRect(left, y - wallH, width, wallH);
       text(ctx, row.options[j] ?? "", o.centre * w, y - wallH / 2, 30 * scale);
     });
@@ -192,6 +203,32 @@ function renderRun(ctx: Ctx, w: number, h: number, run: RunState): void {
         armyY - radius * 0.6 - 24 - 30 * t,
         26,
         COLORS.bad,
+      );
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  if (run.lastAnswer) {
+    const a = run.lastAnswer;
+    const t = (run.dist - a.dist) / ANSWER_FEEDBACK_DIST;
+    if (t < 1) {
+      const color = a.correct ? COLORS.good : COLORS.bad;
+      // a faint ring that swells and fades, plus the army change
+      ctx.globalAlpha = 0.5 * (1 - t);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(run.x * w, armyY, radius + 8 + 24 * t, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.globalAlpha = 1 - t;
+      const sign = a.change >= 0 ? "+" : "−";
+      text(
+        ctx,
+        `${sign}${Math.abs(a.change)}`,
+        run.x * w + radius + 28,
+        armyY - 10 - 24 * t,
+        24,
+        color,
       );
       ctx.globalAlpha = 1;
     }

@@ -36,6 +36,13 @@ export type RunState = {
   results: boolean[];
   /** Most recent clipping loss and the distance it happened at, for feedback. */
   lastClip: { loss: number; dist: number } | null;
+  /** Most recent answer, for feedback: the opening chosen and the army change it caused (after clipping). */
+  lastAnswer: {
+    correct: boolean;
+    choice: number;
+    change: number;
+    dist: number;
+  } | null;
   status: RunStatus;
 };
 
@@ -62,6 +69,7 @@ export function createRunState(rows: GateRow[], track: Track): RunState {
     streak: 0,
     results: [],
     lastClip: null,
+    lastAnswer: null,
     status: "running",
   };
 }
@@ -163,7 +171,8 @@ function resolveRow(s: RunState): RunState {
   // clipping first, then the answer is scored on what is left
   const clip = clipLoss(s.army, s.x, crowdWidth(s.army), wallSolids(n));
   const remaining = s.army - clip;
-  const correct = nearestOpening(n, s.x) === row.answerIndex;
+  const choice = nearestOpening(n, s.x);
+  const correct = choice === row.answerIndex;
   const scored = correct
     ? applyCorrect(remaining, s.streak, BASE_REWARD[row.type])
     : applyWrong(remaining);
@@ -180,6 +189,7 @@ function resolveRow(s: RunState): RunState {
     next: nextIndex,
     results: [...s.results, correct],
     lastClip: clip > 0 ? { loss: clip, dist: s.dist } : s.lastClip,
+    lastAnswer: { correct, choice, change: army - remaining, dist: s.dist },
     status,
   };
 }

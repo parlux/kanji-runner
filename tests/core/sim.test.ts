@@ -227,6 +227,21 @@ describe("row resolution", () => {
     expect(s.status).toBe("dead");
   });
 
+  it("records the last answer and its army change for feedback", () => {
+    let s = fresh();
+    expect(s.lastAnswer).toBeNull();
+    const answer = s.rows[0]?.answerIndex ?? 0;
+    s = runToNextRow(goToOpening(s, answer));
+    expect(s.lastAnswer).toMatchObject({
+      correct: true,
+      choice: answer,
+      change: 3,
+    });
+    s = runToNextRow(goToOpening(s, 1 - (s.rows[1]?.answerIndex ?? 0)));
+    expect(s.lastAnswer?.correct).toBe(false);
+    expect(s.lastAnswer?.change).toBeLessThan(0);
+  });
+
   it("scores the opening nearest the crowd even when it is on solid wall", () => {
     let s = fresh();
     const answer = s.rows[0]?.answerIndex ?? 0;
