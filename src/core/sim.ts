@@ -1,6 +1,7 @@
 import { clipLoss, crowdWidth, type Span } from "./crowd";
 import {
   gateOpenings,
+  growOpening,
   nearestOpening,
   wallSolids,
   type Opening,
@@ -26,6 +27,8 @@ import {
   ENEMY_HP,
   ENEMY_SPEED,
   ENEMY_STEER_SPEED,
+  FIRE_RANGE,
+  GATE_GROW_PER_DAMAGE,
   MAX_SPEED_MUL,
   STARTING_ARMY,
   STEER_EASE,
@@ -69,6 +72,10 @@ export type RunState = {
   packs: (PackState | null)[];
   /** Hazard being fired at this step, if any. */
   target: number | null;
+  /** Per row: its wall's openings as they are now (shooting one grows it). */
+  gates: Opening[][];
+  /** Opening of the next row's wall being shot (grown) this step, if any. */
+  gateTarget: number | null;
   /** Most recent shattered block and the distance it happened at, for feedback. */
   lastShatter: { index: number; dist: number } | null;
   /** Most recent crate payout (recruits from a shattered block) and the distance it happened at, for feedback. */
@@ -113,12 +120,19 @@ export function createRunState(rows: GateRow[], track: Track): RunState {
       h.kind === "pack" ? { pos: h.pos, x: h.x } : null,
     ),
     target: null,
+    gates: rows.map((r) => gateOpenings(r.options.length)),
+    gateTarget: null,
     lastShatter: null,
     lastCrate: null,
     lastClip: null,
     lastAnswer: null,
     status: "running",
   };
+}
+
+/** Row q's wall openings as they are now. */
+export function rowOpenings(s: RunState, q: number): Opening[] {
+  return s.gates[q] ?? gateOpenings(s.rows[q]?.options.length ?? 2);
 }
 
 /** Squads stand in a wall's openings: one per answer, at each opening's centre. */
@@ -162,19 +176,17 @@ export function viewOf(s: RunState): RunView {
     const row = s.rows[q];
     if (!row) return [];
     const answer = q === s.next - 1 ? s.lastAnswer : null;
-    const squads = squadCentres(gateOpenings(row.options.length)).map(
-      (x, j): SquadView => {
-        const chosen = answer?.choice === j;
-        return {
-          label: row.options[j] ?? "",
-          x,
-          count: SQUAD_DEFECT_GAIN,
-          chosen,
-          outcome:
-            answer?.choice === j ? (answer.correct ? "join" : "fight") : null,
-        };
-      },
-    );
+    const squads = squadCentres(rowOpenings(s, q)).map((x, j): SquadView => {
+      const chosen = answer?.choice === j;
+      return {
+        label: row.options[j] ?? "",
+        x,
+        count: SQUAD_DEFECT_GAIN,
+        chosen,
+        outcome:
+          answer?.choice === j ? (answer.correct ? "join" : "fight") : null,
+      };
+    });
     return [
       {
         row: q,
@@ -254,8 +266,30 @@ export const crateReward = (hp: number): number =>
   Math.round(CRATE_REWARD_K * hp);
 
 /**
+ * With nothing else to shoot, fire goes to the next wall once it is within
+ * FIRE_RANGE: the opening nearest the crowd's centre grows (see growOpening).
+ * Only where the crowd is matters, never which answer is right.
+ */
+function shootGate(s: RunState, dt: number): RunState {
+  const q = s.next;
+  const ahead = (s.track.questions[q] ?? Infinity) - s.dist;
+  if (!s.rows[q] || ahead < 0 || ahead > FIRE_RANGE)
+    return { ...s, gateTarget: null };
+  const openings = rowOpenings(s, q);
+  const i = nearestOpening(openings, s.x);
+  const gates = [...s.gates];
+  gates[q] = growOpening(
+    openings,
+    i,
+    firepower(s.army) * dt * GATE_GROW_PER_DAMAGE,
+  );
+  return { ...s, gates, gateTarget: i };
+}
+
+/**
  * All fire goes to the nearest shootable threat ahead; damage is capped at its hp.
  * A block (supply crate) pays out once, on the step it shatters: it is never a target again.
+ * With no threat to shoot, the next wall's opening takes the fire.
  */
 function fire(s: RunState, w: number, dt: number): RunState {
   const target = pickTarget(
@@ -265,7 +299,7 @@ function fire(s: RunState, w: number, dt: number): RunState {
     { left: s.x - w / 2, right: s.x + w / 2 },
     fireLimit(s),
   );
-  if (target === null) return { ...s, target };
+  if (target === null) return shootGate({ ...s, target }, dt);
   const hp = s.hp[target] ?? 0;
   const damage = [...s.damage];
   damage[target] = Math.min(hp, (damage[target] ?? 0) + firepower(s.army) * dt);
@@ -279,6 +313,7 @@ function fire(s: RunState, w: number, dt: number): RunState {
     army: s.army + gain,
     damage,
     target,
+    gateTarget: null,
     lastShatter: shattered ? { index: target, dist: s.dist } : s.lastShatter,
     lastCrate: gain > 0 ? { gain, dist: s.dist } : s.lastCrate,
   };
@@ -371,17 +406,12 @@ function passHazard(s: RunState, h: Hazard): RunState {
 function resolveRow(s: RunState): RunState {
   const row = s.rows[s.next];
   if (!row) return { ...s, status: "finished" };
-  const n = row.options.length;
+  const openings = rowOpenings(s, s.next);
   const charge = isCharge(s.track, s.next);
   // clipping first, then the answer is scored on what is left
-  const clip = clipLoss(
-    s.army,
-    s.x,
-    crowdWidth(s.army),
-    wallSolids(gateOpenings(n)),
-  );
+  const clip = clipLoss(s.army, s.x, crowdWidth(s.army), wallSolids(openings));
   const remaining = s.army - clip;
-  const choice = nearestOpening(gateOpenings(n), s.x);
+  const choice = nearestOpening(openings, s.x);
   const correct = choice === row.answerIndex;
   const base = BASE_REWARD[row.type];
   const scored = correct

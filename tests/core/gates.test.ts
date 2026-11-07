@@ -7,8 +7,27 @@ import {
   wallSolids,
   type Opening,
 } from "../../src/core/gates";
+import { clipLoss, crowdWidth } from "../../src/core/crowd";
+import { KANA } from "../../src/core/kana";
 import { createRng } from "../../src/core/rng";
-import { GATE_EDGE_MIN, GATE_MAX_W, GATE_MIN_W } from "../../src/core/tuning";
+import { buildKanaRun } from "../../src/core/run";
+import {
+  createRunState,
+  rowOpenings,
+  setTarget,
+  stepRun,
+  viewOf,
+  type RunState,
+} from "../../src/core/sim";
+import { buildTrack, type Block } from "../../src/core/track";
+import type { GateRow } from "../../src/core/types";
+import {
+  FIRE_RANGE,
+  GATE_EDGE_MIN,
+  GATE_MAX_W,
+  GATE_MIN_W,
+  ROWS_PER_RUN,
+} from "../../src/core/tuning";
 
 const width = (o: Opening): number => o.right - o.left;
 const total = (os: Opening[]): number => os.reduce((t, o) => t + width(o), 0);
@@ -82,7 +101,7 @@ describe("growOpening", () => {
   });
 
   it("keeps every rule over many random growth sequences (property)", () => {
-    for (let seed = 0; seed < 150; seed++) {
+    for (let seed = 0; seed < 200; seed++) {
       const rng = createRng(seed);
       const n = rng() < 0.5 ? 2 : 3;
       let os = gateOpenings(n);
@@ -106,7 +125,7 @@ describe("growOpening", () => {
       }
       expect(grown).toBeGreaterThan(0);
     }
-  });
+  }, 30_000);
 });
 
 describe("nearestOpening with unequal widths", () => {
@@ -153,5 +172,142 @@ describe("wallSolids with unequal widths", () => {
       expect(solids[j]?.right).toBe(o.left);
       expect(solids[j + 1]?.left).toBe(o.right);
     });
+  });
+});
+
+describe("gate growth in a run", () => {
+  const DT = 1 / 60;
+
+  /** A run of walls (charges too, if asked), with the crowd `lead` short of row q's wall. */
+  function before(
+    q: number,
+    army: number,
+    pick: number,
+    lead = FIRE_RANGE + 0.2,
+    squads = false,
+  ): RunState {
+    const track = buildTrack(1, ROWS_PER_RUN, squads);
+    const s = createRunState(buildKanaRun(1, KANA), { ...track, hazards: [] });
+    const x = at(rowOpenings(s, q), pick).centre;
+    return {
+      ...s,
+      army,
+      next: q,
+      x,
+      targetX: x,
+      dist: (track.questions[q] as number) - lead,
+    };
+  }
+
+  /** Steps until row q resolves, calling `steer` first each step. */
+  function toWall(s: RunState, steer = (r: RunState): RunState => r) {
+    const q = s.next;
+    while (s.next === q && s.status === "running") s = stepRun(steer(s), DT);
+    return s;
+  }
+
+  const firstThree = buildKanaRun(1, KANA).findIndex(
+    (r) => r.options.length === 3,
+  );
+
+  it("grows the opening nearest the crowd once the wall is in range, and only then", () => {
+    let s = before(firstThree, 100, 1);
+    s = stepRun(s, DT);
+    expect(s.gateTarget).toBeNull();
+    expect(rowOpenings(s, firstThree)).toEqual(gateOpenings(3));
+    while (
+      (s.track.questions[firstThree] as number) - s.dist >
+      FIRE_RANGE - 0.5
+    )
+      s = stepRun(s, DT);
+    expect(s.gateTarget).toBe(1);
+    const os = rowOpenings(s, firstThree);
+    expect(width(at(os, 1))).toBeGreaterThan(0.26 + 0.02);
+    expect(at(os, 1).centre).toBeCloseTo(0.5, 9);
+    expectValid(os, 3);
+  });
+
+  it("a block or pack in the way keeps the fire", () => {
+    const s = before(firstThree, 100, 1, 1.5);
+    const pos = (s.track.questions[firstThree] as number) - 0.5;
+    const block: Block = { kind: "block", pos, left: 0.3, right: 0.7 };
+    const withBlock: RunState = {
+      ...s,
+      track: { ...s.track, hazards: [block] },
+      hp: [1000],
+      damage: [0],
+      packs: [null],
+    };
+    const after = stepRun(withBlock, DT);
+    expect(after.target).toBe(0);
+    expect(after.gateTarget).toBeNull();
+    expect(rowOpenings(after, firstThree)).toEqual(gateOpenings(3));
+  });
+
+  it("never depends on correctness, and never changes the streak or results", () => {
+    for (const pick of [0, 1, 2]) {
+      const s = { ...before(firstThree, 60, pick), streak: 2, results: [true] };
+      const row = s.rows[firstThree] as GateRow;
+      // the same run with the right answer moved
+      const moved = s.rows.map((r, i) =>
+        i === firstThree ? { ...r, answerIndex: (r.answerIndex + 1) % 3 } : r,
+      );
+      let a = s;
+      let b: RunState = { ...s, rows: moved };
+      while (a.next === firstThree) {
+        a = stepRun(a, DT);
+        b = stepRun(b, DT);
+        if (a.next === firstThree) {
+          expect(a.streak).toBe(2);
+          expect(a.results).toEqual([true]);
+        }
+        expect(b.gates).toEqual(a.gates);
+      }
+      expect(row.options).toHaveLength(3);
+    }
+  });
+
+  const answer = (buildKanaRun(1, KANA)[firstThree] as GateRow).answerIndex;
+
+  it("a max-size crowd that shoots its opening early passes a 3-answer wall without loss", () => {
+    const s = before(firstThree, 100, answer);
+    const after = toWall(s);
+    expect(after.lastClip).toBeNull();
+    expect(after.lastAnswer).toMatchObject({ choice: answer, correct: true });
+    expect(after.army).toBeGreaterThan(100);
+    // without growth the same crowd would have clipped
+    expect(
+      clipLoss(100, s.x, crowdWidth(100), wallSolids(gateOpenings(3))),
+    ).toBeGreaterThan(0);
+  });
+
+  it("switching late to a narrowed opening clips", () => {
+    const other = (answer + 1) % 3;
+    const after = toWall(before(firstThree, 100, answer), (r) =>
+      (r.track.questions[firstThree] as number) - r.dist < 0.9
+        ? setTarget(r, at(rowOpenings(r, firstThree), other).centre)
+        : r,
+    );
+    expect(after.lastAnswer?.choice).toBe(other);
+    expect(after.lastClip?.loss ?? 0).toBeGreaterThan(0);
+  });
+
+  it("a small army barely grows its opening", () => {
+    const s = before(firstThree, 5, 1, FIRE_RANGE);
+    // the last step before contact
+    let r = s;
+    for (let n = stepRun(r, DT); n.next === firstThree; n = stepRun(n, DT))
+      r = n;
+    expect(width(at(rowOpenings(r, firstThree), 1))).toBeLessThan(0.26 + 0.01);
+  });
+
+  it("squads stand at the openings as they are now", () => {
+    const q = 7;
+    let s = before(q, 100, 2, FIRE_RANGE + 0.2, true);
+    while ((s.track.questions[q] as number) - s.dist > 0.2) s = stepRun(s, DT);
+    const os = rowOpenings(s, q);
+    expect(width(at(os, 2))).toBeGreaterThan(0.3);
+    const view = viewOf(s).charges.find((c) => c.row === q);
+    expect(view?.squads.map((v) => v.x)).toEqual(os.map((o) => o.centre));
   });
 });

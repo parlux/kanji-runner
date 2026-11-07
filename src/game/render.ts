@@ -2,7 +2,7 @@ import { crowdWidth } from "../core/crowd";
 import {
   crateReward,
   fireLimit,
-  gateOpenings,
+  rowOpenings,
   hazardPos,
   isShattered,
   packSpan,
@@ -256,7 +256,7 @@ function renderRun(ctx: Ctx, w: number, h: number, run: RunState): void {
     const y = depthY(ahead);
     const scale = Math.max(0.3, 1 - 0.5 * (ahead / VIEW_DISTANCE));
     const wallH = 56 * scale;
-    const openings = gateOpenings(row.options.length);
+    const openings = rowOpenings(run, i);
     // solid wall across the track, then openings cut into it
     ctx.fillStyle = COLORS.wall;
     ctx.fillRect(0, y - wallH, w, wallH);
