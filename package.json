@@ -25,5 +25,8 @@
     "typescript-eslint": "^8.72.1",
     "vite": "^6.4.5",
     "vitest": "^3.2.7"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.119.0"
   }
 }

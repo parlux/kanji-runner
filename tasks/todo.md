@@ -402,8 +402,8 @@ Placement to Katakana gives Kanji 1, but runs are still mostly basic hiragana: 1
 - Add `@supabase/supabase-js` v2 (pre-approved in the spec).
 
 **Acceptance criteria:**
-- [ ] Mocked tests: offline, network error (paused project), expired session and no remote row all resolve with the correct status and no exception.
-- [ ] With env vars missing, sync is a no-op and reports itself disabled.
+- [x] Mocked tests: offline, network error (paused project), expired session and no remote row all resolve with the correct status and no exception.
+- [x] With env vars missing, sync is a no-op and reports itself disabled.
 
 **Verification:** `npm test -- sync`
 **Dependencies:** T11
