@@ -160,7 +160,7 @@ The army fires straight ahead all the time. There is no fire button: steering is
 - **When to sync:** on app load (pull, merge, save locally) and after each run (merge, push).
 - **Merge (pure function in `src/core/merge.ts`):** per item key, keep the record with the later `lastSeen`. `unlockedLevel` takes the max, and global run stats take the max of each counter. The merge is commutative and idempotent.
 - **Failure handling:** a network error, a paused project, or an expired session never blocks play. The start screen shows a small sync status (`synced` / `offline` / `login`), and the next successful sync catches up.
-- **Config:** `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` (public by design; RLS protects the data). If either is missing, the sync UI is hidden.
+- **Config:** `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` (the publishable key, public by design; RLS protects the data). If either is missing, the sync UI is hidden.
 
 ### Boss clash
 - Boss size = `round(K × expected army)`. The expected army is what the army would be if the player answered at 80% accuracy, simulated from the run's actual question sequence (including squad shapes), times `EXPECTED_SURVIVAL` (start: 0.85) to account for clipping losses. `K` is a tuning constant, starting at 1.0.
@@ -175,7 +175,7 @@ The army fires straight ahead all the time. There is no fire button: steering is
 - Dev-only data build: Node 22 script (`tsx`) that downloads KANJIDIC2 and KRADFILE (EDRDG, CC BY-SA 4.0) and emits compact JSON into `src/data/`. The generated JSON is committed, so the app needs no network at runtime.
 - Storage: `localStorage`, key `kanji-runner:v1`, with a versioned schema and a migration hook.
 - Sync: `@supabase/supabase-js` v2 (the only runtime dependency), on the Supabase free tier.
-- Hosting: GitHub Pages, deployed by a GitHub Actions workflow on push to `main`. Vite `base` is `/kanji-runner/`. The Supabase URL and anon key come from repo Actions variables.
+- Hosting: GitHub Pages, deployed by a GitHub Actions workflow on push to `main`. Vite `base` is `/kanji-runner/`. The Supabase URL and publishable key come from repo Actions variables.
 
 ## Commands
 ```
@@ -191,13 +191,13 @@ Data:        npm run data:build    # regenerate src/data/*.json from EDRDG sourc
 Deploy:      git push origin main  # Actions builds and publishes to GitHub Pages
 ```
 
-Local config: copy `.env.example` to `.env.local` (gitignored) and fill in `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`.
+Local config: copy `.env.example` to `.env.local` (gitignored) and fill in `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`.
 
 ### One-time manual setup (owner)
 1. Make the GitHub repo public, then enable Pages with source "GitHub Actions".
 2. Create a Supabase project (free tier). Run `supabase/schema.sql` in the SQL editor.
 3. Create your user under Auth → Users, then disable new sign-ups.
-4. Add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` as repo Actions variables and to `.env.local`.
+4. Add `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` (the publishable key, `sb_publishable_…`) as repo Actions variables and to `.env.local`.
 5. If the game shows `offline` after a break of a week or more, restore the paused project in the Supabase dashboard.
 
 ## Project Structure
