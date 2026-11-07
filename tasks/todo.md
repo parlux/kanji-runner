@@ -386,8 +386,8 @@ Placement to Katakana gives Kanji 1, but runs are still mostly basic hiragana: 1
 **Description:** `merge.ts` follows the spec rules. Per item, the later `lastSeen` wins. `unlockedLevel` takes the max, and stats take the max of each counter.
 
 **Acceptance criteria:**
-- [ ] Property tests: the merge is commutative, idempotent and associative, and no item from either side is lost.
-- [ ] Merging with an empty or default progress returns the other side unchanged.
+- [x] Property tests: the merge is commutative, idempotent and associative, and no item from either side is lost.
+- [x] Merging with an empty or default progress returns the other side unchanged.
 
 **Verification:** `npm test -- merge`
 **Dependencies:** T7 (the `Progress` type). Parallel-safe with T8–T10.
