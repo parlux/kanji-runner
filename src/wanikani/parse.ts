@@ -1,4 +1,5 @@
 import type { Mnemonics } from "../core/study";
+import type { KanjiItem } from "../core/types";
 
 /** Success or a plain error message; the parser never throws. */
 export type Result<T> = { ok: true; value: T } | { ok: false; error: string };
@@ -174,4 +175,92 @@ export function trim(
     });
   }
   return { ok: true, value: { version: 1, level, kanji } };
+}
+
+/** Per-kanji WaniKani data kept beside the list, not in `KanjiItem`. */
+export type WkExtras = {
+  srsStage: number;
+  /** `available_at <= now`. */
+  due: boolean;
+  /** Visually similar kanji that are also in the list. */
+  similar: string[];
+  mnemonics: Mnemonics;
+  hints: Mnemonics;
+};
+
+export type WkList = {
+  level: number;
+  /** Taught kanji, ordered by WaniKani level then id. */
+  kanji: KanjiItem[];
+  extras: Map<string, WkExtras>;
+};
+
+const plain = (r: string): string => r.replace(".", "");
+
+/** A kun'yomi as shown on gates; okurigana from WaniKani's ".", else the built-in data. */
+function kunReading(
+  r: string,
+  builtIn: KanjiItem | undefined,
+): KanjiItem["kun"] {
+  const dot = r.indexOf(".");
+  if (dot > 0) return { base: r.slice(0, dot), okurigana: r.slice(dot + 1) };
+  const k = builtIn?.kun;
+  if (k && (r === k.base || r === k.base + k.okurigana)) return k;
+  return { base: r, okurigana: "" };
+}
+
+/**
+ * Build the WaniKani kanji list and extras from the cache. `now` is epoch ms.
+ * A kanji with no on'yomi or kun'yomi (only nanori) is left out, since the
+ * reading gate needs one. Built-in data supplies okurigana, components, grade
+ * and frequency when the character exists there.
+ */
+export function buildList(
+  cache: WkCache,
+  builtIn: readonly KanjiItem[],
+  now: number,
+): WkList {
+  const known = new Map(builtIn.map((k) => [k.char, k]));
+  const rows = [...cache.kanji]
+    .sort((a, b) => a.level - b.level || a.id - b.id)
+    .flatMap((w) => {
+      const own = known.get(w.char);
+      const on = w.readings.find((r) => r.type === "onyomi");
+      const kun = w.readings.find((r) => r.type === "kunyomi");
+      if (!on && !kun) return [];
+      const item: KanjiItem = {
+        char: w.char,
+        level: w.level,
+        grade: own?.grade ?? 8,
+        freq: own?.freq ?? null,
+        glosses: w.glosses,
+        on: on ? plain(on.reading) : null,
+        kun: kun ? kunReading(kun.reading, own) : null,
+        readings: [
+          ...new Set(
+            w.readings
+              .filter((r) => r.type !== "nanori")
+              .map((r) => plain(r.reading)),
+          ),
+        ],
+        components: own?.components ?? [],
+      };
+      return [{ w, item }];
+    });
+
+  const charById = new Map(rows.map(({ w }) => [w.id, w.char]));
+  const extras = new Map<string, WkExtras>();
+  for (const { w, item } of rows) {
+    const t = w.availableAt === null ? NaN : Date.parse(w.availableAt);
+    extras.set(item.char, {
+      srsStage: w.srsStage,
+      due: t <= now,
+      similar: w.similarIds
+        .map((id) => charById.get(id))
+        .filter((c): c is string => c !== undefined && c !== item.char),
+      mnemonics: w.mnemonics,
+      hints: w.hints,
+    });
+  }
+  return { level: cache.level, kanji: rows.map((r) => r.item), extras };
 }
