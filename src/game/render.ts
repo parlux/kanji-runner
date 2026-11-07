@@ -67,6 +67,7 @@ export function render(ctx: Ctx, w: number, h: number, scene: Scene): void {
     ctx.fillRect(0, 0, w, h);
     text(ctx, "Paused", w / 2, h / 2 - 20, 40);
     text(ctx, "Tap or P to resume", w / 2, h / 2 + 24, 20, COLORS.dim);
+    text(ctx, `build ${__BUILD__}`, w / 2, h - 24, 14, COLORS.dim);
   }
 }
 
