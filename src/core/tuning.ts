@@ -16,7 +16,7 @@ export const TWO_OPTION_ROWS = 7;
 // Track and speed. Distances are in "track units"; 1 unit/s at 1.0×.
 /** How far ahead rows and hazards become visible. Equals the first row's lead time in seconds. */
 export const VIEW_DISTANCE = 3.0;
-export const BASE_SPEED = 1.0;
+export const BASE_SPEED = 1.3;
 /** Speed multiplier reached by the last row (ramps linearly from 1.0×). */
 export const MAX_SPEED_MUL = 1.3;
 

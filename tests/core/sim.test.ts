@@ -20,6 +20,7 @@ import {
   type Saw,
 } from "../../src/core/track";
 import {
+  BASE_SPEED,
   CROWD_MAX_W,
   ROWS_PER_RUN,
   STARTING_ARMY,
@@ -95,12 +96,13 @@ describe("lead time", () => {
     return reach.map((r, i) => r - (appear[i] ?? 0));
   }
 
-  it("is about 3.0 s for the first row and about 2.3 s (1.3×) for the last", () => {
+  it("is VIEW_DISTANCE / BASE_SPEED for the first row and 1.3× shorter for the last", () => {
     const lead = leadTimes();
+    const first = VIEW_DISTANCE / BASE_SPEED;
     expect(lead).toHaveLength(ROWS_PER_RUN);
-    expect(lead[0]).toBeCloseTo(3.0, 1);
-    expect(lead[ROWS_PER_RUN - 1]).toBeGreaterThan(2.2);
-    expect(lead[ROWS_PER_RUN - 1]).toBeLessThan(2.4);
+    expect(lead[0]).toBeCloseTo(first, 1);
+    expect(lead[ROWS_PER_RUN - 1]).toBeGreaterThan(first / 1.3 - 0.1);
+    expect(lead[ROWS_PER_RUN - 1]).toBeLessThan(first / 1.3 + 0.1);
   });
 
   it("never increases from one row to the next", () => {
@@ -416,12 +418,12 @@ describe("hazards", () => {
     expect(results.filter((r) => r.hazardLoss > 0)).toEqual([]);
   }, 30_000); // 50 full runs at 60 Hz; slow under parallel load
 
-  it("a run to the last question takes about 2 minutes", () => {
+  it("a run to the last question takes about 80 seconds", () => {
     const times = Array.from(
       { length: 10 },
       (_, seed) => skilledRun(seed).time,
     );
-    expect(Math.min(...times)).toBeGreaterThan(95);
-    expect(Math.max(...times)).toBeLessThan(140);
+    expect(Math.min(...times)).toBeGreaterThan(70);
+    expect(Math.max(...times)).toBeLessThan(110);
   }, 30_000);
 });
