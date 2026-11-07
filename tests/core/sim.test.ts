@@ -58,9 +58,9 @@ function goToOpening(s: RunState, i: number): RunState {
 /** Indexes an openings array without undefined. */
 const at = (o: Opening[], i: number): Opening => o[i] as Opening;
 
-/** A seeded run. Hazards are off unless asked for, so row tests stay about rows. */
+/** A seeded run of wall gates (squad charges are in squad.test.ts). Hazards are off unless asked for, so row tests stay about rows. */
 function fresh(seed = 1, hazards = false): RunState {
-  const track = buildTrack(seed, ROWS_PER_RUN);
+  const track = buildTrack(seed, ROWS_PER_RUN, false);
   return createRunState(
     buildKanaRun(seed, KANA),
     hazards ? track : { ...track, hazards: [] },

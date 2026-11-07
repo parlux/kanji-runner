@@ -1,5 +1,10 @@
 import type { Span } from "./crowd";
-import { applyCorrect, applyWrong } from "./scoring";
+import {
+  applyCorrect,
+  applyCorrectCharge,
+  applyWrong,
+  applyWrongCharge,
+} from "./scoring";
 import type { Track } from "./track";
 import {
   BASE_REWARD,
@@ -20,17 +25,27 @@ export function firepower(army: number): number {
 
 /**
  * Army after each question in a deterministic 80%-accuracy pass (every 5th
- * answer wrong, no clipping). Index q is the army after q answers; [0] is the start.
+ * answer wrong, no clipping), scoring the questions in `charges` as squad
+ * charges. Index q is the army after q answers; [0] is the start.
  */
-export function expectedArmy(rows: readonly GateRow[]): number[] {
+export function expectedArmy(
+  rows: readonly GateRow[],
+  charges: readonly number[] = [],
+): number[] {
   const out = [STARTING_ARMY];
   let army = STARTING_ARMY;
   let streak = 0;
   rows.forEach((row, i) => {
-    const r =
-      (i + 1) % 5 === 0
+    const charge = charges.includes(i);
+    const wrong = (i + 1) % 5 === 0;
+    const base = BASE_REWARD[row.type];
+    const r = charge
+      ? wrong
+        ? applyWrongCharge(army)
+        : applyCorrectCharge(army, streak, base)
+      : wrong
         ? applyWrong(army)
-        : applyCorrect(army, streak, BASE_REWARD[row.type]);
+        : applyCorrect(army, streak, base);
     army = r.army;
     streak = r.streak;
     out.push(army);
