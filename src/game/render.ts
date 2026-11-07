@@ -104,16 +104,19 @@ function renderRun(ctx: Ctx, w: number, h: number, run: RunState): void {
   const armyY = h * 0.82;
   const depthY = (ahead: number): number =>
     armyY - (armyY - horizonY) * (ahead / VIEW_DISTANCE);
+  // passed rows and hazards keep scrolling until they leave the bottom edge
+  const behind = ((h - armyY) / (armyY - horizonY)) * VIEW_DISTANCE + 0.3;
 
   ctx.fillStyle = COLORS.track;
   ctx.fillRect(0, horizonY, w, h - horizonY);
 
   // visible hazards, far ones first
   const { hazards, questions } = run.track;
-  for (let i = hazards.length - 1; i >= run.nextHazard; i--) {
+  for (let i = hazards.length - 1; i >= 0; i--) {
     const h = hazards[i];
     if (!h) continue;
     const ahead = h.pos - run.dist;
+    if (ahead < -behind) break;
     if (ahead > VIEW_DISTANCE) continue;
     const y = depthY(ahead);
     const scale = 1 - 0.5 * (ahead / VIEW_DISTANCE);
@@ -146,8 +149,9 @@ function renderRun(ctx: Ctx, w: number, h: number, run: RunState): void {
   }
 
   // visible walls, far ones first
-  for (let i = run.rows.length - 1; i >= run.next; i--) {
+  for (let i = run.rows.length - 1; i >= 0; i--) {
     const ahead = (questions[i] ?? Infinity) - run.dist;
+    if (ahead < -behind) break;
     if (ahead > VIEW_DISTANCE) continue;
     const row = run.rows[i];
     if (!row) continue;
