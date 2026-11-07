@@ -317,6 +317,23 @@ Base rewards are 3, 5 and 8 for kana, meaning and reading.
 **Files:** `src/core/progression.ts`, `src/game/scenes.ts`, `tests/core/progression.test.ts`
 **Scope:** S–M
 
+### Checkpoint B feedback (owner, 2026-11-07)
+Placement to Katakana gives Kanji 1, but runs are still mostly basic hiragana: 142 placed kana at box 2 outweigh the 30 kanji. After a run, a tap goes straight into the next run, so a new level only shows after a reload. Progress persists across reloads. The owner wants a learning element (stories that teach meaning and reading, as in mnemonic-based SRS apps): see `docs/ideas/study-and-kana-mix.md`.
+
+### Task B1: Placement weighting and return to the start screen
+**Description:** From Checkpoint B feedback.
+- Placement marks items as box 4, not box 2 (spec update), so placed items are known but rare. It still never lowers a box.
+- After a run, the end screen leads back to the start screen (level, progress, any newly unlocked level) instead of straight into the next run. Show a short "level unlocked" message when a run unlocks one.
+
+**Acceptance criteria:**
+- [ ] After placing to Katakana, kanji make up most of each run (report the share over 200 seeds, for the first run and after all 30 kanji are introduced), and kana still appear sometimes (tested).
+- [ ] Ending a run returns to the start screen with up-to-date level and progress, using keyboard or touch; a run that unlocks a level says so (tested, plus phone-sized screenshots).
+
+**Verification:** `npm test`. Phone-sized browser check.
+**Dependencies:** T8
+**Files:** `SPEC.md`, `src/core/progression.ts`, `src/game/{scenes,start,render}.ts`, `src/main.ts`, `tests/core/progression.test.ts`, `tests/game/scenes.test.ts`
+**Scope:** S
+
 ### Checkpoint B
 - [ ] Tests, lint and build pass
 - [ ] Owner: missed characters come back noticeably more often, and progress survives a reload
