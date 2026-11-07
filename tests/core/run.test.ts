@@ -12,7 +12,7 @@ describe("kana data", () => {
 });
 
 describe("buildKanaRun", () => {
-  it("builds 20 rows with 2 options then 3", () => {
+  it("builds 14 rows with 2 options then 3", () => {
     const rows = buildKanaRun(1, KANA);
     expect(rows).toHaveLength(ROWS_PER_RUN);
     rows.forEach((row, i) => {

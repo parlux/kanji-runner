@@ -6,22 +6,26 @@ import {
   GATE_OPENING_2,
   GATE_OPENING_3,
   MAX_SPEED_MUL,
-  ROW_SPACING,
   STARTING_ARMY,
   STEER_EASE,
   STEER_MAX_SPEED,
   VIEW_DISTANCE,
 } from "./tuning";
+import type { Hazard, Track } from "./track";
 import type { GateRow } from "./types";
 
 export type RunStatus = "running" | "finished" | "dead";
 
 export type RunState = {
   rows: GateRow[];
+  /** Where the questions and hazards are. */
+  track: Track;
   /** Distance the army has travelled. */
   dist: number;
   /** Index of the next unresolved row. */
   next: number;
+  /** Index of the next hazard not yet passed. */
+  nextHazard: number;
   /** Crowd centre, 0 (left edge) to 1 (right edge). */
   x: number;
   /** Where steering input wants the crowd to be. */
@@ -35,25 +39,23 @@ export type RunState = {
   status: RunStatus;
 };
 
-/** Track position of row i. The first row starts at the edge of view. */
-export function rowPosition(i: number): number {
-  return VIEW_DISTANCE + i * ROW_SPACING;
-}
-
 /** 1.0× until the first row is reached, then linear to MAX_SPEED_MUL by the time the last row appears. */
-export function speedMul(dist: number, rowCount: number): number {
-  const start = rowPosition(0);
-  const end = rowPosition(rowCount - 1) - VIEW_DISTANCE;
+export function speedMul(dist: number, track: Track): number {
+  const q = track.questions;
+  const start = q[0] ?? 0;
+  const end = (q.at(-1) ?? 0) - VIEW_DISTANCE;
   if (end <= start) return 1;
   const t = Math.min(1, Math.max(0, (dist - start) / (end - start)));
   return 1 + (MAX_SPEED_MUL - 1) * t;
 }
 
-export function createRunState(rows: GateRow[]): RunState {
+export function createRunState(rows: GateRow[], track: Track): RunState {
   return {
     rows,
+    track,
     dist: 0,
     next: 0,
+    nextHazard: 0,
     x: 0.5,
     targetX: 0.5,
     army: STARTING_ARMY,
@@ -126,11 +128,30 @@ export function stepRun(s: RunState, dt: number): RunState {
   const w = crowdWidth(s.army);
   next.targetX = clampOnTrack(s.targetX, w);
   next.x = steerStep(s.x, next.targetX, w, dt);
-  next.dist += BASE_SPEED * speedMul(s.dist, s.rows.length) * dt;
-  while (next.status === "running" && next.dist >= rowPosition(next.next)) {
-    next = resolveRow(next);
+  next.dist += BASE_SPEED * speedMul(s.dist, s.track) * dt;
+  // resolve everything passed this step, in track order
+  for (;;) {
+    if (next.status !== "running") return next;
+    const hazard = next.track.hazards[next.nextHazard];
+    const rowPos = next.track.questions[next.next] ?? Infinity;
+    if (hazard && hazard.pos <= rowPos && hazard.pos <= next.dist)
+      next = passHazard(next, hazard);
+    else if (rowPos <= next.dist) next = resolveRow(next);
+    else return next;
   }
-  return next;
+}
+
+/** Clipping only: hazards never touch the streak or results. */
+function passHazard(s: RunState, h: Hazard): RunState {
+  const clip = clipLoss(s.army, s.x, crowdWidth(s.army), [h]);
+  const army = s.army - clip;
+  return {
+    ...s,
+    army,
+    nextHazard: s.nextHazard + 1,
+    lastClip: clip > 0 ? { loss: clip, dist: s.dist } : s.lastClip,
+    status: army <= 0 ? "dead" : s.status,
+  };
 }
 
 function resolveRow(s: RunState): RunState {

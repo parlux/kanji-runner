@@ -6,7 +6,8 @@ import {
   stepRun,
   type RunState,
 } from "../core/sim";
-import { STEER_MAX_SPEED } from "../core/tuning";
+import { buildTrack } from "../core/track";
+import { ROWS_PER_RUN, STEER_MAX_SPEED } from "../core/tuning";
 import type { Action } from "./input";
 
 export type Scene =
@@ -18,7 +19,10 @@ function newRun(seed: number): Scene {
   return {
     kind: "run",
     seed,
-    run: createRunState(buildKanaRun(seed, KANA)),
+    run: createRunState(
+      buildKanaRun(seed, KANA),
+      buildTrack(seed, ROWS_PER_RUN),
+    ),
     paused: false,
   };
 }

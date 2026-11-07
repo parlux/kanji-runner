@@ -5,7 +5,6 @@ import {
   wallSolids,
   nearestOpening,
   nudgeTarget,
-  rowPosition,
   setTarget,
   stepRun,
   type Opening,
@@ -14,7 +13,9 @@ import {
 import { crowdWidth } from "../../src/core/crowd";
 import { buildKanaRun } from "../../src/core/run";
 import { KANA } from "../../src/core/kana";
+import { buildTrack, type Block } from "../../src/core/track";
 import {
+  CROWD_MAX_W,
   ROWS_PER_RUN,
   STARTING_ARMY,
   STEER_MAX_SPEED,
@@ -40,9 +41,18 @@ function goToOpening(s: RunState, i: number): RunState {
 /** Indexes an openings array without undefined. */
 const at = (o: Opening[], i: number): Opening => o[i] as Opening;
 
-function fresh(seed = 1): RunState {
-  return createRunState(buildKanaRun(seed, KANA));
+/** A seeded run. Hazards are off unless asked for, so row tests stay about rows. */
+function fresh(seed = 1, hazards = false): RunState {
+  const track = buildTrack(seed, ROWS_PER_RUN);
+  return createRunState(
+    buildKanaRun(seed, KANA),
+    hazards ? track : { ...track, hazards: [] },
+  );
 }
+
+/** Track position of row i. */
+const rowPos = (s: RunState, i: number): number =>
+  s.track.questions[i] as number;
 
 describe("createRunState", () => {
   it("starts running with the starting army at distance 0", () => {
@@ -69,7 +79,7 @@ describe("lead time", () => {
       // keep the army alive: always pick the answer
       s = goToOpening(s, s.rows[s.next]?.answerIndex ?? 0);
       for (let i = 0; i < s.rows.length; i++) {
-        if (appear[i] === undefined && rowPosition(i) - s.dist <= VIEW_DISTANCE)
+        if (appear[i] === undefined && rowPos(s, i) - s.dist <= VIEW_DISTANCE)
           appear[i] = t;
       }
       const before = s.next;
@@ -80,12 +90,12 @@ describe("lead time", () => {
     return reach.map((r, i) => r - (appear[i] ?? 0));
   }
 
-  it("is about 3.0 s for the first row and about 1.8 s for the last", () => {
+  it("is about 3.0 s for the first row and about 2.3 s (1.3×) for the last", () => {
     const lead = leadTimes();
     expect(lead).toHaveLength(ROWS_PER_RUN);
     expect(lead[0]).toBeCloseTo(3.0, 1);
-    expect(lead[ROWS_PER_RUN - 1]).toBeGreaterThan(1.7);
-    expect(lead[ROWS_PER_RUN - 1]).toBeLessThan(1.95);
+    expect(lead[ROWS_PER_RUN - 1]).toBeGreaterThan(2.2);
+    expect(lead[ROWS_PER_RUN - 1]).toBeLessThan(2.4);
   });
 
   it("never increases from one row to the next", () => {
@@ -240,7 +250,7 @@ describe("wall clipping", () => {
   function atRow(n: number, army: number, streak = 0): RunState {
     const s = fresh();
     const i = s.rows.findIndex((r) => r.options.length === n);
-    return { ...s, army, streak, next: i, dist: rowPosition(i) - 1e-6 };
+    return { ...s, army, streak, next: i, dist: rowPos(s, i) - 1e-6 };
   }
 
   it("wall solids are the complement of the openings", () => {
@@ -302,5 +312,83 @@ describe("wall clipping", () => {
     expect(s.army).toBe(0);
     expect(s.status).toBe("dead");
     expect(s.results.at(-1)).toBe(true);
+  });
+});
+
+describe("hazards", () => {
+  /** A fresh run with one block just ahead of the crowd. */
+  function beforeBlock(left: number, right: number, army = 100): RunState {
+    const s = fresh();
+    const block: Block = { kind: "block", pos: 1, left, right };
+    return {
+      ...s,
+      army,
+      track: { ...s.track, hazards: [block] },
+      dist: 1 - 1e-6,
+    };
+  }
+
+  it("a block overlapping the crowd clips it, without touching streak or results", () => {
+    const base = { ...beforeBlock(0.4, 0.6), streak: 3 };
+    // crowd width 0.30 at x 0.5: 0.2 of 0.3 overlaps
+    const s = stepRun(base, DT);
+    const clip = Math.ceil((100 * 0.2) / 0.3 - 1e-9);
+    expect(s.lastClip?.loss).toBe(clip);
+    expect(s.army).toBe(100 - clip);
+    expect(s.streak).toBe(3);
+    expect(s.results).toEqual([]);
+    expect(s.nextHazard).toBe(1);
+  });
+
+  it("a crowd that steers clear of a block loses nothing", () => {
+    const base = beforeBlock(0, 0.35);
+    const x = 1 - CROWD_MAX_W / 2;
+    const s = stepRun({ ...base, x, targetX: x }, DT);
+    expect(s.army).toBe(100);
+    expect(s.lastClip).toBeNull();
+  });
+
+  it("a crowd clipped to nothing by a block ends the run", () => {
+    const s = stepRun(beforeBlock(0.3, 0.7, 4), DT);
+    expect(s.army).toBe(0);
+    expect(s.status).toBe("dead");
+  });
+
+  /** Steers to the answer at each question and to the widest gap at each hazard. */
+  function skilledRun(seed: number): { hazardLoss: number; time: number } {
+    let s = fresh(seed, true);
+    let hazardLoss = 0;
+    let time = 0;
+    while (s.status === "running") {
+      const h = s.track.hazards[s.nextHazard];
+      const rowAt = s.track.questions[s.next] ?? Infinity;
+      if (h && h.pos < rowAt) {
+        const x = h.left > 1 - h.right ? h.left / 2 : (1 + h.right) / 2;
+        s = setTarget(s, x);
+      } else {
+        const n = s.rows[s.next]?.options.length ?? 2;
+        const o = gateOpenings(n)[s.rows[s.next]?.answerIndex ?? 0];
+        s = setTarget(s, o?.centre ?? 0.5);
+      }
+      const before = s;
+      s = stepRun(s, DT);
+      time += DT;
+      if (s.nextHazard > before.nextHazard) hazardLoss += before.army - s.army;
+    }
+    return { hazardLoss, time };
+  }
+
+  it("a skilled player can dodge every hazard and finish (50 seeds)", () => {
+    const results = Array.from({ length: 50 }, (_, seed) => skilledRun(seed));
+    expect(results.filter((r) => r.hazardLoss > 0)).toEqual([]);
+  });
+
+  it("a run to the last question takes about 2 minutes", () => {
+    const times = Array.from(
+      { length: 10 },
+      (_, seed) => skilledRun(seed).time,
+    );
+    expect(Math.min(...times)).toBeGreaterThan(95);
+    expect(Math.max(...times)).toBeLessThan(140);
   });
 });

@@ -1,6 +1,6 @@
 import { crowdWidth } from "../core/crowd";
-import { gateOpenings, rowPosition, type RunState } from "../core/sim";
-import { VIEW_DISTANCE } from "../core/tuning";
+import { gateOpenings, type RunState } from "../core/sim";
+import { CALM_DISTANCE, VIEW_DISTANCE } from "../core/tuning";
 import type { Scene } from "./scenes";
 
 const FONT = `"Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic", system-ui, sans-serif`;
@@ -18,6 +18,8 @@ const COLORS = {
   soldier: "#ffcf4a",
   good: "#5fd38d",
   bad: "#ff6b6b",
+  hazard: "#c24b4b",
+  hazardEdge: "#ff8a7a",
 };
 
 type Ctx = CanvasRenderingContext2D;
@@ -98,9 +100,24 @@ function renderRun(ctx: Ctx, w: number, h: number, run: RunState): void {
   ctx.fillStyle = COLORS.track;
   ctx.fillRect(0, horizonY, w, h - horizonY);
 
+  // visible hazards, far ones first
+  const { hazards, questions } = run.track;
+  for (let i = hazards.length - 1; i >= run.nextHazard; i--) {
+    const h = hazards[i];
+    if (!h) continue;
+    const ahead = h.pos - run.dist;
+    if (ahead > VIEW_DISTANCE) continue;
+    const y = depthY(ahead);
+    const blockH = 34 * (1 - 0.5 * (ahead / VIEW_DISTANCE));
+    ctx.fillStyle = COLORS.hazard;
+    ctx.fillRect(h.left * w, y - blockH, (h.right - h.left) * w, blockH);
+    ctx.fillStyle = COLORS.hazardEdge;
+    ctx.fillRect(h.left * w, y - 3, (h.right - h.left) * w, 3);
+  }
+
   // visible walls, far ones first
   for (let i = run.rows.length - 1; i >= run.next; i--) {
-    const ahead = rowPosition(i) - run.dist;
+    const ahead = (questions[i] ?? Infinity) - run.dist;
     if (ahead > VIEW_DISTANCE) continue;
     const row = run.rows[i];
     if (!row) continue;
@@ -127,7 +144,9 @@ function renderRun(ctx: Ctx, w: number, h: number, run: RunState): void {
 
   // prompt banner for the next row
   const nextRow = run.rows[run.next];
-  if (nextRow && rowPosition(run.next) - run.dist <= VIEW_DISTANCE) {
+  // the prompt appears as the calm stretch before its question starts
+  const nextAhead = (questions[run.next] ?? Infinity) - run.dist;
+  if (nextRow && nextAhead <= CALM_DISTANCE) {
     text(
       ctx,
       nextRow.prompt,
