@@ -32,6 +32,7 @@ import type { BossResult, Scene, Session } from "./scenes";
 import type { SyncStatus } from "../sync/sync";
 import { canStudy } from "../core/study";
 import { startLayout, studyButton, syncLabel, type Rect } from "./start";
+import type { WkView } from "./wkstate";
 
 const FONT = `"Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic", system-ui, sans-serif`;
 const MAX_DRAWN_SOLDIERS = 200;
@@ -215,11 +216,12 @@ export function render(
   scene: Scene,
   session: Session,
   sync: SyncStatus = "disabled",
+  wk: WkView | null = null,
 ): void {
   ctx.fillStyle = COLORS.bg;
   ctx.fillRect(0, 0, w, h);
   if (scene.kind === "start")
-    return renderStart(ctx, w, h, session, scene.pick, sync);
+    return renderStart(ctx, w, h, session, scene.pick, sync, wk);
   if (scene.kind === "end")
     return renderEnd(ctx, w, h, scene.run, scene.seed, scene.boss, session);
   if (scene.kind === "boss")
@@ -241,11 +243,15 @@ function renderStart(
   session: Session,
   pick: number | undefined,
   sync: SyncStatus,
+  wk: WkView | null,
 ): void {
   if (pick !== undefined) return renderPicker(ctx, w, h, session, pick);
   renderSyncLabel(ctx, w, h, sync);
+  const wanikani = session.wk !== null;
+  if (wk) renderWk(ctx, w, h, wk);
   text(ctx, "Kanji Runner", w / 2, h * 0.22, Math.min(64, w / 8));
-  renderLevel(ctx, w, h * 0.36, session);
+  if (wanikani && wk) renderWkLevel(ctx, w, h * 0.36, wk);
+  else renderLevel(ctx, w, h * 0.36, session);
   unlockedNote(ctx, w, h * 0.463, session, 24);
   text(ctx, "Tap or Enter to start", w / 2, h * 0.5, 22);
   text(
@@ -257,15 +263,17 @@ function renderStart(
     COLORS.dim,
   );
   const l = startLayout(w, h);
-  button(ctx, l.place, "I already know some…", 18);
-  text(
-    ctx,
-    "or ←/→ to choose a starting level",
-    w / 2,
-    l.place.y + l.place.h + 20,
-    14,
-    COLORS.dim,
-  );
+  if (!wanikani) {
+    button(ctx, l.place, "I already know some…", 18);
+    text(
+      ctx,
+      "or ←/→ to choose a starting level",
+      w / 2,
+      l.place.y + l.place.h + 20,
+      14,
+      COLORS.dim,
+    );
+  }
   // the about line: the kanji data's licence requires this credit
   text(
     ctx,
@@ -276,6 +284,46 @@ function renderStart(
     COLORS.dim,
   );
   text(ctx, "© EDRDG, CC BY-SA 4.0 · edrdg.org", w / 2, h - 26, 12, COLORS.dim);
+}
+
+/** WaniKani mode's title and due line, in place of the level bar. */
+function renderWkLevel(ctx: Ctx, w: number, y: number, wk: WkView): void {
+  text(ctx, "WaniKani", w / 2, y, 30);
+  const line = `WaniKani level ${wk.level} · ${wk.due} kanji due`;
+  text(ctx, line, w / 2, y + 40, fitSize(ctx, line, 18, w - 32), COLORS.good);
+}
+
+/** The WaniKani status (top left), the mode switch and the token button. */
+function renderWk(ctx: Ctx, w: number, h: number, wk: WkView): void {
+  const l = startLayout(w, h);
+  if (wk.label) {
+    const bad = wk.label.endsWith("invalid");
+    ctx.font = `15px ${FONT}`;
+    ctx.fillStyle = bad ? COLORS.bad : COLORS.dim;
+    ctx.textAlign = "left";
+    ctx.textBaseline = "middle";
+    const size = fitSize(ctx, wk.label, 15, l.wkStatus.w);
+    ctx.font = `${size}px ${FONT}`;
+    ctx.fillText(wk.label, l.wkStatus.x, l.wkStatus.y + l.wkStatus.h / 2);
+  }
+  if (wk.canSwitch) {
+    const on = "#2f6b48";
+    button(
+      ctx,
+      l.modeBuiltin,
+      "Built-in",
+      16,
+      wk.mode === "builtin" ? on : COLORS.track,
+    );
+    button(
+      ctx,
+      l.modeWk,
+      "WaniKani",
+      16,
+      wk.mode === "wanikani" ? on : COLORS.track,
+    );
+  }
+  button(ctx, l.token, wk.hasToken ? "WaniKani token…" : "Use WaniKani…", 16);
 }
 
 const SYNC_DOT: Record<SyncStatus, string> = {
@@ -458,7 +506,12 @@ function renderEnd(
   text(ctx, stats, w / 2, 142, fitSize(ctx, stats, 18, w - 32), COLORS.dim);
   unlockedNote(ctx, w, 172, session, 22);
 
-  const misses = missedItems(run.rows, run.results, run.track.charges, KANJI);
+  const misses = missedItems(
+    run.rows,
+    run.results,
+    run.track.charges,
+    session.wk?.kanji ?? KANJI,
+  );
   const top = 204;
   const study = canStudy(misses.length, won);
   const bottom = study ? h - 116 : h - 56;

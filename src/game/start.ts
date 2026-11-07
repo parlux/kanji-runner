@@ -1,4 +1,5 @@
 import type { SyncStatus } from "../sync/sync";
+import type { WkMode } from "../wanikani/cache";
 import type { Action } from "./input";
 
 export type Rect = { x: number; y: number; w: number; h: number };
@@ -20,6 +21,13 @@ export function startLayout(w: number, h: number) {
     cancel: { x, y: h * 0.55 + 64, w: bw, h: 44 },
     /** The sync status label, top right; opens login or retries. */
     sync: { x: w - 124, y: 12, w: 112, h: 36 },
+    /** The WaniKani status label, top left. */
+    wkStatus: { x: 12, y: 12, w: w - 124 - 24, h: 36 },
+    /** The Built-in / WaniKani switch, two halves. */
+    modeBuiltin: { x, y: h * 0.6, w: bw / 2, h: 40 },
+    modeWk: { x: x + bw / 2, y: h * 0.6, w: bw / 2, h: 40 },
+    /** Opens the token form. */
+    token: { x, y: h * 0.6 + 52, w: bw, h: 40 },
   };
 }
 
@@ -60,9 +68,10 @@ export function startTap(
   h: number,
   x: number,
   y: number,
+  placement = true,
 ): Action | null {
   const l = startLayout(w, h);
-  if (!picking) return inside(l.place, x, y) ? "place" : "confirm";
+  if (!picking) return placement && inside(l.place, x, y) ? "place" : "confirm";
   if (inside(l.minus, x, y)) return "left";
   if (inside(l.plus, x, y)) return "right";
   if (inside(l.apply, x, y)) return "confirm";
@@ -79,4 +88,23 @@ export function syncTap(
   y: number,
 ): boolean {
   return syncLabel(status) !== null && inside(startLayout(w, h).sync, x, y);
+}
+
+/** What a start screen tap does about WaniKani: switch the mode or open the token form. */
+export type WkTap = { mode: WkMode } | "token";
+
+/** The WaniKani control at (x, y), or null. The switch only counts when offered. */
+export function wkTap(
+  canSwitch: boolean,
+  w: number,
+  h: number,
+  x: number,
+  y: number,
+): WkTap | null {
+  const l = startLayout(w, h);
+  if (inside(l.token, x, y)) return "token";
+  if (!canSwitch) return null;
+  if (inside(l.modeBuiltin, x, y)) return { mode: "builtin" };
+  if (inside(l.modeWk, x, y)) return { mode: "wanikani" };
+  return null;
 }

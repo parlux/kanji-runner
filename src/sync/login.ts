@@ -37,6 +37,9 @@ const CSS = `
 
 let open: HTMLElement | null = null;
 
+/** Whether the sync dialog is up; the game ignores taps and keys meanwhile. */
+export const loginOpen = (): boolean => open !== null;
+
 function el<K extends keyof HTMLElementTagNameMap>(
   tag: K,
   props: Partial<HTMLElementTagNameMap[K]> = {},
