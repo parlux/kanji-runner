@@ -15,9 +15,12 @@ import {
   CROWD_MAX_W,
   ENEMY_X_MARGIN,
   FIRE_RANGE,
+  HAZARDS_MAX,
+  HAZARDS_MIN,
   SAW_RATE,
   SAW_W,
   STEER_MAX_SPEED,
+  VIEW_DISTANCE,
 } from "../../src/core/tuning";
 
 const QUESTIONS = 14;
@@ -75,20 +78,20 @@ function longestDeadStretch(t: Track, step = 0.01): number {
 }
 
 describe("dead time", () => {
-  it("never leaves more than 2 s (at base speed) with nothing to do outside the calm stretches", () => {
+  it("never leaves more than 1.5 s (at base speed) with nothing to do outside the calm stretches", () => {
     const worst = Math.max(
       ...TRACKS.slice(0, 200).map((t) => longestDeadStretch(t)),
     );
-    expect(worst / BASE_SPEED).toBeLessThanOrEqual(2);
+    expect(worst / BASE_SPEED).toBeLessThanOrEqual(1.5);
   });
 });
 
 describe("buildTrack", () => {
-  it("places the questions in ascending order, the first after a calm stretch", () => {
+  it("places the questions in ascending order, the first a full VIEW_DISTANCE in", () => {
     const bad = failing(
       (t) =>
         t.questions.length === QUESTIONS &&
-        (t.questions[0] as number) >= CALM_DISTANCE &&
+        (t.questions[0] as number) >= VIEW_DISTANCE &&
         t.questions.every(
           (q, i) => i === 0 || q > (t.questions[i - 1] as number),
         ),
@@ -96,12 +99,13 @@ describe("buildTrack", () => {
     expect(bad).toEqual([]);
   });
 
-  it("puts 1–2 hazards between consecutive questions and none outside them", () => {
+  it("puts HAZARDS_MIN–HAZARDS_MAX hazards between consecutive questions and none outside them", () => {
     const bad = failing((t) => {
       const counts = t.questions.slice(1).map((_, i) => between(t, i).length);
       const total = counts.reduce((a, b) => a + b, 0);
       return (
-        counts.every((n) => n >= 1 && n <= 2) && total === t.hazards.length
+        counts.every((n) => n >= HAZARDS_MIN && n <= HAZARDS_MAX) &&
+        total === t.hazards.length
       );
     });
     expect(bad).toEqual([]);
@@ -112,6 +116,22 @@ describe("buildTrack", () => {
       t.questions.every((q) =>
         t.hazards.every((h) => h.pos <= q - CALM_DISTANCE || h.pos > q),
       ),
+    );
+    expect(bad).toEqual([]);
+  });
+
+  it("leaves a full calm stretch before each charge line", () => {
+    const bad = failing((t) =>
+      t.charges.every((q) => {
+        const line = chargeLine(t, q);
+        const prev = t.questions[q - 1] as number;
+        return t.hazards.every(
+          (h) =>
+            h.pos <= line - CALM_DISTANCE + 1e-9 ||
+            h.pos <= prev ||
+            h.pos > line,
+        );
+      }),
     );
     expect(bad).toEqual([]);
   });

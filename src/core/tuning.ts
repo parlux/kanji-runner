@@ -51,10 +51,18 @@ export const CROWD_K = 0.03;
 export const CROWD_MAX_W = 0.3;
 
 // Track layout (R3). See track.ts.
-/** Hazard-free stretch before each question, starting when its prompt appears. */
-export const CALM_DISTANCE = 3.0;
+/**
+ * Hazard-free stretch right before each wall. Shorter than VIEW_DISTANCE, so
+ * the prompt appears while the last hazards are still being dodged (S5).
+ * A squad charge's calm stretch is CHARGE_LINE_DISTANCE longer, so lining up
+ * before its charge line keeps this much room.
+ */
+export const CALM_DISTANCE = 1.2;
 /** Distance between a question and the next hazard, and between hazards. */
-export const HAZARD_SPACING = 4.5;
+export const HAZARD_SPACING = 3.0;
+/** Hazard beats between consecutive questions: HAZARDS_MIN to HAZARDS_MAX (seeded). */
+export const HAZARDS_MIN = 2;
+export const HAZARDS_MAX = 3;
 /** Static block width range. */
 export const BLOCK_MIN_W = 0.15;
 export const BLOCK_MAX_W = 0.35;

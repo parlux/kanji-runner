@@ -446,13 +446,13 @@ describe("hazards", () => {
     expect(results.filter((r) => r.hazardLoss > 0)).toEqual([]);
   }, 30_000); // 50 full runs at 60 Hz; slow under parallel load
 
-  it("a run to the last question takes about 65 seconds", () => {
+  it("a run to the last question takes about 60 seconds", () => {
     const times = Array.from(
       { length: 10 },
       (_, seed) => skilledRun(seed).time,
     );
-    expect(Math.min(...times)).toBeGreaterThan(55);
-    expect(Math.max(...times)).toBeLessThan(90);
+    expect(Math.min(...times)).toBeGreaterThan(50);
+    expect(Math.max(...times)).toBeLessThan(70);
   }, 30_000);
 });
 

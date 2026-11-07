@@ -8,6 +8,8 @@ import {
   ENEMY_CHANCE,
   ENEMY_X_MARGIN,
   HAZARD_SPACING,
+  HAZARDS_MAX,
+  HAZARDS_MIN,
   SAW_CHANCE,
   SAW_MAX_AMP,
   SAW_MIN_AMP,
@@ -15,6 +17,7 @@ import {
   SAW_W,
   SQUAD_QUESTIONS,
   SQUADS_ENABLED,
+  VIEW_DISTANCE,
 } from "./tuning";
 
 /** A static solid at track position `pos`, spanning [left, right]. */
@@ -80,10 +83,12 @@ export function chargeLine(track: Track, q: number): number {
 const TRACK_SALT = 0x9e3779b9;
 
 /**
- * Seeded beat layout: the first question after a calm stretch, then 1–2 hazards
- * HAZARD_SPACING apart, then a calm stretch before each next question.
- * Enemy packs only appear after the second question. Questions SQUAD_QUESTIONS
- * are squad charges when `squads` is on; their charge line sits inside the calm stretch.
+ * Seeded beat layout: the first question VIEW_DISTANCE in (a full reading time),
+ * then HAZARDS_MIN–HAZARDS_MAX hazards HAZARD_SPACING apart, then a calm stretch
+ * right before each next question. Enemy packs only appear after the second
+ * question. Questions SQUAD_QUESTIONS are squad charges when `squads` is on;
+ * their calm stretch is CHARGE_LINE_DISTANCE longer (on or off), so a full
+ * CALM_DISTANCE stays before the charge line.
  */
 export function buildTrack(
   seed: number,
@@ -91,21 +96,26 @@ export function buildTrack(
   squads = SQUADS_ENABLED,
 ): Track {
   const rng = createRng(seed ^ TRACK_SALT);
+  // the squad questions keep their longer calm stretch even with squads off,
+  // so the toggle never changes the layout
+  const squadQuestions = SQUAD_QUESTIONS.map((q) => q - 1).filter(
+    (q) => q < questionCount,
+  );
+  const charges = squads ? squadQuestions : [];
   const questions: number[] = [];
   const hazards: Hazard[] = [];
-  let pos = CALM_DISTANCE;
+  let pos = Math.max(VIEW_DISTANCE, CALM_DISTANCE);
   for (let q = 0; q < questionCount; q++) {
     questions.push(pos);
     if (q === questionCount - 1) break;
-    const count = 1 + randInt(rng, 2);
+    const count = HAZARDS_MIN + randInt(rng, HAZARDS_MAX - HAZARDS_MIN + 1);
     for (let j = 0; j < count; j++) {
       pos += HAZARD_SPACING;
       hazards.push(makeHazard(rng, pos, q >= 1));
     }
-    pos += CALM_DISTANCE;
+    pos +=
+      CALM_DISTANCE +
+      (squadQuestions.includes(q + 1) ? CHARGE_LINE_DISTANCE : 0);
   }
-  const charges = squads
-    ? SQUAD_QUESTIONS.map((q) => q - 1).filter((q) => q < questionCount)
-    : [];
   return { questions, hazards, charges };
 }
