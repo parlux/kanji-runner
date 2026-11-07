@@ -58,6 +58,18 @@ const COLORS = {
 
 type Ctx = CanvasRenderingContext2D;
 
+/** Smallest a question prompt is drawn (px), however far away its wall is. */
+const PROMPT_MIN_PX = 34;
+/** Smallest an answer label is drawn (px), unless it must shrink to fit its opening. */
+const LABEL_MIN_PX = 18;
+
+/** `size`, or smaller if needed so `s` fits in `maxWidth`. */
+function fitSize(ctx: Ctx, s: string, size: number, maxWidth: number): number {
+  ctx.font = `${Math.round(size)}px ${FONT}`;
+  const width = ctx.measureText(s).width;
+  return width > maxWidth ? (size * maxWidth) / width : size;
+}
+
 function text(
   ctx: Ctx,
   s: string,
@@ -264,7 +276,14 @@ function renderRun(ctx: Ctx, w: number, h: number, run: RunState): void {
             : COLORS.badFill
           : COLORS.opening;
       ctx.fillRect(left, y - wallH, width, wallH);
-      text(ctx, row.options[j] ?? "", o.centre * w, y - wallH / 2, 30 * scale);
+      const label = row.options[j] ?? "";
+      const size = fitSize(
+        ctx,
+        label,
+        Math.max(LABEL_MIN_PX, 30 * scale),
+        width - 6,
+      );
+      text(ctx, label, o.centre * w, y - wallH / 2, size);
     });
     // a charge is the same wall with a squad standing beyond each opening
     const charge = isCharge(run.track, i)
@@ -273,7 +292,10 @@ function renderRun(ctx: Ctx, w: number, h: number, run: RunState): void {
     const squadsH = charge
       ? renderSquads(ctx, w, run, charge, y - wallH, scale)
       : 0;
-    text(ctx, row.prompt, w / 2, y - wallH - squadsH - 30 * scale, 44 * scale);
+    // never too small to read at first sight; it grows upwards, clear of the labels and squads
+    const promptSize = Math.max(PROMPT_MIN_PX, 44 * scale);
+    const promptY = y - wallH - squadsH - 8 * scale - promptSize / 2;
+    text(ctx, row.prompt, w / 2, promptY, promptSize);
   }
 
   if (fight) renderFirefight(ctx, w, run, fight, armyY, radius);
