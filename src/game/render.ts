@@ -245,7 +245,7 @@ function renderStart(
   renderSyncLabel(ctx, w, h, sync);
   text(ctx, "Kanji Runner", w / 2, h * 0.22, Math.min(64, w / 8));
   renderLevel(ctx, w, h * 0.36, session);
-  unlockedNote(ctx, w, h * 0.455, session, 24);
+  unlockedNote(ctx, w, h * 0.463, session, 24);
   text(ctx, "Tap or Enter to start", w / 2, h * 0.5, 22);
   text(
     ctx,
@@ -448,17 +448,17 @@ function renderEnd(
     : run.army === boss.size
       ? "A tie is a loss"
       : null;
-  if (note) text(ctx, note, w / 2, 76, 16, COLORS.dim);
+  if (note) text(ctx, note, w / 2, 80, 16, COLORS.dim);
   const sizes = boss
     ? `Army ${run.army} vs boss ${boss.size}`
     : `Army ${run.army}`;
-  text(ctx, sizes, w / 2, 104, fitSize(ctx, sizes, 26, w - 32));
+  text(ctx, sizes, w / 2, 112, fitSize(ctx, sizes, 26, w - 32));
   const stats = `Accuracy ${accuracy}% (${correct}/${run.results.length}) · Seed ${seed}`;
-  text(ctx, stats, w / 2, 134, fitSize(ctx, stats, 18, w - 32), COLORS.dim);
-  unlockedNote(ctx, w, 164, session, 22);
+  text(ctx, stats, w / 2, 142, fitSize(ctx, stats, 18, w - 32), COLORS.dim);
+  unlockedNote(ctx, w, 172, session, 22);
 
   const misses = missedItems(run.rows, run.results, run.track.charges, KANJI);
-  const top = 196;
+  const top = 204;
   const bottom = h - 56;
   if (misses.length === 0) {
     text(ctx, "No misses!", w / 2, top + 40, 28, COLORS.good);
