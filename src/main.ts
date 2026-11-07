@@ -53,5 +53,5 @@ startLoop(
     session = settled;
     scene = next;
   },
-  () => render(ctx, window.innerWidth, window.innerHeight, scene),
+  () => render(ctx, window.innerWidth, window.innerHeight, scene, session),
 );

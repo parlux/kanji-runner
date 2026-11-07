@@ -13,7 +13,14 @@ import {
 } from "../core/sim";
 import { hazardSpan, isCharge } from "../core/track";
 import { FIRE_RANGE, SAW_W, VIEW_DISTANCE } from "../core/tuning";
-import type { Scene } from "./scenes";
+import { KANJI } from "../core/kanji";
+import {
+  levelName,
+  levelProgress,
+  maxLevel,
+  UNLOCK_SHARE,
+} from "../core/progression";
+import type { Scene, Session } from "./scenes";
 
 const FONT = `"Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic", system-ui, sans-serif`;
 const MAX_DRAWN_SOLDIERS = 200;
@@ -182,10 +189,16 @@ function text(
   ctx.fillText(s, x, y);
 }
 
-export function render(ctx: Ctx, w: number, h: number, scene: Scene): void {
+export function render(
+  ctx: Ctx,
+  w: number,
+  h: number,
+  scene: Scene,
+  session: Session,
+): void {
   ctx.fillStyle = COLORS.bg;
   ctx.fillRect(0, 0, w, h);
-  if (scene.kind === "start") return renderStart(ctx, w, h);
+  if (scene.kind === "start") return renderStart(ctx, w, h, session);
   if (scene.kind === "end") return renderEnd(ctx, w, h, scene.run, scene.seed);
   renderRun(ctx, w, h, scene.run);
   if (scene.paused) {
@@ -197,8 +210,9 @@ export function render(ctx: Ctx, w: number, h: number, scene: Scene): void {
   }
 }
 
-function renderStart(ctx: Ctx, w: number, h: number): void {
-  text(ctx, "Kanji Runner", w / 2, h * 0.35, Math.min(64, w / 8));
+function renderStart(ctx: Ctx, w: number, h: number, session: Session): void {
+  text(ctx, "Kanji Runner", w / 2, h * 0.22, Math.min(64, w / 8));
+  renderLevel(ctx, w, h * 0.36, session);
   text(ctx, "Tap or Enter to start", w / 2, h * 0.5, 22);
   text(
     ctx,
@@ -206,6 +220,37 @@ function renderStart(ctx: Ctx, w: number, h: number): void {
     w / 2,
     h * 0.5 + 36,
     18,
+    COLORS.dim,
+  );
+}
+
+/** Current level, a learned bar with the unlock mark, and what it unlocks. */
+function renderLevel(ctx: Ctx, w: number, y: number, session: Session): void {
+  const level = session.progress.unlockedLevel;
+  const p = levelProgress(session.progress, level, session.kana, KANJI);
+  text(ctx, levelName(level), w / 2, y, 30);
+  const bw = Math.min(300, w - 64);
+  const bx = (w - bw) / 2;
+  const by = y + 28;
+  const bh = 12;
+  ctx.fillStyle = COLORS.track;
+  ctx.fillRect(bx, by, bw, bh);
+  ctx.fillStyle = COLORS.good;
+  if (p.total) ctx.fillRect(bx, by, (bw * p.learned) / p.total, bh);
+  ctx.fillStyle = COLORS.text;
+  ctx.fillRect(bx + bw * UNLOCK_SHARE - 1, by - 4, 2, bh + 8);
+  const unlocks =
+    level >= maxLevel(KANJI)
+      ? "last level"
+      : p.learned >= p.needed
+        ? `${levelName(level + 1)} unlocks after your next run`
+        : `${p.needed} needed for ${levelName(level + 1)}`;
+  text(
+    ctx,
+    `${p.learned}/${p.total} learned · ${unlocks}`,
+    w / 2,
+    by + bh + 20,
+    15,
     COLORS.dim,
   );
 }
