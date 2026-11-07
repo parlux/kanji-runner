@@ -84,10 +84,10 @@ describe("unlock rule", () => {
 });
 
 describe("placement", () => {
-  it("placing at level 1 marks all kana box 2 and unlocks kanji level 2", () => {
+  it("placing at level 1 marks all kana box 4 and unlocks kanji level 2", () => {
     const p = place(defaultProgress(), 1, KANA, KANJI);
     expect(p.unlockedLevel).toBe(2);
-    for (const k of KANA) expect(p.items[`${k.char}:kana`]?.box).toBe(2);
+    for (const k of KANA) expect(p.items[`${k.char}:kana`]?.box).toBe(4);
     expect(p.items["日:meaning"]).toBeUndefined();
   });
 
@@ -98,7 +98,7 @@ describe("placement", () => {
     const p = place(start, 3, KANA, KANJI);
     expect(p.unlockedLevel).toBe(4);
     expect(p.items["日:meaning"]).toEqual(rec(4));
-    expect(p.items["一:meaning"]).toEqual(rec(2));
+    expect(p.items["一:meaning"]).toEqual(rec(4));
     for (const l of [0, 1, 2, 3])
       expect(levelProgress(p, l, KANA, KANJI).learned).toBe(
         levelKeys(l, KANA, KANJI).length,

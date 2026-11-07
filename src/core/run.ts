@@ -65,8 +65,8 @@ function weightedDraw(
 }
 
 /**
- * The run's 14 prompts. Warm-ups first: the highest-box known items (ties at
- * random). Then up to 4 new items in progression order, shuffled in among
+ * The run's 14 prompts. Warm-ups first: the highest-box known items of the current level
+ * (all known items while it has fewer than 3; ties at random). Then up to 4 new items in progression order, shuffled in among
  * known items drawn by weight 2^(5 − box), no repeats. Only while the pool is
  * too small to fill a run (early on) does a further weighted pass repeat items.
  */
@@ -80,8 +80,15 @@ export function selectEntries(
   const weightOf = (e: Entry): number => weight(box(e));
   const known = pool.filter((e) => record(e));
   const fresh = pool.filter((e) => !record(e)).slice(0, MAX_NEW_PER_RUN);
-  // stable sort after a shuffle: highest box first, ties in random order
-  const warm = shuffle(rng, known)
+  // Warm-ups come from the current level's known items once it has enough,
+  // so placed lower levels don't fill them; else from all known items.
+  // Stable sort after a shuffle: highest box first, ties in random order.
+  const current = known.filter(
+    (e) =>
+      (e.type === "kana" ? kanaLevel(e.item) : e.item.level) ===
+      progress.unlockedLevel,
+  );
+  const warm = shuffle(rng, current.length >= WARM_UPS ? current : known)
     .sort((a, b) => box(b) - box(a))
     .slice(0, WARM_UPS);
   const rest = known.filter((e) => !warm.includes(e));

@@ -146,7 +146,7 @@ The army fires straight ahead all the time. There is no fire button: steering is
 - Level 0 is hiragana (46 basic + dakuten). Level 1 is katakana.
 - Kanji levels 2+ hold **30 kanji each**, in progression order.
 - The next level unlocks when **≥ 80% of the current level's items have box ≥ 2** for their primary gate type (`kana` or `meaning`).
-- A **"I already know these" placement** on the start screen marks every item in a chosen level and the levels before it as box 2. This lets the returning user skip kana quickly.
+- A **"I already know these" placement** on the start screen marks every item in a chosen level and the levels before it as box 4, so placed items count as known but come up rarely (weight 2, against 8 at box 2) and the new level dominates the runs. Placement never lowers a box. This lets the returning user skip kana quickly.
 
 ### Ordering source (WaniKani-like proxy)
 - Use the Jōyō kanji only, ordered by **KANJIDIC2 school grade, then newspaper frequency**.

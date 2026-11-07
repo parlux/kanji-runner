@@ -4,6 +4,8 @@ import type { KanaItem, KanjiItem, Progress } from "./types";
 
 /** An item counts as learned for unlocking at this box or higher. */
 export const LEARNED_BOX = 2;
+/** Placement marks items at this box: known, but drawn rarely (weight 2). */
+export const PLACED_BOX = 4;
 /** The next level unlocks when this share of the current level is learned. */
 export const UNLOCK_SHARE = 0.8;
 
@@ -78,7 +80,7 @@ export function applyUnlock(
 
 /**
  * "I already know up to level N" (−1 = none): every item of levels 0..N is
- * raised to box 2 (never lowered) and level N + 1 is unlocked. Re-picking
+ * raised to box 4 (never lowered) and level N + 1 is unlocked. Re-picking
  * lower undoes an over-placement: the unlocked level becomes N + 1, and
  * placement marks above N that were never answered (seen 0) are removed.
  * Answered items always keep their record.
@@ -99,14 +101,14 @@ export function place(
       if (l <= n) {
         if (!item)
           items[key] = {
-            box: LEARNED_BOX,
+            box: PLACED_BOX,
             seen: 0,
             correct: 0,
             wrong: 0,
             lastSeen: 0,
           };
-        else if (item.box < LEARNED_BOX)
-          items[key] = { ...item, box: LEARNED_BOX };
+        else if (item.box < PLACED_BOX)
+          items[key] = { ...item, box: PLACED_BOX };
       } else if (item?.seen === 0) unplaced.add(key);
     }
   return {
