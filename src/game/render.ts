@@ -223,7 +223,7 @@ function renderStart(
   if (pick !== undefined) return renderPicker(ctx, w, h, session, pick);
   text(ctx, "Kanji Runner", w / 2, h * 0.22, Math.min(64, w / 8));
   renderLevel(ctx, w, h * 0.36, session);
-  unlockedNote(ctx, w, h * 0.45, session);
+  unlockedNote(ctx, w, h * 0.455, session, 24);
   text(ctx, "Tap or Enter to start", w / 2, h * 0.5, 22);
   text(
     ctx,
@@ -246,10 +246,16 @@ function renderStart(
 }
 
 /** "Kanji 2 unlocked!" after a run that unlocked a level. */
-function unlockedNote(ctx: Ctx, w: number, y: number, session: Session): void {
+function unlockedNote(
+  ctx: Ctx,
+  w: number,
+  y: number,
+  session: Session,
+  size = 30,
+): void {
   if (session.unlocked === null) return;
   const msg = `${levelName(session.unlocked)} unlocked!`;
-  text(ctx, msg, w / 2, y, fitSize(ctx, msg, 30, w - 48), COLORS.good);
+  text(ctx, msg, w / 2, y, fitSize(ctx, msg, size, w - 48), COLORS.good);
 }
 
 function button(

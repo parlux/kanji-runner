@@ -327,7 +327,7 @@ Placement to Katakana gives Kanji 1, but runs are still mostly basic hiragana: 1
 
 **Acceptance criteria:**
 - [ ] After placing to Katakana, kanji make up most of each run (report the share over 200 seeds, for the first run and after all 30 kanji are introduced), and kana still appear sometimes (tested).
-- [ ] Ending a run returns to the start screen with up-to-date level and progress, using keyboard or touch; a run that unlocks a level says so (tested, plus phone-sized screenshots).
+- [x] Ending a run returns to the start screen with up-to-date level and progress, using keyboard or touch; a run that unlocks a level says so (tested, plus phone-sized screenshots).
 
 **Verification:** `npm test`. Phone-sized browser check.
 **Dependencies:** T8
