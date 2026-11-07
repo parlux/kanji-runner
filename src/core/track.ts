@@ -4,6 +4,7 @@ import {
   BLOCK_MAX_W,
   BLOCK_MIN_W,
   CALM_DISTANCE,
+  CHARGE_LINE_DISTANCE,
   ENEMY_CHANCE,
   ENEMY_X_MARGIN,
   HAZARD_SPACING,
@@ -12,6 +13,8 @@ import {
   SAW_MIN_AMP,
   SAW_RATE,
   SAW_W,
+  SQUAD_QUESTIONS,
+  SQUADS_ENABLED,
 } from "./tuning";
 
 /** A static solid at track position `pos`, spanning [left, right]. */
@@ -60,7 +63,18 @@ export type Track = {
   questions: number[];
   /** Hazards between questions, ascending by position. */
   hazards: Hazard[];
+  /** Indexes (0-based) of the questions that are squad charges, ascending. The rest are wall gates. */
+  charges: number[];
 };
+
+export function isCharge(track: Track, q: number): boolean {
+  return track.charges.includes(q);
+}
+
+/** Track position of question q's charge line (only meaningful for a charge). */
+export function chargeLine(track: Track, q: number): number {
+  return (track.questions[q] ?? Infinity) - CHARGE_LINE_DISTANCE;
+}
 
 /** Decorrelates the layout from the question content built from the same seed. */
 const TRACK_SALT = 0x9e3779b9;
@@ -68,9 +82,14 @@ const TRACK_SALT = 0x9e3779b9;
 /**
  * Seeded beat layout: the first question after a calm stretch, then 1–2 hazards
  * HAZARD_SPACING apart, then a calm stretch before each next question.
- * Enemy packs only appear after the second question.
+ * Enemy packs only appear after the second question. Questions SQUAD_QUESTIONS
+ * are squad charges when `squads` is on; their charge line sits inside the calm stretch.
  */
-export function buildTrack(seed: number, questionCount: number): Track {
+export function buildTrack(
+  seed: number,
+  questionCount: number,
+  squads = SQUADS_ENABLED,
+): Track {
   const rng = createRng(seed ^ TRACK_SALT);
   const questions: number[] = [];
   const hazards: Hazard[] = [];
@@ -85,5 +104,8 @@ export function buildTrack(seed: number, questionCount: number): Track {
     }
     pos += CALM_DISTANCE;
   }
-  return { questions, hazards };
+  const charges = squads
+    ? SQUAD_QUESTIONS.map((q) => q - 1).filter((q) => q < questionCount)
+    : [];
+  return { questions, hazards, charges };
 }

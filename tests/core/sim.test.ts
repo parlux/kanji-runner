@@ -472,6 +472,7 @@ describe("shooting", () => {
     const s = createRunState(buildKanaRun(1, KANA), {
       questions: [100],
       hazards,
+      charges: [],
     });
     return { ...s, hp, army };
   }

@@ -76,6 +76,7 @@ describe("hazardHp", () => {
     const track: Track = {
       questions: [3, 10, 20],
       hazards: [block(5, 0, 0.3), saw(7), block(15, 0.5, 0.8), pack(17)],
+      charges: [],
     };
     expect(hazardHp(track, [5, 8, 11, 40])).toEqual([
       BLOCK_HP_K * 8,
