@@ -261,6 +261,16 @@ function renderStart(
     14,
     COLORS.dim,
   );
+  // the about line: the kanji data's licence requires this credit
+  text(
+    ctx,
+    "Kanji data: KANJIDIC2 and KRADFILE",
+    w / 2,
+    h - 44,
+    12,
+    COLORS.dim,
+  );
+  text(ctx, "© EDRDG, CC BY-SA 4.0 · edrdg.org", w / 2, h - 26, 12, COLORS.dim);
 }
 
 /** "Kanji 2 unlocked!" after a run that unlocked a level. */

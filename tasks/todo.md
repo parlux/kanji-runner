@@ -366,9 +366,9 @@ Placement to Katakana gives Kanji 1, but runs are still mostly basic hiragana: 1
 - EDRDG CC BY-SA 4.0 attribution in an about line and in the README.
 
 **Acceptance criteria:**
-- [ ] Every missed gate in the run appears on the summary with its correct answer (tested via the run result data).
-- [ ] The streak tier and gain are visible during play.
-- [ ] Attribution is present in the app and the README.
+- [x] Every missed gate in the run appears on the summary with its correct answer (tested via the run result data).
+- [x] The streak tier and gain are visible during play.
+- [x] Attribution is present in the app and the README.
 
 **Verification:** Tests, plus a manual run with deliberate misses.
 **Dependencies:** T9
