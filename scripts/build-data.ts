@@ -294,6 +294,106 @@ async function main(): Promise<void> {
     components: components.get(k.char) ?? [],
   }));
   writeJsonLines("src/data/kanji.json", kanji);
+  writeConfusables(kanji);
+
+  const report = glossReport(sorted, kanji, glossOverrides);
+  writeFileSync(`${CACHE}/gloss-report.txt`, report);
+  console.log(report);
+  console.log(`gloss report written to ${CACHE}/gloss-report.txt`);
+}
+
+/** Hand-curated kana look-alikes, within one script (SPEC: Distractors). */
+const KANA_LOOKALIKES = [
+  ["ぬ", "め"],
+  ["わ", "れ", "ね"],
+  ["は", "ほ", "け"],
+  ["さ", "ち", "き"],
+  ["る", "ろ"],
+  ["い", "り"],
+  ["う", "ら"],
+  ["あ", "お", "め"],
+  ["こ", "に"],
+  ["ま", "も"],
+  ["し", "つ"],
+  ["く", "へ"],
+  ["ば", "ぱ"],
+  ["ぶ", "ぷ"],
+  ["シ", "ツ"],
+  ["ソ", "ン", "リ"],
+  ["ク", "ケ", "タ"],
+  ["ウ", "ワ", "フ"],
+  ["コ", "ユ", "ロ"],
+  ["チ", "テ"],
+  ["ノ", "メ", "ナ"],
+  ["ア", "マ"],
+  ["ヌ", "ス"],
+  ["ラ", "ヲ"],
+  ["セ", "ヒ"],
+  ["ル", "レ"],
+  ["エ", "ニ"],
+  ["ハ", "ル"],
+  ["バ", "パ"],
+  ["ブ", "プ"],
+];
+
+/**
+ * confusables.json: the kana look-alike groups, and for each element shared by
+ * two or more kanji, those kanji in progression order (体 and 休 share ⺅).
+ */
+function writeConfusables(
+  kanji: { char: string; components: string[] }[],
+): void {
+  const index = new Map<string, string[]>();
+  for (const k of kanji) {
+    for (const c of k.components)
+      index.set(c, [...(index.get(c) ?? []), k.char]);
+  }
+  const shared = [...index]
+    .filter(([, chars]) => chars.length > 1)
+    .sort(([a], [b]) => (a.codePointAt(0) ?? 0) - (b.codePointAt(0) ?? 0));
+  const line = (key: string, value: unknown) =>
+    `    ${JSON.stringify(key)}: ${JSON.stringify(value)}`;
+  const text = [
+    "{",
+    `  "kana": [`,
+    KANA_LOOKALIKES.map((g) => `    ${JSON.stringify(g)}`).join(",\n"),
+    "  ],",
+    `  "components": {`,
+    shared.map(([c, chars]) => line(c, chars)).join(",\n"),
+    "  }",
+    "}",
+    "",
+  ];
+  writeFileSync("src/data/confusables.json", text.join("\n"));
+}
+
+/**
+ * Primary glosses worth a look: no clean meaning to pick from, long ones,
+ * and ones shared by several kanji. Overridden kanji are left out.
+ */
+function glossReport(
+  raw: RawKanji[],
+  kanji: { char: string; glosses: string[] }[],
+  overrides: Record<string, string>,
+): string {
+  const primary = new Map(kanji.map((k) => [k.char, k.glosses[0] ?? ""]));
+  const users = new Map<string, string[]>();
+  for (const [c, g] of primary) users.set(g, [...(users.get(g) ?? []), c]);
+  const lines: string[] = [];
+  for (const k of raw) {
+    if (k.char in overrides) continue;
+    const g = primary.get(k.char) ?? "";
+    const why: string[] = [];
+    if (!k.meanings.some((m) => cleanGloss(m))) why.push("no clean meaning");
+    if (!isShort(g)) why.push("long");
+    const others = (users.get(g) ?? []).filter((c) => c !== k.char);
+    if (others.length) why.push(`shared with ${others.join("")}`);
+    if (why.length)
+      lines.push(
+        `${k.char}  ${g}  [${why.join("; ")}]  ← ${k.meanings.join(" | ")}`,
+      );
+  }
+  return [`# Questionable glosses: ${lines.length}`, ...lines, ""].join("\n");
 }
 
 await main();
