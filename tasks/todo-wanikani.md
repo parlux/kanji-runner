@@ -27,10 +27,10 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 **Description:** `src/wanikani/parse.ts` turns `/user`, `/subjects` and `/assignments` JSON into the WaniKani kanji list (`KanjiItem[]`) plus extras (`srsStage`, `due`, `similar`, mnemonics, hints), per the spec. It also holds the trimmed cache shape. It validates the input and returns an error result for bad JSON instead of throwing.
 
 **Acceptance criteria:**
-- [ ] Taught filter: stage 0, hidden and unassigned kanji are excluded (tested).
-- [ ] Gloss order (primary, accepted, whitelist), blacklist excluded, accepted readings only, okurigana and components from the built-in data when the character exists (tested).
-- [ ] `similar` only names kanji in the list; `due` uses an injected `now` (tested).
-- [ ] Malformed or partial JSON → an error result, never a throw (tested).
+- [x] Taught filter: stage 0, hidden and unassigned kanji are excluded (tested).
+- [x] Gloss order (primary, accepted, whitelist), blacklist excluded, accepted readings only, okurigana and components from the built-in data when the character exists (tested).
+- [x] `similar` only names kanji in the list; `due` uses an injected `now` (tested).
+- [x] Malformed or partial JSON → an error result, never a throw (tested).
 
 **Verification:** `npm test -- wanikani`
 **Dependencies:** none (parallel-safe with W1)

@@ -264,3 +264,47 @@ export function buildList(
   }
   return { level: cache.level, kanji: rows.map((r) => r.item), extras };
 }
+
+/**
+ * Validate a cache read back from storage (anything could be there). A wrong
+ * version or shape gives an error result so the caller can refetch.
+ */
+export function parseCache(raw: unknown): Result<WkCache> {
+  if (!isObj(raw) || raw.version !== 1) return fail("cache: wrong version");
+  const level = int(raw.level);
+  if (level === undefined || !Array.isArray(raw.kanji)) {
+    return fail("cache: unexpected shape");
+  }
+  const strs = (v: unknown) =>
+    Array.isArray(v) && v.every((x) => typeof x === "string");
+  const optStr = (v: unknown) => v === undefined || typeof v === "string";
+  const mnem = (v: unknown) =>
+    isObj(v) && optStr(v.meaning) && optStr(v.reading);
+  for (const k of raw.kanji) {
+    if (
+      !isObj(k) ||
+      int(k.id) === undefined ||
+      !str(k.char) ||
+      int(k.level) === undefined ||
+      !strs(k.glosses) ||
+      (k.glosses as string[]).length === 0 ||
+      !Array.isArray(k.readings) ||
+      !k.readings.every(
+        (r) =>
+          isObj(r) &&
+          typeof r.reading === "string" &&
+          typeof r.primary === "boolean" &&
+          (r.type === "onyomi" || r.type === "kunyomi" || r.type === "nanori"),
+      ) ||
+      !Array.isArray(k.similarIds) ||
+      !k.similarIds.every((x) => typeof x === "number") ||
+      !mnem(k.mnemonics) ||
+      !mnem(k.hints) ||
+      int(k.srsStage) === undefined ||
+      !(k.availableAt === null || typeof k.availableAt === "string")
+    ) {
+      return fail("cache: bad kanji entry");
+    }
+  }
+  return { ok: true, value: raw as WkCache };
+}

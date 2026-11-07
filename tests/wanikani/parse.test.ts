@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { KANJI } from "../../src/core/kanji";
-import { buildList, trim } from "../../src/wanikani/parse";
+import { buildList, parseCache, trim } from "../../src/wanikani/parse";
 import assignments from "./fixtures/assignments.json";
 import subjects from "./fixtures/subjects.json";
 import user from "./fixtures/user.json";
@@ -135,5 +135,25 @@ describe("buildList", () => {
     expect(e?.srsStage).toBe(3);
     expect(e?.mnemonics.reading).toBe("Test reading mnemonic about a quux");
     expect(e?.hints.meaning).toBe("Test hint about a flimflam");
+  });
+});
+
+describe("parseCache", () => {
+  const r = trim(user, subjects, assignments);
+  if (!r.ok) throw new Error(r.error);
+
+  it("accepts a cache that went through JSON", () => {
+    const back = parseCache(JSON.parse(JSON.stringify(r.value)));
+    expect(back).toEqual({ ok: true, value: r.value });
+  });
+
+  it.each([
+    ["null", null],
+    ["wrong version", { ...r.value, version: 2 }],
+    ["no kanji", { version: 1, level: 3 }],
+    ["bad entry", { ...r.value, kanji: [{ id: 1 }] }],
+    ["string", "x"],
+  ])("%s gives an error result", (_n, raw) => {
+    expect(parseCache(raw).ok).toBe(false);
   });
 });
