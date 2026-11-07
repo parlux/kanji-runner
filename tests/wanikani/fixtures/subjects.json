@@ -1,0 +1,228 @@
+[
+  {
+    "object": "collection",
+    "pages": { "next_url": "https://example.invalid/page2" },
+    "data": [
+      {
+        "id": 101,
+        "object": "kanji",
+        "data": {
+          "characters": "休",
+          "level": 2,
+          "meanings": [
+            {
+              "meaning": "Zorblat Rest",
+              "primary": false,
+              "accepted_answer": true
+            },
+            { "meaning": "Zorblat", "primary": true, "accepted_answer": true },
+            {
+              "meaning": "Blocked Word",
+              "primary": false,
+              "accepted_answer": true
+            }
+          ],
+          "auxiliary_meanings": [
+            { "meaning": "Extra Whitelisted", "type": "whitelist" },
+            { "meaning": "Blocked Word", "type": "blacklist" }
+          ],
+          "readings": [
+            {
+              "reading": "きゅう",
+              "primary": true,
+              "accepted_answer": true,
+              "type": "onyomi"
+            },
+            {
+              "reading": "やす.む",
+              "primary": false,
+              "accepted_answer": true,
+              "type": "kunyomi"
+            },
+            {
+              "reading": "ぬし",
+              "primary": false,
+              "accepted_answer": false,
+              "type": "nanori"
+            },
+            {
+              "reading": "こっそり",
+              "primary": false,
+              "accepted_answer": false,
+              "type": "kunyomi"
+            }
+          ],
+          "visually_similar_subject_ids": [102, 103, 104, 999],
+          "meaning_mnemonic": "Test mnemonic about a zorblat",
+          "meaning_hint": "Test hint about a flimflam",
+          "reading_mnemonic": "Test reading mnemonic about a quux",
+          "reading_hint": "Test reading hint",
+          "hidden_at": null
+        }
+      },
+      {
+        "id": 102,
+        "object": "kanji",
+        "data": {
+          "characters": "明",
+          "level": 2,
+          "meanings": [
+            { "meaning": "Glimmer", "primary": true, "accepted_answer": true }
+          ],
+          "auxiliary_meanings": [],
+          "readings": [
+            {
+              "reading": "めい",
+              "primary": true,
+              "accepted_answer": true,
+              "type": "onyomi"
+            }
+          ],
+          "visually_similar_subject_ids": [101],
+          "meaning_mnemonic": "Test mnemonic about a glimmer",
+          "reading_mnemonic": "",
+          "hidden_at": null
+        }
+      },
+      {
+        "id": 103,
+        "object": "kanji",
+        "data": {
+          "characters": "人",
+          "level": 1,
+          "meanings": [
+            { "meaning": "Persona", "primary": true, "accepted_answer": true }
+          ],
+          "auxiliary_meanings": [],
+          "readings": [
+            {
+              "reading": "じん",
+              "primary": true,
+              "accepted_answer": true,
+              "type": "onyomi"
+            }
+          ],
+          "visually_similar_subject_ids": [],
+          "hidden_at": null
+        }
+      }
+    ]
+  },
+  {
+    "object": "collection",
+    "pages": { "next_url": null },
+    "data": [
+      {
+        "id": 104,
+        "object": "kanji",
+        "data": {
+          "characters": "日",
+          "level": 1,
+          "meanings": [
+            { "meaning": "Sunny", "primary": true, "accepted_answer": true }
+          ],
+          "auxiliary_meanings": [],
+          "readings": [
+            {
+              "reading": "にち",
+              "primary": true,
+              "accepted_answer": true,
+              "type": "onyomi"
+            }
+          ],
+          "visually_similar_subject_ids": [],
+          "hidden_at": null
+        }
+      },
+      {
+        "id": 105,
+        "object": "kanji",
+        "data": {
+          "characters": "上",
+          "level": 2,
+          "meanings": [
+            { "meaning": "Overhead", "primary": true, "accepted_answer": true }
+          ],
+          "auxiliary_meanings": [],
+          "readings": [
+            {
+              "reading": "じょう",
+              "primary": true,
+              "accepted_answer": true,
+              "type": "onyomi"
+            }
+          ],
+          "visually_similar_subject_ids": [],
+          "hidden_at": "2024-01-01T00:00:00.000000Z"
+        }
+      },
+      {
+        "id": 106,
+        "object": "kanji",
+        "data": {
+          "characters": "一",
+          "level": 1,
+          "meanings": [
+            { "meaning": "Uno", "primary": true, "accepted_answer": true }
+          ],
+          "auxiliary_meanings": [],
+          "readings": [
+            {
+              "reading": "いち",
+              "primary": true,
+              "accepted_answer": true,
+              "type": "onyomi"
+            }
+          ],
+          "visually_similar_subject_ids": [],
+          "hidden_at": null
+        }
+      },
+      {
+        "id": 107,
+        "object": "kanji",
+        "data": {
+          "characters": "龘",
+          "level": 3,
+          "meanings": [
+            { "meaning": "Dragonish", "primary": true, "accepted_answer": true }
+          ],
+          "auxiliary_meanings": [],
+          "readings": [
+            {
+              "reading": "うご.く",
+              "primary": true,
+              "accepted_answer": true,
+              "type": "kunyomi"
+            }
+          ],
+          "visually_similar_subject_ids": [101],
+          "meaning_mnemonic": "Test mnemonic about a wibble",
+          "hidden_at": null
+        }
+      },
+      {
+        "id": 108,
+        "object": "kanji",
+        "data": {
+          "characters": "十",
+          "level": 1,
+          "meanings": [
+            { "meaning": "Decade", "primary": true, "accepted_answer": true }
+          ],
+          "auxiliary_meanings": [],
+          "readings": [
+            {
+              "reading": "なんとか",
+              "primary": true,
+              "accepted_answer": false,
+              "type": "nanori"
+            }
+          ],
+          "visually_similar_subject_ids": [],
+          "hidden_at": null
+        }
+      }
+    ]
+  }
+]
