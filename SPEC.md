@@ -267,7 +267,7 @@ export function clipLoss(army: number, x: number, w: number, solids: Span[]): nu
 ## Boundaries
 - **Always:** keep `src/core` DOM-free; run `npm test` and `npm run lint` before each commit; put tuning numbers in `tuning.ts`; credit EDRDG (CC BY-SA 4.0) in the README and on the in-app about line.
 - **Ask first:** adding any runtime dependency beyond supabase-js; changing the storage schema version or the Supabase table/RLS; changing the scoring curve, squad penalty or SRS model beyond tuning constants; adding new hazard or question shapes.
-- **Never:** use WaniKani content or its API; commit `.env.local`, the Supabase service-role key, or passwords; disable RLS; let sync failures block play; add analytics; copy any existing game's name, art, or levels; commit downloaded raw EDRDG files (only the generated JSON); let clipping or hazards affect SRS; leak squad correctness to the renderer before resolution.
+- **Never:** use WaniKani content or its API (v1; superseded for v1.1 by `SPEC-wanikani.md`, Boundaries); commit `.env.local`, the Supabase service-role key, or passwords; disable RLS; let sync failures block play; add analytics; copy any existing game's name, art, or levels; commit downloaded raw EDRDG files (only the generated JSON); let clipping or hazards affect SRS; leak squad correctness to the renderer before resolution.
 
 ## Success Criteria
 1. `npm run build` produces a static `dist/` that runs offline in Chrome/Safari on a laptop and a phone.
