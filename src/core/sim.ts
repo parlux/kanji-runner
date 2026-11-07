@@ -11,7 +11,7 @@ import {
   STEER_MAX_SPEED,
   VIEW_DISTANCE,
 } from "./tuning";
-import type { Hazard, Track } from "./track";
+import { hazardSpan, type Hazard, type Track } from "./track";
 import type { GateRow } from "./types";
 
 export type RunStatus = "running" | "finished" | "dead";
@@ -143,7 +143,9 @@ export function stepRun(s: RunState, dt: number): RunState {
 
 /** Clipping only: hazards never touch the streak or results. */
 function passHazard(s: RunState, h: Hazard): RunState {
-  const clip = clipLoss(s.army, s.x, crowdWidth(s.army), [h]);
+  const clip = clipLoss(s.army, s.x, crowdWidth(s.army), [
+    hazardSpan(h, s.dist),
+  ]);
   const army = s.army - clip;
   return {
     ...s,

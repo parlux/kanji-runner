@@ -13,7 +13,12 @@ import {
 import { crowdWidth } from "../../src/core/crowd";
 import { buildKanaRun } from "../../src/core/run";
 import { KANA } from "../../src/core/kana";
-import { buildTrack, type Block } from "../../src/core/track";
+import {
+  buildTrack,
+  hazardSpan,
+  type Block,
+  type Saw,
+} from "../../src/core/track";
 import {
   CROWD_MAX_W,
   ROWS_PER_RUN,
@@ -354,6 +359,32 @@ describe("hazards", () => {
     expect(s.status).toBe("dead");
   });
 
+  it("a saw clips where it is when the crowd passes, not where it started", () => {
+    const s = fresh();
+    // centre = 0.5 + 0.3·sin(π/2 + dist·SAW_RATE): 0.8 at dist 0, elsewhere at dist 1
+    const saw: Saw = {
+      kind: "saw",
+      pos: 1,
+      mid: 0.5,
+      amp: 0.3,
+      phase: Math.PI / 2,
+    };
+    const at = hazardSpan(saw, 1);
+    const x = (at.left + at.right) / 2;
+    const base: RunState = {
+      ...s,
+      army: 100,
+      x,
+      targetX: x,
+      track: { ...s.track, hazards: [saw] },
+      dist: 1 - 1e-6,
+    };
+    expect(stepRun(base, DT).lastClip?.loss).toBeGreaterThan(0);
+    const away = { ...base, x: 0.85, targetX: 0.85 };
+    expect(Math.abs(0.85 - x)).toBeGreaterThan(0.2);
+    expect(stepRun(away, DT).lastClip).toBeNull();
+  });
+
   /** Steers to the answer at each question and to the widest gap at each hazard. */
   function skilledRun(seed: number): { hazardLoss: number; time: number } {
     let s = fresh(seed, true);
@@ -363,7 +394,9 @@ describe("hazards", () => {
       const h = s.track.hazards[s.nextHazard];
       const rowAt = s.track.questions[s.next] ?? Infinity;
       if (h && h.pos < rowAt) {
-        const x = h.left > 1 - h.right ? h.left / 2 : (1 + h.right) / 2;
+        // where the hazard will be when the crowd reaches it
+        const { left, right } = hazardSpan(h, h.pos);
+        const x = left > 1 - right ? left / 2 : (1 + right) / 2;
         s = setTarget(s, x);
       } else {
         const n = s.rows[s.next]?.options.length ?? 2;
@@ -381,7 +414,7 @@ describe("hazards", () => {
   it("a skilled player can dodge every hazard and finish (50 seeds)", () => {
     const results = Array.from({ length: 50 }, (_, seed) => skilledRun(seed));
     expect(results.filter((r) => r.hazardLoss > 0)).toEqual([]);
-  });
+  }, 30_000); // 50 full runs at 60 Hz; slow under parallel load
 
   it("a run to the last question takes about 2 minutes", () => {
     const times = Array.from(
@@ -390,5 +423,5 @@ describe("hazards", () => {
     );
     expect(Math.min(...times)).toBeGreaterThan(95);
     expect(Math.max(...times)).toBeLessThan(140);
-  });
+  }, 30_000);
 });

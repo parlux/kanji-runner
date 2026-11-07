@@ -1,6 +1,7 @@
 import { crowdWidth } from "../core/crowd";
 import { gateOpenings, type RunState } from "../core/sim";
-import { CALM_DISTANCE, VIEW_DISTANCE } from "../core/tuning";
+import { hazardSpan } from "../core/track";
+import { CALM_DISTANCE, SAW_W, VIEW_DISTANCE } from "../core/tuning";
 import type { Scene } from "./scenes";
 
 const FONT = `"Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic", system-ui, sans-serif`;
@@ -108,11 +109,33 @@ function renderRun(ctx: Ctx, w: number, h: number, run: RunState): void {
     const ahead = h.pos - run.dist;
     if (ahead > VIEW_DISTANCE) continue;
     const y = depthY(ahead);
-    const blockH = 34 * (1 - 0.5 * (ahead / VIEW_DISTANCE));
-    ctx.fillStyle = COLORS.hazard;
-    ctx.fillRect(h.left * w, y - blockH, (h.right - h.left) * w, blockH);
-    ctx.fillStyle = COLORS.hazardEdge;
-    ctx.fillRect(h.left * w, y - 3, (h.right - h.left) * w, 3);
+    const scale = 1 - 0.5 * (ahead / VIEW_DISTANCE);
+    if (h.kind === "block") {
+      const blockH = 34 * scale;
+      ctx.fillStyle = COLORS.hazard;
+      ctx.fillRect(h.left * w, y - blockH, (h.right - h.left) * w, blockH);
+      ctx.fillStyle = COLORS.hazardEdge;
+      ctx.fillRect(h.left * w, y - 3, (h.right - h.left) * w, 3);
+    } else {
+      // its sweep rail, then the saw where it is now
+      const { left, right } = hazardSpan(h, run.dist);
+      ctx.fillStyle = COLORS.hazard;
+      ctx.globalAlpha = 0.35;
+      ctx.fillRect(
+        (h.mid - h.amp - SAW_W / 2) * w,
+        y - 2,
+        (2 * h.amp + SAW_W) * w,
+        4,
+      );
+      ctx.globalAlpha = 1;
+      renderSaw(
+        ctx,
+        ((left + right) / 2) * w,
+        y - 14 * scale,
+        ((right - left) * w) / 2,
+        run.dist,
+      );
+    }
   }
 
   // visible walls, far ones first
@@ -211,4 +234,31 @@ function renderArmy(
   }
   ctx.fill();
   text(ctx, String(army), cx, cy + radius * 0.6 + 22, 22);
+}
+
+/** A spinning toothed disc of radius r. */
+function renderSaw(
+  ctx: Ctx,
+  cx: number,
+  cy: number,
+  r: number,
+  spin: number,
+): void {
+  const teeth = 10;
+  ctx.fillStyle = COLORS.hazardEdge;
+  ctx.beginPath();
+  for (let k = 0; k < teeth * 2; k++) {
+    const a = spin * 6 + (k * Math.PI) / teeth;
+    const rr = k % 2 ? r * 0.75 : r;
+    const x = cx + rr * Math.cos(a);
+    const y = cy + rr * Math.sin(a);
+    if (k === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle = COLORS.hazard;
+  ctx.beginPath();
+  ctx.arc(cx, cy, r * 0.3, 0, Math.PI * 2);
+  ctx.fill();
 }

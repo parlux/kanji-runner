@@ -43,3 +43,9 @@ export const HAZARD_SPACING = 4.5;
 /** Static block width range. */
 export const BLOCK_MIN_W = 0.15;
 export const BLOCK_MAX_W = 0.35;
+/** Saw: width, sweep amplitude range (of its centre), sweep rate in radians per track unit, and chance a hazard is a saw. */
+export const SAW_W = 0.1;
+export const SAW_MIN_AMP = 0.15;
+export const SAW_MAX_AMP = 0.35;
+export const SAW_RATE = (2 * Math.PI) / 3;
+export const SAW_CHANCE = 1 / 3;

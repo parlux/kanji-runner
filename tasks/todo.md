@@ -55,8 +55,8 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 - Render blocks and moving saws.
 
 **Acceptance criteria:**
-- [ ] Property test over 1,000 seeds: every hazard beat leaves a passable gap ≥ `CROWD_MAX_W` (for saws, at every point of their sweep), and no hazard falls inside a calm stretch.
-- [ ] Same seed → identical track; different seeds → different tracks.
+- [x] Property test over 1,000 seeds: every hazard beat leaves a passable gap ≥ `CROWD_MAX_W` (for saws, at every point of their sweep), and no hazard falls inside a calm stretch.
+- [x] Same seed → identical track; different seeds → different tracks.
 - [ ] A full run plays start to finish on the laptop with hazards between the questions.
 
 **Verification:** `npm test -- track sim`. Manual laptop run.

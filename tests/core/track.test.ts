@@ -1,10 +1,17 @@
 import { describe, expect, it } from "vitest";
-import { buildTrack, type Track } from "../../src/core/track";
+import {
+  buildTrack,
+  hazardSpan,
+  type Hazard,
+  type Track,
+} from "../../src/core/track";
 import {
   BLOCK_MAX_W,
   BLOCK_MIN_W,
   CALM_DISTANCE,
   CROWD_MAX_W,
+  SAW_RATE,
+  SAW_W,
 } from "../../src/core/tuning";
 
 const QUESTIONS = 14;
@@ -55,20 +62,48 @@ describe("buildTrack", () => {
     expect(bad).toEqual([]);
   });
 
-  it("every block is in range and leaves a gap of at least CROWD_MAX_W", () => {
+  /** Spans of a hazard over one full period of its sweep (blocks: one span). */
+  const sweep = (h: Hazard): { left: number; right: number }[] =>
+    Array.from({ length: 64 }, (_, k) =>
+      hazardSpan(h, (k / 64) * ((2 * Math.PI) / SAW_RATE)),
+    );
+
+  it("every hazard stays on the track and leaves a gap ≥ CROWD_MAX_W at every point of its sweep", () => {
+    const bad = failing((t) =>
+      t.hazards.every((h) =>
+        sweep(h).every(
+          (s) =>
+            s.left >= -1e-12 &&
+            s.right <= 1 + 1e-12 &&
+            Math.max(s.left, 1 - s.right) >= CROWD_MAX_W,
+        ),
+      ),
+    );
+    expect(bad).toEqual([]);
+  });
+
+  it("blocks are BLOCK_MIN_W–BLOCK_MAX_W wide and saws SAW_W wide", () => {
     const bad = failing((t) =>
       t.hazards.every((h) => {
-        const w = h.right - h.left;
-        return (
-          w >= BLOCK_MIN_W &&
-          w <= BLOCK_MAX_W &&
-          h.left >= 0 &&
-          h.right <= 1 &&
-          Math.max(h.left, 1 - h.right) >= CROWD_MAX_W
-        );
+        const w = hazardSpan(h, 0).right - hazardSpan(h, 0).left;
+        return h.kind === "saw"
+          ? Math.abs(w - SAW_W) < 1e-12
+          : w >= BLOCK_MIN_W && w <= BLOCK_MAX_W;
       }),
     );
     expect(bad).toEqual([]);
+  });
+
+  it("uses both hazard types, and saws really move", () => {
+    const all = TRACKS.flatMap((t) => t.hazards);
+    const saws = all.filter((h) => h.kind === "saw");
+    expect(saws.length).toBeGreaterThan(all.length * 0.2);
+    expect(saws.length).toBeLessThan(all.length * 0.5);
+    const moved = saws.filter((h) => {
+      const xs = sweep(h).map((s) => s.left);
+      return Math.max(...xs) - Math.min(...xs) > 0.25;
+    });
+    expect(moved).toHaveLength(saws.length);
   });
 
   it("is identical for the same seed and differs between seeds", () => {
