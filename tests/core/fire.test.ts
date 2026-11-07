@@ -124,4 +124,10 @@ describe("pickTarget", () => {
   it("starts at `from`", () => {
     expect(pickTarget([t(1, 0, 1), t(1.5, 0, 1)], 1, 0, crowd)).toBe(1);
   });
+
+  it("skips threats at or past `limit` (the next question)", () => {
+    expect(pickTarget([t(1, 0, 1)], 0, 0, crowd, 1)).toBe(null);
+    expect(pickTarget([t(1, 0, 0.4), t(2, 0, 1)], 0, 0, crowd, 1.5)).toBe(null);
+    expect(pickTarget([t(1, 0, 1)], 0, 0, crowd, 1.01)).toBe(0);
+  });
 });

@@ -490,6 +490,24 @@ describe("shooting", () => {
     expect(s.target).toBe(0);
   });
 
+  it("never fires past the next question, even within FIRE_RANGE", () => {
+    const s0 = range([wide(1.9)], [1e9]);
+    const s = stepFor(
+      { ...s0, track: { ...s0.track, questions: [1.5, 100] } },
+      0.2,
+    );
+    expect(s.target).toBeNull();
+    expect(s.damage[0]).toBe(0);
+  });
+
+  it("never fires past a charge line, even within FIRE_RANGE", () => {
+    const s0 = range([wide(1.9)], [1e9]);
+    const track = { ...s0.track, questions: [2.5, 100], charges: [0] };
+    const s = stepFor({ ...s0, track }, 0.2);
+    expect(s.target).toBeNull();
+    expect(s.damage[0]).toBe(0);
+  });
+
   it("doesn't fire at blocks that don't overlap the crowd", () => {
     const side: Block = { kind: "block", pos: 1.5, left: 0, right: 0.2 };
     const s = stepFor(range([side], [1e9]), 0.5);

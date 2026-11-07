@@ -61,19 +61,27 @@ export type Threat = { pos: number; span: Span };
 
 /**
  * Index of the nearest threat at or after `from`, ahead of `dist` within
- * FIRE_RANGE, whose span overlaps the crowd's. Null entries can't be shot.
+ * FIRE_RANGE and short of `limit` (the next question), whose span overlaps
+ * the crowd's. Null entries can't be shot.
  */
 export function pickTarget(
   threats: readonly (Threat | null)[],
   from: number,
   dist: number,
   crowd: Span,
+  limit = Infinity,
 ): number | null {
   let best: number | null = null;
   let bestPos = Infinity;
   for (let i = from; i < threats.length; i++) {
     const t = threats[i];
-    if (!t || t.pos < dist || t.pos - dist > FIRE_RANGE || t.pos >= bestPos)
+    if (
+      !t ||
+      t.pos < dist ||
+      t.pos - dist > FIRE_RANGE ||
+      t.pos >= limit ||
+      t.pos >= bestPos
+    )
       continue;
     const { left, right } = t.span;
     if (Math.min(crowd.right, right) - Math.max(crowd.left, left) > 0) {

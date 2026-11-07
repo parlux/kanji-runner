@@ -23,7 +23,13 @@ import {
   STEER_MAX_SPEED,
   VIEW_DISTANCE,
 } from "./tuning";
-import { hazardSpan, type Hazard, type Track } from "./track";
+import {
+  chargeLine,
+  hazardSpan,
+  isCharge,
+  type Hazard,
+  type Track,
+} from "./track";
 import type { GateRow } from "./types";
 
 /** A moving enemy pack: its current track position and centre. */
@@ -192,6 +198,16 @@ function threats(s: RunState): (Threat | null)[] {
   });
 }
 
+/**
+ * Fire never reaches past the next unresolved question: its wall, or a
+ * charge's line, so nothing beyond it can be hit (or revealed).
+ */
+export function fireLimit(s: RunState): number {
+  return isCharge(s.track, s.next)
+    ? chargeLine(s.track, s.next)
+    : (s.track.questions[s.next] ?? Infinity);
+}
+
 /** Recruits a crate pays out when it shatters. */
 export const crateReward = (hp: number): number =>
   Math.round(CRATE_REWARD_K * hp);
@@ -201,10 +217,13 @@ export const crateReward = (hp: number): number =>
  * A block (supply crate) pays out once, on the step it shatters: it is never a target again.
  */
 function fire(s: RunState, w: number, dt: number): RunState {
-  const target = pickTarget(threats(s), s.nextHazard, s.dist, {
-    left: s.x - w / 2,
-    right: s.x + w / 2,
-  });
+  const target = pickTarget(
+    threats(s),
+    s.nextHazard,
+    s.dist,
+    { left: s.x - w / 2, right: s.x + w / 2 },
+    fireLimit(s),
+  );
   if (target === null) return { ...s, target };
   const hp = s.hp[target] ?? 0;
   const damage = [...s.damage];
