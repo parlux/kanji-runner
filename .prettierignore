@@ -5,3 +5,5 @@ package-lock.json
 .claude
 skills-lock.json
 *.md
+src/data/kanji.json
+src/data/confusables.json
