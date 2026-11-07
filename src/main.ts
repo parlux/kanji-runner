@@ -1,4 +1,4 @@
-import { bindKeys } from "./game/input";
+import { bindDrag, bindKeys, type Action } from "./game/input";
 import { startLoop } from "./game/loop";
 import { render } from "./game/render";
 import { handleAction, updateScene, type Scene } from "./game/scenes";
@@ -22,13 +22,18 @@ resize();
 const newSeed = (): number => Math.floor(Math.random() * 2 ** 31);
 let scene: Scene = { kind: "start" };
 
-const steerAxis = bindKeys((action) => {
+const act = (action: Action): void => {
   scene = handleAction(scene, action, newSeed);
-});
+};
+const steerAxis = bindKeys(act);
+// a tap starts a run from the start/end screens, and pauses or resumes a run
+const takeDrag = bindDrag(canvas, () =>
+  act(scene.kind === "run" ? "pause" : "confirm"),
+);
 
 startLoop(
   (dt) => {
-    scene = updateScene(scene, dt, steerAxis());
+    scene = updateScene(scene, dt, steerAxis(), takeDrag());
   },
   () => render(ctx, window.innerWidth, window.innerHeight, scene),
 );

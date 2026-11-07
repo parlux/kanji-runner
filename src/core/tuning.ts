@@ -25,6 +25,8 @@ export const MAX_SPEED_MUL = 1.3;
 export const STEER_MAX_SPEED = 1.2;
 /** Easing time constant: the crowd closes the gap to its target at gap / STEER_EASE per second, capped. */
 export const STEER_EASE = 0.08;
+/** Drag gain: a finger moving one screen width moves the target this many track widths. */
+export const DRAG_GAIN = 1.5;
 
 /** Wall-gate opening widths for 2- and 3-answer gates. */
 export const GATE_OPENING_2 = 0.36;

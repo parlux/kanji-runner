@@ -41,12 +41,19 @@ export function handleAction(
   }
 }
 
-/** `steer` is the held axis (-1, 0 or 1); holding moves the target at STEER_MAX_SPEED. */
-export function updateScene(scene: Scene, dt: number, steer: number): Scene {
+/**
+ * `steer` is the held axis (-1, 0 or 1); holding moves the target at STEER_MAX_SPEED.
+ * `dragDx` is target movement from drag, in track units.
+ */
+export function updateScene(
+  scene: Scene,
+  dt: number,
+  steer: number,
+  dragDx = 0,
+): Scene {
   if (scene.kind !== "run" || scene.paused) return scene;
-  let run = steer
-    ? nudgeTarget(scene.run, steer * STEER_MAX_SPEED * dt)
-    : scene.run;
+  const dx = steer * STEER_MAX_SPEED * dt + dragDx;
+  let run = dx ? nudgeTarget(scene.run, dx) : scene.run;
   run = stepRun(run, dt);
   if (run.status !== "running") return { kind: "end", seed: scene.seed, run };
   return { ...scene, run };
