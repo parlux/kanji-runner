@@ -124,7 +124,7 @@ export const ENEMY_X_MARGIN = 0.2;
 
 // Boss (T9). See boss.ts.
 /** Boss size = round(BOSS_K × expected army). */
-export const BOSS_K = 1.0;
+export const BOSS_K = 1.5;
 /** Expected army = median of BOSS_PASSES 80%-accuracy passes × EXPECTED_SURVIVAL (clipping losses). */
 export const EXPECTED_SURVIVAL = 0.85;
 export const BOSS_PASSES = 31;
