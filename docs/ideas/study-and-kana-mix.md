@@ -6,6 +6,7 @@ Status: raw notes from the owner, 2026-11-07 (during Tasks 6–7). Not yet refin
 The owner tried `?level=3` and found it very hard ("my memory is hazy"). A run feels like a test, with no chance to learn. Idea: a learning/study moment after a loss (or before a run), e.g. reviewing the missed kanji with meaning and readings before trying again.
 
 - Owner, at Checkpoint B: there definitely needs to be a learning element, preferably like mnemonic-based SRS apps: a lesson that introduces each new kanji with a short story that helps remember its meaning and reading, before it appears in a run. Open questions: where the stories come from (original stories written per level, built from the components we already have), and whether lessons sit before a run or between runs.
+- WaniKani's own mnemonics can't be copied into the public repo or site (their content). The owner has a WaniKani subscription and is open to syncing with WaniKani, e.g. fetching mnemonics (and maybe progress) at runtime via its API with the owner's personal token, never committed. Check WaniKani's API terms, and plan for the different kanji order. To discuss later.
 - Task 10's summary (every missed item with its correct answer) may cover part of this. Check whether that is enough before adding anything.
 - Also check how new kanji are introduced: Task 7 caps new items at 4 per run, but a first sight of a kanji inside a run gives no time to learn it.
 
