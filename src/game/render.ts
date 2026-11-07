@@ -1,7 +1,7 @@
 import { crowdWidth } from "../core/crowd";
 import { gateOpenings, type RunState } from "../core/sim";
 import { hazardSpan } from "../core/track";
-import { CALM_DISTANCE, SAW_W, VIEW_DISTANCE } from "../core/tuning";
+import { SAW_W, VIEW_DISTANCE } from "../core/tuning";
 import type { Scene } from "./scenes";
 
 const FONT = `"Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic", system-ui, sans-serif`;
@@ -100,6 +100,7 @@ function renderEnd(
 }
 
 function renderRun(ctx: Ctx, w: number, h: number, run: RunState): void {
+  // where VIEW_DISTANCE lands; the track carries on above it to the top edge
   const horizonY = h * 0.22;
   const armyY = h * 0.82;
   const depthY = (ahead: number): number =>
@@ -108,7 +109,9 @@ function renderRun(ctx: Ctx, w: number, h: number, run: RunState): void {
   const behind = ((h - armyY) / (armyY - horizonY)) * VIEW_DISTANCE + 0.3;
 
   ctx.fillStyle = COLORS.track;
-  ctx.fillRect(0, horizonY, w, h - horizonY);
+  ctx.fillRect(0, 0, w, h);
+  // rows and hazards come into view at the top edge (plus room for a wall's height)
+  const farthest = (VIEW_DISTANCE * (armyY + 80)) / (armyY - horizonY);
 
   // visible hazards, far ones first
   const { hazards, questions } = run.track;
@@ -117,9 +120,9 @@ function renderRun(ctx: Ctx, w: number, h: number, run: RunState): void {
     if (!h) continue;
     const ahead = h.pos - run.dist;
     if (ahead < -behind) break;
-    if (ahead > VIEW_DISTANCE) continue;
+    if (ahead > farthest) continue;
     const y = depthY(ahead);
-    const scale = 1 - 0.5 * (ahead / VIEW_DISTANCE);
+    const scale = Math.max(0.3, 1 - 0.5 * (ahead / VIEW_DISTANCE));
     if (h.kind === "block") {
       const blockH = 34 * scale;
       ctx.fillStyle = COLORS.hazard;
@@ -152,11 +155,11 @@ function renderRun(ctx: Ctx, w: number, h: number, run: RunState): void {
   for (let i = run.rows.length - 1; i >= 0; i--) {
     const ahead = (questions[i] ?? Infinity) - run.dist;
     if (ahead < -behind) break;
-    if (ahead > VIEW_DISTANCE) continue;
+    if (ahead > farthest) continue;
     const row = run.rows[i];
     if (!row) continue;
     const y = depthY(ahead);
-    const scale = 1 - 0.5 * (ahead / VIEW_DISTANCE);
+    const scale = Math.max(0.3, 1 - 0.5 * (ahead / VIEW_DISTANCE));
     const wallH = 56 * scale;
     const openings = gateOpenings(row.options.length);
     // solid wall across the track, then openings cut into it
@@ -174,20 +177,6 @@ function renderRun(ctx: Ctx, w: number, h: number, run: RunState): void {
       text(ctx, row.options[j] ?? "", o.centre * w, y - wallH / 2, 30 * scale);
     });
     text(ctx, row.prompt, w / 2, y - wallH - 30 * scale, 44 * scale);
-  }
-
-  // prompt banner for the next row
-  const nextRow = run.rows[run.next];
-  // the prompt appears as the calm stretch before its question starts
-  const nextAhead = (questions[run.next] ?? Infinity) - run.dist;
-  if (nextRow && nextAhead <= CALM_DISTANCE) {
-    text(
-      ctx,
-      nextRow.prompt,
-      w / 2,
-      horizonY / 2,
-      Math.min(96, horizonY * 0.75),
-    );
   }
 
   const radius = (crowdWidth(run.army) * w) / 2;
