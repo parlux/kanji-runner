@@ -121,3 +121,14 @@ export const ENEMY_HP = 1;
 export const ENEMY_DAMAGE = 1;
 /** Pack start centres are drawn from [ENEMY_X_MARGIN, 1 − ENEMY_X_MARGIN]. */
 export const ENEMY_X_MARGIN = 0.2;
+
+// Boss (T9). See boss.ts.
+/** Boss size = round(BOSS_K × expected army). */
+export const BOSS_K = 1.0;
+/** Expected army = median of BOSS_PASSES 80%-accuracy passes × EXPECTED_SURVIVAL (clipping losses). */
+export const EXPECTED_SURVIVAL = 0.85;
+export const BOSS_PASSES = 31;
+/** Accuracy of each simulated pass. */
+export const BOSS_PASS_ACCURACY = 0.8;
+/** The clash takes this long (s) whatever the sizes; both sides lose units at the same rate. */
+export const CLASH_SECONDS = 2.5;
