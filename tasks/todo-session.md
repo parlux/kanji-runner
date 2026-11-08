@@ -25,9 +25,9 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 - `SESSION_IDLE_MINUTES = 30` in `tuning.ts`.
 
 **Acceptance criteria:**
-- [ ] Idle rule: within the limit continues, past it starts fresh, exactly at it continues (tested).
-- [ ] States per the spec: missing, fixed, back to missing, right-only not listed, unanswered rows ignored, meaning and reading apart, first-miss order (tested).
-- [ ] Fixed-this-run marks only items that changed from missing to fixed in the latest run, including a miss and its re-ask in the same run (tested).
+- [x] Idle rule: within the limit continues, past it starts fresh, exactly at it continues (tested).
+- [x] States per the spec: missing, fixed, back to missing, right-only not listed, unanswered rows ignored, meaning and reading apart, first-miss order (tested).
+- [x] Fixed-this-run marks only items that changed from missing to fixed in the latest run, including a miss and its re-ask in the same run (tested).
 
 **Verification:** `npm test -- session`
 **Dependencies:** v1.2 done
