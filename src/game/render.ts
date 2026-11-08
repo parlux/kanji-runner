@@ -32,6 +32,12 @@ import type { BossResult, Scene, Session } from "./scenes";
 import type { SyncStatus } from "../sync/sync";
 import { canStudy, runKanji } from "../core/study";
 import { startLayout, studyButton, syncLabel, type Rect } from "./start";
+import {
+  panelLine,
+  sessionLists,
+  type SessionEntry,
+  type SessionLog,
+} from "../core/session";
 import type { WkView } from "./wkstate";
 
 const FONT = `"Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic", system-ui, sans-serif`;
@@ -469,6 +475,80 @@ function renderLevel(ctx: Ctx, w: number, y: number, session: Session): void {
   );
 }
 
+const PANEL_HEAD_H = 26;
+const PANEL_LINE_H = 30;
+const PANEL_CHAR_PX = 22;
+
+/** Height of the end screen's "This session" panel. */
+function sessionPanelHeight(log: SessionLog): number {
+  const { fixed, missing } = sessionLists(log);
+  const lines = fixed.length + missing.length === 0 ? 1 : 2;
+  return PANEL_HEAD_H + lines * PANEL_LINE_H + 4;
+}
+
+/** The "This session" panel: heading, Fixed line and Still missing line. */
+function renderSessionPanel(
+  ctx: Ctx,
+  w: number,
+  top: number,
+  log: SessionLog,
+): void {
+  const { runs, fixed, missing } = sessionLists(log);
+  text(ctx, `This session · run ${runs}`, w / 2, top + 10, 16, COLORS.dim);
+  if (fixed.length + missing.length === 0) {
+    text(
+      ctx,
+      "No misses this session",
+      w / 2,
+      top + PANEL_HEAD_H + 12,
+      18,
+      COLORS.dim,
+    );
+    return;
+  }
+  const measure = (s: string): number => {
+    ctx.font = `${PANEL_CHAR_PX}px ${FONT}`;
+    return ctx.measureText(s).width;
+  };
+  const line = (
+    head: string,
+    entries: SessionEntry[],
+    y: number,
+    highlight: boolean,
+  ): void => {
+    ctx.textAlign = "left";
+    ctx.textBaseline = "middle";
+    ctx.font = `16px ${FONT}`;
+    ctx.fillStyle = COLORS.dim;
+    ctx.fillText(head, 16, y);
+    let x = 16 + ctx.measureText(head).width + 8;
+    const { tokens, hidden } = panelLine(entries, w - 16 - x, measure);
+    const put = (s: string, color: string, size: number): void => {
+      ctx.font = `${size}px ${FONT}`;
+      ctx.fillStyle = color;
+      ctx.fillText(s, x, y);
+      x += ctx.measureText(s).width + 6;
+    };
+    for (const t of tokens) {
+      if (t.kind === "label") put(t.s, COLORS.dim, 14);
+      else
+        put(
+          t.entry.prompt,
+          highlight && t.entry.thisRun ? COLORS.good : COLORS.text,
+          PANEL_CHAR_PX,
+        );
+    }
+    if (hidden) put(`+${hidden}`, COLORS.dim, 16);
+  };
+  line(`Fixed (${fixed.length}):`, fixed, top + PANEL_HEAD_H + 12, true);
+  line(
+    `Still missing (${missing.length}):`,
+    missing,
+    top + PANEL_HEAD_H + PANEL_LINE_H + 12,
+    false,
+  );
+}
+
 function renderEnd(
   ctx: Ctx,
   w: number,
@@ -517,7 +597,10 @@ function renderEnd(
     misses.length + runKanji(run.rows, run.results).length,
     won,
   );
-  const bottom = study ? h - 116 : h - 56;
+  const panelBottom = study ? h - 116 : h - 56;
+  const log = session.log;
+  const panelH = log ? sessionPanelHeight(log) : 0;
+  const bottom = panelBottom - panelH;
   if (misses.length === 0) {
     text(ctx, "No misses!", w / 2, top + 40, 28, COLORS.good);
   } else {
@@ -552,6 +635,7 @@ function renderEnd(
       }
     });
   }
+  if (log) renderSessionPanel(ctx, w, panelBottom - panelH, log);
   if (study) {
     const r = studyButton(w, h);
     ctx.strokeStyle = COLORS.wallEdge;
