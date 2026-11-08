@@ -1,6 +1,14 @@
 # Lucky guesses and coming back rusty
 
-Status: raw notes from the owner, 2026-11-08. Not yet refined or specced.
+Status: confirmed by owner, 2026-11-08, after an interview. Idea 1 goes ahead in WaniKani mode only: spec `SPEC-reask.md`. Ideas 2 and 3 are parked.
+
+## Decisions (owner, 2026-11-08)
+1. **The problem is the game's record, not in-the-moment feedback.** A lucky guess moves a kanji up a box, so it is shown less and never learned.
+2. **Idea 2 (steering confidence) is out.** The owner knows when they're guessing but commits early anyway, so steering would not tell guesses apart.
+3. **Catch guesses automatically (idea 1).** No "?" opening or any other input from the player.
+4. **Idea 3 (rust) is dropped for now.** The owner plays WaniKani mode, where WaniKani's due list already marks what was forgotten.
+5. **Idea 1, as agreed:** any miss, plus any right answer on an item at box ≤ 2 (seeded boxes count), comes back 3–5 rows later; at most about 3 per run; each replaces a later planned row, so a run stays 14 questions. Right twice → up one box; right then wrong → box 0; wrong then right → stays weak.
+6. **WaniKani mode only.** Built-in mode is unchanged.
 
 ## Feedback
 - "It's quite hard at the moment as I'm coming back, and sometimes I'm lucky and just blind guess the right answer, so I'm not actually learning."
