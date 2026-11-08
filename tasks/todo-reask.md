@@ -73,6 +73,8 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 **Description:**
 - `scenes.ts`: WaniKani runs build a `ReaskConfig` from the pool; Built-in runs pass none. The end of a run passes the re-ask links and start boxes to `recordRun`.
 - The summary lists a re-ask as its own question; study cards are unchanged.
+- Size the boss from `plannedRows(run)`, not `run.rows`: a re-ask can change a row's gate type, and the boss must not change (found in R3).
+- Build WaniKani runs with `reaskRun` and pass its `ReaskConfig` to `createRunState`; at the end call `recordRun(..., run.reask ?? undefined)`.
 
 **Acceptance criteria:**
 - [ ] A WaniKani run in the browser: a missed kanji comes back 3–5 rows later as a 3-answer wall, with no pop-in of the replaced row (browser check with a synthetic WaniKani list, screenshots in the scratchpad).
