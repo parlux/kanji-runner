@@ -18,6 +18,7 @@ import {
   CLASH_APPROACH_SECONDS,
   FIRE_RANGE,
   SAW_W,
+  SESSION_PANEL_MAX_LINES,
   VIEW_DISTANCE,
 } from "../core/tuning";
 import { KANJI } from "../core/kanji";
@@ -33,8 +34,9 @@ import type { SyncStatus } from "../sync/sync";
 import { canStudy, runKanji } from "../core/study";
 import { startLayout, studyButton, syncLabel, type Rect } from "./start";
 import {
-  panelLine,
+  panelLines,
   sessionLists,
+  type PanelToken,
   type SessionEntry,
   type SessionLog,
 } from "../core/session";
@@ -479,23 +481,75 @@ const PANEL_HEAD_H = 26;
 const PANEL_LINE_H = 30;
 const PANEL_CHAR_PX = 22;
 
-/** Height of the end screen's "This session" panel. */
-function sessionPanelHeight(log: SessionLog): number {
-  const { fixed, missing } = sessionLists(log);
-  const lines = fixed.length + missing.length === 0 ? 1 : 2;
-  return PANEL_HEAD_H + lines * PANEL_LINE_H + 4;
+type PanelGroup = {
+  head: string;
+  headW: number;
+  entries: SessionEntry[];
+  lines: PanelToken[][];
+  hidden: number;
+  highlight: boolean;
+};
+
+/**
+ * Wraps the Fixed and Still missing groups. The first line follows the label;
+ * continuation lines start at the left gutter.
+ */
+function layoutSession(ctx: Ctx, w: number, log: SessionLog) {
+  const { runs, fixed, missing } = sessionLists(log);
+  const measure = (s: string): number => {
+    ctx.font = `${PANEL_CHAR_PX}px ${FONT}`;
+    return ctx.measureText(s).width;
+  };
+  const group = (
+    head: string,
+    entries: SessionEntry[],
+    highlight: boolean,
+  ): PanelGroup => {
+    ctx.font = `16px ${FONT}`;
+    const headW = ctx.measureText(head).width;
+    const r = panelLines(
+      entries,
+      w - 32 - headW - 8,
+      w - 32,
+      SESSION_PANEL_MAX_LINES,
+      measure,
+    );
+    return { head, headW, entries, ...r, highlight };
+  };
+  const empty = fixed.length + missing.length === 0;
+  const groups = empty
+    ? []
+    : [
+        group(`Fixed (${fixed.length}):`, fixed, true),
+        group(`Still missing (${missing.length}):`, missing, false),
+      ];
+  const lines = empty
+    ? 1
+    : groups.reduce((n, g) => n + Math.max(1, g.lines.length), 0);
+  return {
+    runs,
+    empty,
+    groups,
+    height: PANEL_HEAD_H + lines * PANEL_LINE_H + 4,
+  };
 }
 
-/** The "This session" panel: heading, Fixed line and Still missing line. */
+/** The "This session" panel: heading, then the wrapped Fixed and Still missing groups. */
 function renderSessionPanel(
   ctx: Ctx,
   w: number,
   top: number,
-  log: SessionLog,
+  layout: ReturnType<typeof layoutSession>,
 ): void {
-  const { runs, fixed, missing } = sessionLists(log);
-  text(ctx, `This session · run ${runs}`, w / 2, top + 10, 16, COLORS.dim);
-  if (fixed.length + missing.length === 0) {
+  text(
+    ctx,
+    `This session · run ${layout.runs}`,
+    w / 2,
+    top + 10,
+    16,
+    COLORS.dim,
+  );
+  if (layout.empty) {
     text(
       ctx,
       "No misses this session",
@@ -506,47 +560,36 @@ function renderSessionPanel(
     );
     return;
   }
-  const measure = (s: string): number => {
-    ctx.font = `${PANEL_CHAR_PX}px ${FONT}`;
-    return ctx.measureText(s).width;
-  };
-  const line = (
-    head: string,
-    entries: SessionEntry[],
-    y: number,
-    highlight: boolean,
-  ): void => {
-    ctx.textAlign = "left";
-    ctx.textBaseline = "middle";
+  let y = top + PANEL_HEAD_H + 12;
+  ctx.textAlign = "left";
+  ctx.textBaseline = "middle";
+  for (const g of layout.groups) {
     ctx.font = `16px ${FONT}`;
     ctx.fillStyle = COLORS.dim;
-    ctx.fillText(head, 16, y);
-    let x = 16 + ctx.measureText(head).width + 8;
-    const { tokens, hidden } = panelLine(entries, w - 16 - x, measure);
-    const put = (s: string, color: string, size: number): void => {
-      ctx.font = `${size}px ${FONT}`;
-      ctx.fillStyle = color;
-      ctx.fillText(s, x, y);
-      x += ctx.measureText(s).width + 6;
-    };
-    for (const t of tokens) {
-      if (t.kind === "label") put(t.s, COLORS.dim, 14);
-      else
-        put(
-          t.entry.prompt,
-          highlight && t.entry.thisRun ? COLORS.good : COLORS.text,
-          PANEL_CHAR_PX,
-        );
-    }
-    if (hidden) put(`+${hidden}`, COLORS.dim, 16);
-  };
-  line(`Fixed (${fixed.length}):`, fixed, top + PANEL_HEAD_H + 12, true);
-  line(
-    `Still missing (${missing.length}):`,
-    missing,
-    top + PANEL_HEAD_H + PANEL_LINE_H + 12,
-    false,
-  );
+    ctx.fillText(g.head, 16, y);
+    const lines = g.lines.length ? g.lines : [[]];
+    lines.forEach((tokens, li) => {
+      let x = li === 0 ? 16 + g.headW + 8 : 16;
+      const put = (s: string, color: string, size: number): void => {
+        ctx.font = `${size}px ${FONT}`;
+        ctx.fillStyle = color;
+        ctx.fillText(s, x, y);
+        x += ctx.measureText(s).width + 6;
+      };
+      for (const t of tokens) {
+        if (t.kind === "label") put(t.s, COLORS.dim, 14);
+        else
+          put(
+            t.entry.prompt,
+            g.highlight && t.entry.thisRun ? COLORS.good : COLORS.text,
+            PANEL_CHAR_PX,
+          );
+      }
+      if (g.hidden && li === lines.length - 1)
+        put(`+${g.hidden}`, COLORS.dim, 16);
+      y += PANEL_LINE_H;
+    });
+  }
 }
 
 function renderEnd(
@@ -599,7 +642,8 @@ function renderEnd(
   );
   const panelBottom = study ? h - 116 : h - 56;
   const log = session.log;
-  const panelH = log ? sessionPanelHeight(log) : 0;
+  const panel = log ? layoutSession(ctx, w, log) : null;
+  const panelH = panel?.height ?? 0;
   const bottom = panelBottom - panelH;
   if (misses.length === 0) {
     text(ctx, "No misses!", w / 2, top + 40, 28, COLORS.good);
@@ -635,7 +679,7 @@ function renderEnd(
       }
     });
   }
-  if (log) renderSessionPanel(ctx, w, panelBottom - panelH, log);
+  if (panel) renderSessionPanel(ctx, w, panelBottom - panelH, panel);
   if (study) {
     const r = studyButton(w, h);
     ctx.strokeStyle = COLORS.wallEdge;

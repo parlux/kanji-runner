@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { logRun, panelLine, sessionLists } from "../../src/core/session";
+import { logRun, panelLines, sessionLists } from "../../src/core/session";
 import { SESSION_IDLE_MINUTES } from "../../src/core/tuning";
 import type { GateRow, GateType } from "../../src/core/types";
 
@@ -138,38 +138,75 @@ describe("fixed this run", () => {
   });
 });
 
-describe("panelLine", () => {
+describe("panelLines", () => {
   const e = (prompt: string, type: GateType = "meaning") => ({
     prompt,
     type,
     thisRun: false,
   });
   const w = (s: string): number => s.length * 10;
-  const texts = (r: ReturnType<typeof panelLine>): string[] =>
-    r.tokens.map((t) => (t.kind === "item" ? t.entry.prompt : t.s));
+  const texts = (r: ReturnType<typeof panelLines>): string[][] =>
+    r.lines.map((l) =>
+      l.map((t) => (t.kind === "item" ? t.entry.prompt : t.s)),
+    );
+  const many = (n: number) =>
+    Array.from({ length: n }, (_, i) => e(String.fromCharCode(97 + i)));
 
   it("lists meaning items first, then reading items after a label", () => {
-    const r = panelLine([e("山", "reading"), e("水"), e("火")], 999, w);
-    expect(texts(r)).toEqual(["水", "火", "· reading", "山"]);
+    const r = panelLines(
+      [e("山", "reading"), e("水"), e("火")],
+      999,
+      999,
+      3,
+      w,
+    );
+    expect(texts(r)).toEqual([["水", "火", "· reading", "山"]]);
     expect(r.hidden).toBe(0);
   });
 
-  it("ends with +k and keeps room for it when too long", () => {
-    const entries = ["a", "b", "c", "d", "e"].map((p) => e(p));
-    const r = panelLine(entries, 80, w);
-    expect(texts(r)).toEqual(["a", "b", "c"]);
-    expect(r.hidden).toBe(2);
+  it("needs no wrap for a short list", () => {
+    const r = panelLines(many(3), 100, 100, 3, w);
+    expect(texts(r)).toEqual([["a", "b", "c"]]);
   });
 
-  it("never leaves the reading label dangling", () => {
-    const entries = [e("a"), e("b", "reading")];
-    const r = panelLine(entries, 60, w);
-    expect(texts(r)).toEqual(["a"]);
+  it("wraps at the first and rest widths", () => {
+    // first: 3 items (50px), rest: 5 items (90px)
+    const r = panelLines(many(10), 50, 90, 3, w);
+    expect(texts(r)).toEqual([
+      ["a", "b", "c"],
+      ["d", "e", "f", "g", "h"],
+      ["i", "j"],
+    ]);
+    expect(r.hidden).toBe(0);
+  });
+
+  it("puts +k only on the last line, leaving room for it", () => {
+    const r = panelLines(many(12), 50, 50, 2, w);
+    expect(texts(r)).toEqual([["a", "b", "c"], ["d"]]);
+    expect(r.hidden).toBe(8);
+  });
+
+  it("keeps the label off the end of a line, and may start a line with it", () => {
+    const entries = [e("a"), e("b"), e("c", "reading")];
+    const r = panelLines(entries, 40, 120, 3, w);
+    expect(texts(r)).toEqual([
+      ["a", "b"],
+      ["· reading", "c"],
+    ]);
+    expect(r.hidden).toBe(0);
+  });
+
+  it("never ends the last line with a label", () => {
+    const r = panelLines([e("a"), e("b", "reading")], 60, 60, 1, w);
+    expect(texts(r)).toEqual([["a"]]);
     expect(r.hidden).toBe(1);
   });
 
-  it("shows nothing but +k when nothing fits, and handles empty", () => {
-    expect(panelLine([e("a")], 5, w)).toEqual({ tokens: [], hidden: 1 });
-    expect(panelLine([], 100, w)).toEqual({ tokens: [], hidden: 0 });
+  it("handles empty and too-narrow input", () => {
+    expect(panelLines([], 100, 100, 3, w)).toEqual({ lines: [[]], hidden: 0 });
+    expect(panelLines([e("a")], 5, 5, 1, w)).toEqual({
+      lines: [[]],
+      hidden: 1,
+    });
   });
 });

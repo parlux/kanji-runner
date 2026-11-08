@@ -104,16 +104,20 @@ export type PanelToken =
   { kind: "item"; entry: SessionEntry } | { kind: "label"; s: string };
 
 /**
- * Which entries of a panel line fit in `avail` px. Meaning and kana items come
- * first, reading items follow a `reading` label. When some are hidden, room is
- * kept for a ` +k` suffix and the label is never left dangling at the end.
+ * Wraps a group's entries onto at most `maxLines` lines. Meaning and kana items
+ * come first, reading items follow a `reading` label. The first line has
+ * `firstAvail` px, later ones `restAvail`. The `reading` label may start a line
+ * but never ends one. Only the last allowed line is shortened to leave room
+ * for a ` +k` suffix, and `hidden` is k (0 when everything fits).
  * `measure` gives the width of a string at the drawn font.
  */
-export function panelLine(
+export function panelLines(
   entries: SessionEntry[],
-  avail: number,
+  firstAvail: number,
+  restAvail: number,
+  maxLines: number,
   measure: (s: string) => number,
-): { tokens: PanelToken[]; hidden: number } {
+): { lines: PanelToken[][]; hidden: number } {
   const item = (entry: SessionEntry): PanelToken => ({ kind: "item", entry });
   const plain = entries.filter((e) => e.type !== "reading").map(item);
   const reading = entries.filter((e) => e.type === "reading").map(item);
@@ -126,13 +130,25 @@ export function panelLine(
   ];
   const text = (t: PanelToken): string =>
     t.kind === "item" ? t.entry.prompt : t.s;
-  for (let c = all.length; c >= 0; c--) {
-    const shown = all.slice(0, c);
-    if (shown[c - 1]?.kind === "label") continue;
-    const hidden =
-      entries.length - shown.filter((t) => t.kind === "item").length;
-    const s = shown.map(text).join(" ") + (hidden ? ` +${hidden}` : "");
-    if (c === 0 || measure(s) <= avail) return { tokens: shown, hidden };
+  const items = (ts: PanelToken[]): number =>
+    ts.filter((t) => t.kind === "item").length;
+  const lines: PanelToken[][] = [];
+  let at = 0;
+  for (let l = 0; l < maxLines && (at < all.length || l === 0); l++) {
+    const avail = l === 0 ? firstAvail : restAvail;
+    const last = l === maxLines - 1;
+    const rest = all.slice(at);
+    let c = rest.length;
+    for (; c > 0; c--) {
+      const shown = rest.slice(0, c);
+      if (shown[c - 1]?.kind === "label" && c < rest.length) continue;
+      const hidden = last ? entries.length - items(all.slice(0, at + c)) : 0;
+      const s = shown.map(text).join(" ") + (hidden ? ` +${hidden}` : "");
+      if (measure(s) <= avail) break;
+    }
+    while (c > 0 && rest[c - 1]?.kind === "label") c--;
+    lines.push(rest.slice(0, c));
+    at += c;
   }
-  return { tokens: [], hidden: entries.length };
+  return { lines, hidden: entries.length - items(all.slice(0, at)) };
 }
