@@ -65,7 +65,7 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 **Scope:** M
 
 ### Checkpoint F1: the pure core works
-- [ ] R1–R3 pass, Built-in mode is unchanged (golden run, all v1 and v1.1 tests, bot balance), and the WaniKani bot balance holds with re-asks on.
+- [x] R1–R3 pass, Built-in mode is unchanged (golden run, all v1 and v1.1 tests, bot balance), and the WaniKani bot balance holds with re-asks on. (Verified by the orchestrator, 2026-11-08: 396 tests; nothing to test on a phone, so the owner's check is Checkpoint F.)
 
 ## Phase 8: Ask again in the game
 
