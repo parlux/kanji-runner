@@ -26,9 +26,9 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 - Share row building with `run.ts` rather than duplicating it.
 
 **Acceptance criteria:**
-- [ ] Trigger and target rules per the spec, including no target near the end of a run, the squad-charge exclusion and the same-key exclusion (tested).
-- [ ] Re-ask row: same item, type and shown reading, 3 options, distractor validity holds, and the answer's position is spread evenly and independent of the first ask's choice over many seeds (tested).
-- [ ] Over many seeded tracks, every row in a trigger's window starts beyond `VIEW_DISTANCE` when the trigger's wall resolves (tested).
+- [x] Trigger and target rules per the spec, including no target near the end of a run, the squad-charge exclusion and the same-key exclusion (tested).
+- [x] Re-ask row: same item, type and shown reading, 3 options, distractor validity holds, and the answer's position is spread evenly and independent of the first ask's choice over many seeds (tested).
+- [x] Over many seeded tracks, every row in a trigger's window starts beyond `VIEW_DISTANCE` when the trigger's wall resolves (tested).
 
 **Verification:** `npm test -- reask`
 **Dependencies:** v1.1 done
