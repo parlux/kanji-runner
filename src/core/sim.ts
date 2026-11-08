@@ -14,6 +14,15 @@ import {
   type Threat,
 } from "./fire";
 import {
+  isTrigger,
+  pickTarget as pickReaskTarget,
+  REASK_OPTIONS,
+  reaskRow,
+  type ReaskConfig,
+  type ReaskLink,
+} from "./reask";
+import { createRng } from "./rng";
+import {
   applyCorrect,
   applyCorrectCharge,
   applyWrong,
@@ -30,6 +39,7 @@ import {
   FIRE_RANGE,
   GATE_GROW_PER_DAMAGE,
   MAX_SPEED_MUL,
+  REASK_MAX,
   STARTING_ARMY,
   STEER_EASE,
   SQUAD_DEFECT_GAIN,
@@ -43,6 +53,24 @@ import type { GateRow } from "./types";
 export type PackState = { pos: number; x: number };
 
 export { gateOpenings, nearestOpening, wallSolids, type Opening };
+
+/**
+ * Re-asks in this run (WaniKani mode): the config it was built with, the
+ * entry each row asks now, and the links placed so far. Fits `ReaskRecord`.
+ */
+export type ReaskState = ReaskConfig & {
+  links: readonly ReaskLink[];
+  /** The rows as built at the start, before any re-ask. */
+  planned: readonly GateRow[];
+};
+
+/**
+ * The run's rows as built at the start. The boss is sized from these, so a
+ * re-ask (which may change a row's gate type) never changes it.
+ */
+export function plannedRows(s: RunState): readonly GateRow[] {
+  return s.reask?.planned ?? s.rows;
+}
 
 export type RunStatus = "running" | "finished" | "dead";
 
@@ -90,6 +118,8 @@ export type RunState = {
     dist: number;
   } | null;
   status: RunStatus;
+  /** Re-asks, when the run has them on; else null. */
+  reask: ReaskState | null;
 };
 
 /** 1.0× until the first row is reached, then linear to MAX_SPEED_MUL by the time the last row appears. */
@@ -102,7 +132,15 @@ export function speedMul(dist: number, track: Track): number {
   return 1 + (MAX_SPEED_MUL - 1) * t;
 }
 
-export function createRunState(rows: GateRow[], track: Track): RunState {
+/**
+ * A run at the start. With a `ReaskConfig` (rows and config from `reaskRun`),
+ * triggers place re-asks ahead; the track and hit points stay as built here.
+ */
+export function createRunState(
+  rows: GateRow[],
+  track: Track,
+  reask: ReaskConfig | null = null,
+): RunState {
   return {
     rows,
     track,
@@ -127,6 +165,7 @@ export function createRunState(rows: GateRow[], track: Track): RunState {
     lastClip: null,
     lastAnswer: null,
     status: "running",
+    reask: reask && { ...reask, links: [], planned: rows },
   };
 }
 
@@ -423,7 +462,7 @@ function resolveRow(s: RunState): RunState {
   const nextIndex = s.next + 1;
   const status =
     army <= 0 ? "dead" : nextIndex >= s.rows.length ? "finished" : "running";
-  return {
+  const resolved: RunState = {
     ...s,
     army,
     streak,
@@ -432,5 +471,58 @@ function resolveRow(s: RunState): RunState {
     lastClip: clip > 0 ? { loss: clip, dist: s.dist } : s.lastClip,
     lastAnswer: { correct, choice, change: army - remaining, dist: s.dist },
     status,
+  };
+  return status === "running"
+    ? placeReask(resolved, s.next, correct)
+    : resolved;
+}
+
+/** Decorrelates a re-ask row's rng from the run's and the target pick's. */
+const REASK_ROW_SALT = 0x27d4eb2f;
+
+/**
+ * After row `q` resolves: if it is a trigger and fewer than `REASK_MAX`
+ * re-asks are placed, `pickTarget`'s row (if any) becomes a re-ask of `q`,
+ * with new openings for `REASK_OPTIONS` answers. Nothing else changes.
+ */
+function placeReask(s: RunState, q: number, correct: boolean): RunState {
+  const r = s.reask;
+  if (!r || r.links.length >= REASK_MAX) return s;
+  const reasks = s.rows.map((_, i) => r.links.some((l) => l.row === i));
+  if (!isTrigger(correct, r.startBoxes[q] ?? 0, reasks[q] ?? false)) return s;
+  const keys = r.entries.map((e) => e.key);
+  const target = pickReaskTarget(r.seed, q, {
+    keys,
+    reasks,
+    charges: s.track.charges,
+  });
+  const entry = r.entries[q];
+  const first = s.rows[q];
+  if (target === null || !entry || !first) return s;
+  const rng = createRng(
+    (r.seed ^
+      REASK_ROW_SALT ^
+      Math.imul(q + 1, 0x9e3779b1) ^
+      Math.imul(target + 1, 0x85ebca77)) >>>
+      0,
+  );
+  const rows = [...s.rows];
+  rows[target] = reaskRow(rng, entry, first, r.pool);
+  const gates = [...s.gates];
+  gates[target] = gateOpenings(REASK_OPTIONS);
+  const entries = [...r.entries];
+  entries[target] = entry;
+  const startBoxes = [...r.startBoxes];
+  startBoxes[target] = r.startBoxes[q] ?? 0;
+  return {
+    ...s,
+    rows,
+    gates,
+    reask: {
+      ...r,
+      entries,
+      startBoxes,
+      links: [...r.links, { row: target, of: q }],
+    },
   };
 }

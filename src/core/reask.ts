@@ -1,9 +1,9 @@
 import { showReading, mainReadings } from "./distractors";
 import type { Entry, Pool } from "./pool";
 import { createRng, randInt, type Rng } from "./rng";
-import { entryRow } from "./run";
+import { entryRow, poolRun } from "./run";
 import { REASK_GAP_MAX, REASK_GAP_MIN, REASK_MAX_BOX } from "./tuning";
-import type { GateRow } from "./types";
+import type { GateRow, Progress } from "./types";
 
 /** Row `row` is a re-ask of row `of` (both 0-based row indexes). */
 export type ReaskLink = { row: number; of: number };
@@ -80,4 +80,31 @@ export function reaskRow(
       ? mainReadings(entry.item).find((r) => showReading(r) === first.answer)
       : undefined;
   return entryRow(rng, entry, pool, REASK_OPTIONS, shown);
+}
+
+/**
+ * What a run needs to place re-asks: the pool (for re-ask rows), the run's
+ * seed, and per row the entry it asks and its box at the start of the run.
+ */
+export type ReaskConfig = {
+  pool: Pool;
+  seed: number;
+  entries: readonly Entry[];
+  startBoxes: readonly number[];
+};
+
+/**
+ * `buildPoolRun`'s rows (identical) with a matching `ReaskConfig`: each
+ * row's entry and its selection box at the start of the run.
+ */
+export function reaskRun(
+  seed: number,
+  progress: Progress,
+  pool: Pool,
+): { rows: GateRow[]; reask: ReaskConfig } {
+  const { rows, entries } = poolRun(seed, progress, pool);
+  return {
+    rows,
+    reask: { pool, seed, entries, startBoxes: entries.map((e) => pool.box(e)) },
+  };
 }

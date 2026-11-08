@@ -11,7 +11,9 @@ import {
   stepRun,
   type RunState,
 } from "../../src/core/sim";
+import type { ReaskConfig } from "../../src/core/reask";
 import { buildTrack, hazardSpan } from "../../src/core/track";
+import type { GateRow } from "../../src/core/types";
 import { BASE_SPEED, FIRE_RANGE, ROWS_PER_RUN } from "../../src/core/tuning";
 import { kanaRun } from "./kana-run";
 
@@ -38,6 +40,8 @@ export type BotOptions = {
   /** Steering skill: 1 aims dead on; lower adds a seeded aim offset of up to (1 − skill) × AIM_SPREAD per beat. */
   skill?: number;
   squads?: boolean;
+  /** The run's rows (and re-ask config) for a seed; a kana run by default. */
+  build?: (seed: number) => { rows: GateRow[]; reask?: ReaskConfig | null };
 };
 
 /**
@@ -48,12 +52,17 @@ export type BotOptions = {
  * offset, kept inside the chosen opening at walls so it never changes the answer.
  */
 export function botRun(seed: number, opts: BotOptions): RunState {
-  const { wrong, skill = 1, squads } = opts;
+  const { wrong, skill = 1, squads, build } = opts;
   const aimRng = createRng(seed * 7919 + 17);
   const spread = (1 - skill) * AIM_SPREAD;
   let beat = -1;
   let offset = 0;
-  let s = createRunState(kanaRun(seed), buildTrack(seed, ROWS_PER_RUN, squads));
+  const built = build?.(seed) ?? { rows: kanaRun(seed) };
+  let s = createRunState(
+    built.rows,
+    buildTrack(seed, ROWS_PER_RUN, squads),
+    built.reask ?? null,
+  );
   while (s.status === "running") {
     if (s.nextHazard + s.next !== beat) {
       beat = s.nextHazard + s.next;

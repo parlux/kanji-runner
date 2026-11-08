@@ -131,9 +131,19 @@ export function buildPoolRun(
   progress: Progress,
   pool: Pool,
 ): GateRow[] {
+  return poolRun(seed, progress, pool).rows;
+}
+
+/** `buildPoolRun` plus the entry each row asks, in row order. */
+export function poolRun(
+  seed: number,
+  progress: Progress,
+  pool: Pool,
+): { rows: GateRow[]; entries: Entry[] } {
   const rng = createRng(seed);
   const asked = new Map<string, number>();
-  return select(rng, pool).map((e, i) => {
+  const entries = select(rng, pool);
+  const rows = entries.map((e, i) => {
     const shown =
       e.type === "reading"
         ? shownReading(
@@ -144,6 +154,7 @@ export function buildPoolRun(
     if (e.type === "reading") asked.set(e.key, (asked.get(e.key) ?? 0) + 1);
     return entryRow(rng, e, pool, optionCount(i), shown);
   });
+  return { rows, entries };
 }
 
 /** A gate the run answered wrongly, for the summary. */
