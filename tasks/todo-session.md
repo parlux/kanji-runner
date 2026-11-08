@@ -61,6 +61,7 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 **Verification:** `npm test && npm run lint && npm run build`; browser check; deploy green.
 **Dependencies:** S2
 **Files:** `src/game/render.ts`
+**Owner feedback after S3:** could not see all missed kanji; each group now wraps to up to 3 lines (then `+k`), panel grows, missed list shrinks.
 **Scope:** S
 
 ### Checkpoint G: v1.3 (owner, on the phone)

@@ -37,7 +37,7 @@ The owner is relearning and loses most runs. A loss shows only what was missed, 
   - `Fixed (n)`: the characters, in the order they were first missed. Fixed-this-run characters are drawn in the "good" color; the others in normal text.
   - `Still missing (n)`: the characters, in the order they were first missed.
   - Reading-gate items are listed after the meaning and kana items in their group, after a small dim `reading` label, e.g. `Fixed (3): 水 火 · reading 山`.
-  - When the list is too long for the width, it ends with `+k`.
+  - Each group wraps onto up to 3 lines (`SESSION_PANEL_MAX_LINES`); continuation lines start at the left gutter. The `reading` label may start a line but never ends one. When items still don't fit, only the last line ends with `+k`. The panel grows with the lines used and the missed list shrinks to match.
   - When both groups are empty (no misses yet this session), one dim line: `No misses this session`.
 - Nothing else changes: the start screen, run, boss and study screens stay as they are.
 
