@@ -1,6 +1,6 @@
 # Tasks: Kanji Runner
 
-Plan: `tasks/plan.md`. Spec: `SPEC.md` (revision 4).
+Plan: `tasks/done/plan.md`. Spec: `docs/specs/SPEC.md` (revision 4).
 Every task: `npm test && npm run lint && npm run build` pass before it is checked off.
 
 ## Phase 1: Playable slice (done)
@@ -118,7 +118,7 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 **Scope:** M
 
 ### Task S3: Always-on fire and supply crates
-**Description:** (spec: Shooting; idea: `docs/ideas/crates.md`). From Checkpoint A feedback.
+**Description:** (spec: Shooting; idea: `docs/ideas/done/crates.md`). From Checkpoint A feedback.
 - `sim.ts`: when a block shatters, add `round(CRATE_REWARD_K × its hit points)` to the army, once. Record it for feedback (`lastCrate`).
 - Tuning: `CRATE_REWARD_K` (start 0.3).
 - Render: a constant bullet stream straight ahead that fades out at `FIRE_RANGE`, with or without a target; a "+N" pop-up and recruits joining when a crate pays out; blocks drawn as crates.
@@ -181,10 +181,10 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 **Scope:** M
 
 ### Checkpoint A2 feedback (owner, 2026-11-07)
-Squads are cool but hard to read ("can't tell if it's too fast or just too hard to figure out what I'm supposed to read and do"). Still too much dead time. Shooting an opening should grow it. Decisions in `docs/ideas/pace-and-gates.md`; spec revision 6. Tasks S5–S7 below, then Checkpoint A3 replaces A2.
+Squads are cool but hard to read ("can't tell if it's too fast or just too hard to figure out what I'm supposed to read and do"). Still too much dead time. Shooting an opening should grow it. Decisions in `docs/ideas/done/pace-and-gates.md`; spec revision 6. Tasks S5–S7 below, then Checkpoint A3 replaces A2.
 
 ### Task S5: Tighter pacing
-**Description:** (spec: Track, Beat layout; idea: `docs/ideas/pace-and-gates.md` decision 1)
+**Description:** (spec: Track, Beat layout; idea: `docs/ideas/done/pace-and-gates.md` decision 1)
 - `track.ts`/`tuning.ts`: shrink `CALM_DISTANCE` (start ~1.2, right before the wall) and `HAZARD_SPACING` (start ~3.0), and raise the hazard beats per gap (e.g. 2–3), so the prompt appears while the last hazards are still being dodged. `BASE_SPEED` unchanged. Run to the last question about 60 s.
 - Keep fire from ever reaching past the next wall (already enforced by `fireLimit`).
 
@@ -331,7 +331,7 @@ Placement to Katakana gives Kanji 1, but runs are still mostly basic hiragana: 1
 
 **Verification:** `npm test`. Phone-sized browser check.
 **Dependencies:** T8
-**Files:** `SPEC.md`, `src/core/progression.ts`, `src/game/{scenes,start,render}.ts`, `src/main.ts`, `tests/core/progression.test.ts`, `tests/game/scenes.test.ts`
+**Files:** `docs/specs/SPEC.md`, `src/core/progression.ts`, `src/game/{scenes,start,render}.ts`, `src/main.ts`, `tests/core/progression.test.ts`, `tests/game/scenes.test.ts`
 **Scope:** S
 
 ### Checkpoint B

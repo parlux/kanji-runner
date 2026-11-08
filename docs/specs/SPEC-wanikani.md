@@ -1,6 +1,6 @@
 # Spec: WaniKani mode and study screen (v1.1)
 
-Extends `SPEC.md` (v1). Everything there still holds unless this spec says otherwise. Idea and spike: `docs/ideas/wanikani.md`.
+Extends `docs/specs/SPEC.md` (v1). Everything there still holds unless this spec says otherwise. Idea and spike: `docs/ideas/done/wanikani.md`.
 
 ## Objective
 Let the owner drill the kanji they have been taught on WaniKani, weighted towards their overdue reviews, and learn from misses on a study screen. WaniKani mode is optional; without a token the game is v1 plus the study screen.

@@ -1,6 +1,6 @@
 # Kanji Runner
 
-A browser game for learning kana and kanji: steer an army through gates, pick the right answer, and beat the boss. Vite and strict TypeScript on a canvas. See `SPEC.md` for the rules.
+A browser game for learning kana and kanji: steer an army through gates, pick the right answer, and beat the boss. Vite and strict TypeScript on a canvas. See `docs/specs/SPEC.md` for the rules.
 
 ```sh
 npm install

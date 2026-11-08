@@ -1,8 +1,8 @@
 # Spec: Kanji Runner
 
 Source of intent: `docs/intent/kanji-runner.md` (confirmed 2026-11-07).
-Gameplay rework: `docs/ideas/crowd-runner-rework.md` (Direction C, confirmed 2026-11-07).
-Shooting: `docs/ideas/shooting.md` (confirmed 2026-11-07). Crates: `docs/ideas/crates.md` (confirmed 2026-11-07). Pace and gates: `docs/ideas/pace-and-gates.md` (confirmed 2026-11-07).
+Gameplay rework: `docs/ideas/done/crowd-runner-rework.md` (Direction C, confirmed 2026-11-07).
+Shooting: `docs/ideas/done/shooting.md` (confirmed 2026-11-07). Crates: `docs/ideas/done/crates.md` (confirmed 2026-11-07). Pace and gates: `docs/ideas/done/pace-and-gates.md` (confirmed 2026-11-07).
 Status: APPROVED revision 6, 2026-11-07. Revision 2 replaced lane picking with a physical track (see Track, crowd and steering). Revision 3 adds auto-fire, breakable blocks and enemy packs (see Shooting). Revision 4 (Checkpoint A feedback) makes fire always visible up to its range, turns blocks into supply crates, and raises `BASE_SPEED` to 1.6. Revision 5 (Checkpoint A passed) raises `FIRE_RANGE` to 2.8 and shows each crate's reward. Revision 6 (Checkpoint A2 feedback) tightens the spacing so answers are chosen while partly distracted, makes squad charges read like walls with no lock, and lets fire grow the opening the crowd is lined up with.
 
 ### Changes from intent
@@ -267,7 +267,7 @@ export function clipLoss(army: number, x: number, w: number, solids: Span[]): nu
 ## Boundaries
 - **Always:** keep `src/core` DOM-free; run `npm test` and `npm run lint` before each commit; put tuning numbers in `tuning.ts`; credit EDRDG (CC BY-SA 4.0) in the README and on the in-app about line.
 - **Ask first:** adding any runtime dependency beyond supabase-js; changing the storage schema version or the Supabase table/RLS; changing the scoring curve, squad penalty or SRS model beyond tuning constants; adding new hazard or question shapes.
-- **Never:** use WaniKani content or its API (v1; superseded for v1.1 by `SPEC-wanikani.md`, Boundaries); commit `.env.local`, the Supabase service-role key, or passwords; disable RLS; let sync failures block play; add analytics; copy any existing game's name, art, or levels; commit downloaded raw EDRDG files (only the generated JSON); let clipping or hazards affect SRS; leak squad correctness to the renderer before resolution.
+- **Never:** use WaniKani content or its API (v1; superseded for v1.1 by `docs/specs/SPEC-wanikani.md`, Boundaries); commit `.env.local`, the Supabase service-role key, or passwords; disable RLS; let sync failures block play; add analytics; copy any existing game's name, art, or levels; commit downloaded raw EDRDG files (only the generated JSON); let clipping or hazards affect SRS; leak squad correctness to the renderer before resolution.
 
 ## Success Criteria
 1. `npm run build` produces a static `dist/` that runs offline in Chrome/Safari on a laptop and a phone.
@@ -289,8 +289,8 @@ export function clipLoss(army: number, x: number, w: number, solids: Span[]): nu
 
 ## Out of Scope (v1)
 Maths gates, English→kanji gates, sound/TTS, multi-user, sign-up flow, password reset UI, realtime sync, vocabulary (multi-kanji words), multiplayer, leaderboards, any backend beyond the Supabase progress table, 3D art, native app.
-Also deferred from the rework (see `docs/ideas/crowd-runner-rework.md`): splitting the crowd across gates; stage chains / long-session structure; more hazard types or enemy variety beyond the one enemy pack; tap-left/right touch controls; the boss as a big squad charge; art, sound and juice beyond simple feedback.
-Deferred from shooting (see `docs/ideas/shooting.md`): a streak bonus to firepower; a fire button or ammo; breakable walls or saws; shooting answer panels; upgrades and pickups; the boss as a shootout (comes with T9).
+Also deferred from the rework (see `docs/ideas/done/crowd-runner-rework.md`): splitting the crowd across gates; stage chains / long-session structure; more hazard types or enemy variety beyond the one enemy pack; tap-left/right touch controls; the boss as a big squad charge; art, sound and juice beyond simple feedback.
+Deferred from shooting (see `docs/ideas/done/shooting.md`): a streak bonus to firepower; a fire button or ammo; breakable walls or saws; shooting answer panels; upgrades and pickups; the boss as a shootout (comes with T9).
 
 ## Open Questions
 1. ~~Hosting~~: resolved, public repo on GitHub Pages.
@@ -298,7 +298,7 @@ Deferred from shooting (see `docs/ideas/shooting.md`): a streak bonus to firepow
 3. ~~Scoring curve~~: resolved. Keep `−max(5, 30%)` for gates. Squads use `−max(8, 50%)`.
 4. ~~Ordering~~: resolved. Use grade + frequency + the component pass, with an override file kept in reserve. No WaniKani-derived data.
 5. ~~Reading gates~~: resolved. Accept any main reading, with no label (see Gate types). A labelled on/kun gate type may come later.
-6. ~~Rework open questions~~: resolved in `docs/ideas/crowd-runner-rework.md` (blob crowd, 1.3× speed, 14 questions, unchanged boss).
-7. ~~Shooting open questions~~: resolved in `docs/ideas/shooting.md` (before R5, packs replace some hazard beats, one soldier per surviving enemy).
+6. ~~Rework open questions~~: resolved in `docs/ideas/done/crowd-runner-rework.md` (blob crowd, 1.3× speed, 14 questions, unchanged boss).
+7. ~~Shooting open questions~~: resolved in `docs/ideas/done/shooting.md` (before R5, packs replace some hazard beats, one soldier per surviving enemy).
 
 None remaining. All new numbers are starting values in `tuning.ts`, to be tuned at the feel checkpoint.

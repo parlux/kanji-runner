@@ -147,3 +147,6 @@ export const REASK_MAX_BOX = 2;
 export const REASK_GAP_MIN = 3;
 /** ... and at most this many rows after it. */
 export const REASK_GAP_MAX = 5;
+
+/** A session ends after this many minutes without a run. */
+export const SESSION_IDLE_MINUTES = 30;

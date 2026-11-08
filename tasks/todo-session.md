@@ -1,6 +1,6 @@
 # Tasks: Session progress (v1.3)
 
-Spec: `SPEC-session.md` (2026-11-09). Idea and interview: `docs/ideas/session-progress.md`. Starts after v1.2 (runs alongside the owner's Checkpoint F playtest).
+Spec: `docs/specs/SPEC-session.md` (2026-11-09). Idea and interview: `docs/ideas/session-progress.md`. Starts after v1.2 (runs alongside the owner's Checkpoint F playtest).
 Every task: `npm test && npm run lint && npm run build` pass before it is checked off. Test fixtures are synthetic: never commit real WaniKani content.
 
 ## Plan

@@ -1,6 +1,6 @@
 # Spec: Ask again (v1.2, WaniKani mode)
 
-Extends `SPEC.md` (v1) and `SPEC-wanikani.md` (v1.1). Everything there still holds unless this spec says otherwise. Idea and interview: `docs/ideas/guessing-and-rust.md`.
+Extends `docs/specs/SPEC.md` (v1) and `docs/specs/SPEC-wanikani.md` (v1.1). Everything there still holds unless this spec says otherwise. Idea and interview: `docs/ideas/guessing-and-rust.md`.
 
 ## Objective
 In WaniKani mode, a lucky guess should not move an item up. Weak or missed items come back later in the same run, and only move up when they are answered right twice.
@@ -78,7 +78,7 @@ Touches `sim.ts` (rows and openings can be replaced ahead of the crowd; the run 
 Unchanged: `npm test`, `npm run lint`, `npm run build`, `npx vite --port 8765`.
 
 ## Code Style
-As `SPEC.md`: strict TS, pure functions in `src/core`, constants in `tuning.ts`, short doc comments that state the rule.
+As `docs/specs/SPEC.md`: strict TS, pure functions in `src/core`, constants in `tuning.ts`, short doc comments that state the rule.
 
 ## Testing Strategy
 - **Triggers:** wrong → trigger; right at box ≤ 2 (real or seeded) → trigger; right at box 3+ → none; a re-ask row never triggers.

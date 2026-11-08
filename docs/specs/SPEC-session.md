@@ -1,6 +1,6 @@
 # Spec: Session progress (v1.3)
 
-Extends `SPEC.md` (v1), `SPEC-wanikani.md` (v1.1) and `SPEC-reask.md` (v1.2). Everything there still holds unless this spec says otherwise. Idea and interview: `docs/ideas/session-progress.md`.
+Extends `docs/specs/SPEC.md` (v1), `docs/specs/SPEC-wanikani.md` (v1.1) and `docs/specs/SPEC-reask.md` (v1.2). Everything there still holds unless this spec says otherwise. Idea and interview: `docs/ideas/session-progress.md`.
 
 ## Objective
 Show the owner, after every run, what they have fixed so far in the current sitting, even when the run was lost.
@@ -62,7 +62,7 @@ Touches `scenes.ts` (the page `Session` carries the log; `afterStep` updates it)
 Unchanged: `npm test`, `npm run lint`, `npm run build`, `npx vite --port 8765`.
 
 ## Code Style
-As `SPEC.md`: strict TS, pure functions in `src/core`, constants in `tuning.ts`, short doc comments that state the rule.
+As `docs/specs/SPEC.md`: strict TS, pure functions in `src/core`, constants in `tuning.ts`, short doc comments that state the rule.
 
 ## Testing Strategy
 - **Idle rule:** a run within 30 minutes of the last continues the session; one after starts a new one (run count resets, lists empty); exactly at the limit continues.

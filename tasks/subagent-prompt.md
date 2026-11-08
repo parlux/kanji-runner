@@ -1,6 +1,6 @@
 # Subagent task prompt
 
-How the orchestrator hands a task in `tasks/todo.md` to a subagent. One task at a time, each to a fresh background subagent, until the next owner checkpoint.
+How the orchestrator hands a task in the active task list to a subagent. One task at a time, each to a fresh background subagent, until the next owner checkpoint.
 
 ## Orchestrator rules
 
@@ -19,13 +19,13 @@ You are implementing **Task <N>: <title>** in /Users/parlux/Projects/number-runn
 **First, load the `incremental-implementation` skill (Skill tool) and follow it.** For browser checks, also load the `browser-test` skill.
 
 ## Read first
-- `AGENTS.md`, `SPEC.md` (<relevant sections>), `tasks/plan.md`, `tasks/todo.md` (the **Task <N>** section is your scope).
+- `AGENTS.md`, `docs/specs/` (the active spec, <relevant sections>), the active task list (the **Task <N>** section is your scope).
 - Code: <relevant files>.
 
 ## State after Task <prev>
 <what exists now, what to build on, issues found in review>
 
-## Task (from tasks/todo.md)
+## Task (from the active task list)
 <description and acceptance criteria, copied>
 
 ## Notes
@@ -36,7 +36,7 @@ Dev server: `npx vite --port 8765` (`vite preview` 404s). Live runs die between 
 
 ## Rules
 - Thin slices; test each one; `npm test && npm run lint && npm run build` pass before every commit; commit and `git push` each slice. Messages like `... (Task <N>, slice M)`, ending with the Co-Authored-By line.
-- Stay in scope. Tick only Task <N>'s acceptance criteria in `tasks/todo.md`, in the final slice.
+- Stay in scope. Tick only Task <N>'s acceptance criteria in the active task list, in the final slice.
 - No committed probes or scratch scripts. Never commit raw KANJIDIC2/KRADFILE downloads or `.data-cache`.
 - Finish with a clean tree, everything pushed<, and the deploy green if a checkpoint follows>.
 

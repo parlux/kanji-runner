@@ -1,6 +1,6 @@
 # Implementation Plan: Kanji Runner
 
-Spec: `SPEC.md` (revision 4, approved 2026-11-07). Tasks: `tasks/todo.md`. Rework rationale: `docs/ideas/crowd-runner-rework.md`. Shooting rationale: `docs/ideas/shooting.md`. Crates: `docs/ideas/crates.md`.
+Spec: `docs/specs/SPEC.md` (revision 4, approved 2026-11-07). Tasks: `tasks/done/todo.md`. Rework rationale: `docs/ideas/done/crowd-runner-rework.md`. Shooting rationale: `docs/ideas/done/shooting.md`. Crates: `docs/ideas/done/crates.md`.
 
 ## Overview
 Build the game in vertical slices:
@@ -66,7 +66,7 @@ T1 scaffold ─ T2 core rules ─ T3 lane slice (done)
 - [x] R5: Squad charges
 
 ### Checkpoint A2: squads (feedback taken, replaced by A3)
-- [x] Owner played 2026-11-07: squads cool but hard to read, too much dead time, shooting should grow gates. See `docs/ideas/pace-and-gates.md`.
+- [x] Owner played 2026-11-07: squads cool but hard to read, too much dead time, shooting should grow gates. See `docs/ideas/done/pace-and-gates.md`.
 
 - [x] S5: Tighter pacing
 - [x] S6: Squad charges read like walls

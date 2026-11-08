@@ -1,6 +1,6 @@
 # Session progress
 
-Status: refined with the owner via interview, 2026-11-09. Confirmed intent. Spec: `SPEC-session.md`, tasks: `tasks/todo-session.md`.
+Status: refined with the owner via interview, 2026-11-09. Confirmed intent. Spec: `docs/specs/SPEC-session.md`, tasks: `tasks/todo-session.md`.
 
 ## Problem
 While relearning and catching up, the owner loses most runs. A loss gives no sense of whether anything is sticking; the study screen only shows misses.
