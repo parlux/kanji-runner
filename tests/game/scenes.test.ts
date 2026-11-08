@@ -3,8 +3,17 @@ import { KANA } from "../../src/core/kana";
 import { KANJI } from "../../src/core/kanji";
 import { levelKeys } from "../../src/core/progression";
 import { bossSize } from "../../src/core/boss";
-import { defaultProgress } from "../../src/core/srs";
-import { CLASH_SECONDS } from "../../src/core/tuning";
+import { builtInPool, wanikaniPool } from "../../src/core/pool";
+import { buildPoolRun, missedItems } from "../../src/core/run";
+import { studyCards } from "../../src/core/study";
+import { itemKey, defaultProgress } from "../../src/core/srs";
+import {
+  plannedRows,
+  rowOpenings,
+  setTarget,
+  type RunState,
+} from "../../src/core/sim";
+import { CLASH_SECONDS, REASK_MAX_BOX } from "../../src/core/tuning";
 import { syntheticList } from "../core/wk-fixture";
 import { STEP } from "../../src/game/loop";
 import {
@@ -388,5 +397,162 @@ describe("adopting synced progress", () => {
     expect(adoptProgress(dev, { ...defaultProgress(), unlockedLevel: 9 })).toBe(
       dev,
     );
+  });
+});
+
+describe("re-asks in runs", () => {
+  const wk = syntheticList(60) as unknown as NonNullable<Session["wk"]>;
+  const wkSession = { ...createSession(defaultProgress(), null), wk };
+  const start = { kind: "start" } as const;
+  const startRun = (seed: number, session: Session) => {
+    const scene = handleAction(start, "confirm", () => seed, session).scene;
+    if (scene.kind !== "run") throw new Error("no run");
+    return scene;
+  };
+
+  /**
+   * Plays a run through the scenes, going through the chosen opening of every
+   * wall with an army too big to die. Returns the last run scene and the next.
+   */
+  function play(
+    scene: Extract<Scene, { kind: "run" }>,
+    wrong: (q: number, run: RunState) => boolean,
+  ): { prev: Scene; next: Scene } {
+    let s: Scene = { ...scene, run: { ...scene.run, army: 100_000 } };
+    for (;;) {
+      if (s.kind !== "run") throw new Error("left the run");
+      const { run } = s;
+      const row = run.rows[run.next];
+      const n = row?.options.length ?? 2;
+      const answer = row?.answerIndex ?? 0;
+      const pick = wrong(run.next, run) ? (answer + 1) % n : answer;
+      const aim = rowOpenings(run, run.next)[pick]?.centre ?? 0.5;
+      const prev: Scene = { ...s, run: setTarget(run, aim) };
+      const next = updateScene(prev, STEP, 0);
+      if (next.kind !== "run") return { prev, next };
+      s = next;
+    }
+  }
+
+  it("a Built-in run is unchanged: same seed, same rows, no re-asks", () => {
+    for (const session of [
+      createSession(defaultProgress(), null),
+      createSession(defaultProgress(), 3),
+    ])
+      for (const seed of [1, 7, 42]) {
+        const { run } = startRun(seed, session);
+        const { progress, kana } = session;
+        const pool = builtInPool(progress, kana, KANJI);
+        expect(run.rows).toEqual(buildPoolRun(seed, progress, pool));
+        expect(run.reask).toBeNull();
+      }
+  });
+
+  it("a WaniKani run has re-asks on, with buildPoolRun's rows", () => {
+    for (const seed of [1, 7, 42]) {
+      const { run } = startRun(seed, wkSession);
+      const { progress, kana } = wkSession;
+      const pool = wanikaniPool(progress, kana, wk);
+      expect(run.rows).toEqual(buildPoolRun(seed, progress, pool));
+      expect(run.reask).not.toBeNull();
+    }
+  });
+
+  it("a missed kanji comes back 3–5 rows later as a 3-answer wall; the boss is sized from the planned rows", () => {
+    const scene = startRun(3, wkSession);
+    const { next } = play(scene, (q) => q === 0);
+    if (next.kind !== "boss") throw new Error(`got ${next.kind}`);
+    const link = next.run.reask?.links.find((l) => l.of === 0);
+    if (!link) throw new Error("no re-ask of row 0");
+    expect(link.row - link.of).toBeGreaterThanOrEqual(3);
+    expect(link.row - link.of).toBeLessThanOrEqual(5);
+    const [first, again] = [next.run.rows[0], next.run.rows[link.row]];
+    expect(again?.prompt).toBe(first?.prompt);
+    expect(again?.type).toBe(first?.type);
+    expect(again?.options).toHaveLength(3);
+    expect(next.boss).toBe(
+      bossSize(plannedRows(next.run), next.run.track.charges, 3),
+    );
+  });
+
+  it("the summary lists a missed re-ask as its own question; study has one card", () => {
+    const { next } = play(startRun(3, wkSession), (q, run) => {
+      const of = run.reask?.links.find((l) => l.row === q)?.of;
+      return q === 0 || of === 0;
+    });
+    if (next.kind === "start") throw new Error("no end");
+    const { rows, results, track } = next.run;
+    const link = next.run.reask?.links.find((l) => l.of === 0);
+    if (!link) throw new Error("no re-ask of row 0");
+    const missed = missedItems(rows, results, track.charges, wk.kanji);
+    const again = missed.find((m) => m.q === link.row + 1);
+    expect(missed[0]?.q).toBe(1);
+    expect(again?.prompt).toBe(missed[0]?.prompt);
+    expect(again?.type).toBe(missed[0]?.type);
+    expect(again?.answers).toEqual(missed[0]?.answers);
+    const cards = studyCards(missed, wk.kanji, KANA);
+    expect(cards.filter((c) => c.char === missed[0]?.prompt)).toHaveLength(1);
+  });
+
+  it("after a WaniKani run, records follow the pair table", () => {
+    const cases = new Set<string>();
+    for (const seed of Array.from({ length: 30 }, (_, i) => i)) {
+      // miss row 0; miss its re-ask on every 3rd seed, other re-asks on odd seeds
+      const wrong = (q: number, run: RunState) => {
+        const of = run.reask?.links.find((l) => l.row === q)?.of;
+        if (of === undefined) return q === 0;
+        return of === 0 ? seed % 3 === 0 : seed % 2 === 1;
+      };
+      const { prev, next } = play(startRun(seed, wkSession), wrong);
+      if (next.kind === "start") throw new Error("no end");
+      const after = afterStep(wkSession, prev, next, 50);
+      const { rows, results } = next.run;
+      const reask = next.run.reask;
+      if (!reask) throw new Error("no re-asks");
+      const { links, startBoxes, planned } = reask;
+      const keys = planned.map((r) => itemKey(r.prompt, r.type));
+      const once = (k: string) => keys.filter((x) => x === k).length === 1;
+      const asked = rows.map((r) => itemKey(r.prompt, r.type));
+      results.forEach((ok, i) => {
+        const key = asked[i] as string;
+        if (!once(key) || links.some((l) => l.row === i)) return;
+        const start = startBoxes[i] as number;
+        const link = links.find((l) => l.of === i);
+        const item = after.progress.items[key];
+        let box: number;
+        if (link) {
+          const again = results[link.row] as boolean;
+          box = ok && again ? Math.min(5, start + 1) : 0;
+          cases.add(`${ok}/${again}`);
+          expect(item?.seen).toBe(2);
+          expect(item?.correct).toBe(Number(ok) + Number(again));
+        } else {
+          box = !ok
+            ? 0
+            : start <= REASK_MAX_BOX
+              ? start
+              : Math.min(5, start + 1);
+          cases.add(!ok ? "wrong" : start <= REASK_MAX_BOX ? "weak" : "known");
+          expect(item?.seen).toBe(1);
+        }
+        expect(item?.box, `seed ${seed} row ${i}`).toBe(box);
+        expect(item?.lastSeen).toBe(50);
+      });
+      // a replaced row's item gets no record
+      for (const l of links) {
+        const key = keys[l.row] as string;
+        if (once(key) && !asked.includes(key))
+          expect(after.progress.items[key]).toBeUndefined();
+      }
+    }
+    for (const c of [
+      "true/true",
+      "true/false",
+      "false/true",
+      "false/false",
+      "weak",
+      "known",
+    ])
+      expect(cases).toContain(c);
   });
 });

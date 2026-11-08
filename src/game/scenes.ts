@@ -2,12 +2,14 @@ import { bossSize, bossWon } from "../core/boss";
 import { applyUnlock, maxLevel, place } from "../core/progression";
 import { mergeProgress } from "../core/merge";
 import { builtInPool, wanikaniPool } from "../core/pool";
+import { reaskRun } from "../core/reask";
 import { buildPoolRun } from "../core/run";
 import { KANA } from "../core/kana";
 import { KANJI } from "../core/kanji";
 import {
   createRunState,
   nudgeTarget,
+  plannedRows,
   stepRun,
   type RunState,
 } from "../core/sim";
@@ -82,22 +84,23 @@ export function adoptProgress(session: Session, synced: Progress): Session {
   return { ...session, progress: mergeProgress(session.progress, synced) };
 }
 
+/**
+ * A new run. WaniKani runs have re-asks on (built with `reaskRun`, same rows
+ * as `buildPoolRun`); Built-in runs have none and are unchanged.
+ */
 function newRun(seed: number, session: Session): Scene {
-  return {
-    kind: "run",
-    seed,
-    run: createRunState(
-      buildPoolRun(
-        seed,
-        session.progress,
-        session.wk
-          ? wanikaniPool(session.progress, session.kana, session.wk)
-          : builtInPool(session.progress, session.kana, KANJI),
-      ),
-      buildTrack(seed, ROWS_PER_RUN),
-    ),
-    paused: false,
-  };
+  const track = buildTrack(seed, ROWS_PER_RUN);
+  const { progress, kana, wk } = session;
+  let run: RunState;
+  if (wk) {
+    const pool = wanikaniPool(progress, kana, wk);
+    const { rows, reask } = reaskRun(seed, progress, pool);
+    run = createRunState(rows, track, reask);
+  } else {
+    const pool = builtInPool(progress, kana, KANJI);
+    run = createRunState(buildPoolRun(seed, progress, pool), track);
+  }
+  return { kind: "run", seed, run, paused: false };
 }
 
 /**
@@ -115,10 +118,10 @@ export function afterStep(
 ): Session {
   if (prev.kind !== "run" || (next.kind !== "boss" && next.kind !== "end"))
     return session;
-  const { rows, results, army } = next.run;
+  const { rows, results, army, reask } = next.run;
   const won = next.kind === "boss" && bossWon(army, next.boss);
   const progress = applyUnlock(
-    recordRun(session.progress, rows, results, won, now),
+    recordRun(session.progress, rows, results, won, now, reask ?? undefined),
     session.kana,
     KANJI,
   );
@@ -231,7 +234,7 @@ export function updateScene(
       kind: "boss",
       seed,
       run,
-      boss: bossSize(run.rows, run.track.charges, seed),
+      boss: bossSize(plannedRows(run), run.track.charges, seed),
       t: 0,
     };
   return { ...scene, run };
