@@ -98,3 +98,41 @@ export function sessionLists(log: SessionLog): {
     missing: log.items.filter((it) => it.state === "missing").map(entry),
   };
 }
+
+/** One piece of a panel line: an item, or the dim `reading` divider. */
+export type PanelToken =
+  { kind: "item"; entry: SessionEntry } | { kind: "label"; s: string };
+
+/**
+ * Which entries of a panel line fit in `avail` px. Meaning and kana items come
+ * first, reading items follow a `reading` label. When some are hidden, room is
+ * kept for a ` +k` suffix and the label is never left dangling at the end.
+ * `measure` gives the width of a string at the drawn font.
+ */
+export function panelLine(
+  entries: SessionEntry[],
+  avail: number,
+  measure: (s: string) => number,
+): { tokens: PanelToken[]; hidden: number } {
+  const item = (entry: SessionEntry): PanelToken => ({ kind: "item", entry });
+  const plain = entries.filter((e) => e.type !== "reading").map(item);
+  const reading = entries.filter((e) => e.type === "reading").map(item);
+  const all: PanelToken[] = [
+    ...plain,
+    ...(reading.length
+      ? [{ kind: "label", s: "· reading" } as PanelToken]
+      : []),
+    ...reading,
+  ];
+  const text = (t: PanelToken): string =>
+    t.kind === "item" ? t.entry.prompt : t.s;
+  for (let c = all.length; c >= 0; c--) {
+    const shown = all.slice(0, c);
+    if (shown.length && shown[shown.length - 1].kind === "label") continue;
+    const hidden =
+      entries.length - shown.filter((t) => t.kind === "item").length;
+    const s = shown.map(text).join(" ") + (hidden ? ` +${hidden}` : "");
+    if (c === 0 || measure(s) <= avail) return { tokens: shown, hidden };
+  }
+  return { tokens: [], hidden: entries.length };
+}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { logRun, sessionLists } from "../../src/core/session";
+import { logRun, panelLine, sessionLists } from "../../src/core/session";
 import { SESSION_IDLE_MINUTES } from "../../src/core/tuning";
 import type { GateRow, GateType } from "../../src/core/types";
 
@@ -135,5 +135,41 @@ describe("fixed this run", () => {
     const a = logRun(null, [row("A"), row("A")], [false, true], 0);
     const l = sessionLists(logRun(a, [row("A")], [true], MIN));
     expect(l.fixed[0]?.thisRun).toBe(false);
+  });
+});
+
+describe("panelLine", () => {
+  const e = (prompt: string, type: GateType = "meaning") => ({
+    prompt,
+    type,
+    thisRun: false,
+  });
+  const w = (s: string): number => s.length * 10;
+  const texts = (r: ReturnType<typeof panelLine>): string[] =>
+    r.tokens.map((t) => (t.kind === "item" ? t.entry.prompt : t.s));
+
+  it("lists meaning items first, then reading items after a label", () => {
+    const r = panelLine([e("山", "reading"), e("水"), e("火")], 999, w);
+    expect(texts(r)).toEqual(["水", "火", "· reading", "山"]);
+    expect(r.hidden).toBe(0);
+  });
+
+  it("ends with +k and keeps room for it when too long", () => {
+    const entries = ["a", "b", "c", "d", "e"].map((p) => e(p));
+    const r = panelLine(entries, 80, w);
+    expect(texts(r)).toEqual(["a", "b", "c"]);
+    expect(r.hidden).toBe(2);
+  });
+
+  it("never leaves the reading label dangling", () => {
+    const entries = [e("a"), e("b", "reading")];
+    const r = panelLine(entries, 60, w);
+    expect(texts(r)).toEqual(["a"]);
+    expect(r.hidden).toBe(1);
+  });
+
+  it("shows nothing but +k when nothing fits, and handles empty", () => {
+    expect(panelLine([e("a")], 5, w)).toEqual({ tokens: [], hidden: 1 });
+    expect(panelLine([], 100, w)).toEqual({ tokens: [], hidden: 0 });
   });
 });
