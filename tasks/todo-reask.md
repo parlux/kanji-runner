@@ -39,9 +39,9 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 **Description:** `recordRun` takes optional re-ask info: which rows are re-asks of which row, and each row's start-of-run box. A pair updates its item once, per the spec's table; a weak right answer with no re-ask leaves the box unchanged; counters (`seen`, `correct`, `wrong`) still count every answer. With no re-ask info, `recordRun` behaves exactly as now.
 
 **Acceptance criteria:**
-- [ ] Every row of the spec's pair table, including a seeded start box and the army dying between the two asks (tested).
-- [ ] Counters count both answers; the displaced row's item gets no update (tested).
-- [ ] Without re-ask info, all existing `srs` and `srs-run` tests pass unchanged, including the v1 repeat rule (tested).
+- [x] Every row of the spec's pair table, including a seeded start box and the army dying between the two asks (tested).
+- [x] Counters count both answers; the displaced row's item gets no update (tested).
+- [x] Without re-ask info, all existing `srs` and `srs-run` tests pass unchanged, including the v1 repeat rule (tested).
 
 **Verification:** `npm test -- srs`
 **Dependencies:** R1 (types)
