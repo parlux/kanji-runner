@@ -71,7 +71,7 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 **Scope:** M
 
 ### Checkpoint E1: the pure core works
-- [ ] W2–W4 pass, and the bot balance test still meets its v1 thresholds in Built-in mode.
+- [x] W2–W4 pass, and the bot balance test still meets its v1 thresholds in Built-in mode.
 
 ### Task W5: Token form, mode switch and wiring
 **Description:**
@@ -93,7 +93,7 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 **Scope:** M
 
 ### Checkpoint E: v1.1 (owner, on the phone)
-- [ ] The owner pastes a token on the phone; runs use their WaniKani kanji and favour due ones.
-- [ ] The study screen helps after a loss, in both modes.
-- [ ] Removing the token returns to Built-in mode with progress intact.
-- [ ] Tune `WK_DUE_BOOST` from the owner's feedback.
+- [x] The owner pastes a token on the phone; runs use their WaniKani kanji and favour due ones.
+- [x] The study screen helps after a loss, in both modes.
+- [x] Removing the token returns to Built-in mode with progress intact.
+- [x] Tune `WK_DUE_BOOST` from the owner's feedback. (Kept at 4: owner signed off on 2026-11-08 with no change asked.)
