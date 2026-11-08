@@ -41,9 +41,9 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 - `main.ts`: load the log at start; save it after every run when `session.persist`. A dev sandbox never reads or writes it.
 
 **Acceptance criteria:**
-- [ ] Storage round trip; missing, corrupt or wrong-shaped data → null, never throws; `Progress` storage untouched (tested).
-- [ ] `afterStep` updates the log exactly once per run, for wins and losses, in both modes; a dev sandbox ignores stored data (tested).
-- [ ] Golden run and every existing test pass unchanged (tested).
+- [x] Storage round trip; missing, corrupt or wrong-shaped data → null, never throws; `Progress` storage untouched (tested).
+- [x] `afterStep` updates the log exactly once per run, for wins and losses, in both modes; a dev sandbox ignores stored data (tested).
+- [x] Golden run and every existing test pass unchanged (tested).
 
 **Verification:** `npm test`
 **Dependencies:** S1

@@ -5,6 +5,7 @@ import { levelKeys } from "../../src/core/progression";
 import { bossSize } from "../../src/core/boss";
 import { builtInPool, wanikaniPool } from "../../src/core/pool";
 import { buildPoolRun, missedItems } from "../../src/core/run";
+import type { SessionLog } from "../../src/core/session";
 import { studyCards } from "../../src/core/study";
 import { itemKey, defaultProgress } from "../../src/core/srs";
 import {
@@ -554,5 +555,51 @@ describe("re-asks in runs", () => {
       "known",
     ])
       expect(cases).toContain(c);
+  });
+});
+
+describe("session log in the session", () => {
+  const stored: SessionLog = {
+    startedAt: 1,
+    lastRunAt: 2,
+    runs: 1,
+    items: [],
+    fixedThisRun: [],
+  };
+  const endOf = (s: Session, kind: "end" | "boss", ok: boolean) => {
+    const run = handleAction({ kind: "start" }, "confirm", () => 7, s).scene;
+    if (run.kind !== "run") throw new Error("no run");
+    const results = run.run.rows.map(() => ok);
+    const done = { ...run.run, results };
+    const next: Scene =
+      kind === "end"
+        ? { kind: "end", seed: 7, boss: null, run: { ...done, status: "dead" } }
+        : ({ kind: "boss", seed: 7, run: done } as unknown as Scene);
+    return { run, next };
+  };
+
+  it("starts from the stored log; a dev sandbox ignores it", () => {
+    expect(createSession(defaultProgress(), null, stored).log).toBe(stored);
+    expect(createSession(defaultProgress(), null).log).toBeNull();
+    expect(createSession(defaultProgress(), 3, stored).log).toBeNull();
+  });
+
+  it("logs exactly one run per ending, for losses and wins, in both modes", () => {
+    for (const level of [null, 3]) {
+      const s = createSession(defaultProgress(), level, stored);
+      for (const kind of ["end", "boss"] as const) {
+        const { run, next } = endOf(s, kind, false);
+        const after = afterStep(s, run, next, 1000);
+        expect(after.log?.runs).toBe((s.log?.runs ?? 0) + 1);
+        expect(after.log?.items.length).toBeGreaterThan(0);
+        // a step that is not a run ending leaves the log alone
+        expect(afterStep(after, run, run, 1001).log).toBe(after.log);
+      }
+    }
+  });
+
+  it("adoptProgress keeps the log", () => {
+    const s = createSession(defaultProgress(), null, stored);
+    expect(adoptProgress(s, defaultProgress()).log).toBe(stored);
   });
 });

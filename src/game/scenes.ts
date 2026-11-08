@@ -14,6 +14,7 @@ import {
   type RunState,
 } from "../core/sim";
 import { buildTrack } from "../core/track";
+import { logRun, type SessionLog } from "../core/session";
 import { recordRun } from "../core/srs";
 import {
   CLASH_APPROACH_SECONDS,
@@ -56,6 +57,8 @@ export type Session = {
   unlocked: number | null;
   /** The taught WaniKani kanji when runs use WaniKani mode, else null (Built-in). */
   wk: WkList | null;
+  /** This sitting's missed and fixed items; updated once per finished run. */
+  log: SessionLog | null;
 };
 
 /**
@@ -63,15 +66,27 @@ export type Session = {
  * session is a sandbox: kanji only, levels 2..N unlocked, SRS updates kept in
  * memory for the page's lifetime but never saved, so real progress is untouched.
  */
-export function createSession(stored: Progress, level: number | null): Session {
+export function createSession(
+  stored: Progress,
+  level: number | null,
+  storedLog: SessionLog | null = null,
+): Session {
   return level === null
-    ? { progress: stored, kana: KANA, persist: true, unlocked: null, wk: null }
+    ? {
+        progress: stored,
+        kana: KANA,
+        persist: true,
+        unlocked: null,
+        wk: null,
+        log: storedLog,
+      }
     : {
         progress: { ...stored, unlockedLevel: level },
         kana: [],
         persist: false,
         unlocked: null,
         wk: null,
+        log: null,
       };
 }
 
@@ -129,6 +144,7 @@ export function afterStep(
   return {
     ...session,
     progress,
+    log: logRun(session.log, rows, results, now),
     unlocked: gained ? progress.unlockedLevel : null,
   };
 }

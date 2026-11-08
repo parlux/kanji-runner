@@ -20,6 +20,7 @@ import { KANA } from "./core/kana";
 import { KANJI } from "./core/kanji";
 import { missedItems } from "./core/run";
 import { canStudy, runKanji, studyCards } from "./core/study";
+import { loadSessionLog, saveSessionLog } from "./storage/session";
 import { loadProgress, saveProgress } from "./storage/storage";
 import { loginOpen, openLogin } from "./sync/login";
 import { createSyncFromEnv } from "./sync/sync";
@@ -45,6 +46,7 @@ let scene: Scene = { kind: "start" };
 let session = createSession(
   loadProgress(localStorage),
   devLevel(window.location.search),
+  loadSessionLog(localStorage),
 );
 
 // a dev `?level=N` sandbox never syncs
@@ -177,7 +179,10 @@ startLoop(
     const settled = afterStep(session, scene, next, Date.now());
     // save, then sync, after every run
     const ran = settled !== session && session.persist;
-    if (ran) saveProgress(localStorage, settled.progress);
+    if (ran) {
+      saveProgress(localStorage, settled.progress);
+      if (settled.log) saveSessionLog(localStorage, settled.log);
+    }
     session = settled;
     if (ran) void sync.push().then(adopt);
     scene = next;
