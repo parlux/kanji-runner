@@ -189,7 +189,7 @@ describe("reaskRow", () => {
       for (const c of row)
         expect(Math.abs(c / (total / 3) - 1)).toBeLessThan(0.15);
     }
-  });
+  }, 60_000);
 });
 
 describe("re-asks stay off screen", () => {

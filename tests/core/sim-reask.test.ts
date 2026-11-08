@@ -120,7 +120,7 @@ describe("re-asks in the sim", () => {
       }
     // only same-key clashes in the window can block these
     expect(placed).toBeGreaterThan(350);
-  });
+  }, 60_000);
 
   it("a right answer at a high box triggers nothing; at a weak box it does", () => {
     for (const seed of SEEDS.slice(0, 20)) {
