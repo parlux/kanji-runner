@@ -19,7 +19,7 @@ import { openStudy, studyOpen } from "./game/study";
 import { KANA } from "./core/kana";
 import { KANJI } from "./core/kanji";
 import { missedItems } from "./core/run";
-import { canStudy, studyCards } from "./core/study";
+import { canStudy, runKanji, studyCards } from "./core/study";
 import { loadProgress, saveProgress } from "./storage/storage";
 import { loginOpen, openLogin } from "./sync/login";
 import { createSyncFromEnv } from "./sync/sync";
@@ -80,7 +80,7 @@ const showTokenForm = (error?: string): void =>
   });
 if (session.persist) void wk.refresh();
 
-// the study screen (end screen only) lists what the last run missed
+// the study screen (end screen only) lists what the last run missed, then its other kanji
 const kanjiList = (): readonly KanjiItem[] => session.wk?.kanji ?? KANJI;
 const studyAvailable = (): boolean => {
   if (scene.kind !== "end") return false;
@@ -91,7 +91,10 @@ const studyAvailable = (): boolean => {
     run.track.charges,
     kanjiList(),
   );
-  return canStudy(missed.length, boss?.won ?? false);
+  return canStudy(
+    missed.length + runKanji(run.rows, run.results).length,
+    boss?.won ?? false,
+  );
 };
 const study = (): void => {
   if (scene.kind !== "end" || !studyAvailable()) return;
@@ -108,6 +111,7 @@ const study = (): void => {
     kanjiList(),
     KANA,
     session.wk ? wk.mnemonics() : undefined,
+    runKanji(run.rows, run.results),
   );
   openStudy(cards, () => {
     act("confirm");

@@ -3,7 +3,7 @@ import { KANA } from "../../src/core/kana";
 import { KANJI } from "../../src/core/kanji";
 import { buildRun, missedItems } from "../../src/core/run";
 import { defaultProgress, recordRun } from "../../src/core/srs";
-import { studyCards } from "../../src/core/study";
+import { canStudy, runKanji, studyCards } from "../../src/core/study";
 import type { KanjiItem, Progress } from "../../src/core/types";
 
 const progress: Progress = { ...defaultProgress(), unlockedLevel: 3 };
@@ -77,10 +77,53 @@ describe("studyCards", () => {
       );
   });
 
+  it("marks every card from misses as missed", () => {
+    for (const c of studyCards(missed, KANJI, KANA))
+      expect(c.missed).toBe(true);
+  });
+
+  it("adds the run's other kanji after the misses, unmarked, without kana", () => {
+    const seen = runKanji(rows, results);
+    const cards = studyCards(missed, KANJI, KANA, undefined, seen);
+    const missedChars = [...new Set(missed.map((m) => m.prompt))];
+    const rest = seen.filter(
+      (c) => !missed.some((m) => m.type !== "kana" && m.prompt === c),
+    );
+    expect(cards.map((c) => c.char)).toEqual([...missedChars, ...rest]);
+    expect(rest.length).toBeGreaterThan(0);
+    for (const c of cards.slice(missedChars.length)) {
+      expect(c.kind).toBe("kanji");
+      expect(c.missed).toBe(false);
+    }
+  });
+
   it("never changes progress", () => {
     const before = recordRun(progress, rows, results, false, 5);
     const snapshot = JSON.stringify(before);
     studyCards(missed, KANJI, KANA);
     expect(JSON.stringify(before)).toBe(snapshot);
+  });
+});
+
+describe("runKanji", () => {
+  it("lists answered kanji gates once, in order, skipping kana and unanswered rows", () => {
+    const answered = results.slice(0, 10);
+    const expected = [
+      ...new Set(
+        rows
+          .slice(0, 10)
+          .filter((r) => r.type !== "kana")
+          .map((r) => r.prompt),
+      ),
+    ];
+    expect(runKanji(rows, answered)).toEqual(expected);
+  });
+});
+
+describe("canStudy", () => {
+  it("is offered after a loss, and after a win only with a card", () => {
+    expect(canStudy(0, false)).toBe(true);
+    expect(canStudy(0, true)).toBe(false);
+    expect(canStudy(3, true)).toBe(true);
   });
 });

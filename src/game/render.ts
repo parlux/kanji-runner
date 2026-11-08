@@ -30,7 +30,7 @@ import {
 } from "../core/progression";
 import type { BossResult, Scene, Session } from "./scenes";
 import type { SyncStatus } from "../sync/sync";
-import { canStudy } from "../core/study";
+import { canStudy, runKanji } from "../core/study";
 import { startLayout, studyButton, syncLabel, type Rect } from "./start";
 import type { WkView } from "./wkstate";
 
@@ -513,7 +513,10 @@ function renderEnd(
     session.wk?.kanji ?? KANJI,
   );
   const top = 204;
-  const study = canStudy(misses.length, won);
+  const study = canStudy(
+    misses.length + runKanji(run.rows, run.results).length,
+    won,
+  );
   const bottom = study ? h - 116 : h - 56;
   if (misses.length === 0) {
     text(ctx, "No misses!", w / 2, top + 40, 28, COLORS.good);

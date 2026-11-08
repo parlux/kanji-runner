@@ -16,6 +16,8 @@ const CSS = `
 .kr-study .info { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 6px;
   overflow-wrap: anywhere; }
 .kr-study .meaning { font-size: 18px; font-weight: 600; }
+.kr-study .tag { align-self: flex-start; padding: 1px 6px; font-size: 12px; font-weight: 600;
+  color: #111; background: #ff6b6b; text-transform: uppercase; letter-spacing: 0.04em; }
 .kr-study .row { font-size: 15px; color: #9aa3b5; }
 .kr-study .row b { color: #5fd38d; font-weight: 600; }
 .kr-study .parts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
@@ -60,6 +62,7 @@ function line(label: string, value: string): HTMLElement {
 
 function cardEl(c: StudyCard): HTMLElement {
   const info = el("div", "info");
+  if (c.missed) info.append(el("span", "tag", "missed"));
   if (c.kind === "kana") {
     info.append(el("div", "meaning", c.romaji), el("div", "row", c.script));
   } else {
@@ -89,7 +92,8 @@ function cardEl(c: StudyCard): HTMLElement {
 }
 
 /**
- * Opens the study screen over the canvas: one scrollable card per missed item.
+ * Opens the study screen over the canvas: one scrollable card per missed item
+ * (marked "missed"), then one per other kanji from the run.
  * "Play again" closes it and calls `onPlay`; Escape or "Back" just closes it.
  * Does nothing if already open.
  */
@@ -117,7 +121,7 @@ export function openStudy(cards: readonly StudyCard[], onPlay: () => void) {
   });
 
   const list = el("div", "cards");
-  if (cards.length === 0) list.append(el("div", "empty", "Nothing missed."));
+  if (cards.length === 0) list.append(el("div", "empty", "Nothing to study."));
   else list.append(...cards.map(cardEl));
   const back = el("button", "", "Back");
   back.type = "button";
