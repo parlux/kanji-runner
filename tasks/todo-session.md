@@ -54,9 +54,9 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 **Description:** `render.ts` `renderEnd`: a compact panel between the missed list and the Study button, per the spec (heading with run count, Fixed and Still missing lines, fixed-this-run in the good color, reading items after a dim `reading` label, `+k` overflow, empty state). The missed list's area shrinks to make room.
 
 **Acceptance criteria:**
-- [ ] Browser check at 390×844 with crafted end scenes: long fixed and missing lists (overflow shows `+k`), reading items, fixed-this-run highlighted, the empty state; the missed list, Study button and "Tap or Enter" line don't overlap (screenshots in the scratchpad).
-- [ ] Also check a short screen (390×667) still fits.
-- [ ] Deploy green.
+- [x] Browser check at 390×844 with crafted end scenes: long fixed and missing lists (overflow shows `+k`), reading items, fixed-this-run highlighted, the empty state; the missed list, Study button and "Tap or Enter" line don't overlap (screenshots in the scratchpad).
+- [x] Also check a short screen (390×667) still fits.
+- [x] Deploy green.
 
 **Verification:** `npm test && npm run lint && npm run build`; browser check; deploy green.
 **Dependencies:** S2
