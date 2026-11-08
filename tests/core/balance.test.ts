@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { RunState } from "../../src/core/sim";
 import { botBossRun, botRun } from "./bot";
+import { wkRun } from "./wk-run";
 
 /** Died before answering the last question. */
 const diedEarly = (s: RunState): boolean =>
@@ -19,6 +20,28 @@ describe("balance bot (perfect steering)", () => {
   it("50% accuracy dies before the last question in at least half the runs", () => {
     const dead = SEEDS.filter((seed) =>
       diedEarly(botRun(seed, { wrong: (q) => q % 2 === 1 })),
+    );
+    expect(dead.length).toBeGreaterThanOrEqual(SEEDS.length / 2);
+  }, 60_000);
+});
+
+describe("balance bot in WaniKani mode, re-asks on (perfect steering)", () => {
+  const wk = { build: (seed: number) => wkRun(seed) };
+
+  it("100% accuracy never dies before the last question", () => {
+    const runs = SEEDS.map((seed) =>
+      botRun(seed, { ...wk, wrong: () => false }),
+    );
+    expect(SEEDS.filter((seed) => diedEarly(runs[seed] as RunState))).toEqual(
+      [],
+    );
+    // re-asks are actually placed
+    expect(runs.some((s) => (s.reask?.links.length ?? 0) > 0)).toBe(true);
+  }, 60_000);
+
+  it("50% accuracy dies before the last question in at least half the runs", () => {
+    const dead = SEEDS.filter((seed) =>
+      diedEarly(botRun(seed, { ...wk, wrong: (q) => q % 2 === 1 })),
     );
     expect(dead.length).toBeGreaterThanOrEqual(SEEDS.length / 2);
   }, 60_000);

@@ -55,9 +55,9 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 - A WaniKani balance check: the bot over 200 seeded runs on a synthetic WaniKani list, with re-asks on.
 
 **Acceptance criteria:**
-- [ ] A miss at question q is asked again 3–5 rows later; the cap of 3 holds; the track (hazards, hit points, boss) is identical with and without re-asks; same seed and answers give the same run (tested).
-- [ ] Without a config, the golden run snapshot and every existing sim, squad, fire and balance test pass unchanged (tested).
-- [ ] With re-asks on a synthetic WaniKani list: 100% accuracy never dies early, and 50% dies early in at least half of 200 runs (tested).
+- [x] A miss at question q is asked again 3–5 rows later; the cap of 3 holds; the track (hazards, hit points, boss) is identical with and without re-asks; same seed and answers give the same run (tested).
+- [x] Without a config, the golden run snapshot and every existing sim, squad, fire and balance test pass unchanged (tested).
+- [x] With re-asks on a synthetic WaniKani list: 100% accuracy never dies early, and 50% dies early in at least half of 200 runs (tested).
 
 **Verification:** `npm test`
 **Dependencies:** R1, R2
