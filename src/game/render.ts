@@ -480,6 +480,8 @@ function renderLevel(ctx: Ctx, w: number, y: number, session: Session): void {
 const PANEL_HEAD_H = 26;
 const PANEL_LINE_H = 30;
 const PANEL_CHAR_PX = 22;
+/** The missed list's rows never get thinner than this because of the panel. */
+const MISSED_MIN_ROW_H = 20;
 
 type PanelGroup = {
   head: string;
@@ -494,7 +496,7 @@ type PanelGroup = {
  * Wraps the Fixed and Still missing groups. The first line follows the label;
  * continuation lines start at the left gutter.
  */
-function layoutSession(ctx: Ctx, w: number, log: SessionLog) {
+function layoutSession(ctx: Ctx, w: number, log: SessionLog, maxLines: number) {
   const { runs, fixed, missing } = sessionLists(log);
   const measure = (s: string): number => {
     ctx.font = `${PANEL_CHAR_PX}px ${FONT}`;
@@ -511,7 +513,7 @@ function layoutSession(ctx: Ctx, w: number, log: SessionLog) {
       entries,
       w - 32 - headW - 8,
       w - 32,
-      SESSION_PANEL_MAX_LINES,
+      maxLines,
       measure,
     );
     return { head, headW, entries, ...r, highlight };
@@ -642,7 +644,16 @@ function renderEnd(
   );
   const panelBottom = study ? h - 116 : h - 56;
   const log = session.log;
-  const panel = log ? layoutSession(ctx, w, log) : null;
+  // Wrap as far as SESSION_PANEL_MAX_LINES, fewer when the missed rows would
+  // drop below MISSED_MIN_ROW_H.
+  const listNeed = misses.length ? 16 + misses.length * MISSED_MIN_ROW_H : 0;
+  const budget = panelBottom - top - listNeed;
+  let panel = null;
+  if (log)
+    for (let n = SESSION_PANEL_MAX_LINES; n >= 1; n--) {
+      panel = layoutSession(ctx, w, log, n);
+      if (panel.height <= budget) break;
+    }
   const panelH = panel?.height ?? 0;
   const bottom = panelBottom - panelH;
   if (misses.length === 0) {
