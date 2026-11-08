@@ -138,3 +138,12 @@ export const CLASH_SECONDS = 2.5;
 export const CLASH_APPROACH_SECONDS = 0.6;
 /** The result stays up this long (s) after the clash before the end screen. */
 export const CLASH_HOLD_SECONDS = 1.2;
+
+/** WaniKani mode: most re-asks (asking an item again) one run can hold. */
+export const REASK_MAX = 3;
+/** A right answer triggers a re-ask when the item's box at the start of the run was at most this. */
+export const REASK_MAX_BOX = 2;
+/** A re-ask replaces a row at least this many rows after its trigger. */
+export const REASK_GAP_MIN = 3;
+/** ... and at most this many rows after it. */
+export const REASK_GAP_MAX = 5;

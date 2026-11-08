@@ -4,6 +4,7 @@ import {
   meaningRow,
   readingRow,
   shownReading,
+  type Reading,
   showReading,
 } from "./distractors";
 import { createRng, shuffle, type Rng } from "./rng";
@@ -103,6 +104,25 @@ export function buildRun(
 }
 
 /**
+ * One gate row for an entry, with `count` options and distractors by the
+ * pool's rules (`similar` first). A reading gate needs the reading to show.
+ */
+export function entryRow(
+  rng: Rng,
+  e: Entry,
+  pool: Pool,
+  count: number,
+  shown?: Reading,
+): GateRow {
+  if (e.type === "kana") return kanaRow(rng, e.item, pool.kana, count);
+  const similar = pool.similar(e.item.char);
+  if (e.type === "meaning")
+    return meaningRow(rng, e.item, pool.kanji, count, similar);
+  if (!shown) throw new Error("A reading gate needs the reading to show");
+  return readingRow(rng, e.item, pool.kanji, count, shown, similar);
+}
+
+/**
  * A run from the seed, SRS state and a mode's pool (`pool.ts`). A reading
  * gate shows the kanji's main readings in turn, by how often it has been asked.
  */
@@ -114,21 +134,15 @@ export function buildPoolRun(
   const rng = createRng(seed);
   const asked = new Map<string, number>();
   return select(rng, pool).map((e, i) => {
-    const count = optionCount(i);
-    if (e.type === "kana") return kanaRow(rng, e.item, pool.kana, count);
-    const similar = pool.similar(e.item.char);
-    if (e.type === "meaning")
-      return meaningRow(rng, e.item, pool.kanji, count, similar);
-    const turn = (progress.items[e.key]?.seen ?? 0) + (asked.get(e.key) ?? 0);
-    asked.set(e.key, (asked.get(e.key) ?? 0) + 1);
-    return readingRow(
-      rng,
-      e.item,
-      pool.kanji,
-      count,
-      shownReading(e.item, turn),
-      similar,
-    );
+    const shown =
+      e.type === "reading"
+        ? shownReading(
+            e.item,
+            (progress.items[e.key]?.seen ?? 0) + (asked.get(e.key) ?? 0),
+          )
+        : undefined;
+    if (e.type === "reading") asked.set(e.key, (asked.get(e.key) ?? 0) + 1);
+    return entryRow(rng, e, pool, optionCount(i), shown);
   });
 }
 
