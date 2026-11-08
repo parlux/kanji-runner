@@ -52,14 +52,15 @@ export function logRun(
     if (!row) return;
     const key = keyOf(row.prompt, row.type);
     const at = index.get(key);
+    const hit = at === undefined ? undefined : items[at];
     if (!correct) {
-      if (at === undefined) {
+      if (!hit) {
         index.set(key, items.length);
         items.push({ prompt: row.prompt, type: row.type, state: "missing" });
-      } else items[at].state = "missing";
+      } else hit.state = "missing";
       fixedNow.delete(key);
-    } else if (at !== undefined && items[at].state === "missing") {
-      items[at].state = "fixed";
+    } else if (hit && hit.state === "missing") {
+      hit.state = "fixed";
       fixedNow.add(key);
     }
   });

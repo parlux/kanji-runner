@@ -134,6 +134,6 @@ describe("fixed this run", () => {
   it("does not mark an item that was already fixed and stays right", () => {
     const a = logRun(null, [row("A"), row("A")], [false, true], 0);
     const l = sessionLists(logRun(a, [row("A")], [true], MIN));
-    expect(l.fixed[0].thisRun).toBe(false);
+    expect(l.fixed[0]?.thisRun).toBe(false);
   });
 });
