@@ -128,7 +128,7 @@ export function panelLine(
     t.kind === "item" ? t.entry.prompt : t.s;
   for (let c = all.length; c >= 0; c--) {
     const shown = all.slice(0, c);
-    if (shown.length && shown[shown.length - 1].kind === "label") continue;
+    if (shown[c - 1]?.kind === "label") continue;
     const hidden =
       entries.length - shown.filter((t) => t.kind === "item").length;
     const s = shown.map(text).join(" ") + (hidden ? ` +${hidden}` : "");
