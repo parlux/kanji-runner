@@ -77,9 +77,9 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 - Build WaniKani runs with `reaskRun` and pass its `ReaskConfig` to `createRunState`; at the end call `recordRun(..., run.reask ?? undefined)`.
 
 **Acceptance criteria:**
-- [ ] A WaniKani run in the browser: a missed kanji comes back 3–5 rows later as a 3-answer wall, with no pop-in of the replaced row (browser check with a synthetic WaniKani list, screenshots in the scratchpad).
-- [ ] A Built-in run is unchanged: same seed, same rows (tested).
-- [ ] After a WaniKani run, records follow the pair table (tested at the scene level with a synthetic list).
+- [x] A WaniKani run in the browser: a missed kanji comes back 3–5 rows later as a 3-answer wall, with no pop-in of the replaced row (browser check with a synthetic WaniKani list, screenshots in the scratchpad).
+- [x] A Built-in run is unchanged: same seed, same rows (tested).
+- [x] After a WaniKani run, records follow the pair table (tested at the scene level with a synthetic list).
 
 **Verification:** `npm test`. Browser check at 390×844. Deploy green.
 **Dependencies:** R3
