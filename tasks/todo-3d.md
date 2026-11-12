@@ -40,9 +40,20 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 **Files:** `package.json`, `index.html`, `src/main.ts`, `src/game/render.ts`, `src/game/three/{world,view,figures,scene3d}.ts`, `tests/game/world.test.ts`
 **Scope:** L (highest risk: the look and camera set up everything after it)
 
-### Checkpoint H1: the look (owner, on the phone, with `?3d`)
-- [ ] The camera, track and crowd feel like a crowd runner; the crowd visibly grows and shrinks.
-- [ ] Camera numbers OK, or the owner says what to change (higher, lower, closer, wider).
+### Task T1b: Camera fix (owner feedback at H1)
+**Owner, 2026-11-12, on the phone with `?3d`:** "the player is a long way up the screen, and basically half the screen is light blue." (Gates missing was expected: T2.) H1 moved after T2 so the look is judged with gates.
+
+**Description:** Re-tune the camera in `view.ts` (height, distance back, pitch, field of view; `DIST_SCALE`/`TRACK_W` if needed) so the screen is mostly track, like the 2D layout: the army near the bottom and the fog line high. Both track edges stay visible at the army. Still a low-ish, behind-the-crowd 3D view, not top-down.
+
+**Acceptance criteria:**
+- [ ] Tested (pure projection in `world.ts`/`view.ts`) at 390×844 and 1280×800: army centre at 78–86% of screen height; the fog line (track at `VIEW_DISTANCE`) at 18–28% from the top; both track edges inside the screen at the army's depth.
+- [ ] Army count and pop-ups stay on screen at both sizes.
+- [ ] Browser check at both sizes with crowds of 5, 40, 200; screenshots in the scratchpad.
+
+**Verification:** `npm test && npm run lint && npm run build`; browser check; deploy green.
+**Dependencies:** T1
+**Files:** `src/game/three/{view,world,scene3d}.ts`, `tests/game/world.test.ts`
+**Scope:** S
 
 ### Task T2: Walls, gates, labels and squad charges
 **Description:**
@@ -56,9 +67,13 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 - [ ] Projected label size shrinks with distance (tested).
 
 **Verification:** `npm test && npm run lint && npm run build`; browser check; deploy green.
-**Dependencies:** T1 (and H1's camera feedback)
+**Dependencies:** T1b
 **Files:** `src/game/three/{scene3d,overlay,world}.ts`, `src/game/render.ts`, `tests/game/world.test.ts`
 **Scope:** L
+
+### Checkpoint H1: the look (owner, on the phone, with `?3d`; moved after T2)
+- [ ] The camera, track, gates and crowd feel like a crowd runner; the crowd visibly grows and shrinks.
+- [ ] Camera numbers OK, or the owner says what to change (higher, lower, closer, wider).
 
 ### Task T3: Hazards, fire and pop-ups
 **Description:** Crates (hit points and `+N` as overlay, damage, hit flash, burst on shatter, recruits running in), saws (toothed spinning disc on its rail), enemy packs (enemy figures facing the army, thinned as shot, kills popping off), fire tracers from the crowd to its target, and the clip-loss and answer-feedback pop-ups placed on the crowd.
