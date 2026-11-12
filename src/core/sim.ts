@@ -384,13 +384,14 @@ function steerStep(x: number, targetX: number, w: number, dt: number): number {
   return clampOnTrack(x + step, w);
 }
 
-export function stepRun(s: RunState, dt: number): RunState {
+/** `pace` scales the forward scroll only (a speed preset's multiplier). */
+export function stepRun(s: RunState, dt: number, pace = 1): RunState {
   if (s.status !== "running") return s;
   let next = { ...s };
   const w = crowdWidth(s.army);
   next.targetX = clampOnTrack(s.targetX, w);
   next.x = steerStep(s.x, next.targetX, w, dt);
-  next.dist += BASE_SPEED * speedMul(s.dist, s.track) * dt;
+  next.dist += BASE_SPEED * pace * speedMul(s.dist, s.track) * dt;
   next = movePacks(next, dt);
   next = fire(next, w, dt);
   // resolve everything passed this step, in track order

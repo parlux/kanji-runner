@@ -232,6 +232,7 @@ export function render(
   sync: SyncStatus = "disabled",
   wk: WkView | null = null,
   project?: Projector,
+  speed?: string,
 ): void {
   // with a 3D view, the run is drawn behind this canvas: draw only the overlay
   if (project && scene.kind === "run") {
@@ -243,7 +244,7 @@ export function render(
   ctx.fillStyle = COLORS.bg;
   ctx.fillRect(0, 0, w, h);
   if (scene.kind === "start")
-    return renderStart(ctx, w, h, session, scene.pick, sync, wk);
+    return renderStart(ctx, w, h, session, scene.pick, sync, wk, speed);
   if (scene.kind === "end")
     return renderEnd(ctx, w, h, scene.run, scene.seed, scene.boss, session);
   if (scene.kind === "boss")
@@ -295,9 +296,11 @@ function renderStart(
   pick: number | undefined,
   sync: SyncStatus,
   wk: WkView | null,
+  speed?: string,
 ): void {
   if (pick !== undefined) return renderPicker(ctx, w, h, session, pick);
   renderSyncLabel(ctx, w, h, sync);
+  if (speed) renderSpeedPill(ctx, w, h, speed);
   const wanikani = session.wk !== null;
   if (wk) renderWk(ctx, w, h, wk);
   text(ctx, "Kanji Runner", w / 2, h * 0.22, Math.min(64, w / 8));
@@ -409,6 +412,19 @@ function renderSyncLabel(
   ctx.textAlign = "left";
   ctx.textBaseline = "middle";
   ctx.fillText(label, r.x + 34, cy);
+}
+
+/** The speed preset pill, top right under the sync label. */
+function renderSpeedPill(ctx: Ctx, w: number, h: number, label: string): void {
+  const r = startLayout(w, h).speed;
+  ctx.strokeStyle = COLORS.wall;
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.roundRect(r.x + 0.5, r.y + 0.5, r.w - 1, r.h - 1, r.h / 2);
+  ctx.stroke();
+  ctx.font = `15px ${FONT}`;
+  const size = fitSize(ctx, label, 15, r.w - 24);
+  text(ctx, label, r.x + r.w / 2, r.y + r.h / 2, size, COLORS.dim);
 }
 
 /** "Kanji 2 unlocked!" after a run that unlocked a level. */

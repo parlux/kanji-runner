@@ -11,7 +11,16 @@ import {
   updateScene,
   type Scene,
 } from "./game/scenes";
-import { hits, startTap, studyButton, syncTap, wkTap } from "./game/start";
+import {
+  hits,
+  speedTap,
+  startTap,
+  studyButton,
+  syncTap,
+  wkTap,
+} from "./game/start";
+import { SPEED_PRESETS } from "./core/tuning";
+import { loadSpeed, nextSpeed, saveSpeed, speedLabel } from "./storage/speed";
 import { openTokenForm, tokenFormOpen } from "./game/wanikani";
 import { createWkState } from "./game/wkstate";
 import { createWkClient } from "./wanikani/client";
@@ -72,6 +81,9 @@ const adopt = (p: Progress): void => {
   session = adoptProgress(session, p);
 };
 void sync.pull().then(adopt);
+
+// speed preset: this device only, changed on the start screen
+let speed = loadSpeed(localStorage);
 
 // WaniKani: token, cache and mode live on this device only; a dev sandbox skips it
 const wk = createWkState({
@@ -167,6 +179,11 @@ const takeDrag = bindDrag(canvas, (x, y) => {
     else openLogin(sync, adopt);
     return;
   }
+  if (scene.pick === undefined && speedTap(w, h, x, y)) {
+    speed = nextSpeed(speed);
+    saveSpeed(localStorage, speed);
+    return;
+  }
   if (scene.pick === undefined && session.persist) {
     const tap = wkTap(wk.view().canSwitch, w, h, x, y);
     if (tap === "token") return showTokenForm();
@@ -188,7 +205,13 @@ startLoop(
     // an invalid token reopens the form, once, from the start screen
     if (scene.kind === "start" && !overlayOpen() && wk.takeInvalid())
       showTokenForm("WaniKani token invalid");
-    const next = updateScene(scene, dt, steerAxis(), takeDrag());
+    const next = updateScene(
+      scene,
+      dt,
+      steerAxis(),
+      takeDrag(),
+      SPEED_PRESETS[speed],
+    );
 
     const settled = afterStep(session, scene, next, Date.now());
     // save, then sync, after every run
@@ -217,6 +240,7 @@ startLoop(
       sync.status(),
       session.persist ? wk.view() : null,
       project,
+      speedLabel(speed),
     );
   },
 );

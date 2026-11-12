@@ -35,6 +35,10 @@ export const TWO_OPTION_ROWS = 7;
 /** How far ahead rows and hazards become visible. Equals the first row's lead time in seconds. */
 export const VIEW_DISTANCE = 3.0;
 export const BASE_SPEED = 1.6;
+/** Player speed presets: multipliers on BASE_SPEED (the ramp still applies on top). */
+export const SPEED_PRESETS = { relaxed: 0.7, normal: 0.85, fast: 1.0 } as const;
+export type SpeedPreset = keyof typeof SPEED_PRESETS;
+export const DEFAULT_SPEED: SpeedPreset = "normal";
 /** Speed multiplier reached by the last row (ramps linearly from 1.0×). */
 export const MAX_SPEED_MUL = 1.3;
 

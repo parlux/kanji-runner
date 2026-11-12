@@ -693,3 +693,11 @@ describe("shooting", () => {
     expect(s.results).toEqual([true, false]);
   });
 });
+
+describe("pace", () => {
+  it("scales the scroll by the speed preset's multiplier", () => {
+    const full = stepRun(fresh(), 0.1);
+    const slow = stepRun(fresh(), 0.1, 0.7);
+    expect(slow.dist).toBeCloseTo(full.dist * 0.7);
+  });
+});

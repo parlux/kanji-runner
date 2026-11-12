@@ -231,18 +231,20 @@ export function handleAction(
 /**
  * `steer` is the held axis (-1, 0 or 1); holding moves the target at STEER_MAX_SPEED.
  * `dragDx` is target movement from drag, in track units.
+ * `pace` is the speed preset's multiplier on the scroll.
  */
 export function updateScene(
   scene: Scene,
   dt: number,
   steer: number,
   dragDx = 0,
+  pace = 1,
 ): Scene {
   if (scene.kind === "boss") return stepBoss(scene, dt);
   if (scene.kind !== "run" || scene.paused) return scene;
   const dx = steer * STEER_MAX_SPEED * dt + dragDx;
   let run = dx ? nudgeTarget(scene.run, dx) : scene.run;
-  run = stepRun(run, dt);
+  run = stepRun(run, dt, pace);
   const { seed } = scene;
   if (run.status === "dead") return { kind: "end", seed, run, boss: null };
   if (run.status === "finished")

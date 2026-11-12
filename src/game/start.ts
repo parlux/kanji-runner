@@ -21,6 +21,8 @@ export function startLayout(w: number, h: number) {
     cancel: { x, y: h * 0.55 + 64, w: bw, h: 44 },
     /** The sync status label, top right; opens login or retries. */
     sync: { x: w - 124, y: 12, w: 112, h: 36 },
+    /** The speed preset pill, under the sync label; tap cycles. */
+    speed: { x: w - 164, y: 56, w: 152, h: 36 },
     /** The WaniKani status label, top left. */
     wkStatus: { x: 12, y: 12, w: w - 124 - 24, h: 36 },
     /** The Built-in / WaniKani switch, two halves. */
@@ -88,6 +90,11 @@ export function syncTap(
   y: number,
 ): boolean {
   return syncLabel(status) !== null && inside(startLayout(w, h).sync, x, y);
+}
+
+/** Whether a start screen tap (picker closed) hits the speed pill. */
+export function speedTap(w: number, h: number, x: number, y: number): boolean {
+  return inside(startLayout(w, h).speed, x, y);
 }
 
 /** What a start screen tap does about WaniKani: switch the mode or open the token form. */
