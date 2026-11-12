@@ -56,9 +56,9 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 - `study.ts`: when a card has `radicals`, a "radicals" row replaces "parts": chips with the character, or an `<img>` of the SVG sized to the text, plus the WaniKani name, in the radical blue. Stories render as today.
 
 **Acceptance criteria:**
-- [ ] Browser checks at 390×844, mocked fetch and synthetic data: Built-in study card with stories and radicals (character and image chips); a card for a kanji not in the library; no token (today's card). Screenshots in the scratchpad only.
-- [ ] Reload: the library comes back from IndexedDB without a refetch (browser check).
-- [ ] Same seed, same Built-in run before and after saving a token (tested or checked).
+- [x] Browser checks at 390×844, mocked fetch and synthetic data: Built-in study card with stories and radicals (character and image chips); a card for a kanji not in the library; no token (today's card). Screenshots in the scratchpad only.
+- [x] Reload: the library comes back from IndexedDB without a refetch (browser check).
+- [x] Same seed, same Built-in run before and after saving a token (tested or checked).
 - [ ] `dist/` and the repo contain no WaniKani content or token: grep for a phrase from one real story and the token prefix (manual, by the orchestrator, using data in the scratchpad).
 
 **Verification:** `npm test`. Browser checks. Deploy green.

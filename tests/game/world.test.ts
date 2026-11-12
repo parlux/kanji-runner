@@ -38,8 +38,21 @@ import {
   BURST_PIECES,
   recruitProgress,
   packFigureScale,
+  clipGaps,
+  crowdHalfDepth,
+  drawnCentre,
+  drawnWidth,
+  scaledWidth,
+  spreadScale,
+  spreadShare,
+  spreadWidth,
+  SQUEEZE_DIST,
   type CameraPose,
 } from "../../src/game/three/world";
+import { createRunState, stepRun, type RunState } from "../../src/core/sim";
+import { buildTrack } from "../../src/core/track";
+import { ROWS_PER_RUN } from "../../src/core/tuning";
+import { kanaRun } from "../core/kana-run";
 import { gateOpenings } from "../../src/core/gates";
 import { hazardSpan, type Saw } from "../../src/core/track";
 import { AIM, CAMERA_MIN_HEIGHT, cameraFit } from "../../src/game/three/view";
@@ -94,6 +107,109 @@ describe("crowd layout", () => {
   });
 });
 
+describe("crowd spread and squeeze", () => {
+  const out = new Float32Array(2 * MAX_DRAWN_SOLDIERS);
+
+  it("spreads wider than the true width on open road: ~0.1, ~0.3, 0.55 of the track", () => {
+    expect(spreadWidth(5)).toBeCloseTo(0.11, 2);
+    expect(spreadWidth(40)).toBeCloseTo(0.32, 2);
+    expect(spreadWidth(200)).toBe(0.55);
+    for (const army of [1, 5, 40, 100, 200, 1000])
+      expect(spreadWidth(army)).toBeGreaterThanOrEqual(crowdWidth(army));
+    expect(drawnWidth(200, Infinity, Infinity)).toBe(spreadWidth(200));
+  });
+
+  it("keeps the stretched layout inside the drawn width and on the track", () => {
+    for (const army of [1, 5, 40, 200, 1000])
+      for (const share of [0, 0.3, 1]) {
+        const n = crowdLayout(army, out);
+        const cw = crowdWidth(army);
+        const w = cw + (spreadWidth(army) - cw) * share;
+        const k = spreadScale(army, w);
+        expect(scaledWidth(army, k)).toBeCloseTo(w, 9);
+        for (const x of [cw / 2, 0.5, 1]) {
+          const c = worldX(drawnCentre(x, w));
+          for (let i = 0; i < n; i++) {
+            const fx = c + (out[2 * i] as number) * k;
+            expect(Math.abs(fx - c) + FIGURE_RADIUS).toBeLessThan(
+              (w * TRACK_W) / 2 + 1e-9,
+            );
+            expect(fx - FIGURE_RADIUS).toBeGreaterThan(worldX(0) - 1e-9);
+            expect(fx + FIGURE_RADIUS).toBeLessThan(worldX(1) + 1e-9);
+          }
+        }
+      }
+    // squeezed: exactly the sim's crowd, where the sim has it
+    expect(spreadScale(40, crowdWidth(40))).toBe(1);
+    expect(drawnCentre(0.2, crowdWidth(100))).toBe(0.2);
+  });
+
+  it("is exactly the true width while an obstacle is within the crowd, and continuous", () => {
+    for (const army of [5, 40, 200]) {
+      expect(drawnWidth(army, 0, Infinity)).toBe(crowdWidth(army));
+      expect(drawnWidth(army, Infinity, 0)).toBe(crowdWidth(army));
+      expect(drawnWidth(army, crowdHalfDepth(army), 5)).toBe(crowdWidth(army));
+      let last = drawnWidth(army, 3, Infinity);
+      for (let d = 3; d >= -3; d -= 0.01) {
+        const w =
+          d >= 0
+            ? drawnWidth(army, d, Infinity)
+            : drawnWidth(army, Infinity, -d);
+        expect(Math.abs(w - last)).toBeLessThan(0.01);
+        last = w;
+      }
+      expect(drawnWidth(army, SQUEEZE_DIST + crowdHalfDepth(army), 9)).toBe(
+        spreadWidth(army),
+      );
+    }
+  });
+
+  it("finds every kind of obstacle: walls, charges, saws, crates and packs", () => {
+    const base = createRunState(kanaRun(1), buildTrack(1, ROWS_PER_RUN));
+    const run: RunState = {
+      ...base,
+      track: {
+        questions: [10, 20],
+        charges: [1],
+        hazards: [
+          { kind: "saw", pos: 13, mid: 0.5, amp: 0.2, phase: 0 },
+          { kind: "block", pos: 15, left: 0.4, right: 0.6 },
+          { kind: "pack", pos: 18, x: 0.5 },
+        ],
+      },
+      // the pack has run in from 18 to 17
+      packs: [null, null, { pos: 17, x: 0.5 }],
+    };
+    for (const pos of [10, 13, 15, 17, 20]) {
+      const g = clipGaps({ ...run, dist: pos });
+      expect(g.ahead).toBe(0);
+      expect(drawnWidth(200, g.ahead, g.behind)).toBe(crowdWidth(200));
+    }
+    expect(clipGaps({ ...run, dist: 14 })).toEqual({ ahead: 1, behind: 1 });
+    expect(clipGaps({ ...run, dist: 25 }).ahead).toBe(Infinity);
+  });
+
+  it("is fully squeezed in the frames either side of every contact in a real run", () => {
+    for (const seed of [1, 2, 3]) {
+      let s = createRunState(kanaRun(seed), buildTrack(seed, ROWS_PER_RUN));
+      s = { ...s, army: 150 };
+      let contacts = 0;
+      while (s.status === "running" && s.dist < 200) {
+        const next = stepRun(s, 1 / 60);
+        if (next.nextHazard !== s.nextHazard || next.next !== s.next) {
+          contacts++;
+          for (const r of [s, next]) {
+            const g = clipGaps(r);
+            expect(spreadShare(r.army, g.ahead, g.behind)).toBe(0);
+          }
+        }
+        s = next;
+      }
+      expect(contacts).toBeGreaterThan(5);
+    }
+  });
+});
+
 describe("haze and horizons", () => {
   const poses = [pose, cameraFit(390 / 844).pose, cameraFit(1280 / 800).pose];
   const haze = (p: CameraPose, ahead: number, y: number): number =>
@@ -140,15 +256,14 @@ describe("camera fit", () => {
     (Math.atan2(p.height - p.lookHeight, p.back + p.lookAhead) * 180) / Math.PI;
 
   for (const [w, h] of sizes)
-    it(`at ${w}×${h} puts the army in the lower third, the far line near the top and both edges in view`, () => {
+    it(`at ${w}×${h} puts the army 80% down, the far line near the top and both edges in view`, () => {
       const aspect = w / h;
       const fit = cameraFit(aspect);
       const army = screenAt(fit, aspect, 0, 0, 0).y;
       const far = screenAt(fit, aspect, 0, 0, farZ).y;
       expect(army).toBeCloseTo(AIM.armyY, 6);
       expect(far).toBeCloseTo(AIM.farY, 6);
-      expect(army).toBeGreaterThanOrEqual(0.66);
-      expect(army).toBeLessThanOrEqual(0.76);
+      expect(army).toBeCloseTo(0.8, 6);
       expect(far).toBeGreaterThanOrEqual(0.05);
       expect(far).toBeLessThanOrEqual(0.15);
       // the read line sits between them
@@ -188,7 +303,12 @@ describe("camera fit", () => {
           }
   });
 
-  it("is flatter than before on a phone, and closer on a wide screen", () => {
+  it("keeps T3b's pitch with the army lower: 28.7° at 390×844, 25.7° at 1280×800", () => {
+    expect(pitchOf(cameraFit(390 / 844).pose)).toBeCloseTo(28.7, 1);
+    expect(pitchOf(cameraFit(1280 / 800).pose)).toBeCloseTo(25.7, 1);
+  });
+
+  it("is flatter than T1b's camera on a phone and on a wide screen", () => {
     // T1b's camera pitched 40.7° down at 390×844 and 29.7° at 1280×800
     expect(pitchOf(cameraFit(390 / 844).pose)).toBeLessThan(40.7 - 8);
     expect(pitchOf(cameraFit(1280 / 800).pose)).toBeLessThan(29.7);

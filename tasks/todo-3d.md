@@ -134,20 +134,41 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 - Unchanged: `src/core`, `crowdWidth`, clipping, balance, golden run, haze, `SHAPE_DISTANCE`, text (T3c), 2D.
 
 **Acceptance criteria:**
-- [ ] Tested: `spreadWidth` at 5, 40, 200; drawn width equals `crowdWidth` at contact with each obstacle kind and is continuous as an obstacle approaches and passes; layout footprint within the drawn width and on the track.
-- [ ] Tested: pitch at 390×844 and 1280×800 unchanged from T3b (28.7°, 25.7°); army centre ≈ 80% (or the lowest the hard rule allows, reported); hard rule still holds.
-- [ ] Browser check at 390×844 with `?3d`: crowds of 5, 40 and 200 on open road; a 200 crowd squeezing through a gate (filmstrip) and past a saw and a crate; the army's screen position before and after. Screenshots in the scratchpad.
+- [x] Tested: `spreadWidth` at 5, 40, 200; drawn width equals `crowdWidth` at contact with each obstacle kind and is continuous as an obstacle approaches and passes; layout footprint within the drawn width and on the track.
+- [x] Tested: pitch at 390×844 and 1280×800 unchanged from T3b (28.7°, 25.7°); army centre ≈ 80% (or the lowest the hard rule allows, reported); hard rule still holds.
+- [x] Browser check at 390×844 with `?3d`: crowds of 5, 40 and 200 on open road; a 200 crowd squeezing through a gate (filmstrip) and past a saw and a crate; the army's screen position before and after. Screenshots in the scratchpad.
 
 **Verification:** `npm test && npm run lint && npm run build`; browser check; deploy green.
 **Dependencies:** T3c
 **Files:** `src/game/three/{world,view,squads,scene3d}.ts` (crowd code), `tests/game/world.test.ts`
 **Scope:** M
 
-### Checkpoint H1: the look (owner, on the phone, with `?3d`; moved after T3: hazards must be visible for a playable run; T3b, T3c and T3d from owner feedback)
+### Task T3e: Steady crowd width, straight fire at gates (owner feedback at H1, 2026-11-13)
+**Owner:** "the army width 'pulses' even without an obstacle. It should stay 'wide' until it approaches an obstacle that requires narrowing." / "get rid of the strange shooting at gates where the bullets hit the edge of the gates rather than shooting straight ahead."
+
+**Cause:** `clipGaps` (`world.ts`) counts every wall and hazard on the track, including crates/saws/packs in another lane and ones already shot down, so with hazards every 3.0 the crowd is fully spread only ~1.3 of each gap. In `squads.ts` the fire at a gate splits onto the opening's two edges; 2D fires straight ahead and stops at the wall.
+
+**Description:**
+- **Squeeze only for what would hit:** walls and squad charges always count. Crates, saws and packs count only while still standing and while their span (at their position when the crowd reaches them, e.g. a saw's sweep) overlaps the crowd's spread span. Otherwise the crowd stays wide.
+- **No snaps:** the spread share eases over time (or is otherwise continuous), so a crate shattering, a pack dying or the player steering away/into a hazard never jumps the width. At contact with anything that clips, the drawn width is still exactly `crowdWidth`.
+- **Straight fire at gates:** while shooting a gate, tracers go straight ahead from the crowd's lanes and stop at the wall's face, like 2D. Keep the opening's glowing edges (they show the widening). Crate/pack/squad fire unchanged.
+- Unchanged: `src/core`, the width curve, the camera, text.
+
+**Acceptance criteria:**
+- [ ] Tested: a crate, saw and pack in another lane, or shot down, don't squeeze the crowd; one in its path does; walls always do; width stays continuous when a hazard is destroyed mid-squeeze and when steering across one.
+- [ ] Browser check at 390×844 with `?3d`: a 200 crowd running past an off-lane crate and saw stays wide (filmstrip); fire at a gate goes straight ahead and stops at the wall. Screenshots in the scratchpad.
+
+**Verification:** `npm test && npm run lint && npm run build`; browser check; deploy green.
+**Dependencies:** T3d
+**Files:** `src/game/three/{world,scene3d,squads}.ts`, `tests/game/world.test.ts`
+**Scope:** S
+
+### Checkpoint H1: the look (owner, on the phone, with `?3d`; moved after T3: hazards must be visible for a playable run; T3b–T3e from owner feedback)
 - [ ] The camera, track, gates, hazards and crowd feel like a crowd runner; the crowd visibly grows and shrinks.
 - [ ] Things appear in the distance and fade in; the camera is closer and less steep; 3D no longer feels faster than 2D (v1.4.1).
 - [ ] Gate and crate text comes out of the haze with its object, never popping in (T3c).
 - [ ] A big army spreads across most of the road and squeezes through gates and past hazards; the army sits lower on the screen (T3d).
+- [ ] The crowd stays wide on open road, no pulsing; fire at gates goes straight ahead (T3e).
 - [ ] Camera numbers OK, or the owner says what to change (higher, lower, closer, wider).
 
 ### Task T4: The boss at the end of the track

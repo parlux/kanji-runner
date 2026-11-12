@@ -24,7 +24,13 @@ import { createFx } from "./fx";
 import { createProps } from "./props";
 import { createHazards } from "./hazards";
 import {
+  clipGaps,
   crowdLayout,
+  drawnCentre,
+  scaledWidth,
+  spreadScale,
+  spreadShare,
+  spreadWidth,
   DIST_SCALE,
   MAX_DRAWN_SOLDIERS,
   fogRange,
@@ -76,6 +82,8 @@ const phaseOf = (k: number): number => {
 /**
  * An animated crowd of figures: laid out by `crowdLayout`, bobbing as it runs.
  * New figures scale in at the edge; lost ones fall back and shrink away.
+ * On open road it spreads sideways (`spreadShare` of the way to
+ * `spreadWidth`), squeezed back to the true width at any obstacle.
  * Purely visual: the army size passed in is the truth.
  */
 function createCrowd(kind: FigureKind) {
@@ -87,6 +95,8 @@ function createCrowd(kind: FigureKind) {
   const diedAt = new Float32Array(max).fill(-Infinity);
   const alive = new Uint8Array(max);
   let lastArmy = -1;
+  // the open-road stretch, eased so an army change never jumps the width
+  let stretch = 1;
   const pos = new Vector3();
   const scl = new Vector3();
   const rot = new Euler();
@@ -95,8 +105,18 @@ function createCrowd(kind: FigureKind) {
 
   return {
     mesh,
-    /** Places the crowd centred at world (cx, 0, cz) at animation time `now` (s); `dt` eases layout changes. */
-    update(army: number, cx: number, cz: number, now: number, dt: number) {
+    /**
+     * Places the crowd for an army centred at track x `x` (world Z `cz`),
+     * `share` spread out, at animation time `now` (s); `dt` eases layout changes.
+     */
+    update(
+      army: number,
+      x0: number,
+      cz: number,
+      share: number,
+      now: number,
+      dt: number,
+    ) {
       if (army !== lastArmy) {
         lastArmy = army;
         const n = crowdLayout(army, target);
@@ -113,6 +133,10 @@ function createCrowd(kind: FigureKind) {
         }
       }
       const ease = 1 - Math.exp(-SETTLE_RATE * dt);
+      stretch += (spreadScale(army, spreadWidth(army)) - stretch) * ease;
+      // exactly the true width (and centre) when squeezed
+      const sx = 1 + (stretch - 1) * share;
+      const cx = worldX(drawnCentre(x0, scaledWidth(army, sx)));
       let i = 0;
       for (let k = 0; k < max; k++) {
         const dying = !alive[k] && now - (diedAt[k] as number) < DROP_S;
@@ -126,7 +150,7 @@ function createCrowd(kind: FigureKind) {
             (cur[2 * k + 1] as number) +
             (tz - (cur[2 * k + 1] as number)) * ease;
         }
-        const x = cx + (cur[2 * k] as number);
+        const x = cx + (cur[2 * k] as number) * sx;
         const z = cz + (cur[2 * k + 1] as number);
         const stride = (now * STRIDE_HZ + phaseOf(k)) * Math.PI * 2;
         if (alive[k]) {
@@ -268,7 +292,15 @@ export function createView3d(canvas: HTMLCanvasElement): View3d | null {
         hazards.update(s.run, clock, fighting);
       }
       fx.end();
-      army.update(s.run.army, worldX(s.run.x), 0, clock, paused ? 0 : dt);
+      const gaps = clipGaps(s.run);
+      army.update(
+        s.run.army,
+        s.run.x,
+        0,
+        spreadShare(s.run.army, gaps.ahead, gaps.behind),
+        clock,
+        paused ? 0 : dt,
+      );
       renderer.render(scene, camera);
     },
     haze: (dist, height) => haze(dist, height),

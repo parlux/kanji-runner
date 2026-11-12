@@ -128,7 +128,7 @@ export function render(
   if (view3d && scene.kind === "run") {
     ctx.clearRect(0, 0, w, h);
     renderRunOverlay(ctx, w, h, scene.run, view3d);
-    if (scene.paused) renderPaused(ctx, w, h);
+    if (scene.paused) renderPaused(ctx, w, h, scene.run.results.length > 0);
     return;
   }
   ctx.fillStyle = COLORS.bg;
@@ -140,14 +140,22 @@ export function render(
   if (scene.kind === "boss")
     return renderBoss(ctx, w, h, scene.run.army, scene.boss, scene.t);
   renderRun(ctx, w, h, scene.run);
-  if (scene.paused) renderPaused(ctx, w, h);
+  if (scene.paused) renderPaused(ctx, w, h, scene.run.results.length > 0);
 }
 
-function renderPaused(ctx: Ctx, w: number, h: number): void {
+/** With `lastPanel`, the DOM pause panel (src/game/pausecard.ts) shows the title and hint. */
+function renderPaused(
+  ctx: Ctx,
+  w: number,
+  h: number,
+  lastPanel: boolean,
+): void {
   ctx.fillStyle = "rgba(0,0,0,0.6)";
   ctx.fillRect(0, 0, w, h);
-  text(ctx, "Paused", w / 2, h / 2 - 20, 40);
-  text(ctx, "Tap or P to resume", w / 2, h / 2 + 24, 20, COLORS.dim);
+  if (!lastPanel) {
+    text(ctx, "Paused", w / 2, h / 2 - 20, 40);
+    text(ctx, "Tap or P to resume", w / 2, h / 2 + 24, 20, COLORS.dim);
+  }
   text(ctx, `build ${__BUILD__}`, w / 2, h - 24, 14, COLORS.dim);
 }
 

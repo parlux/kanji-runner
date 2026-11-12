@@ -26,11 +26,13 @@ import { createWkState } from "./game/wkstate";
 import { createStoryStore } from "./wanikani/storystore";
 import { createWkClient } from "./wanikani/client";
 import { openStudy, studyOpen } from "./game/study";
+import { syncPauseCard } from "./game/pausecard";
 import { KANA } from "./core/kana";
 import { KANJI } from "./core/kanji";
 import { missedItems } from "./core/run";
 import {
   canStudy,
+  lastAnswer,
   runKanji,
   storiesWithFallback,
   studyCards,
@@ -130,6 +132,24 @@ const studyAvailable = (): boolean => {
     boss?.won ?? false,
   );
 };
+// a paused run shows its last answered gate with that item's study card
+const pauseCard = (): void => {
+  if (scene.kind !== "run" || !scene.paused)
+    return syncPauseCard(null, "", () => {});
+  const { run } = scene;
+  const last = lastAnswer(
+    run.rows,
+    run.results,
+    run.lastAnswer?.choice ?? -1,
+    kanjiList(),
+    KANA,
+    storiesWithFallback(wk.stories(), session.wk ? wk.mnemonics() : undefined),
+  );
+  syncPauseCard(last, `${scene.seed}:${run.results.length}`, () =>
+    act("pause"),
+  );
+};
+
 const study = (): void => {
   if (scene.kind !== "end" || !studyAvailable()) return;
   const { run } = scene;
@@ -248,5 +268,6 @@ startLoop(
       track,
       speedLabel(speed),
     );
+    pauseCard();
   },
 );
