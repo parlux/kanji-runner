@@ -50,6 +50,7 @@ Everything the 2D renderer draws today has a 3D form with the same position, spa
 - **Pop-ups:** the clip loss, answer feedback (`+N`, tier tag, `−%`) and streak HUD as overlay text, as now.
 
 ### Boss at the end of the track
+> **Amendment (owner, 2026-11-13):** in 3D the boss is **one giant figure**, not a crowd: the enemy figure about 5–6× a soldier's height with a big gun, fixed size, HP = the boss size (number and draining bar above it). The clash is a gunfight with no charge: the army stops at firing range, both sides fire, each soldier lost takes 1 HP per `clashAt`. Victory: it topples; Defeated: it stomps forward; Tie: it stands. Read "boss crowd" below as this boss; the maths, timings and the 2D boss are unchanged.
 - The boss crowd stands on the track past the last question, at the distance the army covers in `CLASH_APPROACH_SECONDS` at the run's final speed. It comes into view through the fog like anything else, as a large crowd of enemy figures.
 - Its count is shown above it once it is in view (see Open Questions).
 - The scene switch from `run` to `boss` is invisible: no clear, no "BOSS" title. During the `boss` scene the renderer keeps the camera moving at the final speed for `CLASH_APPROACH_SECONDS` until the fronts meet, then the clash plays: both crowds lose figures per `clashAt`, with sparks or tracers at the front. The result banner (`Victory!`, `Defeated`, `Tie: the boss holds`) shows over the scene, then the end screen follows as now.

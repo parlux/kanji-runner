@@ -172,20 +172,25 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 - [x] Camera numbers OK, or the owner says what to change (higher, lower, closer, wider).
   - Owner, 2026-11-13: OK for now; a flatter camera that follows the army comes after the boss (`docs/ideas/3d-camera-follow.md`).
 
-### Task T4: The boss at the end of the track
+### Task T4: A giant boss at the end of the track
+**Owner, 2026-11-13:** "Can we turn the boss crowd into a big single boss with more hitpoints (matching crowd size I suppose). Like a big scary boss." Confirmed intent: `docs/intent/3d-run.md` (amendment 2026-11-13); spec: SPEC-3d "Boss at the end of the track" (amended).
+
 **Description:**
-- `world.ts`: boss placement (past the last question, the distance covered in `CLASH_APPROACH_SECONDS` at the final speed), tested.
-- The boss crowd (factory figures, larger) on the track, coming into view through the fog, its count above it (spec Open Question 1 default). Boss size computed once per run with `bossSize(plannedRows(run), charges, seed)`.
-- During the `boss` scene: no clear and no "BOSS" title; the camera keeps moving until the fronts meet, then the clash removes figures per `clashAt` with sparks at the front; the result banner over the scene; then the end screen as now.
+- `world.ts`: boss placement (past the last question, the distance covered in `CLASH_APPROACH_SECONDS` at the final speed), tested; the army's firing stop distance in front of it.
+- **One giant boss** from the figure factory (`figures.ts`): the enemy figure in the same low-poly, flat-shaded style and enemy red, about 5–6× a soldier's height, with a big gun / arm cannon. Fixed size (not scaled by HP). It stands on the track and comes into view through the haze like anything else.
+- **HP** = `bossSize(plannedRows(run), charges, seed)`, computed once per run (value unchanged). Shown above its head as a big number plus a draining bar (overlay, hazed like its object).
+- **Gunfight, no charge:** during the `boss` scene (no clear, no "BOSS" title in 3D) the camera and army keep moving until the army reaches firing range, then stop. The crowd fires at the boss; the boss fires back into the crowd. Per `clashAt`, each soldier lost takes 1 HP, over `CLASH_SECONDS`: soldiers drop out of the crowd, sparks/hits on the boss, the bar and number drain.
+- **Ending:** Victory → the boss topples; Defeated → it stomps forward over where the army stood; Tie → it stays standing. Then the result banner over the scene and the end screen as now.
+- Unchanged: `src/core` (`bossSize`, `clashAt`, timings), results, records, the golden run, the camera, the 2D boss (still a crowd). Boss swings/attacks are later.
 
 **Acceptance criteria:**
-- [ ] Boss placement tested; boss size unchanged from the 2D version for the same seed (tested).
-- [ ] Browser check at 390×844 with `?3d`: the last wall with the boss behind it, the run → boss switch (frames just before and after look continuous), mid-clash, each result banner. Screenshots in the scratchpad.
+- [ ] Tested: boss placement and the firing stop; HP equals the 2D boss size for the same seed; HP and army shown per `clashAt` through the fight.
+- [ ] Browser check at 390×844 with `?3d`: the last wall with the boss behind it in the haze; the run → boss switch (frames just before and after look continuous); the gunfight start and mid-fight; each ending (topple, stomp, standing) with its banner. Screenshots in the scratchpad. Frame time logged mid-fight with a full crowd.
 - [ ] Scenes, timings and records unchanged (existing scene tests pass unchanged).
 
 **Verification:** `npm test && npm run lint && npm run build`; browser check; deploy green.
-**Dependencies:** T3
-**Files:** `src/game/three/{scene3d,world,overlay}.ts`, `src/game/render.ts`, `tests/game/world.test.ts`
+**Dependencies:** T3e
+**Files:** `src/game/three/{scene3d,world,figures,overlay,fx}.ts` (a new `boss.ts` if cleaner), `src/game/render.ts`, `tests/game/world.test.ts`
 **Scope:** M
 
 ### Task T5: 3D by default
@@ -204,6 +209,6 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 
 ### Checkpoint H: v1.4 (owner, on the phone)
 - [ ] A run looks and feels like a crowd runner: figures bob, the crowd swells and thins.
-- [ ] The boss feels like the end of the run, not a separate screen.
+- [ ] The boss feels like the end of the run, not a separate screen; the giant boss looks big and scary.
 - [ ] Smooth on the phone with a full crowd.
 - [ ] Labels: readable enough, or the owner says what to tune.

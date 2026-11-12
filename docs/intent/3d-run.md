@@ -18,3 +18,10 @@ Status: confirmed by the owner, 2026-11-12, after an interview. Extends `docs/in
 | Boss is the end of the track | Owner: the clash should feel like the end of the run, not a separate thing. |
 | Low-poly figures built in code first | No asset pipeline; figures are tiny on screen; no licensing or likeness risk. Better art is a later round. |
 | Low dramatic camera; look beats readability | Owner chose it. Labels shrink with distance like real 3D; readability is adjusted later if it becomes a problem. |
+
+## Amendment, 2026-11-13 (owner): a giant boss
+- **Outcome:** the boss is one big, scary figure instead of a crowd: enemy figure ~5–6× a soldier, big gun, fixed size, HP = today's boss size (big number + draining bar), coming out of the haze past the last gate.
+- **Fight:** gunfight, no charge: the army stops at range, both sides fire; each soldier lost takes 1 HP over the same 2.5 s.
+- **Ending:** Victory → topples; Defeated → stomps forward over the army; Tie → stands. Then banner and end screen as now.
+- **Constraint:** gameplay identical (`bossSize`, `clashAt`, timings, results, records, `src/core`); no visible scene switch.
+- **Out of scope:** boss swings/attacks (later), 2D boss, camera, new art beyond the figure factory.
