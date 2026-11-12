@@ -71,10 +71,6 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 **Files:** `src/game/three/{scene3d,overlay,world}.ts`, `src/game/render.ts`, `tests/game/world.test.ts`
 **Scope:** L
 
-### Checkpoint H1: the look (owner, on the phone, with `?3d`; moved after T2)
-- [ ] The camera, track, gates and crowd feel like a crowd runner; the crowd visibly grows and shrinks.
-- [ ] Camera numbers OK, or the owner says what to change (higher, lower, closer, wider).
-
 ### Task T3: Hazards, fire and pop-ups
 **Description:** Crates (hit points and `+N` as overlay, damage, hit flash, burst on shatter, recruits running in), saws (toothed spinning disc on its rail), enemy packs (enemy figures facing the army, thinned as shot, kills popping off), fire tracers from the crowd to its target, and the clip-loss and answer-feedback pop-ups placed on the crowd.
 
@@ -87,6 +83,10 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 **Dependencies:** T2
 **Files:** `src/game/three/{scene3d,overlay,figures,world}.ts`
 **Scope:** M
+
+### Checkpoint H1: the look (owner, on the phone, with `?3d`; moved after T3: hazards must be visible for a playable run)
+- [ ] The camera, track, gates, hazards and crowd feel like a crowd runner; the crowd visibly grows and shrinks.
+- [ ] Camera numbers OK, or the owner says what to change (higher, lower, closer, wider).
 
 ### Task T4: The boss at the end of the track
 **Description:**
