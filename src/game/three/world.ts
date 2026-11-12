@@ -117,8 +117,8 @@ export type CameraFit = { pose: CameraPose; fov: number };
 export type CameraAim = {
   /** The army (track centre at the army). */
   armyY: number;
-  /** The fog line (track centre at VIEW_DISTANCE ahead). */
-  fogY: number;
+  /** The far line: track centre at SHAPE_DISTANCE ahead, where the haze is total. */
+  farY: number;
 };
 
 /** Screen position of a world point, as shares of the screen (0..1 from the left / top). */
@@ -147,7 +147,7 @@ export function screenAt(
 
 /**
  * Pitch and field of view for a camera `height` up and `back` behind the
- * army that put the army at `aim.armyY` and the fog line at `aim.fogY`.
+ * army that put the army at `aim.armyY` and the far line at `aim.farY`.
  */
 export function aimCamera(
   height: number,
@@ -155,10 +155,10 @@ export function aimCamera(
   aim: CameraAim,
 ): CameraFit {
   const va = 1 - 2 * aim.armyY;
-  const vf = 1 - 2 * aim.fogY;
-  // depression angles of the army and of the fog line
+  const vf = 1 - 2 * aim.farY;
+  // depression angles of the army and of the far line
   const da = Math.atan2(height, back);
-  const df = Math.atan2(height, back - worldZ(VIEW_DISTANCE, 0));
+  const df = Math.atan2(height, back - worldZ(SHAPE_DISTANCE, 0));
   // tan(pitch − da) / tan(pitch − df) rises with pitch: bisect it to va / vf
   let lo = df;
   let hi = da;
@@ -181,29 +181,32 @@ export function aimCamera(
 }
 
 /**
- * The camera for a screen of this aspect: aimed per `aimCamera`, at least
- * `minHeight` up, and raised (steeper) until both track edges, plus `margin`,
- * are in view at the army.
+ * The camera for a screen of this aspect: `height` up and `back` behind the
+ * army, aimed per `aimCamera`. When both track edges (plus `margin`, up to a
+ * wall's top) don't fit at the army, it moves farther back along the same
+ * slope, with a narrower field of view, rather than going steeper.
  */
 export function fitCameraTo(
   aspect: number,
   back: number,
-  minHeight: number,
+  height: number,
   aim: CameraAim,
   margin: number,
 ): CameraFit {
+  const edge = (TRACK_W / 2) * margin;
   const fits = (fit: CameraFit): boolean =>
-    screenAt(fit, aspect, (TRACK_W / 2) * margin, 0, 0).x <= 1;
-  const low = aimCamera(minHeight, back, aim);
-  if (fits(low)) return low;
-  let lo = minHeight;
-  let hi = minHeight * 8;
+    screenAt(fit, aspect, edge, 0, 0).x <= 1 &&
+    screenAt(fit, aspect, edge, WALL_H, 0).x <= 1;
+  const near = aimCamera(height, back, aim);
+  if (fits(near)) return near;
+  let lo = 1;
+  let hi = 16;
   for (let k = 0; k < 40; k++) {
-    const h = (lo + hi) / 2;
-    if (fits(aimCamera(h, back, aim))) hi = h;
-    else lo = h;
+    const s = (lo + hi) / 2;
+    if (fits(aimCamera(height * s, back * s, aim))) hi = s;
+    else lo = s;
   }
-  return aimCamera(hi, back, aim);
+  return aimCamera(height * hi, back * hi, aim);
 }
 
 /** A wall's height and thickness (world units); its near face stands at the row's distance. */
