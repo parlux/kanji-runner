@@ -16,9 +16,9 @@ export const DIST_SCALE = 8;
 /** Most figures drawn per crowd; above it the count on the crowd tells the real number. */
 export const MAX_DRAWN_SOLDIERS = 200;
 /** A figure's footprint radius: the layout keeps it inside the crowd's width. */
-export const FIGURE_RADIUS = 0.1;
+export const FIGURE_RADIUS = 0.12;
 /** A crowd is this many times deeper (along the track) than it is wide. */
-export const CROWD_DEPTH = 1.2;
+export const CROWD_DEPTH = 1.8;
 /** Fog starts at this share of VIEW_DISTANCE ahead of the army. */
 export const FOG_START = 0.7;
 /** Tallest thing on the track (world units): fog hides it whole beyond VIEW_DISTANCE. */

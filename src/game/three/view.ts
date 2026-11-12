@@ -35,8 +35,6 @@ export const LOOK = {
   track: 0xf3ecf8,
   edge: 0xff7a59,
   marking: 0xc9b8e6,
-  soldier: 0x3a8dff,
-  soldierHead: 0xffe0b8,
 } as const;
 
 /** The run's camera, posed and fitted to the screen's aspect. */

@@ -9,14 +9,19 @@ import {
   Mesh,
   MeshLambertMaterial,
   PlaneGeometry,
+  Euler,
+  Quaternion,
   Scene as ThreeScene,
   Vector3,
   WebGLRenderer,
 } from "three";
 import type { Scene } from "../scenes";
 import { fitCamera, LOOK, makeCamera, MAX_DPR, POSE } from "./view";
+import { makeCrowdMesh, type FigureKind } from "./figures";
 import {
+  crowdLayout,
   DIST_SCALE,
+  MAX_DRAWN_SOLDIERS,
   fogRange,
   TRACK_W,
   worldX,
@@ -41,6 +46,103 @@ const DASH_GAP = 6;
 const DASH_LINES = [1 / 3, 2 / 3];
 const EDGE_W = 0.35;
 const EDGE_H = 0.25;
+
+/** Run cycle: strides per second, hop height, forward lean and side sway (radians). */
+const STRIDE_HZ = 2.4;
+const HOP = 0.07;
+const LEAN = 0.18;
+const SWAY = 0.1;
+/** Seconds a new figure takes to scale in, and a lost one to fall and shrink away. */
+const GROW_S = 0.35;
+const DROP_S = 0.45;
+/** How fast figures ease to their new place when the crowd's layout changes (per second). */
+const SETTLE_RATE = 8;
+
+/** A cheap fixed pseudo-random number in [0, 1) per figure index, for its stride phase. */
+const phaseOf = (k: number): number => {
+  const x = Math.sin(k * 12.9898 + 4.1414) * 43758.5453;
+  return x - Math.floor(x);
+};
+
+/**
+ * An animated crowd of figures: laid out by `crowdLayout`, bobbing as it runs.
+ * New figures scale in at the edge; lost ones fall back and shrink away.
+ * Purely visual: the army size passed in is the truth.
+ */
+function createCrowd(kind: FigureKind) {
+  const max = MAX_DRAWN_SOLDIERS;
+  const mesh = makeCrowdMesh(kind, max);
+  const target = new Float32Array(2 * max);
+  const cur = new Float32Array(2 * max);
+  const bornAt = new Float32Array(max);
+  const diedAt = new Float32Array(max).fill(-Infinity);
+  const alive = new Uint8Array(max);
+  let lastArmy = -1;
+  const pos = new Vector3();
+  const scl = new Vector3();
+  const rot = new Euler();
+  const q = new Quaternion();
+  const m = new Matrix4();
+
+  return {
+    mesh,
+    /** Places the crowd centred at world (cx, 0, cz) at animation time `now` (s); `dt` eases layout changes. */
+    update(army: number, cx: number, cz: number, now: number, dt: number) {
+      if (army !== lastArmy) {
+        lastArmy = army;
+        const n = crowdLayout(army, target);
+        for (let k = 0; k < max; k++) {
+          if (k < n && !alive[k]) {
+            alive[k] = 1;
+            bornAt[k] = now;
+            cur[2 * k] = target[2 * k] as number;
+            cur[2 * k + 1] = target[2 * k + 1] as number;
+          } else if (k >= n && alive[k]) {
+            alive[k] = 0;
+            diedAt[k] = now;
+          }
+        }
+      }
+      const ease = 1 - Math.exp(-SETTLE_RATE * dt);
+      let i = 0;
+      for (let k = 0; k < max; k++) {
+        const dying = !alive[k] && now - (diedAt[k] as number) < DROP_S;
+        if (!alive[k] && !dying) continue;
+        if (alive[k]) {
+          const tx = target[2 * k] as number;
+          const tz = target[2 * k + 1] as number;
+          cur[2 * k] =
+            (cur[2 * k] as number) + (tx - (cur[2 * k] as number)) * ease;
+          cur[2 * k + 1] =
+            (cur[2 * k + 1] as number) +
+            (tz - (cur[2 * k + 1] as number)) * ease;
+        }
+        const x = cx + (cur[2 * k] as number);
+        const z = cz + (cur[2 * k + 1] as number);
+        const stride = (now * STRIDE_HZ + phaseOf(k)) * Math.PI * 2;
+        if (alive[k]) {
+          const g = Math.min(1, (now - (bornAt[k] as number)) / GROW_S);
+          // ease out with a little overshoot, so a new figure pops in
+          const s = 1 + 2.2 * (g - 1) ** 3 + 1.2 * (g - 1) ** 2;
+          pos.set(x, Math.abs(Math.sin(stride)) * HOP, z);
+          rot.set(-LEAN, 0, Math.sin(stride) * SWAY);
+          scl.setScalar(s);
+        } else {
+          // left behind as the crowd runs on: tips over backwards and shrinks
+          const t = (now - (diedAt[k] as number)) / DROP_S;
+          pos.set(x, -0.15 * t, z + 2.5 * t);
+          rot.set(t * 1.4, 0, 0);
+          scl.setScalar(1 - t);
+        }
+        q.setFromEuler(rot);
+        m.compose(pos, q, scl);
+        mesh.setMatrixAt(i++, m);
+      }
+      mesh.count = i;
+      mesh.instanceMatrix.needsUpdate = true;
+    },
+  };
+}
 
 /**
  * Creates the 3D view on `canvas`, or returns null when WebGL is unavailable
@@ -113,9 +215,15 @@ export function createView3d(canvas: HTMLCanvasElement): View3d | null {
     dashes.instanceMatrix.needsUpdate = true;
   };
 
+  const army = createCrowd("soldier");
+  scene.add(army.mesh);
+
   let w = 1;
   let h = 1;
   let runDist = 0;
+  // animation time: stands still while the run is paused
+  let clock = 0;
+  let last = performance.now();
   const v = new Vector3();
   return {
     resize(cw, ch) {
@@ -125,8 +233,14 @@ export function createView3d(canvas: HTMLCanvasElement): View3d | null {
       fitCamera(camera, cw / ch);
     },
     render(s) {
+      const now = performance.now();
+      const dt = Math.min(0.1, (now - last) / 1000);
+      last = now;
+      const paused = s.kind === "run" && s.paused;
+      if (!paused) clock += dt;
       runDist = s.run.dist;
       layDashes(runDist);
+      army.update(s.run.army, worldX(s.run.x), 0, clock, paused ? 0 : dt);
       renderer.render(scene, camera);
     },
     project(x, dist, height) {
