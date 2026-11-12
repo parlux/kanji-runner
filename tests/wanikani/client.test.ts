@@ -8,6 +8,7 @@ import {
 import { trim } from "../../src/wanikani/parse";
 import assignments from "./fixtures/assignments.json";
 import subjects from "./fixtures/subjects.json";
+import stories from "./fixtures/stories.json";
 import user from "./fixtures/user.json";
 
 const TOKEN = "secret-token-123";
@@ -233,5 +234,102 @@ describe("throttle", () => {
     const [a, b] = await Promise.all([client.refresh(), client.refresh()]);
     expect(a).toBe(b);
     expect(f.calls).toHaveLength(4);
+  });
+});
+
+describe("fetchStories", () => {
+  const story = [
+    {
+      ...stories[0],
+      pages: { next_url: `${WK_BASE}subjects?page_after_id=9` },
+    },
+    stories[1],
+  ];
+  const serve = (url: string) => {
+    if (url === `${WK_BASE}user`) {
+      return json({
+        data: { level: 5, subscription: { max_level_granted: 3 } },
+      });
+    }
+    if (url === `${WK_BASE}subjects?page_after_id=9`) return json(story[1]);
+    if (url.startsWith(`${WK_BASE}subjects`)) return json(story[0]);
+    return json({}, 404);
+  };
+
+  it("joins pages into a library, using max_level_granted", async () => {
+    const { client, f } = setup(serve);
+    const r = await client.fetchStories();
+    if (r.status !== "ok") throw new Error(r.status);
+    expect(Object.keys(r.library.kanji).sort()).toEqual(
+      ["口", "明", "休"].sort(),
+    );
+    expect(f.calls.map((c) => c.url)).toEqual([
+      `${WK_BASE}user`,
+      `${WK_BASE}subjects?types=kanji,radical&levels=1,2,3`,
+      `${WK_BASE}subjects?page_after_id=9`,
+    ]);
+    for (const c of f.calls) {
+      expect(c.url.startsWith(WK_BASE)).toBe(true);
+      expect(JSON.stringify(c.init?.headers)).toContain(TOKEN);
+      expect(c.url).not.toContain(TOKEN);
+    }
+  });
+
+  it("returns none without a token", async () => {
+    const f = makeFetch(serve);
+    const client = createWkClient({
+      fetch: f.fn,
+      store: fakeStore(),
+      now: () => 0,
+    });
+    expect(await client.fetchStories()).toEqual({ status: "none" });
+    expect(f.calls).toHaveLength(0);
+  });
+
+  it.each([
+    ["401", () => json({}, 401), "invalid"],
+    ["403", () => json({}, 403), "invalid"],
+    ["429", () => json({}, 429), "offline"],
+    ["500", () => json({}, 500), "offline"],
+    ["malformed", () => new Response("nope"), "offline"],
+  ])("%s on /user is %s", async (_n, res, status) => {
+    const { client } = setup(res);
+    expect(await client.fetchStories()).toEqual({ status });
+  });
+
+  it("failures on later pages and bad shapes", async () => {
+    const a = setup((u) =>
+      u.includes("page_after_id") ? json({}, 429) : serve(u),
+    );
+    expect(await a.client.fetchStories()).toEqual({ status: "offline" });
+    const b = setup((u) =>
+      u.includes("page_after_id") ? json({ data: 5 }) : serve(u),
+    );
+    expect(await b.client.fetchStories()).toEqual({ status: "offline" });
+    const c = setup((u) =>
+      u.endsWith("user") ? json({ data: {} }) : serve(u),
+    );
+    expect(await c.client.fetchStories()).toEqual({ status: "offline" });
+  });
+
+  it("network error is offline and a foreign next_url is refused", async () => {
+    const a = createWkClient({
+      fetch: (() =>
+        Promise.reject(new Error("down"))) as unknown as typeof fetch,
+      store: (() => {
+        const s = fakeStore();
+        saveToken(s, TOKEN);
+        return s;
+      })(),
+      now: () => 0,
+    });
+    expect(await a.fetchStories()).toEqual({ status: "offline" });
+    const b = setup((u) =>
+      u.startsWith(`${WK_BASE}subjects`)
+        ? json({ ...story[0], pages: { next_url: "https://evil.example/x" } })
+        : serve(u),
+    );
+    expect(await b.client.fetchStories()).toEqual({ status: "offline" });
+    expect(b.f.calls.every((c) => c.url.startsWith(WK_BASE))).toBe(true);
   });
 });

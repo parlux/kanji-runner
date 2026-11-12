@@ -28,6 +28,8 @@ export const WARM_UPS = 3;
 export const MAX_NEW_PER_RUN = 4;
 /** WaniKani mode: a kanji due for review on WaniKani is drawn this many times as often. */
 export const WK_DUE_BOOST = 4;
+/** The story library is refetched when older than this. */
+export const STORY_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 /** Rows 1..N have 2 options; later rows have 3. */
 export const TWO_OPTION_ROWS = 7;
 
