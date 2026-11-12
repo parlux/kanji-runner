@@ -133,3 +133,28 @@ export function runKanji(
 /** Whether the end screen offers "Study": always after a loss, after a win only if there is a card. */
 export const canStudy = (cards: number, won: boolean): boolean =>
   !won || cards > 0;
+
+/**
+ * The story lookup for the study screen: the library entry for a kanji, with
+ * any mnemonic it lacks filled from the taught-cache mnemonics (WaniKani
+ * mode); a kanji only in the taught cache gets those alone. Undefined when
+ * neither source exists.
+ */
+export function storiesWithFallback(
+  library: ReadonlyMap<string, Story> | undefined,
+  taught: ReadonlyMap<string, Mnemonics> | undefined,
+): ReadonlyMap<string, Story> | undefined {
+  if (!taught || taught.size === 0) return library;
+  const out = new Map<string, Story>(library);
+  for (const [char, mn] of taught) {
+    const lib = out.get(char);
+    const meaning = lib?.meaning ?? mn.meaning;
+    const reading = lib?.reading ?? mn.reading;
+    out.set(char, {
+      ...lib,
+      ...(meaning ? { meaning } : {}),
+      ...(reading ? { reading } : {}),
+    });
+  }
+  return out;
+}

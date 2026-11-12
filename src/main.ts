@@ -29,7 +29,12 @@ import { openStudy, studyOpen } from "./game/study";
 import { KANA } from "./core/kana";
 import { KANJI } from "./core/kanji";
 import { missedItems } from "./core/run";
-import { canStudy, runKanji, studyCards } from "./core/study";
+import {
+  canStudy,
+  runKanji,
+  storiesWithFallback,
+  studyCards,
+} from "./core/study";
 import { loadSessionLog, saveSessionLog } from "./storage/session";
 import { loadProgress, saveProgress } from "./storage/storage";
 import { loginOpen, openLogin } from "./sync/login";
@@ -139,7 +144,7 @@ const study = (): void => {
     missed,
     kanjiList(),
     KANA,
-    session.wk ? wk.mnemonics() : undefined,
+    storiesWithFallback(wk.stories(), session.wk ? wk.mnemonics() : undefined),
     runKanji(run.rows, run.results),
   );
   openStudy(cards, () => {
