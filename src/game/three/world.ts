@@ -1,4 +1,5 @@
 import { crowdWidth } from "../../core/crowd";
+import type { ChargeView, SquadView } from "../../core/sim";
 import { VIEW_DISTANCE } from "../../core/tuning";
 
 /**
@@ -267,4 +268,79 @@ export function wallPx(project: Projector, x: number, dist: number): number {
   const foot = project(x, dist, 0);
   const top = project(x, dist, WALL_H);
   return foot && top ? Math.max(0, foot.y - top.y) : 0;
+}
+
+/** Height (world units) of a figure's head top: counts sit above it. */
+export const FIGURE_TOP = 0.8;
+
+/** Where and how a charge's squad is drawn this frame. */
+export type SquadPlace = {
+  x: number;
+  dist: number;
+  /** Figures still standing (a fighting squad is shot down). */
+  standing: number;
+  /** Firefight progress after the reveal (0..1), for figures dropping. */
+  u: number;
+  /** The squad turned friendly and is running into the army. */
+  friendly: boolean;
+  /** How far it has merged into the army (0..1, friendly only). */
+  merge: number;
+  /** 1 while it stands; falls to 0 as a squad not run into falls back. */
+  shown: number;
+  /** The outcome, once revealed, for its tag. */
+  tag: "join" | "fight" | null;
+  /** Firefight progress (0..1) while the fight plays, else null. */
+  fight: number | null;
+};
+
+/**
+ * A charge's squad this frame, from the view model only: standing beyond its
+ * opening; once run into, the firefight (it steps back, both sides fire, then
+ * it joins the army or is shot down); the others fall back. Null when gone.
+ */
+export function squadPlace(
+  runDist: number,
+  runX: number,
+  c: ChargeView,
+  q: SquadView,
+): SquadPlace | null {
+  const still = {
+    x: q.x,
+    standing: q.count,
+    u: 0,
+    friendly: false,
+    merge: 0,
+    tag: null,
+    fight: null,
+  };
+  if (!q.chosen) {
+    const shown = c.resolved
+      ? 1 - Math.min(1, Math.max(0, (runDist - c.pos) / SQUAD_FADE_DIST))
+      : 1;
+    if (shown <= 0) return null;
+    return { ...still, dist: squadDist(c.pos, runDist, null), shown };
+  }
+  if (c.contactDist === null || runDist - c.contactDist >= FIREFIGHT_DIST)
+    return null;
+  const t = firefightProgress(runDist, c.contactDist);
+  const revealed = t >= FIREFIGHT_REVEAL;
+  const u = revealed ? (t - FIREFIGHT_REVEAL) / (1 - FIREFIGHT_REVEAL) : 0;
+  const home = squadDist(c.pos, runDist, t);
+  const tag = revealed ? q.outcome : null;
+  if (tag === "join") {
+    const k = Math.min(1, u * 1.4);
+    return {
+      ...still,
+      x: q.x + (runX - q.x) * k,
+      dist: home + (runDist - home) * k,
+      u,
+      friendly: true,
+      merge: k,
+      shown: 1,
+      tag,
+      fight: t,
+    };
+  }
+  const standing = tag === "fight" ? Math.round(q.count * (1 - u)) : q.count;
+  return { ...still, dist: home, standing, u, shown: 1, tag, fight: t };
 }

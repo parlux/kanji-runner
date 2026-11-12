@@ -18,6 +18,8 @@ import {
   fogAlpha,
   projectorFor,
   squadDist,
+  squadPlace,
+  FIREFIGHT_DIST,
   SQUAD_BEYOND,
   wallPx,
   type CameraPose,
@@ -172,5 +174,56 @@ describe("walls and their text", () => {
     // at contact it is still where it stood, then steps back and keeps ahead
     expect(squadDist(10, 10, 0)).toBe(10 + SQUAD_BEYOND);
     expect(squadDist(10, 10.5, 0.5)).toBeGreaterThan(10.5 + SQUAD_BEYOND);
+  });
+});
+
+describe("squad placement", () => {
+  const squad = (chosen: boolean, outcome: "join" | "fight" | null) => ({
+    label: "a",
+    x: 0.3,
+    count: 10,
+    chosen,
+    outcome,
+  });
+  const charge = (contactDist: number | null, resolved: boolean) => ({
+    row: 0,
+    pos: 10,
+    prompt: "水",
+    resolved,
+    contactDist,
+    squads: [],
+  });
+
+  it("stands beyond its opening before contact", () => {
+    const p = squadPlace(8, 0.5, charge(null, false), squad(false, null));
+    expect(p).toMatchObject({ x: 0.3, dist: 10 + SQUAD_BEYOND, standing: 10 });
+  });
+
+  it("falls back once another squad was run into", () => {
+    expect(
+      squadPlace(10.1, 0.5, charge(10, true), squad(false, null))?.shown,
+    ).toBeLessThan(1);
+    expect(
+      squadPlace(11, 0.5, charge(10, true), squad(false, null)),
+    ).toBeNull();
+  });
+
+  it("is shot down when it fights back, and runs into the army when it joins", () => {
+    const end = 10 + FIREFIGHT_DIST * 0.9;
+    const fight = squadPlace(end, 0.5, charge(10, true), squad(true, "fight"));
+    expect(fight?.tag).toBe("fight");
+    expect(fight?.standing).toBeLessThan(10);
+    const join = squadPlace(end, 0.5, charge(10, true), squad(true, "join"));
+    expect(join?.friendly).toBe(true);
+    expect(join?.x).toBeCloseTo(0.5, 6);
+    expect(join?.dist).toBeCloseTo(end, 6);
+    expect(
+      squadPlace(
+        10 + FIREFIGHT_DIST + 0.01,
+        0.5,
+        charge(10, true),
+        squad(true, "join"),
+      ),
+    ).toBeNull();
   });
 });
