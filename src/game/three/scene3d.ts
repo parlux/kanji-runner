@@ -22,6 +22,7 @@ import { createWalls } from "./walls";
 import { createSquads } from "./squads";
 import { createFx } from "./fx";
 import { createProps } from "./props";
+import { createHazards } from "./hazards";
 import {
   crowdLayout,
   DIST_SCALE,
@@ -223,6 +224,7 @@ export function createView3d(canvas: HTMLCanvasElement): View3d | null {
   const fx = createFx(scene);
   const squads = createSquads(scene, fx);
   const props = createProps(scene);
+  const hazards = createHazards(scene, fx);
   const army = createCrowd("soldier");
   scene.add(army.mesh);
 
@@ -253,8 +255,9 @@ export function createView3d(canvas: HTMLCanvasElement): View3d | null {
       fx.begin();
       if (s.kind === "run") {
         walls.update(s.run);
-        squads.update(s.run, clock);
+        const fighting = squads.update(s.run, clock);
         props.update(s.run);
+        hazards.update(s.run, clock, fighting);
       }
       fx.end();
       army.update(s.run.army, worldX(s.run.x), 0, clock, paused ? 0 : dt);

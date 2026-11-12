@@ -190,6 +190,22 @@ function renderRunOverlay(
       back.y - 16,
     );
   }
+  // a crate's payout, left of the crowd as in 2D (its recruits run in, in the scene)
+  const gain = run.lastCrate;
+  const gt = gain ? (run.dist - gain.dist) / CRATE_POPUP_DIST : 1;
+  if (gain && gt >= 0 && gt < 1 && centre && right) {
+    const radius = Math.max(8, right.x - centre.x);
+    ctx.globalAlpha = 1 - gt;
+    outlinedText(
+      ctx,
+      `+${gain.gain}`,
+      Math.max(36, centre.x - radius - 28),
+      centre.y - 10 - 24 * gt,
+      24,
+      COLORS.good,
+    );
+    ctx.globalAlpha = 1;
+  }
   renderHud(ctx, w, run, outlinedText);
 }
 
