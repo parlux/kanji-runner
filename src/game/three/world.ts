@@ -1,5 +1,10 @@
 import { crowdWidth } from "../../core/crowd";
-import type { ChargeView, SquadView } from "../../core/sim";
+import {
+  hazardPos,
+  type ChargeView,
+  type RunState,
+  type SquadView,
+} from "../../core/sim";
 import { hazardSpan, type Saw } from "../../core/track";
 import { SAW_W, VIEW_DISTANCE } from "../../core/tuning";
 
@@ -70,6 +75,98 @@ export function crowdLayout(army: number, out: Float32Array): number {
     out[2 * k + 1] = d * Math.sin(a) * CROWD_DEPTH;
   }
   return n;
+}
+
+/** Open-road spread: the drawn crowd is SPREAD_K × √army of the track wide, up to SPREAD_MAX_W (look only). */
+export const SPREAD_K = 0.05;
+export const SPREAD_MAX_W = 0.55;
+/**
+ * The crowd pulls in to its true width over this much track before anything
+ * that can clip it, and spreads out again over SPREAD_OUT_DIST once its rear
+ * is past (both counted from where the crowd's front, or rear, meets it).
+ */
+export const SQUEEZE_DIST = 0.8;
+export const SPREAD_OUT_DIST = 0.4;
+
+/** How wide (track share) the crowd is drawn on open road: wider than `crowdWidth`, never narrower. */
+export const spreadWidth = (army: number): number =>
+  Math.max(
+    crowdWidth(army),
+    Math.min(SPREAD_MAX_W, SPREAD_K * Math.sqrt(Math.max(0, army))),
+  );
+
+/** How far (track distance) the crowd reaches ahead of and behind its centre. */
+export const crowdHalfDepth = (army: number): number =>
+  ((crowdWidth(army) * TRACK_W) / 2) * (CROWD_DEPTH / DIST_SCALE);
+
+const smooth = (t: number): number => {
+  const u = Math.min(1, Math.max(0, t));
+  return u * u * (3 - 2 * u);
+};
+
+/**
+ * How spread out (0 = squeezed to `crowdWidth`, 1 = `spreadWidth`) the crowd
+ * is, with the nearest thing that can clip it `ahead` and `behind` of its
+ * centre (track distance, Infinity for none). Fully squeezed while an
+ * obstacle is within the crowd's depth; continuous in both distances.
+ */
+export function spreadShare(
+  army: number,
+  ahead: number,
+  behind: number,
+): number {
+  const hold = crowdHalfDepth(army);
+  return Math.min(
+    smooth((ahead - hold) / SQUEEZE_DIST),
+    smooth((behind - hold) / SPREAD_OUT_DIST),
+  );
+}
+
+/** The drawn crowd's width (track share) with the nearest clipping obstacle `ahead` and `behind`. */
+export function drawnWidth(
+  army: number,
+  ahead: number,
+  behind: number,
+): number {
+  const cw = crowdWidth(army);
+  return cw + (spreadWidth(army) - cw) * spreadShare(army, ahead, behind);
+}
+
+/** Half the spread of figure centres (world units) in a crowd `width` (track share) wide. */
+const layoutHalf = (width: number): number =>
+  Math.max(0, (width * TRACK_W) / 2 - FIGURE_RADIUS);
+
+/** Sideways stretch of `crowdLayout` that draws the crowd `width` wide (1 at `crowdWidth`). */
+export function spreadScale(army: number, width: number): number {
+  const base = layoutHalf(crowdWidth(army));
+  return base > 0 ? layoutHalf(width) / base : 1;
+}
+
+/** Width (track share) of a crowd whose layout is stretched sideways by `scale`. */
+export const scaledWidth = (army: number, scale: number): number =>
+  ((layoutHalf(crowdWidth(army)) * scale + FIGURE_RADIUS) * 2) / TRACK_W;
+
+/** Where (track x) a crowd `width` wide is drawn for an army centred at `x`: kept on the track. */
+export const drawnCentre = (x: number, width: number): number =>
+  Math.min(1 - width / 2, Math.max(width / 2, x));
+
+/**
+ * Track distance from the army to the nearest thing that can clip it ahead
+ * and behind: every wall row (charges too) and every hazard (saws, crates,
+ * packs where they are now). Shot-down crates and packs still count, so the
+ * width never jumps when one goes.
+ */
+export function clipGaps(run: RunState): { ahead: number; behind: number } {
+  let ahead = Infinity;
+  let behind = Infinity;
+  const near = (pos: number): void => {
+    const d = pos - run.dist;
+    if (d >= 0) ahead = Math.min(ahead, d);
+    else behind = Math.min(behind, -d);
+  };
+  for (const q of run.track.questions) near(q);
+  for (let i = 0; i < run.track.hazards.length; i++) near(hazardPos(run, i));
+  return { ahead, behind };
 }
 
 /** Where the camera sits and what it looks at, in world units (centred on the track). */
