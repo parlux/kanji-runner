@@ -56,6 +56,12 @@ import {
   bossHp,
   bossPlace,
   type CameraPose,
+  CAMERA_LIMITS,
+  followStep,
+  followTarget,
+  poseFromSettings,
+  settingsFromFit,
+  type CameraSettings,
 } from "../../src/game/three/world";
 import { clashAt } from "../../src/core/boss";
 import {
@@ -79,7 +85,13 @@ import { ROWS_PER_RUN } from "../../src/core/tuning";
 import { kanaRun } from "../core/kana-run";
 import { gateOpenings } from "../../src/core/gates";
 import { hazardSpan, type Saw } from "../../src/core/track";
-import { AIM, CAMERA_MIN_HEIGHT, cameraFit } from "../../src/game/three/view";
+import {
+  AIM,
+  CAMERA_MIN_HEIGHT,
+  cameraFit,
+  cameraFor,
+  defaultCameraSettings,
+} from "../../src/game/three/view";
 
 const pose: CameraPose = { height: 4, back: 12, lookAhead: 20, lookHeight: 0 };
 
@@ -734,5 +746,113 @@ describe("the giant boss", () => {
         screenAt(fit, aspect, 0, 0, 0).y - screenAt(fit, aspect, 0, 0.8, 0).y;
       expect(foot - top).toBeGreaterThan(2.5 * soldier);
     }
+  });
+});
+
+describe("camera settings", () => {
+  const aspects = [390 / 844, 1280 / 800];
+
+  it("with no saved settings is exactly today's fitted camera", () => {
+    for (const a of aspects) expect(cameraFor(a, null)).toEqual(cameraFit(a));
+  });
+
+  it("round-trips today's pose through settings", () => {
+    for (const a of aspects) {
+      const fit = cameraFit(a);
+      const s = defaultCameraSettings(a);
+      expect(s.follow).toBe(0);
+      const back = poseFromSettings(s, AIM.armyY);
+      expect(back.fov).toBeCloseTo(fit.fov, 9);
+      for (const k of ["height", "back", "lookAhead", "lookHeight"] as const)
+        expect(back.pose[k]).toBeCloseTo(fit.pose[k], 6);
+      expect(settingsFromFit(back).pitch).toBeCloseTo(s.pitch, 9);
+    }
+  });
+
+  it("keeps the army at the aim height and the chosen pitch, FOV and distance", () => {
+    const s: CameraSettings = {
+      pitch: 20,
+      distance: 12,
+      fov: 50,
+      follow: 0,
+      smoothing: 0.2,
+    };
+    const fit = poseFromSettings(s, AIM.armyY);
+    const { pose } = fit;
+    expect(screenAt(fit, 0.5, 0, 0, 0).y).toBeCloseTo(AIM.armyY, 6);
+    expect(Math.hypot(pose.height, pose.back)).toBeCloseTo(12, 9);
+    expect(
+      (Math.atan2(pose.height, pose.back + pose.lookAhead) * 180) / Math.PI,
+    ).toBeCloseTo(20, 9);
+    expect(fit.fov).toBe(50);
+  });
+
+  it("keeps the haze total at SHAPE_DISTANCE and clear at VIEW_DISTANCE across tuned extremes", () => {
+    for (const a of aspects) {
+      const d = defaultCameraSettings(a);
+      for (const pitch of [8, 20, 45])
+        for (const dm of [0.4, 1, 2])
+          for (const fov of [20, 45, 75]) {
+            const { pose } = poseFromSettings(
+              { ...d, pitch, distance: d.distance * dm, fov },
+              AIM.armyY,
+            );
+            const range = fogRange(pose);
+            expect(range.far).toBeGreaterThan(range.near);
+            for (const y of [0, WALL_H, FOG_TOP_H]) {
+              const at = (dist: number): number =>
+                hazeAt(range, viewDepth(pose, y, worldZ(dist, 0)));
+              expect(at(SHAPE_DISTANCE)).toBeGreaterThan(0.97);
+              expect(at(VIEW_DISTANCE)).toBeLessThan(0.05);
+            }
+          }
+    }
+  });
+
+  it("offers slider ranges around today's values", () => {
+    expect(CAMERA_LIMITS.pitch).toEqual({ min: 8, max: 45 });
+    for (const a of aspects) {
+      const s = defaultCameraSettings(a);
+      expect(s.pitch).toBeGreaterThan(CAMERA_LIMITS.pitch.min);
+      expect(s.pitch).toBeLessThan(CAMERA_LIMITS.pitch.max);
+      expect(s.fov).toBeGreaterThan(CAMERA_LIMITS.fov.min);
+      expect(s.fov).toBeLessThan(CAMERA_LIMITS.fov.max);
+    }
+  });
+});
+
+describe("camera follow", () => {
+  it("targets follow × the army's world x", () => {
+    expect(followTarget(0, 1)).toBe(0);
+    expect(followTarget(1, 1)).toBeCloseTo(worldX(1), 9);
+    expect(followTarget(0.6, 0)).toBeCloseTo(0.6 * worldX(0), 9);
+    expect(followTarget(1, 0.5)).toBeCloseTo(0, 9);
+  });
+
+  it("follow 0 keeps the camera at x = 0 and follow 1 settles on the army", () => {
+    let x0 = 0;
+    let x1 = 0;
+    for (let i = 0; i < 600; i++) {
+      x0 = followStep(x0, followTarget(0, 1), 1 / 60, 0.3);
+      x1 = followStep(x1, followTarget(1, 1), 1 / 60, 0.3);
+    }
+    expect(x0).toBe(0);
+    expect(x1).toBeCloseTo(worldX(1), 6);
+  });
+
+  it("snaps at 0 smoothing, and is continuous: a tiny step moves a tiny way", () => {
+    expect(followStep(0, 3, 1 / 60, 0)).toBe(3);
+    expect(followStep(0, 3, 0, 0.3)).toBe(0);
+    expect(Math.abs(followStep(1, 3, 1e-6, 0.3) - 1)).toBeLessThan(1e-4);
+  });
+
+  it("is the same at 30 and 60 fps", () => {
+    let a = 0;
+    let b = 0;
+    for (let i = 0; i < 30; i++) a = followStep(a, 2, 1 / 30, 0.5);
+    for (let i = 0; i < 60; i++) b = followStep(b, 2, 1 / 60, 0.5);
+    expect(a).toBeCloseTo(b, 9);
+    // most of the gap (95%) closes in the smoothing time
+    expect(followStep(0, 1, 0.5, 0.5)).toBeCloseTo(0.95, 2);
   });
 });

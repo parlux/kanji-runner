@@ -2,8 +2,11 @@ import { PerspectiveCamera } from "three";
 import {
   fitCameraTo,
   HAZE_COLOUR,
+  poseFromSettings,
+  settingsFromFit,
   type CameraAim,
   type CameraFit,
+  type CameraSettings,
 } from "./world";
 
 /**
@@ -47,15 +50,30 @@ export function makeCamera(): PerspectiveCamera {
   return new PerspectiveCamera(45, 1, 0.5, 400);
 }
 
-/** Poses and fits the camera to `aspect`; returns the fit (for the fog). */
+/** Today's camera for a screen aspect, as the settings screen's starting values. */
+export const defaultCameraSettings = (aspect: number): CameraSettings =>
+  settingsFromFit(cameraFit(aspect));
+
+/** The camera for `aspect`: today's fitted one, or the tuned `settings` (no edge rule). */
+export const cameraFor = (
+  aspect: number,
+  settings: CameraSettings | null,
+): CameraFit =>
+  settings ? poseFromSettings(settings, AIM.armyY) : cameraFit(aspect);
+
+/**
+ * Poses and fits the camera to `aspect`, shifted sideways by `x` (camera and
+ * look point together: no yaw). Returns the fit (for the fog).
+ */
 export function fitCamera(
   camera: PerspectiveCamera,
   aspect: number,
+  fit: CameraFit,
+  x = 0,
 ): CameraFit {
-  const fit = cameraFit(aspect);
   const { pose } = fit;
-  camera.position.set(0, pose.height, pose.back);
-  camera.lookAt(0, pose.lookHeight, -pose.lookAhead);
+  camera.position.set(x, pose.height, pose.back);
+  camera.lookAt(x, pose.lookHeight, -pose.lookAhead);
   camera.aspect = aspect;
   camera.fov = fit.fov;
   camera.updateProjectionMatrix();

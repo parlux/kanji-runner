@@ -385,6 +385,88 @@ export function fitCameraTo(
   return aimCamera(height * hi, back * hi, aim);
 }
 
+/**
+ * Tunable camera settings (Task C1). `pitch` is the view direction's
+ * downward tilt (degrees), `distance` the camera-to-army distance (world
+ * units), `fov` the vertical field of view (degrees), `follow` how much of the
+ * army's sideways position the camera takes (0..1) and `smoothing` the
+ * seconds it takes to close most of the gap (0 = instant).
+ */
+export type CameraSettings = {
+  pitch: number;
+  distance: number;
+  fov: number;
+  follow: number;
+  smoothing: number;
+};
+
+/** Slider ranges. Distance is a multiple of today's camera distance for the screen. */
+export const CAMERA_LIMITS = {
+  pitch: { min: 8, max: 45 },
+  distance: { min: 0.4, max: 2 },
+  fov: { min: 20, max: 75 },
+  follow: { min: 0, max: 1 },
+  smoothing: { min: 0, max: 1 },
+} as const;
+
+/** Follow smoothing the settings screen starts with. */
+export const DEFAULT_SMOOTHING = 0.25;
+
+const RAD = Math.PI / 180;
+
+/**
+ * The camera for `s` around the army: the view looks `pitch` down, the army
+ * sits `distance` away and `armyY` (share of the screen from the top) down
+ * the screen, which fixes height and distance back.
+ */
+export function poseFromSettings(s: CameraSettings, armyY: number): CameraFit {
+  const tanV = Math.tan((s.fov * RAD) / 2);
+  // depression of the army: below the view axis by the army's screen offset
+  const da = s.pitch * RAD + Math.atan((2 * armyY - 1) * tanV);
+  const height = s.distance * Math.sin(da);
+  const back = s.distance * Math.cos(da);
+  return {
+    pose: {
+      height,
+      back,
+      lookAhead: height / Math.tan(s.pitch * RAD) - back,
+      lookHeight: 0,
+    },
+    fov: s.fov,
+  };
+}
+
+/** A fitted camera expressed as settings (follow 0, default smoothing); `poseFromSettings` inverts it. */
+export function settingsFromFit(fit: CameraFit): CameraSettings {
+  const { pose } = fit;
+  return {
+    pitch: Math.atan2(pose.height, pose.back + pose.lookAhead) / RAD,
+    distance: Math.hypot(pose.height, pose.back),
+    fov: fit.fov,
+    follow: 0,
+    smoothing: DEFAULT_SMOOTHING,
+  };
+}
+
+/** Where the camera wants to be sideways (world X): `follow` of the army's place on the track. */
+export const followTarget = (follow: number, trackX: number): number =>
+  follow * worldX(trackX);
+
+/**
+ * One easing step of the camera's sideways position: continuous, and the same
+ * however the time is split into frames (exponential; 95% of the gap closes in
+ * `smoothing` seconds, 0 snaps).
+ */
+export function followStep(
+  current: number,
+  target: number,
+  dt: number,
+  smoothing: number,
+): number {
+  if (smoothing <= 0) return target;
+  return target + (current - target) * Math.exp((-3 * dt) / smoothing);
+}
+
 /** A wall's height and thickness (world units); its near face stands at the row's distance. */
 export const WALL_H = 2;
 export const WALL_T = 0.4;
