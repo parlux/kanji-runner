@@ -1,6 +1,6 @@
 # Intent: Katakana loanwords
 
-Status: confirmed by the owner, 2026-11-13, after an interview. Extends `docs/intent/kanji-runner.md`. Idea: `docs/ideas/kana-words.md`. Spec: `docs/specs/SPEC-kana-words.md`, tasks: `tasks/todo-kana-words.md`.
+Status: confirmed by the owner, 2026-11-13, after an interview. Extends `docs/intent/kanji-runner.md`. Idea: `docs/ideas/done/kana-words.md`. Spec: `docs/specs/SPEC-kana-words.md`, tasks: `tasks/done/todo-kana-words.md`.
 
 ## Statement of intent
 - **Outcome:** katakana loanwords (コーヒー, レストラン, テレビ…) become their own SRS items. A gate shows the word; you pick its English meaning.

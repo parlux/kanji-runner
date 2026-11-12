@@ -1,6 +1,6 @@
 # Tasks: Katakana loanwords (v1.6)
 
-Spec: `docs/specs/SPEC-kana-words.md` (2026-11-13). Intent: `docs/intent/kana-words.md`. Idea: `docs/ideas/kana-words.md`. Queued: starts when the owner says so (independent of the 3D and stories rounds).
+Spec: `docs/specs/SPEC-kana-words.md` (2026-11-13). Intent: `docs/intent/kana-words.md`. Idea: `docs/ideas/done/kana-words.md`. Done: Checkpoint J approved by the owner, 2026-11-13.
 Every task: `npm test && npm run lint && npm run build` pass before it is checked off. Test fixtures are synthetic: never commit real WaniKani content.
 
 ## Plan
@@ -69,7 +69,7 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 **Scope:** M
 
 ### Checkpoint J: v1.6 (owner, on the phone)
-- [ ] With katakana learned, kanji runs now and then ask a loanword; none uses katakana you haven't learned.
-- [ ] Runs still feel mostly about kanji (or note: more / fewer words).
-- [ ] Word gates are readable while steering, in 3D.
-- [ ] Missed words show a useful study card.
+- [x] With katakana learned, kanji runs now and then ask a loanword; none uses katakana you haven't learned.
+- [x] Runs still feel mostly about kanji (or note: more / fewer words).
+- [x] Word gates are readable while steering, in 3D.
+- [x] Missed words show a useful study card.
