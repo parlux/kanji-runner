@@ -77,6 +77,39 @@ describe("studyCards", () => {
       );
   });
 
+  it("attaches stories and radicals from a lookup; others stay today's card", () => {
+    const chars = [
+      ...new Set(missed.filter((m) => m.type !== "kana").map((m) => m.prompt)),
+    ];
+    const c0 = chars[0] as string;
+    const rad = {
+      char: null,
+      name: "squig",
+      image: "https://example.invalid/a.svg",
+    };
+    const plain = studyCards(missed, KANJI, KANA);
+    const cards = studyCards(
+      missed,
+      KANJI,
+      KANA,
+      new Map([[c0, { meaning: "m", reading: "r", radicals: [rad] }]]),
+    );
+    expect(cards).toHaveLength(plain.length);
+    cards.forEach((c, i) => {
+      if (c.kind === "kanji" && c.char === c0) {
+        expect(c.mnemonics).toEqual({ meaning: "m", reading: "r" });
+        expect(c.radicals).toEqual([rad]);
+      } else expect(c).toEqual(plain[i]);
+    });
+  });
+
+  it("ignores an empty story: the card equals today's", () => {
+    const c0 = missed.find((m) => m.type !== "kana")?.prompt as string;
+    expect(
+      studyCards(missed, KANJI, KANA, new Map([[c0, { radicals: [] }]])),
+    ).toEqual(studyCards(missed, KANJI, KANA));
+  });
+
   it("marks every card from misses as missed", () => {
     for (const c of studyCards(missed, KANJI, KANA))
       expect(c.missed).toBe(true);

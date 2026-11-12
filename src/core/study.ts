@@ -1,8 +1,20 @@
 import type { Missed } from "./run";
 import type { GateRow, KanaItem, KanjiItem } from "./types";
 
-/** WaniKani's mnemonics (W5); unused for built-in cards. */
+/** WaniKani's mnemonics (raw text). */
 export type Mnemonics = { meaning?: string; reading?: string };
+
+/** A WaniKani radical shown on a kanji card. */
+export type StoryRadical = {
+  /** The radical's character, or null when WaniKani draws it as an image. */
+  char: string | null;
+  name: string;
+  /** SVG URL, only when `char` is null. */
+  image: string | null;
+};
+
+/** What a story lookup gives for one kanji: stories and WaniKani's radicals. */
+export type Story = Mnemonics & { radicals?: readonly StoryRadical[] };
 
 /** One study card: what to learn about an item missed in a run. */
 export type StudyCard =
@@ -19,6 +31,8 @@ export type StudyCard =
       readings: string[];
       components: string[];
       mnemonics?: Mnemonics;
+      /** WaniKani's radicals in order, when a story lookup has the kanji. */
+      radicals?: StoryRadical[];
       /** Answered wrongly in the run; false for a kanji only answered right. */
       missed: boolean;
     }
@@ -33,9 +47,13 @@ export type StudyCard =
 function kanjiCard(
   k: KanjiItem,
   missed: boolean,
-  mnemonics?: ReadonlyMap<string, Mnemonics>,
+  stories?: ReadonlyMap<string, Story>,
 ): StudyCard {
-  const mn = mnemonics?.get(k.char);
+  const st = stories?.get(k.char);
+  const mn: Mnemonics = {};
+  if (st?.meaning) mn.meaning = st.meaning;
+  if (st?.reading) mn.reading = st.reading;
+  const hasMn = mn.meaning !== undefined || mn.reading !== undefined;
   return {
     kind: "kanji",
     char: k.char,
@@ -48,7 +66,8 @@ function kanjiCard(
       : null,
     readings: k.readings,
     components: k.components,
-    ...(mn ? { mnemonics: mn } : {}),
+    ...(hasMn ? { mnemonics: mn } : {}),
+    ...(st?.radicals?.length ? { radicals: [...st.radicals] } : {}),
     missed,
   };
 }
@@ -57,14 +76,14 @@ function kanjiCard(
  * One card per missed item, in the order first missed, then one card per
  * other kanji in `seen` (the run's kanji, in order), marked not missed. An item
  * missed on several gates (e.g. meaning and reading) gets one card. Items not
- * found in the given lists are skipped. `mnemonics` (WaniKani mode) are
- * attached by character.
+ * found in the given lists are skipped. `stories` (mnemonics and radicals, either
+ * mode) are attached by character; a kanji missing from it gets today's card.
  */
 export function studyCards(
   missed: readonly Missed[],
   kanji: readonly KanjiItem[],
   kana: readonly KanaItem[],
-  mnemonics?: ReadonlyMap<string, Mnemonics>,
+  stories?: ReadonlyMap<string, Story>,
   seen: readonly string[] = [],
 ): StudyCard[] {
   const done = new Set<string>();
@@ -85,7 +104,7 @@ export function studyCards(
         });
     } else {
       const k = kanji.find((x) => x.char === m.prompt);
-      if (k) out.push(kanjiCard(k, true, mnemonics));
+      if (k) out.push(kanjiCard(k, true, stories));
     }
   }
   for (const char of seen) {
@@ -93,7 +112,7 @@ export function studyCards(
     if (done.has(key)) continue;
     done.add(key);
     const k = kanji.find((x) => x.char === char);
-    if (k) out.push(kanjiCard(k, false, mnemonics));
+    if (k) out.push(kanjiCard(k, false, stories));
   }
   return out;
 }
