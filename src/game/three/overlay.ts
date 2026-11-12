@@ -19,6 +19,8 @@ import {
   type Tint,
 } from "../labels";
 import {
+  BOSS_TOP,
+  type BossView,
   CRATE_H,
   FIGURE_TOP,
   HAZE_COLOUR,
@@ -256,4 +258,54 @@ function renderWall(
       ? fitSize(ctx, row.prompt, size, rgt.x - lft.x - PROMPT_MARGIN)
       : size;
   outlinedText(ctx, row.prompt, top.x, y, fitted, undefined, tint);
+}
+
+/** The boss's HP is this many times its projected height (with a floor); its bar this wide and tall. */
+const BOSS_HP_K = 0.32;
+const BOSS_HP_MIN_PX = 14;
+const BOSS_BAR_W = 0.9;
+const BOSS_BAR_H = 0.07;
+const BAR_COLOURS = { back: "#2a1f2e", fill: "#ff4a6a", edge: "#ffffff" };
+
+/**
+ * The boss's HP above its head, from SHAPE_DISTANCE in: a big number and a
+ * bar draining with it, sized by its projected height and hazed with it.
+ */
+export function renderBossText(
+  ctx: Ctx,
+  boss: BossView,
+  project: Projector,
+  haze: Haze,
+): void {
+  if (boss.dist - boss.armyDist > SHAPE_DISTANCE || boss.alpha <= 0) return;
+  const foot = project(0.5, boss.dist, 0);
+  const head = project(0.5, boss.dist, BOSS_TOP);
+  const top = project(0.5, boss.dist, boss.height);
+  if (!foot || !head || !top) return;
+  const px = foot.y - head.y;
+  if (px <= 0) return;
+  const tint = hazed(haze(boss.dist, boss.height));
+  const size = Math.max(BOSS_HP_MIN_PX, BOSS_HP_K * px);
+  const barW = BOSS_BAR_W * px;
+  const barH = Math.max(3, BOSS_BAR_H * px);
+  const barY = top.y - 0.12 * px - barH;
+  const share = boss.size > 0 ? Math.max(0, boss.hp / boss.size) : 0;
+  ctx.globalAlpha = boss.alpha;
+  ctx.fillStyle = tint(BAR_COLOURS.back);
+  ctx.fillRect(top.x - barW / 2, barY, barW, barH);
+  ctx.fillStyle = tint(BAR_COLOURS.fill);
+  ctx.fillRect(top.x - barW / 2, barY, barW * share, barH);
+  ctx.strokeStyle = tint(BAR_COLOURS.edge);
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(top.x - barW / 2, barY, barW, barH);
+  outlinedText(
+    ctx,
+    String(boss.hp),
+    top.x,
+    barY - size * 0.6,
+    size,
+    TAG_COLOURS.fight,
+    tint,
+  );
+  ctx.globalAlpha = 1;
 }
