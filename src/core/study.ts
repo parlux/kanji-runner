@@ -158,3 +158,56 @@ export function storiesWithFallback(
   }
   return out;
 }
+
+/** The pause screen's look back at the last answered gate: what it asked, what was picked, and its card. */
+export type LastAnswer = {
+  type: GateRow["type"];
+  prompt: string;
+  picked: string;
+  answer: string;
+  correct: boolean;
+  card: StudyCard | null;
+};
+
+/**
+ * The most recently resolved row of a run (`rows[results.length - 1]`) with the
+ * option picked (`choice`) and the item's study card, marked missed when wrong.
+ * Null before the first answer. Kana cards are always typed `missed: true`, so
+ * callers show `correct`, not the card's tag.
+ */
+export function lastAnswer(
+  rows: readonly GateRow[],
+  results: readonly boolean[],
+  choice: number,
+  kanji: readonly KanjiItem[],
+  kana: readonly KanaItem[],
+  stories?: ReadonlyMap<string, Story>,
+): LastAnswer | null {
+  const i = results.length - 1;
+  const row = rows[i];
+  if (i < 0 || !row) return null;
+  const correct = results[i] === true;
+  let card: StudyCard | null = null;
+  if (row.type === "kana") {
+    const k = kana.find((x) => x.char === row.prompt);
+    if (k)
+      card = {
+        kind: "kana",
+        char: k.char,
+        romaji: k.romaji,
+        script: k.script,
+        missed: true,
+      };
+  } else {
+    const k = kanji.find((x) => x.char === row.prompt);
+    if (k) card = kanjiCard(k, !correct, stories);
+  }
+  return {
+    type: row.type,
+    prompt: row.prompt,
+    picked: row.options[choice] ?? "",
+    answer: row.answer,
+    correct,
+    card,
+  };
+}
