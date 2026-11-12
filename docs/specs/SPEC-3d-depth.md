@@ -4,6 +4,8 @@ Extends `docs/specs/SPEC-3d.md` (v1.4). Everything there still holds unless this
 
 > **Amendment v1.4.2 (owner, 2026-11-13, Task T3c):** overlay text is no longer held back to `VIEW_DISTANCE`. Prompts, labels and counts show from `SHAPE_DISTANCE`, hazed exactly like their object (opaque, colours mixed toward the haze by the object's haze factor; size proportional). This overrides the **Read horizon** rule, the text fade band, and the matching Always/Never/success lines below. 3D may be easier than 2D.
 
+> **Amendment v1.4.3 (owner, 2026-11-13, Tasks C1–C2):** camera tuning and sideways follow. Intent: `docs/intent/3d-camera-follow.md`. See **Camera tuning (v1.4.3)** below; it overrides "The camera still does not follow steering" and, for tuned settings, the camera **Hard rule** and **Aim** bands. With no tuned settings, today's camera is unchanged.
+
 ## Objective
 Make the 3D run read like a crowd runner seen from just behind the crowd. The track should run deep into the distance, with gates, crates, saws and crowds appearing far off as faint shapes that fade in slowly instead of popping in. The camera is lower, flatter and closer, so the army is bigger on screen. Gameplay and difficulty do not change.
 
@@ -45,6 +47,14 @@ This replaces SPEC-3d's **Visibility horizon** rule ("nothing on the track more 
 - **Hard rule:** at 390×844, both track edges are inside the screen at the army's depth, and both side openings of a wall are fully on screen (with their labels) from `VIEW_DISTANCE` until the wall reaches the army. Fitting a narrow screen may change distance back, height, pitch or FOV, in that order of preference. Making the camera steeper is the last resort.
 - **Ask first** if the hard rule can't be met with a camera clearly flatter than now (pitch at the army more than about 8° shallower than the current 390×844 pose). Report the numbers rather than quietly going steep.
 - The camera still does not follow steering.
+
+### Camera tuning (v1.4.3)
+- **Camera settings** (pure, in `world.ts`/`view.ts`): pitch (°, at the army), distance (camera to army, world units), FOV (°), follow (0–1), follow smoothing (seconds to close most of the gap; 0 = instant). The pose is built from these around the army. Height and distance back follow from pitch and distance.
+- **Defaults:** with no saved settings, the pose is exactly today's fitted camera for the screen's aspect (existing aim and hard-rule tests pass unchanged). The settings screen opens with today's pose expressed as settings, follow 0.
+- **Follow:** the camera's target sideways position is `follow × worldX(run.x)`; the camera and its look point both shift by it (no yaw). It eases toward the target with the smoothing time, continuous frame to frame, framerate-independent. Run scene only; in the boss scene it eases back to centre. The overlay (labels, counts, pop-ups) projects with the same camera, so text stays on its object.
+- **No hard rule for tuned settings:** edges and outer openings may leave the screen. The re-ask, haze and text rules still hold.
+- **Settings screen (dev tool):** a DOM panel like the pause card, opened from a gear on the start screen and from the pause card (so the owner can tweak mid-run and resume). One slider per setting with its value shown, a Reset (back to today's camera), and Close. Changes apply live and are saved to `localStorage`; bad or missing saved data falls back to the defaults. Slider ranges: pitch 8–45°, distance from about 0.4× to 2× today's, FOV 20–75°, follow 0–1, smoothing 0–1 s.
+- **Untouched:** 2D (the gear's panel may show in 2D but changes nothing there), `src/core`, the golden run, haze, `SHAPE_DISTANCE`, text rules.
 
 ### What stays
 - `VIEW_DISTANCE`, and every number in `src/core/tuning.ts`.
@@ -95,7 +105,7 @@ This replaces SPEC-3d's "Never: show a track row beyond `VIEW_DISTANCE`" and suc
 - Any gameplay or tuning number, including `VIEW_DISTANCE` and speed.
 - Making 3D easier than 2D (no earlier labels).
 - New art, models or textures.
-- A camera that follows steering.
+- A camera that follows steering. (Superseded by v1.4.3.)
 - Label readability tuning beyond what the closer camera gives for free.
 
 ## Open Questions

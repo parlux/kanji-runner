@@ -212,3 +212,31 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 - [ ] The boss feels like the end of the run, not a separate screen; the giant boss looks big and scary.
 - [ ] Smooth on the phone with a full crowd.
 - [ ] Labels: readable enough, or the owner says what to tune.
+
+## Phase 11: camera tuning (independent of T4; worktree `camera`)
+Intent: `docs/intent/3d-camera-follow.md`. Spec: SPEC-3d-depth amendment v1.4.3, "Camera tuning". Idea: `docs/ideas/3d-camera-follow.md`. Runs alongside T4; both touch `view.ts`/`scene3d.ts`, so merge main before starting and before the checkpoint.
+
+### Task C1: Camera settings screen with live sliders and sideways follow
+**Description:**
+- **Settings (pure):** a `CameraSettings` type (pitch, distance, FOV, follow, smoothing) and a pose built from it around the army in `world.ts`/`view.ts`. No saved settings → today's fitted pose, unchanged. A function that expresses today's pose for an aspect as settings (the screen's starting values).
+- **Follow (pure):** target x = `follow × worldX(run.x)`; an easing step `(current, target, dt, smoothing)` that is continuous and framerate-independent. Camera and look point shift together. Run scene only; eases back to centre in the boss scene. The overlay projects with the same camera.
+- **Storage:** load/save in `localStorage` with validation (out-of-range or bad data → defaults), like `loadSpeed`/`saveSpeed`.
+- **Screen:** a DOM panel styled like the pause card: sliders for pitch, distance, FOV, follow and smoothing with their values; Reset; Close. Opens from a gear on the start screen (clear of the speed pill) and from the pause card. Changes apply live (visible behind the panel mid-run) and are saved.
+- Unchanged: `src/core`, golden run, haze, `SHAPE_DISTANCE`, text rules, 2D.
+
+**Acceptance criteria:**
+- [ ] Tested: no saved settings → pose identical to today's at 390×844 and 1280×800 (existing aim/hard-rule tests pass unchanged); today's pose → settings → pose round trip; follow 0 keeps x = 0; follow 1 settles on the army's x; the easing is continuous and the same at 30 and 60 fps; storage round trip and bad-data fallback.
+- [ ] Browser check at 390×844 with `?3d`: the gear on the start screen and the pause card opens the panel; a run at today's camera, at pitch ~20° with follow 0, and at pitch ~20° with follow 0.6 while steering to an outer opening (filmstrips); labels stay on their gates with follow on; Reset restores today's camera; settings survive a reload. Screenshots in the scratchpad.
+- [ ] Frame time unchanged (logged with a 200 crowd).
+
+**Verification:** `npm test && npm run lint && npm run build`; browser check; deploy green.
+**Dependencies:** T3e
+**Files:** `src/game/three/{world,view,scene3d}.ts`, a new `src/game/camerasettings.ts` (panel + storage), `src/game/{start,pausecard}.ts`, `src/main.ts`, `tests/game/world.test.ts` (+ a storage test)
+**Scope:** M
+
+### Checkpoint H2: the camera (owner, on the phone, with `?3d`)
+- [ ] The settings screen works mid-run and settings stick.
+- [ ] The owner picks values that feel right (reports pitch, distance, FOV, follow, smoothing) and says what to do about answers that leave the screen, if anything.
+
+### Task C2: Bake in the chosen camera
+Shaped at H2. Likely: the owner's values become the defaults (the hard rule and aim tests replaced by tests pinning the new pose at 390×844 and 1280×800); the settings screen stays as a hidden tuning screen or becomes a simple preset; any off-screen-answer fix the owner asks for.
