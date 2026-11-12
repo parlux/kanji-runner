@@ -45,6 +45,7 @@ import {
   scaledWidth,
   spreadScale,
   spreadShare,
+  stepShare,
   spreadWidth,
   SQUEEZE_DIST,
   type CameraPose,
@@ -172,7 +173,7 @@ describe("crowd spread and squeeze", () => {
         questions: [10, 20],
         charges: [1],
         hazards: [
-          { kind: "saw", pos: 13, mid: 0.5, amp: 0.2, phase: 0 },
+          { kind: "saw", pos: 13, mid: 0.5, amp: 0.01, phase: 0 },
           { kind: "block", pos: 15, left: 0.4, right: 0.6 },
           { kind: "pack", pos: 18, x: 0.5 },
         ],
@@ -196,7 +197,8 @@ describe("crowd spread and squeeze", () => {
       let contacts = 0;
       while (s.status === "running" && s.dist < 200) {
         const next = stepRun(s, 1 / 60);
-        if (next.nextHazard !== s.nextHazard || next.next !== s.next) {
+        // contacts that clip (walls always; hazards only if they hit)
+        if (next.next !== s.next || next.lastClip !== s.lastClip) {
           contacts++;
           for (const r of [s, next]) {
             const g = clipGaps(r);
@@ -205,8 +207,133 @@ describe("crowd spread and squeeze", () => {
         }
         s = next;
       }
-      expect(contacts).toBeGreaterThan(5);
+      expect(contacts).toBeGreaterThan(3);
     }
+  });
+
+  describe("only what would hit squeezes", () => {
+    const base = createRunState(kanaRun(1), buildTrack(1, ROWS_PER_RUN));
+    const withHazards = (
+      hazards: RunState["track"]["hazards"],
+      over: Partial<RunState> = {},
+    ): RunState => ({
+      ...base,
+      army: 200,
+      x: 0.5,
+      dist: 0,
+      track: { questions: [50], charges: [], hazards },
+      hp: hazards.map(() => 3),
+      damage: hazards.map(() => 0),
+      packs: hazards.map(() => null),
+      ...over,
+    });
+    const ahead = (r: RunState): number => clipGaps(r).ahead;
+
+    it("ignores a crate, saw and pack in another lane; counts them in the crowd's path", () => {
+      // a 200 crowd spreads over 0.225..0.775
+      const off = withHazards(
+        [
+          { kind: "block", pos: 5, left: 0.05, right: 0.15 },
+          { kind: "saw", pos: 8, mid: 0.9, amp: 0.02, phase: 0 },
+          { kind: "pack", pos: 11, x: 0.93 },
+        ],
+        { packs: [null, null, { pos: 11, x: 0.93 }] },
+      );
+      expect(ahead(off)).toBe(50);
+      const on = withHazards([
+        { kind: "block", pos: 5, left: 0.45, right: 0.55 },
+      ]);
+      expect(ahead(on)).toBe(5);
+      const saw = withHazards([
+        { kind: "saw", pos: 8, mid: 0.5, amp: 0.02, phase: 0 },
+      ]);
+      expect(ahead(saw)).toBe(8);
+      const pack = withHazards([{ kind: "pack", pos: 11, x: 0.6 }], {
+        packs: [{ pos: 11, x: 0.6 }],
+      });
+      expect(ahead(pack)).toBe(11);
+    });
+
+    it("tests a saw where it is when the crowd reaches it, not its sweep", () => {
+      // sweeps 0.1..0.9: in the crowd's lane for some phases, off it for others
+      const mk = (ph: number) =>
+        withHazards([{ kind: "saw", pos: 8, mid: 0.5, amp: 0.4, phase: ph }]);
+      const gaps = [0, Math.PI / 4, Math.PI / 2, Math.PI, 5].map((ph) =>
+        ahead(mk(ph)),
+      );
+      expect(gaps.some((g) => g === 8)).toBe(true);
+      expect(gaps.some((g) => g === 50)).toBe(true);
+    });
+
+    it("ignores shattered crates and dead packs", () => {
+      const blk = withHazards(
+        [{ kind: "block", pos: 5, left: 0.4, right: 0.6 }],
+        { damage: [3] },
+      );
+      expect(ahead(blk)).toBe(50);
+      const pk = withHazards([{ kind: "pack", pos: 5, x: 0.5 }], {
+        damage: [3],
+        packs: [{ pos: 5, x: 0.5 }],
+      });
+      expect(ahead(pk)).toBe(50);
+    });
+
+    it("always counts a wall, even with nothing else", () => {
+      expect(ahead(withHazards([]))).toBe(50);
+    });
+
+    it("everything the sim clips counts: crowd span inside the spread span at any x", () => {
+      for (const x of [0.1, 0.3, 0.5, 0.9]) {
+        const w = crowdWidth(200);
+        const r = withHazards(
+          [{ kind: "block", pos: 5, left: x - w / 2, right: x + w / 2 }],
+          { x },
+        );
+        expect(ahead(r)).toBe(5);
+      }
+    });
+  });
+
+  describe("share easing", () => {
+    const step = (p: number, a: number, b: number, n: number, dt = 1 / 60) => {
+      for (let i = 0; i < n; i++) p = stepShare(p, 200, a, b, dt);
+      return p;
+    };
+    it("stays at 1 on open road and 0 at contact", () => {
+      expect(step(1, Infinity, Infinity, 60)).toBe(1);
+      expect(step(1, 0, Infinity, 1)).toBe(0);
+      expect(step(1, crowdHalfDepth(200), Infinity, 1)).toBe(0);
+      expect(step(1, Infinity, 0, 1)).toBe(0);
+    });
+    it("follows a normal approach continuously and reaches 0 by contact", () => {
+      let p = 1;
+      let last = 1;
+      const speed = 3; // track units per second, fast
+      for (let d = 5; d > 0; d -= speed / 60) {
+        p = stepShare(p, 200, d, Infinity, 1 / 60);
+        expect(Math.abs(p - last)).toBeLessThan(0.1);
+        last = p;
+      }
+      expect(p).toBe(0);
+    });
+    it("eases (no snap) when a hazard is destroyed mid-squeeze, and when steering off/into it", () => {
+      const hold = crowdHalfDepth(200);
+      const mid = hold + SQUEEZE_DIST / 2;
+      const squeezed = spreadShare(200, mid, Infinity);
+      // gone: target 1, the share rises at the easing rate only
+      const up = stepShare(squeezed, 200, Infinity, Infinity, 1 / 60);
+      expect(up - squeezed).toBeGreaterThan(0);
+      expect(up - squeezed).toBeLessThan(0.05);
+      // it reappears (steered into): comes in fast but not at once
+      const down = stepShare(1, 200, mid, Infinity, 1 / 60);
+      expect(1 - down).toBeGreaterThan(0);
+      expect(1 - down).toBeLessThan(0.14);
+      // yet never late: within the crowd's depth it is 0 regardless
+      expect(stepShare(1, 200, hold, Infinity, 1 / 60)).toBe(0);
+    });
+    it("a paused frame (dt 0) changes nothing", () => {
+      expect(stepShare(0.4, 200, Infinity, Infinity, 0)).toBe(0.4);
+    });
   });
 });
 

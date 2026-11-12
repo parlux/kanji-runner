@@ -122,7 +122,8 @@ export function createSquads(scene: Scene, fx: Fx) {
         }
       }
 
-      // the opening being shot: the stream splits onto its two edges
+      // the opening being shot: straight ahead from each lane, stopping at the
+      // wall's face (the opening's edges glow in walls.ts)
       const gate =
         run.gateTarget === null || fighting
           ? undefined
@@ -130,12 +131,11 @@ export function createSquads(scene: Scene, fx: Fx) {
       const wallPos = run.track.questions[run.next];
       if (gate && wallPos !== undefined) {
         const wz = worldZ(wallPos, run.dist);
-        const edges = [worldX(gate.left), worldX(gate.right)];
-        for (let l = 0; l < Math.max(2, lanes); l++)
+        for (let l = 0; l < lanes; l++)
           fx.stream(
-            laneX(l % lanes),
+            laneX(l),
             -0.4,
-            edges[l % 2] as number,
+            laneX(l),
             wz,
             6,
             1.6,
