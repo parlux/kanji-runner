@@ -84,8 +84,30 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 **Files:** `src/game/three/{scene3d,overlay,figures,world}.ts`
 **Scope:** M
 
-### Checkpoint H1: the look (owner, on the phone, with `?3d`; moved after T3: hazards must be visible for a playable run)
+### Task T3b: Depth haze and flatter camera (owner feedback at H1)
+**Owner, 2026-11-12:** "all objects are appearing too late, rather than 'fading in'. I think our angle is a bit too steep too." 3D also feels faster than 2D. Spec: `docs/specs/SPEC-3d-depth.md` (v1.4.1). Intent: `docs/intent/3d-depth.md`.
+
+**Description:**
+- Two horizons: solid objects (walls, panes, crates, saws, packs, squads) drawn up to `SHAPE_DISTANCE` (start at 2 × `VIEW_DISTANCE`); overlay text (prompts, labels, counts) still only inside `VIEW_DISTANCE`, fading in from 0 at `VIEW_DISTANCE` to 1 by 0.9 × `VIEW_DISTANCE`.
+- Long distance haze instead of the 0.7–1.0 fog band: near-total at `SHAPE_DISTANCE`, about none by `VIEW_DISTANCE`, no contrast jump.
+- Camera lower, flatter and closer: army centre at 66–76% from the top, track at `SHAPE_DISTANCE` at 5–15%, sky at most about 10%. At 390×844, both track edges and both outer openings with labels stay on screen. Fit narrow screens by distance back, height, pitch, then FOV; steeper is the last resort.
+
+**Acceptance criteria:**
+- [x] Tested: haze near-total at `SHAPE_DISTANCE` and near-none at `VIEW_DISTANCE`; overlay alpha 0 at or beyond `VIEW_DISTANCE`, 1 inside 0.9 × `VIEW_DISTANCE`; `SHAPE_DISTANCE` below the minimum re-ask gap (the seeded re-ask "not visible" test extended to `SHAPE_DISTANCE`); aim bands at 390×844 and 1280×800; both track edges and a 3-answer wall's outer openings on screen at 390×844 at the army and at `VIEW_DISTANCE`.
+- [x] Browser check at 390×844 and 1280×800 with `?3d`: a row and a crate at about 1.8×, 1.2×, 1.0× and 0.8× `VIEW_DISTANCE`; a filmstrip of a wall approaching from `SHAPE_DISTANCE`, with no jump; a 3-answer wall near the army; crowds of 5, 40 and 200; 2D and 3D side by side at the same state. Screenshots in the scratchpad.
+- [x] Frame time logged with a full crowd and everything within `SHAPE_DISTANCE` drawn, compared with T3.
+  - Headless (software GL), 200 crowd, two 3-answer walls, three crates, a saw and two packs: CPU 0.70 → 0.95 ms per frame at 390×844 (T3 drew only what was within `VIEW_DISTANCE`), 0.92 → 1.0 ms at 1280×800; the T3 test scene alone is unchanged at 0.43 ms.
+- [x] Camera pitch at 390×844 before and after reported. If the both-sides rule forces it to stay about as steep as now, stop and ask.
+  - 390×844: pitch 40.7° → 28.7° (army seen 58.2° → 36.9° down); camera 19.4 up / 12 back → 20.9 up / 27.9 back, FOV 55.6° → 37.8°. 1280×800: 29.7° → 25.7°, 12 / 12 → 6 / 8, army about 1.6× wider. On a phone the army's width is pinned by the both-edges rule, so it is not bigger there.
+
+**Verification:** `npm test && npm run lint && npm run build`; browser check; deploy green.
+**Dependencies:** T3
+**Files:** `src/game/three/{world,view,scene3d,hazards,squads,overlay}.ts`, `src/game/render.ts`, `tests/game/world.test.ts`
+**Scope:** M
+
+### Checkpoint H1: the look (owner, on the phone, with `?3d`; moved after T3: hazards must be visible for a playable run; T3b from owner feedback)
 - [ ] The camera, track, gates, hazards and crowd feel like a crowd runner; the crowd visibly grows and shrinks.
+- [ ] Things appear in the distance and fade in; the camera is closer and less steep; 3D no longer feels faster than 2D (v1.4.1).
 - [ ] Camera numbers OK, or the owner says what to change (higher, lower, closer, wider).
 
 ### Task T4: The boss at the end of the track

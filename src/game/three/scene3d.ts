@@ -42,7 +42,7 @@ export type View3d = {
   project: Projector;
 };
 
-/** Track length drawn ahead of and behind the army (world units); it runs on into the fog. */
+/** Track length drawn ahead of and behind the army (world units); it runs on into the haze. */
 const TRACK_AHEAD = 260;
 const TRACK_BEHIND = 30;
 /** Lane markings: dashes this long, this far apart, on lines at these track x. */
@@ -164,7 +164,7 @@ export function createView3d(canvas: HTMLCanvasElement): View3d | null {
   const camera = makeCamera();
   const scene = new ThreeScene();
   scene.background = new Color(LOOK.sky);
-  const fog = new Fog(LOOK.sky, 1, 2);
+  const fog = new Fog(LOOK.haze, 1, 2);
   scene.fog = fog;
 
   scene.add(new HemisphereLight(0xffffff, 0x8aa070, 1.6));

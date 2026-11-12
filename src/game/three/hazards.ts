@@ -8,7 +8,7 @@ import {
   packSurvivors,
   type RunState,
 } from "../../core/sim";
-import { ENEMY_HP, FIRE_RANGE, VIEW_DISTANCE } from "../../core/tuning";
+import { ENEMY_HP, FIRE_RANGE } from "../../core/tuning";
 import { makeCrowdMesh } from "./figures";
 import { FX_COLOURS, type Fx } from "./fx";
 import {
@@ -24,6 +24,7 @@ import {
   MAX_RECRUITS,
   packFigureScale,
   recruitProgress,
+  SHAPE_DISTANCE,
   SHATTER_DIST,
   spanWorld,
   TRACK_W,
@@ -37,9 +38,9 @@ import {
  * crate into the crowd. Drawn from the sim's state as it is now.
  */
 
-/** Most pack figures drawn in all, and in one pack (above it the count tells the real number). */
-const MAX_PACK_FIGURES = 150;
+/** Most pack figures drawn in one pack (above it the count tells the real number), and in all (two packs fit within SHAPE_DISTANCE). */
 const MAX_PER_PACK = 100;
+const MAX_PACK_FIGURES = 2 * MAX_PER_PACK;
 const COLOURS = {
   enemy: new Color(0xe8456f),
   wood: new Color(0xc08a4a),
@@ -75,7 +76,7 @@ export function createHazards(scene: Scene, fx: Fx) {
         if (hz?.kind !== "pack" || i < run.nextHazard || isShattered(run, i))
           continue;
         const ahead = hazardPos(run, i) - run.dist;
-        if (ahead > VIEW_DISTANCE) continue;
+        if (ahead > SHAPE_DISTANCE) continue;
         const n = packSurvivors(run, i);
         if (n <= 0) continue;
         const span = packSpan(run, i);

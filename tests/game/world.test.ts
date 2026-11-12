@@ -1,12 +1,21 @@
 import { describe, expect, it } from "vitest";
 import { crowdWidth } from "../../src/core/crowd";
-import { SAW_W, CROWD_MAX_W, VIEW_DISTANCE } from "../../src/core/tuning";
+import {
+  CALM_DISTANCE,
+  CROWD_MAX_W,
+  HAZARD_SPACING,
+  REASK_GAP_MIN,
+  SAW_W,
+  VIEW_DISTANCE,
+} from "../../src/core/tuning";
 import {
   CROWD_DEPTH,
   crowdLayout,
   FIGURE_RADIUS,
   FOG_TOP_H,
   fogRange,
+  hazeAt,
+  SHAPE_DISTANCE,
   MAX_DRAWN_SOLDIERS,
   TRACK_W,
   trackDist,
@@ -15,13 +24,14 @@ import {
   worldX,
   worldZ,
   screenAt,
-  fogAlpha,
+  textAlpha,
   projectorFor,
   squadDist,
   squadPlace,
   FIREFIGHT_DIST,
   SQUAD_BEYOND,
   wallPx,
+  WALL_H,
   spanWorld,
   sawPlace,
   burstPiece,
@@ -30,6 +40,7 @@ import {
   packFigureScale,
   type CameraPose,
 } from "../../src/game/three/world";
+import { gateOpenings } from "../../src/core/gates";
 import { hazardSpan, type Saw } from "../../src/core/track";
 import { AIM, CAMERA_MIN_HEIGHT, cameraFit } from "../../src/game/three/view";
 
@@ -83,18 +94,38 @@ describe("crowd layout", () => {
   });
 });
 
-describe("fog and camera", () => {
-  it("is total by VIEW_DISTANCE for anything up to FOG_TOP_H tall", () => {
-    const { near, far } = fogRange(pose);
-    expect(near).toBeLessThan(far);
-    const z = worldZ(VIEW_DISTANCE, 0);
-    expect(Math.min(viewDepth(pose, 0, z), viewDepth(pose, FOG_TOP_H, z))).toBe(
-      far,
+describe("haze and horizons", () => {
+  const poses = [pose, cameraFit(390 / 844).pose, cameraFit(1280 / 800).pose];
+  const haze = (p: CameraPose, ahead: number, y: number): number =>
+    hazeAt(fogRange(p), viewDepth(p, y, worldZ(ahead, 0)));
+
+  it("is near-total at SHAPE_DISTANCE and near-none at VIEW_DISTANCE", () => {
+    for (const p of poses)
+      for (const y of [0, WALL_H, FOG_TOP_H]) {
+        expect(haze(p, SHAPE_DISTANCE, y)).toBeGreaterThan(0.97);
+        expect(haze(p, VIEW_DISTANCE, y)).toBeLessThan(0.05);
+        // shapes are already gone as they cross the shape horizon: no pop-in
+        expect(haze(p, SHAPE_DISTANCE + 0.01, y)).toBe(1);
+      }
+  });
+
+  it("thins steadily as a shape comes closer, with no jump", () => {
+    for (const p of poses) {
+      let last = 1;
+      for (let a = SHAPE_DISTANCE; a >= VIEW_DISTANCE; a -= 0.05) {
+        const h = haze(p, a, WALL_H / 2);
+        expect(h).toBeLessThanOrEqual(last);
+        expect(last - h).toBeLessThan(0.03);
+        last = h;
+      }
+    }
+  });
+
+  it("keeps SHAPE_DISTANCE below the closest a re-ask can replace a row", () => {
+    expect(SHAPE_DISTANCE).toBeGreaterThan(VIEW_DISTANCE);
+    expect(SHAPE_DISTANCE).toBeLessThan(
+      REASK_GAP_MIN * (CALM_DISTANCE + 2 * HAZARD_SPACING),
     );
-    // just beyond it, nothing on the track is in front of the fog's end
-    const beyond = worldZ(VIEW_DISTANCE + 0.01, 0);
-    for (const y of [0, FOG_TOP_H / 2, FOG_TOP_H])
-      expect(viewDepth(pose, y, beyond)).toBeGreaterThan(far);
   });
 });
 
@@ -103,20 +134,29 @@ describe("camera fit", () => {
     [390, 844],
     [1280, 800],
   ];
-  const fogZ = worldZ(VIEW_DISTANCE, 0);
+  const viewZ = worldZ(VIEW_DISTANCE, 0);
+  const farZ = worldZ(SHAPE_DISTANCE, 0);
+  const pitchOf = (p: CameraPose): number =>
+    (Math.atan2(p.height - p.lookHeight, p.back + p.lookAhead) * 180) / Math.PI;
 
   for (const [w, h] of sizes)
-    it(`at ${w}×${h} puts the army low, the fog line high and both edges in view`, () => {
+    it(`at ${w}×${h} puts the army in the lower third, the far line near the top and both edges in view`, () => {
       const aspect = w / h;
       const fit = cameraFit(aspect);
-      expect(screenAt(fit, aspect, 0, 0, 0).y).toBeCloseTo(AIM.armyY, 6);
-      expect(screenAt(fit, aspect, 0, 0, fogZ).y).toBeCloseTo(AIM.fogY, 6);
       const army = screenAt(fit, aspect, 0, 0, 0).y;
-      const fog = screenAt(fit, aspect, 0, 0, fogZ).y;
-      expect(army).toBeGreaterThanOrEqual(0.78);
-      expect(army).toBeLessThanOrEqual(0.86);
-      expect(fog).toBeGreaterThanOrEqual(0.18);
-      expect(fog).toBeLessThanOrEqual(0.28);
+      const far = screenAt(fit, aspect, 0, 0, farZ).y;
+      expect(army).toBeCloseTo(AIM.armyY, 6);
+      expect(far).toBeCloseTo(AIM.farY, 6);
+      expect(army).toBeGreaterThanOrEqual(0.66);
+      expect(army).toBeLessThanOrEqual(0.76);
+      expect(far).toBeGreaterThanOrEqual(0.05);
+      expect(far).toBeLessThanOrEqual(0.15);
+      // the read line sits between them
+      const view = screenAt(fit, aspect, 0, 0, viewZ).y;
+      expect(view).toBeGreaterThan(far);
+      expect(view).toBeLessThan(army);
+      // sky (and the hazed track beyond the far line) is about a tenth at most
+      expect(far).toBeLessThanOrEqual(0.12);
       for (const x of [0, 1]) {
         const p = screenAt(fit, aspect, worldX(x), 0, 0).x;
         expect(p).toBeGreaterThan(0);
@@ -125,20 +165,41 @@ describe("camera fit", () => {
       // the biggest crowd's near edge stays on screen
       const nearZ = (CROWD_MAX_W / 2) * CROWD_DEPTH * TRACK_W;
       expect(screenAt(fit, aspect, 0, 0, nearZ).y).toBeLessThan(1);
-      // real perspective: the track at the fog line is narrower than at the army
-      const near = screenAt(fit, aspect, worldX(1), 0, 0).x - 0.5;
-      const far = screenAt(fit, aspect, worldX(1), 0, fogZ).x - 0.5;
-      expect(far).toBeLessThan(near * 0.7);
-      // the fog stays total by VIEW_DISTANCE with this pose
-      const { far: fogEnd } = fogRange(fit.pose);
-      expect(
-        viewDepth(fit.pose, 0, worldZ(VIEW_DISTANCE + 0.01, 0)),
-      ).toBeGreaterThan(fogEnd);
+      // real perspective: the track at the read line is narrower than at the army
+      const nearW = screenAt(fit, aspect, worldX(1), 0, 0).x - 0.5;
+      const farW = screenAt(fit, aspect, worldX(1), 0, viewZ).x - 0.5;
+      expect(farW).toBeLessThan(nearW * 0.7);
     });
 
-  it("raises the camera only when the screen is too narrow", () => {
-    expect(cameraFit(1280 / 800).pose.height).toBe(CAMERA_MIN_HEIGHT);
-    expect(cameraFit(390 / 844).pose.height).toBeGreaterThan(CAMERA_MIN_HEIGHT);
+  it("keeps a 3-answer wall's outer openings on screen at 390×844 from VIEW_DISTANCE to the army", () => {
+    const aspect = 390 / 844;
+    const fit = cameraFit(aspect);
+    const openings = gateOpenings(3);
+    const outer = [openings[0], openings[2]];
+    for (let ahead = 0; ahead <= VIEW_DISTANCE; ahead += 0.25)
+      for (const o of outer)
+        for (const x of [o?.left ?? 0, o?.right ?? 1])
+          for (const y of [0, WALL_H]) {
+            const p = screenAt(fit, aspect, worldX(x), y, worldZ(ahead, 0));
+            expect(p.x).toBeGreaterThan(0);
+            expect(p.x).toBeLessThan(1);
+            expect(p.y).toBeGreaterThan(0);
+            expect(p.y).toBeLessThan(1);
+          }
+  });
+
+  it("is flatter than before on a phone, and closer on a wide screen", () => {
+    // T1b's camera pitched 40.7° down at 390×844 and 29.7° at 1280×800
+    expect(pitchOf(cameraFit(390 / 844).pose)).toBeLessThan(40.7 - 8);
+    expect(pitchOf(cameraFit(1280 / 800).pose)).toBeLessThan(29.7);
+  });
+
+  it("moves the camera back (not steeper) only when the screen is too narrow", () => {
+    const wide = cameraFit(1280 / 800).pose;
+    const narrow = cameraFit(390 / 844).pose;
+    expect(wide.height).toBe(CAMERA_MIN_HEIGHT);
+    expect(narrow.height).toBeGreaterThan(CAMERA_MIN_HEIGHT);
+    expect(narrow.height / narrow.back).toBeCloseTo(wide.height / wide.back, 6);
   });
 });
 
@@ -158,22 +219,25 @@ describe("walls and their text", () => {
     }
   });
 
-  it("matches the live camera's placement of the army and the fog line", () => {
+  it("matches the live camera's placement of the army and the far line", () => {
     const project = projectorFor(fit, w, h, 2);
     expect((project(0.5, 2, 0)?.y ?? 0) / h).toBeCloseTo(AIM.armyY, 6);
-    expect((project(0.5, 2 + VIEW_DISTANCE, 0)?.y ?? 0) / h).toBeCloseTo(
-      AIM.fogY,
+    expect((project(0.5, 2 + SHAPE_DISTANCE, 0)?.y ?? 0) / h).toBeCloseTo(
+      AIM.farY,
       6,
     );
     expect(project(0.5, 2 - 10, 0)).toBeNull();
   });
 
-  it("fades overlay text with the fog: full near, gone at VIEW_DISTANCE", () => {
-    expect(fogAlpha(0)).toBe(1);
-    expect(fogAlpha(0.7 * VIEW_DISTANCE)).toBeCloseTo(1, 9);
-    expect(fogAlpha(0.85 * VIEW_DISTANCE)).toBeCloseTo(0.5, 9);
-    expect(fogAlpha(VIEW_DISTANCE)).toBe(0);
-    expect(fogAlpha(VIEW_DISTANCE + 1)).toBe(0);
+  it("fades overlay text in just inside VIEW_DISTANCE, never beyond it", () => {
+    expect(textAlpha(0)).toBe(1);
+    expect(textAlpha(-1)).toBe(1);
+    expect(textAlpha(0.9 * VIEW_DISTANCE)).toBeCloseTo(1, 9);
+    expect(textAlpha(0.89 * VIEW_DISTANCE)).toBe(1);
+    expect(textAlpha(0.95 * VIEW_DISTANCE)).toBeCloseTo(0.5, 9);
+    expect(textAlpha(VIEW_DISTANCE)).toBe(0);
+    expect(textAlpha(VIEW_DISTANCE + 1)).toBe(0);
+    expect(textAlpha(SHAPE_DISTANCE)).toBe(0);
   });
 
   it("stands squads beyond the wall, and the fighting one ahead of the army", () => {

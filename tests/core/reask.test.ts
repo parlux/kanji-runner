@@ -26,6 +26,7 @@ import {
   ROWS_PER_RUN,
   VIEW_DISTANCE,
 } from "../../src/core/tuning";
+import { SHAPE_DISTANCE } from "../../src/game/three/world";
 import { syntheticList } from "./wk-fixture";
 
 const list = syntheticList(60);
@@ -199,9 +200,10 @@ describe("re-asks stay off screen", () => {
       for (let t = 0; t < ROWS_PER_RUN; t++)
         for (let j = t + REASK_GAP_MIN; j <= t + REASK_GAP_MAX; j++) {
           if (j >= ROWS_PER_RUN) continue;
-          expect(
-            (questions[j] as number) - (questions[t] as number),
-          ).toBeGreaterThan(VIEW_DISTANCE);
+          const gap = (questions[j] as number) - (questions[t] as number);
+          expect(gap).toBeGreaterThan(VIEW_DISTANCE);
+          // nor within the 3D run's shape horizon
+          expect(gap).toBeGreaterThan(SHAPE_DISTANCE);
         }
     }
   });

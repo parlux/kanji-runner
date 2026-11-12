@@ -10,11 +10,11 @@ import {
   type Scene,
 } from "three";
 import { hazardPos, isShattered, type RunState } from "../../core/sim";
-import { VIEW_DISTANCE } from "../../core/tuning";
 import {
   CRATE_D,
   CRATE_H,
   sawPlace,
+  SHAPE_DISTANCE,
   spanWorld,
   WALL_BEHIND,
   worldZ,
@@ -98,8 +98,8 @@ export function createProps(scene: Scene) {
         if (!h || h.kind === "pack") continue;
         const ahead = hazardPos(run, i) - run.dist;
         if (ahead < -WALL_BEHIND) break;
-        // never beyond the visibility horizon
-        if (ahead > VIEW_DISTANCE) continue;
+        // never beyond the shape horizon
+        if (ahead > SHAPE_DISTANCE) continue;
         const z = worldZ(h.pos, run.dist);
         if (h.kind === "block") {
           if (isShattered(run, i) || nc >= MAX_CRATES) continue;

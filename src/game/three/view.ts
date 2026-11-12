@@ -2,18 +2,20 @@ import { PerspectiveCamera } from "three";
 import { fitCameraTo, type CameraAim, type CameraFit } from "./world";
 
 /**
- * Camera and look constants for the 3D run. The camera is behind and above
- * the army, centred on the track (it does not follow steering), and aimed so
- * the screen is mostly track, like the 2D layout: the army low, the fog line
- * high. Narrow screens get a higher, steeper camera so both edges stay in view.
+ * Camera and look constants for the 3D run. The camera is low and close
+ * behind the army, centred on the track (it does not follow steering), and
+ * aimed so the track runs up the screen into the haze: the army in the lower
+ * third, the far line near the top. Narrow screens move the camera farther
+ * back along the same slope (narrower view), not steeper, so both edges and
+ * every gate's outer openings stay in view.
  */
 
-/** How far behind the army the camera stands (world units). */
-export const CAMERA_BACK = 12;
+/** How far behind the army the camera stands on wide screens (world units). */
+export const CAMERA_BACK = 8;
 /** Lowest camera height (world units); wide screens use it. */
-export const CAMERA_MIN_HEIGHT = 12;
-/** Where the army and the fog line sit, as shares of the screen height from the top. */
-export const AIM: CameraAim = { armyY: 0.8, fogY: 0.23 };
+export const CAMERA_MIN_HEIGHT = 6;
+/** Where the army and the far line (SHAPE_DISTANCE) sit, as shares of the screen height from the top. */
+export const AIM: CameraAim = { armyY: 0.71, farY: 0.1 };
 /** Both track edges stay in view at the army with this much to spare. */
 export const EDGE_MARGIN = 1.06;
 /** Most device pixels per CSS pixel the 3D canvas draws. */
@@ -26,6 +28,8 @@ export const cameraFit = (aspect: number): CameraFit =>
 /** Bright daylight colours (original; genre-inspired only). */
 export const LOOK = {
   sky: 0x9fdcff,
+  /** The distance haze: a paler sky, so the far track softens into the horizon. */
+  haze: 0xd4eeff,
   ground: 0x7fcf6a,
   track: 0xf3ecf8,
   edge: 0xff7a59,

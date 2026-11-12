@@ -21,9 +21,15 @@ export const MAX_DRAWN_SOLDIERS = 200;
 export const FIGURE_RADIUS = 0.12;
 /** A crowd is this many times deeper (along the track) than it is wide. */
 export const CROWD_DEPTH = 1.8;
-/** Fog starts at this share of VIEW_DISTANCE ahead of the army. */
-export const FOG_START = 0.7;
-/** Tallest thing on the track (world units): fog hides it whole beyond VIEW_DISTANCE. */
+/**
+ * The shape horizon (track distance ahead of the army): solid objects are
+ * drawn up to here, faint in the haze; their text only inside VIEW_DISTANCE.
+ * Must stay below the closest a re-ask can replace a row (tested).
+ */
+export const SHAPE_DISTANCE = 2 * VIEW_DISTANCE;
+/** Overlay text fades in from VIEW_DISTANCE to this share of it. */
+export const TEXT_FADE_END = 0.9;
+/** Tallest thing on the track (world units): the haze hides it whole at SHAPE_DISTANCE. */
 export const FOG_TOP_H = 3;
 
 /** Screen position (CSS px) of a track point (x, distance, height), or null when behind the camera. */
@@ -83,15 +89,25 @@ export function viewDepth(pose: CameraPose, y: number, z: number): number {
 }
 
 /**
- * Linear fog range (view depths): it starts FOG_START × VIEW_DISTANCE ahead
- * and is total by VIEW_DISTANCE for anything up to FOG_TOP_H tall.
+ * Linear haze range (view depths): none up to VIEW_DISTANCE ahead, then
+ * thickening steadily until it is total at SHAPE_DISTANCE for anything up to
+ * FOG_TOP_H tall, so a shape crossing the shape horizon is already gone.
  */
 export function fogRange(pose: CameraPose): { near: number; far: number } {
-  const z = worldZ(VIEW_DISTANCE, 0);
+  const z = worldZ(SHAPE_DISTANCE, 0);
   return {
-    near: viewDepth(pose, 0, worldZ(FOG_START * VIEW_DISTANCE, 0)),
+    near: viewDepth(pose, 0, worldZ(VIEW_DISTANCE, 0)),
     far: Math.min(viewDepth(pose, 0, z), viewDepth(pose, FOG_TOP_H, z)),
   };
+}
+
+/** How much haze (0 none .. 1 total) linear fog `range` puts at view depth `depth`. */
+export function hazeAt(
+  range: { near: number; far: number },
+  depth: number,
+): number {
+  const t = (depth - range.near) / (range.far - range.near);
+  return Math.min(1, Math.max(0, t));
 }
 
 /** A posed camera and its vertical field of view (degrees). */
@@ -101,8 +117,8 @@ export type CameraFit = { pose: CameraPose; fov: number };
 export type CameraAim = {
   /** The army (track centre at the army). */
   armyY: number;
-  /** The fog line (track centre at VIEW_DISTANCE ahead). */
-  fogY: number;
+  /** The far line: track centre at SHAPE_DISTANCE ahead, where the haze is total. */
+  farY: number;
 };
 
 /** Screen position of a world point, as shares of the screen (0..1 from the left / top). */
@@ -131,7 +147,7 @@ export function screenAt(
 
 /**
  * Pitch and field of view for a camera `height` up and `back` behind the
- * army that put the army at `aim.armyY` and the fog line at `aim.fogY`.
+ * army that put the army at `aim.armyY` and the far line at `aim.farY`.
  */
 export function aimCamera(
   height: number,
@@ -139,10 +155,10 @@ export function aimCamera(
   aim: CameraAim,
 ): CameraFit {
   const va = 1 - 2 * aim.armyY;
-  const vf = 1 - 2 * aim.fogY;
-  // depression angles of the army and of the fog line
+  const vf = 1 - 2 * aim.farY;
+  // depression angles of the army and of the far line
   const da = Math.atan2(height, back);
-  const df = Math.atan2(height, back - worldZ(VIEW_DISTANCE, 0));
+  const df = Math.atan2(height, back - worldZ(SHAPE_DISTANCE, 0));
   // tan(pitch − da) / tan(pitch − df) rises with pitch: bisect it to va / vf
   let lo = df;
   let hi = da;
@@ -165,29 +181,32 @@ export function aimCamera(
 }
 
 /**
- * The camera for a screen of this aspect: aimed per `aimCamera`, at least
- * `minHeight` up, and raised (steeper) until both track edges, plus `margin`,
- * are in view at the army.
+ * The camera for a screen of this aspect: `height` up and `back` behind the
+ * army, aimed per `aimCamera`. When both track edges (plus `margin`, up to a
+ * wall's top) don't fit at the army, it moves farther back along the same
+ * slope, with a narrower field of view, rather than going steeper.
  */
 export function fitCameraTo(
   aspect: number,
   back: number,
-  minHeight: number,
+  height: number,
   aim: CameraAim,
   margin: number,
 ): CameraFit {
+  const edge = (TRACK_W / 2) * margin;
   const fits = (fit: CameraFit): boolean =>
-    screenAt(fit, aspect, (TRACK_W / 2) * margin, 0, 0).x <= 1;
-  const low = aimCamera(minHeight, back, aim);
-  if (fits(low)) return low;
-  let lo = minHeight;
-  let hi = minHeight * 8;
+    screenAt(fit, aspect, edge, 0, 0).x <= 1 &&
+    screenAt(fit, aspect, edge, WALL_H, 0).x <= 1;
+  const near = aimCamera(height, back, aim);
+  if (fits(near)) return near;
+  let lo = 1;
+  let hi = 16;
   for (let k = 0; k < 40; k++) {
-    const h = (lo + hi) / 2;
-    if (fits(aimCamera(h, back, aim))) hi = h;
-    else lo = h;
+    const s = (lo + hi) / 2;
+    if (fits(aimCamera(height * s, back * s, aim))) hi = s;
+    else lo = s;
   }
-  return aimCamera(hi, back, aim);
+  return aimCamera(height * hi, back * hi, aim);
 }
 
 /** A wall's height and thickness (world units); its near face stands at the row's distance. */
@@ -237,12 +256,11 @@ export function squadDist(
 }
 
 /**
- * How much of an object `ahead` track distance in front of the army shows
- * through the fog, for overlay text on it: 1 up to where the fog starts,
- * 0 from VIEW_DISTANCE on.
+ * Overlay text alpha for an object `ahead` track distance in front of the
+ * army: 0 from VIEW_DISTANCE on (as in 2D), 1 from TEXT_FADE_END of it in.
  */
-export function fogAlpha(ahead: number): number {
-  const t = (VIEW_DISTANCE - ahead) / ((1 - FOG_START) * VIEW_DISTANCE);
+export function textAlpha(ahead: number): number {
+  const t = (VIEW_DISTANCE - ahead) / ((1 - TEXT_FADE_END) * VIEW_DISTANCE);
   return Math.min(1, Math.max(0, t));
 }
 
