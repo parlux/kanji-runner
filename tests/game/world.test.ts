@@ -15,6 +15,11 @@ import {
   worldX,
   worldZ,
   screenAt,
+  fogAlpha,
+  projectorFor,
+  squadDist,
+  SQUAD_BEYOND,
+  wallPx,
   type CameraPose,
 } from "../../src/game/three/world";
 import { AIM, CAMERA_MIN_HEIGHT, cameraFit } from "../../src/game/three/view";
@@ -125,5 +130,47 @@ describe("camera fit", () => {
   it("raises the camera only when the screen is too narrow", () => {
     expect(cameraFit(1280 / 800).pose.height).toBe(CAMERA_MIN_HEIGHT);
     expect(cameraFit(390 / 844).pose.height).toBeGreaterThan(CAMERA_MIN_HEIGHT);
+  });
+});
+
+describe("walls and their text", () => {
+  const w = 390;
+  const h = 844;
+  const fit = cameraFit(w / h);
+
+  it("projects a wall smaller the farther away it is", () => {
+    const project = projectorFor(fit, w, h, 5);
+    let last = Infinity;
+    for (const ahead of [0.3, 0.8, 1.5, 2.2, VIEW_DISTANCE]) {
+      const px = wallPx(project, 0.5, 5 + ahead);
+      expect(px).toBeGreaterThan(0);
+      expect(px).toBeLessThan(last);
+      last = px;
+    }
+  });
+
+  it("matches the live camera's placement of the army and the fog line", () => {
+    const project = projectorFor(fit, w, h, 2);
+    expect((project(0.5, 2, 0)?.y ?? 0) / h).toBeCloseTo(AIM.armyY, 6);
+    expect((project(0.5, 2 + VIEW_DISTANCE, 0)?.y ?? 0) / h).toBeCloseTo(
+      AIM.fogY,
+      6,
+    );
+    expect(project(0.5, 2 - 10, 0)).toBeNull();
+  });
+
+  it("fades overlay text with the fog: full near, gone at VIEW_DISTANCE", () => {
+    expect(fogAlpha(0)).toBe(1);
+    expect(fogAlpha(0.7 * VIEW_DISTANCE)).toBeCloseTo(1, 9);
+    expect(fogAlpha(0.85 * VIEW_DISTANCE)).toBeCloseTo(0.5, 9);
+    expect(fogAlpha(VIEW_DISTANCE)).toBe(0);
+    expect(fogAlpha(VIEW_DISTANCE + 1)).toBe(0);
+  });
+
+  it("stands squads beyond the wall, and the fighting one ahead of the army", () => {
+    expect(squadDist(10, 8, null)).toBe(10 + SQUAD_BEYOND);
+    // at contact it is still where it stood, then steps back and keeps ahead
+    expect(squadDist(10, 10, 0)).toBe(10 + SQUAD_BEYOND);
+    expect(squadDist(10, 10.5, 0.5)).toBeGreaterThan(10.5 + SQUAD_BEYOND);
   });
 });

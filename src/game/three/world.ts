@@ -187,3 +187,82 @@ export function fitCameraTo(
   }
   return aimCamera(hi, back, aim);
 }
+
+/** A wall's height and thickness (world units); its near face stands at the row's distance. */
+export const WALL_H = 1.6;
+export const WALL_T = 0.4;
+/** How far (track distance) beyond its wall a charge's squads stand. */
+export const SQUAD_BEYOND = 0.45;
+/** How far (track distance) the squad run into steps back as the firefight starts. */
+export const SQUAD_STEP_BACK = 0.25;
+/** Answer labels and prompts are this many times the projected wall height. */
+export const LABEL_K = 0.55;
+export const PROMPT_K = 0.8;
+
+/** How long (in track distance) a charge's firefight plays after contact. */
+export const FIREFIGHT_DIST = 1.2;
+/** Fraction of the firefight both sides fire before the chosen squad's outcome shows. */
+export const FIREFIGHT_REVEAL = 0.2;
+/** How long (in track distance) the squads not run into take to fall back after contact. */
+export const SQUAD_FADE_DIST = 0.3;
+/** How far (in track distance) past a wall its answer labels take to fade out. */
+export const PASSED_LABEL_FADE_DIST = 0.15;
+
+/** How far through its firefight a charge is: 0 at contact, 1 when it ends. */
+export function firefightProgress(
+  runDist: number,
+  contactDist: number,
+): number {
+  const t = (runDist - contactDist) / FIREFIGHT_DIST;
+  return Math.min(1, Math.max(0, t));
+}
+
+/**
+ * Where (track distance) a charge's squads stand: SQUAD_BEYOND past the
+ * wall at `wallPos`. With `fight` (its firefight progress) the squad run into
+ * keeps ahead of the army, stepping back SQUAD_STEP_BACK as the fight starts.
+ */
+export function squadDist(
+  wallPos: number,
+  runDist: number,
+  fight: number | null,
+): number {
+  if (fight === null) return wallPos + SQUAD_BEYOND;
+  const back = SQUAD_STEP_BACK * Math.min(1, fight / 0.15);
+  return Math.max(wallPos, runDist) + SQUAD_BEYOND + back;
+}
+
+/**
+ * How much of an object `ahead` track distance in front of the army shows
+ * through the fog, for overlay text on it: 1 up to where the fog starts,
+ * 0 from VIEW_DISTANCE on.
+ */
+export function fogAlpha(ahead: number): number {
+  const t = (VIEW_DISTANCE - ahead) / ((1 - FOG_START) * VIEW_DISTANCE);
+  return Math.min(1, Math.max(0, t));
+}
+
+/**
+ * A pure projector for a camera fit on a `w` × `h` screen with the army at
+ * `runDist`: the same placement the live camera gives (for tests and sizing).
+ */
+export function projectorFor(
+  fit: CameraFit,
+  w: number,
+  h: number,
+  runDist: number,
+): Projector {
+  return (x, dist, height) => {
+    const z = worldZ(dist, runDist);
+    if (viewDepth(fit.pose, height, z) <= 0) return null;
+    const p = screenAt(fit, w / h, worldX(x), height, z);
+    return { x: p.x * w, y: p.y * h };
+  };
+}
+
+/** Projected height (px) of a wall at track distance `dist`, at track x `x`; 0 when off camera. */
+export function wallPx(project: Projector, x: number, dist: number): number {
+  const foot = project(x, dist, 0);
+  const top = project(x, dist, WALL_H);
+  return foot && top ? Math.max(0, foot.y - top.y) : 0;
+}

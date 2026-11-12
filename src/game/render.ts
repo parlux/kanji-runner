@@ -44,7 +44,12 @@ import type { WkView } from "./wkstate";
 import {
   CROWD_DEPTH,
   DIST_SCALE,
+  FIREFIGHT_DIST,
+  FIREFIGHT_REVEAL,
+  firefightProgress,
   MAX_DRAWN_SOLDIERS,
+  PASSED_LABEL_FADE_DIST,
+  SQUAD_FADE_DIST,
   TRACK_W,
   type Projector,
 } from "./three/world";
@@ -63,18 +68,10 @@ import {
 const CLIP_POPUP_DIST = 0.8;
 /** How long (in track distance) answer feedback stays up. */
 const ANSWER_FEEDBACK_DIST = 1.0;
-/** How far (in track distance) past a wall its answer labels take to fade out. */
-const PASSED_LABEL_FADE_DIST = 0.15;
 /** How long (in track distance) a shatter burst lasts. */
 const SHATTER_DIST = 0.6;
 /** How long (in track distance) a crate's "+N" and its recruits running in last. */
 const CRATE_POPUP_DIST = 0.8;
-/** How long (in track distance) a charge's firefight plays after contact. */
-const FIREFIGHT_DIST = 1.2;
-/** Fraction of the firefight both sides fire before the chosen squad's outcome shows. */
-const FIREFIGHT_REVEAL = 0.2;
-/** How long (in track distance) the squads not run into take to fall back after contact. */
-const SQUAD_FADE_DIST = 0.3;
 const COLORS = {
   bg: "#111",
   track: "#1d2230",
@@ -1150,10 +1147,8 @@ function renderFire(
 }
 
 /** How far through its firefight a charge is: 0 at contact, 1 when it ends. */
-function firefightProgress(run: RunState, c: ChargeView): number {
-  const t = (run.dist - (c.contactDist ?? run.dist)) / FIREFIGHT_DIST;
-  return Math.min(1, Math.max(0, t));
-}
+const chargeProgress = (run: RunState, c: ChargeView): number =>
+  firefightProgress(run.dist, c.contactDist ?? run.dist);
 
 /** Squads are drawn this much larger than a crowd their size, so they read at a distance. */
 const SQUAD_DRAW_K = 1.4;
@@ -1232,7 +1227,7 @@ function renderFirefight(
 ): void {
   const q = c.squads.find((s) => s.chosen);
   if (!q) return;
-  const t = firefightProgress(run, c);
+  const t = chargeProgress(run, c);
   const revealed = t >= FIREFIGHT_REVEAL;
   const joins = revealed && q.outcome === "join";
   const u = revealed ? (t - FIREFIGHT_REVEAL) / (1 - FIREFIGHT_REVEAL) : 0;
