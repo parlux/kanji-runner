@@ -41,9 +41,9 @@ import {
   type SessionLog,
 } from "../core/session";
 import type { WkView } from "./wkstate";
+import { MAX_DRAWN_SOLDIERS } from "./three/world";
 
 const FONT = `"Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic", system-ui, sans-serif`;
-const MAX_DRAWN_SOLDIERS = 200;
 /** How long (in track distance) a clip-loss pop-up stays up. */
 const CLIP_POPUP_DIST = 0.8;
 /** How long (in track distance) answer feedback stays up. */
