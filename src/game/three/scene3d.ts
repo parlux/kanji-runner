@@ -29,7 +29,7 @@ import {
   drawnCentre,
   scaledWidth,
   spreadScale,
-  spreadShare,
+  stepShare,
   spreadWidth,
   DIST_SCALE,
   MAX_DRAWN_SOLDIERS,
@@ -82,8 +82,8 @@ const phaseOf = (k: number): number => {
 /**
  * An animated crowd of figures: laid out by `crowdLayout`, bobbing as it runs.
  * New figures scale in at the edge; lost ones fall back and shrink away.
- * On open road it spreads sideways (`spreadShare` of the way to
- * `spreadWidth`), squeezed back to the true width at any obstacle.
+ * On open road it spreads sideways (`share` of the way to
+ * `spreadWidth`), squeezed back to the true width at what would clip it.
  * Purely visual: the army size passed in is the truth.
  */
 function createCrowd(kind: FigureKind) {
@@ -259,6 +259,8 @@ export function createView3d(canvas: HTMLCanvasElement): View3d | null {
   let w = 1;
   let h = 1;
   let runDist = 0;
+  // how spread out the crowd is (1 open road, 0 squeezed), eased over time
+  let share = 1;
   let pose = fitCamera(camera, 1).pose;
   let haze: Haze = hazeFor(pose, 0);
   // animation time: stands still while the run is paused
@@ -293,14 +295,9 @@ export function createView3d(canvas: HTMLCanvasElement): View3d | null {
       }
       fx.end();
       const gaps = clipGaps(s.run);
-      army.update(
-        s.run.army,
-        s.run.x,
-        0,
-        spreadShare(s.run.army, gaps.ahead, gaps.behind),
-        clock,
-        paused ? 0 : dt,
-      );
+      const pdt = paused ? 0 : dt;
+      share = stepShare(share, s.run.army, gaps.ahead, gaps.behind, pdt);
+      army.update(s.run.army, s.run.x, 0, share, clock, pdt);
       renderer.render(scene, camera);
     },
     haze: (dist, height) => haze(dist, height),

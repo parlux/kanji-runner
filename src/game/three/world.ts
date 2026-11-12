@@ -1,6 +1,9 @@
 import { crowdWidth } from "../../core/crowd";
 import {
   hazardPos,
+  isShattered,
+  packSpan,
+  packSurvivors,
   type ChargeView,
   type RunState,
   type SquadView,
@@ -151,10 +154,15 @@ export const drawnCentre = (x: number, width: number): number =>
   Math.min(1 - width / 2, Math.max(width / 2, x));
 
 /**
- * Track distance from the army to the nearest thing that can clip it ahead
- * and behind: every wall row (charges too) and every hazard (saws, crates,
- * packs where they are now). Shot-down crates and packs still count, so the
- * width never jumps when one goes.
+ * Track distance from the army to the nearest thing that would clip it
+ * ahead and behind. Every wall row counts (charges too). A hazard counts only
+ * while it is still standing (a shattered crate or a dead pack does not) and
+ * its span overlaps where the crowd is drawn when spread (`spreadWidth`, centred
+ * by `drawnCentre`). That test ignores the current squeeze, so squeezing never
+ * feeds back into it, and whatever the sim clips always overlaps it.
+ * A saw is tested where it will be when the crowd reaches it (`hazardSpan` at
+ * its own position, which is exactly what the sim clips with), not its
+ * sweep: it stays steady as it swings and still never lies at contact.
  */
 export function clipGaps(run: RunState): { ahead: number; behind: number } {
   let ahead = Infinity;
@@ -164,9 +172,59 @@ export function clipGaps(run: RunState): { ahead: number; behind: number } {
     if (d >= 0) ahead = Math.min(ahead, d);
     else behind = Math.min(behind, -d);
   };
+  const sw = spreadWidth(run.army);
+  const c = drawnCentre(run.x, sw);
+  const left = c - sw / 2;
+  const right = c + sw / 2;
   for (const q of run.track.questions) near(q);
-  for (let i = 0; i < run.track.hazards.length; i++) near(hazardPos(run, i));
+  run.track.hazards.forEach((h, i) => {
+    const span =
+      h.kind === "saw"
+        ? hazardSpan(h, h.pos)
+        : isShattered(run, i) || (h.kind === "pack" && !packSurvivors(run, i))
+          ? null
+          : h.kind === "pack"
+            ? packSpan(run, i)
+            : { left: h.left, right: h.right };
+    if (span && span.right > left && span.left < right) near(hazardPos(run, i));
+  });
   return { ahead, behind };
+}
+
+/** Most the spread share may change per second: out towards open road, and in towards a squeeze. */
+export const SHARE_OUT_RATE = 2.5;
+export const SHARE_IN_RATE = 8;
+
+/**
+ * One frame of the spread share (0 squeezed .. 1 spread), `prev` last frame.
+ * The geometric target (`spreadShare`) is continuous in distance, but can jump
+ * when something stops or starts counting (a crate shatters, the player
+ * steers into or off a hazard). So the share follows the target with a limit
+ * on its speed: a normal approach is tracked exactly (the squeeze rate is
+ * above the target's steepest slope at running speed), a sudden change is
+ * spread over a fraction of a second. On top, it never exceeds the geometric
+ * cap of the last quarter of the squeeze distance, which is 0 when the
+ * obstacle is within the crowd's depth: a sudden squeeze can lag, but never
+ * arrives late, so at contact the width is exactly `crowdWidth`.
+ */
+export function stepShare(
+  prev: number,
+  army: number,
+  ahead: number,
+  behind: number,
+  dt: number,
+): number {
+  const target = spreadShare(army, ahead, behind);
+  const eased = Math.min(
+    prev + SHARE_OUT_RATE * dt,
+    Math.max(target, prev - SHARE_IN_RATE * dt),
+  );
+  const hold = crowdHalfDepth(army);
+  const cap = Math.min(
+    smooth((ahead - hold) / (SQUEEZE_DIST / 4)),
+    smooth((behind - hold) / (SPREAD_OUT_DIST / 4)),
+  );
+  return Math.min(eased, cap);
 }
 
 /** Where the camera sits and what it looks at, in world units (centred on the track). */
