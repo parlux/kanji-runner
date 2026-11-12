@@ -8,10 +8,12 @@ import {
   readingRow,
   showReading,
   shownReading,
+  wordRow,
 } from "../../src/core/distractors";
 import { KANA } from "../../src/core/kana";
 import { createRng } from "../../src/core/rng";
-import type { GateRow, KanjiItem } from "../../src/core/types";
+import { WORDS } from "../../src/core/words";
+import type { GateRow, KanjiItem, WordItem } from "../../src/core/types";
 import kanjiData from "../../src/data/kanji.json";
 
 const KANJI = kanjiData as KanjiItem[];
@@ -188,5 +190,31 @@ describe("reading distractors", () => {
       for (const o of wrong(r))
         expect(Math.abs(plainReading(o).length - 3)).toBeLessThanOrEqual(1);
     }
+  });
+});
+
+describe("wordRow", () => {
+  const norm = (g: string) => normGloss(g);
+  it("never offers a correct gloss, for every word and pool", () => {
+    for (const w of WORDS) {
+      const own = new Set(w.glosses.map(norm));
+      for (const pool of [WORDS.filter((x) => x.level <= w.level + 1), []]) {
+        for (let seed = 0; seed < 3; seed++) {
+          const r = wordRow(createRng(seed), w, pool, WORDS, 3);
+          expect(r.options).toHaveLength(3);
+          expect(r.answer).toBe(w.glosses[0]);
+          expect(r.options[r.answerIndex]).toBe(r.answer);
+          for (const [i, o] of r.options.entries())
+            if (i !== r.answerIndex) expect(own.has(norm(o))).toBe(false);
+        }
+      }
+    }
+  });
+
+  it("prefers the pool and pads from the whole list when it is short", () => {
+    const [a, b] = WORDS as [WordItem, WordItem];
+    const r = wordRow(createRng(1), a, [b], WORDS, 3);
+    expect(r.options).toContain(b.glosses[0]);
+    expect(new Set(r.options).size).toBe(3);
   });
 });

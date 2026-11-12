@@ -1,24 +1,28 @@
 import { itemKey, READING_UNLOCK_BOX, weight } from "./srs";
+import { isWordEligible } from "./words";
 import { WK_DUE_BOOST } from "./tuning";
-import type { KanaItem, KanjiItem, Progress } from "./types";
+import type { KanaItem, KanjiItem, Progress, WordItem } from "./types";
 
 /** Level 0 is hiragana, level 1 katakana. */
 export const kanaLevel = (k: KanaItem): number =>
   k.script === "hiragana" ? 0 : 1;
 
-/** One askable item: a kana, or a kanji as a meaning or a reading gate. */
+/** One askable item: a kana, a kanji as a meaning or a reading gate, or a loanword. */
 export type Entry =
   | { key: string; type: "kana"; item: KanaItem }
+  | { key: string; type: "word"; item: WordItem }
   | { key: string; type: "meaning" | "reading"; item: KanjiItem };
 
 /**
  * Every unlocked item, in progression order: kana, then kanji by level. A
- * kanji's reading follows its meaning, once the meaning box is ≥ 3.
+ * kanji's reading follows its meaning, once the meaning box is ≥ 3. Then the
+ * eligible `words` (Built-in only), in list order.
  */
 export function unlockedPool(
   progress: Progress,
   kana: readonly KanaItem[],
   kanji: readonly KanjiItem[],
+  words: readonly WordItem[] = [],
 ): Entry[] {
   const level = progress.unlockedLevel;
   const out: Entry[] = [];
@@ -32,6 +36,9 @@ export function unlockedPool(
     if ((progress.items[key]?.box ?? 0) >= READING_UNLOCK_BOX)
       out.push({ key: itemKey(k.char, "reading"), type: "reading", item: k });
   }
+  for (const w of words)
+    if (isWordEligible(w, progress))
+      out.push({ key: itemKey(w.word, "word"), type: "word", item: w });
   return out;
 }
 
@@ -53,11 +60,15 @@ export type Pool = Selection & {
   /** Kana and kanji that distractors are drawn from. */
   kana: readonly KanaItem[];
   kanji: readonly KanjiItem[];
+  /** Words that distractors are drawn from (Built-in: levels up to the next), then `allWords` to pad. */
+  words: readonly WordItem[];
+  allWords: readonly WordItem[];
   /** Kanji ranked most confusable with `char`, before shared components. */
   similar: (char: string) => readonly string[];
 };
 
 const NONE: readonly string[] = [];
+const NONE_WORDS: readonly WordItem[] = [];
 
 /** Built-in selection rules for a list of entries: the v1 SRS. */
 export function builtInSelection(
@@ -85,12 +96,15 @@ export function builtInPool(
   progress: Progress,
   kana: readonly KanaItem[],
   kanji: readonly KanjiItem[],
+  words: readonly WordItem[] = [],
 ): Pool {
   const next = progress.unlockedLevel + 1;
   return {
-    ...builtInSelection(progress, unlockedPool(progress, kana, kanji)),
+    ...builtInSelection(progress, unlockedPool(progress, kana, kanji, words)),
     kana: kana.filter((k) => kanaLevel(k) <= next),
     kanji: kanji.filter((k) => k.level <= next),
+    words: words.filter((w) => w.level <= next),
+    allWords: words,
     similar: () => NONE,
   };
 }
@@ -135,7 +149,9 @@ export function wanikaniPool(
 ): Pool {
   const record = (e: Entry) => progress.items[e.key];
   const extras = (e: Entry) =>
-    e.type === "kana" ? undefined : list.extras.get(e.item.char);
+    e.type === "kana" || e.type === "word"
+      ? undefined
+      : list.extras.get(e.item.char);
   const box = (e: Entry): number => {
     const r = record(e);
     if (r) return r.box;
@@ -167,6 +183,8 @@ export function wanikaniPool(
     current: () => true,
     kana: kana.filter((k) => kanaLevel(k) <= next),
     kanji: list.kanji,
+    words: NONE_WORDS,
+    allWords: NONE_WORDS,
     similar: (char) => list.extras.get(char)?.similar ?? NONE,
   };
 }

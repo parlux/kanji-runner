@@ -1,9 +1,8 @@
 import { kanaLevel } from "./run";
-import { itemKey } from "./srs";
-import type { KanaItem, KanjiItem, Progress } from "./types";
+import { maxLevel } from "./kanji";
+import { itemKey, LEARNED_BOX } from "./srs";
+import type { KanaItem, KanjiItem, Progress, WordItem } from "./types";
 
-/** An item counts as learned for unlocking at this box or higher. */
-export const LEARNED_BOX = 2;
 /** Placement marks items at this box: known, but drawn rarely (weight 2). */
 export const PLACED_BOX = 4;
 /** The next level unlocks when this share of the current level is learned. */
@@ -13,9 +12,9 @@ export const UNLOCK_SHARE = 0.8;
 export const levelName = (level: number): string =>
   level === 0 ? "Hiragana" : level === 1 ? "Katakana" : `Kanji ${level - 1}`;
 
-/** The highest level with any items (the last kanji level). */
-export const maxLevel = (kanji: readonly KanjiItem[]): number =>
-  kanji.reduce((m, k) => Math.max(m, k.level), 1);
+// moved to dependency-free modules so words.ts can use them without a cycle
+export { maxLevel } from "./kanji";
+export { LEARNED_BOX } from "./srs";
 
 /** Item keys of a level for its primary gate type: kana, or kanji meaning. */
 export function levelKeys(
@@ -83,34 +82,37 @@ export function applyUnlock(
  * raised to box 4 (never lowered) and level N + 1 is unlocked. Re-picking
  * lower undoes an over-placement: the unlocked level becomes N + 1, and
  * placement marks above N that were never answered (seen 0) are removed.
- * Answered items always keep their record.
+ * Answered items always keep their record. Words of those levels are marked
+ * the same way (`words`); they never affect unlocking (`levelKeys`).
  */
 export function place(
   progress: Progress,
   level: number,
   kana: readonly KanaItem[],
   kanji: readonly KanjiItem[],
+  words: readonly WordItem[] = [],
 ): Progress {
   const top = maxLevel(kanji);
   const n = Math.max(-1, Math.min(level, top - 1));
   const items = { ...progress.items };
   const unplaced = new Set<string>();
+  const mark = (key: string, l: number): void => {
+    const item = items[key];
+    if (l <= n) {
+      if (!item)
+        items[key] = {
+          box: PLACED_BOX,
+          seen: 0,
+          correct: 0,
+          wrong: 0,
+          lastSeen: 0,
+        };
+      else if (item.box < PLACED_BOX) items[key] = { ...item, box: PLACED_BOX };
+    } else if (item?.seen === 0) unplaced.add(key);
+  };
   for (let l = 0; l <= top; l++)
-    for (const key of levelKeys(l, kana, kanji)) {
-      const item = items[key];
-      if (l <= n) {
-        if (!item)
-          items[key] = {
-            box: PLACED_BOX,
-            seen: 0,
-            correct: 0,
-            wrong: 0,
-            lastSeen: 0,
-          };
-        else if (item.box < PLACED_BOX)
-          items[key] = { ...item, box: PLACED_BOX };
-      } else if (item?.seen === 0) unplaced.add(key);
-    }
+    for (const key of levelKeys(l, kana, kanji)) mark(key, l);
+  for (const w of words) mark(itemKey(w.word, "word"), w.level);
   return {
     ...progress,
     unlockedLevel: n + 1,

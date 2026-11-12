@@ -4,6 +4,7 @@ import {
   meaningRow,
   readingRow,
   shownReading,
+  wordRow,
   type Reading,
   showReading,
 } from "./distractors";
@@ -17,11 +18,12 @@ import {
 } from "./pool";
 import {
   MAX_NEW_PER_RUN,
+  MAX_NEW_WORDS_PER_RUN,
   ROWS_PER_RUN,
   TWO_OPTION_ROWS,
   WARM_UPS,
 } from "./tuning";
-import type { GateRow, KanaItem, KanjiItem, Progress } from "./types";
+import type { GateRow, KanaItem, KanjiItem, Progress, WordItem } from "./types";
 
 const optionCount = (i: number): number => (i < TWO_OPTION_ROWS ? 2 : 3);
 
@@ -65,9 +67,15 @@ export function selectEntries(
 export function select(rng: Rng, sel: Selection): Entry[] {
   const { box, weight: weightOf } = sel;
   const known = sel.entries.filter(sel.known);
-  const fresh = sel.entries
-    .filter((e) => !sel.known(e))
-    .slice(0, MAX_NEW_PER_RUN);
+  // new items in progression order; at most MAX_NEW_WORDS_PER_RUN of them words
+  const fresh: Entry[] = [];
+  let newWords = 0;
+  for (const e of sel.entries) {
+    if (fresh.length >= MAX_NEW_PER_RUN) break;
+    if (sel.known(e)) continue;
+    if (e.type === "word" && newWords++ >= MAX_NEW_WORDS_PER_RUN) continue;
+    fresh.push(e);
+  }
   // Warm-ups come from the current level's known items once it has enough,
   // so placed lower levels don't fill them; else from all known items.
   // Stable sort after a shuffle: highest box first, ties in random order.
@@ -99,8 +107,13 @@ export function buildRun(
   progress: Progress,
   kana: readonly KanaItem[],
   kanji: readonly KanjiItem[],
+  words: readonly WordItem[] = [],
 ): GateRow[] {
-  return buildPoolRun(seed, progress, builtInPool(progress, kana, kanji));
+  return buildPoolRun(
+    seed,
+    progress,
+    builtInPool(progress, kana, kanji, words),
+  );
 }
 
 /**
@@ -115,6 +128,8 @@ export function entryRow(
   shown?: Reading,
 ): GateRow {
   if (e.type === "kana") return kanaRow(rng, e.item, pool.kana, count);
+  if (e.type === "word")
+    return wordRow(rng, e.item, pool.words, pool.allWords, count);
   const similar = pool.similar(e.item.char);
   if (e.type === "meaning")
     return meaningRow(rng, e.item, pool.kanji, count, similar);

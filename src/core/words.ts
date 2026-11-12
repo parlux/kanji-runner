@@ -1,7 +1,6 @@
 import data from "../data/loanwords.json";
-import { KANJI } from "./kanji";
-import { LEARNED_BOX, maxLevel } from "./progression";
-import { itemKey } from "./srs";
+import { KANJI, maxLevel } from "./kanji";
+import { itemKey, LEARNED_BOX } from "./srs";
 import { WORDS_PER_LEVEL } from "./tuning";
 import type { Progress, WordItem } from "./types";
 

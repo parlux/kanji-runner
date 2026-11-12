@@ -9,7 +9,8 @@ import {
   maxLevel,
   place,
 } from "../../src/core/progression";
-import { defaultProgress } from "../../src/core/srs";
+import { defaultProgress, itemKey } from "../../src/core/srs";
+import { WORDS } from "../../src/core/words";
 import type { ItemProgress, Progress } from "../../src/core/types";
 
 const rec = (box: number, seen = 1): ItemProgress => ({
@@ -120,5 +121,48 @@ describe("placement", () => {
 
   it("clamps to the last level", () => {
     expect(place(defaultProgress(), 99, KANA, KANJI).unlockedLevel).toBe(73);
+  });
+});
+
+describe("words and progression", () => {
+  const wordKey = (w: { word: string }) => itemKey(w.word, "word");
+
+  it("place marks words of placed levels at box 4, never lowers", () => {
+    const first = WORDS[0] as (typeof WORDS)[number]; // level 2
+    const high = WORDS.find((w) => w.level === 5) as (typeof WORDS)[number];
+    const p = place(defaultProgress(), 3, KANA, KANJI, WORDS);
+    for (const w of WORDS)
+      expect(p.items[wordKey(w)]?.box).toBe(w.level <= 3 ? 4 : undefined);
+    expect(p.items[wordKey(first)]?.seen).toBe(0);
+    const q: Progress = {
+      ...defaultProgress(),
+      items: { [wordKey(first)]: rec(5), [wordKey(high)]: rec(1, 2) },
+    };
+    const r = place(q, 4, KANA, KANJI, WORDS);
+    expect(r.items[wordKey(first)]?.box).toBe(5);
+  });
+
+  it("re-placement lower removes unanswered word marks, keeps answered", () => {
+    const answered = WORDS.find((w) => w.level === 4) as (typeof WORDS)[number];
+    const high = place(defaultProgress(), 5, KANA, KANJI, WORDS);
+    high.items[wordKey(answered)] = rec(4, 3);
+    const low = place(high, 2, KANA, KANJI, WORDS);
+    for (const w of WORDS) {
+      if (w.level > 3 && w !== answered)
+        expect(low.items[wordKey(w)]).toBeUndefined();
+    }
+    expect(low.items[wordKey(answered)]?.seen).toBe(3);
+  });
+
+  it("level unlock ignores words", () => {
+    expect(levelKeys(3, KANA, KANJI).some((k) => k.endsWith(":word"))).toBe(
+      false,
+    );
+    const p = withLearned(2, 24);
+    for (const w of WORDS) p.items[wordKey(w)] = rec(0);
+    expect(applyUnlock(p, KANA, KANJI).unlockedLevel).toBe(3);
+    const q = withLearned(2, 23);
+    for (const w of WORDS) q.items[wordKey(w)] = rec(5);
+    expect(applyUnlock(q, KANA, KANJI).unlockedLevel).toBe(2);
   });
 });

@@ -31,6 +31,8 @@ export const ROWS_PER_RUN = 14;
 export const WARM_UPS = 3;
 /** Most never-seen items introduced per run, taken in progression order. */
 export const MAX_NEW_PER_RUN = 4;
+/** Of those, at most this many may be words (kanji keep priority). */
+export const MAX_NEW_WORDS_PER_RUN = 1;
 /** WaniKani mode: a kanji due for review on WaniKani is drawn this many times as often. */
 export const WK_DUE_BOOST = 4;
 /** The story library is refetched when older than this. */

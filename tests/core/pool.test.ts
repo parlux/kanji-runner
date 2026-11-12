@@ -8,14 +8,18 @@ import {
   shownReading,
 } from "../../src/core/distractors";
 import { KANA } from "../../src/core/kana";
+import { KANJI } from "../../src/core/kanji";
+import { WORDS, kanaNeeded } from "../../src/core/words";
 import {
   seededBox,
+  builtInPool,
+  unlockedPool,
   wanikaniPool,
   type Entry,
   type WkPoolInput,
 } from "../../src/core/pool";
 import { createRng } from "../../src/core/rng";
-import { buildPoolRun, select } from "../../src/core/run";
+import { buildPoolRun, buildRun, select } from "../../src/core/run";
 import { defaultProgress, itemKey, MAX_BOX } from "../../src/core/srs";
 import { MAX_NEW_PER_RUN, ROWS_PER_RUN } from "../../src/core/tuning";
 import type { GateRow, KanjiItem, Progress } from "../../src/core/types";
@@ -310,11 +314,95 @@ describe("WaniKani pool", () => {
     let otherN = 0;
     for (let seed = 0; seed < 1000; seed++)
       for (const e of select(createRng(seed), pool))
-        if (e.type !== "kana") {
+        if (e.type !== "kana" && e.type !== "word") {
           if (due.has(e.item.char)) dueN++;
           else otherN++;
         }
     // the same number of due and non-due kanji: the ratio is the pick-rate ratio
     expect(dueN / otherN).toBeGreaterThan(2);
+  });
+});
+
+describe("words in the Built-in pool", () => {
+  const learnedKana = (p: Progress, box = 2): Progress => {
+    for (const k of KANA) p.items[itemKey(k.char, "kana")] = rec(box);
+    return p;
+  };
+  const rec = (box: number) => ({
+    box,
+    seen: 1,
+    correct: 1,
+    wrong: 0,
+    lastSeen: 1,
+  });
+  const at = (level: number): Progress =>
+    learnedKana({ ...defaultProgress(), unlockedLevel: level });
+
+  it("has no word before its level or with an unlearned kana", () => {
+    for (const level of [0, 1, 2, 5, 20]) {
+      const p = at(level);
+      const wordsIn = unlockedPool(p, KANA, KANJI, WORDS).filter(
+        (e) => e.type === "word",
+      );
+      for (const e of wordsIn) expect(e.item.level).toBeLessThanOrEqual(level);
+    }
+    const p = at(5);
+    p.items[itemKey("コ", "kana")] = rec(1);
+    for (const e of unlockedPool(p, KANA, KANJI, WORDS))
+      if (e.type === "word")
+        expect(kanaNeeded(e.item.word)).not.toContain("コ");
+  });
+
+  it("lists words after the kanji, in list order, none when not given", () => {
+    const p = at(6);
+    const pool = unlockedPool(p, KANA, KANJI, WORDS);
+    const firstWord = pool.findIndex((e) => e.type === "word");
+    expect(firstWord).toBeGreaterThan(0);
+    expect(pool.slice(firstWord).every((e) => e.type === "word")).toBe(true);
+    expect(unlockedPool(p, KANA, KANJI).some((e) => e.type === "word")).toBe(
+      false,
+    );
+  });
+
+  it("introduces at most 1 new word per run, inside the cap of 4", () => {
+    // every kanji known, no word known: only new words are left to introduce
+    const p = at(6);
+    for (const k of KANJI)
+      if (k.level <= 6) p.items[itemKey(k.char, "meaning")] = rec(2);
+    const pool = builtInPool(p, KANA, KANJI, WORDS);
+    expect(
+      pool.entries.filter((e) => e.type === "word").length,
+    ).toBeGreaterThan(1);
+    for (let seed = 0; seed < 300; seed++) {
+      const run = select(createRng(seed), pool);
+      const fresh = run.filter((e) => !pool.known(e));
+      expect(fresh.filter((e) => e.type === "word").length).toBeLessThanOrEqual(
+        1,
+      );
+      expect(fresh.length).toBeLessThanOrEqual(MAX_NEW_PER_RUN);
+    }
+  });
+
+  it("runs with no eligible words are identical with or without the list", () => {
+    const p = { ...defaultProgress(), unlockedLevel: 3 }; // katakana unlearned
+    for (let seed = 0; seed < 20; seed++)
+      expect(buildRun(seed, p, KANA, KANJI, WORDS)).toEqual(
+        buildRun(seed, p, KANA, KANJI),
+      );
+  });
+
+  it("builds word rows asking the first gloss", () => {
+    const p = at(8);
+    for (const k of KANJI)
+      if (k.level <= 8) p.items[itemKey(k.char, "meaning")] = rec(2);
+    const rows = [];
+    for (let seed = 0; seed < 50; seed++)
+      rows.push(...buildRun(seed, p, KANA, KANJI, WORDS));
+    const w = rows.filter((r) => r.type === "word");
+    expect(w.length).toBeGreaterThan(0);
+    for (const r of w) {
+      const item = WORDS.find((x) => x.word === r.prompt);
+      expect(item?.glosses[0]).toBe(r.answer);
+    }
   });
 });

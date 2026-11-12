@@ -1,6 +1,6 @@
 import confusables from "../data/confusables.json";
 import { randInt, shuffle, type Rng } from "./rng";
-import type { GateRow, KanaItem, KanjiItem } from "./types";
+import type { GateRow, KanaItem, KanjiItem, WordItem } from "./types";
 
 /** A possible wrong answer. `key` dedupes options; lower `rank` is more confusable. */
 type Candidate = { label: string; key: string; rank: number };
@@ -165,6 +165,42 @@ export function meaningRow(
     rng,
     "meaning",
     item.char,
+    item.glosses[0] as string,
+    pick(rng, candidates, count - 1),
+  );
+}
+
+/**
+ * Word → first gloss. Distractors are first glosses of other words in `pool`,
+ * never one sharing any gloss with the prompt; if fewer than needed, `rest`
+ * (the whole list) pads, after the pool's own.
+ */
+export function wordRow(
+  rng: Rng,
+  item: WordItem,
+  pool: readonly WordItem[],
+  rest: readonly WordItem[],
+  count: number,
+): GateRow {
+  const own = new Set(item.glosses.map(normGloss));
+  const candidates: Candidate[] = [];
+  const add = (list: readonly WordItem[], rank: number): void => {
+    for (const w of list) {
+      if (w.word === item.word || w.glosses.some((g) => own.has(normGloss(g))))
+        continue;
+      candidates.push({
+        label: w.glosses[0] as string,
+        key: normGloss(w.glosses[0] as string),
+        rank,
+      });
+    }
+  };
+  add(pool, 0);
+  add(rest, 1);
+  return row(
+    rng,
+    "word",
+    item.word,
     item.glosses[0] as string,
     pick(rng, candidates, count - 1),
   );

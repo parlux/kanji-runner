@@ -3,6 +3,8 @@ import { REASK_MAX_BOX } from "./tuning";
 import type { GateRow, GateType, ItemProgress, Progress } from "./types";
 
 export const MAX_BOX = 5;
+/** An item counts as learned for unlocking at this box or higher. */
+export const LEARNED_BOX = 2;
 /** A kanji's reading gate unlocks once its meaning box reaches this. */
 export const READING_UNLOCK_BOX = 3;
 
