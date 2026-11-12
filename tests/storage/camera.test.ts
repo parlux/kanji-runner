@@ -11,7 +11,7 @@ const memory = (init: Record<string, string> = {}) => {
       data[k] = v;
     },
     removeItem: (k: string) => {
-      delete data[k];
+      Reflect.deleteProperty(data, k);
     },
   };
 };
