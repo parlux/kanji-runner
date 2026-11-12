@@ -16,7 +16,7 @@ import {
   WebGLRenderer,
 } from "three";
 import type { Scene } from "../scenes";
-import { fitCamera, LOOK, makeCamera, MAX_DPR, POSE } from "./view";
+import { fitCamera, LOOK, makeCamera, MAX_DPR } from "./view";
 import { makeCrowdMesh, type FigureKind } from "./figures";
 import {
   crowdLayout,
@@ -159,8 +159,8 @@ export function createView3d(canvas: HTMLCanvasElement): View3d | null {
   const camera = makeCamera();
   const scene = new ThreeScene();
   scene.background = new Color(LOOK.sky);
-  const fog = fogRange(POSE);
-  scene.fog = new Fog(LOOK.sky, fog.near, fog.far);
+  const fog = new Fog(LOOK.sky, 1, 2);
+  scene.fog = fog;
 
   scene.add(new HemisphereLight(0xffffff, 0x8aa070, 1.6));
   const sun = new DirectionalLight(0xffffff, 1.8);
@@ -230,7 +230,9 @@ export function createView3d(canvas: HTMLCanvasElement): View3d | null {
       w = cw;
       h = ch;
       renderer.setSize(cw, ch, false);
-      fitCamera(camera, cw / ch);
+      const range = fogRange(fitCamera(camera, cw / ch).pose);
+      fog.near = range.near;
+      fog.far = range.far;
     },
     render(s) {
       const now = performance.now();

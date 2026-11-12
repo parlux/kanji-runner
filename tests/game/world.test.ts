@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { crowdWidth } from "../../src/core/crowd";
-import { VIEW_DISTANCE } from "../../src/core/tuning";
+import { CROWD_MAX_W, VIEW_DISTANCE } from "../../src/core/tuning";
 import {
+  CROWD_DEPTH,
   crowdLayout,
   FIGURE_RADIUS,
-  fitFov,
   FOG_TOP_H,
   fogRange,
   MAX_DRAWN_SOLDIERS,
@@ -14,8 +14,10 @@ import {
   viewDepth,
   worldX,
   worldZ,
+  screenAt,
   type CameraPose,
 } from "../../src/game/three/world";
+import { AIM, CAMERA_MIN_HEIGHT, cameraFit } from "../../src/game/three/view";
 
 const pose: CameraPose = { height: 4, back: 12, lookAhead: 20, lookHeight: 0 };
 
@@ -80,13 +82,48 @@ describe("fog and camera", () => {
     for (const y of [0, FOG_TOP_H / 2, FOG_TOP_H])
       expect(viewDepth(pose, y, beyond)).toBeGreaterThan(far);
   });
+});
 
-  it("widens the view on a narrow screen to show both track edges at the army", () => {
-    const aspect = 390 / 844;
-    const fov = fitFov(pose, aspect, 40, 1.05);
-    const tanH = Math.tan(((fov / 2) * Math.PI) / 180) * aspect;
-    expect(TRACK_W / 2 / viewDepth(pose, 0, 0)).toBeLessThan(tanH);
-    // a wide screen keeps the base field of view
-    expect(fitFov(pose, 1280 / 800, 40, 1.05)).toBe(40);
+describe("camera fit", () => {
+  const sizes: [number, number][] = [
+    [390, 844],
+    [1280, 800],
+  ];
+  const fogZ = worldZ(VIEW_DISTANCE, 0);
+
+  for (const [w, h] of sizes)
+    it(`at ${w}×${h} puts the army low, the fog line high and both edges in view`, () => {
+      const aspect = w / h;
+      const fit = cameraFit(aspect);
+      expect(screenAt(fit, aspect, 0, 0, 0).y).toBeCloseTo(AIM.armyY, 6);
+      expect(screenAt(fit, aspect, 0, 0, fogZ).y).toBeCloseTo(AIM.fogY, 6);
+      const army = screenAt(fit, aspect, 0, 0, 0).y;
+      const fog = screenAt(fit, aspect, 0, 0, fogZ).y;
+      expect(army).toBeGreaterThanOrEqual(0.78);
+      expect(army).toBeLessThanOrEqual(0.86);
+      expect(fog).toBeGreaterThanOrEqual(0.18);
+      expect(fog).toBeLessThanOrEqual(0.28);
+      for (const x of [0, 1]) {
+        const p = screenAt(fit, aspect, worldX(x), 0, 0).x;
+        expect(p).toBeGreaterThan(0);
+        expect(p).toBeLessThan(1);
+      }
+      // the biggest crowd's near edge stays on screen
+      const nearZ = (CROWD_MAX_W / 2) * CROWD_DEPTH * TRACK_W;
+      expect(screenAt(fit, aspect, 0, 0, nearZ).y).toBeLessThan(1);
+      // real perspective: the track at the fog line is narrower than at the army
+      const near = screenAt(fit, aspect, worldX(1), 0, 0).x - 0.5;
+      const far = screenAt(fit, aspect, worldX(1), 0, fogZ).x - 0.5;
+      expect(far).toBeLessThan(near * 0.7);
+      // the fog stays total by VIEW_DISTANCE with this pose
+      const { far: fogEnd } = fogRange(fit.pose);
+      expect(
+        viewDepth(fit.pose, 0, worldZ(VIEW_DISTANCE + 0.01, 0)),
+      ).toBeGreaterThan(fogEnd);
+    });
+
+  it("raises the camera only when the screen is too narrow", () => {
+    expect(cameraFit(1280 / 800).pose.height).toBe(CAMERA_MIN_HEIGHT);
+    expect(cameraFit(390 / 844).pose.height).toBeGreaterThan(CAMERA_MIN_HEIGHT);
   });
 });

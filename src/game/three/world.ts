@@ -12,7 +12,7 @@ import { VIEW_DISTANCE } from "../../core/tuning";
 /** Track width in world units (track x 0..1 spans this). */
 export const TRACK_W = 10;
 /** World units per unit of track distance. */
-export const DIST_SCALE = 8;
+export const DIST_SCALE = 10;
 /** Most figures drawn per crowd; above it the count on the crowd tells the real number. */
 export const MAX_DRAWN_SOLDIERS = 200;
 /** A figure's footprint radius: the layout keeps it inside the crowd's width. */
@@ -92,18 +92,98 @@ export function fogRange(pose: CameraPose): { near: number; far: number } {
   };
 }
 
-/**
- * Vertical field of view (degrees): `base`, widened when the screen is too
- * narrow to show both track edges (plus `margin`) at the army's depth.
- */
-export function fitFov(
-  pose: CameraPose,
+/** A posed camera and its vertical field of view (degrees). */
+export type CameraFit = { pose: CameraPose; fov: number };
+
+/** Where the camera is asked to put things, as shares of the screen height from the top. */
+export type CameraAim = {
+  /** The army (track centre at the army). */
+  armyY: number;
+  /** The fog line (track centre at VIEW_DISTANCE ahead). */
+  fogY: number;
+};
+
+/** Screen position of a world point, as shares of the screen (0..1 from the left / top). */
+export function screenAt(
+  fit: CameraFit,
   aspect: number,
-  base: number,
+  x: number,
+  y: number,
+  z: number,
+): { x: number; y: number } {
+  const { pose } = fit;
+  const pitch = Math.atan2(
+    pose.height - pose.lookHeight,
+    pose.back + pose.lookAhead,
+  );
+  const dy = y - pose.height;
+  const dz = z - pose.back;
+  const depth = -dy * Math.sin(pitch) - dz * Math.cos(pitch);
+  const up = dy * Math.cos(pitch) - dz * Math.sin(pitch);
+  const tanV = Math.tan((fit.fov * Math.PI) / 360);
+  return {
+    x: (1 + x / depth / (tanV * aspect)) / 2,
+    y: (1 - up / depth / tanV) / 2,
+  };
+}
+
+/**
+ * Pitch and field of view for a camera `height` up and `back` behind the
+ * army that put the army at `aim.armyY` and the fog line at `aim.fogY`.
+ */
+export function aimCamera(
+  height: number,
+  back: number,
+  aim: CameraAim,
+): CameraFit {
+  const va = 1 - 2 * aim.armyY;
+  const vf = 1 - 2 * aim.fogY;
+  // depression angles of the army and of the fog line
+  const da = Math.atan2(height, back);
+  const df = Math.atan2(height, back - worldZ(VIEW_DISTANCE, 0));
+  // tan(pitch − da) / tan(pitch − df) rises with pitch: bisect it to va / vf
+  let lo = df;
+  let hi = da;
+  for (let k = 0; k < 60; k++) {
+    const p = (lo + hi) / 2;
+    if (Math.tan(p - da) / Math.tan(p - df) < va / vf) lo = p;
+    else hi = p;
+  }
+  const pitch = (lo + hi) / 2;
+  const tanV = Math.tan(pitch - da) / va;
+  return {
+    pose: {
+      height,
+      back,
+      lookAhead: height / Math.tan(pitch) - back,
+      lookHeight: 0,
+    },
+    fov: (2 * Math.atan(tanV) * 180) / Math.PI,
+  };
+}
+
+/**
+ * The camera for a screen of this aspect: aimed per `aimCamera`, at least
+ * `minHeight` up, and raised (steeper) until both track edges, plus `margin`,
+ * are in view at the army.
+ */
+export function fitCameraTo(
+  aspect: number,
+  back: number,
+  minHeight: number,
+  aim: CameraAim,
   margin: number,
-): number {
-  const need = (TRACK_W / 2) * margin;
-  const tanV = need / viewDepth(pose, 0, 0) / aspect;
-  const fit = (2 * Math.atan(tanV) * 180) / Math.PI;
-  return Math.max(base, fit);
+): CameraFit {
+  const fits = (fit: CameraFit): boolean =>
+    screenAt(fit, aspect, (TRACK_W / 2) * margin, 0, 0).x <= 1;
+  const low = aimCamera(minHeight, back, aim);
+  if (fits(low)) return low;
+  let lo = minHeight;
+  let hi = minHeight * 8;
+  for (let k = 0; k < 40; k++) {
+    const h = (lo + hi) / 2;
+    if (fits(aimCamera(h, back, aim))) hi = h;
+    else lo = h;
+  }
+  return aimCamera(hi, back, aim);
 }

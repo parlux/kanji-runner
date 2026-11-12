@@ -236,7 +236,7 @@ export function render(
   // with a 3D view, the run is drawn behind this canvas: draw only the overlay
   if (project && scene.kind === "run") {
     ctx.clearRect(0, 0, w, h);
-    renderRunOverlay(ctx, w, scene.run, project);
+    renderRunOverlay(ctx, w, h, scene.run, project);
     if (scene.paused) renderPaused(ctx, w, h);
     return;
   }
@@ -267,6 +267,7 @@ function renderPaused(ctx: Ctx, w: number, h: number): void {
 function renderRunOverlay(
   ctx: Ctx,
   w: number,
+  h: number,
   run: RunState,
   project: Projector,
 ): void {
@@ -281,7 +282,9 @@ function renderRunOverlay(
   );
   if (centre && right && front) {
     const radius = Math.max(8, right.x - centre.x);
-    outlinedText(ctx, String(run.army), centre.x, front.y + 20, 22);
+    // below the crowd's front, kept on screen when a big crowd reaches the bottom
+    const countY = Math.min(front.y + 20, h - 16);
+    outlinedText(ctx, String(run.army), centre.x, countY, 22);
     renderArmyPopups(ctx, w, run, centre.x, centre.y, radius, outlinedText);
   }
   renderHud(ctx, w, run, outlinedText);
