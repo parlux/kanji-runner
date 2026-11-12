@@ -134,9 +134,9 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 - Unchanged: `src/core`, `crowdWidth`, clipping, balance, golden run, haze, `SHAPE_DISTANCE`, text (T3c), 2D.
 
 **Acceptance criteria:**
-- [ ] Tested: `spreadWidth` at 5, 40, 200; drawn width equals `crowdWidth` at contact with each obstacle kind and is continuous as an obstacle approaches and passes; layout footprint within the drawn width and on the track.
-- [ ] Tested: pitch at 390×844 and 1280×800 unchanged from T3b (28.7°, 25.7°); army centre ≈ 80% (or the lowest the hard rule allows, reported); hard rule still holds.
-- [ ] Browser check at 390×844 with `?3d`: crowds of 5, 40 and 200 on open road; a 200 crowd squeezing through a gate (filmstrip) and past a saw and a crate; the army's screen position before and after. Screenshots in the scratchpad.
+- [x] Tested: `spreadWidth` at 5, 40, 200; drawn width equals `crowdWidth` at contact with each obstacle kind and is continuous as an obstacle approaches and passes; layout footprint within the drawn width and on the track.
+- [x] Tested: pitch at 390×844 and 1280×800 unchanged from T3b (28.7°, 25.7°); army centre ≈ 80% (or the lowest the hard rule allows, reported); hard rule still holds.
+- [x] Browser check at 390×844 with `?3d`: crowds of 5, 40 and 200 on open road; a 200 crowd squeezing through a gate (filmstrip) and past a saw and a crate; the army's screen position before and after. Screenshots in the scratchpad.
 
 **Verification:** `npm test && npm run lint && npm run build`; browser check; deploy green.
 **Dependencies:** T3c
