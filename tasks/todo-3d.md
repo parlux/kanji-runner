@@ -155,8 +155,8 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 - Unchanged: `src/core`, the width curve, the camera, text.
 
 **Acceptance criteria:**
-- [ ] Tested: a crate, saw and pack in another lane, or shot down, don't squeeze the crowd; one in its path does; walls always do; width stays continuous when a hazard is destroyed mid-squeeze and when steering across one.
-- [ ] Browser check at 390×844 with `?3d`: a 200 crowd running past an off-lane crate and saw stays wide (filmstrip); fire at a gate goes straight ahead and stops at the wall. Screenshots in the scratchpad.
+- [x] Tested: a crate, saw and pack in another lane, or shot down, don't squeeze the crowd; one in its path does; walls always do; width stays continuous when a hazard is destroyed mid-squeeze and when steering across one.
+- [x] Browser check at 390×844 with `?3d`: a 200 crowd running past an off-lane crate and saw stays wide (filmstrip); fire at a gate goes straight ahead and stops at the wall. Screenshots in the scratchpad.
 
 **Verification:** `npm test && npm run lint && npm run build`; browser check; deploy green.
 **Dependencies:** T3d
