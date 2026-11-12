@@ -40,10 +40,10 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 - `wkstate.ts`: owns the library: loads it at start, fetches when missing, token changed, or older than 7 days (checked inside `refresh()`); `stories()` lookup by character; `remove()` deletes it. **Saving a token no longer switches to WaniKani mode.**
 
 **Acceptance criteria:**
-- [ ] Mocked fetch: pages joined, 401 → invalid, 429 / network / malformed → offline, requests only to `https://api.wanikani.com/v2/` (tested).
-- [ ] Refresh rules with a fake clock and in-memory store: fetch when missing, token changed, older than 7 days; no fetch otherwise (tested).
-- [ ] Remove token deletes the library (tested).
-- [ ] Saving a token keeps Built-in mode; the switch still changes mode (tested; replaces "saving a token fetches and switches to WaniKani").
+- [x] Mocked fetch: pages joined, 401 → invalid, 429 / network / malformed → offline, requests only to `https://api.wanikani.com/v2/` (tested).
+- [x] Refresh rules with a fake clock and in-memory store: fetch when missing, token changed, older than 7 days; no fetch otherwise (tested).
+- [x] Remove token deletes the library (tested).
+- [x] Saving a token keeps Built-in mode; the switch still changes mode (tested; replaces "saving a token fetches and switches to WaniKani").
 
 **Verification:** `npm test -- wanikani wkstate`
 **Dependencies:** M1

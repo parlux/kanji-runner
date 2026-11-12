@@ -9,12 +9,19 @@ import {
   type ChargeView,
   type RunState,
 } from "../../core/sim";
-import { VIEW_DISTANCE } from "../../core/tuning";
-import { drawLabel, outlinedText, TEXT_COLORS } from "../labels";
+import {
+  drawLabel,
+  mixHex,
+  outlinedText,
+  TEXT_COLORS,
+  type Tint,
+} from "../labels";
 import {
   CRATE_H,
   FIGURE_TOP,
-  textAlpha,
+  HAZE_COLOUR,
+  SHAPE_DISTANCE,
+  type Haze,
   squadPlace,
   LABEL_K,
   PASSED_LABEL_FADE_DIST,
@@ -26,6 +33,14 @@ import {
 } from "./world";
 
 type Ctx = CanvasRenderingContext2D;
+
+const HAZE_HEX = `#${HAZE_COLOUR.toString(16).padStart(6, "0")}`;
+
+/** Text colours mixed toward the haze by `amount`, as the fog does to the object. */
+const hazed =
+  (amount: number): Tint =>
+  (c) =>
+    mixHex(c, HAZE_HEX, amount);
 
 /** Gap (in wall heights) between a wall's top and its prompt. */
 const PROMPT_GAP = 0.15;
@@ -48,19 +63,29 @@ function renderSquadText(
   run: RunState,
   c: ChargeView,
   project: Projector,
+  haze: Haze,
   alpha: number,
 ): number {
   let top = Infinity;
   for (const q of c.squads) {
     const p = squadPlace(run.dist, run.x, c, q);
     if (!p || p.merge >= 1) continue;
-    const a = alpha * p.shown * textAlpha(p.dist - run.dist) * (1 - p.merge);
+    const a = alpha * p.shown * (1 - p.merge);
+    const tint = hazed(haze(p.dist, FIGURE_TOP));
     const at = project(p.x, p.dist, FIGURE_TOP + 0.3);
     const size = COUNT_K * wallPx(project, p.x, p.dist);
     if (a <= 0 || !at || size <= 0) continue;
     ctx.globalAlpha = a;
     const colour = p.friendly ? TEXT_COLORS.text : TAG_COLOURS.fight;
-    outlinedText(ctx, String(p.standing), at.x, at.y - size / 2, size, colour);
+    outlinedText(
+      ctx,
+      String(p.standing),
+      at.x,
+      at.y - size / 2,
+      size,
+      colour,
+      tint,
+    );
     top = Math.min(top, at.y - size);
     if (p.tag) {
       outlinedText(
@@ -70,6 +95,7 @@ function renderSquadText(
         at.y - size * 1.6,
         size * 0.8,
         TAG_COLOURS[p.tag],
+        tint,
       );
       top = Math.min(top, at.y - size * 2);
     }
@@ -82,7 +108,7 @@ function renderSquadText(
  * The 3D run's track text, projected with the live camera: wall prompts and
  * answer labels (labels fitted to their opening's projected width), crate hit
  * points and rewards, pack and squad counts. Sized by projected height, so it
- * shrinks with distance, faded in just inside VIEW_DISTANCE, far objects first (walls and
+ * shrinks with distance, hazed toward the fog colour with its object from SHAPE_DISTANCE in, far objects first (walls and
  * hazards interleaved by distance). A passed wall's labels fade and its
  * prompt is gone, as in 2D.
  */
@@ -90,6 +116,7 @@ export function renderTrackText(
   ctx: Ctx,
   run: RunState,
   project: Projector,
+  haze: Haze,
 ): void {
   const { questions, hazards } = run.track;
   // squads are drawn only from the view model, never from the rows
@@ -99,8 +126,9 @@ export function renderTrackText(
   while (w >= 0 || h >= 0) {
     const wallAt = w >= 0 ? (questions[w] ?? Infinity) : -Infinity;
     const hazardAt = h >= 0 ? hazardPos(run, h) : -Infinity;
-    if (w >= 0 && wallAt >= hazardAt) renderWall(ctx, run, project, view, w--);
-    else renderHazardText(ctx, run, project, h--);
+    if (w >= 0 && wallAt >= hazardAt)
+      renderWall(ctx, run, project, haze, view, w--);
+    else renderHazardText(ctx, run, project, haze, h--);
   }
 }
 
@@ -109,15 +137,14 @@ function renderHazardText(
   ctx: Ctx,
   run: RunState,
   project: Projector,
+  haze: Haze,
   i: number,
 ): void {
   const hz = run.track.hazards[i];
   if (!hz || hz.kind === "saw") return;
   const pos = hazardPos(run, i);
   const ahead = pos - run.dist;
-  if (ahead < -WALL_BEHIND || ahead > VIEW_DISTANCE) return;
-  const alpha = textAlpha(ahead);
-  if (alpha <= 0) return;
+  if (ahead < -WALL_BEHIND || ahead > SHAPE_DISTANCE) return;
   if (hz.kind === "pack") {
     if (i < run.nextHazard || isShattered(run, i)) return;
     const n = packSurvivors(run, i);
@@ -125,7 +152,6 @@ function renderHazardText(
     const at = project(x, pos, FIGURE_TOP + 0.3);
     const size = COUNT_K * wallPx(project, x, pos);
     if (n <= 0 || !at || size <= 0) return;
-    ctx.globalAlpha = alpha;
     outlinedText(
       ctx,
       String(n),
@@ -133,8 +159,8 @@ function renderHazardText(
       at.y - size / 2,
       size,
       TAG_COLOURS.fight,
+      hazed(haze(pos, FIGURE_TOP)),
     );
-    ctx.globalAlpha = 1;
     return;
   }
   const hp = run.hp[i] ?? 0;
@@ -145,16 +171,21 @@ function renderHazardText(
   const mid = project(cx, pos, CRATE_H / 2);
   if (!foot || !top || !mid) return;
   const px = foot.y - top.y;
-  // floors keep far crates readable on a phone
-  const hpSize = Math.max(CRATE_TEXT_MIN_PX, CRATE_HP_K * px);
-  const rewardSize = Math.max(CRATE_TEXT_MIN_PX, CRATE_REWARD_K * px);
-  ctx.globalAlpha = alpha;
+  // a floor keeps near crates readable on a phone, but never beyond the crate's own height
+  const hpSize = Math.min(px, Math.max(CRATE_TEXT_MIN_PX, CRATE_HP_K * px));
+  const rewardSize = Math.min(
+    px,
+    Math.max(CRATE_TEXT_MIN_PX, CRATE_REWARD_K * px),
+  );
+  const tint = hazed(haze(pos, CRATE_H / 2));
   outlinedText(
     ctx,
     String(Math.ceil(hp - (run.damage[i] ?? 0))),
     mid.x,
     mid.y,
     hpSize,
+    undefined,
+    tint,
   );
   outlinedText(
     ctx,
@@ -163,20 +194,21 @@ function renderHazardText(
     top.y - rewardSize * 0.65,
     rewardSize,
     REWARD_COLOUR,
+    tint,
   );
-  ctx.globalAlpha = 1;
 }
 
 function renderWall(
   ctx: Ctx,
   run: RunState,
   project: Projector,
+  haze: Haze,
   view: ReturnType<typeof viewOf> | null,
   i: number,
 ): void {
   const pos = run.track.questions[i] ?? Infinity;
   const ahead = pos - run.dist;
-  if (ahead < -WALL_BEHIND || ahead > VIEW_DISTANCE) return;
+  if (ahead < -WALL_BEHIND || ahead > SHAPE_DISTANCE) return;
   const row = run.rows[i];
   if (!row) return;
   const passed = i < run.next;
@@ -188,13 +220,14 @@ function renderWall(
     ? view?.charges.find((c) => c.row === i)
     : undefined;
   const squadTop = charge
-    ? renderSquadText(ctx, run, charge, project, 1)
+    ? renderSquadText(ctx, run, charge, project, haze, 1)
     : Infinity;
-  const alpha = textAlpha(ahead) * fade;
-  if (alpha <= 0) return;
+  // one haze for the prompt and every label: they come out of the haze together
+  const tint = hazed(haze(pos, WALL_H / 2));
+  if (fade <= 0) return;
   const px = wallPx(project, 0.5, pos);
   if (px <= 0) return;
-  ctx.globalAlpha = alpha;
+  ctx.globalAlpha = fade;
   const answered = i === run.next - 1 ? run.lastAnswer : null;
   rowOpenings(run, i).forEach((o, j) => {
     // the one run through goes at once, so it never covers the army
@@ -204,7 +237,7 @@ function renderWall(
     const r = project(o.right, pos, WALL_H / 2);
     if (!c || !l || !r) return;
     const label = row.options[j] ?? "";
-    drawLabel(ctx, label, c.x, c.y, LABEL_K * px, r.x - l.x - 6, true);
+    drawLabel(ctx, label, c.x, c.y, LABEL_K * px, r.x - l.x - 6, true, tint);
   });
   ctx.globalAlpha = 1;
   if (passed) return;
@@ -213,7 +246,5 @@ function renderWall(
   const size = PROMPT_K * px;
   if (!top) return;
   const y = Math.min(top.y, squadTop - 0.15 * size) - size / 2;
-  ctx.globalAlpha = alpha;
-  outlinedText(ctx, row.prompt, top.x, y, size);
-  ctx.globalAlpha = 1;
+  outlinedText(ctx, row.prompt, top.x, y, size, undefined, tint);
 }

@@ -1,5 +1,6 @@
 import { loadToken, loadWkCache, saveWkCache, type WkStore } from "./cache";
 import { trim, type WkCache } from "./parse";
+import { buildLibrary, storyLevel, type StoryLibrary } from "./stories";
 
 export const WK_BASE = "https://api.wanikani.com/v2/";
 export const WK_REVISION = "20170710";
@@ -18,6 +19,11 @@ const MAX_PAGES = 50;
 export type WkStatus = "ok" | "offline" | "invalid" | "none";
 export type WkFetchResult = { status: WkStatus; cache: WkCache | null };
 
+/** Result of a stories fetch; `library` is set only with `ok`. */
+export type StoriesResult =
+  | { status: "ok"; library: StoryLibrary }
+  | { status: "offline" | "invalid" | "none" };
+
 export type WkClientDeps = {
   fetch: typeof fetch;
   store: WkStore;
@@ -31,6 +37,11 @@ export type WkClient = {
    * result without fetching; concurrent calls share one fetch.
    */
   refresh(): Promise<WkFetchResult>;
+  /**
+   * Fetches the story library (`/user`, then kanji and radical `/subjects`).
+   * Never throws, never stores anything; the caller owns the result.
+   */
+  fetchStories(): Promise<StoriesResult>;
 };
 
 class Stop extends Error {
@@ -112,7 +123,29 @@ export function createWkClient(deps: WkClientDeps): WkClient {
     }
   }
 
+  async function fetchLibrary(token: string): Promise<StoryLibrary> {
+    const level = storyLevel(await get(`${WK_BASE}user`, token));
+    if (!level.ok) throw new Stop("offline");
+    const levels = Array.from({ length: level.value }, (_, i) => i + 1);
+    const subjects = await pages(
+      `${WK_BASE}subjects?types=kanji,radical&levels=${levels.join(",")}`,
+      token,
+    );
+    const lib = buildLibrary(subjects);
+    if (!lib.ok) throw new Stop("offline");
+    return lib.value;
+  }
+
   return {
+    async fetchStories() {
+      const token = loadToken(store);
+      if (!token) return { status: "none" };
+      try {
+        return { status: "ok", library: await fetchLibrary(token) };
+      } catch (e) {
+        return { status: e instanceof Stop ? e.status : "offline" };
+      }
+    },
     refresh() {
       const token = loadToken(store);
       if (!token) return Promise.resolve({ status: "none", cache: null });

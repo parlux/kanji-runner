@@ -24,7 +24,7 @@ import {
   worldX,
   worldZ,
   screenAt,
-  textAlpha,
+  hazeFor,
   projectorFor,
   squadDist,
   squadPlace,
@@ -229,15 +229,24 @@ describe("walls and their text", () => {
     expect(project(0.5, 2 - 10, 0)).toBeNull();
   });
 
-  it("fades overlay text in just inside VIEW_DISTANCE, never beyond it", () => {
-    expect(textAlpha(0)).toBe(1);
-    expect(textAlpha(-1)).toBe(1);
-    expect(textAlpha(0.9 * VIEW_DISTANCE)).toBeCloseTo(1, 9);
-    expect(textAlpha(0.89 * VIEW_DISTANCE)).toBe(1);
-    expect(textAlpha(0.95 * VIEW_DISTANCE)).toBeCloseTo(0.5, 9);
-    expect(textAlpha(VIEW_DISTANCE)).toBe(0);
-    expect(textAlpha(VIEW_DISTANCE + 1)).toBe(0);
-    expect(textAlpha(SHAPE_DISTANCE)).toBe(0);
+  it("gives overlay text the haze the fog gives the object at that point", () => {
+    const run = 7;
+    for (const p of [pose, cameraFit(390 / 844).pose]) {
+      const haze = hazeFor(p, run);
+      for (const ahead of [
+        0.5,
+        VIEW_DISTANCE,
+        1.5 * VIEW_DISTANCE,
+        SHAPE_DISTANCE,
+      ])
+        for (const y of [0, WALL_H / 2, WALL_H])
+          expect(haze(run + ahead, y)).toBe(
+            hazeAt(fogRange(p), viewDepth(p, y, worldZ(ahead, 0))),
+          );
+      expect(haze(run + SHAPE_DISTANCE, WALL_H / 2)).toBeGreaterThan(0.97);
+      expect(haze(run + VIEW_DISTANCE, WALL_H / 2)).toBeLessThan(0.05);
+      expect(haze(run + 1, WALL_H / 2)).toBe(0);
+    }
   });
 
   it("stands squads beyond the wall, and the fighting one ahead of the army", () => {

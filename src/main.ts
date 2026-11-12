@@ -1,6 +1,6 @@
 import { bindDrag, bindKeys, type Action } from "./game/input";
 import { startLoop } from "./game/loop";
-import { render } from "./game/render";
+import { render, type TrackView } from "./game/render";
 import type { KanjiItem, Progress } from "./core/types";
 import {
   adoptProgress,
@@ -23,18 +23,23 @@ import { SPEED_PRESETS } from "./core/tuning";
 import { loadSpeed, nextSpeed, saveSpeed, speedLabel } from "./storage/speed";
 import { openTokenForm, tokenFormOpen } from "./game/wanikani";
 import { createWkState } from "./game/wkstate";
+import { createStoryStore } from "./wanikani/storystore";
 import { createWkClient } from "./wanikani/client";
 import { openStudy, studyOpen } from "./game/study";
 import { KANA } from "./core/kana";
 import { KANJI } from "./core/kanji";
 import { missedItems } from "./core/run";
-import { canStudy, runKanji, studyCards } from "./core/study";
+import {
+  canStudy,
+  runKanji,
+  storiesWithFallback,
+  studyCards,
+} from "./core/study";
 import { loadSessionLog, saveSessionLog } from "./storage/session";
 import { loadProgress, saveProgress } from "./storage/storage";
 import { loginOpen, openLogin } from "./sync/login";
 import { createSyncFromEnv } from "./sync/sync";
 import type { View3d } from "./game/three/scene3d";
-import type { Projector } from "./game/three/world";
 
 const canvas = document.querySelector<HTMLCanvasElement>("#game");
 if (!canvas) throw new Error("Missing #game canvas");
@@ -88,6 +93,7 @@ let speed = loadSpeed(localStorage);
 // WaniKani: token, cache and mode live on this device only; a dev sandbox skips it
 const wk = createWkState({
   store: localStorage,
+  storyStore: createStoryStore(),
   now: Date.now,
   makeClient: () =>
     createWkClient({
@@ -138,7 +144,7 @@ const study = (): void => {
     missed,
     kanjiList(),
     KANA,
-    session.wk ? wk.mnemonics() : undefined,
+    storiesWithFallback(wk.stories(), session.wk ? wk.mnemonics() : undefined),
     runKanji(run.rows, run.results),
   );
   openStudy(cards, () => {
@@ -226,10 +232,10 @@ startLoop(
   },
   () => {
     // 3D draws the run and the boss clash; #game then draws only the overlay
-    let project: Projector | undefined;
+    let track: TrackView | undefined;
     if (view3d && (scene.kind === "run" || scene.kind === "boss")) {
       view3d.render(scene);
-      project = view3d.project;
+      track = { project: view3d.project, haze: view3d.haze };
     }
     render(
       ctx,
@@ -239,7 +245,7 @@ startLoop(
       session,
       sync.status(),
       session.persist ? wk.view() : null,
-      project,
+      track,
       speedLabel(speed),
     );
   },

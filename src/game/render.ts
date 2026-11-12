@@ -52,6 +52,7 @@ import {
   PASSED_LABEL_FADE_DIST,
   SQUAD_FADE_DIST,
   TRACK_W,
+  type Haze,
   type Projector,
 } from "./three/world";
 import { renderTrackText } from "./three/overlay";
@@ -109,6 +110,9 @@ const TIER_POPUP: Record<StreakTier, string> = {
   triple: "×3",
 };
 
+/** What the 3D view gives the overlay: where things are on screen and how hazy. */
+export type TrackView = { project: Projector; haze: Haze };
+
 export function render(
   ctx: Ctx,
   w: number,
@@ -117,13 +121,13 @@ export function render(
   session: Session,
   sync: SyncStatus = "disabled",
   wk: WkView | null = null,
-  project?: Projector,
+  view3d?: TrackView,
   speed?: string,
 ): void {
   // with a 3D view, the run is drawn behind this canvas: draw only the overlay
-  if (project && scene.kind === "run") {
+  if (view3d && scene.kind === "run") {
     ctx.clearRect(0, 0, w, h);
-    renderRunOverlay(ctx, w, h, scene.run, project);
+    renderRunOverlay(ctx, w, h, scene.run, view3d);
     if (scene.paused) renderPaused(ctx, w, h);
     return;
   }
@@ -156,9 +160,9 @@ function renderRunOverlay(
   w: number,
   h: number,
   run: RunState,
-  project: Projector,
+  { project, haze }: TrackView,
 ): void {
-  renderTrackText(ctx, run, project);
+  renderTrackText(ctx, run, project, haze);
   const centre = project(run.x, run.dist, 0);
   const half = crowdWidth(run.army) / 2;
   const right = project(run.x + half, run.dist, 0);

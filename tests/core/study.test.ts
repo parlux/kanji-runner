@@ -3,7 +3,12 @@ import { KANA } from "../../src/core/kana";
 import { KANJI } from "../../src/core/kanji";
 import { buildRun, missedItems } from "../../src/core/run";
 import { defaultProgress, recordRun } from "../../src/core/srs";
-import { canStudy, runKanji, studyCards } from "../../src/core/study";
+import {
+  canStudy,
+  runKanji,
+  storiesWithFallback,
+  studyCards,
+} from "../../src/core/study";
 import type { KanjiItem, Progress } from "../../src/core/types";
 
 const progress: Progress = { ...defaultProgress(), unlockedLevel: 3 };
@@ -158,5 +163,41 @@ describe("canStudy", () => {
     expect(canStudy(0, false)).toBe(true);
     expect(canStudy(0, true)).toBe(false);
     expect(canStudy(3, true)).toBe(true);
+  });
+});
+
+describe("storiesWithFallback", () => {
+  const lib = new Map([
+    [
+      "a",
+      { meaning: "lib-m", radicals: [{ char: "x", name: "ex", image: null }] },
+    ],
+    ["b", { reading: "lib-r" }],
+  ]);
+  const taught = new Map([
+    ["a", { meaning: "t-m", reading: "t-r" }],
+    ["c", { meaning: "t-c" }],
+  ]);
+
+  it("returns the library untouched without taught mnemonics", () => {
+    expect(storiesWithFallback(lib, undefined)).toBe(lib);
+    expect(storiesWithFallback(undefined, undefined)).toBeUndefined();
+  });
+
+  it("prefers library text, fills gaps from taught, keeps radicals", () => {
+    const m = storiesWithFallback(lib, taught);
+    expect(m?.get("a")).toEqual({
+      meaning: "lib-m",
+      reading: "t-r",
+      radicals: lib.get("a")?.radicals,
+    });
+    expect(m?.get("b")).toEqual({ reading: "lib-r" });
+    expect(m?.get("c")).toEqual({ meaning: "t-c" });
+  });
+
+  it("uses taught mnemonics alone when there is no library", () => {
+    expect(storiesWithFallback(undefined, taught)?.get("c")).toEqual({
+      meaning: "t-c",
+    });
   });
 });
