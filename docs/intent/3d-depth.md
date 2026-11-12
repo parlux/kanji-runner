@@ -16,3 +16,9 @@ Status: confirmed by the owner, 2026-11-12, after an interview at Checkpoint H1.
 | Shapes far, kanji at the 2D distance | Owner: mostly about the look; difficulty stays tied to 2D. |
 | Camera closer and bigger, not just tilted | Owner chose it, matching the reference. |
 | Both gate sides always visible | Owner: hard rule; it limits how low the camera goes. |
+
+## Amendment, 2026-11-13 (owner, after playing T3b)
+- **Outcome:** all overlay text (prompts, answer labels, counts) shows from the moment its object comes out of the haze, hazed exactly like it (painted-on, size proportional), instead of appearing at `VIEW_DISTANCE`. A gate's prompt and answers appear together.
+- **Why:** gates travelled a long way as blank slabs, then their text snapped on; it felt wrong.
+- **Rule relaxed:** "kanji readable at the same distance as in 2D" is dropped. 3D may be easier than 2D: 2D will be deprecated, and speed is adjustable.
+- **Out of scope:** `SHAPE_DISTANCE`, haze curve, camera, gameplay numbers, 2D, passed-label fade-out.

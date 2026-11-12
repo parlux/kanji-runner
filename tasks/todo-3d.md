@@ -105,9 +105,29 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 **Files:** `src/game/three/{world,view,scene3d,hazards,squads,overlay}.ts`, `src/game/render.ts`, `tests/game/world.test.ts`
 **Scope:** M
 
-### Checkpoint H1: the look (owner, on the phone, with `?3d`; moved after T3: hazards must be visible for a playable run; T3b from owner feedback)
+### Task T3c: Text hazed in with its object (owner feedback, 2026-11-13)
+**Owner:** "The gates show up visually at the right time, but without the text, then the text just 'appears'. Can we add the text as soon as the gate appears, even if it's too small/blurry to read?" Intent: `docs/intent/3d-depth.md` (amendment 2026-11-13). Drops SPEC-3d-depth's "no overlay text beyond `VIEW_DISTANCE`": 3D may be easier than 2D.
+
+**Description:**
+- All 3D overlay text (gate prompts and answer labels, crate hit points and `+N`, squad, pack and crowd counts) shows from `SHAPE_DISTANCE`, hazed exactly like its object: drawn opaque, fill and outline mixed toward the haze colour by `hazeAt` at the object's view depth (the same factor Three.js fog gives the object), instead of `textAlpha`'s fade over the last tenth before `VIEW_DISTANCE`. Remove `textAlpha`/`TEXT_FADE_END` if unused.
+- A gate's prompt and its labels share one haze factor (they appear together).
+- Size stays proportional to the object (painted-on). Crate text's 14 px minimum never makes far crate text larger than the crate (e.g. cap by the crate's projected height).
+- Unchanged: `SHAPE_DISTANCE`, the haze curve, the camera, re-ask safety (rows never swapped within `SHAPE_DISTANCE`), passed walls' label fade-out, merge/shown fades of squads, 2D.
+
+**Acceptance criteria:**
+- [ ] Tested: overlay text haze equals the object's haze at the same point (near `SHAPE_DISTANCE`, at `VIEW_DISTANCE`, near the army); text is drawn (not culled) between `VIEW_DISTANCE` and `SHAPE_DISTANCE`.
+- [ ] A gate's prompt and labels use one haze factor (tested or evident in code).
+- [ ] Browser check at 390×844 with `?3d`: a filmstrip of a gate and a crate approaching from `SHAPE_DISTANCE` (about 1.9×, 1.5×, 1.2×, 1.0×, 0.8× `VIEW_DISTANCE`): whenever the object is visible its text is too, hazy far off, with no frame where text jumps in. Screenshots in the scratchpad.
+
+**Verification:** `npm test && npm run lint && npm run build`; browser check; deploy green.
+**Dependencies:** T3b
+**Files:** `src/game/three/{overlay,world}.ts`, `src/game/labels.ts`, `tests/game/world.test.ts`, `docs/specs/SPEC-3d-depth.md`
+**Scope:** S
+
+### Checkpoint H1: the look (owner, on the phone, with `?3d`; moved after T3: hazards must be visible for a playable run; T3b and T3c from owner feedback)
 - [ ] The camera, track, gates, hazards and crowd feel like a crowd runner; the crowd visibly grows and shrinks.
 - [ ] Things appear in the distance and fade in; the camera is closer and less steep; 3D no longer feels faster than 2D (v1.4.1).
+- [ ] Gate and crate text comes out of the haze with its object, never popping in (T3c).
 - [ ] Camera numbers OK, or the owner says what to change (higher, lower, closer, wider).
 
 ### Task T4: The boss at the end of the track
