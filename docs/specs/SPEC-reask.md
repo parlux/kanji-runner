@@ -1,6 +1,6 @@
 # Spec: Ask again (v1.2, WaniKani mode)
 
-Extends `docs/specs/SPEC.md` (v1) and `docs/specs/SPEC-wanikani.md` (v1.1). Everything there still holds unless this spec says otherwise. Idea and interview: `docs/ideas/guessing-and-rust.md`.
+Extends `docs/specs/SPEC.md` (v1) and `docs/specs/SPEC-wanikani.md` (v1.1). Everything there still holds unless this spec says otherwise. Idea and interview: `docs/ideas/done/guessing-and-rust.md`.
 
 ## Objective
 In WaniKani mode, a lucky guess should not move an item up. Weak or missed items come back later in the same run, and only move up when they are answered right twice.

@@ -1,6 +1,6 @@
 # Tasks: Ask again (v1.2, WaniKani mode)
 
-Spec: `docs/specs/SPEC-reask.md` (approved 2026-11-08, open questions at their defaults). Idea and interview: `docs/ideas/guessing-and-rust.md`. Starts after v1.1 Checkpoint E.
+Spec: `docs/specs/SPEC-reask.md` (approved 2026-11-08, open questions at their defaults). Idea and interview: `docs/ideas/done/guessing-and-rust.md`. Starts after v1.1 Checkpoint E.
 Every task: `npm test && npm run lint && npm run build` pass before it is checked off. Test fixtures are synthetic: never commit real WaniKani content.
 
 ## Plan
@@ -87,6 +87,8 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 **Scope:** M
 
 ### Checkpoint F: v1.2 (owner, on the phone)
-- [ ] Weak kanji keep coming back until they're known, and lucky guesses no longer feel like they count.
-- [ ] Runs don't feel repetitive, and nothing pops in.
-- [ ] Tune `REASK_MAX` (and revisit "a weak right with no re-ask stays put") from the owner's feedback.
+- [x] Weak kanji keep coming back until they're known, and lucky guesses no longer feel like they count.
+- [x] Runs don't feel repetitive, and nothing pops in.
+- [x] Tune `REASK_MAX` (and revisit "a weak right with no re-ask stays put") from the owner's feedback.
+
+Approved by the owner, 2026-11-12, with no tuning changes.
