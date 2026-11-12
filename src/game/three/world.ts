@@ -24,6 +24,13 @@ export const FOG_START = 0.7;
 /** Tallest thing on the track (world units): fog hides it whole beyond VIEW_DISTANCE. */
 export const FOG_TOP_H = 3;
 
+/** Screen position (CSS px) of a track point (x, distance, height), or null when behind the camera. */
+export type Projector = (
+  x: number,
+  dist: number,
+  height: number,
+) => { x: number; y: number } | null;
+
 /** Track x (0 left .. 1 right) → world X. */
 export const worldX = (x: number): number => (x - 0.5) * TRACK_W;
 /** World X → track x. */

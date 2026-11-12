@@ -41,7 +41,13 @@ import {
   type SessionLog,
 } from "../core/session";
 import type { WkView } from "./wkstate";
-import { MAX_DRAWN_SOLDIERS } from "./three/world";
+import {
+  CROWD_DEPTH,
+  DIST_SCALE,
+  MAX_DRAWN_SOLDIERS,
+  TRACK_W,
+  type Projector,
+} from "./three/world";
 
 const FONT = `"Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic", system-ui, sans-serif`;
 /** How long (in track distance) a clip-loss pop-up stays up. */
@@ -225,7 +231,15 @@ export function render(
   session: Session,
   sync: SyncStatus = "disabled",
   wk: WkView | null = null,
+  project?: Projector,
 ): void {
+  // with a 3D view, the run is drawn behind this canvas: draw only the overlay
+  if (project && scene.kind === "run") {
+    ctx.clearRect(0, 0, w, h);
+    renderRunOverlay(ctx, w, scene.run, project);
+    if (scene.paused) renderPaused(ctx, w, h);
+    return;
+  }
   ctx.fillStyle = COLORS.bg;
   ctx.fillRect(0, 0, w, h);
   if (scene.kind === "start")
@@ -235,13 +249,42 @@ export function render(
   if (scene.kind === "boss")
     return renderBoss(ctx, w, h, scene.run.army, scene.boss, scene.t);
   renderRun(ctx, w, h, scene.run);
-  if (scene.paused) {
-    ctx.fillStyle = "rgba(0,0,0,0.6)";
-    ctx.fillRect(0, 0, w, h);
-    text(ctx, "Paused", w / 2, h / 2 - 20, 40);
-    text(ctx, "Tap or P to resume", w / 2, h / 2 + 24, 20, COLORS.dim);
-    text(ctx, `build ${__BUILD__}`, w / 2, h - 24, 14, COLORS.dim);
+  if (scene.paused) renderPaused(ctx, w, h);
+}
+
+function renderPaused(ctx: Ctx, w: number, h: number): void {
+  ctx.fillStyle = "rgba(0,0,0,0.6)";
+  ctx.fillRect(0, 0, w, h);
+  text(ctx, "Paused", w / 2, h / 2 - 20, 40);
+  text(ctx, "Tap or P to resume", w / 2, h / 2 + 24, 20, COLORS.dim);
+  text(ctx, `build ${__BUILD__}`, w / 2, h - 24, 14, COLORS.dim);
+}
+
+/**
+ * The 3D run's overlay: the army's count and pop-ups placed on the projected
+ * crowd, and the HUD. Outlined, so it reads over the bright scene.
+ */
+function renderRunOverlay(
+  ctx: Ctx,
+  w: number,
+  run: RunState,
+  project: Projector,
+): void {
+  const centre = project(run.x, run.dist, 0);
+  const half = crowdWidth(run.army) / 2;
+  const right = project(run.x + half, run.dist, 0);
+  // the crowd's front edge, nearest the camera
+  const front = project(
+    run.x,
+    run.dist - (half * CROWD_DEPTH * TRACK_W) / DIST_SCALE,
+    0,
+  );
+  if (centre && right && front) {
+    const radius = Math.max(8, right.x - centre.x);
+    outlinedText(ctx, String(run.army), centre.x, front.y + 20, 22);
+    renderArmyPopups(ctx, w, run, centre.x, centre.y, radius, outlinedText);
   }
+  renderHud(ctx, w, run, outlinedText);
 }
 
 function renderStart(
@@ -957,14 +1000,30 @@ function renderRun(ctx: Ctx, w: number, h: number, run: RunState): void {
 
   renderCrateRecruits(ctx, w, run, armyY, radius, depthY);
   renderArmy(ctx, run.x * w, armyY, radius, run.army);
+  renderArmyPopups(ctx, w, run, run.x * w, armyY, radius);
+  renderHud(ctx, w, run);
+}
+
+type Draw = typeof text;
+
+/** The clip loss and answer feedback around the army at (cx, armyY). */
+function renderArmyPopups(
+  ctx: Ctx,
+  w: number,
+  run: RunState,
+  cx: number,
+  armyY: number,
+  radius: number,
+  draw: Draw = text,
+): void {
   if (run.lastClip) {
     const t = (run.dist - run.lastClip.dist) / CLIP_POPUP_DIST;
     if (t < 1) {
       ctx.globalAlpha = 1 - t;
-      text(
+      draw(
         ctx,
         `−${run.lastClip.loss}`,
-        run.x * w,
+        cx,
         armyY - radius * 0.6 - 24 - 30 * t,
         26,
         COLORS.bad,
@@ -983,13 +1042,13 @@ function renderRun(ctx: Ctx, w: number, h: number, run: RunState): void {
       ctx.strokeStyle = color;
       ctx.lineWidth = 3;
       ctx.beginPath();
-      ctx.arc(run.x * w, armyY, radius + 8 + 24 * t, 0, Math.PI * 2);
+      ctx.arc(cx, armyY, radius + 8 + 24 * t, 0, Math.PI * 2);
       ctx.stroke();
       ctx.globalAlpha = 1 - t;
       const sign = a.change >= 0 ? "+" : "−";
-      const px = Math.min(run.x * w + radius + 28, w - 36);
+      const px = Math.min(cx + radius + 28, w - 36);
       const py = armyY - 10 - 24 * t;
-      text(ctx, `${sign}${Math.abs(a.change)}`, px, py, 24, color);
+      draw(ctx, `${sign}${Math.abs(a.change)}`, px, py, 24, color);
       // what caused it: the streak's multiplier, or the share lost
       const before = run.army - a.change;
       const tag = a.correct
@@ -997,13 +1056,20 @@ function renderRun(ctx: Ctx, w: number, h: number, run: RunState): void {
         : before > 0
           ? `−${Math.round((-a.change / before) * 100)}%`
           : "";
-      if (tag) text(ctx, tag, px, py + 22, 18, color);
+      if (tag) draw(ctx, tag, px, py + 22, 18, color);
       ctx.globalAlpha = 1;
     }
   }
+}
 
-  // HUD
-  text(
+/** Question number and streak, top corners. */
+function renderHud(
+  ctx: Ctx,
+  w: number,
+  run: RunState,
+  draw: Draw = text,
+): void {
+  draw(
     ctx,
     `${Math.min(run.next + 1, run.rows.length)}/${run.rows.length}`,
     40,
@@ -1015,9 +1081,9 @@ function renderRun(ctx: Ctx, w: number, h: number, run: RunState): void {
     // the streak, and what the next right answer pays
     const tier = streakTier(run.streak + 1);
     const hot = tier !== "base";
-    text(ctx, `streak ${run.streak}`, w - 60, 24, 16, COLORS.good);
+    draw(ctx, `streak ${run.streak}`, w - 60, 24, 16, COLORS.good);
     if (hot)
-      text(ctx, `next ${TIER_POPUP[tier]}`, w - 60, 44, 16, COLORS.chargeLine);
+      draw(ctx, `next ${TIER_POPUP[tier]}`, w - 60, 44, 16, COLORS.chargeLine);
   }
 }
 

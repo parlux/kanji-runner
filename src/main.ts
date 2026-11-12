@@ -24,11 +24,24 @@ import { loadSessionLog, saveSessionLog } from "./storage/session";
 import { loadProgress, saveProgress } from "./storage/storage";
 import { loginOpen, openLogin } from "./sync/login";
 import { createSyncFromEnv } from "./sync/sync";
+import type { View3d } from "./game/three/scene3d";
+import type { Projector } from "./game/three/world";
 
 const canvas = document.querySelector<HTMLCanvasElement>("#game");
 if (!canvas) throw new Error("Missing #game canvas");
 const ctx = canvas.getContext("2d");
 if (!ctx) throw new Error("Canvas 2D not supported");
+
+// `?3d`: the run is drawn in 3D on a WebGL canvas behind #game (2D if WebGL fails)
+let view3d: View3d | null = null;
+const canvas3d = document.querySelector<HTMLCanvasElement>("#world");
+if (canvas3d && new URLSearchParams(window.location.search).has("3d"))
+  void import("./game/three/scene3d").then(({ createView3d }) => {
+    view3d = createView3d(canvas3d);
+    if (!view3d) return;
+    canvas3d.style.display = "block";
+    resize();
+  });
 
 function resize(): void {
   if (!canvas || !ctx) return;
@@ -36,6 +49,7 @@ function resize(): void {
   canvas.width = Math.round(window.innerWidth * dpr);
   canvas.height = Math.round(window.innerHeight * dpr);
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  view3d?.resize(window.innerWidth, window.innerHeight);
 }
 
 window.addEventListener("resize", resize);
@@ -187,7 +201,13 @@ startLoop(
     if (ran) void sync.push().then(adopt);
     scene = next;
   },
-  () =>
+  () => {
+    // 3D draws the run and the boss clash; #game then draws only the overlay
+    let project: Projector | undefined;
+    if (view3d && (scene.kind === "run" || scene.kind === "boss")) {
+      view3d.render(scene);
+      project = view3d.project;
+    }
     render(
       ctx,
       window.innerWidth,
@@ -196,5 +216,7 @@ startLoop(
       session,
       sync.status(),
       session.persist ? wk.view() : null,
-    ),
+      project,
+    );
+  },
 );
