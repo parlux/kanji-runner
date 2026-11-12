@@ -10,7 +10,7 @@ import {
 } from "three";
 import { rowOpenings, wallSolids, type RunState } from "../../core/sim";
 import { VIEW_DISTANCE } from "../../core/tuning";
-import { TRACK_W, WALL_H, WALL_T, worldX, worldZ } from "./world";
+import { TRACK_W, WALL_BEHIND, WALL_H, WALL_T, worldX, worldZ } from "./world";
 
 /**
  * The run's walls in 3D: solid pieces between the openings, a translucent
@@ -21,8 +21,6 @@ import { TRACK_W, WALL_H, WALL_T, worldX, worldZ } from "./world";
 
 /** Most walls drawn at once (rows from just behind the camera to VIEW_DISTANCE). */
 const MAX_WALLS = 6;
-/** Rows stay drawn until this far (track distance) behind the army: past the camera. */
-export const WALL_BEHIND = 2;
 const WALL_COLOUR = 0x8c7fd0;
 const TRIM_COLOUR = 0x6a5bb8;
 const TRIM_H = 0.12;

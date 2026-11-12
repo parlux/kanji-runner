@@ -191,6 +191,8 @@ export function fitCameraTo(
 /** A wall's height and thickness (world units); its near face stands at the row's distance. */
 export const WALL_H = 2;
 export const WALL_T = 0.4;
+/** Rows stay drawn until this far (track distance) behind the army: past the camera. */
+export const WALL_BEHIND = 2;
 /** How far (track distance) beyond its wall a charge's squads stand. */
 export const SQUAD_BEYOND = 0.45;
 /** How far (track distance) the squad run into steps back as the firefight starts. */

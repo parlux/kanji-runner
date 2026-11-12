@@ -95,7 +95,11 @@ export function labelLayout(
   return best;
 }
 
-/** An answer label centred on (x, y), on one or two lines, okurigana greyed. */
+/**
+ * An answer label centred on (x, y), on one or two lines, okurigana greyed;
+ * with `outline`, edged in dark so it reads over a bright scene. Returns the
+ * size (px) it was drawn at.
+ */
 export function drawLabel(
   ctx: Ctx,
   s: string,
@@ -103,7 +107,8 @@ export function drawLabel(
   y: number,
   size: number,
   maxWidth: number,
-): void {
+  outline = false,
+): number {
   const { lines, size: px } = labelLayout(ctx, s, size, maxWidth);
   const lineH = px * 1.1;
   lines.forEach((line, n) => {
@@ -115,11 +120,18 @@ export function drawLabel(
     ctx.textAlign = "left";
     ctx.textBaseline = "middle";
     runs.forEach((r, k) => {
+      if (outline) {
+        ctx.strokeStyle = TEXT_COLORS.outline;
+        ctx.lineWidth = 3;
+        ctx.lineJoin = "round";
+        ctx.strokeText(r.s, left, ly);
+      }
       ctx.fillStyle = r.color;
       ctx.fillText(r.s, left, ly);
       left += widths[k] as number;
     });
   });
+  return px;
 }
 
 export function text(

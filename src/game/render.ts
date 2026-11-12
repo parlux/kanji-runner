@@ -53,6 +53,7 @@ import {
   TRACK_W,
   type Projector,
 } from "./three/world";
+import { renderWallText } from "./three/overlay";
 import {
   drawLabel,
   fitSize,
@@ -156,6 +157,7 @@ function renderRunOverlay(
   run: RunState,
   project: Projector,
 ): void {
+  renderWallText(ctx, run, project);
   const centre = project(run.x, run.dist, 0);
   const half = crowdWidth(run.army) / 2;
   const right = project(run.x + half, run.dist, 0);
