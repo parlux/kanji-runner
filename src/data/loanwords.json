@@ -1,0 +1,926 @@
+[
+  {
+    "word": "テレビ",
+    "glosses": ["television", "TV"]
+  },
+  {
+    "word": "パン",
+    "glosses": ["bread"]
+  },
+  {
+    "word": "バス",
+    "glosses": ["bus"]
+  },
+  {
+    "word": "ホテル",
+    "glosses": ["hotel"]
+  },
+  {
+    "word": "コーヒー",
+    "glosses": ["coffee"]
+  },
+  {
+    "word": "カメラ",
+    "glosses": ["camera"]
+  },
+  {
+    "word": "ペン",
+    "glosses": ["pen"]
+  },
+  {
+    "word": "ノート",
+    "glosses": ["notebook"]
+  },
+  {
+    "word": "トマト",
+    "glosses": ["tomato"]
+  },
+  {
+    "word": "バナナ",
+    "glosses": ["banana"]
+  },
+  {
+    "word": "メロン",
+    "glosses": ["melon"]
+  },
+  {
+    "word": "ピアノ",
+    "glosses": ["piano"]
+  },
+  {
+    "word": "ギター",
+    "glosses": ["guitar"]
+  },
+  {
+    "word": "ドア",
+    "glosses": ["door"]
+  },
+  {
+    "word": "ベッド",
+    "glosses": ["bed"]
+  },
+  {
+    "word": "テーブル",
+    "glosses": ["table"]
+  },
+  {
+    "word": "ケーキ",
+    "glosses": ["cake"]
+  },
+  {
+    "word": "ミルク",
+    "glosses": ["milk"]
+  },
+  {
+    "word": "ジュース",
+    "glosses": ["juice"]
+  },
+  {
+    "word": "ビール",
+    "glosses": ["beer"]
+  },
+  {
+    "word": "ワイン",
+    "glosses": ["wine"]
+  },
+  {
+    "word": "パスタ",
+    "glosses": ["pasta"]
+  },
+  {
+    "word": "ピザ",
+    "glosses": ["pizza"]
+  },
+  {
+    "word": "スープ",
+    "glosses": ["soup"]
+  },
+  {
+    "word": "サラダ",
+    "glosses": ["salad"]
+  },
+  {
+    "word": "カレー",
+    "glosses": ["curry"]
+  },
+  {
+    "word": "ラーメン",
+    "glosses": ["ramen"]
+  },
+  {
+    "word": "タクシー",
+    "glosses": ["taxi"]
+  },
+  {
+    "word": "ボール",
+    "glosses": ["ball"]
+  },
+  {
+    "word": "テスト",
+    "glosses": ["test", "exam"]
+  },
+  {
+    "word": "ゲーム",
+    "glosses": ["game", "video game"]
+  },
+  {
+    "word": "ニュース",
+    "glosses": ["news"]
+  },
+  {
+    "word": "メール",
+    "glosses": ["email", "e-mail"]
+  },
+  {
+    "word": "ネット",
+    "glosses": ["internet", "the net"]
+  },
+  {
+    "word": "トイレ",
+    "glosses": ["toilet", "restroom"]
+  },
+  {
+    "word": "タオル",
+    "glosses": ["towel"]
+  },
+  {
+    "word": "シャツ",
+    "glosses": ["shirt"]
+  },
+  {
+    "word": "コート",
+    "glosses": ["coat"]
+  },
+  {
+    "word": "ボタン",
+    "glosses": ["button"]
+  },
+  {
+    "word": "ベルト",
+    "glosses": ["belt"]
+  },
+  {
+    "word": "レモン",
+    "glosses": ["lemon"]
+  },
+  {
+    "word": "オレンジ",
+    "glosses": ["orange"]
+  },
+  {
+    "word": "アイス",
+    "glosses": ["ice cream"]
+  },
+  {
+    "word": "チーズ",
+    "glosses": ["cheese"]
+  },
+  {
+    "word": "バター",
+    "glosses": ["butter"]
+  },
+  {
+    "word": "ハム",
+    "glosses": ["ham"]
+  },
+  {
+    "word": "ジャム",
+    "glosses": ["jam"]
+  },
+  {
+    "word": "コーラ",
+    "glosses": ["cola"]
+  },
+  {
+    "word": "ソース",
+    "glosses": ["sauce"]
+  },
+  {
+    "word": "ナイフ",
+    "glosses": ["knife"]
+  },
+  {
+    "word": "フォーク",
+    "glosses": ["fork"]
+  },
+  {
+    "word": "スプーン",
+    "glosses": ["spoon"]
+  },
+  {
+    "word": "コップ",
+    "glosses": ["cup"]
+  },
+  {
+    "word": "ボトル",
+    "glosses": ["bottle"]
+  },
+  {
+    "word": "ビル",
+    "glosses": ["building"]
+  },
+  {
+    "word": "アパート",
+    "glosses": ["apartment", "flat"]
+  },
+  {
+    "word": "レストラン",
+    "glosses": ["restaurant"]
+  },
+  {
+    "word": "カフェ",
+    "glosses": ["cafe"]
+  },
+  {
+    "word": "スーパー",
+    "glosses": ["supermarket"]
+  },
+  {
+    "word": "デパート",
+    "glosses": ["dept. store", "department store"]
+  },
+  {
+    "word": "コンビニ",
+    "glosses": ["corner store", "convenience store"]
+  },
+  {
+    "word": "テニス",
+    "glosses": ["tennis"]
+  },
+  {
+    "word": "サッカー",
+    "glosses": ["soccer", "football"]
+  },
+  {
+    "word": "ゴルフ",
+    "glosses": ["golf"]
+  },
+  {
+    "word": "スキー",
+    "glosses": ["skiing", "ski"]
+  },
+  {
+    "word": "プール",
+    "glosses": ["pool", "swimming pool"]
+  },
+  {
+    "word": "チーム",
+    "glosses": ["team"]
+  },
+  {
+    "word": "スポーツ",
+    "glosses": ["sports", "sport"]
+  },
+  {
+    "word": "ラジオ",
+    "glosses": ["radio"]
+  },
+  {
+    "word": "ドラマ",
+    "glosses": ["TV drama", "drama"]
+  },
+  {
+    "word": "アニメ",
+    "glosses": ["anime", "cartoon"]
+  },
+  {
+    "word": "マンガ",
+    "glosses": ["manga", "comics"]
+  },
+  {
+    "word": "カード",
+    "glosses": ["card"]
+  },
+  {
+    "word": "チケット",
+    "glosses": ["ticket"]
+  },
+  {
+    "word": "メニュー",
+    "glosses": ["menu"]
+  },
+  {
+    "word": "レシート",
+    "glosses": ["receipt"]
+  },
+  {
+    "word": "レジ",
+    "glosses": ["checkout", "cash register"]
+  },
+  {
+    "word": "ポスト",
+    "glosses": ["mailbox", "postbox"]
+  },
+  {
+    "word": "パソコン",
+    "glosses": ["computer", "PC"]
+  },
+  {
+    "word": "スマホ",
+    "glosses": ["smartphone", "mobile phone"]
+  },
+  {
+    "word": "シャワー",
+    "glosses": ["shower"]
+  },
+  {
+    "word": "キッチン",
+    "glosses": ["kitchen"]
+  },
+  {
+    "word": "ソファー",
+    "glosses": ["sofa", "couch"]
+  },
+  {
+    "word": "カーテン",
+    "glosses": ["curtain"]
+  },
+  {
+    "word": "ベランダ",
+    "glosses": ["balcony", "veranda"]
+  },
+  {
+    "word": "エレベーター",
+    "glosses": ["elevator", "lift"]
+  },
+  {
+    "word": "セーター",
+    "glosses": ["sweater", "jumper"]
+  },
+  {
+    "word": "スカート",
+    "glosses": ["skirt"]
+  },
+  {
+    "word": "ネクタイ",
+    "glosses": ["necktie", "tie"]
+  },
+  {
+    "word": "ポケット",
+    "glosses": ["pocket"]
+  },
+  {
+    "word": "バッグ",
+    "glosses": ["bag", "handbag"]
+  },
+  {
+    "word": "スーツ",
+    "glosses": ["suit"]
+  },
+  {
+    "word": "ドレス",
+    "glosses": ["dress"]
+  },
+  {
+    "word": "ジーンズ",
+    "glosses": ["jeans"]
+  },
+  {
+    "word": "ブーツ",
+    "glosses": ["boots"]
+  },
+  {
+    "word": "サンダル",
+    "glosses": ["sandals"]
+  },
+  {
+    "word": "スリッパ",
+    "glosses": ["slippers"]
+  },
+  {
+    "word": "マフラー",
+    "glosses": ["scarf"]
+  },
+  {
+    "word": "マスク",
+    "glosses": ["mask", "face mask"]
+  },
+  {
+    "word": "ハンカチ",
+    "glosses": ["handkerchief"]
+  },
+  {
+    "word": "ティッシュ",
+    "glosses": ["tissue"]
+  },
+  {
+    "word": "シャンプー",
+    "glosses": ["shampoo"]
+  },
+  {
+    "word": "ステーキ",
+    "glosses": ["steak"]
+  },
+  {
+    "word": "ソーセージ",
+    "glosses": ["sausage"]
+  },
+  {
+    "word": "ハンバーガー",
+    "glosses": ["hamburger", "burger"]
+  },
+  {
+    "word": "サンドイッチ",
+    "glosses": ["sandwich"]
+  },
+  {
+    "word": "ホットドッグ",
+    "glosses": ["hot dog"]
+  },
+  {
+    "word": "トースト",
+    "glosses": ["toast"]
+  },
+  {
+    "word": "オムレツ",
+    "glosses": ["omelet", "omelette"]
+  },
+  {
+    "word": "ドーナツ",
+    "glosses": ["donut", "doughnut"]
+  },
+  {
+    "word": "クッキー",
+    "glosses": ["cookie", "biscuit"]
+  },
+  {
+    "word": "チョコレート",
+    "glosses": ["chocolate"]
+  },
+  {
+    "word": "ガム",
+    "glosses": ["chewing gum", "gum"]
+  },
+  {
+    "word": "キウイ",
+    "glosses": ["kiwi"]
+  },
+  {
+    "word": "ポテト",
+    "glosses": ["fries", "potato"]
+  },
+  {
+    "word": "キャベツ",
+    "glosses": ["cabbage"]
+  },
+  {
+    "word": "レタス",
+    "glosses": ["lettuce"]
+  },
+  {
+    "word": "ピーマン",
+    "glosses": ["green pepper", "bell pepper"]
+  },
+  {
+    "word": "カボチャ",
+    "glosses": ["pumpkin", "squash"]
+  },
+  {
+    "word": "コーン",
+    "glosses": ["corn", "sweetcorn"]
+  },
+  {
+    "word": "ナッツ",
+    "glosses": ["nuts"]
+  },
+  {
+    "word": "ペット",
+    "glosses": ["pet"]
+  },
+  {
+    "word": "ライオン",
+    "glosses": ["lion"]
+  },
+  {
+    "word": "パンダ",
+    "glosses": ["panda"]
+  },
+  {
+    "word": "ゴリラ",
+    "glosses": ["gorilla"]
+  },
+  {
+    "word": "コアラ",
+    "glosses": ["koala"]
+  },
+  {
+    "word": "ペンギン",
+    "glosses": ["penguin"]
+  },
+  {
+    "word": "チーター",
+    "glosses": ["cheetah"]
+  },
+  {
+    "word": "カンガルー",
+    "glosses": ["kangaroo"]
+  },
+  {
+    "word": "ピンク",
+    "glosses": ["pink"]
+  },
+  {
+    "word": "グレー",
+    "glosses": ["gray", "grey"]
+  },
+  {
+    "word": "ゼロ",
+    "glosses": ["zero"]
+  },
+  {
+    "word": "ドル",
+    "glosses": ["dollar"]
+  },
+  {
+    "word": "ユーロ",
+    "glosses": ["euro"]
+  },
+  {
+    "word": "メートル",
+    "glosses": ["meter", "metre"]
+  },
+  {
+    "word": "センチ",
+    "glosses": ["centimeter", "cm"]
+  },
+  {
+    "word": "グラム",
+    "glosses": ["gram"]
+  },
+  {
+    "word": "パーセント",
+    "glosses": ["percent"]
+  },
+  {
+    "word": "ページ",
+    "glosses": ["page"]
+  },
+  {
+    "word": "ペア",
+    "glosses": ["pair"]
+  },
+  {
+    "word": "クラス",
+    "glosses": ["class"]
+  },
+  {
+    "word": "クラブ",
+    "glosses": ["club"]
+  },
+  {
+    "word": "メンバー",
+    "glosses": ["member"]
+  },
+  {
+    "word": "リーダー",
+    "glosses": ["leader"]
+  },
+  {
+    "word": "プロ",
+    "glosses": ["pro", "professional"]
+  },
+  {
+    "word": "ファン",
+    "glosses": ["fan"]
+  },
+  {
+    "word": "アイドル",
+    "glosses": ["idol", "pop idol"]
+  },
+  {
+    "word": "モデル",
+    "glosses": ["model"]
+  },
+  {
+    "word": "デザイン",
+    "glosses": ["design"]
+  },
+  {
+    "word": "アイデア",
+    "glosses": ["idea"]
+  },
+  {
+    "word": "プラン",
+    "glosses": ["plan"]
+  },
+  {
+    "word": "ルール",
+    "glosses": ["rule"]
+  },
+  {
+    "word": "チャンス",
+    "glosses": ["chance"]
+  },
+  {
+    "word": "ミス",
+    "glosses": ["mistake", "error"]
+  },
+  {
+    "word": "スピード",
+    "glosses": ["speed"]
+  },
+  {
+    "word": "エネルギー",
+    "glosses": ["energy"]
+  },
+  {
+    "word": "ガス",
+    "glosses": ["gas"]
+  },
+  {
+    "word": "バイク",
+    "glosses": ["motorbike", "motorcycle"]
+  },
+  {
+    "word": "トラック",
+    "glosses": ["truck", "lorry"]
+  },
+  {
+    "word": "ボート",
+    "glosses": ["boat"]
+  },
+  {
+    "word": "ロケット",
+    "glosses": ["rocket"]
+  },
+  {
+    "word": "ロボット",
+    "glosses": ["robot"]
+  },
+  {
+    "word": "キーボード",
+    "glosses": ["keyboard"]
+  },
+  {
+    "word": "マウス",
+    "glosses": ["mouse"]
+  },
+  {
+    "word": "プリンター",
+    "glosses": ["printer"]
+  },
+  {
+    "word": "データ",
+    "glosses": ["data"]
+  },
+  {
+    "word": "ファイル",
+    "glosses": ["file"]
+  },
+  {
+    "word": "パスワード",
+    "glosses": ["password"]
+  },
+  {
+    "word": "アプリ",
+    "glosses": ["app"]
+  },
+  {
+    "word": "サイト",
+    "glosses": ["website"]
+  },
+  {
+    "word": "ブログ",
+    "glosses": ["blog"]
+  },
+  {
+    "word": "ビデオ",
+    "glosses": ["video"]
+  },
+  {
+    "word": "ドラム",
+    "glosses": ["drums", "drum"]
+  },
+  {
+    "word": "コンサート",
+    "glosses": ["concert"]
+  },
+  {
+    "word": "ダンス",
+    "glosses": ["dance"]
+  },
+  {
+    "word": "ジム",
+    "glosses": ["gym"]
+  },
+  {
+    "word": "ヨガ",
+    "glosses": ["yoga"]
+  },
+  {
+    "word": "マラソン",
+    "glosses": ["marathon"]
+  },
+  {
+    "word": "ボクシング",
+    "glosses": ["boxing"]
+  },
+  {
+    "word": "ゴール",
+    "glosses": ["goal"]
+  },
+  {
+    "word": "メダル",
+    "glosses": ["medal"]
+  },
+  {
+    "word": "チャンピオン",
+    "glosses": ["champion"]
+  },
+  {
+    "word": "オリンピック",
+    "glosses": ["Olympics"]
+  },
+  {
+    "word": "ビーチ",
+    "glosses": ["beach"]
+  },
+  {
+    "word": "キャンプ",
+    "glosses": ["camping", "camp"]
+  },
+  {
+    "word": "ツアー",
+    "glosses": ["tour"]
+  },
+  {
+    "word": "ガイド",
+    "glosses": ["guide"]
+  },
+  {
+    "word": "パスポート",
+    "glosses": ["passport"]
+  },
+  {
+    "word": "スーツケース",
+    "glosses": ["suitcase"]
+  },
+  {
+    "word": "アルバイト",
+    "glosses": ["part-time job"]
+  },
+  {
+    "word": "サラリーマン",
+    "glosses": ["office worker"]
+  },
+  {
+    "word": "ナース",
+    "glosses": ["nurse"]
+  },
+  {
+    "word": "コック",
+    "glosses": ["cook", "chef"]
+  },
+  {
+    "word": "パイロット",
+    "glosses": ["pilot"]
+  },
+  {
+    "word": "バイオリン",
+    "glosses": ["violin"]
+  },
+  {
+    "word": "パズル",
+    "glosses": ["puzzle"]
+  },
+  {
+    "word": "ペンキ",
+    "glosses": ["paint"]
+  },
+  {
+    "word": "テープ",
+    "glosses": ["tape"]
+  },
+  {
+    "word": "カレンダー",
+    "glosses": ["calendar"]
+  },
+  {
+    "word": "デート",
+    "glosses": ["date"]
+  },
+  {
+    "word": "プレゼント",
+    "glosses": ["present", "gift"]
+  },
+  {
+    "word": "パーティー",
+    "glosses": ["party"]
+  },
+  {
+    "word": "クリスマス",
+    "glosses": ["Christmas"]
+  },
+  {
+    "word": "リボン",
+    "glosses": ["ribbon"]
+  },
+  {
+    "word": "キス",
+    "glosses": ["kiss"]
+  },
+  {
+    "word": "ハート",
+    "glosses": ["heart"]
+  },
+  {
+    "word": "ストレス",
+    "glosses": ["stress"]
+  },
+  {
+    "word": "ダイエット",
+    "glosses": ["diet"]
+  },
+  {
+    "word": "カロリー",
+    "glosses": ["calorie"]
+  },
+  {
+    "word": "ビタミン",
+    "glosses": ["vitamin"]
+  },
+  {
+    "word": "ウイルス",
+    "glosses": ["virus"]
+  },
+  {
+    "word": "アレルギー",
+    "glosses": ["allergy"]
+  },
+  {
+    "word": "エアコン",
+    "glosses": ["air con", "air conditioner"]
+  },
+  {
+    "word": "ストーブ",
+    "glosses": ["heater"]
+  },
+  {
+    "word": "ランプ",
+    "glosses": ["lamp"]
+  },
+  {
+    "word": "ガラス",
+    "glosses": ["glass"]
+  },
+  {
+    "word": "プラスチック",
+    "glosses": ["plastic"]
+  },
+  {
+    "word": "ゴム",
+    "glosses": ["rubber"]
+  },
+  {
+    "word": "ジャズ",
+    "glosses": ["jazz"]
+  },
+  {
+    "word": "オペラ",
+    "glosses": ["opera"]
+  },
+  {
+    "word": "ミュージカル",
+    "glosses": ["musical"]
+  },
+  {
+    "word": "ホラー",
+    "glosses": ["horror"]
+  },
+  {
+    "word": "コメディー",
+    "glosses": ["comedy"]
+  },
+  {
+    "word": "ヒーロー",
+    "glosses": ["hero"]
+  },
+  {
+    "word": "ドラゴン",
+    "glosses": ["dragon"]
+  },
+  {
+    "word": "モンスター",
+    "glosses": ["monster"]
+  },
+  {
+    "word": "ゾンビ",
+    "glosses": ["zombie"]
+  },
+  {
+    "word": "エンジン",
+    "glosses": ["engine"]
+  },
+  {
+    "word": "ブレーキ",
+    "glosses": ["brake", "brakes"]
+  },
+  {
+    "word": "タイヤ",
+    "glosses": ["tire", "tyre"]
+  },
+  {
+    "word": "ハンドル",
+    "glosses": ["steering wheel"]
+  }
+]

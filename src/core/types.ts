@@ -1,4 +1,4 @@
-export type GateType = "kana" | "meaning" | "reading";
+export type GateType = "kana" | "meaning" | "reading" | "word";
 
 export type KanaItem = {
   char: string;
@@ -33,6 +33,15 @@ export type KanjiItem = {
   readings: string[];
   /** KRADFILE elements, some of them kanji, some radicals such as ⺅. */
   components: string[];
+};
+
+/** A katakana loanword from `src/data/loanwords.json`; its level is assigned at load (see words.ts). */
+export type WordItem = {
+  word: string;
+  /** Hand-written English glosses; the first is shown on gates. */
+  glosses: string[];
+  /** Kanji level (2+) the word joins. */
+  level: number;
 };
 
 /** SRS record for one item and gate type, keyed `char:type` (e.g. `水:meaning`). */

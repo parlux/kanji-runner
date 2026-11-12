@@ -18,7 +18,12 @@ export const SQUAD_DEFECT_GAIN = 10;
 export const WRONG_CHARGE_MIN_LOSS = 8;
 export const WRONG_CHARGE_PCT_LOSS = 0.5;
 
-export const BASE_REWARD = { kana: 3, meaning: 5, reading: 8 } as const;
+export const BASE_REWARD = {
+  kana: 3,
+  meaning: 5,
+  reading: 8,
+  word: 5,
+} as const;
 
 export const ROWS_PER_RUN = 14;
 // Item selection (SRS). See run.ts.
@@ -30,6 +35,8 @@ export const MAX_NEW_PER_RUN = 4;
 export const WK_DUE_BOOST = 4;
 /** The story library is refetched when older than this. */
 export const STORY_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+/** Katakana loanwords that join each kanji level, in list order. See words.ts. */
+export const WORDS_PER_LEVEL = 5;
 /** Rows 1..N have 2 options; later rows have 3. */
 export const TWO_OPTION_ROWS = 7;
 
