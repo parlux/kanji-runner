@@ -10,6 +10,21 @@ export const TEXT_COLORS = {
   outline: "#4a3220",
 };
 
+/** Maps a colour (#rrggbb) to what is drawn, e.g. mixed toward a haze colour. */
+export type Tint = (colour: string) => string;
+
+/** `a` mixed toward `b` by `t` (0 = a, 1 = b); both #rrggbb. */
+export function mixHex(a: string, b: string, t: number): string {
+  const ch = (c: string, i: number): number =>
+    parseInt(c.slice(1 + 2 * i, 3 + 2 * i), 16);
+  let out = "#";
+  for (let i = 0; i < 3; i++) {
+    const v = Math.round(ch(a, i) + (ch(b, i) - ch(a, i)) * t);
+    out += v.toString(16).padStart(2, "0");
+  }
+  return out;
+}
+
 /** Smallest a question prompt is drawn (px), however far away its wall is. */
 export const PROMPT_MIN_PX = 34;
 /** Smallest an answer label is drawn (px), unless it must shrink to fit its opening. */
@@ -108,6 +123,7 @@ export function drawLabel(
   size: number,
   maxWidth: number,
   outline = false,
+  tint: Tint = (c) => c,
 ): number {
   const { lines, size: px } = labelLayout(ctx, s, size, maxWidth);
   const lineH = px * 1.1;
@@ -121,12 +137,12 @@ export function drawLabel(
     ctx.textBaseline = "middle";
     runs.forEach((r, k) => {
       if (outline) {
-        ctx.strokeStyle = TEXT_COLORS.outline;
+        ctx.strokeStyle = tint(TEXT_COLORS.outline);
         ctx.lineWidth = 3;
         ctx.lineJoin = "round";
         ctx.strokeText(r.s, left, ly);
       }
-      ctx.fillStyle = r.color;
+      ctx.fillStyle = tint(r.color);
       ctx.fillText(r.s, left, ly);
       left += widths[k] as number;
     });
@@ -157,14 +173,15 @@ export function outlinedText(
   y: number,
   size: number,
   color = TEXT_COLORS.text,
+  tint: Tint = (c) => c,
 ): void {
   ctx.font = `${Math.round(size)}px ${FONT}`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.strokeStyle = TEXT_COLORS.outline;
+  ctx.strokeStyle = tint(TEXT_COLORS.outline);
   ctx.lineWidth = 3;
   ctx.lineJoin = "round";
   ctx.strokeText(s, x, y);
-  ctx.fillStyle = color;
+  ctx.fillStyle = tint(color);
   ctx.fillText(s, x, y);
 }

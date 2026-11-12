@@ -31,7 +31,9 @@ import {
   TRACK_W,
   worldX,
   worldZ,
+  type Haze,
   type Projector,
+  hazeFor,
 } from "./world";
 
 export type View3d = {
@@ -40,6 +42,8 @@ export type View3d = {
   render(scene: Extract<Scene, { kind: "run" | "boss" }>): void;
   /** Projects with the camera of the last render. */
   project: Projector;
+  /** Haze at a track point, as the fog gives the scene (for the overlay text). */
+  haze: Haze;
 };
 
 /** Track length drawn ahead of and behind the army (world units); it runs on into the haze. */
@@ -231,6 +235,8 @@ export function createView3d(canvas: HTMLCanvasElement): View3d | null {
   let w = 1;
   let h = 1;
   let runDist = 0;
+  let pose = fitCamera(camera, 1).pose;
+  let haze: Haze = hazeFor(pose, 0);
   // animation time: stands still while the run is paused
   let clock = 0;
   let last = performance.now();
@@ -240,7 +246,8 @@ export function createView3d(canvas: HTMLCanvasElement): View3d | null {
       w = cw;
       h = ch;
       renderer.setSize(cw, ch, false);
-      const range = fogRange(fitCamera(camera, cw / ch).pose);
+      pose = fitCamera(camera, cw / ch).pose;
+      const range = fogRange(pose);
       fog.near = range.near;
       fog.far = range.far;
     },
@@ -251,6 +258,7 @@ export function createView3d(canvas: HTMLCanvasElement): View3d | null {
       const paused = s.kind === "run" && s.paused;
       if (!paused) clock += dt;
       runDist = s.run.dist;
+      haze = hazeFor(pose, runDist);
       layDashes(runDist);
       fx.begin();
       if (s.kind === "run") {
@@ -263,6 +271,7 @@ export function createView3d(canvas: HTMLCanvasElement): View3d | null {
       army.update(s.run.army, worldX(s.run.x), 0, clock, paused ? 0 : dt);
       renderer.render(scene, camera);
     },
+    haze: (dist, height) => haze(dist, height),
     project(x, dist, height) {
       v.set(worldX(x), height, worldZ(dist, runDist)).project(camera);
       if (v.z > 1) return null;

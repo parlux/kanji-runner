@@ -23,12 +23,12 @@ export const FIGURE_RADIUS = 0.12;
 export const CROWD_DEPTH = 1.8;
 /**
  * The shape horizon (track distance ahead of the army): solid objects are
- * drawn up to here, faint in the haze; their text only inside VIEW_DISTANCE.
+ * drawn up to here, faint in the haze, and so is their text.
  * Must stay below the closest a re-ask can replace a row (tested).
  */
 export const SHAPE_DISTANCE = 2 * VIEW_DISTANCE;
-/** Overlay text fades in from VIEW_DISTANCE to this share of it. */
-export const TEXT_FADE_END = 0.9;
+/** The distance haze colour (the fog's), as 0xrrggbb. */
+export const HAZE_COLOUR = 0xd4eeff;
 /** Tallest thing on the track (world units): the haze hides it whole at SHAPE_DISTANCE. */
 export const FOG_TOP_H = 3;
 
@@ -108,6 +108,16 @@ export function hazeAt(
 ): number {
   const t = (depth - range.near) / (range.far - range.near);
   return Math.min(1, Math.max(0, t));
+}
+
+/** Haze (0 none .. 1 total) at a track point `dist` ahead of the army (as in `Projector`), `height` up. */
+export type Haze = (dist: number, height: number) => number;
+
+/** The haze at track points for a camera `pose` with the army at `runDist`: what the fog gives the scene. */
+export function hazeFor(pose: CameraPose, runDist: number): Haze {
+  const range = fogRange(pose);
+  return (dist, height) =>
+    hazeAt(range, viewDepth(pose, height, worldZ(dist, runDist)));
 }
 
 /** A posed camera and its vertical field of view (degrees). */
@@ -253,15 +263,6 @@ export function squadDist(
   if (fight === null) return wallPos + SQUAD_BEYOND;
   const back = SQUAD_STEP_BACK * Math.min(1, fight / 0.15);
   return Math.max(wallPos, runDist) + SQUAD_BEYOND + back;
-}
-
-/**
- * Overlay text alpha for an object `ahead` track distance in front of the
- * army: 0 from VIEW_DISTANCE on (as in 2D), 1 from TEXT_FADE_END of it in.
- */
-export function textAlpha(ahead: number): number {
-  const t = (VIEW_DISTANCE - ahead) / ((1 - TEXT_FADE_END) * VIEW_DISTANCE);
-  return Math.min(1, Math.max(0, t));
 }
 
 /**

@@ -1,5 +1,10 @@
 import { PerspectiveCamera } from "three";
-import { fitCameraTo, type CameraAim, type CameraFit } from "./world";
+import {
+  fitCameraTo,
+  HAZE_COLOUR,
+  type CameraAim,
+  type CameraFit,
+} from "./world";
 
 /**
  * Camera and look constants for the 3D run. The camera is low and close
@@ -29,7 +34,7 @@ export const cameraFit = (aspect: number): CameraFit =>
 export const LOOK = {
   sky: 0x9fdcff,
   /** The distance haze: a paler sky, so the far track softens into the horizon. */
-  haze: 0xd4eeff,
+  haze: HAZE_COLOUR,
   ground: 0x7fcf6a,
   track: 0xf3ecf8,
   edge: 0xff7a59,
