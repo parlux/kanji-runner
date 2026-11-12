@@ -75,9 +75,9 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 **Description:** Crates (hit points and `+N` as overlay, damage, hit flash, burst on shatter, recruits running in), saws (toothed spinning disc on its rail), enemy packs (enemy figures facing the army, thinned as shot, kills popping off), fire tracers from the crowd to its target, and the clip-loss and answer-feedback pop-ups placed on the crowd.
 
 **Acceptance criteria:**
-- [ ] Browser check at 390×844 with `?3d`: a crate full, damaged, flashing and bursting; recruits running in; a saw mid-sweep; a pack before and under fire; a clip pop-up; right and wrong answer feedback. Screenshots in the scratchpad.
-- [ ] Every 2D run element has a 3D form (checked against `renderRun` in `render.ts`).
-- [ ] Frame time logged with a full crowd, a pack and a crate on screen.
+- [x] Browser check at 390×844 with `?3d`: a crate full, damaged, flashing and bursting; recruits running in; a saw mid-sweep; a pack before and under fire; a clip pop-up; right and wrong answer feedback. Screenshots in the scratchpad.
+- [x] Every 2D run element has a 3D form (checked against `renderRun` in `render.ts`).
+- [x] Frame time logged with a full crowd, a pack and a crate on screen.
 
 **Verification:** `npm test && npm run lint && npm run build`; browser check; deploy green.
 **Dependencies:** T2
