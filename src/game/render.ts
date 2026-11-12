@@ -44,6 +44,7 @@ import type { WkView } from "./wkstate";
 import {
   CROWD_DEPTH,
   DIST_SCALE,
+  FIGURE_TOP,
   FIREFIGHT_DIST,
   FIREFIGHT_REVEAL,
   firefightProgress,
@@ -167,12 +168,27 @@ function renderRunOverlay(
     run.dist - (half * CROWD_DEPTH * TRACK_W) / DIST_SCALE,
     0,
   );
-  if (centre && right && front) {
+  // the top of the crowd's far edge: the clip loss rises from there, clear of the figures
+  const back = project(
+    run.x,
+    run.dist + (half * CROWD_DEPTH * TRACK_W) / DIST_SCALE,
+    FIGURE_TOP,
+  );
+  if (centre && right && front && back) {
     const radius = Math.max(8, right.x - centre.x);
     // below the crowd's front, kept on screen when a big crowd reaches the bottom
     const countY = Math.min(front.y + 20, h - 16);
     outlinedText(ctx, String(run.army), centre.x, countY, 22);
-    renderArmyPopups(ctx, w, run, centre.x, centre.y, radius, outlinedText);
+    renderArmyPopups(
+      ctx,
+      w,
+      run,
+      centre.x,
+      centre.y,
+      radius,
+      outlinedText,
+      back.y - 16,
+    );
   }
   renderHud(ctx, w, run, outlinedText);
 }
@@ -920,19 +936,13 @@ function renderArmyPopups(
   armyY: number,
   radius: number,
   draw: Draw = text,
+  clipY = armyY - radius * 0.6 - 24,
 ): void {
   if (run.lastClip) {
     const t = (run.dist - run.lastClip.dist) / CLIP_POPUP_DIST;
     if (t < 1) {
       ctx.globalAlpha = 1 - t;
-      draw(
-        ctx,
-        `−${run.lastClip.loss}`,
-        cx,
-        armyY - radius * 0.6 - 24 - 30 * t,
-        26,
-        COLORS.bad,
-      );
+      draw(ctx, `−${run.lastClip.loss}`, cx, clipY - 30 * t, 26, COLORS.bad);
       ctx.globalAlpha = 1;
     }
   }
