@@ -167,8 +167,8 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 - [x] The camera, track, gates, hazards and crowd feel like a crowd runner; the crowd visibly grows and shrinks.
 - [x] Things appear in the distance and fade in; the camera is closer and less steep; 3D no longer feels faster than 2D (v1.4.1).
 - [x] Gate and crate text comes out of the haze with its object, never popping in (T3c).
-- [ ] A big army spreads across most of the road and squeezes through gates and past hazards; the army sits lower on the screen (T3d).
-- [ ] The crowd stays wide on open road, no pulsing; fire at gates goes straight ahead (T3e).
+- [x] A big army spreads across most of the road and squeezes through gates and past hazards; the army sits lower on the screen (T3d).
+- [x] The crowd stays wide on open road, no pulsing; fire at gates goes straight ahead (T3e).
 - [x] Camera numbers OK, or the owner says what to change (higher, lower, closer, wider).
   - Owner, 2026-11-13: OK for now; a flatter camera that follows the army comes after the boss (`docs/ideas/3d-camera-follow.md`).
 
