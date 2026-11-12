@@ -9,18 +9,19 @@ import {
 /**
  * Camera and look constants for the 3D run. The camera is low and close
  * behind the army, centred on the track (it does not follow steering), and
- * aimed so the track runs up the screen into the haze: the army in the lower
- * third, the far line near the top. Narrow screens move the camera farther
+ * aimed so the track runs up the screen into the haze: the army low on the
+ * screen (80% down), the far line near the top. Lowering the army (T3d) kept
+ * the T3b pitch by moving the camera up and back with a narrower view. Narrow screens move the camera farther
  * back along the same slope (narrower view), not steeper, so both edges and
  * every gate's outer openings stay in view.
  */
 
 /** How far behind the army the camera stands on wide screens (world units). */
-export const CAMERA_BACK = 8;
+export const CAMERA_BACK = 13.85;
 /** Lowest camera height (world units); wide screens use it. */
-export const CAMERA_MIN_HEIGHT = 6;
+export const CAMERA_MIN_HEIGHT = 11.1;
 /** Where the army and the far line (SHAPE_DISTANCE) sit, as shares of the screen height from the top. */
-export const AIM: CameraAim = { armyY: 0.71, farY: 0.1 };
+export const AIM: CameraAim = { armyY: 0.8, farY: 0.1 };
 /** Both track edges stay in view at the army with this much to spare. */
 export const EDGE_MARGIN = 1.06;
 /** Most device pixels per CSS pixel the 3D canvas draws. */

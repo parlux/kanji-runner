@@ -256,15 +256,14 @@ describe("camera fit", () => {
     (Math.atan2(p.height - p.lookHeight, p.back + p.lookAhead) * 180) / Math.PI;
 
   for (const [w, h] of sizes)
-    it(`at ${w}×${h} puts the army in the lower third, the far line near the top and both edges in view`, () => {
+    it(`at ${w}×${h} puts the army 80% down, the far line near the top and both edges in view`, () => {
       const aspect = w / h;
       const fit = cameraFit(aspect);
       const army = screenAt(fit, aspect, 0, 0, 0).y;
       const far = screenAt(fit, aspect, 0, 0, farZ).y;
       expect(army).toBeCloseTo(AIM.armyY, 6);
       expect(far).toBeCloseTo(AIM.farY, 6);
-      expect(army).toBeGreaterThanOrEqual(0.66);
-      expect(army).toBeLessThanOrEqual(0.76);
+      expect(army).toBeCloseTo(0.8, 6);
       expect(far).toBeGreaterThanOrEqual(0.05);
       expect(far).toBeLessThanOrEqual(0.15);
       // the read line sits between them
@@ -304,7 +303,12 @@ describe("camera fit", () => {
           }
   });
 
-  it("is flatter than before on a phone, and closer on a wide screen", () => {
+  it("keeps T3b's pitch with the army lower: 28.7° at 390×844, 25.7° at 1280×800", () => {
+    expect(pitchOf(cameraFit(390 / 844).pose)).toBeCloseTo(28.7, 1);
+    expect(pitchOf(cameraFit(1280 / 800).pose)).toBeCloseTo(25.7, 1);
+  });
+
+  it("is flatter than T1b's camera on a phone and on a wide screen", () => {
     // T1b's camera pitched 40.7° down at 390×844 and 29.7° at 1280×800
     expect(pitchOf(cameraFit(390 / 844).pose)).toBeLessThan(40.7 - 8);
     expect(pitchOf(cameraFit(1280 / 800).pose)).toBeLessThan(29.7);
