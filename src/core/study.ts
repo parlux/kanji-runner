@@ -1,5 +1,5 @@
 import type { Missed } from "./run";
-import type { GateRow, KanaItem, KanjiItem } from "./types";
+import type { GateRow, KanaItem, KanjiItem, WordItem } from "./types";
 
 /** WaniKani's mnemonics (raw text). */
 export type Mnemonics = { meaning?: string; reading?: string };
@@ -42,7 +42,59 @@ export type StudyCard =
       romaji: string;
       script: KanaItem["script"];
       missed: true;
+    }
+  | {
+      kind: "word";
+      /** The katakana word. */
+      char: string;
+      /** English glosses, first is the one shown on gates. */
+      meanings: string[];
+      /** Each character with its romaji or note, in order. */
+      breakdown: WordPart[];
+      missed: boolean;
     };
+
+/** One character of a word with how to read it, e.g. ヒ "hi", ー "(long)", ャ "ya (small)". */
+export type WordPart = { char: string; note: string };
+
+const SMALL: Record<string, string> = {
+  ァ: "ア",
+  ィ: "イ",
+  ゥ: "ウ",
+  ェ: "エ",
+  ォ: "オ",
+  ャ: "ヤ",
+  ュ: "ユ",
+  ョ: "ヨ",
+};
+
+/** Per-character reading of a word: romaji from `kana`, ー "(long)", ッ "(double next)", small kana "ya (small)". */
+export function wordBreakdown(
+  word: string,
+  kana: readonly KanaItem[],
+): WordPart[] {
+  const romaji = (c: string) => kana.find((k) => k.char === c)?.romaji ?? "?";
+  return [...word].map((char) => {
+    if (char === "ー") return { char, note: "(long)" };
+    if (char === "ッ") return { char, note: "(double next)" };
+    const full = SMALL[char];
+    return { char, note: full ? `${romaji(full)} (small)` : romaji(char) };
+  });
+}
+
+function wordCard(
+  w: WordItem,
+  missed: boolean,
+  kana: readonly KanaItem[],
+): StudyCard {
+  return {
+    kind: "word",
+    char: w.word,
+    meanings: w.glosses,
+    breakdown: wordBreakdown(w.word, kana),
+    missed,
+  };
+}
 
 function kanjiCard(
   k: KanjiItem,
@@ -85,11 +137,12 @@ export function studyCards(
   kana: readonly KanaItem[],
   stories?: ReadonlyMap<string, Story>,
   seen: readonly string[] = [],
+  words: readonly WordItem[] = [],
 ): StudyCard[] {
   const done = new Set<string>();
   const out: StudyCard[] = [];
   for (const m of missed) {
-    const key = `${m.type === "kana" ? "kana" : "kanji"}:${m.prompt}`;
+    const key = `${m.type === "kana" || m.type === "word" ? m.type : "kanji"}:${m.prompt}`;
     if (done.has(key)) continue;
     done.add(key);
     if (m.type === "kana") {
@@ -102,6 +155,9 @@ export function studyCards(
           script: k.script,
           missed: true,
         });
+    } else if (m.type === "word") {
+      const w = words.find((x) => x.word === m.prompt);
+      if (w) out.push(wordCard(w, true, kana));
     } else {
       const k = kanji.find((x) => x.char === m.prompt);
       if (k) out.push(kanjiCard(k, true, stories));
@@ -117,7 +173,7 @@ export function studyCards(
   return out;
 }
 
-/** The kanji asked on the run's answered gates, in order of first sight. */
+/** The kanji asked on the run's answered gates (not kana or words), in order of first sight. */
 export function runKanji(
   rows: readonly GateRow[],
   results: readonly boolean[],
@@ -125,7 +181,7 @@ export function runKanji(
   const out = new Set<string>();
   results.forEach((_, i) => {
     const row = rows[i];
-    if (row && row.type !== "kana") out.add(row.prompt);
+    if (row && row.type !== "kana" && row.type !== "word") out.add(row.prompt);
   });
   return [...out];
 }
@@ -182,6 +238,7 @@ export function lastAnswer(
   kanji: readonly KanjiItem[],
   kana: readonly KanaItem[],
   stories?: ReadonlyMap<string, Story>,
+  words: readonly WordItem[] = [],
 ): LastAnswer | null {
   const i = results.length - 1;
   const row = rows[i];
@@ -198,6 +255,9 @@ export function lastAnswer(
         script: k.script,
         missed: true,
       };
+  } else if (row.type === "word") {
+    const w = words.find((x) => x.word === row.prompt);
+    if (w) card = wordCard(w, !correct, kana);
   } else {
     const k = kanji.find((x) => x.char === row.prompt);
     if (k) card = kanjiCard(k, !correct, stories);

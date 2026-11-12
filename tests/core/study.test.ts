@@ -9,8 +9,14 @@ import {
   runKanji,
   storiesWithFallback,
   studyCards,
+  wordBreakdown,
 } from "../../src/core/study";
-import type { GateRow, KanjiItem, Progress } from "../../src/core/types";
+import type {
+  GateRow,
+  KanjiItem,
+  Progress,
+  WordItem,
+} from "../../src/core/types";
 
 const progress: Progress = { ...defaultProgress(), unlockedLevel: 3 };
 const rows = [
@@ -28,7 +34,8 @@ describe("studyCards", () => {
     for (const c of cards) {
       const ms = missed.filter((m) => m.prompt === c.char);
       for (const m of ms) {
-        if (c.kind === "kana") expect([c.romaji]).toEqual(m.answers);
+        if (c.kind === "word") throw new Error("no words here");
+        else if (c.kind === "kana") expect([c.romaji]).toEqual(m.answers);
         else if (m.type === "meaning")
           expect([c.meanings[0]]).toEqual(m.answers);
         else
@@ -245,5 +252,77 @@ describe("lastAnswer", () => {
     expect(right?.card?.kind === "kanji" && right.card.mnemonics).toEqual({
       meaning: "m",
     });
+  });
+});
+
+describe("word cards", () => {
+  const words: WordItem[] = [
+    { word: "コーヒー", glosses: ["coffee"], level: 2 },
+    { word: "ジャズ", glosses: ["jazz"], level: 2 },
+    { word: "ホッチキス", glosses: ["stapler"], level: 2 },
+  ];
+  const wrows: GateRow[] = words.map((w) => ({
+    type: "word",
+    prompt: w.word,
+    options: [w.glosses[0] ?? "", "x"],
+    answer: w.glosses[0] ?? "",
+    answerIndex: 0,
+  }));
+
+  it("breaks a word into romaji per character, with ー and small kana", () => {
+    const [c] = studyCards(
+      missedItems(wrows, [false], [], KANJI),
+      KANJI,
+      KANA,
+      undefined,
+      [],
+      words,
+    );
+    expect(c).toEqual({
+      kind: "word",
+      char: "コーヒー",
+      meanings: ["coffee"],
+      breakdown: [
+        { char: "コ", note: "ko" },
+        { char: "ー", note: "(long)" },
+        { char: "ヒ", note: "hi" },
+        { char: "ー", note: "(long)" },
+      ],
+      missed: true,
+    });
+    expect(wordBreakdown("ジャ", KANA)).toEqual([
+      { char: "ジ", note: "ji" },
+      { char: "ャ", note: "ya (small)" },
+    ]);
+    expect(wordBreakdown("ホッチ", KANA)[1]).toEqual({
+      char: "ッ",
+      note: "(double next)",
+    });
+  });
+
+  it("skips unknown words, dedupes, and keeps words out of runKanji", () => {
+    expect(
+      studyCards(missedItems(wrows, [false], [], KANJI), KANJI, KANA),
+    ).toEqual([]);
+    expect(runKanji(wrows, [true, true, true])).toEqual([]);
+  });
+
+  it("gives the pause card a word card, missed when wrong", () => {
+    const a = lastAnswer(
+      wrows,
+      [true, false],
+      1,
+      KANJI,
+      KANA,
+      undefined,
+      words,
+    );
+    expect(a?.card).toMatchObject({
+      kind: "word",
+      char: "ジャズ",
+      missed: true,
+    });
+    const b = lastAnswer(wrows, [true], 0, KANJI, KANA, undefined, words);
+    expect(b?.card).toMatchObject({ kind: "word", missed: false });
   });
 });

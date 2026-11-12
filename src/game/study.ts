@@ -13,6 +13,13 @@ const CSS = `
   border: 1px solid #5a6478; }
 .kr-study .big { flex: none; width: 76px; font-size: 56px; line-height: 1.1;
   text-align: center; }
+.kr-study .card.word { flex-direction: column; gap: 8px; }
+.kr-study .card.word .big { width: auto; font-size: 40px; text-align: left; }
+.kr-study .crumbs { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
+.kr-study .crumb { display: flex; flex-direction: column; align-items: center;
+  min-width: 44px; padding: 2px 6px; background: #111; border: 1px solid #5a6478; }
+.kr-study .crumb .ch { font-size: 22px; line-height: 1.2; }
+.kr-study .crumb .rm { font-size: 12px; color: #5fd38d; white-space: nowrap; }
 .kr-study .info { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 6px;
   overflow-wrap: anywhere; }
 .kr-study .meaning { font-size: 18px; font-weight: 600; }
@@ -98,6 +105,15 @@ export function cardEl(c: StudyCard): HTMLElement {
   if (c.missed) info.append(el("span", "tag", "missed"));
   if (c.kind === "kana") {
     info.append(el("div", "meaning", c.romaji), el("div", "row", c.script));
+  } else if (c.kind === "word") {
+    info.append(el("div", "meaning", c.meanings.join(", ")));
+    const crumbs = el("div", "crumbs");
+    crumbs.append(
+      ...c.breakdown.map((p) =>
+        el("span", "crumb", el("span", "ch", p.char), el("span", "rm", p.note)),
+      ),
+    );
+    info.append(crumbs);
   } else {
     info.append(el("div", "meaning", c.meanings.join(", ")));
     if (c.on) info.append(line("on", c.on));
@@ -110,7 +126,12 @@ export function cardEl(c: StudyCard): HTMLElement {
       info.append(el("div", "row", "parts"), parts);
     }
   }
-  const card = el("div", "card", el("div", "big", c.char), info);
+  const card = el(
+    "div",
+    c.kind === "word" ? "card word" : "card",
+    el("div", "big", c.char),
+    info,
+  );
   if (c.kind === "kanji" && c.mnemonics) {
     const notes = [
       ["Meaning mnemonic", c.mnemonics.meaning],

@@ -30,6 +30,7 @@ import { syncPauseCard } from "./game/pausecard";
 import { KANA } from "./core/kana";
 import { KANJI } from "./core/kanji";
 import { missedItems } from "./core/run";
+import { WORDS } from "./core/words";
 import {
   canStudy,
   lastAnswer,
@@ -144,6 +145,7 @@ const pauseCard = (): void => {
     kanjiList(),
     KANA,
     storiesWithFallback(wk.stories(), session.wk ? wk.mnemonics() : undefined),
+    WORDS,
   );
   syncPauseCard(last, `${scene.seed}:${run.results.length}`, () =>
     act("pause"),
@@ -166,6 +168,7 @@ const study = (): void => {
     KANA,
     storiesWithFallback(wk.stories(), session.wk ? wk.mnemonics() : undefined),
     runKanji(run.rows, run.results),
+    WORDS,
   );
   openStudy(cards, () => {
     act("confirm");
