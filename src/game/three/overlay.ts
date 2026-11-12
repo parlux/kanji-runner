@@ -11,8 +11,10 @@ import {
 } from "../../core/sim";
 import {
   drawLabel,
+  fitSize,
   mixHex,
   outlinedText,
+  PROMPT_MARGIN,
   TEXT_COLORS,
   type Tint,
 } from "../labels";
@@ -246,5 +248,12 @@ function renderWall(
   const size = PROMPT_K * px;
   if (!top) return;
   const y = Math.min(top.y, squadTop - 0.15 * size) - size / 2;
-  outlinedText(ctx, row.prompt, top.x, y, size, undefined, tint);
+  // a long word shrinks to the wall's projected width; a single character is never touched
+  const lft = project(0, pos, WALL_H);
+  const rgt = project(1, pos, WALL_H);
+  const fitted =
+    lft && rgt && rgt.x > lft.x
+      ? fitSize(ctx, row.prompt, size, rgt.x - lft.x - PROMPT_MARGIN)
+      : size;
+  outlinedText(ctx, row.prompt, top.x, y, fitted, undefined, tint);
 }

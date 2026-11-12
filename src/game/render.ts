@@ -62,6 +62,7 @@ import {
   FONT,
   LABEL_MIN_PX,
   outlinedText,
+  PROMPT_MARGIN,
   PROMPT_MIN_PX,
   text,
   TEXT_COLORS,
@@ -586,6 +587,9 @@ function renderSessionPanel(
   }
 }
 
+/** Widest a missed item's prompt is drawn on the end screen (px); only words reach it. */
+const MISSED_PROMPT_MAX_W = 132;
+
 function renderEnd(
   ctx: Ctx,
   w: number,
@@ -659,8 +663,6 @@ function renderEnd(
     const rowH = Math.min(52, (bottom - top - 16) / misses.length);
     const size = Math.min(28, rowH * 0.7);
     const small = Math.max(12, Math.min(16, rowH * 0.4));
-    const answerX = 96;
-    const answerW = w - answerX - 64;
     misses.forEach((m, i) => {
       const y = top + 16 + rowH * (i + 0.5);
       ctx.textAlign = "left";
@@ -668,8 +670,14 @@ function renderEnd(
       ctx.font = `${Math.round(small)}px ${FONT}`;
       ctx.fillText(String(m.q), 16, y);
       ctx.fillStyle = COLORS.text;
-      ctx.font = `${Math.round(size)}px ${FONT}`;
+      // a long word shrinks to MISSED_PROMPT_MAX_W and pushes its answer right
+      const promptPx = Math.round(
+        fitSize(ctx, m.prompt, size, MISSED_PROMPT_MAX_W),
+      );
+      ctx.font = `${promptPx}px ${FONT}`;
       ctx.fillText(m.prompt, 44, y);
+      const answerX = Math.max(96, 44 + ctx.measureText(m.prompt).width + 12);
+      const answerW = w - answerX - 64;
       const answer = m.answers.join(" · ");
       ctx.fillStyle = COLORS.good;
       ctx.font = `${Math.round(fitSize(ctx, answer, size * 0.85, answerW))}px ${FONT}`;
@@ -942,7 +950,9 @@ function renderRun(ctx: Ctx, w: number, h: number, run: RunState): void {
     // never too small to read at first sight; it grows upwards, clear of the labels and squads
     const promptSize = Math.max(PROMPT_MIN_PX, 44 * scale);
     const promptY = y - wallH - squadsH - 8 * scale - promptSize / 2;
-    text(ctx, row.prompt, w / 2, promptY, promptSize);
+    // a long word shrinks to fit the screen; a single character is never touched
+    const fitted = fitSize(ctx, row.prompt, promptSize, w - PROMPT_MARGIN);
+    text(ctx, row.prompt, w / 2, promptY, fitted);
   }
 
   if (fight) renderFirefight(ctx, w, run, fight, armyY, radius);

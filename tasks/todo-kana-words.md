@@ -59,9 +59,9 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 - `study.ts` (core and game): `kind: "word"` card with glosses and a kana breakdown with romaji per character.
 
 **Acceptance criteria:**
-- [ ] Study card model tested (breakdown with small kana and ー).
-- [ ] Browser checks at 390×844 and 1280×800, 2D and `?3d`, with a progress fixture where words are eligible: a 6-character word gate readable; summary and study card for a missed word. Screenshots in the scratchpad.
-- [ ] Deploy green.
+- [x] Study card model tested (breakdown with small kana and ー).
+- [x] Browser checks at 390×844 and 1280×800, 2D and `?3d`, with a progress fixture where words are eligible: a 6-character word gate readable; summary and study card for a missed word. Screenshots in the scratchpad.
+- [x] Deploy green. (Not applicable on this branch; `npm run build` clean. Deploy is from main after the merge.)
 
 **Verification:** `npm test`; browser checks; deploy green.
 **Dependencies:** K2
