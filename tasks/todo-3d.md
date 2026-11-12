@@ -30,9 +30,10 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 - `render.ts`: a transparent overlay mode during `run`/`boss` with `?3d`, drawing only the HUD, the army count and pop-ups for now. Walls, hazards and the boss are not drawn yet in 3D (the run is playable but blind; that's fine behind the flag).
 
 **Acceptance criteria:**
-- [ ] Without `?3d` the game is unchanged (golden run and every existing test pass unchanged; browser check of a run).
-- [ ] `world.ts` tested: mapping round trip, layout count and footprint within `crowdWidth`, layout stable for the same size, fog end = `VIEW_DISTANCE`.
-- [ ] Browser check at 390×844 and 1280×800 with `?3d`: crowds of 5, 40 and 200; both track edges visible at the army; screenshots in the scratchpad. Frame time logged for the 200 crowd. Build size before and after noted.
+- [x] Without `?3d` the game is unchanged (golden run and every existing test pass unchanged; browser check of a run).
+- [x] `world.ts` tested: mapping round trip, layout count and footprint within `crowdWidth`, layout stable for the same size, fog end = `VIEW_DISTANCE`.
+- [x] Browser check at 390×844 and 1280×800 with `?3d`: crowds of 5, 40 and 200; both track edges visible at the army; screenshots in the scratchpad. Frame time logged for the 200 crowd. Build size before and after noted.
+  - Build: main chunk 615.9 → 617.4 kB (gzip 160.8 → 161.4); Three.js loads only with `?3d`, as its own chunk (529 kB, gzip 134). Frame time with a 200 crowd (headless, 390×844): 0.37 ms CPU per frame, 60 fps.
 
 **Verification:** `npm test && npm run lint && npm run build`; browser check; deploy green.
 **Dependencies:** none
