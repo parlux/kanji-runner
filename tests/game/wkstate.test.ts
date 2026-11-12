@@ -271,5 +271,13 @@ describe("wk state", () => {
       expect(t.state.view().mode).toBe("builtin");
       expect(t.state.stories()).toBeDefined();
     });
+
+    it("saving a token leaves the run list unset, so a seed plays the same Built-in run", async () => {
+      const t = setup(OK, false);
+      expect(t.state.list()).toBeNull();
+      await t.state.save(TOKEN);
+      // main.ts runs on session.wk = wk.list(): null means the Built-in kanji
+      expect(t.state.list()).toBeNull();
+    });
   });
 });

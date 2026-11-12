@@ -1,5 +1,5 @@
 import { mnemonicNodes } from "../core/mnemonic";
-import type { StudyCard } from "../core/study";
+import type { StoryRadical, StudyCard } from "../core/study";
 
 const CSS = `
 .kr-study { position: fixed; inset: 0; display: flex; flex-direction: column;
@@ -23,6 +23,12 @@ const CSS = `
 .kr-study .parts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
 .kr-study .part { padding: 2px 8px; font-size: 20px; background: #111;
   border: 1px solid #5a6478; }
+.kr-study .radicals { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
+.kr-study .rad { display: inline-flex; align-items: center; gap: 6px; padding: 2px 8px;
+  background: #111; border: 1px solid #5a6478; color: #6cc4ff; font-weight: 600; }
+.kr-study .rad .glyph { font-size: 20px; }
+.kr-study .rad img { height: 1.2em; width: 1.2em; filter: invert(0.8) sepia(1) saturate(6) hue-rotate(172deg); }
+.kr-study .rad .rname { font-size: 14px; }
 .kr-study .mn { font-size: 14px; line-height: 1.45; color: #cfd5e2; }
 .kr-study .mn h3 { margin: 0 0 2px; font-size: 12px; font-weight: 600;
   color: #9aa3b5; text-transform: uppercase; letter-spacing: 0.04em; }
@@ -60,6 +66,24 @@ function line(label: string, value: string): HTMLElement {
   return el("div", "row", `${label} `, el("b", "", value));
 }
 
+function radicalChip(r: StoryRadical): HTMLElement {
+  const chip = el("span", "rad");
+  if (r.char) chip.append(el("span", "glyph", r.char));
+  else if (r.image) {
+    const img = document.createElement("img");
+    img.alt = r.name;
+    img.src = r.image;
+    img.onerror = () => img.remove(); // the name below still shows
+    chip.append(img);
+  }
+  chip.append(el("span", "rname", r.name));
+  return chip;
+}
+
+function radicalsEl(rs: readonly StoryRadical[]): HTMLElement {
+  return el("div", "radicals", ...rs.map(radicalChip));
+}
+
 function cardEl(c: StudyCard): HTMLElement {
   const info = el("div", "info");
   if (c.missed) info.append(el("span", "tag", "missed"));
@@ -69,7 +93,9 @@ function cardEl(c: StudyCard): HTMLElement {
     info.append(el("div", "meaning", c.meanings.join(", ")));
     if (c.on) info.append(line("on", c.on));
     if (c.kun) info.append(line("kun", c.kun));
-    if (c.components.length > 0) {
+    if (c.radicals?.length) {
+      info.append(el("div", "row", "radicals"), radicalsEl(c.radicals));
+    } else if (c.components.length > 0) {
       const parts = el("div", "parts");
       parts.append(...c.components.map((p) => el("span", "part", p)));
       info.append(el("div", "row", "parts"), parts);
