@@ -22,3 +22,9 @@ Status: confirmed by the owner, 2026-11-12, after an interview at Checkpoint H1.
 - **Why:** gates travelled a long way as blank slabs, then their text snapped on; it felt wrong.
 - **Rule relaxed:** "kanji readable at the same distance as in 2D" is dropped. 3D may be easier than 2D: 2D will be deprecated, and speed is adjustable.
 - **Out of scope:** `SHAPE_DISTANCE`, haze curve, camera, gameplay numbers, 2D, passed-label fade-out.
+
+## Amendment 2, 2026-11-13 (owner, at Checkpoint H1)
+- **Crowd spread:** on open road a big army spreads wider than its gameplay width: ~0.10 of the road for a handful, ~0.35 at 40, ~0.55 at 150–200, centred. Look-only.
+- **Squeeze:** near anything that can clip it (gate, saw, crate, pack), the crowd pulls in to its true collision width (≤ 0.3), then spreads out again. The look never lies about what the army hits.
+- **Army lower:** about 80% down the screen, camera pitch unchanged (closer/lower/FOV only). If the both-edges rule stops it short, as low as it allows is fine.
+- **Out of scope:** `src/core` and balance, 2D, haze, the boss, text.

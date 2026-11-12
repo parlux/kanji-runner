@@ -124,10 +124,30 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 **Files:** `src/game/three/{overlay,world}.ts`, `src/game/labels.ts`, `tests/game/world.test.ts`, `docs/specs/SPEC-3d-depth.md`
 **Scope:** S
 
-### Checkpoint H1: the look (owner, on the phone, with `?3d`; moved after T3: hazards must be visible for a playable run; T3b and T3c from owner feedback)
+### Task T3d: Wider crowd that squeezes, army lower (owner feedback at H1, 2026-11-13)
+**Owner:** "The army sits a bit too far up the screen. If that's a limitation fine." / "The army only grows in size within a 'lane' rather than spreading across the road when big … mostly centered but taking up closer to 2/3s of the entire road." Intent: `docs/intent/3d-depth.md` (amendment 2). Look-only: the sim's `crowdWidth` (≤ 0.3) stays the collision width.
+
+**Description:**
+- **Spread:** on open road the drawn crowd is wider than `crowdWidth`: a pure `spreadWidth(army)` in `world.ts`, same √ shape, about 0.10 of the track for a handful, ~0.35 at 40, ~0.55 at 150–200 (`MAX_DRAWN_SOLDIERS`), centred on `run.x`, kept on the track (figures never past the edges).
+- **Squeeze:** as anything that can clip the army comes near (a wall row, saw, crate, pack, squad charge), the drawn width eases smoothly to `crowdWidth(army)` so that at contact the crowd seen is exactly the crowd the sim clips; it eases back out once clear. Pure and tested (e.g. `drawnWidth(army, nearestObstacleAhead/behind)`), no popping: width is continuous in distance.
+- **Army lower:** army centre at about 80% of the screen height (`AIM.armyY`), **without changing the camera pitch** at 390×844 or 1280×800 (move the camera closer/lower or change FOV only). The hard rule stays: at 390×844 both track edges and a 3-answer wall's outer openings with labels stay on screen. If the rule stops it short of 80%, go as low as it allows and report the number.
+- Unchanged: `src/core`, `crowdWidth`, clipping, balance, golden run, haze, `SHAPE_DISTANCE`, text (T3c), 2D.
+
+**Acceptance criteria:**
+- [ ] Tested: `spreadWidth` at 5, 40, 200; drawn width equals `crowdWidth` at contact with each obstacle kind and is continuous as an obstacle approaches and passes; layout footprint within the drawn width and on the track.
+- [ ] Tested: pitch at 390×844 and 1280×800 unchanged from T3b (28.7°, 25.7°); army centre ≈ 80% (or the lowest the hard rule allows, reported); hard rule still holds.
+- [ ] Browser check at 390×844 with `?3d`: crowds of 5, 40 and 200 on open road; a 200 crowd squeezing through a gate (filmstrip) and past a saw and a crate; the army's screen position before and after. Screenshots in the scratchpad.
+
+**Verification:** `npm test && npm run lint && npm run build`; browser check; deploy green.
+**Dependencies:** T3c
+**Files:** `src/game/three/{world,view,squads,scene3d}.ts` (crowd code), `tests/game/world.test.ts`
+**Scope:** M
+
+### Checkpoint H1: the look (owner, on the phone, with `?3d`; moved after T3: hazards must be visible for a playable run; T3b, T3c and T3d from owner feedback)
 - [ ] The camera, track, gates, hazards and crowd feel like a crowd runner; the crowd visibly grows and shrinks.
 - [ ] Things appear in the distance and fade in; the camera is closer and less steep; 3D no longer feels faster than 2D (v1.4.1).
 - [ ] Gate and crate text comes out of the haze with its object, never popping in (T3c).
+- [ ] A big army spreads across most of the road and squeezes through gates and past hazards; the army sits lower on the screen (T3d).
 - [ ] Camera numbers OK, or the owner says what to change (higher, lower, closer, wider).
 
 ### Task T4: The boss at the end of the track
