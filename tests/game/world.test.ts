@@ -1,12 +1,21 @@
 import { describe, expect, it } from "vitest";
 import { crowdWidth } from "../../src/core/crowd";
-import { SAW_W, CROWD_MAX_W, VIEW_DISTANCE } from "../../src/core/tuning";
+import {
+  CALM_DISTANCE,
+  CROWD_MAX_W,
+  HAZARD_SPACING,
+  REASK_GAP_MIN,
+  SAW_W,
+  VIEW_DISTANCE,
+} from "../../src/core/tuning";
 import {
   CROWD_DEPTH,
   crowdLayout,
   FIGURE_RADIUS,
   FOG_TOP_H,
   fogRange,
+  hazeAt,
+  SHAPE_DISTANCE,
   MAX_DRAWN_SOLDIERS,
   TRACK_W,
   trackDist,
@@ -15,13 +24,14 @@ import {
   worldX,
   worldZ,
   screenAt,
-  fogAlpha,
+  textAlpha,
   projectorFor,
   squadDist,
   squadPlace,
   FIREFIGHT_DIST,
   SQUAD_BEYOND,
   wallPx,
+  WALL_H,
   spanWorld,
   sawPlace,
   burstPiece,
@@ -83,18 +93,38 @@ describe("crowd layout", () => {
   });
 });
 
-describe("fog and camera", () => {
-  it("is total by VIEW_DISTANCE for anything up to FOG_TOP_H tall", () => {
-    const { near, far } = fogRange(pose);
-    expect(near).toBeLessThan(far);
-    const z = worldZ(VIEW_DISTANCE, 0);
-    expect(Math.min(viewDepth(pose, 0, z), viewDepth(pose, FOG_TOP_H, z))).toBe(
-      far,
+describe("haze and horizons", () => {
+  const poses = [pose, cameraFit(390 / 844).pose, cameraFit(1280 / 800).pose];
+  const haze = (p: CameraPose, ahead: number, y: number): number =>
+    hazeAt(fogRange(p), viewDepth(p, y, worldZ(ahead, 0)));
+
+  it("is near-total at SHAPE_DISTANCE and near-none at VIEW_DISTANCE", () => {
+    for (const p of poses)
+      for (const y of [0, WALL_H, FOG_TOP_H]) {
+        expect(haze(p, SHAPE_DISTANCE, y)).toBeGreaterThan(0.97);
+        expect(haze(p, VIEW_DISTANCE, y)).toBeLessThan(0.05);
+        // shapes are already gone as they cross the shape horizon: no pop-in
+        expect(haze(p, SHAPE_DISTANCE + 0.01, y)).toBe(1);
+      }
+  });
+
+  it("thins steadily as a shape comes closer, with no jump", () => {
+    for (const p of poses) {
+      let last = 1;
+      for (let a = SHAPE_DISTANCE; a >= VIEW_DISTANCE; a -= 0.05) {
+        const h = haze(p, a, WALL_H / 2);
+        expect(h).toBeLessThanOrEqual(last);
+        expect(last - h).toBeLessThan(0.03);
+        last = h;
+      }
+    }
+  });
+
+  it("keeps SHAPE_DISTANCE below the closest a re-ask can replace a row", () => {
+    expect(SHAPE_DISTANCE).toBeGreaterThan(VIEW_DISTANCE);
+    expect(SHAPE_DISTANCE).toBeLessThan(
+      REASK_GAP_MIN * (CALM_DISTANCE + 2 * HAZARD_SPACING),
     );
-    // just beyond it, nothing on the track is in front of the fog's end
-    const beyond = worldZ(VIEW_DISTANCE + 0.01, 0);
-    for (const y of [0, FOG_TOP_H / 2, FOG_TOP_H])
-      expect(viewDepth(pose, y, beyond)).toBeGreaterThan(far);
   });
 });
 
@@ -129,11 +159,6 @@ describe("camera fit", () => {
       const near = screenAt(fit, aspect, worldX(1), 0, 0).x - 0.5;
       const far = screenAt(fit, aspect, worldX(1), 0, fogZ).x - 0.5;
       expect(far).toBeLessThan(near * 0.7);
-      // the fog stays total by VIEW_DISTANCE with this pose
-      const { far: fogEnd } = fogRange(fit.pose);
-      expect(
-        viewDepth(fit.pose, 0, worldZ(VIEW_DISTANCE + 0.01, 0)),
-      ).toBeGreaterThan(fogEnd);
     });
 
   it("raises the camera only when the screen is too narrow", () => {
@@ -168,12 +193,15 @@ describe("walls and their text", () => {
     expect(project(0.5, 2 - 10, 0)).toBeNull();
   });
 
-  it("fades overlay text with the fog: full near, gone at VIEW_DISTANCE", () => {
-    expect(fogAlpha(0)).toBe(1);
-    expect(fogAlpha(0.7 * VIEW_DISTANCE)).toBeCloseTo(1, 9);
-    expect(fogAlpha(0.85 * VIEW_DISTANCE)).toBeCloseTo(0.5, 9);
-    expect(fogAlpha(VIEW_DISTANCE)).toBe(0);
-    expect(fogAlpha(VIEW_DISTANCE + 1)).toBe(0);
+  it("fades overlay text in just inside VIEW_DISTANCE, never beyond it", () => {
+    expect(textAlpha(0)).toBe(1);
+    expect(textAlpha(-1)).toBe(1);
+    expect(textAlpha(0.9 * VIEW_DISTANCE)).toBeCloseTo(1, 9);
+    expect(textAlpha(0.89 * VIEW_DISTANCE)).toBe(1);
+    expect(textAlpha(0.95 * VIEW_DISTANCE)).toBeCloseTo(0.5, 9);
+    expect(textAlpha(VIEW_DISTANCE)).toBe(0);
+    expect(textAlpha(VIEW_DISTANCE + 1)).toBe(0);
+    expect(textAlpha(SHAPE_DISTANCE)).toBe(0);
   });
 
   it("stands squads beyond the wall, and the fighting one ahead of the army", () => {

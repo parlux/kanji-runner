@@ -1,9 +1,15 @@
 import { Euler, Matrix4, Quaternion, Vector3, type Scene } from "three";
 import { rowOpenings, viewOf, type RunState } from "../../core/sim";
-import { VIEW_DISTANCE } from "../../core/tuning";
 import { makeCrowdMesh } from "./figures";
 import { FX_COLOURS, type Fx } from "./fx";
-import { crowdLayout, squadPlace, WALL_BEHIND, worldX, worldZ } from "./world";
+import {
+  crowdLayout,
+  SHAPE_DISTANCE,
+  squadPlace,
+  WALL_BEHIND,
+  worldX,
+  worldZ,
+} from "./world";
 
 /**
  * Squad charges and fire in 3D: enemy figures standing beyond each opening
@@ -49,15 +55,15 @@ export function createSquads(scene: Scene, fx: Fx) {
       let near = false;
       for (const i of run.track.charges) {
         const ahead = (run.track.questions[i] ?? Infinity) - run.dist;
-        if (ahead >= -WALL_BEHIND - 2 && ahead <= VIEW_DISTANCE) near = true;
+        if (ahead >= -WALL_BEHIND - 2 && ahead <= SHAPE_DISTANCE) near = true;
       }
       for (const c of near ? viewOf(run).charges : []) {
         const ahead = c.pos - run.dist;
         if (ahead < -WALL_BEHIND - 2) continue;
-        if (ahead > VIEW_DISTANCE) break;
+        if (ahead > SHAPE_DISTANCE) break;
         for (const s of c.squads) {
           const p = squadPlace(run.dist, run.x, c, s);
-          if (!p || p.dist - run.dist > VIEW_DISTANCE) continue;
+          if (!p || p.dist - run.dist > SHAPE_DISTANCE) continue;
           const cx = worldX(p.x);
           const cz = worldZ(p.dist, run.dist);
           const n = crowdLayout(s.count, layout);

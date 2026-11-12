@@ -25,6 +25,7 @@ import {
   ROWS_PER_RUN,
   VIEW_DISTANCE,
 } from "../../src/core/tuning";
+import { SHAPE_DISTANCE } from "../../src/game/three/world";
 import { botRun } from "./bot";
 import { kanaRun } from "./kana-run";
 import { wkPool, wkProgress, wkRun } from "./wk-run";
@@ -34,7 +35,8 @@ const SEEDS = Array.from({ length: 100 }, (_, seed) => seed);
 
 /**
  * Drives a run to the end through the chosen opening of every wall, with an
- * army too big to die, checking each new re-ask is placed out of sight.
+ * army too big to die, checking each new re-ask is placed out of sight
+ * (beyond VIEW_DISTANCE, and beyond the 3D run's shape horizon).
  */
 function drive(s0: RunState, wrong: (q: number) => boolean): RunState {
   let s: RunState = { ...s0, army: 100_000 };
@@ -50,6 +52,7 @@ function drive(s0: RunState, wrong: (q: number) => boolean): RunState {
     if (link) {
       const wall = s.track.questions[link.row] ?? 0;
       expect(wall - s.dist).toBeGreaterThan(VIEW_DISTANCE);
+      expect(wall - s.dist).toBeGreaterThan(SHAPE_DISTANCE);
     }
   }
   return s;

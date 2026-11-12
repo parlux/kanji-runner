@@ -26,6 +26,8 @@ export const cameraFit = (aspect: number): CameraFit =>
 /** Bright daylight colours (original; genre-inspired only). */
 export const LOOK = {
   sky: 0x9fdcff,
+  /** The distance haze: a paler sky, so the far track softens into the horizon. */
+  haze: 0xd4eeff,
   ground: 0x7fcf6a,
   track: 0xf3ecf8,
   edge: 0xff7a59,

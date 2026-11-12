@@ -9,8 +9,15 @@ import {
   type Scene,
 } from "three";
 import { rowOpenings, wallSolids, type RunState } from "../../core/sim";
-import { VIEW_DISTANCE } from "../../core/tuning";
-import { TRACK_W, WALL_BEHIND, WALL_H, WALL_T, worldX, worldZ } from "./world";
+import {
+  SHAPE_DISTANCE,
+  TRACK_W,
+  WALL_BEHIND,
+  WALL_H,
+  WALL_T,
+  worldX,
+  worldZ,
+} from "./world";
 
 /**
  * The run's walls in 3D: solid pieces between the openings, a translucent
@@ -19,7 +26,7 @@ import { TRACK_W, WALL_BEHIND, WALL_H, WALL_T, worldX, worldZ } from "./world";
  * now, so they widen as the sim grows them.
  */
 
-/** Most walls drawn at once (rows from just behind the camera to VIEW_DISTANCE). */
+/** Most walls drawn at once (rows from just behind the camera to SHAPE_DISTANCE). */
 const MAX_WALLS = 6;
 const WALL_COLOUR = 0x8c7fd0;
 const TRIM_COLOUR = 0x6a5bb8;
@@ -76,8 +83,8 @@ export function createWalls(scene: Scene) {
       for (let i = run.rows.length - 1; i >= 0; i--) {
         const ahead = (questions[i] ?? Infinity) - run.dist;
         if (ahead < -WALL_BEHIND) break;
-        // never a row beyond the visibility horizon
-        if (ahead > VIEW_DISTANCE || rows >= MAX_WALLS) continue;
+        // never a row beyond the shape horizon
+        if (ahead > SHAPE_DISTANCE || rows >= MAX_WALLS) continue;
         rows++;
         const z = worldZ(questions[i] as number, run.dist) - WALL_T / 2;
         const openings = rowOpenings(run, i);

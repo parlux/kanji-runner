@@ -14,7 +14,7 @@ import { drawLabel, outlinedText, TEXT_COLORS } from "../labels";
 import {
   CRATE_H,
   FIGURE_TOP,
-  fogAlpha,
+  textAlpha,
   squadPlace,
   LABEL_K,
   PASSED_LABEL_FADE_DIST,
@@ -54,7 +54,7 @@ function renderSquadText(
   for (const q of c.squads) {
     const p = squadPlace(run.dist, run.x, c, q);
     if (!p || p.merge >= 1) continue;
-    const a = alpha * p.shown * fogAlpha(p.dist - run.dist) * (1 - p.merge);
+    const a = alpha * p.shown * textAlpha(p.dist - run.dist) * (1 - p.merge);
     const at = project(p.x, p.dist, FIGURE_TOP + 0.3);
     const size = COUNT_K * wallPx(project, p.x, p.dist);
     if (a <= 0 || !at || size <= 0) continue;
@@ -82,7 +82,7 @@ function renderSquadText(
  * The 3D run's track text, projected with the live camera: wall prompts and
  * answer labels (labels fitted to their opening's projected width), crate hit
  * points and rewards, pack and squad counts. Sized by projected height, so it
- * shrinks with distance, faded in with the fog, far objects first (walls and
+ * shrinks with distance, faded in just inside VIEW_DISTANCE, far objects first (walls and
  * hazards interleaved by distance). A passed wall's labels fade and its
  * prompt is gone, as in 2D.
  */
@@ -116,7 +116,7 @@ function renderHazardText(
   const pos = hazardPos(run, i);
   const ahead = pos - run.dist;
   if (ahead < -WALL_BEHIND || ahead > VIEW_DISTANCE) return;
-  const alpha = fogAlpha(ahead);
+  const alpha = textAlpha(ahead);
   if (alpha <= 0) return;
   if (hz.kind === "pack") {
     if (i < run.nextHazard || isShattered(run, i)) return;
@@ -190,7 +190,7 @@ function renderWall(
   const squadTop = charge
     ? renderSquadText(ctx, run, charge, project, 1)
     : Infinity;
-  const alpha = fogAlpha(ahead) * fade;
+  const alpha = textAlpha(ahead) * fade;
   if (alpha <= 0) return;
   const px = wallPx(project, 0.5, pos);
   if (px <= 0) return;
