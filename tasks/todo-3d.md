@@ -62,9 +62,9 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 - Squad charges: enemy figures (from the factory) standing beyond each opening, counts on top; the firefight with tracers and figures dropping.
 
 **Acceptance criteria:**
-- [ ] Browser check at 390×844 with `?3d`: a 2- and a 3-answer wall far and near, an answered wall (green and red), a wall being shot, a reading label with okurigana, a squad charge before and mid-firefight, a crowd at an opening's edge (the clip matches what is seen). Screenshots in the scratchpad.
-- [ ] No row visible beyond `VIEW_DISTANCE` (browser check of a row just beyond and just inside).
-- [ ] Projected label size shrinks with distance (tested).
+- [x] Browser check at 390×844 with `?3d`: a 2- and a 3-answer wall far and near, an answered wall (green and red), a wall being shot, a reading label with okurigana, a squad charge before and mid-firefight, a crowd at an opening's edge (the clip matches what is seen). Screenshots in the scratchpad.
+- [x] No row visible beyond `VIEW_DISTANCE` (browser check of a row just beyond and just inside).
+- [x] Projected label size shrinks with distance (tested).
 
 **Verification:** `npm test && npm run lint && npm run build`; browser check; deploy green.
 **Dependencies:** T1b
