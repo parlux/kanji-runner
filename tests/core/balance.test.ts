@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
+import { KANA } from "../../src/core/kana";
+import { KANJI } from "../../src/core/kanji";
+import { buildRun } from "../../src/core/run";
 import type { RunState } from "../../src/core/sim";
+import { defaultProgress, itemKey } from "../../src/core/srs";
+import { WORDS } from "../../src/core/words";
 import { botBossRun, botRun } from "./bot";
 import { wkRun } from "./wk-run";
 
@@ -22,6 +27,26 @@ describe("balance bot (perfect steering)", () => {
       diedEarly(botRun(seed, { wrong: (q) => q % 2 === 1 })),
     );
     expect(dead.length).toBeGreaterThanOrEqual(SEEDS.length / 2);
+  }, 60_000);
+});
+
+describe("balance bot with words in the pool (perfect steering)", () => {
+  // all kana and the kanji of levels 2-8 learned: words are the new items
+  const progress = { ...defaultProgress(), unlockedLevel: 8 };
+  const known = { box: 2, seen: 1, correct: 1, wrong: 0, lastSeen: 1 };
+  for (const k of KANA) progress.items[itemKey(k.char, "kana")] = known;
+  for (const k of KANJI)
+    if (k.level <= 8) progress.items[itemKey(k.char, "meaning")] = known;
+  const build = (seed: number) => ({
+    rows: buildRun(seed, progress, KANA, KANJI, WORDS),
+  });
+
+  it("100% accuracy never dies before the last question", () => {
+    const runs = SEEDS.slice(0, 60).map((seed) =>
+      botRun(seed, { build, wrong: () => false }),
+    );
+    expect(runs.filter(diedEarly)).toEqual([]);
+    expect(runs.some((r) => r.rows.some((x) => x.type === "word"))).toBe(true);
   }, 60_000);
 });
 

@@ -4,6 +4,7 @@ import { mergeProgress } from "../core/merge";
 import { builtInPool, wanikaniPool } from "../core/pool";
 import { reaskRun } from "../core/reask";
 import { buildPoolRun } from "../core/run";
+import { WORDS } from "../core/words";
 import { KANA } from "../core/kana";
 import { KANJI } from "../core/kanji";
 import {
@@ -112,7 +113,7 @@ function newRun(seed: number, session: Session): Scene {
     const { rows, reask } = reaskRun(seed, progress, pool);
     run = createRunState(rows, track, reask);
   } else {
-    const pool = builtInPool(progress, kana, KANJI);
+    const pool = builtInPool(progress, kana, KANJI, WORDS);
     run = createRunState(buildPoolRun(seed, progress, pool), track);
   }
   return { kind: "run", seed, run, paused: false };
@@ -193,7 +194,7 @@ function startAction(
         scene: { kind: "start" },
         session: {
           ...session,
-          progress: place(session.progress, pick, KANA, KANJI),
+          progress: place(session.progress, pick, KANA, KANJI, WORDS),
         },
       };
     case "back":

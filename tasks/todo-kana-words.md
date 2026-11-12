@@ -42,10 +42,10 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 - `progression.ts`: `place()` marks words of placed levels; `levelKeys` unchanged.
 
 **Acceptance criteria:**
-- [ ] No word before its level or with an unlearned kana; ≤ 1 new word per run (property test over seeds).
-- [ ] Word distractors never correct (property test over all words).
-- [ ] Placement covers words; level unlock ignores them (tested).
-- [ ] Golden run unchanged; balance simulation within thresholds.
+- [x] No word before its level or with an unlearned kana; ≤ 1 new word per run (property test over seeds).
+- [x] Word distractors never correct (property test over all words).
+- [x] Placement covers words; level unlock ignores them (tested).
+- [x] Golden run unchanged; balance simulation within thresholds.
 
 **Verification:** `npm test`
 **Dependencies:** K1
