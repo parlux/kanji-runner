@@ -32,7 +32,7 @@ Status: confirmed by user, 2026-11-07. Input for `spec-driven-development`.
 - English → kanji gates (possible later)
 - Multiplayer, leaderboards, accounts, backend, WaniKani API sync
 - Monetisation, ads
-- Polished 3D art, native app
+- Native app (3D art came back in scope on 2026-11-12: `docs/intent/3d-run.md`)
 - Copying any existing game's name, art, characters or levels. Inspired by the genre only (mobile "crowd runner" games such as "Real War (not fake)").
 
 ## Open questions for the spec
