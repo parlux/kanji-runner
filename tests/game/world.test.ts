@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { crowdWidth } from "../../src/core/crowd";
-import { CROWD_MAX_W, VIEW_DISTANCE } from "../../src/core/tuning";
+import { SAW_W, CROWD_MAX_W, VIEW_DISTANCE } from "../../src/core/tuning";
 import {
   CROWD_DEPTH,
   crowdLayout,
@@ -22,8 +22,15 @@ import {
   FIREFIGHT_DIST,
   SQUAD_BEYOND,
   wallPx,
+  spanWorld,
+  sawPlace,
+  burstPiece,
+  BURST_PIECES,
+  recruitProgress,
+  packFigureScale,
   type CameraPose,
 } from "../../src/game/three/world";
+import { hazardSpan, type Saw } from "../../src/core/track";
 import { AIM, CAMERA_MIN_HEIGHT, cameraFit } from "../../src/game/three/view";
 
 const pose: CameraPose = { height: 4, back: 12, lookAhead: 20, lookHeight: 0 };
@@ -225,5 +232,52 @@ describe("squad placement", () => {
         squad(true, "join"),
       ),
     ).toBeNull();
+  });
+});
+
+describe("hazards in the world", () => {
+  it("draws a crate over the span the sim clips", () => {
+    const { x, w } = spanWorld(0.2, 0.5);
+    expect(x - w / 2).toBeCloseTo(worldX(0.2));
+    expect(x + w / 2).toBeCloseTo(worldX(0.5));
+  });
+
+  it("puts a saw's disc over its sim span at every distance", () => {
+    const saw: Saw = { kind: "saw", pos: 5, mid: 0.5, amp: 0.3, phase: 1 };
+    for (const d of [0, 0.4, 1.1, 2.7]) {
+      const s = hazardSpan(saw, d);
+      const p = sawPlace(saw, d);
+      expect(p.x - p.r).toBeCloseTo(worldX(s.left));
+      expect(p.x + p.r).toBeCloseTo(worldX(s.right));
+      expect(p.r * 2).toBeCloseTo(SAW_W * TRACK_W);
+      // the rail holds the whole sweep
+      expect(Math.abs(p.x - p.railX) + p.r).toBeLessThanOrEqual(
+        p.railW / 2 + 1e-9,
+      );
+    }
+  });
+
+  it("flings burst pieces out from nothing and shrinks them away", () => {
+    for (let k = 0; k < BURST_PIECES; k++) {
+      const a = burstPiece(k, 0, 2);
+      expect(Math.hypot(a.x, a.y, a.z)).toBe(0);
+      expect(burstPiece(k, 0.9, 2).size).toBeLessThan(a.size);
+    }
+    expect(Math.abs(burstPiece(3, 0.5, 2).x)).toBeGreaterThan(0);
+  });
+
+  it("sends recruits off staggered, all arrived by the end", () => {
+    expect(recruitProgress(0, 10, 0)).toBe(0);
+    expect(recruitProgress(9, 10, 0.2)).toBe(0);
+    expect(recruitProgress(0, 10, 0.3)).toBeGreaterThan(0);
+    for (let k = 0; k < 10; k++) expect(recruitProgress(k, 10, 1)).toBe(1);
+  });
+
+  it("thins a pack figure by figure, the last one shrinking as it is hit", () => {
+    expect(packFigureScale(0, 3)).toBe(1);
+    expect(packFigureScale(2, 3)).toBe(1);
+    expect(packFigureScale(3, 3)).toBe(0);
+    expect(packFigureScale(2, 2.5)).toBeCloseTo(0.7);
+    expect(packFigureScale(2, 2.01)).toBeLessThan(0.5);
   });
 });

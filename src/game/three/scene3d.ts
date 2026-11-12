@@ -20,6 +20,8 @@ import { fitCamera, LOOK, makeCamera, MAX_DPR } from "./view";
 import { makeCrowdMesh, type FigureKind } from "./figures";
 import { createWalls } from "./walls";
 import { createSquads } from "./squads";
+import { createFx } from "./fx";
+import { createProps } from "./props";
 import {
   crowdLayout,
   DIST_SCALE,
@@ -218,7 +220,9 @@ export function createView3d(canvas: HTMLCanvasElement): View3d | null {
   };
 
   const walls = createWalls(scene);
-  const squads = createSquads(scene);
+  const fx = createFx(scene);
+  const squads = createSquads(scene, fx);
+  const props = createProps(scene);
   const army = createCrowd("soldier");
   scene.add(army.mesh);
 
@@ -246,10 +250,13 @@ export function createView3d(canvas: HTMLCanvasElement): View3d | null {
       if (!paused) clock += dt;
       runDist = s.run.dist;
       layDashes(runDist);
+      fx.begin();
       if (s.kind === "run") {
         walls.update(s.run);
         squads.update(s.run, clock);
+        props.update(s.run);
       }
+      fx.end();
       army.update(s.run.army, worldX(s.run.x), 0, clock, paused ? 0 : dt);
       renderer.render(scene, camera);
     },

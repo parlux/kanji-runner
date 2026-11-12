@@ -1,5 +1,9 @@
 import { isCharge } from "../../core/track";
 import {
+  crateReward,
+  hazardPos,
+  isShattered,
+  packSurvivors,
   rowOpenings,
   viewOf,
   type ChargeView,
@@ -8,6 +12,7 @@ import {
 import { VIEW_DISTANCE } from "../../core/tuning";
 import { drawLabel, outlinedText, TEXT_COLORS } from "../labels";
 import {
+  CRATE_H,
   FIGURE_TOP,
   fogAlpha,
   squadPlace,
@@ -26,7 +31,12 @@ type Ctx = CanvasRenderingContext2D;
 const PROMPT_GAP = 0.15;
 /** A squad's count is this many times the projected wall height at the squad. */
 const COUNT_K = 0.5;
+const REWARD_COLOUR = "#5fd38d";
 const TAG_COLOURS = { join: "#3fbf6f", fight: "#ff5a5a" } as const;
+/** A crate's hit points and reward are this many times its projected height (with a floor). */
+const CRATE_HP_K = 0.6;
+const CRATE_REWARD_K = 0.45;
+const CRATE_TEXT_MIN_PX = 14;
 const TAGS = { join: "JOINS YOU", fight: "FIGHTS BACK" } as const;
 
 /**
@@ -69,63 +79,141 @@ function renderSquadText(
 }
 
 /**
- * The 3D run's wall text, projected with the live camera: answer labels
- * centred in each opening and fitted to its projected width, the prompt
- * above the wall. Sized by the wall's projected height (so it shrinks with
- * distance, with no minimum), faded in with the fog, far walls first. A
- * passed wall's labels fade and its prompt is gone, as in 2D.
+ * The 3D run's track text, projected with the live camera: wall prompts and
+ * answer labels (labels fitted to their opening's projected width), crate hit
+ * points and rewards, pack and squad counts. Sized by projected height, so it
+ * shrinks with distance, faded in with the fog, far objects first (walls and
+ * hazards interleaved by distance). A passed wall's labels fade and its
+ * prompt is gone, as in 2D.
  */
-export function renderWallText(
+export function renderTrackText(
   ctx: Ctx,
   run: RunState,
   project: Projector,
 ): void {
-  const { questions } = run.track;
+  const { questions, hazards } = run.track;
   // squads are drawn only from the view model, never from the rows
   const view = run.track.charges.length ? viewOf(run) : null;
-  for (let i = run.rows.length - 1; i >= 0; i--) {
-    const pos = questions[i] ?? Infinity;
-    const ahead = pos - run.dist;
-    if (ahead < -WALL_BEHIND) break;
-    if (ahead > VIEW_DISTANCE) continue;
-    const row = run.rows[i];
-    if (!row) continue;
-    const passed = i < run.next;
-    const fade = passed
-      ? 1 - Math.min(1, Math.max(0, -ahead) / PASSED_LABEL_FADE_DIST)
-      : 1;
-    // a charge's squads stand beyond the wall (drawn first), their counts above them
-    const charge = isCharge(run.track, i)
-      ? view?.charges.find((c) => c.row === i)
-      : undefined;
-    const squadTop = charge
-      ? renderSquadText(ctx, run, charge, project, 1)
-      : Infinity;
-    const alpha = fogAlpha(ahead) * fade;
-    if (alpha <= 0) continue;
-    const px = wallPx(project, 0.5, pos);
-    if (px <= 0) continue;
-    ctx.globalAlpha = alpha;
-    const answered = i === run.next - 1 ? run.lastAnswer : null;
-    rowOpenings(run, i).forEach((o, j) => {
-      // the one run through goes at once, so it never covers the army
-      if (passed && answered?.choice === j) return;
-      const c = project(o.centre, pos, WALL_H / 2);
-      const l = project(o.left, pos, WALL_H / 2);
-      const r = project(o.right, pos, WALL_H / 2);
-      if (!c || !l || !r) return;
-      const label = row.options[j] ?? "";
-      drawLabel(ctx, label, c.x, c.y, LABEL_K * px, r.x - l.x - 6, true);
-    });
-    ctx.globalAlpha = 1;
-    if (passed) continue;
-    // the prompt sits above the wall, and above any squads beyond it
-    const top = project(0.5, pos, WALL_H * (1 + PROMPT_GAP));
-    const size = PROMPT_K * px;
-    if (!top) continue;
-    const y = Math.min(top.y, squadTop - 0.15 * size) - size / 2;
-    ctx.globalAlpha = alpha;
-    outlinedText(ctx, row.prompt, top.x, y, size);
-    ctx.globalAlpha = 1;
+  let w = run.rows.length - 1;
+  let h = hazards.length - 1;
+  while (w >= 0 || h >= 0) {
+    const wallAt = w >= 0 ? (questions[w] ?? Infinity) : -Infinity;
+    const hazardAt = h >= 0 ? hazardPos(run, h) : -Infinity;
+    if (w >= 0 && wallAt >= hazardAt) renderWall(ctx, run, project, view, w--);
+    else renderHazardText(ctx, run, project, h--);
   }
+}
+
+/** A crate's hit points on its face and its reward above, or a pack's count above it. */
+function renderHazardText(
+  ctx: Ctx,
+  run: RunState,
+  project: Projector,
+  i: number,
+): void {
+  const hz = run.track.hazards[i];
+  if (!hz || hz.kind === "saw") return;
+  const pos = hazardPos(run, i);
+  const ahead = pos - run.dist;
+  if (ahead < -WALL_BEHIND || ahead > VIEW_DISTANCE) return;
+  const alpha = fogAlpha(ahead);
+  if (alpha <= 0) return;
+  if (hz.kind === "pack") {
+    if (i < run.nextHazard || isShattered(run, i)) return;
+    const n = packSurvivors(run, i);
+    const x = run.packs[i]?.x ?? 0.5;
+    const at = project(x, pos, FIGURE_TOP + 0.3);
+    const size = COUNT_K * wallPx(project, x, pos);
+    if (n <= 0 || !at || size <= 0) return;
+    ctx.globalAlpha = alpha;
+    outlinedText(
+      ctx,
+      String(n),
+      at.x,
+      at.y - size / 2,
+      size,
+      TAG_COLOURS.fight,
+    );
+    ctx.globalAlpha = 1;
+    return;
+  }
+  const hp = run.hp[i] ?? 0;
+  if (hp <= 0 || isShattered(run, i)) return;
+  const cx = (hz.left + hz.right) / 2;
+  const foot = project(cx, pos, 0);
+  const top = project(cx, pos, CRATE_H);
+  const mid = project(cx, pos, CRATE_H / 2);
+  if (!foot || !top || !mid) return;
+  const px = foot.y - top.y;
+  // floors keep far crates readable on a phone
+  const hpSize = Math.max(CRATE_TEXT_MIN_PX, CRATE_HP_K * px);
+  const rewardSize = Math.max(CRATE_TEXT_MIN_PX, CRATE_REWARD_K * px);
+  ctx.globalAlpha = alpha;
+  outlinedText(
+    ctx,
+    String(Math.ceil(hp - (run.damage[i] ?? 0))),
+    mid.x,
+    mid.y,
+    hpSize,
+  );
+  outlinedText(
+    ctx,
+    `+${crateReward(hp)}`,
+    top.x,
+    top.y - rewardSize * 0.65,
+    rewardSize,
+    REWARD_COLOUR,
+  );
+  ctx.globalAlpha = 1;
+}
+
+function renderWall(
+  ctx: Ctx,
+  run: RunState,
+  project: Projector,
+  view: ReturnType<typeof viewOf> | null,
+  i: number,
+): void {
+  const pos = run.track.questions[i] ?? Infinity;
+  const ahead = pos - run.dist;
+  if (ahead < -WALL_BEHIND || ahead > VIEW_DISTANCE) return;
+  const row = run.rows[i];
+  if (!row) return;
+  const passed = i < run.next;
+  const fade = passed
+    ? 1 - Math.min(1, Math.max(0, -ahead) / PASSED_LABEL_FADE_DIST)
+    : 1;
+  // a charge's squads stand beyond the wall (drawn first), their counts above them
+  const charge = isCharge(run.track, i)
+    ? view?.charges.find((c) => c.row === i)
+    : undefined;
+  const squadTop = charge
+    ? renderSquadText(ctx, run, charge, project, 1)
+    : Infinity;
+  const alpha = fogAlpha(ahead) * fade;
+  if (alpha <= 0) return;
+  const px = wallPx(project, 0.5, pos);
+  if (px <= 0) return;
+  ctx.globalAlpha = alpha;
+  const answered = i === run.next - 1 ? run.lastAnswer : null;
+  rowOpenings(run, i).forEach((o, j) => {
+    // the one run through goes at once, so it never covers the army
+    if (passed && answered?.choice === j) return;
+    const c = project(o.centre, pos, WALL_H / 2);
+    const l = project(o.left, pos, WALL_H / 2);
+    const r = project(o.right, pos, WALL_H / 2);
+    if (!c || !l || !r) return;
+    const label = row.options[j] ?? "";
+    drawLabel(ctx, label, c.x, c.y, LABEL_K * px, r.x - l.x - 6, true);
+  });
+  ctx.globalAlpha = 1;
+  if (passed) return;
+  // the prompt sits above the wall, and above any squads beyond it
+  const top = project(0.5, pos, WALL_H * (1 + PROMPT_GAP));
+  const size = PROMPT_K * px;
+  if (!top) return;
+  const y = Math.min(top.y, squadTop - 0.15 * size) - size / 2;
+  ctx.globalAlpha = alpha;
+  outlinedText(ctx, row.prompt, top.x, y, size);
+  ctx.globalAlpha = 1;
 }
