@@ -24,9 +24,9 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 - `src/core/study.ts`: `StudyCard` (kanji) gets optional `radicals`; `studyCards` takes a story lookup (character → mnemonics + radicals) used in both modes, replacing the WaniKani-only `mnemonics` map argument. In WaniKani mode, callers pass a lookup that falls back to the taught-cache mnemonics.
 
 **Acceptance criteria:**
-- [ ] Radicals resolved in WaniKani's order; radical without characters → SVG URL; hidden subjects dropped; kanji with nothing to show left out (tested).
-- [ ] Bad pages or a bad stored library → error result, never a throw (tested).
-- [ ] Built-in cards with a lookup carry stories and radicals; a kanji missing from the lookup, or no lookup, gives today's card exactly (tested; existing study tests unchanged).
+- [x] Radicals resolved in WaniKani's order; radical without characters → SVG URL; hidden subjects dropped; kanji with nothing to show left out (tested).
+- [x] Bad pages or a bad stored library → error result, never a throw (tested).
+- [x] Built-in cards with a lookup carry stories and radicals; a kanji missing from the lookup, or no lookup, gives today's card exactly (tested; existing study tests unchanged).
 
 **Verification:** `npm test -- stories study`
 **Dependencies:** none
