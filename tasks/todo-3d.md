@@ -115,9 +115,9 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 - Unchanged: `SHAPE_DISTANCE`, the haze curve, the camera, re-ask safety (rows never swapped within `SHAPE_DISTANCE`), passed walls' label fade-out, merge/shown fades of squads, 2D.
 
 **Acceptance criteria:**
-- [ ] Tested: overlay text haze equals the object's haze at the same point (near `SHAPE_DISTANCE`, at `VIEW_DISTANCE`, near the army); text is drawn (not culled) between `VIEW_DISTANCE` and `SHAPE_DISTANCE`.
-- [ ] A gate's prompt and labels use one haze factor (tested or evident in code).
-- [ ] Browser check at 390×844 with `?3d`: a filmstrip of a gate and a crate approaching from `SHAPE_DISTANCE` (about 1.9×, 1.5×, 1.2×, 1.0×, 0.8× `VIEW_DISTANCE`): whenever the object is visible its text is too, hazy far off, with no frame where text jumps in. Screenshots in the scratchpad.
+- [x] Tested: overlay text haze equals the object's haze at the same point (near `SHAPE_DISTANCE`, at `VIEW_DISTANCE`, near the army); text is drawn (not culled) between `VIEW_DISTANCE` and `SHAPE_DISTANCE`.
+- [x] A gate's prompt and labels use one haze factor (tested or evident in code).
+- [x] Browser check at 390×844 with `?3d`: a filmstrip of a gate and a crate approaching from `SHAPE_DISTANCE` (about 1.9×, 1.5×, 1.2×, 1.0×, 0.8× `VIEW_DISTANCE`): whenever the object is visible its text is too, hazy far off, with no frame where text jumps in. Screenshots in the scratchpad.
 
 **Verification:** `npm test && npm run lint && npm run build`; browser check; deploy green.
 **Dependencies:** T3b
