@@ -25,9 +25,9 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 - `types.ts`: `WordItem`; `GateType` gets `"word"`.
 
 **Acceptance criteria:**
-- [ ] Data validation test passes over the real list (characters, length, unique words, no shared glosses, ≥ 150).
-- [ ] Small-kana mapping, level assignment and eligibility tested.
-- [ ] No run changes (golden run and all existing tests pass unchanged).
+- [x] Data validation test passes over the real list (characters, length, unique words, no shared glosses, ≥ 150).
+- [x] Small-kana mapping, level assignment and eligibility tested.
+- [x] No run changes (golden run and all existing tests pass unchanged).
 
 **Verification:** `npm test -- words`
 **Dependencies:** none
