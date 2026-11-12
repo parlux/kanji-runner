@@ -5,11 +5,12 @@ import { buildRun, missedItems } from "../../src/core/run";
 import { defaultProgress, recordRun } from "../../src/core/srs";
 import {
   canStudy,
+  lastAnswer,
   runKanji,
   storiesWithFallback,
   studyCards,
 } from "../../src/core/study";
-import type { KanjiItem, Progress } from "../../src/core/types";
+import type { GateRow, KanjiItem, Progress } from "../../src/core/types";
 
 const progress: Progress = { ...defaultProgress(), unlockedLevel: 3 };
 const rows = [
@@ -198,6 +199,51 @@ describe("storiesWithFallback", () => {
   it("uses taught mnemonics alone when there is no library", () => {
     expect(storiesWithFallback(undefined, taught)?.get("c")).toEqual({
       meaning: "t-c",
+    });
+  });
+});
+
+describe("lastAnswer", () => {
+  it("is null before the first answer", () => {
+    expect(lastAnswer(rows, [], 0, KANJI, KANA)).toBeNull();
+  });
+
+  it("shows the last resolved row, the pick and the answer", () => {
+    for (const n of [1, 5, rows.length]) {
+      const row = rows[n - 1] as GateRow;
+      const res = results.slice(0, n);
+      const wrong = (row.answerIndex + 1) % row.options.length;
+      const choice = res[n - 1] ? row.answerIndex : wrong;
+      const last = lastAnswer(rows, res, choice, KANJI, KANA);
+      expect(last).toMatchObject({
+        type: row.type,
+        prompt: row.prompt,
+        picked: row.options[choice],
+        answer: row.answer,
+        correct: res[n - 1],
+      });
+      expect(last?.card?.char).toBe(row.prompt);
+    }
+  });
+
+  it("gives a kanji card marked missed only when wrong, with its story", () => {
+    const i = rows.findIndex((r) => r.type !== "kana");
+    const row = rows[i] as GateRow;
+    const stories = new Map([[row.prompt, { meaning: "m" }]]);
+    const res = (ok: boolean) => [...results.slice(0, i), ok];
+    const right = lastAnswer(
+      rows,
+      res(true),
+      row.answerIndex,
+      KANJI,
+      KANA,
+      stories,
+    );
+    const wrong = lastAnswer(rows, res(false), 0, KANJI, KANA, stories);
+    expect(right?.card).toMatchObject({ kind: "kanji", missed: false });
+    expect(wrong?.card).toMatchObject({ kind: "kanji", missed: true });
+    expect(right?.card?.kind === "kanji" && right.card.mnemonics).toEqual({
+      meaning: "m",
     });
   });
 });

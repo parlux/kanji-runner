@@ -48,6 +48,14 @@ const CSS = `
 
 let open: HTMLElement | null = null;
 
+/** Adds the study styles (`.kr-study` and its cards) once. */
+export function installStudyCss(): void {
+  if (document.getElementById("kr-study-css")) return;
+  const style = el("style", "", CSS);
+  style.id = "kr-study-css";
+  document.head.append(style);
+}
+
 /** Whether the study screen is up; the game ignores taps and keys meanwhile. */
 export const studyOpen = (): boolean => open !== null;
 
@@ -84,7 +92,8 @@ function radicalsEl(rs: readonly StoryRadical[]): HTMLElement {
   return el("div", "radicals", ...rs.map(radicalChip));
 }
 
-function cardEl(c: StudyCard): HTMLElement {
+/** One study card; shared with the pause screen. */
+export function cardEl(c: StudyCard): HTMLElement {
   const info = el("div", "info");
   if (c.missed) info.append(el("span", "tag", "missed"));
   if (c.kind === "kana") {
@@ -125,11 +134,7 @@ function cardEl(c: StudyCard): HTMLElement {
  */
 export function openStudy(cards: readonly StudyCard[], onPlay: () => void) {
   if (open) return;
-  if (!document.getElementById("kr-study-css")) {
-    const style = el("style", "", CSS);
-    style.id = "kr-study-css";
-    document.head.append(style);
-  }
+  installStudyCss();
   const overlay = el("div", "kr-study");
   overlay.tabIndex = -1;
   const close = () => {
