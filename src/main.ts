@@ -23,6 +23,7 @@ import { SPEED_PRESETS } from "./core/tuning";
 import { loadSpeed, nextSpeed, saveSpeed, speedLabel } from "./storage/speed";
 import { openTokenForm, tokenFormOpen } from "./game/wanikani";
 import { createWkState } from "./game/wkstate";
+import { createStoryStore } from "./wanikani/storystore";
 import { createWkClient } from "./wanikani/client";
 import { openStudy, studyOpen } from "./game/study";
 import { KANA } from "./core/kana";
@@ -87,6 +88,7 @@ let speed = loadSpeed(localStorage);
 // WaniKani: token, cache and mode live on this device only; a dev sandbox skips it
 const wk = createWkState({
   store: localStorage,
+  storyStore: createStoryStore(),
   now: Date.now,
   makeClient: () =>
     createWkClient({
