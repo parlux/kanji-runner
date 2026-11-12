@@ -46,9 +46,9 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 **Description:** Re-tune the camera in `view.ts` (height, distance back, pitch, field of view; `DIST_SCALE`/`TRACK_W` if needed) so the screen is mostly track, like the 2D layout: the army near the bottom and the fog line high. Both track edges stay visible at the army. Still a low-ish, behind-the-crowd 3D view, not top-down.
 
 **Acceptance criteria:**
-- [ ] Tested (pure projection in `world.ts`/`view.ts`) at 390×844 and 1280×800: army centre at 78–86% of screen height; the fog line (track at `VIEW_DISTANCE`) at 18–28% from the top; both track edges inside the screen at the army's depth.
-- [ ] Army count and pop-ups stay on screen at both sizes.
-- [ ] Browser check at both sizes with crowds of 5, 40, 200; screenshots in the scratchpad.
+- [x] Tested (pure projection in `world.ts`/`view.ts`) at 390×844 and 1280×800: army centre at 78–86% of screen height; the fog line (track at `VIEW_DISTANCE`) at 18–28% from the top; both track edges inside the screen at the army's depth.
+- [x] Army count and pop-ups stay on screen at both sizes.
+- [x] Browser check at both sizes with crowds of 5, 40, 200; screenshots in the scratchpad.
 
 **Verification:** `npm test && npm run lint && npm run build`; browser check; deploy green.
 **Dependencies:** T1
