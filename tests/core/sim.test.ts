@@ -28,8 +28,8 @@ import {
   BASE_SPEED,
   CRATE_REWARD_K,
   CROWD_MAX_W,
-  ENEMY_DAMAGE,
   ENEMY_HP,
+  HORDE_THREAT,
   ENEMY_SPEED,
   ENEMY_STEER_SPEED,
   ROWS_PER_RUN,
@@ -646,16 +646,20 @@ describe("shooting", () => {
     expect(width(narrow)).toBeCloseTo(crowdWidth(4), 9);
   });
 
-  it("contact costs ENEMY_DAMAGE per survivor when spans overlap, then the pack is gone", () => {
-    // 7 enemies, 3 of them already shot: 4 survivors reach the crowd
-    const s0 = {
-      ...range([pack(0.02)], [7 * ENEMY_HP], 20),
-      damage: [3 * ENEMY_HP],
-    };
-    const s = stepRun(s0, DT);
-    expect(s.nextHazard).toBe(1);
-    expect(s.army).toBe(20 - 4 * ENEMY_DAMAGE);
-    expect(s.lastClip?.loss).toBe(4 * ENEMY_DAMAGE);
+  it("contact costs round(HORDE_THREAT × remaining HP / ENEMY_HP) when spans overlap, then the pack is gone", () => {
+    expect(HORDE_THREAT).toBeGreaterThan(0);
+    expect(HORDE_THREAT).toBeLessThanOrEqual(1);
+    for (const shot of [0, 3, 2.6, 3.4, 6.6]) {
+      const s0 = {
+        ...range([pack(0.02)], [7 * ENEMY_HP], 20),
+        damage: [shot * ENEMY_HP],
+      };
+      const loss = Math.round(HORDE_THREAT * (7 - shot));
+      const s = stepRun(s0, DT);
+      expect(s.nextHazard).toBe(1);
+      expect(s.army).toBe(20 - loss);
+      expect(s.lastClip?.loss ?? 0).toBe(loss);
+    }
   });
 
   it("a pack that misses the crowd costs nothing", () => {

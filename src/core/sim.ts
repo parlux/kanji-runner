@@ -32,8 +32,8 @@ import {
   BASE_REWARD,
   BASE_SPEED,
   CRATE_REWARD_K,
-  ENEMY_DAMAGE,
   ENEMY_HP,
+  HORDE_THREAT,
   ENEMY_SPEED,
   ENEMY_STEER_SPEED,
   FIRE_RANGE,
@@ -262,10 +262,18 @@ export function packSurvivors(s: RunState, i: number): number {
   return Math.max(0, Math.ceil(left - 1e-9));
 }
 
-/** Pack i's span: its centre ± half the width of a crowd its size. */
+/**
+ * Pack i's remaining hit points as a pre-horde strength (enemies of ENEMY_HP):
+ * what its width and contact threat go by, so a horde is denser, not wider.
+ */
+export function packStrengthLeft(s: RunState, i: number): number {
+  return Math.max(0, ((s.hp[i] ?? 0) - (s.damage[i] ?? 0)) / ENEMY_HP);
+}
+
+/** Pack i's span: its centre ± half the width of a crowd of its remaining strength. */
 export function packSpan(s: RunState, i: number): Span {
   const x = s.packs[i]?.x ?? 0.5;
-  const w = crowdWidth(packSurvivors(s, i));
+  const w = crowdWidth(packStrengthLeft(s, i));
   return { left: x - w / 2, right: x + w / 2 };
 }
 
@@ -282,7 +290,7 @@ function movePacks(s: RunState, dt: number): RunState {
       -ENEMY_STEER_SPEED * dt,
       Math.min(ENEMY_STEER_SPEED * dt, s.x - p.x),
     );
-    const w = crowdWidth(packSurvivors(s, i));
+    const w = crowdWidth(packStrengthLeft(s, i));
     return {
       pos: p.pos - ENEMY_SPEED * dt,
       x: clampOnTrack(p.x + drift, w),
@@ -418,13 +426,17 @@ export function stepRun(s: RunState, dt: number, pace = 1): RunState {
   }
 }
 
-/** Soldiers lost when pack i reaches the crowd: one per survivor if their spans overlap. */
+/**
+ * Soldiers lost when pack i reaches the crowd, if their spans overlap:
+ * round(HORDE_THREAT × its remaining strength).
+ */
 function contactLoss(s: RunState, i: number): number {
   const w = crowdWidth(s.army);
   const p = packSpan(s, i);
   const overlap =
     Math.min(s.x + w / 2, p.right) - Math.max(s.x - w / 2, p.left) > 0;
-  return overlap ? Math.min(s.army, ENEMY_DAMAGE * packSurvivors(s, i)) : 0;
+  const loss = Math.round(HORDE_THREAT * packStrengthLeft(s, i));
+  return overlap ? Math.min(s.army, loss) : 0;
 }
 
 /**

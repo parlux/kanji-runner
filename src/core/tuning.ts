@@ -134,8 +134,6 @@ export const ENEMY_SPEED = 0.5;
 export const ENEMY_STEER_SPEED = 0.15;
 /** Damage that kills one enemy. */
 export const ENEMY_HP = 1;
-/** Soldiers lost per surviving enemy on contact. */
-export const ENEMY_DAMAGE = 1;
 /** Pack start centres are drawn from [ENEMY_X_MARGIN, 1 − ENEMY_X_MARGIN]. */
 export const ENEMY_X_MARGIN = 0.2;
 /**
@@ -145,6 +143,11 @@ export const ENEMY_X_MARGIN = 0.2;
  */
 export const HORDE_K = 3;
 export const PACK_MAX = 200;
+/**
+ * Contact costs round(HORDE_THREAT × remaining pack HP / ENEMY_HP) soldiers, in
+ * (0, 1]. At 1 a pack is as dangerous as a pre-horde one.
+ */
+export const HORDE_THREAT = 1;
 
 // Boss (T9). See boss.ts.
 /** Boss size = round(BOSS_K × expected army). */
