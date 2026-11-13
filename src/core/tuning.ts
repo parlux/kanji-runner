@@ -142,10 +142,12 @@ export const ENEMY_X_MARGIN = 0.2;
 /**
  * Hordes (v1.10): a pack's head count = clamp(round(HORDE_K × expected army),
  * ENEMY_MIN, PACK_MAX). Its hit points (see KILL_SECONDS) are shared evenly.
- * The owner's default (Checkpoint M2) is a 500 pack; K scales with it (3 per
- * 200), so the late packs of a normal run (expected army about 67) reach it.
+ * The owner's default is a 200 pack (back from 500: "fine with lower numbers
+ * as long as the pace of killing them seems reasonable"); K scales with it
+ * (3 per 200), so the late packs of a normal run (expected army about 67)
+ * reach it.
  */
-export const PACK_MAX = 500;
+export const PACK_MAX = 200;
 export const HORDE_K = 3 * (PACK_MAX / 200);
 /**
  * Seconds an army of the expected size takes to mow down a whole pack: pack

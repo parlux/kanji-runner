@@ -1,9 +1,11 @@
-# Idea: horde sandbox (tuning run)
+# Idea: horde gauntlet (tuning run)
 
-Status: owner idea, 2026-11-14, during v1.10 hordes. Owner: "if we still can't get it right, I'd like to set up a playable test run of just killing armies, with different settings and army strengths and sizes, to really tune it. It's an important mechanic."
+Status: owner idea, 2026-11-14, during v1.10 hordes. Queued after Task H5b, before H6 (kill effects).
 
-Proposal (not yet confirmed):
-- `?sandbox=horde`: a run with no questions or walls, just packs on a loop; steer and shoot as normal.
-- Live sliders (dev gear): the horde sliders plus army size (20–2,000), army strength (fire per soldier), pack interval, and pack adapt (how much packs follow the real army).
-- Per-pack readout: kill time, soldiers lost, enemies, fps.
-- A respawn button to rerun the same pack with new settings.
+Owner: "if we still can't get it right, I'd like to set up a playable test run of just killing armies, with different settings and army strengths and sizes, to really tune it. It's an important mechanic." And: "I'd want each army to have different settings, so I can say army 3 and 5 felt right, 4 felt off, etc, to feed back and tune. I'm fiddling with knobs I don't understand."
+
+So: the owner reacts, the orchestrator turns the knobs.
+- `?sandbox=horde` (behind the dev gear): no questions or walls, a gauntlet of numbered waves. Each wave has its own preset (army size, enemy count, kill time, spread, adapt), chosen to sweep the settings sensibly (e.g. one variable at a time across a few waves). A big "Wave N" label before each.
+- After each wave, a one-tap rating: Felt right / Too fast / Too slow / Too few / Too many. Then the next wave.
+- A per-wave log: preset, measured kill time, soldiers lost, fps, rating. "Copy results" puts it on the clipboard as text for the owner to paste into chat.
+- The preset list lives in one data file, so the next gauntlet is a quick edit.

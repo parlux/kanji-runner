@@ -108,11 +108,11 @@ describe("packStrength", () => {
 
 describe("packCount", () => {
   it("is round(HORDE_K × expected army), clamped to [ENEMY_MIN, PACK_MAX]", () => {
-    // the owner's default (Checkpoint M2): 500, K scaled from 3 per 200
-    expect(PACK_MAX).toBe(500);
-    expect(HORDE_K).toBe(7.5);
+    // the owner's default: 200, K 3 per 200
+    expect(PACK_MAX).toBe(200);
+    expect(HORDE_K).toBe(3);
     expect(packCount(0)).toBe(ENEMY_MIN);
-    expect(packCount(5)).toBe(38);
+    expect(packCount(5)).toBe(15);
     expect(packCount(10.4)).toBe(Math.round(HORDE_K * 10.4));
     expect(packCount(1000)).toBe(PACK_MAX);
     // more heads than today's pack, never fewer, until the cap

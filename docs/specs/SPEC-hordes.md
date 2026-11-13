@@ -70,6 +70,10 @@ Owner's defaults: **count 500, kill time 2.5 s, figure size 1.0, pack width 0.8*
 - **Fire reaches the stream:** the army can shoot the stream from where it starts (a pack-only fire range, up to the wake distance, never past an unanswered wall), so a 2.5 s kill time can play out.
 - Stream contact, light damage, merging and front-first deaths stay as in "Column design". The balance bands must hold at the new defaults.
 
+**Owner change during H5b (2026-11-14; overrides the above where they differ):**
+- **Default count back to 200** (panel count 200: K 3, `PACK_MAX` 200). Kill time 2.5 s, figure size 1.0 and pack width 0.8 stay. Owner: "it's fine with lower numbers as long as the pace of killing them seems reasonable."
+- **Packs follow the army you actually have, part of the way.** Owner: "early waves feel great, but toward end of run if I'm too powerful it just wipes out enemies almost instantly." When a pack wakes, its HP, head count and contact strength are set from an effective army between the expected army and the actual one (`PACK_ADAPT`), never below the expected: an army well above expected mows a pack a bit faster (about 1.5 s instead of 2.5 s) but never in a blink; an army at or below expected sees the same numbers as before. Computed once at waking, from the run state, and stored per pack.
+
 ## Code layout
 - `src/core/tuning.ts`: `HORDE_K`, `PACK_MAX`, `HORDE_THREAT`.
 - `src/core/fire.ts`: `packCount`, and `hazardHp` unchanged in value.
