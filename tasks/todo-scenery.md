@@ -1,6 +1,6 @@
 # Tasks: scenery (v1.8)
 
-Spec: `docs/specs/SPEC-scenery.md` (2026-11-13). Intent: `docs/intent/scenery.md`. Idea and mockup: `docs/ideas/scenery.md`, `docs/ideas/scenery-mockup.html`. Queued after Checkpoint K (meaning mode).
+Spec: `docs/specs/SPEC-scenery.md` (2026-11-13). Intent: `docs/intent/scenery.md`. Idea and mockup: `docs/ideas/scenery.md`, `docs/ideas/scenery-mockup.html`. Started 2026-11-13.
 Every task: `npm test && npm run lint && npm run build` pass before it is checked off.
 
 ## Plan
