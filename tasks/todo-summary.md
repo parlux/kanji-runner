@@ -1,11 +1,11 @@
-# Tasks: summary screen (v1.8)
+# Tasks: summary screen (v1.9)
 
-Spec: `docs/specs/SPEC-summary.md` (2026-11-13). Idea and mockup: `docs/ideas/summary-screen.md`. Queued 2026-11-13.
+Spec: `docs/specs/SPEC-summary.md` (2026-11-13). Idea and mockup: `docs/ideas/summary-screen.md`. Started 2026-11-13 (owner go), in parallel with v1.8 scenery on main.
 Every task: `npm test && npm run lint && npm run build` pass before it is checked off.
 
-## Phase 14: Summary screen
+## Phase 15: Summary screen
 
-### Task S1: Best streak and level-card data (pure)
+### Task E1: Best streak and level-card data (pure)
 **Description:**
 - `RunState` tracks the run's best streak (`src/core/sim.ts`).
 - `afterStep` keeps the level state before the run beside `unlocked`; a pure helper returns the level card's numbers for the end screen: level, learned, total, needed, gained this run, unlocked level or null, last level or not.
@@ -21,7 +21,7 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 **Files:** `src/core/sim.ts`, `src/core/progression.ts` (helper, if it fits there), `src/game/scenes.ts`, tests
 **Scope:** S
 
-### Task S2: New end screen and buttons
+### Task E2: New end screen and buttons
 **Description:**
 - Redraw `renderEnd` in `src/game/render.ts` to the spec's layout: result, level card, stat tiles, missed rows, session line, buttons. Seed and "Tap or Enter to continue" go.
 - Buttons: Play again (Enter/Space), Study (S, only when offered), Home (Escape); hit rects beside `studyButton` in `src/game/start.ts`; tap handling in `src/main.ts`; a stray tap does nothing.
@@ -32,11 +32,11 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 - [ ] Golden run and existing tests unchanged apart from end-screen expectations; deploy green.
 
 **Verification:** `npm test && npm run lint && npm run build`; browser check; deploy green.
-**Dependencies:** S1
+**Dependencies:** E1
 **Files:** `src/game/render.ts`, `src/game/start.ts`, `src/game/scenes.ts`, `src/game/input.ts`, `src/main.ts`, tests
 **Scope:** M
 
-### Checkpoint S: v1.8 (owner, on their phone)
+### Checkpoint E: v1.9 (owner, on their phone)
 - [ ] The level card makes it clear how close the next level is, after wins and losses.
 - [ ] Play again / Study / Home feel right; no accidental exits.
 - [ ] Nothing feels missing from the old screen (or note what to bring back).

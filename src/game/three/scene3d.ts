@@ -1,6 +1,5 @@
 import {
   BoxGeometry,
-  Color,
   DirectionalLight,
   Fog,
   HemisphereLight,
@@ -18,6 +17,8 @@ import {
 import type { RunState } from "../../core/sim";
 import type { Scene } from "../scenes";
 import { cameraFor, fitCamera, LOOK, makeCamera, MAX_DPR } from "./view";
+import { sceneryFor, sceneryParam, type LookId } from "./scenery";
+import { createScenery } from "./sceneryMeshes";
 import { makeCrowdMesh, type FigureKind } from "./figures";
 import { createWalls } from "./walls";
 import { createSquads } from "./squads";
@@ -41,6 +42,7 @@ import {
   shapeDistance,
   followStep,
   followTarget,
+  setHazeColour,
   TRACK_W,
   worldX,
   worldZ,
@@ -73,6 +75,8 @@ export type View3d = {
 /** Track length drawn ahead of and behind the army (world units); it runs on into the haze. */
 const TRACK_AHEAD = 260;
 const TRACK_BEHIND = 30;
+/** Roadside props are hidden this far (world units) past the shape horizon, where the haze is total. */
+const PROP_CULL = 10;
 /** Lane markings: dashes this long, this far apart, on lines at these track x. */
 const DASH_LEN = 2.2;
 const DASH_GAP = 6;
@@ -213,7 +217,6 @@ export function createView3d(canvas: HTMLCanvasElement): View3d | null {
   renderer.setPixelRatio(Math.min(MAX_DPR, window.devicePixelRatio || 1));
   const camera = makeCamera();
   const scene = new ThreeScene();
-  scene.background = new Color(LOOK.sky);
   const fog = new Fog(LOOK.haze, 1, 2);
   scene.fog = fog;
 
@@ -268,6 +271,20 @@ export function createView3d(canvas: HTMLCanvasElement): View3d | null {
         dashes.setMatrixAt(i++, m);
       }
     dashes.instanceMatrix.needsUpdate = true;
+  };
+
+  const scenery = createScenery(scene);
+  // `?scenery=<id>` forces a look; otherwise the run's seed picks it
+  const forcedLook = sceneryParam(window.location.search);
+  let lookId: LookId | null = null;
+  const showLook = (id: LookId): void => {
+    if (id === lookId) return;
+    lookId = id;
+    const look = scenery.show(id);
+    fog.color.setHex(look.sky.horizon);
+    setHazeColour(look.sky.horizon);
+    ground.visible = look.ground !== null;
+    if (look.ground !== null) ground.material.color.setHex(look.ground);
   };
 
   const walls = createWalls(scene);
@@ -353,6 +370,13 @@ export function createView3d(canvas: HTMLCanvasElement): View3d | null {
       fitCamera(camera, w / h, fit, camX);
       haze = hazeFor(pose, runDist, shapeDistance());
       layDashes(runDist);
+      showLook(forcedLook ?? sceneryFor(s.seed));
+      scenery.update(
+        runDist,
+        clock,
+        worldZ(shapeDistance(), 0) - PROP_CULL,
+        camera.position,
+      );
       fx.begin();
       walls.update(run);
       const fighting = squads.update(run, clock);
