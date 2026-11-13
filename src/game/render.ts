@@ -32,7 +32,13 @@ import {
 import type { BossResult, Scene, Session } from "./scenes";
 import type { SyncStatus } from "../sync/sync";
 import { canStudy, runKanji } from "../core/study";
-import { startLayout, studyButton, syncLabel, type Rect } from "./start";
+import {
+  startLayout,
+  studyButton,
+  syncAlert,
+  syncLabel,
+  type Rect,
+} from "./start";
 import {
   panelLines,
   sessionLists,
@@ -40,7 +46,6 @@ import {
   type SessionEntry,
   type SessionLog,
 } from "../core/session";
-import type { WkView } from "./wkstate";
 import {
   CROWD_DEPTH,
   DIST_SCALE,
@@ -123,9 +128,9 @@ export function render(
   scene: Scene,
   session: Session,
   sync: SyncStatus = "disabled",
-  wk: WkView | null = null,
   view3d?: TrackView,
-  speed?: string,
+  /** The other mode's unlocked level, for the mode switch; null hides it. */
+  otherLevel: number | null = null,
 ): void {
   // with a 3D view, the run and boss are drawn behind this canvas: draw only the overlay
   if (view3d && scene.kind === "run") {
@@ -141,7 +146,7 @@ export function render(
   ctx.fillStyle = COLORS.bg;
   ctx.fillRect(0, 0, w, h);
   if (scene.kind === "start")
-    return renderStart(ctx, w, h, session, scene.pick, sync, wk, speed);
+    return renderStart(ctx, w, h, session, scene.pick, sync, otherLevel);
   if (scene.kind === "end")
     return renderEnd(ctx, w, h, scene.run, scene.seed, scene.boss, session);
   if (scene.kind === "boss")
@@ -240,92 +245,136 @@ function renderStart(
   session: Session,
   pick: number | undefined,
   sync: SyncStatus,
-  wk: WkView | null,
-  speed?: string,
+  otherLevel: number | null,
 ): void {
   if (pick !== undefined) return renderPicker(ctx, w, h, session, pick);
-  // meaning mode never syncs: no login or sync label
-  if (!session.meaning) renderSyncLabel(ctx, w, h, sync);
-  if (speed) renderSpeedPill(ctx, w, h, speed);
-  if (session.persist) renderMeaningSwitch(ctx, w, h, session.meaning);
-  const wanikani = session.wk !== null;
-  if (wk) renderWk(ctx, w, h, wk);
-  text(ctx, "Kanji Runner", w / 2, h * 0.22, Math.min(64, w / 8));
-  if (wanikani && wk) renderWkLevel(ctx, w, h * 0.36, wk);
-  else renderLevel(ctx, w, h * 0.36, session);
-  unlockedNote(ctx, w, h * 0.463, session, 24);
-  text(ctx, "Tap or Enter to start", w / 2, h * 0.5, 22);
-  text(
-    ctx,
-    "Drag or ←/→ steer · tap or P pause",
-    w / 2,
-    h * 0.5 + 36,
-    18,
-    COLORS.dim,
-  );
   const l = startLayout(w, h);
-  if (!wanikani) {
-    button(ctx, l.place, "I already know some…", 18);
-    text(
-      ctx,
-      "or ←/→ to choose a starting level",
-      w / 2,
-      l.place.y + l.place.h + 20,
-      14,
-      COLORS.dim,
-    );
+  renderGear(ctx, l.settings);
+  // sync shows only when it needs attention; meaning mode never syncs
+  if (!session.meaning && syncAlert(sync)) renderSyncLabel(ctx, w, h, sync);
+  text(ctx, "Kanji Runner", w / 2, h * 0.17, Math.min(52, w / 8));
+  // a dev sandbox has no modes: no switch
+  if (session.persist) renderModeSwitch(ctx, w, h, session, otherLevel);
+  renderLevel(ctx, w, h * 0.46, session);
+  unlockedNote(ctx, w, h * 0.46 + 92, session, 22);
+  renderPlay(ctx, l.play);
+  if (!session.wk) {
+    const label = "I already know some…";
+    const cy = l.place.y + l.place.h / 2;
+    text(ctx, label, w / 2, cy, 15, COLORS.dim);
+    const tw = ctx.measureText(label).width;
+    ctx.fillStyle = COLORS.dim;
+    ctx.fillRect(w / 2 - tw / 2, cy + 10, tw, 1);
   }
   // the about line: the kanji data's licence requires this credit
   text(
     ctx,
-    "Kanji data: KANJIDIC2 and KRADFILE",
+    "Kanji data: KANJIDIC2, KRADFILE · © EDRDG, CC BY-SA 4.0",
     w / 2,
-    h - 44,
-    12,
+    h - 32,
+    fitSize(
+      ctx,
+      "Kanji data: KANJIDIC2, KRADFILE · © EDRDG, CC BY-SA 4.0",
+      11,
+      w - 32,
+    ),
     COLORS.dim,
   );
-  text(ctx, "© EDRDG, CC BY-SA 4.0 · edrdg.org", w / 2, h - 26, 12, COLORS.dim);
-  text(ctx, `build ${__BUILD__}`, w / 2, h - 9, 10, COLORS.dim);
+  text(ctx, `build ${__BUILD__}`, w / 2, h - 11, 10, COLORS.dim);
 }
 
-/** WaniKani mode's title and due line, in place of the level bar. */
-function renderWkLevel(ctx: Ctx, w: number, y: number, wk: WkView): void {
-  text(ctx, "WaniKani", w / 2, y, 30);
-  const line = `WaniKani level ${wk.level} · ${wk.due} kanji due`;
-  text(ctx, line, w / 2, y + 40, fitSize(ctx, line, 18, w - 32), COLORS.good);
+const ON_FILL = "#2f6b48";
+
+/** The settings gear: a toothed ring, dim. */
+function renderGear(ctx: Ctx, r: Rect): void {
+  const cx = r.x + r.w / 2;
+  const cy = r.y + r.h / 2;
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.fillStyle = COLORS.dim;
+  for (let i = 0; i < 8; i++) {
+    ctx.rotate(Math.PI / 4);
+    ctx.fillRect(-2.5, -11, 5, 6);
+  }
+  ctx.beginPath();
+  ctx.arc(0, 0, 7.5, 0, Math.PI * 2);
+  ctx.arc(0, 0, 3.5, 0, Math.PI * 2, true);
+  ctx.fill("evenodd");
+  ctx.restore();
 }
 
-/** The WaniKani status (top left), the mode switch and the token button. */
-function renderWk(ctx: Ctx, w: number, h: number, wk: WkView): void {
+/** Normal / Meanings only, each half with its mode's level; the current one filled. */
+function renderModeSwitch(
+  ctx: Ctx,
+  w: number,
+  h: number,
+  session: Session,
+  otherLevel: number | null,
+): void {
   const l = startLayout(w, h);
-  if (wk.label) {
-    const bad = wk.label.endsWith("invalid");
-    ctx.font = `15px ${FONT}`;
-    ctx.fillStyle = bad ? COLORS.bad : COLORS.dim;
-    ctx.textAlign = "left";
-    ctx.textBaseline = "middle";
-    const size = fitSize(ctx, wk.label, 15, l.wkStatus.w);
-    ctx.font = `${size}px ${FONT}`;
-    ctx.fillText(wk.label, l.wkStatus.x, l.wkStatus.y + l.wkStatus.h / 2);
+  const level = session.progress.unlockedLevel;
+  const halves = [
+    {
+      r: l.modeNormal,
+      name: "Normal",
+      on: !session.meaning,
+      level: session.meaning ? otherLevel : level,
+    },
+    {
+      r: l.modeMeaning,
+      name: "Meanings only",
+      on: session.meaning,
+      level: session.meaning ? level : otherLevel,
+    },
+  ];
+  const outer = {
+    x: l.modeNormal.x,
+    y: l.modeNormal.y,
+    w: l.modeNormal.w + l.modeMeaning.w,
+    h: l.modeNormal.h,
+  };
+  ctx.fillStyle = COLORS.track;
+  ctx.beginPath();
+  ctx.roundRect(outer.x, outer.y, outer.w, outer.h, 12);
+  ctx.fill();
+  ctx.strokeStyle = COLORS.wall;
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  for (const half of halves) {
+    const { r } = half;
+    if (half.on) {
+      ctx.fillStyle = ON_FILL;
+      ctx.beginPath();
+      ctx.roundRect(r.x + 4, r.y + 4, r.w - 8, r.h - 8, 9);
+      ctx.fill();
+    }
+    const color = half.on ? COLORS.text : COLORS.dim;
+    const cx = r.x + r.w / 2;
+    const cy = r.y + r.h / 2;
+    const size = fitSize(ctx, half.name, 16, r.w - 16);
+    if (half.level === null) text(ctx, half.name, cx, cy, size, color);
+    else {
+      text(ctx, half.name, cx, cy - 9, size, color);
+      text(ctx, levelName(half.level), cx, cy + 12, 12, color);
+    }
   }
-  if (wk.canSwitch) {
-    const on = "#2f6b48";
-    button(
-      ctx,
-      l.modeBuiltin,
-      "Built-in",
-      16,
-      wk.mode === "builtin" ? on : COLORS.track,
-    );
-    button(
-      ctx,
-      l.modeWk,
-      "WaniKani",
-      16,
-      wk.mode === "wanikani" ? on : COLORS.track,
-    );
-  }
-  button(ctx, l.token, wk.hasToken ? "WaniKani token…" : "Use WaniKani…", 16);
+  const sub = session.meaning
+    ? "Kanji → English meanings"
+    : "Kana, readings and meanings";
+  text(ctx, sub, w / 2, outer.y + outer.h + 20, 13, COLORS.dim);
+}
+
+/** The big green Play button. */
+function renderPlay(ctx: Ctx, r: Rect): void {
+  ctx.fillStyle = COLORS.good;
+  ctx.beginPath();
+  ctx.roundRect(r.x, r.y, r.w, r.h, 14);
+  ctx.fill();
+  ctx.font = `bold 22px ${FONT}`;
+  ctx.fillStyle = COLORS.bg;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("Play", r.x + r.w / 2, r.y + r.h / 2);
 }
 
 const SYNC_DOT: Record<SyncStatus, string> = {
@@ -335,7 +384,7 @@ const SYNC_DOT: Record<SyncStatus, string> = {
   disabled: COLORS.dim,
 };
 
-/** A small pill, top right: a status dot and Synced / Offline / Log in. */
+/** A small pill, top right by the gear: a status dot and Offline / Log in. */
 function renderSyncLabel(
   ctx: Ctx,
   w: number,
@@ -360,49 +409,6 @@ function renderSyncLabel(
   ctx.textAlign = "left";
   ctx.textBaseline = "middle";
   ctx.fillText(label, r.x + 34, cy);
-}
-
-/** The speed preset pill, top right under the sync label. */
-function renderSpeedPill(ctx: Ctx, w: number, h: number, label: string): void {
-  const r = startLayout(w, h).speed;
-  ctx.strokeStyle = COLORS.wall;
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.roundRect(r.x + 0.5, r.y + 0.5, r.w - 1, r.h - 1, r.h / 2);
-  ctx.stroke();
-  ctx.font = `15px ${FONT}`;
-  const size = fitSize(ctx, label, 15, r.w - 24);
-  text(ctx, label, r.x + r.w / 2, r.y + r.h / 2, size, COLORS.dim);
-}
-
-/** The "Meanings only" switch, top left: green when on. */
-function renderMeaningSwitch(
-  ctx: Ctx,
-  w: number,
-  h: number,
-  on: boolean,
-): void {
-  const r = startLayout(w, h).meaning;
-  ctx.beginPath();
-  ctx.roundRect(r.x + 0.5, r.y + 0.5, r.w - 1, r.h - 1, r.h / 2);
-  if (on) {
-    ctx.fillStyle = "#2f6b48";
-    ctx.fill();
-  }
-  ctx.strokeStyle = on ? COLORS.good : COLORS.wall;
-  ctx.lineWidth = 1;
-  ctx.stroke();
-  const label = `Meanings only: ${on ? "on" : "off"}`;
-  ctx.font = `15px ${FONT}`;
-  const size = fitSize(ctx, label, 15, r.w - 20);
-  text(
-    ctx,
-    label,
-    r.x + r.w / 2,
-    r.y + r.h / 2,
-    size,
-    on ? COLORS.text : COLORS.dim,
-  );
 }
 
 /** "Kanji 2 unlocked!" after a run that unlocked a level. */
@@ -472,7 +478,7 @@ function renderPicker(
     16,
     target < unlocked ? COLORS.chargeLine : COLORS.dim,
   );
-  button(ctx, l.apply, "Apply", 22, "#2f6b48");
+  button(ctx, l.apply, "Apply", 22, ON_FILL);
   button(ctx, l.cancel, "Cancel", 18);
   text(
     ctx,

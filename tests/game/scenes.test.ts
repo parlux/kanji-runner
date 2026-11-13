@@ -32,6 +32,7 @@ import type { Action } from "../../src/game/input";
 import {
   startLayout,
   startTap,
+  syncAlert,
   syncLabel,
   syncTap,
 } from "../../src/game/start";
@@ -253,9 +254,11 @@ describe("start screen taps", () => {
   const mid = (r: { x: number; y: number; w: number; h: number }) =>
     [r.x + r.w / 2, r.y + r.h / 2] as const;
 
-  it("the placement button opens the picker; elsewhere starts a run", () => {
+  it("Play starts a run, the placement link opens the picker, elsewhere does nothing", () => {
+    expect(startTap(false, W, H, ...mid(l.play))).toBe("confirm");
     expect(startTap(false, W, H, ...mid(l.place))).toBe("place");
-    expect(startTap(false, W, H, W / 2, H / 2)).toBe("confirm");
+    expect(startTap(false, W, H, ...mid(l.place), false)).toBeNull();
+    expect(startTap(false, W, H, W / 2, H / 2)).toBeNull();
   });
 
   it("in the picker only its buttons act", () => {
@@ -400,14 +403,20 @@ describe("sync label", () => {
   const [x, y] = [r.x + r.w / 2, r.y + r.h / 2];
 
   it("names each status, and is hidden when sync is disabled", () => {
+    expect(syncAlert("synced")).toBe(false);
+    expect(syncAlert("offline")).toBe(true);
+    expect(syncAlert("login")).toBe(true);
+    expect(syncAlert("disabled")).toBe(false);
     expect(syncLabel("synced")).toBe("Synced");
     expect(syncLabel("offline")).toBe("Offline");
     expect(syncLabel("login")).toBe("Log in");
     expect(syncLabel("disabled")).toBeNull();
   });
 
-  it("a tap on the label hits it unless sync is disabled", () => {
+  it("a tap on the label hits it only while it shows (offline or log in)", () => {
     expect(syncTap("login", W, H, x, y)).toBe(true);
+    expect(syncTap("offline", W, H, x, y)).toBe(true);
+    expect(syncTap("synced", W, H, x, y)).toBe(false);
     expect(syncTap("disabled", W, H, x, y)).toBe(false);
     expect(syncTap("login", W, H, W / 2, H / 2)).toBe(false);
   });

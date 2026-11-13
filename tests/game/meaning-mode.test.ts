@@ -13,7 +13,12 @@ import {
   type Session,
 } from "../../src/game/scenes";
 import { persistence } from "../../src/game/mode";
-import { meaningTap, startLayout, type Rect } from "../../src/game/start";
+import {
+  modeTap,
+  settingsTap,
+  startLayout,
+  type Rect,
+} from "../../src/game/start";
 import type { Action } from "../../src/game/input";
 import { MEANING_SESSION_KEY, SESSION_KEY } from "../../src/storage/session";
 import { MEANING_STORAGE_KEY, STORAGE_KEY } from "../../src/storage/storage";
@@ -142,33 +147,43 @@ describe("persistence", () => {
   });
 });
 
-describe("the Meanings only switch", () => {
+describe("the start screen's controls", () => {
   const overlaps = (a: Rect, b: Rect): boolean =>
     a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
+  const mid = (r: Rect) => [r.x + r.w / 2, r.y + r.h / 2] as const;
 
-  it("sits clear of the other start-screen controls and is hit by a tap", () => {
+  it("never overlap, stay on screen, and the switch and gear are hit by a tap", () => {
     for (const [w, h] of [
       [390, 844],
       [390, 667],
       [375, 667],
     ] as const) {
       const l = startLayout(w, h);
-      for (const k of [
-        "place",
+      const keys = [
+        "settings",
         "sync",
-        "speed",
-        "wkStatus",
-        "modeBuiltin",
-        "modeWk",
+        "modeNormal",
+        "modeMeaning",
+        "play",
+        "place",
         "stamp",
-        "token",
-      ] as const)
-        expect(overlaps(l.meaning, l[k]), `${w}x${h} ${k}`).toBe(false);
-      // the camera gear (src/game/camerasettings.ts): 44 px at left 12, top 56
-      expect(overlaps(l.meaning, { x: 12, y: 56, w: 44, h: 44 })).toBe(false);
-      const m = l.meaning;
-      expect(meaningTap(w, h, m.x + m.w / 2, m.y + m.h / 2)).toBe(true);
-      expect(meaningTap(w, h, w / 2, h / 2)).toBe(false);
+      ] as const;
+      for (const a of keys) {
+        const r = l[a];
+        expect(r.x, `${w}x${h} ${a}`).toBeGreaterThanOrEqual(0);
+        expect(r.x + r.w, `${w}x${h} ${a}`).toBeLessThanOrEqual(w);
+        expect(r.y + r.h, `${w}x${h} ${a}`).toBeLessThanOrEqual(h);
+        for (const b of keys)
+          if (a < b)
+            expect(overlaps(r, l[b]), `${w}x${h} ${a}/${b}`).toBe(false);
+        // the camera gear (src/game/camerasettings.ts): 44 px at left 12, top 56
+        expect(overlaps(r, { x: 12, y: 56, w: 44, h: 44 })).toBe(false);
+      }
+      expect(modeTap(w, h, ...mid(l.modeNormal))).toBe("normal");
+      expect(modeTap(w, h, ...mid(l.modeMeaning))).toBe("meaning");
+      expect(modeTap(w, h, w / 2, h / 2)).toBeNull();
+      expect(settingsTap(w, h, ...mid(l.settings))).toBe(true);
+      expect(settingsTap(w, h, w / 2, h / 2)).toBe(false);
     }
   });
 });

@@ -53,7 +53,7 @@ describe("build stamp taps", () => {
     ]);
   });
 
-  it("sits at the bottom centre of the start screen, away from the start tap", () => {
+  it("sits at the bottom centre of the start screen, away from Play", () => {
     for (const [w, h] of [
       [390, 844],
       [1280, 800],
@@ -62,8 +62,8 @@ describe("build stamp taps", () => {
       expect(stampTap(w, h, w / 2, h - 9)).toBe(true);
       expect(stampTap(w, h, w / 2, h / 2)).toBe(false);
       expect(s.y + s.h).toBeLessThanOrEqual(h);
-      // a stamp tap is handled before startTap would start a run
-      expect(startTap(false, w, h, w / 2, h - 9, true)).toBe("confirm");
+      // a stamp tap never starts a run
+      expect(startTap(false, w, h, w / 2, h - 9, true)).toBeNull();
     }
   });
 });

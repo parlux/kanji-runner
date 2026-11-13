@@ -13,17 +13,17 @@ import {
 } from "./game/scenes";
 import {
   hits,
-  meaningTap,
-  speedTap,
+  modeTap,
+  settingsTap,
   stampTap,
   stampTapped,
   startTap,
   studyButton,
   syncTap,
-  wkTap,
 } from "./game/start";
 import { SPEED_PRESETS } from "./core/tuning";
-import { loadSpeed, nextSpeed, saveSpeed, speedLabel } from "./storage/speed";
+import { loadSpeed, saveSpeed } from "./storage/speed";
+import { openSettings, settingsOpen, syncSettings } from "./game/settings";
 import { openTokenForm, tokenFormOpen } from "./game/wanikani";
 import { createWkState } from "./game/wkstate";
 import { createStoryStore } from "./wanikani/storystore";
@@ -116,6 +116,13 @@ const loadSession = (meaning: boolean) =>
         loadSessionLog(localStorage),
       );
 let session = loadSession(loadMeaningMode(localStorage));
+// the other mode's level, for the start screen's mode switch (none in a dev sandbox)
+const otherLevelOf = (meaning: boolean): number | null =>
+  dev !== null
+    ? null
+    : (meaning ? loadProgress : loadMeaningProgress)(localStorage)
+        .unlockedLevel;
+let otherLevel = otherLevelOf(session.meaning);
 const syncs = (): boolean => persistence(session)?.sync ?? false;
 
 // a dev `?level=N` sandbox never syncs; meaning mode neither pulls nor pushes
@@ -148,7 +155,7 @@ const openCamera = (): void =>
     });
   });
 
-// speed preset: this device only, changed on the start screen
+// speed preset: this device only, changed in settings
 let speed = loadSpeed(localStorage);
 
 // WaniKani: token, cache and mode live on this device only; a dev sandbox skips it
@@ -164,10 +171,14 @@ const wk = createWkState({
     }),
 });
 const overlayOpen = (): boolean =>
-  studyOpen() || tokenFormOpen() || loginOpen() || cameraPanelOpen();
-// WaniKani is off in a dev sandbox and in meaning mode (Built-in kanji only)
+  studyOpen() ||
+  tokenFormOpen() ||
+  loginOpen() ||
+  cameraPanelOpen() ||
+  settingsOpen();
+// WaniKani (the token, for stories) is off in a dev sandbox and in meaning mode;
+// runs always use the Built-in list
 const wkOn = (): boolean => session.persist && !session.meaning;
-const wkList = () => (wkOn() ? wk.list() : null);
 const showTokenForm = (error?: string): void =>
   openTokenForm({
     saved: wk.token(),
@@ -213,6 +224,28 @@ const pauseCard = (): void => {
     act("pause"),
   );
 };
+
+// offline retries; log in opens the form; synced offers sign out
+const syncAction = (): void => {
+  if (sync.status() === "offline") void sync.pull().then(adopt);
+  else openLogin(sync, adopt);
+};
+const showSettings = (): void =>
+  openSettings({
+    view: () => ({
+      speed,
+      wkLabel: wk.view().label,
+      hasToken: wk.token() !== null,
+      sync: session.persist && !session.meaning ? sync.status() : null,
+    }),
+    onSpeed: (s) => {
+      speed = s;
+      saveSpeed(localStorage, speed);
+    },
+    onToken: () => showTokenForm(),
+    onSync: syncAction,
+    build: __BUILD__,
+  });
 
 const study = (): void => {
   if (scene.kind !== "end" || !studyAvailable()) return;
@@ -265,25 +298,21 @@ const takeDrag = bindDrag(canvas, (x, y) => {
   }
   const w = window.innerWidth;
   const h = window.innerHeight;
-  if (scene.pick === undefined && session.persist && meaningTap(w, h, x, y)) {
+  const picking = scene.pick !== undefined;
+  if (!picking && settingsTap(w, h, x, y)) return showSettings();
+  const mode = !picking && session.persist ? modeTap(w, h, x, y) : null;
+  if (mode && (mode === "meaning") !== session.meaning) {
     // switch modes: load the other save; nothing carries over
-    const on = !session.meaning;
+    const on = mode === "meaning";
     saveMeaningMode(localStorage, on);
     session = loadSession(on);
+    otherLevel = otherLevelOf(on);
     if (syncs()) void sync.pull().then(adopt);
     return;
   }
-  if (
-    scene.pick === undefined &&
-    !session.meaning &&
-    syncTap(sync.status(), w, h, x, y)
-  ) {
-    // offline retries; log in opens the form; synced offers sign out
-    if (sync.status() === "offline") void sync.pull().then(adopt);
-    else openLogin(sync, adopt);
-    return;
-  }
-  if (scene.pick === undefined && stampTap(w, h, x, y)) {
+  if (!picking && !session.meaning && syncTap(sync.status(), w, h, x, y))
+    return syncAction();
+  if (!picking && stampTap(w, h, x, y)) {
     const t = stampTapped(stampTaps, performance.now() / 1000);
     stampTaps = t.taps;
     if (t.toggle) {
@@ -292,16 +321,6 @@ const takeDrag = bindDrag(canvas, (x, y) => {
     }
     return;
   }
-  if (scene.pick === undefined && speedTap(w, h, x, y)) {
-    speed = nextSpeed(speed);
-    saveSpeed(localStorage, speed);
-    return;
-  }
-  if (scene.pick === undefined && wkOn()) {
-    const tap = wkTap(wk.view().canSwitch, w, h, x, y);
-    if (tap === "token") return showTokenForm();
-    if (tap) return wk.setMode(tap.mode);
-  }
   const action = startTap(scene.pick !== undefined, w, h, x, y, !session.wk);
   if (action) act(action);
 });
@@ -309,8 +328,6 @@ const takeDrag = bindDrag(canvas, (x, y) => {
 let lastKind: Scene["kind"] = "start";
 startLoop(
   (dt) => {
-    // runs use the WaniKani list in WaniKani mode
-    if (session.wk !== wkList()) session = { ...session, wk: wkList() };
     // back on the start screen: refresh WaniKani (the client throttles)
     if (scene.kind === "start" && lastKind !== "start" && wkOn())
       void wk.refresh();
@@ -355,11 +372,11 @@ startLoop(
       scene,
       session,
       sync.status(),
-      wkOn() ? wk.view() : null,
       track,
-      speedLabel(speed),
+      otherLevel,
     );
     pauseCard();
+    syncSettings();
     // the camera gear: on the start screen (picker closed) and on a paused run
     syncCameraGear(
       gearShown &&
