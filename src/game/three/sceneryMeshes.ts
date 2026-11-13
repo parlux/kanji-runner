@@ -127,12 +127,14 @@ function shapeGeometry(shape: Shape): BufferGeometry {
     }
     case "hill":
     case "puff":
+    case "blimp":
       return new IcosahedronGeometry(1, 1);
     case "box":
     case "block":
       // a unit box standing on y = 0
       return new BoxGeometry(1, 1, 1).translate(0, 0.5, 0);
     case "roof":
+    case "fin":
       // a four-sided pyramid on y = 0, its edges square with a box's
       return new ConeGeometry(1, 1, 4)
         .rotateY(Math.PI / 4)
@@ -279,7 +281,7 @@ export function createScenery(scene: Scene): Scenery {
   const fogged = new MeshLambertMaterial({ flatShading: true });
   const clear = new MeshLambertMaterial({ flatShading: true, fog: false });
   const windowed = windowMaterial();
-  // clouds glow a little, so their shaded undersides stay light
+  // clouds, the sun, Block city's skyline and blimp glow a little, so their shaded sides stay light
   const glowing = new MeshLambertMaterial({
     flatShading: true,
     fog: false,
@@ -324,7 +326,13 @@ export function createScenery(scene: Scene): Scenery {
     for (const [shape, parts] of byShape(backdrop)) {
       const mesh = instanced(
         geometry(shape),
-        shape === "puff" || shape === "sun" ? glowing : clear,
+        shape === "puff" ||
+          shape === "sun" ||
+          shape === "box" ||
+          shape === "blimp" ||
+          shape === "fin"
+          ? glowing
+          : clear,
         parts,
       );
       group.add(mesh);

@@ -37,7 +37,9 @@ export type Shape =
   | "awning"
   | "flag"
   | "balloon"
-  | "block";
+  | "block"
+  | "blimp"
+  | "fin";
 
 /**
  * One instance of a shape: its place (world units; `z` is where it starts,
@@ -270,6 +272,61 @@ function cityLayout(): Layout {
   for (const s of [-1, 1]) {
     blockRow(rng, s, BLOCK_X, [6, 8, 10], [6, 8, 10], [3, 9], props);
     blockRow(rng, s, 24, [14, 16, 18, 20, 22], [8, 10, 12], [5, 12], props);
+  }
+  // a pale skyline beyond the haze (within the drift wrap, so it stays put)
+  for (let i = 0; i < 40; i++) {
+    const h = range(rng, 14, 50);
+    backdrop.push(
+      part(
+        "box",
+        range(rng, -210, 210),
+        -2,
+        range(rng, -340, -300),
+        1,
+        pick(rng, [0xf2f7ff, 0xe6eefa, 0xdde8f6]),
+        {
+          sx: range(rng, 12, 26),
+          sy: h,
+          sz: 12,
+        },
+      ),
+    );
+  }
+  // a blimp drifting slowly: a white body with an orange tail fin
+  backdrop.push(
+    part("blimp", -8, 34, -260, 1, 0xf0f2f7, {
+      sx: 12,
+      sy: 5,
+      sz: 5,
+      drift: 2,
+    }),
+    part("fin", -19, 35, -260, 1, 0xff7a59, {
+      sx: 4,
+      sy: 6,
+      sz: 0.4,
+      drift: 2,
+    }),
+  );
+  for (let i = 0; i < 5; i++) {
+    const scale = range(rng, 1.5, 2.4);
+    const cx = range(rng, -160, 160);
+    const cy = range(rng, 70, 100);
+    const cz = range(rng, -200, -320);
+    const n = 3 + Math.floor(rng() * 3);
+    for (let k = 0; k < n; k++) {
+      const r = range(rng, 2, 3.4) * scale;
+      backdrop.push(
+        part(
+          "puff",
+          cx + ((k - n / 2) * 2.6 + range(rng, -0.6, 0.6)) * scale,
+          cy + range(rng, -0.4, 1.2) * scale,
+          cz + range(rng, -1, 1) * scale,
+          r,
+          0xffffff,
+          { sy: r * 0.7, drift: 1.5 },
+        ),
+      );
+    }
   }
   return { props, backdrop, petals: [] };
 }

@@ -65,8 +65,11 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 ### Task S4: Block city
 **Description:** pastel block buildings with a window texture made in code, in a near-continuous row on both sides; pavement strips; street lamps along the kerbs; a pale skyline backdrop; a slowly drifting blimp.
 **Acceptance criteria:**
-- [ ] Tested: the layout clears the track (buildings start beyond the pavement); the pick covers four looks.
-- [ ] Browser check as in S1 with `?scenery=city`; draw calls and frame time logged within the limits.
+- [x] Tested: the layout clears the track (buildings start beyond the pavement); the pick covers four looks.
+- [x] Browser check as in S1 with `?scenery=city`; draw calls and frame time logged within the limits.
+  - Screenshots (run, both edges, boss, at 390×844 and 1280×800) checked; gates and labels read as before; tall blocks leave a strip of sky and the track clear.
+  - Headless (Chrome for Testing, loaded machine), 200 crowd, median of 3 × 240 frames: draw calls 16 (no scenery) → 23 (+7: sky dome, blocks, boxes for pavement and lamps, skyline, blimp body, fin, clouds); frame time 3.5-3.8 ms at 390×844 (1.2×) and 7.1-7.5 ms at 1280×800 (about 1.4-1.5×) against 3.1 / 5.1 ms with no scenery in S1; Countryside alongside 3.4-3.7 / 6.3-7.0 ms (city about 1.1× that).
+  - Windows: a `block` shape with its own material; a small `onBeforeCompile` tweak computes the window UVs from each instance's own scale (sides only, one window per 2 × 2.4 world units; block sizes are multiples, so windows fit), from one 32×32 `CanvasTexture`. No extra draw call per size. Two rows of blocks per side tile the wrap exactly (gaps absorb the remainder). Lamp arms reach outward over the pavement, never over the kerb. The skyline and blimp glow a little (emissive) so they stay pale.
 **Verification:** as S1. **Dependencies:** S1. **Files:** as S2. **Scope:** S
 
 ### Task S5: Cloud road

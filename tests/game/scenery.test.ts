@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   builtLooks,
   BLOCK_X,
+  DRIFT_WRAP,
   FENCE_STEP,
   LAMP_STEP,
   WALK_STEP,
@@ -198,6 +199,21 @@ describe("block city", () => {
       }
       expect(PROP_NEAR - prevEnd).toBeLessThan(4);
     }
+  });
+
+  it("has a pale skyline within the drift wrap, and a drifting blimp", () => {
+    const { backdrop } = LOOKS.city?.layout() ?? { backdrop: [] };
+    const skyline = backdrop.filter((p) => p.shape === "box");
+    expect(skyline.length).toBe(40);
+    for (const b of skyline) {
+      expect(Math.abs(b.x)).toBeLessThan(DRIFT_WRAP - 10);
+      expect(b.drift).toBe(0);
+    }
+    const blimp = backdrop.filter(
+      (p) => p.shape === "blimp" || p.shape === "fin",
+    );
+    expect(blimp.length).toBe(2);
+    for (const b of blimp) expect(b.drift).not.toBe(0);
   });
 
   it("sizes blocks in whole windows and colours them from the pastels", () => {
