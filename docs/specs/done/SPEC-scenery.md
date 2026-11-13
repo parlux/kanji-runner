@@ -1,6 +1,6 @@
 # Spec: scenery (v1.8)
 
-Extends `docs/specs/done/SPEC-3d.md` and `docs/specs/done/SPEC-3d-depth.md`. Everything there still holds unless this spec says otherwise. Intent: `docs/intent/scenery.md`. Idea and mockup: `docs/ideas/scenery.md`, `docs/ideas/scenery-mockup.html`.
+Extends `docs/specs/done/SPEC-3d.md` and `docs/specs/done/SPEC-3d-depth.md`. Everything there still holds unless this spec says otherwise. Intent: `docs/intent/scenery.md`. Idea and mockup: `docs/ideas/done/scenery.md`, `docs/ideas/done/scenery-mockup.html`.
 
 ## Objective
 Give the 3D run a sky and a roadside. There are five looks, and the run's seed picks one.

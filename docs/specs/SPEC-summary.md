@@ -1,6 +1,6 @@
 # Spec: summary screen (v1.9)
 
-Extends `docs/specs/done/SPEC.md` (v1) through `docs/specs/SPEC-scenery.md` (v1.8). Everything there still holds unless this spec says otherwise. Idea and mockup: `docs/ideas/summary-screen.md`.
+Extends `docs/specs/done/SPEC.md` (v1) through `docs/specs/done/SPEC-scenery.md` (v1.8). Everything there still holds unless this spec says otherwise. Idea and mockup: `docs/ideas/summary-screen.md`.
 
 ## Objective
 The end-of-run screen shows, at a glance, how the run went and how far it moved you toward the next level, then offers clear buttons for what to do next.

@@ -1,6 +1,6 @@
 # Intent: scenery
 
-Status: confirmed by the owner in chat, 2026-11-13, after seeing the mockups (no interview). Extends `docs/intent/3d-run.md`. Idea: `docs/ideas/scenery.md`. Spec: `docs/specs/SPEC-scenery.md`.
+Status: confirmed by the owner in chat, 2026-11-13, after seeing the mockups (no interview). Extends `docs/intent/3d-run.md`. Idea: `docs/ideas/done/scenery.md`. Spec: `docs/specs/done/SPEC-scenery.md`.
 
 ## Statement of intent
 - **Outcome:** the 3D run has a world around it: a gradient sky with things in it, and props beside the road that stream past. There are five looks (Countryside, Spring village, Race day, Cloud road, Block city), and each run picks one at random.

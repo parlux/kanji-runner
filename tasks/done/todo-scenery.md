@@ -1,13 +1,13 @@
 # Tasks: scenery (v1.8)
 
-Spec: `docs/specs/SPEC-scenery.md` (2026-11-13). Intent: `docs/intent/scenery.md`. Idea and mockup: `docs/ideas/scenery.md`, `docs/ideas/scenery-mockup.html`. Started 2026-11-13.
+Spec: `docs/specs/done/SPEC-scenery.md` (2026-11-13). Intent: `docs/intent/scenery.md`. Idea and mockup: `docs/ideas/done/scenery.md`, `docs/ideas/done/scenery-mockup.html`. Started 2026-11-13.
 Every task: `npm test && npm run lint && npm run build` pass before it is checked off.
 
 ## Plan
 - **Shared part plus one look first.** S1 builds the module, the sky dome, the seed pick and Countryside. The owner checks the look and phone speed at Checkpoint L1 before the other four are built.
 - **Pure layout, thin meshes.** Layouts, picking and wrapping live in `scenery.ts` and are tested; the mesh code only reads.
 - **Core untouched.** No task edits `src/core`, the camera or 2D. A task that seems to need to stops and asks.
-- **Mockup as reference.** `docs/ideas/scenery-mockup.html` has each look's shapes and colours. Port the look, not the code: the game must instance or merge its meshes.
+- **Mockup as reference.** `docs/ideas/done/scenery-mockup.html` has each look's shapes and colours. Port the look, not the code: the game must instance or merge its meshes.
 
 ### Risks
 | Risk | Impact | Mitigation |
@@ -85,6 +85,6 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 **Verification:** as S1. **Dependencies:** S1. **Files:** `scenery.ts`, `sceneryMeshes.ts`, `scene3d.ts` (ground and underside toggles), tests. **Scope:** M
 
 ### Checkpoint L: v1.8 (owner, on the phone)
-- [ ] Several runs show different looks, and each matches its mockup.
-- [ ] Smooth on the phone with every look.
-- [ ] Gates, text and the boss read as well as before.
+- [x] Several runs show different looks, and each matches its mockup.
+- [x] Smooth on the phone with every look.
+- [x] Gates, text and the boss read as well as before. (Owner, 2026-11-13: "good to go".)
