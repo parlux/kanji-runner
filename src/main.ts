@@ -35,10 +35,12 @@ import {
   openCameraPanel,
   syncCameraGear,
 } from "./game/camerasettings";
+import { hordePanelOpen, openHordePanel } from "./game/hordesettings";
 import {
   DEFAULT_HORDE_SETTINGS,
   hordeTuning,
   loadHorde,
+  saveHorde,
 } from "./storage/horde";
 import { loadCamera, loadGear, saveCamera, saveGear } from "./storage/camera";
 import { KANA } from "./core/kana";
@@ -156,11 +158,22 @@ const openCamera = (): void =>
         view3d?.setCamera(camera);
       },
       onClose: () => {},
+      onHorde: openHorde,
     });
+  });
+const openHorde = (): void =>
+  openHordePanel({
+    defaults: DEFAULT_HORDE_SETTINGS,
+    current: horde,
+    onChange: (next) => {
+      horde = next;
+      saveHorde(localStorage, horde);
+    },
+    onClose: () => {},
   });
 
 // tuned horde (dev tool): saved on this device, applied from the next run; null is the defaults
-const horde = loadHorde(localStorage);
+let horde = loadHorde(localStorage);
 
 // speed preset: this device only, changed in settings
 let speed = loadSpeed(localStorage);
@@ -182,6 +195,7 @@ const overlayOpen = (): boolean =>
   tokenFormOpen() ||
   loginOpen() ||
   cameraPanelOpen() ||
+  hordePanelOpen() ||
   settingsOpen();
 // WaniKani (the token, for stories) is off in a dev sandbox and in meaning mode;
 // runs always use the Built-in list

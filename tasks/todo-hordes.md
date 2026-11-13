@@ -84,9 +84,9 @@ Owner, 2026-11-14: not a horde yet. "Still looks like a static red blip that jus
 ### Task H5: Horde dev panel
 **Description:** a "Horde" sheet like the camera panel, opened from the hidden gear: sliders for enemy count (log 200–20,000), figure size, kill time (0.5–3 s), pack width (the far, funnel-mouth width); reset; saved on this device (`storage/horde.ts`); applied from the next run.
 **Acceptance criteria:**
-- [ ] Tested: storage round-trip, malformed or out-of-range saves fall back to defaults; the run is built with the saved tuning.
-- [ ] Browser: the sheet opens and closes, values show, a changed count shows up in the next run.
-- [ ] Deploy green (checkpoint follows).
+- [x] Tested: storage round-trip, malformed or out-of-range saves fall back to defaults; the run is built with the saved tuning.
+- [x] Browser: the sheet opens and closes, values show, a changed count shows up in the next run.
+- [x] Deploy green (checkpoint follows).
 **Verification:** as H4. **Dependencies:** H3b. **Files:** `src/game/hordesettings.ts`, `src/storage/horde.ts`, wiring, tests. **Scope:** S
 
 ### Checkpoint M2: horde tuning on the Pixel 7 (owner)

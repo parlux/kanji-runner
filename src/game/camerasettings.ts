@@ -88,7 +88,7 @@ const FIELDS: Field[] = [
 let panelEl: HTMLElement | null = null;
 let gearEl: HTMLButtonElement | null = null;
 
-const installCss = (): void => {
+export const installCss = (): void => {
   if (document.getElementById("kr-cam-css")) return;
   const style = document.createElement("style");
   style.id = "kr-cam-css";
@@ -109,6 +109,8 @@ export function openCameraPanel(opts: {
   current: CameraSettings | null;
   onChange: (settings: CameraSettings | null) => void;
   onClose: () => void;
+  /** Adds a button that closes this panel and calls it (the Horde sheet). */
+  onHorde?: () => void;
 }): void {
   if (panelEl) return;
   installCss();
@@ -173,6 +175,16 @@ export function openCameraPanel(opts: {
     opts.onClose();
   };
   row.append(reset, close);
+  const { onHorde } = opts;
+  if (onHorde) {
+    const horde = document.createElement("button");
+    horde.textContent = "Horde…";
+    horde.onclick = () => {
+      close.click();
+      onHorde();
+    };
+    row.append(horde);
+  }
   box.append(row);
   root.append(box);
   document.body.append(root);
