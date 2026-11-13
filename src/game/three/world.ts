@@ -56,8 +56,15 @@ export const shapeDistance = (): number => horizon;
 export const setShapeDistance = (d: number): void => {
   horizon = Math.min(HAZE_MAX, Math.max(VIEW_DISTANCE + 1, d));
 };
-/** The distance haze colour (the fog's), as 0xrrggbb. */
+/** The default distance haze colour (the fog's), as 0xrrggbb. */
 export const HAZE_COLOUR = 0xd4eeff;
+let hazeHex = HAZE_COLOUR;
+/** The haze colour in use: the scenery look's horizon (`HAZE_COLOUR` until set). */
+export const hazeColour = (): number => hazeHex;
+/** Sets the haze colour in use (the 3D view does, to its look's horizon). */
+export const setHazeColour = (c: number): void => {
+  hazeHex = c;
+};
 /** Tallest thing on the track (world units): the haze hides it whole at SHAPE_DISTANCE. */
 export const FOG_TOP_H = 3;
 

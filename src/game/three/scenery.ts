@@ -178,10 +178,10 @@ function countryLayout(): Layout {
     );
   }
   for (let i = 0; i < 9; i++) {
-    const scale = range(rng, 1.6, 3);
+    const scale = range(rng, 1.4, 2.6);
     const cx = range(rng, -160, 160);
     const cy = range(rng, 28, 70);
-    const cz = range(rng, -150, -300);
+    const cz = range(rng, -200, -320);
     const n = 3 + Math.floor(rng() * 3);
     for (let k = 0; k < n; k++) {
       const r = range(rng, 2, 3.4) * scale;

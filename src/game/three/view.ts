@@ -22,7 +22,6 @@ export const MAX_DPR = 2;
 
 /** Bright daylight colours (original; genre-inspired only). */
 export const LOOK = {
-  sky: 0x9fdcff,
   /** The distance haze: a paler sky, so the far track softens into the horizon. */
   haze: HAZE_COLOUR,
   ground: 0x7fcf6a,

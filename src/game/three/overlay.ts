@@ -23,7 +23,7 @@ import {
   type BossView,
   CRATE_H,
   FIGURE_TOP,
-  HAZE_COLOUR,
+  hazeColour,
   shapeDistance,
   type Haze,
   squadPlace,
@@ -38,13 +38,23 @@ import {
 
 type Ctx = CanvasRenderingContext2D;
 
-const HAZE_HEX = `#${HAZE_COLOUR.toString(16).padStart(6, "0")}`;
+let hexOf = -1;
+let hex = "";
+/** The haze colour in use, as #rrggbb (remade only when it changes). */
+const hazeHex = (): string => {
+  const c = hazeColour();
+  if (c !== hexOf) {
+    hexOf = c;
+    hex = `#${c.toString(16).padStart(6, "0")}`;
+  }
+  return hex;
+};
 
 /** Text colours mixed toward the haze by `amount`, as the fog does to the object. */
 const hazed =
   (amount: number): Tint =>
   (c) =>
-    mixHex(c, HAZE_HEX, amount);
+    mixHex(c, hazeHex(), amount);
 
 /** Gap (in wall heights) between a wall's top and its prompt. */
 const PROMPT_GAP = 0.15;
