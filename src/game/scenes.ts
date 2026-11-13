@@ -1,7 +1,12 @@
 import { bossSize, bossWon } from "../core/boss";
-import { applyUnlock, maxLevel, place } from "../core/progression";
+import {
+  applyUnlock,
+  maxLevel,
+  place,
+  placeMeaning,
+} from "../core/progression";
 import { mergeProgress } from "../core/merge";
-import { builtInPool, wanikaniPool } from "../core/pool";
+import { builtInPool, meaningPool, wanikaniPool } from "../core/pool";
 import { reaskRun } from "../core/reask";
 import { buildPoolRun } from "../core/run";
 import { WORDS } from "../core/words";
@@ -60,6 +65,11 @@ export type Session = {
   wk: WkList | null;
   /** This sitting's missed and fixed items; updated once per finished run. */
   log: SessionLog | null;
+  /**
+   * "Meanings only": kanji meaning gates of the Built-in list, its own save,
+   * never synced, no reveal or study cards. Never set in a dev sandbox.
+   */
+  meaning: boolean;
 };
 
 /**
@@ -71,15 +81,17 @@ export function createSession(
   stored: Progress,
   level: number | null,
   storedLog: SessionLog | null = null,
+  meaning = false,
 ): Session {
   return level === null
     ? {
         progress: stored,
-        kana: KANA,
+        kana: meaning ? [] : KANA,
         persist: true,
         unlocked: null,
         wk: null,
         log: storedLog,
+        meaning,
       }
     : {
         progress: { ...stored, unlockedLevel: level },
@@ -88,15 +100,17 @@ export function createSession(
         unlocked: null,
         wk: null,
         log: null,
+        meaning: false,
       };
 }
 
 /**
  * The session with synced progress merged in. Merging (not replacing) keeps a
- * run that finished while the sync was in flight. A dev session never syncs.
+ * run that finished while the sync was in flight. A dev session never syncs,
+ * and neither does meaning mode: synced (the owner's) progress is never adopted into it.
  */
 export function adoptProgress(session: Session, synced: Progress): Session {
-  if (!session.persist) return session;
+  if (!session.persist || session.meaning) return session;
   return { ...session, progress: mergeProgress(session.progress, synced) };
 }
 
@@ -108,7 +122,10 @@ function newRun(seed: number, session: Session): Scene {
   const track = buildTrack(seed, ROWS_PER_RUN);
   const { progress, kana, wk } = session;
   let run: RunState;
-  if (wk) {
+  if (session.meaning) {
+    const pool = meaningPool(progress, KANJI);
+    run = createRunState(buildPoolRun(seed, progress, pool), track);
+  } else if (wk) {
     const pool = wanikaniPool(progress, kana, wk);
     const { rows, reask } = reaskRun(seed, progress, pool);
     run = createRunState(rows, track, reask);
@@ -179,12 +196,14 @@ function startAction(
     return { scene, session };
   }
   const top = maxLevel(KANJI) - 1;
+  // meaning mode has no kana levels: its lowest pick (1, "none") starts at Kanji 1
+  const bottom = session.meaning ? 1 : -1;
   switch (action) {
     case "left":
     case "right": {
       const next = pick + (action === "left" ? -1 : 1);
       return {
-        scene: { kind: "start", pick: Math.max(-1, Math.min(top, next)) },
+        scene: { kind: "start", pick: Math.max(bottom, Math.min(top, next)) },
         session,
       };
     }
@@ -194,7 +213,9 @@ function startAction(
         scene: { kind: "start" },
         session: {
           ...session,
-          progress: place(session.progress, pick, KANA, KANJI, WORDS),
+          progress: session.meaning
+            ? placeMeaning(session.progress, pick, KANJI)
+            : place(session.progress, pick, KANA, KANJI, WORDS),
         },
       };
     case "back":
