@@ -207,11 +207,29 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 **Files:** `src/main.ts`, `src/game/three/*`, `src/game/render.ts`
 **Scope:** S
 
+### Task T5b: Steer during the boss fight (owner feedback at H, 2026-11-13)
+**Owner:** "Should still be able to move when fighting the boss (even though it doesn't do anything)."
+
+**Description:**
+- During the `boss` scene, steering (keys, drag) moves the army left and right exactly as in the run (same speed, easing and track clamp), from the approach through the fight and the ending hold. Today input is ignored there (`main.ts` returns early for `boss`; `stepBoss` in `scenes.ts` never moves `run.x`).
+- Look-only: no effect on the clash result, `clashAt`, timings, records or `src/core`. A tap during the boss still does nothing (no pause), as now.
+- 3D: the crowd, its count and its fire follow the army; the boss's cannon fire aims at where the crowd is now. 2D (`?2d`): the army moves too if the 2D boss scene draws it at `run.x`; otherwise leave 2D as is and say so.
+
+**Acceptance criteria:**
+- [ ] Tested: in the boss scene, steering moves `run.x` as in the run (and is clamped); the clash result and timings are unchanged for the same inputs.
+- [ ] Browser check at 390×844: the army steered to the left and to the right mid-fight, the boss's fire following it. Screenshots in the scratchpad.
+
+**Verification:** `npm test && npm run lint && npm run build`; browser check; deploy green.
+**Dependencies:** T5
+**Files:** `src/main.ts`, `src/game/scenes.ts`, `src/game/three/{boss,scene3d}.ts`, tests
+**Scope:** S
+
 ### Checkpoint H: v1.4 (owner, on the phone)
 - [ ] A run looks and feels like a crowd runner: figures bob, the crowd swells and thins.
 - [ ] The boss feels like the end of the run, not a separate screen; the giant boss looks big and scary.
 - [ ] Smooth on the phone with a full crowd.
 - [ ] Labels: readable enough, or the owner says what to tune.
+- [ ] The army can steer during the boss fight (T5b).
 
 ## Phase 11: camera tuning (independent of T4; worktree `camera`)
 Intent: `docs/intent/3d-camera-follow.md`. Spec: SPEC-3d-depth amendment v1.4.3, "Camera tuning". Idea: `docs/ideas/3d-camera-follow.md`. Runs alongside T4; both touch `view.ts`/`scene3d.ts`, so merge main before starting and before the checkpoint.
