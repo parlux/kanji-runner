@@ -46,6 +46,8 @@ import {
   SQUAD_DEFECT_GAIN,
   STEER_MAX_SPEED,
   VIEW_DISTANCE,
+  HORDE_DEFAULTS,
+  type HordeTuning,
 } from "./tuning";
 import { hazardSpan, isCharge, type Hazard, type Track } from "./track";
 import type { GateRow } from "./types";
@@ -133,6 +135,8 @@ export type RunState = {
   status: RunStatus;
   /** Re-asks, when the run has them on; else null. */
   reask: ReaskState | null;
+  /** The horde tuning this run was built with (the view reads its figure size). */
+  horde: HordeTuning;
 };
 
 /** 1.0× until the first row is reached, then linear to MAX_SPEED_MUL by the time the last row appears. */
@@ -148,11 +152,13 @@ export function speedMul(dist: number, track: Track): number {
 /**
  * A run at the start. With a `ReaskConfig` (rows and config from `reaskRun`),
  * triggers place re-asks ahead; the track and hit points stay as built here.
+ * `horde` sets the packs (HORDE_DEFAULTS when absent).
  */
 export function createRunState(
   rows: GateRow[],
   track: Track,
   reask: ReaskConfig | null = null,
+  horde: HordeTuning = HORDE_DEFAULTS,
 ): RunState {
   const expected = expectedArmy(rows, track.charges);
   return {
@@ -168,7 +174,7 @@ export function createRunState(
     bestStreak: 0,
     results: [],
     hp: hazardHp(track, expected),
-    heads: hazardHeads(track, expected),
+    heads: hazardHeads(track, expected, horde),
     damage: track.hazards.map(() => 0),
     packs: track.hazards.map((h) =>
       h.kind === "pack" ? { pos: h.pos, x: h.x } : null,
@@ -182,6 +188,7 @@ export function createRunState(
     lastAnswer: null,
     status: "running",
     reask: reask && { ...reask, links: [], planned: rows },
+    horde,
   };
 }
 

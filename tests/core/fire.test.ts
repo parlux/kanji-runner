@@ -18,6 +18,7 @@ import {
   ENEMY_MIN,
   FIRE_PER_SOLDIER,
   FIRE_RANGE,
+  HORDE_DEFAULTS,
   HORDE_K,
   PACK_MAX,
   STARTING_ARMY,
@@ -109,6 +110,21 @@ describe("packCount", () => {
       expect(packCount(e)).toBeGreaterThanOrEqual(packStrength(e));
       expect(packCount(e + 1)).toBeGreaterThanOrEqual(packCount(e));
     }
+  });
+});
+
+describe("packCount with horde tuning", () => {
+  it("defaults match the constants; overrides change the factor and the cap", () => {
+    expect(HORDE_DEFAULTS).toMatchObject({
+      hordeK: HORDE_K,
+      packMax: PACK_MAX,
+    });
+    for (const e of [0, 5, 40, 1000])
+      expect(packCount(e, HORDE_DEFAULTS)).toBe(packCount(e));
+    const big = { ...HORDE_DEFAULTS, hordeK: 100, packMax: 20_000 };
+    expect(packCount(5, big)).toBe(500);
+    expect(packCount(1000, big)).toBe(20_000);
+    expect(packCount(0, big)).toBe(ENEMY_MIN);
   });
 });
 

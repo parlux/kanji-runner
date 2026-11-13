@@ -143,6 +143,24 @@ export const ENEMY_X_MARGIN = 0.2;
  */
 export const HORDE_K = 3;
 export const PACK_MAX = 200;
+/** Enemy figures are drawn this size of a soldier (a view value; the core ignores it). */
+export const HORDE_SCALE = 0.7;
+
+/**
+ * Horde tuning a run is built with (v1.10 rework): the dev panel changes it,
+ * from the next run. `hordeK` and `packMax` set the head count (packCount),
+ * `hordeScale` is the figure size (view only). Defaults: HORDE_DEFAULTS.
+ */
+export type HordeTuning = {
+  readonly hordeK: number;
+  readonly packMax: number;
+  readonly hordeScale: number;
+};
+export const HORDE_DEFAULTS: HordeTuning = {
+  hordeK: HORDE_K,
+  packMax: PACK_MAX,
+  hordeScale: HORDE_SCALE,
+};
 /**
  * Contact costs round(HORDE_THREAT × remaining pack HP / ENEMY_HP) soldiers, in
  * (0, 1]. At 1 a pack is as dangerous as a pre-horde one.

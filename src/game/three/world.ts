@@ -18,6 +18,7 @@ import {
   CLASH_HOLD_SECONDS,
   CLASH_SECONDS,
   PACK_MAX,
+  HORDE_SCALE,
   SAW_W,
   VIEW_DISTANCE,
 } from "../../core/tuning";
@@ -621,8 +622,8 @@ export function burstPiece(
 export const recruitProgress = (k: number, n: number, t: number): number =>
   Math.min(1, Math.max(0, (t * 1.6 - k / (n * 2)) / 0.8));
 
-/** Pack figures are drawn this size of a soldier, so a 200 horde fits its pack's width. */
-export const HORDE_SCALE = 0.7;
+/** Pack figures are drawn this size of a soldier (the default; a run carries its own in `horde.hordeScale`). */
+export { HORDE_SCALE };
 /** A pack's figures stand this many times deeper (along the track) than wide: deeper than an army. */
 export const HORDE_DEPTH = 3;
 

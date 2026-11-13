@@ -12,11 +12,11 @@ import {
   ENEMY_HP,
   ENEMY_K,
   ENEMY_MIN,
-  HORDE_K,
-  PACK_MAX,
+  HORDE_DEFAULTS,
   FIRE_PER_SOLDIER,
   FIRE_RANGE,
   STARTING_ARMY,
+  type HordeTuning,
 } from "./tuning";
 import type { GateRow } from "./types";
 
@@ -60,11 +60,17 @@ export function packStrength(expected: number): number {
   return Math.max(ENEMY_MIN, Math.round(ENEMY_K * expected));
 }
 
-/** Head count of a pack met when the expected army is `expected`: a horde of weak enemies. */
-export function packCount(expected: number): number {
+/**
+ * Head count of a pack met when the expected army is `expected`: a horde of
+ * weak enemies, clamp(round(hordeK × expected), ENEMY_MIN, packMax).
+ */
+export function packCount(
+  expected: number,
+  horde: HordeTuning = HORDE_DEFAULTS,
+): number {
   return Math.min(
-    PACK_MAX,
-    Math.max(ENEMY_MIN, Math.round(HORDE_K * expected)),
+    horde.packMax,
+    Math.max(ENEMY_MIN, Math.round(horde.hordeK * expected)),
   );
 }
 
@@ -94,9 +100,12 @@ export function hazardHp(track: Track, expected: readonly number[]): number[] {
 export function hazardHeads(
   track: Track,
   expected: readonly number[],
+  horde: HordeTuning = HORDE_DEFAULTS,
 ): number[] {
   return track.hazards.map((h) =>
-    h.kind === "pack" ? packCount(expectedAt(track, expected, h.pos)) : 0,
+    h.kind === "pack"
+      ? packCount(expectedAt(track, expected, h.pos), horde)
+      : 0,
   );
 }
 

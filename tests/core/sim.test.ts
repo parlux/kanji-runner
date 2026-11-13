@@ -34,6 +34,7 @@ import {
   CRATE_REWARD_K,
   CROWD_MAX_W,
   ENEMY_HP,
+  HORDE_DEFAULTS,
   HORDE_THREAT,
   ENEMY_SPEED,
   ENEMY_STEER_SPEED,
@@ -690,12 +691,32 @@ describe("shooting", () => {
       expect(packs).toBeGreaterThan(0);
     });
 
+    it("is built with HORDE_DEFAULTS unless given a tuning, which changes the heads", () => {
+      const rows = kanaRun(1);
+      const track = buildTrack(1, ROWS_PER_RUN, false);
+      const s = createRunState(rows, track);
+      expect(s.horde).toEqual(HORDE_DEFAULTS);
+      const big = { ...HORDE_DEFAULTS, hordeK: 10_000, packMax: 20_000 };
+      const t = createRunState(rows, track, null, big);
+      expect(t.horde).toBe(big);
+      const expected = expectedArmy(rows, track.charges);
+      track.hazards.forEach((h, i) => {
+        if (h.kind !== "pack") return expect(t.heads[i]).toBe(0);
+        const q = track.questions.filter((p) => p < h.pos).length;
+        const e = expected[Math.min(q, expected.length - 1)] ?? 0;
+        expect(t.heads[i]).toBe(packCount(e, big));
+        expect(t.heads[i]).toBe(20_000);
+        expect(t.hp[i]).toBe(s.hp[i]);
+      });
+    });
+
     it("survivors drop by one per per-enemy HP of damage, exactly", () => {
       for (const [strength, heads] of [
         [6, 15],
         [7, 21],
         [41, 200],
         [133, 200],
+        [133, 20_000],
       ] as const) {
         const hp = strength * ENEMY_HP;
         const per = hp / heads;
