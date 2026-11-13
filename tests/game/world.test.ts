@@ -7,6 +7,7 @@ import {
   REASK_GAP_MIN,
   SAW_W,
   VIEW_DISTANCE,
+  PACK_MAX,
 } from "../../src/core/tuning";
 import {
   CROWD_DEPTH,
@@ -38,6 +39,8 @@ import {
   BURST_PIECES,
   recruitProgress,
   packFigureScale,
+  hordeLayout,
+  HORDE_SCALE,
   clipGaps,
   crowdHalfDepth,
   drawnCentre,
@@ -136,6 +139,46 @@ describe("crowd layout", () => {
     expect(Array.from(b.subarray(0, 80))).toEqual(
       Array.from(a.subarray(0, 80)),
     );
+  });
+});
+
+describe("horde layout", () => {
+  const out = new Float32Array(2 * PACK_MAX);
+
+  it("draws every enemy, capped at PACK_MAX", () => {
+    expect(hordeLayout(3, 0.06, out)).toBe(3);
+    expect(hordeLayout(200, 0.19, out)).toBe(200);
+    expect(hordeLayout(1000, 0.3, out)).toBe(PACK_MAX);
+    expect(hordeLayout(0, 0.06, out)).toBe(0);
+  });
+
+  it("keeps every figure within the pack's span", () => {
+    // a pack has about 5 heads per strength; its width goes by strength
+    for (const heads of [3, 15, 60, 100, 200]) {
+      const width = crowdWidth(heads / 5);
+      const n = hordeLayout(heads, width, out);
+      const half = (width * TRACK_W) / 2;
+      for (let k = 0; k < n; k++)
+        expect(
+          Math.abs(out[2 * k] as number) + FIGURE_RADIUS * HORDE_SCALE,
+        ).toBeLessThan(half + 1e-6);
+    }
+  });
+
+  it("packs 200 small figures into today's width without stacking them", () => {
+    const n = hordeLayout(200, crowdWidth(40), out);
+    let closest = Infinity;
+    for (let a = 0; a < n; a++)
+      for (let b = a + 1; b < n; b++)
+        closest = Math.min(
+          closest,
+          Math.hypot(
+            (out[2 * a] as number) - (out[2 * b] as number),
+            (out[2 * a + 1] as number) - (out[2 * b + 1] as number),
+          ),
+        );
+    expect(HORDE_SCALE).toBeLessThan(1);
+    expect(closest).toBeGreaterThan(FIGURE_RADIUS * HORDE_SCALE * 1.5);
   });
 });
 

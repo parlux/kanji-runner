@@ -17,6 +17,7 @@ import {
   CLASH_APPROACH_SECONDS,
   CLASH_HOLD_SECONDS,
   CLASH_SECONDS,
+  PACK_MAX,
   SAW_W,
   VIEW_DISTANCE,
 } from "../../core/tuning";
@@ -619,6 +620,64 @@ export function burstPiece(
 /** How far (0..1) recruit k of n has run from a shattered crate into the crowd, `t` through its pop-up: staggered. */
 export const recruitProgress = (k: number, n: number, t: number): number =>
   Math.min(1, Math.max(0, (t * 1.6 - k / (n * 2)) / 0.8));
+
+/** Pack figures are drawn this size of a soldier, so a 200 horde fits its pack's width. */
+export const HORDE_SCALE = 0.7;
+/** A pack's figures stand this many times deeper (along the track) than wide: deeper than an army. */
+export const HORDE_DEPTH = 3;
+
+/**
+ * The horde's figure pattern, made once: a loosely jittered hex grid in unit
+ * spacing, ordered from the centre out by elliptic radius (HORDE_DEPTH deep),
+ * so the first n points always fill an ellipse and the rim falls first.
+ * `HORDE_REACH[k]` is the widest |x| among the first k + 1 points.
+ */
+const HORDE_PATTERN = new Float32Array(2 * PACK_MAX);
+const HORDE_REACH = new Float32Array(PACK_MAX);
+{
+  const rowH = Math.sqrt(3) / 2;
+  const span = Math.ceil(Math.sqrt(PACK_MAX)) + 2;
+  const pts: [number, number, number][] = [];
+  for (let j = -span * 2; j <= span * 2; j++)
+    for (let i = -span; i <= span; i++) {
+      const h = Math.sin(i * 12.9898 + j * 78.233) * 43758.5453;
+      const u = h - Math.floor(h);
+      const x = i + (j & 1) / 2 + (u - 0.5) * 0.3;
+      const z = j * rowH + (((u * 7.31) % 1) - 0.5) * 0.3;
+      pts.push([x, z, x * x + (z / HORDE_DEPTH) ** 2]);
+    }
+  pts.sort((a, b) => a[2] - b[2] || a[1] - b[1] || a[0] - b[0]);
+  let reach = 0;
+  for (let k = 0; k < PACK_MAX; k++) {
+    const [x, z] = pts[k] ?? [0, 0];
+    HORDE_PATTERN[2 * k] = x;
+    HORDE_PATTERN[2 * k + 1] = z;
+    reach = Math.max(reach, Math.abs(x));
+    HORDE_REACH[k] = reach;
+  }
+}
+
+/**
+ * Each of a pack's `heads` figures' offset from its centre, written as (x, z)
+ * pairs into `out` (capped at its length and PACK_MAX); returns the count.
+ * The first `heads` points of the horde pattern, scaled so the widest figure
+ * (HORDE_SCALE in size) is inside `width` (track units): the same pack is as
+ * dense as it gets smaller, and higher indices sit at the rim.
+ */
+export function hordeLayout(
+  heads: number,
+  width: number,
+  out: Float32Array,
+): number {
+  const n = Math.max(0, Math.min(Math.floor(heads), out.length >> 1, PACK_MAX));
+  if (n === 0) return 0;
+  const r = Math.max(0, (width * TRACK_W) / 2 - FIGURE_RADIUS * HORDE_SCALE);
+  const reach = HORDE_REACH[n - 1] as number;
+  // one figure, or one column: as far apart as the width allows a row
+  const s = r / Math.max(reach, 0.5);
+  for (let k = 0; k < 2 * n; k++) out[k] = (HORDE_PATTERN[k] as number) * s;
+  return n;
+}
 
 /**
  * Scale (0..1) of figure k in a pack with `left` enemies' worth of hit points

@@ -9,7 +9,7 @@ import {
   packSurvivors,
   type RunState,
 } from "../../core/sim";
-import { FIRE_RANGE } from "../../core/tuning";
+import { FIRE_RANGE, PACK_MAX } from "../../core/tuning";
 import { makeCrowdMesh } from "./figures";
 import { FX_COLOURS, type Fx } from "./fx";
 import {
@@ -18,10 +18,11 @@ import {
   CRATE_D,
   CRATE_H,
   CRATE_POPUP_DIST,
-  crowdLayout,
   CROWD_DEPTH,
   DIST_SCALE,
   FIGURE_TOP,
+  hordeLayout,
+  HORDE_SCALE,
   MAX_RECRUITS,
   packFigureScale,
   recruitProgress,
@@ -39,9 +40,8 @@ import {
  * crate into the crowd. Drawn from the sim's state as it is now.
  */
 
-/** Most pack figures drawn in one pack (above it the count tells the real number), and in all (two packs fit within SHAPE_DISTANCE). */
-const MAX_PER_PACK = 100;
-const MAX_PACK_FIGURES = 2 * MAX_PER_PACK;
+/** Most pack figures drawn: every enemy of two full packs (two packs fit within SHAPE_DISTANCE). */
+const MAX_PACK_FIGURES = 2 * PACK_MAX;
 const COLOURS = {
   enemy: new Color(0xe8456f),
   wood: new Color(0xc08a4a),
@@ -53,7 +53,7 @@ export function createHazards(scene: Scene, fx: Fx) {
   const enemies = makeCrowdMesh("enemy", MAX_PACK_FIGURES);
   const recruits = makeCrowdMesh("soldier", MAX_RECRUITS);
   scene.add(enemies, recruits);
-  const layout = new Float32Array(2 * MAX_PER_PACK);
+  const layout = new Float32Array(2 * PACK_MAX);
   const m = new Matrix4();
   const pos = new Vector3();
   const scl = new Vector3();
@@ -87,7 +87,7 @@ export function createHazards(scene: Scene, fx: Fx) {
         const span = packSpan(run, i);
         const cx = worldX((span.left + span.right) / 2);
         const cz = worldZ(hazardPos(run, i), run.dist);
-        const drawn = crowdLayout(Math.min(n, MAX_PER_PACK), layout);
+        const drawn = hordeLayout(n, span.right - span.left, layout);
         const left = packHeadsLeft(run, i) * (drawn / n);
         for (let k = 0; k < drawn && ne < MAX_PACK_FIGURES; k++) {
           const s = packFigureScale(k, left);
@@ -95,13 +95,13 @@ export function createHazards(scene: Scene, fx: Fx) {
           const stride = (clock * STRIDE_HZ + k * 0.37) * Math.PI * 2;
           pos.set(
             cx + (layout[2 * k] as number),
-            Math.abs(Math.sin(stride)) * 0.07,
+            Math.abs(Math.sin(stride)) * 0.07 * HORDE_SCALE,
             cz + (layout[2 * k + 1] as number),
           );
           // facing the army, leaning into the run
           rot.set(-0.18, Math.PI, Math.sin(stride) * 0.1);
           q.setFromEuler(rot);
-          scl.setScalar(s);
+          scl.setScalar(s * HORDE_SCALE);
           m.compose(pos, q, scl);
           enemies.setMatrixAt(ne++, m);
         }
