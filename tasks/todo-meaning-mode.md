@@ -27,9 +27,9 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 - In the mode: no answer reveal, no Study button or study cards; level picker without kana levels.
 
 **Acceptance criteria:**
-- [ ] Browser check at 390×844 and 390×667, 3D (and one `?2d` run screenshot): switch on, place high, run shows only kanji with English answers, no reveal, loss end screen without Study; switch off, owner's progress and session panel unchanged. Screenshots in the scratchpad.
-- [ ] Tested or checked: no sync push/pull and no write to `kanji-runner:v1` while the mode is on.
-- [ ] Golden run and existing tests unchanged; deploy green.
+- [x] Browser check at 390×844 and 390×667, 3D (and one `?2d` run screenshot): switch on, place high, run shows only kanji with English answers, no reveal, loss end screen without Study; switch off, owner's progress and session panel unchanged. Screenshots in the scratchpad. (The reveal is being removed outright, by the orchestrator.)
+- [x] Tested or checked: no sync push/pull and no write to `kanji-runner:v1` while the mode is on.
+- [x] Golden run and existing tests unchanged; deploy green.
 
 **Verification:** `npm test && npm run lint && npm run build`; browser check; deploy green.
 **Dependencies:** K1, v1.6 R1 (reveal exists to turn off)

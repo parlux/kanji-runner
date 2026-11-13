@@ -23,6 +23,11 @@ export function startLayout(w: number, h: number) {
     sync: { x: w - 124, y: 12, w: 112, h: 36 },
     /** The speed preset pill, under the sync label; tap cycles. */
     speed: { x: w - 164, y: 56, w: 152, h: 36 },
+    /**
+     * The "Meanings only" switch, under the WaniKani status, right of where
+     * the camera gear (DOM, 44 px at left 12, top 56) shows; tap toggles.
+     */
+    meaning: { x: 64, y: 56, w: Math.min(152, w - 164 - 64 - 10), h: 36 },
     /** The WaniKani status label, top left. */
     wkStatus: { x: 12, y: 12, w: w - 124 - 24, h: 36 },
     /** The Built-in / WaniKani switch, two halves. */
@@ -97,6 +102,16 @@ export function syncTap(
 /** Whether a start screen tap (picker closed) hits the speed pill. */
 export function speedTap(w: number, h: number, x: number, y: number): boolean {
   return inside(startLayout(w, h).speed, x, y);
+}
+
+/** Whether a start screen tap (picker closed) hits the "Meanings only" switch. */
+export function meaningTap(
+  w: number,
+  h: number,
+  x: number,
+  y: number,
+): boolean {
+  return inside(startLayout(w, h).meaning, x, y);
 }
 
 /** Taps on the build stamp that toggle the camera gear, and the seconds they must come within. */

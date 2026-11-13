@@ -135,7 +135,7 @@ export function render(
   if (view3d && scene.kind === "run") {
     ctx.clearRect(0, 0, w, h);
     renderRunOverlay(ctx, w, h, scene.run, view3d, session.wk?.kanji ?? KANJI);
-    if (scene.paused) renderPaused(ctx, w, h, scene.run.results.length > 0);
+    if (scene.paused) renderPaused(ctx, w, h, hasPauseCard(scene.run, session));
     return;
   }
   if (view3d && scene.kind === "boss") {
@@ -151,8 +151,12 @@ export function render(
   if (scene.kind === "boss")
     return renderBoss(ctx, w, h, scene.run.army, scene.boss, scene.t);
   renderRun(ctx, w, h, scene.run, session.wk?.kanji ?? KANJI);
-  if (scene.paused) renderPaused(ctx, w, h, scene.run.results.length > 0);
+  if (scene.paused) renderPaused(ctx, w, h, hasPauseCard(scene.run, session));
 }
+
+/** Whether a paused run shows the DOM pause card (never in meaning mode: it shows readings). */
+const hasPauseCard = (run: RunState, session: Session): boolean =>
+  run.results.length > 0 && !session.meaning;
 
 /** With `lastPanel`, the DOM pause panel (src/game/pausecard.ts) shows the title and hint. */
 function renderPaused(
@@ -246,8 +250,10 @@ function renderStart(
   speed?: string,
 ): void {
   if (pick !== undefined) return renderPicker(ctx, w, h, session, pick);
-  renderSyncLabel(ctx, w, h, sync);
+  // meaning mode never syncs: no login or sync label
+  if (!session.meaning) renderSyncLabel(ctx, w, h, sync);
   if (speed) renderSpeedPill(ctx, w, h, speed);
+  if (session.persist) renderMeaningSwitch(ctx, w, h, session.meaning);
   const wanikani = session.wk !== null;
   if (wk) renderWk(ctx, w, h, wk);
   text(ctx, "Kanji Runner", w / 2, h * 0.22, Math.min(64, w / 8));
@@ -375,6 +381,36 @@ function renderSpeedPill(ctx: Ctx, w: number, h: number, label: string): void {
   text(ctx, label, r.x + r.w / 2, r.y + r.h / 2, size, COLORS.dim);
 }
 
+/** The "Meanings only" switch, top left: green when on. */
+function renderMeaningSwitch(
+  ctx: Ctx,
+  w: number,
+  h: number,
+  on: boolean,
+): void {
+  const r = startLayout(w, h).meaning;
+  ctx.beginPath();
+  ctx.roundRect(r.x + 0.5, r.y + 0.5, r.w - 1, r.h - 1, r.h / 2);
+  if (on) {
+    ctx.fillStyle = "#2f6b48";
+    ctx.fill();
+  }
+  ctx.strokeStyle = on ? COLORS.good : COLORS.wall;
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  const label = `Meanings only: ${on ? "on" : "off"}`;
+  ctx.font = `15px ${FONT}`;
+  const size = fitSize(ctx, label, 15, r.w - 20);
+  text(
+    ctx,
+    label,
+    r.x + r.w / 2,
+    r.y + r.h / 2,
+    size,
+    on ? COLORS.text : COLORS.dim,
+  );
+}
+
 /** "Kanji 2 unlocked!" after a run that unlocked a level. */
 function unlockedNote(
   ctx: Ctx,
@@ -415,7 +451,9 @@ function renderPicker(
   ctx.fillStyle = COLORS.banner;
   ctx.fillRect(l.panel.x, l.panel.y, l.panel.w, l.panel.h);
   text(ctx, "I already know up to", w / 2, l.panel.y + 32, 20, COLORS.dim);
-  const name = pick < 0 ? "Nothing yet" : levelName(pick);
+  // meaning mode has no kana levels: its lowest pick (Katakana) means none
+  const none = pick < (session.meaning ? 2 : 0);
+  const name = none ? "Nothing yet" : levelName(pick);
   const cy = l.minus.y + l.minus.h / 2;
   text(
     ctx,
@@ -648,10 +686,10 @@ function renderEnd(
     session.wk?.kanji ?? KANJI,
   );
   const top = 204;
-  const study = canStudy(
-    misses.length + runKanji(run.rows, run.results).length,
-    won,
-  );
+  // meaning mode has no study cards (they show readings)
+  const study =
+    !session.meaning &&
+    canStudy(misses.length + runKanji(run.rows, run.results).length, won);
   const panelBottom = study ? h - 116 : h - 56;
   const log = session.log;
   // Wrap as far as SESSION_PANEL_MAX_LINES, fewer when the missed rows would

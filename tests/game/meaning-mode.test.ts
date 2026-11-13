@@ -13,6 +13,7 @@ import {
   type Session,
 } from "../../src/game/scenes";
 import { persistence } from "../../src/game/mode";
+import { meaningTap, startLayout, type Rect } from "../../src/game/start";
 import type { Action } from "../../src/game/input";
 import { MEANING_SESSION_KEY, SESSION_KEY } from "../../src/storage/session";
 import { MEANING_STORAGE_KEY, STORAGE_KEY } from "../../src/storage/storage";
@@ -138,5 +139,36 @@ describe("persistence", () => {
 
   it("dev sandbox: nothing", () => {
     expect(persistence(createSession(defaultProgress(), 4))).toBeNull();
+  });
+});
+
+describe("the Meanings only switch", () => {
+  const overlaps = (a: Rect, b: Rect): boolean =>
+    a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
+
+  it("sits clear of the other start-screen controls and is hit by a tap", () => {
+    for (const [w, h] of [
+      [390, 844],
+      [390, 667],
+      [375, 667],
+    ] as const) {
+      const l = startLayout(w, h);
+      for (const k of [
+        "place",
+        "sync",
+        "speed",
+        "wkStatus",
+        "modeBuiltin",
+        "modeWk",
+        "stamp",
+        "token",
+      ] as const)
+        expect(overlaps(l.meaning, l[k]), `${w}x${h} ${k}`).toBe(false);
+      // the camera gear (src/game/camerasettings.ts): 44 px at left 12, top 56
+      expect(overlaps(l.meaning, { x: 12, y: 56, w: 44, h: 44 })).toBe(false);
+      const m = l.meaning;
+      expect(meaningTap(w, h, m.x + m.w / 2, m.y + m.h / 2)).toBe(true);
+      expect(meaningTap(w, h, w / 2, h / 2)).toBe(false);
+    }
   });
 });

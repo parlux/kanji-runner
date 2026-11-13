@@ -13,6 +13,7 @@ import {
 } from "./game/scenes";
 import {
   hits,
+  meaningTap,
   speedTap,
   stampTap,
   stampTapped,
@@ -46,8 +47,18 @@ import {
   storiesWithFallback,
   studyCards,
 } from "./core/study";
-import { loadSessionLog, saveSessionLog } from "./storage/session";
-import { loadProgress, saveProgress } from "./storage/storage";
+import {
+  loadMeaningSessionLog,
+  loadSessionLog,
+  saveSessionLog,
+} from "./storage/session";
+import {
+  loadMeaningProgress,
+  loadProgress,
+  saveProgress,
+} from "./storage/storage";
+import { loadMeaningMode, saveMeaningMode } from "./storage/meaning";
+import { persistence } from "./game/mode";
 import { loginOpen, openLogin } from "./sync/login";
 import { createSyncFromEnv } from "./sync/sync";
 import type { View3d } from "./game/three/scene3d";
@@ -88,21 +99,35 @@ resize();
 
 const newSeed = (): number => Math.floor(Math.random() * 2 ** 31);
 let scene: Scene = { kind: "start" };
-let session = createSession(
-  loadProgress(localStorage),
-  devLevel(window.location.search),
-  loadSessionLog(localStorage),
-);
+const dev = devLevel(window.location.search);
+// "Meanings only" plays its own save; the owner's is not read or written then.
+// A dev `?level=N` sandbox ignores the switch.
+const loadSession = (meaning: boolean) =>
+  meaning && dev === null
+    ? createSession(
+        loadMeaningProgress(localStorage),
+        null,
+        loadMeaningSessionLog(localStorage),
+        true,
+      )
+    : createSession(
+        loadProgress(localStorage),
+        dev,
+        loadSessionLog(localStorage),
+      );
+let session = loadSession(loadMeaningMode(localStorage));
+const syncs = (): boolean => persistence(session)?.sync ?? false;
 
-// a dev `?level=N` sandbox never syncs
+// a dev `?level=N` sandbox never syncs; meaning mode neither pulls nor pushes
 const sync = createSyncFromEnv(
   localStorage,
   session.persist ? import.meta.env : {},
 );
+// adoptProgress ignores meaning mode, so an in-flight pull never lands in it
 const adopt = (p: Progress): void => {
   session = adoptProgress(session, p);
 };
-void sync.pull().then(adopt);
+if (syncs()) void sync.pull().then(adopt);
 
 // tuned camera (dev tool, 3D only): saved on this device; null is the default camera
 let camera = loadCamera(localStorage);
@@ -140,7 +165,9 @@ const wk = createWkState({
 });
 const overlayOpen = (): boolean =>
   studyOpen() || tokenFormOpen() || loginOpen() || cameraPanelOpen();
-const wkList = () => (session.persist ? wk.list() : null);
+// WaniKani is off in a dev sandbox and in meaning mode (Built-in kanji only)
+const wkOn = (): boolean => session.persist && !session.meaning;
+const wkList = () => (wkOn() ? wk.list() : null);
 const showTokenForm = (error?: string): void =>
   openTokenForm({
     saved: wk.token(),
@@ -148,12 +175,13 @@ const showTokenForm = (error?: string): void =>
     onSave: (token) => void wk.save(token),
     onRemove: wk.remove,
   });
-if (session.persist) void wk.refresh();
+if (wkOn()) void wk.refresh();
 
 // the study screen (end screen only) lists what the last run missed, then its other kanji
 const kanjiList = (): readonly KanjiItem[] => session.wk?.kanji ?? KANJI;
 const studyAvailable = (): boolean => {
-  if (scene.kind !== "end") return false;
+  // meaning mode has no study cards: they show readings
+  if (scene.kind !== "end" || session.meaning) return false;
   const { run, boss } = scene;
   const missed = missedItems(
     run.rows,
@@ -168,7 +196,8 @@ const studyAvailable = (): boolean => {
 };
 // a paused run shows its last answered gate with that item's study card
 const pauseCard = (): void => {
-  if (scene.kind !== "run" || !scene.paused)
+  // meaning mode: no card (it shows readings), the plain "Paused" instead
+  if (scene.kind !== "run" || !scene.paused || session.meaning)
     return syncPauseCard(null, "", () => {});
   const { run } = scene;
   const last = lastAnswer(
@@ -213,9 +242,10 @@ const act = (action: Action): void => {
   if (overlayOpen()) return;
   if (action === "study") return study();
   const next = handleAction(scene, action, newSeed, session);
-  // placement changes progress: save it right away
-  if (next.session !== session && session.persist)
-    saveProgress(localStorage, next.session.progress);
+  // placement changes progress: save it right away, under this mode's key
+  const keys = persistence(session);
+  if (next.session !== session && keys)
+    saveProgress(localStorage, next.session.progress, keys.progress);
   scene = next.scene;
   session = next.session;
 };
@@ -235,7 +265,19 @@ const takeDrag = bindDrag(canvas, (x, y) => {
   }
   const w = window.innerWidth;
   const h = window.innerHeight;
-  if (scene.pick === undefined && syncTap(sync.status(), w, h, x, y)) {
+  if (scene.pick === undefined && session.persist && meaningTap(w, h, x, y)) {
+    // switch modes: load the other save; nothing carries over
+    const on = !session.meaning;
+    saveMeaningMode(localStorage, on);
+    session = loadSession(on);
+    if (syncs()) void sync.pull().then(adopt);
+    return;
+  }
+  if (
+    scene.pick === undefined &&
+    !session.meaning &&
+    syncTap(sync.status(), w, h, x, y)
+  ) {
     // offline retries; log in opens the form; synced offers sign out
     if (sync.status() === "offline") void sync.pull().then(adopt);
     else openLogin(sync, adopt);
@@ -255,7 +297,7 @@ const takeDrag = bindDrag(canvas, (x, y) => {
     saveSpeed(localStorage, speed);
     return;
   }
-  if (scene.pick === undefined && session.persist) {
+  if (scene.pick === undefined && wkOn()) {
     const tap = wkTap(wk.view().canSwitch, w, h, x, y);
     if (tap === "token") return showTokenForm();
     if (tap) return wk.setMode(tap.mode);
@@ -270,11 +312,11 @@ startLoop(
     // runs use the WaniKani list in WaniKani mode
     if (session.wk !== wkList()) session = { ...session, wk: wkList() };
     // back on the start screen: refresh WaniKani (the client throttles)
-    if (scene.kind === "start" && lastKind !== "start" && session.persist)
+    if (scene.kind === "start" && lastKind !== "start" && wkOn())
       void wk.refresh();
     lastKind = scene.kind;
     // an invalid token reopens the form, once, from the start screen
-    if (scene.kind === "start" && !overlayOpen() && wk.takeInvalid())
+    if (scene.kind === "start" && !overlayOpen() && wkOn() && wk.takeInvalid())
       showTokenForm("WaniKani token invalid");
     const next = updateScene(
       scene,
@@ -285,14 +327,14 @@ startLoop(
     );
 
     const settled = afterStep(session, scene, next, Date.now());
-    // save, then sync, after every run
-    const ran = settled !== session && session.persist;
-    if (ran) {
-      saveProgress(localStorage, settled.progress);
-      if (settled.log) saveSessionLog(localStorage, settled.log);
+    // save (under this mode's keys), then sync if this mode syncs, after every run
+    const keys = settled !== session ? persistence(session) : null;
+    if (keys) {
+      saveProgress(localStorage, settled.progress, keys.progress);
+      if (settled.log) saveSessionLog(localStorage, settled.log, keys.log);
     }
     session = settled;
-    if (ran) void sync.push().then(adopt);
+    if (keys?.sync) void sync.push().then(adopt);
     scene = next;
   },
   () => {
@@ -313,7 +355,7 @@ startLoop(
       scene,
       session,
       sync.status(),
-      session.persist ? wk.view() : null,
+      wkOn() ? wk.view() : null,
       track,
       speedLabel(speed),
     );
