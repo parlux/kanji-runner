@@ -151,9 +151,8 @@ export const PACK_MAX = 200;
  */
 export const KILL_SECONDS = 1.0;
 /**
- * A pack's width far away (its mouth) as a share of the track (1 = the
- * whole track). It stays this wide as it is shot (it thins from the front),
- * and closes into a stream at the army's width within STREAM_DISTANCE.
+ * A pack's crowd's width (its mouth) as a share of the track (1 = the
+ * whole track), at the pack's own x. Its stream is as wide as the army.
  */
 export const PACK_WIDTH = 1.0;
 /** Enemy figures are drawn this size of a soldier (a view value; the core ignores it). */
@@ -187,25 +186,40 @@ export const HORDE_DEFAULTS: HordeTuning = {
  */
 export const HORDE_THREAT = 0.2;
 /**
- * Track area (track widths × track units) one enemy takes in a pack's column
- * at figure size 1: the view's figure gap (0.36 world units) squared over
- * the track's 10 × 10 world units. Times hordeScale², it sets how many
- * enemies arrive per track unit the column runs into the army.
+ * A waiting pack is a loose, scattered crowd (owner at Checkpoint M2): its
+ * figures stand this far apart (track units, times the figure size), about
+ * 2.7 figure widths, across its mouth and as deep as that needs, up to
+ * CROWD_DEPTH_MAX (then they stand closer). See packCrowd.
  */
-export const HORDE_AREA = 0.36 ** 2 / 100;
+export const HORDE_GAP_LOOSE = 0.065;
 /**
- * Longest a pack's column runs in the core (track units): a bigger pack is
- * packed tighter, so its stream into the army lasts at most this over the
- * closing speed (about half a second) and always ends before the next wall
- * (at least CALM_DISTANCE beyond the pack).
+ * Deepest a pack's crowd stands (track units). It starts half this short of
+ * the pack's place, so it stays clear of the beats around it (HAZARD_SPACING
+ * before, CALM_DISTANCE after).
  */
-export const PACK_COLUMN_MAX = 1.2;
+export const CROWD_DEPTH_MAX = 2.0;
 /**
- * Within this far (track units) of the army a charging pack pours inward
- * into a stream as wide as the army, centred on it (see packConverge);
- * further out it stays spread wide where it is.
+ * The stream's own length in the core's column (track units), past the
+ * deepest crowd: the crowd empties into the stream from its front while
+ * the head runs at least this far (1.2 s at ENEMY_SPEED).
  */
-export const STREAM_DISTANCE = 2.5;
+export const STREAM_LEAD = 0.6;
+/**
+ * Length of every pack's column (track units): its enemies stand
+ * PACK_COLUMN_MAX / heads apart behind the stream's head (packDensity), as
+ * the crowd empties into the stream. A pack's front starts at its
+ * crowd's front (CROWD_DEPTH_MAX / 2 short of its place, 2 track units past
+ * the beat before it), so even at the fastest scroll the whole column has
+ * streamed in about 0.7 track units past the pack's place, before the next
+ * wall (CALM_DISTANCE).
+ */
+export const PACK_COLUMN_MAX = CROWD_DEPTH_MAX + STREAM_LEAD;
+/**
+ * The army's fire reaches an awake pack's stream from where it starts: up to
+ * this far ahead (never past an unanswered wall; nothing beyond one wakes).
+ * Other threats stay within FIRE_RANGE.
+ */
+export const PACK_FIRE_RANGE = PACK_WAKE;
 /** A pack that wakes behind another still charging catches up with that column's tail this much faster (track units per second). */
 export const PACK_MERGE_SPEED = 2.5;
 

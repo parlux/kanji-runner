@@ -5,7 +5,9 @@ import {
   gateOpenings,
   hazardPos,
   isShattered,
-  packConverge,
+  crowdFront,
+  crowdOf,
+  packCrowd,
   packLength,
   packStreaming,
   rowOpenings,
@@ -40,11 +42,14 @@ import {
   CRATE_REWARD_K,
   CROWD_MAX_W,
   ENEMY_HP,
-  HORDE_AREA,
+  CROWD_DEPTH_MAX,
+  HORDE_GAP_LOOSE,
   HORDE_DEFAULTS,
   HORDE_THREAT,
   PACK_COLUMN_MAX,
-  STREAM_DISTANCE,
+  STREAM_LEAD,
+  PACK_FIRE_RANGE,
+  FIRE_RANGE,
   KILL_SECONDS,
   PACK_WIDTH,
   PACK_WAKE,
@@ -495,7 +500,11 @@ describe("shooting", () => {
       hazards,
       charges: [],
     });
-    return { ...s, hp, heads, strength, army };
+    // the head starts at the given place (createRunState starts it at the crowd's front)
+    const packs = hazards.map((h) =>
+      h.kind === "pack" ? { pos: h.pos, x: h.x } : null,
+    );
+    return { ...s, hp, heads, strength, army, packs };
   }
   const pack = (pos: number, x = 0.5): Pack => ({ kind: "pack", pos, x });
   /** Packs narrower than the track, so they can miss the crowd. */
@@ -653,7 +662,7 @@ describe("shooting", () => {
     expect(passed.packs[0]?.pos ?? 6).toBeLessThan(6);
   });
 
-  it("a pack stays where it is across the track as it charges (it doesn't follow the army)", () => {
+  it("a pack's crowd stays where it is across the track (it doesn't follow the army); its stream is the army's width, on the army", () => {
     const s0 = {
       ...range([pack(5, 0.8)], [10 * ENEMY_HP]),
       horde: NARROW,
@@ -663,7 +672,10 @@ describe("shooting", () => {
     const s = stepFor({ ...s0, targetX: 0.6 }, 0.5);
     expect(s.packs[0]?.pos).toBeLessThan(5);
     expect(s.packs[0]?.x).toBe(0.8);
-    expect(packSpan(s, 0)).toEqual(packMouth(s0, 0));
+    expect(packMouth(s, 0)).toEqual(packMouth(s0, 0));
+    const w = crowdWidth(s.army);
+    expect(packSpan(s, 0).left).toBeCloseTo(s.x - w / 2, 12);
+    expect(packSpan(s, 0).right).toBeCloseTo(s.x + w / 2, 12);
   });
 
   it("fire kills one enemy per ENEMY_HP; the pack thins from the front, never narrows", () => {
@@ -746,21 +758,19 @@ describe("shooting", () => {
       expect(stepFor(s, 0.5).army).toBe(s.army);
     });
 
-    it("fits a pack's column in PACK_COLUMN_MAX: even 20,000 stream in within PACK_COLUMN_MAX / the closing speed", () => {
-      const scale = HORDE_DEFAULTS.hordeScale;
-      for (const heads of [3, 200, 2_000, 20_000]) {
+    it("every pack's column is PACK_COLUMN_MAX long (its deepest crowd plus STREAM_LEAD): even 20,000 stream in within that / the closing speed", () => {
+      for (const heads of [3, 200, 500, 2_000, 20_000]) {
         const s0 = range([pack(0.001)], [1e12], 1000, [heads], [100]);
-        const natural = (heads * HORDE_AREA * scale ** 2) / crowdWidth(1000);
-        expect(packLength(s0, 0)).toBeCloseTo(
-          Math.min(natural, PACK_COLUMN_MAX),
-          9,
+        const length = PACK_COLUMN_MAX;
+        expect(packLength(s0, 0)).toBeCloseTo(length, 9);
+        expect(crowdOf(s0, 0).depth + STREAM_LEAD).toBeLessThanOrEqual(
+          length + 1e-12,
         );
         const { s, states } = stream(s0);
         expect(s.nextHazard).toBe(1);
         const secs = states.length * DT;
         expect(secs).toBeLessThanOrEqual(
-          Math.min(natural, PACK_COLUMN_MAX) / (BASE_SPEED + ENEMY_SPEED) +
-            2 * DT,
+          length / (BASE_SPEED + ENEMY_SPEED) + 2 * DT,
         );
       }
     });
@@ -834,6 +844,144 @@ describe("shooting", () => {
           }
           expect(s.status).toBe("finished");
         }
+    });
+  });
+
+  describe("scattered crowd and early stream", () => {
+    it("a crowd stands HORDE_GAP_LOOSE × scale apart across its mouth, deeper with more heads, at most CROWD_DEPTH_MAX deep (then closer)", () => {
+      for (const scale of [0.7, 1]) {
+        let last = 0;
+        for (const heads of [3, 200, 500, 2_000, 20_000]) {
+          const c = packCrowd(heads, 0.8, scale);
+          expect(c.cols * c.rows).toBeGreaterThanOrEqual(heads);
+          expect((c.rows - 1) * c.cols).toBeLessThan(heads);
+          expect(c.cols * c.gx).toBeCloseTo(0.8, 12);
+          expect(c.depth).toBeCloseTo(c.rows * c.gz, 12);
+          expect(c.depth).toBeLessThanOrEqual(CROWD_DEPTH_MAX + 1e-12);
+          expect(c.depth).toBeGreaterThanOrEqual(last);
+          last = c.depth;
+          // about one gap² of track per figure, never sparser than the loose gap
+          const g = HORDE_GAP_LOOSE * scale;
+          expect(c.gx * c.gz).toBeLessThanOrEqual(g * g * 1.0001);
+          expect(Math.min(c.gx, c.gz)).toBeGreaterThan(0);
+        }
+      }
+      // the owner's 500 at 0.8 wide: a loose crowd about two track units deep, figures ~2.4 widths apart
+      const c = packCrowd(500, 0.8, 1);
+      expect(c.depth).toBeCloseTo(CROWD_DEPTH_MAX, 1);
+      expect(Math.sqrt(c.gx * c.gz)).toBeGreaterThan(0.05);
+      expect(packCrowd(200, 0.8, 1).gx).toBeCloseTo(HORDE_GAP_LOOSE, 2);
+      expect(packCrowd(200, 0.8, 1).depth).toBeLessThan(1.2);
+    });
+
+    it("a pack's crowd starts CROWD_DEPTH_MAX / 2 short of its place (the deepest is centred on it); its stream's head starts at the crowd's front", () => {
+      const rows = kanaRun(1);
+      const track = buildTrack(1, ROWS_PER_RUN, false);
+      const s = createRunState(rows, track);
+      let packs = 0;
+      track.hazards.forEach((h, i) => {
+        if (h.kind !== "pack") return;
+        packs++;
+        const c = crowdOf(s, i);
+        expect(crowdFront(s, i)).toBeCloseTo(h.pos - CROWD_DEPTH_MAX / 2, 12);
+        expect(crowdFront(s, i) + c.depth).toBeLessThanOrEqual(
+          h.pos + CROWD_DEPTH_MAX / 2 + 1e-12,
+        );
+        expect(hazardPos(s, i)).toBeCloseTo(crowdFront(s, i), 12);
+        // clear of the beats before and after it
+        const before = Math.max(
+          ...track.hazards.slice(0, i).map((x) => x.pos),
+          ...track.questions.filter((q) => q < h.pos),
+        );
+        expect(crowdFront(s, i) - before).toBeGreaterThanOrEqual(1.9);
+      });
+      expect(packs).toBeGreaterThan(0);
+    });
+
+    it("the stream starts the moment the pack wakes: its head leaves the crowd's front and can be shot from there", () => {
+      // a pack 7 ahead (well beyond FIRE_RANGE), behind a wall at 0.3
+      const s0 = range([pack(7)], [1e9], 100, [500], [60]);
+      const walled = { ...s0, track: { ...s0.track, questions: [0.3, 100] } };
+      const waiting = stepFor(walled, 0.1);
+      expect(waiting.packs[0]?.pos).toBe(7);
+      expect(waiting.target).toBeNull();
+      expect(waiting.damage[0]).toBe(0);
+      let s = waiting;
+      while (s.next === 0) s = stepRun(s, DT);
+      // woken: the head moves at once and takes the fire, 7 − 0.3 ahead
+      const woke = stepRun(s, DT);
+      expect(woke.packs[0]?.pos ?? 7).toBeLessThan(s.packs[0]?.pos ?? 7);
+      expect(hazardPos(woke, 0) - woke.dist).toBeGreaterThan(FIRE_RANGE);
+      expect(woke.target).toBe(0);
+      expect(woke.damage[0]).toBeGreaterThan(0);
+    });
+
+    it("fire reaches an awake pack up to PACK_FIRE_RANGE, never past an unanswered wall; nearer threats still go first", () => {
+      const far = range([pack(PACK_FIRE_RANGE + 0.5)], [1e9], 100);
+      expect(stepRun(far, DT).target).toBeNull();
+      const near = range([pack(PACK_FIRE_RANGE - 0.5)], [1e9], 100);
+      expect(stepRun(near, DT).target).toBe(0);
+      const walled = {
+        ...near,
+        track: { ...near.track, questions: [4, 100] },
+      };
+      expect(stepRun(walled, DT).target).toBeNull();
+      const crate = range([wide(1.9), pack(8)], [1e9, 1e9], 100);
+      expect(stepRun(crate, DT).target).toBe(0);
+      // a crate beyond FIRE_RANGE is still out of reach: the pack takes the fire
+      const later = range([wide(FIRE_RANGE + 0.5), pack(8)], [1e9, 1e9], 100);
+      expect(stepRun(later, DT).target).toBe(1);
+    });
+
+    it("in a real run, the army can fire at each pack for at least 1.7 s (from waking until it has streamed in; 2.2 s at the start's speed), and its whole column streams in before the next wall", () => {
+      for (const killSeconds of [1, 2.5]) {
+        const tuning = {
+          ...HORDE_DEFAULTS,
+          killSeconds,
+          hordeK: 7.5,
+          packMax: 500,
+          packWidth: 0.8,
+          hordeScale: 1,
+        };
+        for (const seed of [1, 2, 3, 4]) {
+          let s = createRunState(
+            kanaRun(seed),
+            buildTrack(seed, ROWS_PER_RUN, false),
+            null,
+            tuning,
+          );
+          // so many hit points that nothing dies: the window is as long as it gets
+          // (crates break at once, so only the packs take fire)
+          s = {
+            ...s,
+            hp: s.hp.map((h, i) =>
+              s.track.hazards[i]?.kind === "pack" ? h * 1e6 : h && 1e-9,
+            ),
+            army: 60,
+          };
+          const fired = s.hp.map(() => 0);
+          for (let n = 0; n < 200 / DT && s.status === "running"; n++) {
+            const row = s.rows[s.next];
+            const o = rowOpenings(s, s.next)[row?.answerIndex ?? 0];
+            const next = stepRun(
+              setTarget({ ...s, army: 60 }, o?.centre ?? 0.5),
+              DT,
+            );
+            if (next.target !== null)
+              fired[next.target] = (fired[next.target] ?? 0) + DT;
+            if (next.next > s.next)
+              for (let i = s.nextHazard; i < s.packs.length; i++)
+                expect(packStreaming(s, i)).toBe(false);
+            s = next;
+          }
+          expect(s.status).toBe("finished");
+          s.track.hazards.forEach((h, i) => {
+            // a pack right behind another shares its time; a lone one gets its own
+            if (h.kind === "pack" && s.track.hazards[i - 1]?.kind !== "pack")
+              expect(fired[i]).toBeGreaterThan(1.7);
+          });
+        }
+      }
     });
   });
 
@@ -957,7 +1105,7 @@ describe("shooting", () => {
     });
   });
 
-  it("a pack's span is its mouth beyond STREAM_DISTANCE, closing into the army's column (as wide as the army, centred on it) at contact", () => {
+  it("a pack's span is its mouth while it waits, and the army's (as wide as the army, centred on it) from the moment it wakes, however far", () => {
     for (const [army, x, packX] of [
       [20, 0.1, 0.9],
       [200, 0.5, 0.2],
@@ -973,20 +1121,19 @@ describe("shooting", () => {
         ...s0,
         packs: [{ pos: ahead, x: packX }],
       });
-      expect(packConverge(at(STREAM_DISTANCE + 0.5), 0)).toBe(0);
-      expect(packSpan(at(STREAM_DISTANCE + 0.5), 0)).toEqual(packMouth(s0, 0));
-      expect(packConverge(at(STREAM_DISTANCE / 2), 0)).toBeCloseTo(0.5, 12);
       const w = crowdWidth(army);
-      const col = packSpan(at(0), 0);
-      expect(packConverge(at(0), 0)).toBe(1);
-      expect(col.left).toBeCloseTo(x - w / 2, 12);
-      expect(col.right).toBeCloseTo(x + w / 2, 12);
-      // waiting behind a wall it stays wide
+      for (const ahead of [PACK_WAKE - 0.1, 6, 2, 0]) {
+        const col = packSpan(at(ahead), 0);
+        expect(col.left).toBeCloseTo(x - w / 2, 12);
+        expect(col.right).toBeCloseTo(x + w / 2, 12);
+      }
+      // too far to wake, or waiting behind a wall: its mouth
+      expect(packSpan(at(PACK_WAKE + 0.5), 0)).toEqual(packMouth(s0, 0));
       const walled = {
         ...at(1),
         track: { ...s0.track, questions: [0.5, 100] },
       };
-      expect(packConverge(walled, 0)).toBe(0);
+      expect(packSpan(walled, 0)).toEqual(packMouth(s0, 0));
     }
     // a narrow pack far to the side still reaches the army
     const s = stepFor(

@@ -1,22 +1,11 @@
 import { Scene, type InstancedBufferAttribute, type Vector4 } from "three";
 import { describe, expect, it } from "vitest";
 import { crowdWidth } from "../../src/core/crowd";
-import {
-  createRunState,
-  packConverge,
-  packMouth,
-  packSpan,
-  type RunState,
-} from "../../src/core/sim";
+import { createRunState, type RunState } from "../../src/core/sim";
 import type { Track } from "../../src/core/track";
-import {
-  HORDE_AREA,
-  HORDE_SCALE,
-  STREAM_DISTANCE,
-} from "../../src/core/tuning";
+import { HORDE_SCALE } from "../../src/core/tuning";
 import { createHorde, DIE_DIST } from "../../src/game/three/horde";
 import {
-  DIST_SCALE,
   FIGURE_RADIUS,
   HORDE_CAP,
   HORDE_COLUMN,
@@ -24,7 +13,6 @@ import {
   hordePlace,
   type HordeShape,
   TRACK_W,
-  worldX,
 } from "../../src/game/three/world";
 
 const scale = HORDE_SCALE;
@@ -128,6 +116,8 @@ function horde(at: number[], damage: number, heads = 200): RunState {
   run.hp = at.map(() => 40);
   run.heads = at.map(() => heads);
   run.damage = at.map(() => damage);
+  // the stream's head at the given place
+  run.packs = at.map((pos) => ({ pos, x: 0.5 }));
   return run;
 }
 
@@ -198,43 +188,6 @@ describe("drawing the horde", () => {
     expect(slot(0).count).toBe(190);
   });
 
-  it("stays spread wide where it is far away, whatever the army does; within STREAM_DISTANCE its front is the core's span", () => {
-    const { h, slot } = setup();
-    const far = { ...horde([STREAM_DISTANCE + 2], 0), x: 0.2, targetX: 0.2 };
-    far.packs = [{ pos: STREAM_DISTANCE + 2, x: 0.7 }];
-    h.update(far, 0);
-    const mouth = packMouth(far, 0);
-    const front = slot(0).front.clone();
-    expect(front.z).toBeCloseTo((mouth.right - mouth.left) * TRACK_W, 6);
-    expect(front.w).toBeCloseTo(front.z, 6);
-    expect(slot(0).back.z).toBe(0);
-    // the army steers across: the far pack doesn't follow
-    h.update({ ...far, x: 0.8, targetX: 0.8 }, 0.1);
-    expect(slot(0).front.x).toBeCloseTo(front.x, 9);
-    expect(slot(0).front.z).toBeCloseTo(front.z, 9);
-    // near the army: the front closes onto it, exactly as the core's span
-    for (const ahead of [STREAM_DISTANCE / 2, 0.1, 0]) {
-      const near = {
-        ...far,
-        x: 0.3,
-        targetX: 0.3,
-        packs: [{ pos: ahead, x: 0.7 }],
-      };
-      h.update(near, 0.2);
-      const span = packSpan(near, 0);
-      expect(slot(0).front.x).toBeCloseTo(
-        worldX((span.left + span.right) / 2),
-        9,
-      );
-      expect(slot(0).front.z).toBeCloseTo(
-        (span.right - span.left) * TRACK_W,
-        9,
-      );
-      expect(slot(0).back.z).toBeCloseTo(packConverge(near, 0), 12);
-    }
-    expect(slot(0).front.z).toBeCloseTo(crowdWidth(200) * TRACK_W, 9);
-  });
-
   it("figures that reach the army vanish into it; shot ones fall", () => {
     const { h, slot } = setup();
     const a = { ...horde([0.5], 0), packs: [{ pos: 0, x: 0.5 }] };
@@ -246,10 +199,6 @@ describe("drawing the horde", () => {
     h.update({ ...a, damage: [1.6], arrived: [5], dist: 0.02 }, 0.04);
     for (let k = 192; k < 195; k++) expect(d[3 * k]).toBeCloseTo(0.02, 6);
     expect(slot(0).state.x).toBe(192);
-  });
-
-  it("spaces its figures as the core's column density (HORDE_AREA)", () => {
-    expect(HORDE_GAP ** 2 / (TRACK_W * DIST_SCALE)).toBeCloseTo(HORDE_AREA, 15);
   });
 
   it("stands still while paused (the clock and distance stop)", () => {

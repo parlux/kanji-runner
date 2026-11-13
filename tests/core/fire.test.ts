@@ -174,6 +174,14 @@ describe("pickTarget", () => {
     expect(pickTarget([t(0.9, 0, 1)], 0, 1, crowd)).toBe(null);
   });
 
+  it("reaches a threat with its own range that far (a pack's stream), still nearest first", () => {
+    const far = { ...t(8, 0, 1), range: 12 };
+    expect(pickTarget([far], 0, 0, crowd)).toBe(0);
+    expect(pickTarget([{ ...far, pos: 12.01 }], 0, 0, crowd)).toBe(null);
+    expect(pickTarget([far], 0, 0, crowd, 7)).toBe(null);
+    expect(pickTarget([t(2, 0, 1), far], 0, 0, crowd)).toBe(0);
+  });
+
   it("never targets null entries", () => {
     expect(pickTarget([null, t(1.5, 0, 1)], 0, 0, crowd)).toBe(1);
     expect(pickTarget([null], 0, 0, crowd)).toBe(null);

@@ -10,7 +10,7 @@ import {
 import {
   hazardPos,
   isShattered,
-  packConverge,
+  packAwake,
   packHeadsLeft,
   packMouth,
   packSpan,
@@ -323,7 +323,10 @@ export function createHorde(scene: Scene): Horde {
         sh.cx = worldX((span.left + span.right) / 2);
         sh.area = (HORDE_GAP * size) ** 2;
         // the core meets the army at its centre; drawn, a stream crashes into its front rows
-        const converge = packConverge(run, i);
+        const converge =
+          packAwake(run, i) || (run.arrived[i] ?? 0) > 0
+            ? Math.min(1, Math.max(0, 1 - (pos - dist) / 2.5))
+            : 0;
         s.z0 = worldZ(pos + crowdHalfDepth(run.army) * converge, 0);
         s.front.set(sh.cx, s.z0 + dist * DIST_SCALE, sh.cw, sh.pw);
         s.back.set(sh.px, sh.area, converge, size);

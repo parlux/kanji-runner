@@ -126,12 +126,12 @@ export function hazardHeads(
   );
 }
 
-/** Where a shootable threat is now: its track position and its span across the track. */
-export type Threat = { pos: number; span: Span };
+/** Where a shootable threat is now: its track position, its span across the track, and how far ahead it can be hit (FIRE_RANGE when absent). */
+export type Threat = { pos: number; span: Span; range?: number };
 
 /**
  * Index of the nearest threat at or after `from`, ahead of `dist` within
- * FIRE_RANGE and short of `limit` (the next question), whose span overlaps
+ * its range (FIRE_RANGE unless it says) and short of `limit` (the next question), whose span overlaps
  * the crowd's. Null entries can't be shot.
  */
 export function pickTarget(
@@ -148,7 +148,7 @@ export function pickTarget(
     if (
       !t ||
       t.pos < dist ||
-      t.pos - dist > FIRE_RANGE ||
+      t.pos - dist > (t.range ?? FIRE_RANGE) ||
       t.pos >= limit ||
       t.pos >= bestPos
     )

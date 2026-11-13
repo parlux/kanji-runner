@@ -34,17 +34,18 @@ import {
   BASE_REWARD,
   BASE_SPEED,
   CRATE_REWARD_K,
-  HORDE_AREA,
+  CROWD_DEPTH_MAX,
+  HORDE_GAP_LOOSE,
   HORDE_THREAT,
   ENEMY_SPEED,
   FIRE_RANGE,
   GATE_GROW_PER_DAMAGE,
   MAX_SPEED_MUL,
-  PACK_COLUMN_MAX,
+  PACK_FIRE_RANGE,
   PACK_MERGE_SPEED,
   PACK_WAKE,
   REASK_MAX,
-  STREAM_DISTANCE,
+  PACK_COLUMN_MAX,
   STARTING_ARMY,
   STEER_EASE,
   SQUAD_DEFECT_GAIN,
@@ -56,8 +57,57 @@ import {
 import { hazardSpan, isCharge, type Hazard, type Track } from "./track";
 import type { GateRow } from "./types";
 
-/** A moving enemy pack: its current track position and centre. */
+/** A moving enemy pack: its stream's head (track position) and its crowd's centre. */
 export type PackState = { pos: number; x: number };
+
+/**
+ * A pack's waiting crowd (track units): `cols` across its mouth `gx` apart
+ * and `rows` back `gz` apart (odd rows shifted a quarter gap each way, so
+ * it reads as scattered, not a grid), `depth` = rows × gz deep. Figures
+ * stand HORDE_GAP_LOOSE × scale apart (about gx × gz each), closer when
+ * that would be deeper than CROWD_DEPTH_MAX.
+ */
+export type Crowd = {
+  cols: number;
+  rows: number;
+  gx: number;
+  gz: number;
+  depth: number;
+};
+
+/** The crowd a pack of `heads` stands in, `width` wide (track units), figures `scale` a soldier's size. */
+export function packCrowd(heads: number, width: number, scale: number): Crowd {
+  const n = Math.max(1, heads);
+  const w = Math.max(1e-3, width);
+  const g = Math.min(
+    HORDE_GAP_LOOSE * scale,
+    Math.sqrt((CROWD_DEPTH_MAX * w) / n),
+  );
+  const cols = Math.max(1, Math.min(n, Math.floor(w / g)));
+  const gx = w / cols;
+  const rows = Math.ceil(n / cols);
+  const gz = Math.min((g * g) / gx, CROWD_DEPTH_MAX / rows);
+  return { cols, rows, gx, gz, depth: rows * gz };
+}
+
+/** Pack i's crowd (see packCrowd), from its head count and the run's tuning. */
+export function crowdOf(s: RunState, i: number): Crowd {
+  return packCrowd(
+    s.heads[i] ?? 0,
+    Math.min(1, s.horde.packWidth),
+    s.horde.hordeScale,
+  );
+}
+
+/**
+ * Where pack i's crowd starts (its front row's track position):
+ * CROWD_DEPTH_MAX / 2 short of the pack's place, whatever its size, so every
+ * pack gives the army as long to shoot and the deepest crowd is centred on
+ * the place. It stands there for good; the stream's head starts here.
+ */
+export function crowdFront(s: RunState, i: number): number {
+  return (s.track.hazards[i]?.pos ?? Infinity) - CROWD_DEPTH_MAX / 2;
+}
 
 export { gateOpenings, nearestOpening, wallSolids, type Opening };
 
@@ -186,8 +236,9 @@ export function createRunState(
     strength: hazardStrength(track, expected),
     damage: track.hazards.map(() => 0),
     arrived: track.hazards.map(() => 0),
+    // the head starts at the crowd's front (crowdFront)
     packs: track.hazards.map((h) =>
-      h.kind === "pack" ? { pos: h.pos, x: h.x } : null,
+      h.kind === "pack" ? { pos: h.pos - CROWD_DEPTH_MAX / 2, x: h.x } : null,
     ),
     target: null,
     gates: rows.map((r) => gateOpenings(r.options.length)),
@@ -306,30 +357,14 @@ export function packMouth(s: RunState, i: number): Span {
 }
 
 /**
- * How far (0..1) pack i has poured into a stream at the army: 0 while it is
- * waiting or more than STREAM_DISTANCE ahead, rising to 1 as its front
- * reaches the army; 1 once it has started streaming in.
- */
-export function packConverge(s: RunState, i: number): number {
-  if ((s.arrived[i] ?? 0) > 0) return 1;
-  if (!packAwake(s, i)) return 0;
-  const ahead = hazardPos(s, i) - s.dist;
-  return Math.min(1, Math.max(0, 1 - ahead / STREAM_DISTANCE));
-}
-
-/**
- * Pack i's span where it can hit and be hit: its mouth far away, closing
- * within STREAM_DISTANCE into a column as wide as the army and centred on it
- * (packConverge), so whatever reaches the army can't be dodged.
+ * Pack i's span where it can hit and be hit: its mouth while it waits; once
+ * it wakes, its stream, as wide as the army and centred on it (it homes in,
+ * so nothing that reaches the army can be dodged).
  */
 export function packSpan(s: RunState, i: number): Span {
-  const m = packMouth(s, i);
-  const t = packConverge(s, i);
+  if (!packAwake(s, i) && (s.arrived[i] ?? 0) <= 0) return packMouth(s, i);
   const w = crowdWidth(s.army);
-  return {
-    left: m.left + (s.x - w / 2 - m.left) * t,
-    right: m.right + (s.x + w / 2 - m.right) * t,
-  };
+  return { left: s.x - w / 2, right: s.x + w / 2 };
 }
 
 /** Where hazard i is now: packs move, everything else stays put. */
@@ -338,16 +373,14 @@ export function hazardPos(s: RunState, i: number): number {
 }
 
 /**
- * Enemies per track unit along pack i's column: its figures' spacing
- * (HORDE_AREA × hordeScale²) at the army's width, packed tighter when needed
- * so the whole pack fits in PACK_COLUMN_MAX.
+ * Enemies per track unit along pack i's column: its heads over
+ * PACK_COLUMN_MAX, the same length for every pack, so each gives the army
+ * as long to shoot. Enemy k from the front stands k / packDensity behind the
+ * head, or (drawn) in the crowd until the head has run far enough for that
+ * place to be nearer than its own: the crowd empties from its front.
  */
 export function packDensity(s: RunState, i: number): number {
-  const area = HORDE_AREA * s.horde.hordeScale ** 2;
-  return Math.max(
-    (s.heads[i] ?? 0) / PACK_COLUMN_MAX,
-    crowdWidth(s.army) / area,
-  );
+  return (s.heads[i] ?? 0) / PACK_COLUMN_MAX;
 }
 
 /** How far back (track units) pack i's column runs from its front: its enemies left over packDensity. */
@@ -457,7 +490,11 @@ function threats(s: RunState): (Threat | null)[] {
     if (h.kind === "block")
       return { pos: h.pos, span: { left: h.left, right: h.right } };
     if (h.kind === "pack")
-      return { pos: hazardPos(s, i), span: packSpan(s, i) };
+      return {
+        pos: hazardPos(s, i),
+        span: packSpan(s, i),
+        range: PACK_FIRE_RANGE,
+      };
     return null;
   });
 }
