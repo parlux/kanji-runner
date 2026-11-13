@@ -225,10 +225,11 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 **Scope:** S
 
 ### Checkpoint H: v1.4 (owner, on the phone)
-- [ ] A run looks and feels like a crowd runner: figures bob, the crowd swells and thins.
-- [ ] The boss feels like the end of the run, not a separate screen; the giant boss looks big and scary.
-- [ ] Smooth on the phone with a full crowd.
-- [ ] Labels: readable enough, or the owner says what to tune.
+- [x] A run looks and feels like a crowd runner: figures bob, the crowd swells and thins.
+- [x] The boss feels like the end of the run, not a separate screen; the giant boss looks big and scary.
+- [x] Smooth on the phone with a full crowd.
+- [x] Labels: readable enough, or the owner says what to tune.
+  - Owner, 2026-11-13: very readable with the camera changes; camera still being finalised (`docs/ideas/3d-camera-follow.md`).
 - [ ] The army can steer during the boss fight (T5b).
 
 ## Phase 11: camera tuning (independent of T4; worktree `camera`)
