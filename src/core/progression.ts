@@ -55,6 +55,56 @@ export function levelProgress(
   };
 }
 
+/** The end screen's level card: the level after the run and how the run moved it. */
+export type LevelCard = {
+  /** The level shown: the unlocked level if the run unlocked one, else the current level. */
+  level: number;
+  learned: number;
+  total: number;
+  /** Learned items needed to unlock the next level. */
+  needed: number;
+  /** Items still to learn for the unlock, never below 0. */
+  toUnlock: number;
+  /** Items this run newly learned on `level`; 0 when the run unlocked a level. */
+  gained: number;
+  /** The level this run unlocked, else null. */
+  unlocked: number | null;
+  /** True on the last level: no next level, no unlock mark. */
+  last: boolean;
+};
+
+/**
+ * The level card from the progress before and after a run. Counts like
+ * `levelProgress` (the start screen's bar), so the bar's "this run" segment is
+ * `gained` items after the first `learned - gained`. On an unlock the card shows
+ * the new level with `gained` 0.
+ */
+export function levelCard(
+  before: Progress,
+  after: Progress,
+  kana: readonly KanaItem[],
+  kanji: readonly KanjiItem[],
+): LevelCard {
+  const level = after.unlockedLevel;
+  const p = levelProgress(after, level, kana, kanji);
+  const unlocked = level > before.unlockedLevel ? level : null;
+  const gained =
+    unlocked === null
+      ? Math.max(
+          0,
+          p.learned - levelProgress(before, level, kana, kanji).learned,
+        )
+      : 0;
+  return {
+    level,
+    ...p,
+    toUnlock: Math.max(0, p.needed - p.learned),
+    gained,
+    unlocked,
+    last: level >= maxLevel(kanji),
+  };
+}
+
 /**
  * Progress with every level unlocked that the rule allows: while ≥ 80% of the
  * current level is learned, the next level unlocks. Never lowers the level.

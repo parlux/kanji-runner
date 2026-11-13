@@ -3,6 +3,7 @@ import { KANA } from "../../src/core/kana";
 import { KANJI } from "../../src/core/kanji";
 import {
   applyUnlock,
+  levelCard,
   levelKeys,
   levelName,
   levelProgress,
@@ -199,5 +200,73 @@ describe("meaning-mode progress", () => {
     for (const key of levelKeys(2, [], KANJI).slice(0, 23))
       short.items[key] = rec(2);
     expect(applyUnlock(short, [], KANJI).unlockedLevel).toBe(2);
+  });
+});
+
+describe("levelCard", () => {
+  it("shows what the run added on the same level", () => {
+    const card = levelCard(withLearned(2, 10), withLearned(2, 14), KANA, KANJI);
+    expect(card).toEqual({
+      level: 2,
+      learned: 14,
+      total: 30,
+      needed: 24,
+      toUnlock: 10,
+      gained: 4,
+      unlocked: null,
+      last: false,
+    });
+  });
+
+  it("has no gain when nothing was learned", () => {
+    const p = withLearned(2, 10);
+    const card = levelCard(p, p, KANA, KANJI);
+    expect(card.gained).toBe(0);
+    expect(card.learned).toBe(10);
+  });
+
+  it("never reports a negative gain", () => {
+    expect(
+      levelCard(withLearned(2, 10), withLearned(2, 8), KANA, KANJI).gained,
+    ).toBe(0);
+  });
+
+  it("shows the new level with its own numbers after an unlock", () => {
+    const after = applyUnlock(withLearned(2, 24), KANA, KANJI);
+    const card = levelCard(withLearned(2, 23), after, KANA, KANJI);
+    expect(card).toMatchObject({
+      level: 3,
+      learned: 0,
+      total: 30,
+      needed: 24,
+      toUnlock: 24,
+      gained: 0,
+      unlocked: 3,
+      last: false,
+    });
+  });
+
+  it("marks the last level", () => {
+    const top = maxLevel(KANJI);
+    const card = levelCard(
+      withLearned(top, 1),
+      withLearned(top, 3),
+      KANA,
+      KANJI,
+    );
+    expect(card).toMatchObject({ level: top, gained: 2, last: true });
+  });
+
+  it("counts meaning mode by kanji meaning keys, with no kana", () => {
+    const before = meaningProgress();
+    const after = withLearned(2, 5);
+    const card = levelCard(before, after, [], KANJI);
+    expect(card).toMatchObject({
+      level: 2,
+      learned: 5,
+      total: 30,
+      gained: 5,
+      unlocked: null,
+    });
   });
 });

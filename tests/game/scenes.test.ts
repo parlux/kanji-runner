@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { KANA } from "../../src/core/kana";
 import { KANJI } from "../../src/core/kanji";
-import { levelKeys } from "../../src/core/progression";
+import { levelKeys, meaningProgress } from "../../src/core/progression";
 import { crowdWidth } from "../../src/core/crowd";
 import { bossSize } from "../../src/core/boss";
 import { builtInPool, wanikaniPool } from "../../src/core/pool";
@@ -21,6 +21,7 @@ import { STEP } from "../../src/game/loop";
 import {
   adoptProgress,
   afterStep,
+  endLevelCard,
   createSession,
   devLevel,
   handleAction,
@@ -159,6 +160,42 @@ describe("afterStep", () => {
     // starting the next run clears the message
     const start = handleAction({ kind: "start" }, "confirm", () => 1, after);
     expect(start.session.unlocked).toBeNull();
+  });
+
+  it("keeps the progress before the run for the level card, and clears it on a new run", () => {
+    const ended: Scene = {
+      kind: "end",
+      seed: 7,
+      boss: null,
+      run: { ...run.run, results: [true], status: "dead" },
+    };
+    expect(session.before).toBeNull();
+    const after = afterStep(session, run, ended, 1);
+    expect(after.before).toBe(session.progress);
+    const start = handleAction({ kind: "start" }, "confirm", () => 1, after);
+    expect(start.session.before).toBeNull();
+  });
+
+  it("gives the end screen's level card from the session", () => {
+    const row = {
+      type: "meaning" as const,
+      prompt: "日",
+      options: ["a", "b"],
+      answerIndex: 0,
+      answer: "a",
+    };
+    const meaning = createSession(meaningProgress(), null, null, true);
+    expect(endLevelCard(meaning)).toMatchObject({ level: 2, gained: 0 });
+    const ended: Scene = {
+      kind: "end",
+      seed: 7,
+      boss: null,
+      run: { ...run.run, rows: [row], results: [true], status: "dead" },
+    };
+    const after = afterStep(meaning, run, ended, 1);
+    const card = endLevelCard(after);
+    expect(card).toMatchObject({ level: 2, total: 30, unlocked: null });
+    expect(card.gained).toBe(card.learned);
   });
 
   it("reports no unlock when the level does not change", () => {

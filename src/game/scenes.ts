@@ -1,9 +1,11 @@
 import { bossSize, bossWon } from "../core/boss";
 import {
   applyUnlock,
+  levelCard,
   maxLevel,
   place,
   placeMeaning,
+  type LevelCard,
 } from "../core/progression";
 import { mergeProgress } from "../core/merge";
 import { builtInPool, meaningPool, wanikaniPool } from "../core/pool";
@@ -61,6 +63,11 @@ export type Session = {
   persist: boolean;
   /** The level the last run unlocked, shown until the next run starts. */
   unlocked: number | null;
+  /**
+   * The progress just before the last run, kept for the end screen's level
+   * card (`endLevelCard`); null before the first run and once a new run starts.
+   */
+  before: Progress | null;
   /** The taught WaniKani kanji when runs use WaniKani mode, else null (Built-in). */
   wk: WkList | null;
   /** This sitting's missed and fixed items; updated once per finished run. */
@@ -89,6 +96,7 @@ export function createSession(
         kana: meaning ? [] : KANA,
         persist: true,
         unlocked: null,
+        before: null,
         wk: null,
         log: storedLog,
         meaning,
@@ -98,6 +106,7 @@ export function createSession(
         kana: [],
         persist: false,
         unlocked: null,
+        before: null,
         wk: null,
         log: null,
         meaning: false,
@@ -164,7 +173,21 @@ export function afterStep(
     progress,
     log: logRun(session.log, rows, results, now),
     unlocked: gained ? progress.unlockedLevel : null,
+    before: session.progress,
   };
+}
+
+/**
+ * The end screen's level card for the last run (see `levelCard`); counts the
+ * same way as the start screen's level bar. Without a run behind it, nothing gained.
+ */
+export function endLevelCard(session: Session): LevelCard {
+  return levelCard(
+    session.before ?? session.progress,
+    session.progress,
+    session.kana,
+    KANJI,
+  );
 }
 
 /**
@@ -181,7 +204,7 @@ function startAction(
   const { pick } = scene;
   if (pick === undefined) {
     if (action === "confirm") {
-      const next = { ...session, unlocked: null };
+      const next = { ...session, unlocked: null, before: null };
       return { scene: newRun(newSeed(), next), session: next };
     }
     // placement is off in WaniKani mode: WaniKani's level gates the pool

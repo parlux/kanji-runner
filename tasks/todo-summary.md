@@ -12,9 +12,9 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 - The wiped-out gate number and "gate N of M" from the run state.
 
 **Acceptance criteria:**
-- [ ] Tested: best streak (none right, longest not last, with re-asks).
-- [ ] Tested: card numbers for +N, no gain, an unlock, the last level, meaning mode.
-- [ ] Golden run and existing tests unchanged.
+- [x] Tested: best streak (none right, longest not last, with re-asks).
+- [x] Tested: card numbers for +N, no gain, an unlock, the last level, meaning mode.
+- [x] Golden run and existing tests unchanged.
 
 **Verification:** `npm test && npm run lint && npm run build`.
 **Dependencies:** none
