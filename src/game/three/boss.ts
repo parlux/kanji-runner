@@ -27,6 +27,8 @@ const STOMP_HZ = 2.5;
 const STOMP_LIFT = 0.35;
 /** Share of the hold the stomp to the firing stop takes. */
 const STOMP_U = 0.85;
+/** The stomp ends this far (track distance) short of the army, so its count stays readable. */
+const STOMP_SHORT = 0.6;
 /** Sparks flickering on its body while it is hit. */
 const HITS = 6;
 
@@ -75,7 +77,7 @@ export function createBoss(scene: Scene, fx: Fx) {
         sway = (Math.PI / 2) * u * u;
       } else if (end?.kind === "stomp") {
         const u = Math.min(1, end.u / STOMP_U);
-        dist = at - (at - stop) * u;
+        dist = at - (at - (stop + STOMP_SHORT)) * u;
         lift = u < 1 ? Math.abs(Math.sin(clock * STOMP_HZ * Math.PI)) : 0;
         lift *= STOMP_LIFT;
         sway = u < 1 ? Math.sin(clock * STOMP_HZ * Math.PI) * 0.08 : 0;

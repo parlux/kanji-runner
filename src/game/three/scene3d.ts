@@ -15,6 +15,7 @@ import {
   Vector3,
   WebGLRenderer,
 } from "three";
+import type { RunState } from "../../core/sim";
 import type { Scene } from "../scenes";
 import { fitCamera, LOOK, makeCamera, MAX_DPR } from "./view";
 import { makeCrowdMesh, type FigureKind } from "./figures";
@@ -276,7 +277,8 @@ export function createView3d(canvas: HTMLCanvasElement): View3d | null {
   let share = 1;
   // the crowd's run cycle (1 running, 0 stopped at the boss), eased
   let running = 1;
-  let bossView: BossView = {
+  const bossRun = {} as RunState;
+  const bossView: BossView = {
     dist: Infinity,
     height: 0,
     hp: 0,
@@ -311,16 +313,15 @@ export function createView3d(canvas: HTMLCanvasElement): View3d | null {
       // in the boss scene the army runs on to the firing stop, the fight as clashAt has it
       const fight =
         s.kind === "boss" ? bossFightAt(s.run.army, s.boss, s.t) : null;
-      const run =
-        s.kind === "boss"
-          ? {
-              ...s.run,
-              dist: bossArmyDist(s.run.dist, s.run.track, pace, s.t),
-              army: fight?.army ?? 0,
-              target: null,
-              gateTarget: null,
-            }
-          : s.run;
+      let run = s.run;
+      if (s.kind === "boss") {
+        // one reused copy of the run, the army drawn on to the firing stop
+        run = Object.assign(bossRun, s.run);
+        run.dist = bossArmyDist(s.run.dist, s.run.track, pace, s.t);
+        run.army = fight?.army ?? 0;
+        run.target = null;
+        run.gateTarget = null;
+      }
       runDist = run.dist;
       haze = hazeFor(pose, runDist);
       layDashes(runDist);
@@ -345,14 +346,12 @@ export function createView3d(canvas: HTMLCanvasElement): View3d | null {
       );
       fx.end();
       const toppled = fight?.ending?.kind === "topple" ? fight.ending.u : 0;
-      bossView = {
-        dist: top.dist,
-        height: top.height,
-        hp: fight?.hp ?? size,
-        size,
-        armyDist: runDist,
-        alpha: 1 - Math.min(1, toppled * 2),
-      };
+      bossView.dist = top.dist;
+      bossView.height = top.height;
+      bossView.hp = fight?.hp ?? size;
+      bossView.size = size;
+      bossView.armyDist = runDist;
+      bossView.alpha = 1 - Math.min(1, toppled * 2);
       const gaps = clipGaps(run);
       const pdt = paused ? 0 : dt;
       share = stepShare(share, run.army, gaps.ahead, gaps.behind, pdt);
