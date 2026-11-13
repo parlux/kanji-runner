@@ -28,6 +28,7 @@ import { createFx } from "./fx";
 import { createProps } from "./props";
 import { createHazards } from "./hazards";
 import { createBoss } from "./boss";
+import { createFpsReadout } from "./fps";
 import {
   clipGaps,
   crowdLayout,
@@ -345,6 +346,7 @@ export function createView3d(canvas: HTMLCanvasElement): View3d | null {
   const army = createCrowd("soldier");
   scene.add(army.mesh);
   const boss = createBoss(scene, fx);
+  const fps = createFpsReadout();
 
   let w = 1;
   let h = 1;
@@ -395,6 +397,7 @@ export function createView3d(canvas: HTMLCanvasElement): View3d | null {
     },
     render(s, pace = 1) {
       const now = performance.now();
+      fps?.frame(now);
       const dt = Math.min(0.1, (now - last) / 1000);
       last = now;
       const paused = s.kind === "run" && s.paused;
