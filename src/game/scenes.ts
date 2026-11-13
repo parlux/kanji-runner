@@ -10,7 +10,8 @@ import {
 import { mergeProgress } from "../core/merge";
 import { builtInPool, meaningPool, wanikaniPool } from "../core/pool";
 import { reaskRun } from "../core/reask";
-import { buildPoolRun } from "../core/run";
+import { buildPoolRun, missedItems } from "../core/run";
+import { canStudy, runKanji } from "../core/study";
 import { WORDS } from "../core/words";
 import { KANA } from "../core/kana";
 import { KANJI } from "../core/kanji";
@@ -187,6 +188,28 @@ export function endLevelCard(session: Session): LevelCard {
     session.progress,
     session.kana,
     KANJI,
+  );
+}
+
+/**
+ * Whether the end screen offers Study: what `canStudy` says about the run's
+ * misses and kanji. Never in meaning mode (its cards show readings).
+ */
+export function studyOffered(
+  run: RunState,
+  boss: BossResult | null,
+  session: Session,
+): boolean {
+  if (session.meaning) return false;
+  const misses = missedItems(
+    run.rows,
+    run.results,
+    run.track.charges,
+    session.wk?.kanji ?? KANJI,
+  );
+  return canStudy(
+    misses.length + runKanji(run.rows, run.results).length,
+    boss?.won ?? false,
   );
 }
 

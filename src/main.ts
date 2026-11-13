@@ -8,6 +8,7 @@ import {
   createSession,
   devLevel,
   handleAction,
+  studyOffered,
   updateScene,
   type Scene,
 } from "./game/scenes";
@@ -40,7 +41,6 @@ import { KANJI } from "./core/kanji";
 import { missedItems } from "./core/run";
 import { WORDS } from "./core/words";
 import {
-  canStudy,
   lastAnswer,
   runKanji,
   storiesWithFallback,
@@ -189,21 +189,8 @@ if (wkOn()) void wk.refresh();
 
 // the study screen (end screen only) lists what the last run missed, then its other kanji
 const kanjiList = (): readonly KanjiItem[] => session.wk?.kanji ?? KANJI;
-const studyAvailable = (): boolean => {
-  // meaning mode has no study cards: they show readings
-  if (scene.kind !== "end" || session.meaning) return false;
-  const { run, boss } = scene;
-  const missed = missedItems(
-    run.rows,
-    run.results,
-    run.track.charges,
-    kanjiList(),
-  );
-  return canStudy(
-    missed.length + runKanji(run.rows, run.results).length,
-    boss?.won ?? false,
-  );
-};
+const studyAvailable = (): boolean =>
+  scene.kind === "end" && studyOffered(scene.run, scene.boss, session);
 // a paused run shows its last answered gate with that item's study card
 const pauseCard = (): void => {
   // meaning mode: no card (it shows readings), the plain "Paused" instead

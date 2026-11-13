@@ -27,9 +27,9 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 - Buttons: Play again (Enter/Space), Study (S, only when offered), Home (Escape); hit rects beside `studyButton` in `src/game/start.ts`; tap handling in `src/main.ts`; a stray tap does nothing.
 
 **Acceptance criteria:**
-- [ ] Tested: button hit rects at 390×844 and 390×667, with and without Study.
-- [ ] Browser check, 390×844 and 390×667, 3D plus one `?2d`: win with 2 misses, wiped out with 5+ misses, a tie, an unlock, meaning mode. No overlaps; each button goes to the right place by tap and key. Screenshots in the scratchpad.
-- [ ] Golden run and existing tests unchanged apart from end-screen expectations; deploy green.
+- [x] Tested: button hit rects at 390×844 and 390×667, with and without Study.
+- [x] Browser check, 390×844 and 390×667, 3D plus one `?2d`: win with 2 misses, wiped out with 5+ misses, a tie, an unlock, meaning mode. No overlaps; each button goes to the right place by tap and key. Screenshots in the scratchpad.
+- [ ] Golden run and existing tests unchanged apart from end-screen expectations (done); deploy green (pending: deploys run from `main`, after the merge).
 
 **Verification:** `npm test && npm run lint && npm run build`; browser check; deploy green.
 **Dependencies:** E1

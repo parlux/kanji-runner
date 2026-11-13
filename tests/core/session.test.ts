@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { logRun, panelLines, sessionLists } from "../../src/core/session";
+import {
+  logRun,
+  sessionLists,
+  sessionTokens,
+  wrapTokens,
+  type PanelToken,
+} from "../../src/core/session";
 import { SESSION_IDLE_MINUTES } from "../../src/core/tuning";
 import type { GateRow, GateType } from "../../src/core/types";
 
@@ -138,75 +144,65 @@ describe("fixed this run", () => {
   });
 });
 
-describe("panelLines", () => {
-  const e = (prompt: string, type: GateType = "meaning") => ({
-    prompt,
-    type,
-    thisRun: false,
-  });
-  const w = (s: string): number => s.length * 10;
-  const texts = (r: ReturnType<typeof panelLines>): string[][] =>
-    r.lines.map((l) =>
-      l.map((t) => (t.kind === "item" ? t.entry.prompt : t.s)),
+describe("session line", () => {
+  const str = (t: PanelToken): string =>
+    t.kind === "item" ? t.entry.prompt : t.s;
+  const flat = (ts: PanelToken[]): string => ts.map(str).join(" ");
+
+  it("reads run, fixed and still missing, readings after their label", () => {
+    const a = logRun(
+      null,
+      [row("A"), row("B"), row("C", "reading")],
+      [false, false, false],
+      0,
     );
-  const many = (n: number) =>
-    Array.from({ length: n }, (_, i) => e(String.fromCharCode(97 + i)));
-
-  it("lists meaning items first, then reading items after a label", () => {
-    const r = panelLines(
-      [e("山", "reading"), e("水"), e("火")],
-      999,
-      999,
-      3,
-      w,
+    const b = logRun(a, [row("A"), row("C", "reading")], [true, true], MIN);
+    expect(flat(sessionTokens(b))).toBe(
+      "Session · run 2 · fixed A reading C · still missing B",
     );
-    expect(texts(r)).toEqual([["水", "火", "· reading", "山"]]);
+    expect(flat(sessionTokens(logRun(null, [row("A")], [false], 0)))).toBe(
+      "Session · run 1 · still missing A",
+    );
+  });
+
+  it("says no misses when both lists are empty", () => {
+    expect(flat(sessionTokens(logRun(null, [row("A")], [true], 0)))).toBe(
+      "Session · run 1 · no misses this session",
+    );
+  });
+
+  const item = (prompt: string): PanelToken => ({
+    kind: "item",
+    entry: { prompt, type: "meaning", thisRun: false },
+  });
+  const label = (s: string): PanelToken => ({ kind: "label", s });
+  // every token is 10 px wide per character, 10 px gaps
+  const w = (t: PanelToken): number => str(t).length * 10;
+  const texts = (r: ReturnType<typeof wrapTokens>): string[] =>
+    r.lines.map(flat);
+
+  it("fits on one line when there is room", () => {
+    const r = wrapTokens([label("ab"), item("x"), item("y")], 100, 2, 10, w);
+    expect(texts(r)).toEqual(["ab x y"]);
     expect(r.hidden).toBe(0);
   });
 
-  it("needs no wrap for a short list", () => {
-    const r = panelLines(many(3), 100, 100, 3, w);
-    expect(texts(r)).toEqual([["a", "b", "c"]]);
-  });
-
-  it("wraps at the first and rest widths", () => {
-    // first: 3 items (50px), rest: 5 items (90px)
-    const r = panelLines(many(10), 50, 90, 3, w);
-    expect(texts(r)).toEqual([
-      ["a", "b", "c"],
-      ["d", "e", "f", "g", "h"],
-      ["i", "j"],
-    ]);
+  it("wraps onto a second line, never ending a line on a label", () => {
+    // "aaaa x" is 70 px; "· b" would fit too, but a line can't end on it
+    const ts = [label("aaaa"), item("x"), label("bb"), item("y"), item("z")];
+    const r = wrapTokens(ts, 90, 2, 10, w);
+    expect(texts(r)).toEqual(["aaaa x", "bb y z"]);
     expect(r.hidden).toBe(0);
   });
 
-  it("puts +k only on the last line, leaving room for it", () => {
-    const r = panelLines(many(12), 50, 50, 2, w);
-    expect(texts(r)).toEqual([["a", "b", "c"], ["d"]]);
-    expect(r.hidden).toBe(8);
-  });
-
-  it("keeps the label off the end of a line, and may start a line with it", () => {
-    const entries = [e("a"), e("b"), e("c", "reading")];
-    const r = panelLines(entries, 40, 120, 3, w);
-    expect(texts(r)).toEqual([
-      ["a", "b"],
-      ["· reading", "c"],
-    ]);
-    expect(r.hidden).toBe(0);
-  });
-
-  it("never ends the last line with a label", () => {
-    const r = panelLines([e("a"), e("b", "reading")], 60, 60, 1, w);
-    expect(texts(r)).toEqual([["a"]]);
-    expect(r.hidden).toBe(1);
-  });
-
-  it("handles empty and too-narrow input", () => {
-    expect(panelLines([], 100, 100, 3, w)).toEqual({ lines: [[]], hidden: 0 });
-    expect(panelLines([e("a")], 5, 5, 1, w)).toEqual({
-      lines: [[]],
-      hidden: 1,
-    });
+  it("stops at maxLines with +k for the items left out", () => {
+    const ts = [
+      label("a"),
+      ...Array.from({ length: 10 }, (_, i) => item(String(i))),
+    ];
+    // 50 px: 3 tokens a line; the last line keeps room for "+k"
+    const r = wrapTokens(ts, 50, 2, 10, w);
+    expect(texts(r)).toEqual(["a 0 1", "2"]); // "2 +7" is 40 px, "2 3 +6" 60
+    expect(r.hidden).toBe(7);
   });
 });

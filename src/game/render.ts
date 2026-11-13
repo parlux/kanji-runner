@@ -3,6 +3,7 @@ import { crowdWidth } from "../core/crowd";
 import {
   crateReward,
   fireLimit,
+  gateReached,
   rowOpenings,
   hazardPos,
   isShattered,
@@ -18,7 +19,7 @@ import {
   CLASH_APPROACH_SECONDS,
   FIRE_RANGE,
   SAW_W,
-  SESSION_PANEL_MAX_LINES,
+  SESSION_LINE_MAX_LINES,
   VIEW_DISTANCE,
 } from "../core/tuning";
 import { KANJI } from "../core/kanji";
@@ -28,10 +29,16 @@ import {
   levelProgress,
   maxLevel,
   UNLOCK_SHARE,
+  type LevelCard,
 } from "../core/progression";
-import type { BossResult, Scene, Session } from "./scenes";
+import {
+  endLevelCard,
+  studyOffered,
+  type BossResult,
+  type Scene,
+  type Session,
+} from "./scenes";
 import type { SyncStatus } from "../sync/sync";
-import { canStudy, runKanji } from "../core/study";
 import {
   startLayout,
   endLayout,
@@ -40,10 +47,9 @@ import {
   type Rect,
 } from "./start";
 import {
-  panelLines,
-  sessionLists,
+  sessionTokens,
+  wrapTokens,
   type PanelToken,
-  type SessionEntry,
   type SessionLog,
 } from "../core/session";
 import {
@@ -106,6 +112,8 @@ const COLORS = {
   enemyBullet: "#ff9bbd",
   bullet: "#fff3b0",
   badFill: "rgba(255, 107, 107, 0.35)",
+  /** The empty part of the end screen's level bar, on its panel. */
+  barTrack: "#2c3345",
 };
 
 type Ctx = CanvasRenderingContext2D;
@@ -148,7 +156,7 @@ export function render(
   if (scene.kind === "start")
     return renderStart(ctx, w, h, session, scene.pick, sync, otherLevel);
   if (scene.kind === "end")
-    return renderEnd(ctx, w, h, scene.run, scene.seed, scene.boss, session);
+    return renderEnd(ctx, w, h, scene.run, scene.boss, session);
   if (scene.kind === "boss")
     return renderBoss(ctx, w, h, scene.run.army, scene.boss, scene.t);
   renderRun(ctx, w, h, scene.run);
@@ -522,228 +530,399 @@ function renderLevel(ctx: Ctx, w: number, y: number, session: Session): void {
   );
 }
 
-const PANEL_HEAD_H = 26;
-const PANEL_LINE_H = 30;
-const PANEL_CHAR_PX = 22;
-/** The missed list's rows never get thinner than this because of the panel. */
+/** The missed list's rows never get thinner than this because of the session line. */
 const MISSED_MIN_ROW_H = 20;
-
-type PanelGroup = {
-  head: string;
-  headW: number;
-  entries: SessionEntry[];
-  lines: PanelToken[][];
-  hidden: number;
-  highlight: boolean;
-};
-
-/**
- * Wraps the Fixed and Still missing groups. The first line follows the label;
- * continuation lines start at the left gutter.
- */
-function layoutSession(ctx: Ctx, w: number, log: SessionLog, maxLines: number) {
-  const { runs, fixed, missing } = sessionLists(log);
-  const measure = (s: string): number => {
-    ctx.font = `${PANEL_CHAR_PX}px ${FONT}`;
-    return ctx.measureText(s).width;
-  };
-  const group = (
-    head: string,
-    entries: SessionEntry[],
-    highlight: boolean,
-  ): PanelGroup => {
-    ctx.font = `16px ${FONT}`;
-    const headW = ctx.measureText(head).width;
-    const r = panelLines(
-      entries,
-      w - 32 - headW - 8,
-      w - 32,
-      maxLines,
-      measure,
-    );
-    return { head, headW, entries, ...r, highlight };
-  };
-  const empty = fixed.length + missing.length === 0;
-  const groups = empty
-    ? []
-    : [
-        group(`Fixed (${fixed.length}):`, fixed, true),
-        group(`Still missing (${missing.length}):`, missing, false),
-      ];
-  const lines = empty
-    ? 1
-    : groups.reduce((n, g) => n + Math.max(1, g.lines.length), 0);
-  return {
-    runs,
-    empty,
-    groups,
-    height: PANEL_HEAD_H + lines * PANEL_LINE_H + 4,
-  };
-}
-
-/** The "This session" panel: heading, then the wrapped Fixed and Still missing groups. */
-function renderSessionPanel(
-  ctx: Ctx,
-  w: number,
-  top: number,
-  layout: ReturnType<typeof layoutSession>,
-): void {
-  text(
-    ctx,
-    `This session · run ${layout.runs}`,
-    w / 2,
-    top + 10,
-    16,
-    COLORS.dim,
-  );
-  if (layout.empty) {
-    text(
-      ctx,
-      "No misses this session",
-      w / 2,
-      top + PANEL_HEAD_H + 12,
-      18,
-      COLORS.dim,
-    );
-    return;
-  }
-  let y = top + PANEL_HEAD_H + 12;
-  ctx.textAlign = "left";
-  ctx.textBaseline = "middle";
-  for (const g of layout.groups) {
-    ctx.font = `16px ${FONT}`;
-    ctx.fillStyle = COLORS.dim;
-    ctx.fillText(g.head, 16, y);
-    const lines = g.lines.length ? g.lines : [[]];
-    lines.forEach((tokens, li) => {
-      let x = li === 0 ? 16 + g.headW + 8 : 16;
-      const put = (s: string, color: string, size: number): void => {
-        ctx.font = `${size}px ${FONT}`;
-        ctx.fillStyle = color;
-        ctx.fillText(s, x, y);
-        x += ctx.measureText(s).width + 6;
-      };
-      for (const t of tokens) {
-        if (t.kind === "label") put(t.s, COLORS.dim, 14);
-        else
-          put(
-            t.entry.prompt,
-            g.highlight && t.entry.thisRun ? COLORS.good : COLORS.text,
-            PANEL_CHAR_PX,
-          );
-      }
-      if (g.hidden && li === lines.length - 1)
-        put(`+${g.hidden}`, COLORS.dim, 16);
-      y += PANEL_LINE_H;
-    });
-  }
-}
-
 /** Widest a missed item's prompt is drawn on the end screen (px); only words reach it. */
 const MISSED_PROMPT_MAX_W = 132;
+/** The end screen's side margin (px). */
+const END_PAD = 20;
+const SESSION_ITEM_PX = 16;
+const SESSION_LABEL_PX = 14;
+const SESSION_LINE_H = 20;
+const SESSION_GAP = 5;
 
+/** Text at (x, y), vertically centred, optionally bold, shrunk to `maxW`. */
+function put(
+  ctx: Ctx,
+  s: string,
+  x: number,
+  y: number,
+  size: number,
+  color: string,
+  align: CanvasTextAlign = "center",
+  bold = false,
+  maxW = Infinity,
+): number {
+  const font = (px: number): string =>
+    `${bold ? "bold " : ""}${Math.round(px)}px ${FONT}`;
+  ctx.font = font(size);
+  const width = ctx.measureText(s).width;
+  if (width > maxW) ctx.font = font((size * maxW) / width);
+  ctx.fillStyle = color;
+  ctx.textAlign = align;
+  ctx.textBaseline = "middle";
+  ctx.fillText(s, x, y);
+  return Math.min(width, maxW);
+}
+
+function panel(
+  ctx: Ctx,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  r: number,
+) {
+  ctx.fillStyle = COLORS.track;
+  ctx.beginPath();
+  ctx.roundRect(x, y, w, h, r);
+  ctx.fill();
+}
+
+/**
+ * The end screen, top to bottom: result, level card, stat tiles, missed rows,
+ * the session line, then the buttons. Short screens get tighter gaps; the
+ * missed rows shrink to the space left.
+ */
 function renderEnd(
   ctx: Ctx,
   w: number,
   h: number,
   run: RunState,
-  seed: number,
   boss: BossResult | null,
   session: Session,
 ): void {
-  const correct = run.results.filter(Boolean).length;
-  const accuracy = run.results.length
-    ? Math.round((correct / run.results.length) * 100)
-    : 0;
+  const compact = h < 760;
+  const gap = compact ? 10 : 18;
+  const inner = w - 2 * END_PAD;
+  let y = compact ? 22 : 40;
+
+  // result
   const won = boss?.won ?? false;
   const title = !boss ? "Army wiped out" : won ? "Boss defeated!" : "Boss wins";
-  text(
+  const titlePx = Math.min(36, w / 9);
+  put(
     ctx,
     title,
     w / 2,
-    38,
-    fitSize(ctx, title, Math.min(40, w / 9), w - 32),
+    y + 22,
+    titlePx,
     won ? COLORS.good : COLORS.bad,
+    "center",
+    true,
+    inner,
   );
-  const note = !boss
-    ? "The boss was never reached"
-    : run.army === boss.size
-      ? "A tie is a loss"
-      : null;
-  if (note) text(ctx, note, w / 2, 80, 16, COLORS.dim);
-  const sizes = boss
-    ? `Army ${run.army} vs boss ${boss.size}`
-    : `Army ${run.army}`;
-  text(ctx, sizes, w / 2, 112, fitSize(ctx, sizes, 26, w - 32));
-  const stats = `Accuracy ${accuracy}% (${correct}/${run.results.length}) · Seed ${seed}`;
-  text(ctx, stats, w / 2, 142, fitSize(ctx, stats, 18, w - 32), COLORS.dim);
-  unlockedNote(ctx, w, 172, session, 22);
+  y += 50;
+  if (!boss) {
+    const { gate, of } = gateReached(run);
+    const sub = `The boss was never reached · gate ${gate} of ${of}`;
+    put(ctx, sub, w / 2, y + 13, 16, COLORS.dim, "center", false, inner);
+  } else {
+    const tie = run.army === boss.size ? " · a tie is a loss" : "";
+    const sub = `Army ${run.army} vs boss ${boss.size}${tie}`;
+    put(ctx, sub, w / 2, y + 13, 22, COLORS.text, "center", true, inner);
+  }
+  y += 26 + gap;
 
+  y = renderLevelCard(ctx, w, y, compact, endLevelCard(session)) + gap;
+  y = renderStatTiles(ctx, w, y, compact, run) + gap;
+
+  // the session line sits just above the buttons; the missed rows fill what's between
+  const buttons = endLayout(w, h, studyOffered(run, boss, session));
+  const listTop = y + 24;
   const misses = missedItems(
     run.rows,
     run.results,
     run.track.charges,
     session.wk?.kanji ?? KANJI,
   );
-  const top = 204;
-  // meaning mode has no study cards (they show readings)
-  const study =
-    !session.meaning &&
-    canStudy(misses.length + runKanji(run.rows, run.results).length, won);
-  const panelBottom = endLayout(w, h, study).play.y - 12;
-  const log = session.log;
-  // Wrap as far as SESSION_PANEL_MAX_LINES, fewer when the missed rows would
-  // drop below MISSED_MIN_ROW_H.
-  const listNeed = misses.length ? 16 + misses.length * MISSED_MIN_ROW_H : 0;
-  const budget = panelBottom - top - listNeed;
-  let panel = null;
-  if (log)
-    for (let n = SESSION_PANEL_MAX_LINES; n >= 1; n--) {
-      panel = layoutSession(ctx, w, log, n);
-      if (panel.height <= budget) break;
-    }
-  const panelH = panel?.height ?? 0;
-  const bottom = panelBottom - panelH;
+  const line = (maxLines: number) =>
+    session.log ? layoutSessionLine(ctx, inner, session.log, maxLines) : null;
+  const sessionTop = (l: ReturnType<typeof line>): number =>
+    buttons.play.y - gap - (l ? l.lines.length * SESSION_LINE_H : 0);
+  let sl = line(SESSION_LINE_MAX_LINES);
+  const pitch = (l: ReturnType<typeof line>): number =>
+    (sessionTop(l) - gap - listTop) / Math.max(1, misses.length);
+  if (sl && sl.lines.length > 1 && pitch(sl) < MISSED_MIN_ROW_H) sl = line(1);
+
+  // the session line follows the list, never lower than just above the buttons
+  let listBottom = y + 54;
   if (misses.length === 0) {
-    text(ctx, "No misses!", w / 2, top + 40, 28, COLORS.good);
+    put(ctx, "No misses!", w / 2, y + 26, 26, COLORS.good, "center", true);
   } else {
-    ctx.textAlign = "left";
-    ctx.font = `16px ${FONT}`;
-    ctx.fillStyle = COLORS.dim;
-    ctx.textBaseline = "middle";
-    ctx.fillText(`Missed (${misses.length})`, 16, top);
-    const rowH = Math.min(52, (bottom - top - 16) / misses.length);
-    const size = Math.min(28, rowH * 0.7);
-    const small = Math.max(12, Math.min(16, rowH * 0.4));
+    put(
+      ctx,
+      `Missed (${misses.length})`,
+      END_PAD,
+      y + 8,
+      14,
+      COLORS.dim,
+      "left",
+    );
+    const p = Math.min(64, pitch(sl));
+    const rowGap = Math.min(8, p * 0.15);
+    const rowH = p - rowGap;
     misses.forEach((m, i) => {
-      const y = top + 16 + rowH * (i + 0.5);
-      ctx.textAlign = "left";
-      ctx.fillStyle = COLORS.dim;
-      ctx.font = `${Math.round(small)}px ${FONT}`;
-      ctx.fillText(String(m.q), 16, y);
-      ctx.fillStyle = COLORS.text;
-      // a long word shrinks to MISSED_PROMPT_MAX_W and pushes its answer right
-      const promptPx = Math.round(
-        fitSize(ctx, m.prompt, size, MISSED_PROMPT_MAX_W),
-      );
-      ctx.font = `${promptPx}px ${FONT}`;
-      ctx.fillText(m.prompt, 44, y);
-      const answerX = Math.max(96, 44 + ctx.measureText(m.prompt).width + 12);
-      const answerW = w - answerX - 64;
-      const answer = m.answers.join(" · ");
-      ctx.fillStyle = COLORS.good;
-      ctx.font = `${Math.round(fitSize(ctx, answer, size * 0.85, answerW))}px ${FONT}`;
-      ctx.fillText(answer, answerX, y);
-      if (m.charge) {
-        ctx.textAlign = "right";
-        ctx.fillStyle = COLORS.chargeLine;
-        ctx.font = `${Math.round(small)}px ${FONT}`;
-        ctx.fillText("charge", w - 12, y);
-      }
+      const top = listTop + p * i;
+      renderMissedRow(ctx, w, top, rowH, m);
     });
+    listBottom = listTop + p * misses.length - rowGap;
   }
-  if (panel) renderSessionPanel(ctx, w, panelBottom - panelH, panel);
-  renderEndButtons(ctx, endLayout(w, h, study));
+  if (sl)
+    renderSessionLine(
+      ctx,
+      Math.min(listBottom + gap, sessionTop(sl)),
+      sl.lines,
+      sl.hidden,
+    );
+  renderEndButtons(ctx, buttons);
+}
+
+/** The level card: level and learned count, the bar, "+N this run" and what's left to unlock. Returns its bottom. */
+function renderLevelCard(
+  ctx: Ctx,
+  w: number,
+  top: number,
+  compact: boolean,
+  card: LevelCard,
+): number {
+  const pad = compact ? 12 : 16;
+  const step = compact ? 8 : 10;
+  const x = END_PAD;
+  const cw = w - 2 * END_PAD;
+  const h = 2 * pad + 22 + step + 14 + step + 16;
+  panel(ctx, x, top, cw, h, 12);
+  const left = x + 14;
+  const right = x + cw - 14;
+  let y = top + pad + 11;
+  const name = levelName(card.level);
+  const nameW = put(ctx, name, left, y, 18, COLORS.text, "left", true, cw / 2);
+  const learned = `${card.learned} of ${card.total} learned`;
+  put(
+    ctx,
+    learned,
+    right,
+    y,
+    14,
+    COLORS.dim,
+    "right",
+    false,
+    right - left - nameW - 12,
+  );
+
+  // the bar: learned before the run, learned this run (faded), the unlock mark
+  y += 11 + step;
+  const bw = right - left;
+  ctx.save();
+  ctx.beginPath();
+  ctx.roundRect(left, y, bw, 14, 7);
+  ctx.fillStyle = COLORS.barTrack;
+  ctx.fill();
+  ctx.clip();
+  if (card.total) {
+    const before = (bw * (card.learned - card.gained)) / card.total;
+    ctx.fillStyle = COLORS.good;
+    ctx.beginPath();
+    ctx.roundRect(left, y, before, 14, 7);
+    ctx.fill();
+    ctx.fillStyle = COLORS.goodFill;
+    ctx.fillRect(left + before, y, (bw * card.gained) / card.total, 14);
+  }
+  ctx.restore();
+  if (!card.last) {
+    ctx.fillStyle = COLORS.soldier;
+    ctx.fillRect(left + bw * UNLOCK_SHARE - 1, y - 4, 2, 22);
+  }
+
+  y += 14 + step + 8;
+  const gainedNote =
+    card.unlocked !== null
+      ? `${levelName(card.unlocked)} unlocked!`
+      : card.gained > 0
+        ? `+${card.gained} this run`
+        : "";
+  const noteW = gainedNote
+    ? put(
+        ctx,
+        gainedNote,
+        left,
+        y,
+        13,
+        COLORS.good,
+        "left",
+        card.unlocked !== null,
+        bw / 2,
+      )
+    : 0;
+  const next = levelName(card.level + 1);
+  const unlock = card.last
+    ? "Last level"
+    : card.toUnlock > 0
+      ? `${card.toUnlock} more to unlock ${next}`
+      : `${next} unlocks next run`;
+  put(
+    ctx,
+    unlock,
+    right,
+    y,
+    13,
+    card.last ? COLORS.dim : COLORS.soldier,
+    "right",
+    false,
+    bw - noteW - 12,
+  );
+  return top + h;
+}
+
+/** Accuracy, gates right and best streak, three tiles in a row. Returns their bottom. */
+function renderStatTiles(
+  ctx: Ctx,
+  w: number,
+  top: number,
+  compact: boolean,
+  run: RunState,
+): number {
+  const correct = run.results.filter(Boolean).length;
+  const answered = run.results.length;
+  const accuracy = answered ? Math.round((correct / answered) * 100) : 0;
+  const tiles: [string, string, string][] = [
+    [`${accuracy}%`, "Accuracy", COLORS.text],
+    [`${correct}/${answered}`, "Gates right", COLORS.text],
+    [String(run.bestStreak), "Best streak", COLORS.soldier],
+  ];
+  const th = compact ? 54 : 64;
+  const tw = (w - 2 * END_PAD - 16) / 3;
+  tiles.forEach(([value, label, color], i) => {
+    const x = END_PAD + i * (tw + 8);
+    panel(ctx, x, top, tw, th, 10);
+    put(
+      ctx,
+      value,
+      x + tw / 2,
+      top + th * 0.4,
+      22,
+      color,
+      "center",
+      true,
+      tw - 12,
+    );
+    put(
+      ctx,
+      label,
+      x + tw / 2,
+      top + th * 0.76,
+      12,
+      COLORS.dim,
+      "center",
+      false,
+      tw - 8,
+    );
+  });
+  return top + th;
+}
+
+/** One missed gate as a rounded row: gate number, prompt, answers, a "charge" tag. */
+function renderMissedRow(
+  ctx: Ctx,
+  w: number,
+  top: number,
+  rowH: number,
+  m: ReturnType<typeof missedItems>[number],
+): void {
+  const x = END_PAD;
+  const rw = w - 2 * END_PAD;
+  panel(ctx, x, top, rw, rowH, Math.min(10, rowH / 2));
+  const y = top + rowH / 2;
+  // fonts fill a thin row: on a tight list they stay readable rather than to scale
+  const size = Math.min(30, rowH * 0.85);
+  const small = Math.min(13, rowH * 0.7);
+  put(ctx, String(m.q), x + 14, y, small, COLORS.dim, "left");
+  const promptX = x + 14 + 18 + 14;
+  // a long word shrinks to MISSED_PROMPT_MAX_W and pushes its answer right
+  const promptW = put(
+    ctx,
+    m.prompt,
+    promptX,
+    y,
+    size,
+    COLORS.text,
+    "left",
+    false,
+    MISSED_PROMPT_MAX_W,
+  );
+  let right = x + rw - 14;
+  if (m.charge) {
+    ctx.font = `${Math.round(small)}px ${FONT}`;
+    const tagW = ctx.measureText("charge").width + 12;
+    const tagH = Math.min(rowH - 2, small + 8);
+    ctx.strokeStyle = COLORS.chargeLine;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.roundRect(
+      right - tagW + 0.5,
+      y - tagH / 2 + 0.5,
+      tagW - 1,
+      tagH - 1,
+      6,
+    );
+    ctx.stroke();
+    put(ctx, "charge", right - tagW / 2, y, small, COLORS.chargeLine);
+    right -= tagW + 10;
+  }
+  const answerX = Math.max(promptX + 44, promptX + promptW + 14);
+  const answer = m.answers.join(" · ");
+  put(
+    ctx,
+    answer,
+    answerX,
+    y,
+    Math.min(20, rowH * 0.7),
+    COLORS.good,
+    "left",
+    false,
+    Math.max(1, right - answerX),
+  );
+}
+
+/** The session line wrapped to `maxLines` across `avail` px. */
+function layoutSessionLine(
+  ctx: Ctx,
+  avail: number,
+  log: SessionLog,
+  maxLines: number,
+) {
+  const measure = (t: PanelToken): number => {
+    ctx.font = `${t.kind === "item" ? SESSION_ITEM_PX : SESSION_LABEL_PX}px ${FONT}`;
+    return ctx.measureText(t.kind === "item" ? t.entry.prompt : t.s).width;
+  };
+  return wrapTokens(sessionTokens(log), avail, maxLines, SESSION_GAP, measure);
+}
+
+/** "Session · run 3 · fixed 左 玉 · still missing 右 石": fixed this run in good colour. */
+function renderSessionLine(
+  ctx: Ctx,
+  top: number,
+  lines: PanelToken[][],
+  hidden: number,
+): void {
+  lines.forEach((tokens, li) => {
+    const y = top + SESSION_LINE_H * (li + 0.5);
+    let x = END_PAD;
+    const draw = (s: string, color: string, size: number): void => {
+      x += put(ctx, s, x, y, size, color, "left") + SESSION_GAP;
+    };
+    for (const t of tokens) {
+      if (t.kind === "label") draw(t.s, COLORS.dim, SESSION_LABEL_PX);
+      else
+        draw(
+          t.entry.prompt,
+          t.entry.thisRun ? COLORS.good : COLORS.text,
+          SESSION_ITEM_PX,
+        );
+    }
+    if (hidden && li === lines.length - 1)
+      draw(`+${hidden}`, COLORS.dim, SESSION_LABEL_PX);
+  });
 }
 
 /** Play again (filled), then Study and Home (outlined). */

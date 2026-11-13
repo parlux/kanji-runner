@@ -166,5 +166,5 @@ export const REASK_GAP_MAX = 5;
 /** A session ends after this many minutes without a run. */
 export const SESSION_IDLE_MINUTES = 30;
 
-/** Each group in the end screen's "This session" panel wraps to this many lines. */
-export const SESSION_PANEL_MAX_LINES = 3;
+/** The end screen's session line wraps to at most this many lines. */
+export const SESSION_LINE_MAX_LINES = 2;

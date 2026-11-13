@@ -25,6 +25,7 @@ import {
   createSession,
   devLevel,
   handleAction,
+  studyOffered,
   updateScene,
   type Scene,
   type Session,
@@ -240,6 +241,16 @@ describe("end screen", () => {
     const r = handleAction(end(), "back", () => 1, session);
     expect(r.scene).toEqual({ kind: "start" });
     expect(r.session).toBe(session);
+  });
+
+  it("offers Study only outside meaning mode, as canStudy says", () => {
+    const e = end();
+    if (e.kind !== "end") throw new Error("end");
+    const missed = { ...e.run, results: e.run.rows.map(() => false) };
+    expect(studyOffered(missed, null, session)).toBe(true);
+    expect(studyOffered(missed, null, { ...session, meaning: true })).toBe(
+      false,
+    );
   });
 
   it("other actions leave the end screen alone", () => {

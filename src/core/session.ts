@@ -99,56 +99,81 @@ export function sessionLists(log: SessionLog): {
   };
 }
 
-/** One piece of a panel line: an item, or the dim `reading` divider. */
+/** One piece of the session line: an item, or a dim label. */
 export type PanelToken =
   { kind: "item"; entry: SessionEntry } | { kind: "label"; s: string };
 
 /**
- * Wraps a group's entries onto at most `maxLines` lines. Meaning and kana items
- * come first, reading items follow a `reading` label. The first line has
- * `firstAvail` px, later ones `restAvail`. The `reading` label may start a line
- * but never ends one. Only the last allowed line is shortened to leave room
- * for a ` +k` suffix, and `hidden` is k (0 when everything fits).
- * `measure` gives the width of a string at the drawn font.
+ * The end screen's session line as tokens: "Session · run 3", then "· fixed"
+ * and "· still missing" with their items (each group's reading items after a
+ * `reading` label); "· no misses this session" when both are empty.
  */
-export function panelLines(
-  entries: SessionEntry[],
-  firstAvail: number,
-  restAvail: number,
-  maxLines: number,
-  measure: (s: string) => number,
-): { lines: PanelToken[][]; hidden: number } {
-  const item = (entry: SessionEntry): PanelToken => ({ kind: "item", entry });
-  const plain = entries.filter((e) => e.type !== "reading").map(item);
-  const reading = entries.filter((e) => e.type === "reading").map(item);
-  const all: PanelToken[] = [
-    ...plain,
-    ...(reading.length
-      ? [{ kind: "label", s: "· reading" } as PanelToken]
-      : []),
-    ...reading,
+export function sessionTokens(log: SessionLog): PanelToken[] {
+  const { runs, fixed, missing } = sessionLists(log);
+  const label = (s: string): PanelToken => ({ kind: "label", s });
+  const group = (head: string, entries: SessionEntry[]): PanelToken[] => {
+    if (!entries.length) return [];
+    const item = (entry: SessionEntry): PanelToken => ({ kind: "item", entry });
+    const reading = entries.filter((e) => e.type === "reading");
+    return [
+      label(head),
+      ...entries.filter((e) => e.type !== "reading").map(item),
+      ...(reading.length ? [label("reading"), ...reading.map(item)] : []),
+    ];
+  };
+  const empty = !fixed.length && !missing.length;
+  return [
+    label(`Session · run ${runs}`),
+    ...(empty ? [label("· no misses this session")] : []),
+    ...group("· fixed", fixed),
+    ...group("· still missing", missing),
   ];
-  const text = (t: PanelToken): string =>
-    t.kind === "item" ? t.entry.prompt : t.s;
-  const items = (ts: PanelToken[]): number =>
+}
+
+/**
+ * Wraps `tokens` greedily onto at most `maxLines` lines of `avail` px, `gap` px
+ * between tokens. A line never ends on a label. When not everything fits, the
+ * last line is shortened to leave room for "+k", and `hidden` is k (the items
+ * not shown; 0 when everything fits). `measure` gives a token's drawn width.
+ */
+export function wrapTokens(
+  tokens: readonly PanelToken[],
+  avail: number,
+  maxLines: number,
+  gap: number,
+  measure: (t: PanelToken) => number,
+): { lines: PanelToken[][]; hidden: number } {
+  const width = (ts: readonly PanelToken[]): number =>
+    ts.reduce((s, t) => s + measure(t), 0) + gap * Math.max(0, ts.length - 1);
+  const items = (ts: readonly PanelToken[]): number =>
     ts.filter((t) => t.kind === "item").length;
+  const trim = (ts: PanelToken[]): PanelToken[] => {
+    while (ts.length && ts[ts.length - 1]?.kind === "label") ts.pop();
+    return ts;
+  };
   const lines: PanelToken[][] = [];
   let at = 0;
-  for (let l = 0; l < maxLines && (at < all.length || l === 0); l++) {
-    const avail = l === 0 ? firstAvail : restAvail;
-    const last = l === maxLines - 1;
-    const rest = all.slice(at);
-    let c = rest.length;
-    for (; c > 0; c--) {
-      const shown = rest.slice(0, c);
-      if (shown[c - 1]?.kind === "label" && c < rest.length) continue;
-      const hidden = last ? entries.length - items(all.slice(0, at + c)) : 0;
-      const s = shown.map(text).join(" ") + (hidden ? ` +${hidden}` : "");
-      if (measure(s) <= avail) break;
+  for (let l = 0; l < maxLines && at < tokens.length; l++) {
+    const line: PanelToken[] = [];
+    while (
+      at + line.length < tokens.length &&
+      (line.length === 0 ||
+        width([...line, tokens[at + line.length] as PanelToken]) <= avail)
+    )
+      line.push(tokens[at + line.length] as PanelToken);
+    if (l === maxLines - 1 && at + line.length < tokens.length) {
+      const plus = (n: number): PanelToken => ({ kind: "label", s: `+${n}` });
+      const left = (): number => items(tokens.slice(at + line.length));
+      while (line.length && width([...line, plus(left())]) > avail) line.pop();
+      trim(line);
+    } else if (at + line.length < tokens.length) {
+      const n = line.length;
+      trim(line);
+      // a line can't be all label: keep it then
+      if (!line.length) line.push(...tokens.slice(at, at + n));
     }
-    while (c > 0 && rest[c - 1]?.kind === "label") c--;
-    lines.push(rest.slice(0, c));
-    at += c;
+    lines.push(line);
+    at += line.length;
   }
-  return { lines, hidden: entries.length - items(all.slice(0, at)) };
+  return { lines, hidden: items(tokens.slice(at)) };
 }
