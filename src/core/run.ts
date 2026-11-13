@@ -239,8 +239,7 @@ export function revealFor(
   const readings = mainReadings(k).map((r) => ({
     text: showReading(r),
     kind: (k.on && r.base === k.on && !r.okurigana ? "on" : "kun") as
-      | "on"
-      | "kun",
+      "on" | "kun",
   }));
   return readings.length ? { char: k.char, readings, meaning: "" } : null;
 }
