@@ -49,7 +49,7 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 - [ ] Deploy green.
 **Verification:** as H2. **Dependencies:** H2. **Files:** `src/game/three/{kills,hazards,fx}.ts`, tests. **Scope:** M
 
-### Checkpoint M: v1.9 (owner, on the Pixel 7)
+### Checkpoint M: v1.10 (owner, on the Pixel 7)
 - [ ] Mowing down a pack looks spectacular.
 - [ ] Smooth with `?fps` while big packs die, in several looks.
 - [ ] Packs still feel fair: a light bite when misaligned.
