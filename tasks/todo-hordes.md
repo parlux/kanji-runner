@@ -32,10 +32,14 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 ### Task H2: Draw the whole horde, `?fps`
 **Description:** `hazards.ts` draws every live enemy up to `PACK_MAX` per pack (cap covers two full packs), smaller (about 0.7×), denser and deeper, so 200 fit today's width. A dead figure shrinks out over a short time rather than popping. Add the `?fps` readout.
 **Acceptance criteria:**
-- [ ] Tested: horde layout keeps every figure within the pack's span; caps hold.
-- [ ] Browser at 390×844: a 200 pack approaching, half shot, and dying, with a 200 army, in Countryside and Race day; gates and labels read as before. Screenshots in the scratchpad.
-- [ ] Frame time and draw calls logged before and after (≤ 1.3×, ≤ 4 extra draw calls). `?fps` shows and is absent without the flag.
-- [ ] Deploy green (checkpoint follows).
+- [x] Tested: horde layout keeps every figure within the pack's span; caps hold.
+  - `hordeLayout` (world.ts): a jittered hex pattern made once (`PACK_MAX` points, ordered centre-out on a 3:1 deep ellipse), scaled so the widest figure fits the span; figures at `HORDE_SCALE` 0.7, `HORDE_DEPTH` 3. A 200 pack at today's width: closest two figures > 1.5 figure radii apart. hazards.test.ts: 200 drawn for a full pack, 400 for three packs in view (cap), and 10 kills stay drawn while they fall, then go.
+- [x] Browser at 390×844: a 200 pack approaching, half shot, and dying, with a 200 army, in Countryside and Race day; gates and labels read as before. Screenshots in the scratchpad.
+  - Crafted states rendered offscreen with the overlay text on top (`h2-{country,stadium}-{1-approach,2-half-shot,3-dying}.png`). Killed figures topple back, hop and shrink out over 0.45 run distance (about 0.3 s) from a fixed ring of 64 in the same instanced mesh.
+- [x] Frame time and draw calls logged before and after (≤ 1.3×, ≤ 4 extra draw calls). `?fps` shows and is absent without the flag.
+  - Headless (Chrome for Testing, GPU synced each frame), 200 army, a 200 pack being shot from half to nearly dead, a gate row in view, median of 3 × 240 frames, before (c2bf4ed) and after run in turn, twice: Countryside 3.0-3.4 → 2.8-3.3 ms, Race day 3.5-3.9 → 3.0-3.7 ms (≤ 1.0×); draw calls unchanged (21 Countryside, 19 Race day; +0).
+  - `?fps`: bottom-left readout (rolling 1 s average, updated 4×/s), shown only while the 3D run is drawn; hidden over menus; no element without the flag or in `?2d`.
+- [x] Deploy green (checkpoint follows).
 **Verification:** as H1, plus the browser check. **Dependencies:** H1. **Files:** `src/game/three/{hazards,world,scene3d,view}.ts`, tests. **Scope:** M
 
 ### Checkpoint M1: horde on the Pixel 7 (owner)
