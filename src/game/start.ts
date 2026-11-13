@@ -34,14 +34,46 @@ export function startLayout(w: number, h: number) {
   };
 }
 
-/** The end screen's "Study" button, above the continue hint. */
-export function studyButton(w: number, h: number): Rect {
-  const bw = Math.min(200, w - 48);
-  return { x: (w - bw) / 2, y: h - 104, w: bw, h: 44 };
+/** Side margin and bottom padding of the end screen's buttons (px). */
+const END_PAD = 20;
+const END_BOTTOM = 24;
+const END_GAP = 10;
+
+/**
+ * The end screen's buttons, at the bottom: Play again full width, then Study
+ * and Home side by side; Home takes the full width when Study isn't offered.
+ */
+export function endLayout(
+  w: number,
+  h: number,
+  study: boolean,
+): { play: Rect; study: Rect | null; home: Rect } {
+  const bw = w - 2 * END_PAD;
+  const rowY = h - END_BOTTOM - 48;
+  const half = (bw - END_GAP) / 2;
+  return {
+    play: { x: END_PAD, y: rowY - END_GAP - 52, w: bw, h: 52 },
+    study: study ? { x: END_PAD, y: rowY, w: half, h: 48 } : null,
+    home: study
+      ? { x: END_PAD + half + END_GAP, y: rowY, w: half, h: 48 }
+      : { x: END_PAD, y: rowY, w: bw, h: 48 },
+  };
 }
 
-/** Whether a tap at (x, y) hits `r`. */
-export const hits = (r: Rect, x: number, y: number): boolean => inside(r, x, y);
+/** The action for a tap at (x, y) on the end screen; a tap off the buttons does nothing. */
+export function endTap(
+  study: boolean,
+  w: number,
+  h: number,
+  x: number,
+  y: number,
+): Action | null {
+  const l = endLayout(w, h, study);
+  if (inside(l.play, x, y)) return "confirm";
+  if (l.study && inside(l.study, x, y)) return "study";
+  if (inside(l.home, x, y)) return "back";
+  return null;
+}
 
 /** The start screen's sync label, or null when sync is not configured. */
 export function syncLabel(status: SyncStatus): string | null {

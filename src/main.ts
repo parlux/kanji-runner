@@ -12,13 +12,12 @@ import {
   type Scene,
 } from "./game/scenes";
 import {
-  hits,
+  endTap,
   modeTap,
   settingsTap,
   stampTap,
   stampTapped,
   startTap,
-  studyButton,
   syncTap,
 } from "./game/start";
 import { SPEED_PRESETS } from "./core/tuning";
@@ -256,7 +255,6 @@ const study = (): void => {
     run.track.charges,
     kanjiList(),
   );
-  // Play again: end -> start -> run, the same as confirming twice
   const cards = studyCards(
     missed,
     kanjiList(),
@@ -265,10 +263,8 @@ const study = (): void => {
     runKanji(run.rows, run.results),
     WORDS,
   );
-  openStudy(cards, () => {
-    act("confirm");
-    act("confirm");
-  });
+  // its Play again is the end screen's: a new run straight away
+  openStudy(cards, () => act("confirm"));
 };
 
 const act = (action: Action): void => {
@@ -283,8 +279,9 @@ const act = (action: Action): void => {
   session = next.session;
 };
 const steerAxis = bindKeys(act);
-// a tap pauses or resumes a run, does nothing during the boss clash, leaves the end screen
-// for the start screen, and on the start screen hits the placement controls or else starts a run
+// a tap pauses or resumes a run, does nothing during the boss clash, hits the end
+// screen's buttons (Play again, Study, Home; elsewhere nothing), and on the start
+// screen hits the placement controls or else starts a run
 const takeDrag = bindDrag(canvas, (x, y) => {
   if (overlayOpen()) return;
   if (scene.kind === "run") return act("pause");
@@ -292,9 +289,9 @@ const takeDrag = bindDrag(canvas, (x, y) => {
   if (scene.kind === "end") {
     const w = window.innerWidth;
     const h = window.innerHeight;
-    return studyAvailable() && hits(studyButton(w, h), x, y)
-      ? act("study")
-      : act("confirm");
+    const action = endTap(studyAvailable(), w, h, x, y);
+    if (action) act(action);
+    return;
   }
   const w = window.innerWidth;
   const h = window.innerHeight;

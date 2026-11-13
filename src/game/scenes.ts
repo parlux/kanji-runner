@@ -260,9 +260,12 @@ export function handleAction(
       return startAction(scene, action, newSeed, session);
     case "boss":
       return { scene, session };
+    // Play again starts the next run as the start screen's Play does; Home goes back
     case "end":
+      if (action === "confirm")
+        return startAction({ kind: "start" }, action, newSeed, session);
       return {
-        scene: action === "confirm" ? { kind: "start" } : scene,
+        scene: action === "back" ? { kind: "start" } : scene,
         session,
       };
     case "run":

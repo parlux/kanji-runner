@@ -31,6 +31,8 @@ import {
 } from "../../src/game/scenes";
 import type { Action } from "../../src/game/input";
 import {
+  endLayout,
+  endTap,
   startLayout,
   startTap,
   syncAlert,
@@ -222,8 +224,20 @@ describe("end screen", () => {
     return { kind: "end", seed: 7, run: run.run, boss: null };
   };
 
-  it("confirm (Enter or tap) returns to the start screen, not a new run", () => {
+  it("Play again (Enter, Space or the button) starts a new run straight away", () => {
     const r = handleAction(end(), "confirm", () => 1, session);
+    expect(r.scene.kind).toBe("run");
+    if (r.scene.kind === "run") expect(r.scene.seed).toBe(1);
+  });
+
+  it("Play again clears the last run's unlock and level-card baseline", () => {
+    const shown = { ...session, unlocked: 3, before: session.progress };
+    const r = handleAction(end(), "confirm", () => 1, shown);
+    expect(r.session).toMatchObject({ unlocked: null, before: null });
+  });
+
+  it("Home (Escape or the button) goes to the start screen", () => {
+    const r = handleAction(end(), "back", () => 1, session);
     expect(r.scene).toEqual({ kind: "start" });
     expect(r.session).toBe(session);
   });
@@ -231,13 +245,40 @@ describe("end screen", () => {
   it("other actions leave the end screen alone", () => {
     const e = end();
     expect(handleAction(e, "left", () => 1, session).scene).toBe(e);
+    expect(handleAction(e, "pause", () => 1, session).scene).toBe(e);
   });
+});
 
-  it("a tap and then a tap again starts the next run", () => {
-    const first = handleAction(end(), "confirm", () => 1, session);
-    const second = handleAction(first.scene, "confirm", () => 1, first.session);
-    expect(second.scene.kind).toBe("run");
-  });
+describe("end screen buttons", () => {
+  const mid = (r: { x: number; y: number; w: number; h: number }) =>
+    [r.x + r.w / 2, r.y + r.h / 2] as const;
+  const W = 390;
+
+  for (const H of [844, 667]) {
+    it(`at ${W}×${H} with Study: Play again, then Study and Home side by side`, () => {
+      const l = endLayout(W, H, true);
+      const study = l.study as NonNullable<typeof l.study>;
+      expect(l.play).toEqual({ x: 20, y: H - 134, w: 350, h: 52 });
+      expect(study).toEqual({ x: 20, y: H - 72, w: 170, h: 48 });
+      expect(l.home).toEqual({ x: 200, y: H - 72, w: 170, h: 48 });
+      expect(endTap(true, W, H, ...mid(l.play))).toBe("confirm");
+      expect(endTap(true, W, H, ...mid(study))).toBe("study");
+      expect(endTap(true, W, H, ...mid(l.home))).toBe("back");
+      // a stray tap: the middle of the screen, the gap between buttons, below them
+      expect(endTap(true, W, H, W / 2, H / 2)).toBeNull();
+      expect(endTap(true, W, H, 195, H - 48)).toBeNull();
+      expect(endTap(true, W, H, W / 2, H - 10)).toBeNull();
+    });
+
+    it(`at ${W}×${H} without Study: Home takes the full width`, () => {
+      const l = endLayout(W, H, false);
+      expect(l.study).toBeNull();
+      expect(l.home).toEqual({ x: 20, y: H - 72, w: 350, h: 48 });
+      expect(endTap(false, W, H, ...mid(l.play))).toBe("confirm");
+      expect(endTap(false, W, H, 60, H - 48)).toBe("back");
+      expect(endTap(false, W, H, W / 2, 100)).toBeNull();
+    });
+  }
 });
 
 describe("placement picker", () => {

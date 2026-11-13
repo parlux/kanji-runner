@@ -34,7 +34,7 @@ import type { SyncStatus } from "../sync/sync";
 import { canStudy, runKanji } from "../core/study";
 import {
   startLayout,
-  studyButton,
+  endLayout,
   syncAlert,
   syncLabel,
   type Rect,
@@ -690,7 +690,7 @@ function renderEnd(
   const study =
     !session.meaning &&
     canStudy(misses.length + runKanji(run.rows, run.results).length, won);
-  const panelBottom = study ? h - 116 : h - 56;
+  const panelBottom = endLayout(w, h, study).play.y - 12;
   const log = session.log;
   // Wrap as far as SESSION_PANEL_MAX_LINES, fewer when the missed rows would
   // drop below MISSED_MIN_ROW_H.
@@ -743,16 +743,31 @@ function renderEnd(
     });
   }
   if (panel) renderSessionPanel(ctx, w, panelBottom - panelH, panel);
-  if (study) {
-    const r = studyButton(w, h);
+  renderEndButtons(ctx, endLayout(w, h, study));
+}
+
+/** Play again (filled), then Study and Home (outlined). */
+function renderEndButtons(ctx: Ctx, l: ReturnType<typeof endLayout>): void {
+  const { play } = l;
+  ctx.fillStyle = COLORS.good;
+  ctx.beginPath();
+  ctx.roundRect(play.x, play.y, play.w, play.h, 12);
+  ctx.fill();
+  ctx.font = `bold 18px ${FONT}`;
+  ctx.fillStyle = COLORS.bg;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("Play again", play.x + play.w / 2, play.y + play.h / 2);
+  const outlined = (r: Rect, label: string): void => {
     ctx.strokeStyle = COLORS.wallEdge;
     ctx.lineWidth = 1;
     ctx.beginPath();
-    ctx.roundRect(r.x + 0.5, r.y + 0.5, r.w - 1, r.h - 1, 8);
+    ctx.roundRect(r.x + 0.5, r.y + 0.5, r.w - 1, r.h - 1, 12);
     ctx.stroke();
-    text(ctx, "Study (S)", r.x + r.w / 2, r.y + r.h / 2, 20);
-  }
-  text(ctx, "Tap or Enter to continue", w / 2, h - 28, 20);
+    text(ctx, label, r.x + r.w / 2, r.y + r.h / 2, 17);
+  };
+  if (l.study) outlined(l.study, "Study");
+  outlined(l.home, "Home");
 }
 
 /** A cheap deterministic pseudo-random number in [0, 1), for flicker. */
