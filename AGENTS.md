@@ -3,7 +3,7 @@
 - Always push after implementing a change.
 
 ## Workflow: "implement the next round"
-- Active task list: none. Done: v1.3 session, v1.4 3D + camera, v1.5 stories (all in `tasks/done/`). Queued: `tasks/todo-reveal.md` (spec `docs/specs/SPEC-reveal.md`, v1.6): start it only when the owner says so.
+- Active task list: `tasks/todo-reveal.md` (v1.6, in progress). Done: v1.3 session, v1.4 3D + camera, v1.5 stories (all in `tasks/done/`). Spec `docs/specs/SPEC-reveal.md`.
 - You are the orchestrator. Start at the first unchecked task and run tasks one at a time, each in a fresh background subagent, until the next checkpoint. Follow `tasks/subagent-prompt.md` (model choice, prompt template, verify between tasks).
 - Stop at the checkpoint: report to the owner (what changed, what to check, rough edges). Contact them earlier only for a blocking decision.
 - The owner ticks checkpoints. Owner ideas go to `docs/ideas/`.

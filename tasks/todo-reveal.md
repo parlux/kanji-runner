@@ -1,6 +1,6 @@
 # Tasks: the other half after a right answer (v1.6)
 
-Spec: `docs/specs/SPEC-reveal.md` (2026-11-13). Intent: `docs/intent/answer-reveal.md`. Idea: `docs/ideas/answer-reveal.md`. Queued: starts when the owner says so.
+Spec: `docs/specs/SPEC-reveal.md` (2026-11-13). Intent: `docs/intent/answer-reveal.md`. Idea: `docs/ideas/answer-reveal.md`. Started 2026-11-13.
 Every task: `npm test && npm run lint && npm run build` pass before it is checked off.
 
 ## Phase 12: Answer reveal
