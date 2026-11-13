@@ -2,6 +2,8 @@ import type { SessionItem, SessionLog } from "../core/session";
 import type { KeyValueStore } from "./storage";
 
 export const SESSION_KEY = "kanji-runner:session:v1";
+/** Meaning mode keeps its own session log. */
+export const MEANING_SESSION_KEY = "kanji-runner:meaning:session:v1";
 
 const isObject = (v: unknown): v is Record<string, unknown> =>
   typeof v === "object" && v !== null && !Array.isArray(v);
@@ -41,9 +43,12 @@ export function parseSessionLog(raw: unknown): SessionLog | null {
 }
 
 /** The stored session log, or null when missing, corrupt or unreadable. Never throws. */
-export function loadSessionLog(store: KeyValueStore): SessionLog | null {
+export function loadSessionLog(
+  store: KeyValueStore,
+  key: string = SESSION_KEY,
+): SessionLog | null {
   try {
-    const text = store.getItem(SESSION_KEY);
+    const text = store.getItem(key);
     if (text === null) return null;
     return parseSessionLog(JSON.parse(text));
   } catch {
@@ -52,11 +57,24 @@ export function loadSessionLog(store: KeyValueStore): SessionLog | null {
 }
 
 /** Writes the log. Returns false if storage refused; never throws. */
-export function saveSessionLog(store: KeyValueStore, log: SessionLog): boolean {
+export function saveSessionLog(
+  store: KeyValueStore,
+  log: SessionLog,
+  key: string = SESSION_KEY,
+): boolean {
   try {
-    store.setItem(SESSION_KEY, JSON.stringify(log));
+    store.setItem(key, JSON.stringify(log));
     return true;
   } catch {
     return false;
   }
 }
+
+export const loadMeaningSessionLog = (
+  store: KeyValueStore,
+): SessionLog | null => loadSessionLog(store, MEANING_SESSION_KEY);
+
+export const saveMeaningSessionLog = (
+  store: KeyValueStore,
+  log: SessionLog,
+): boolean => saveSessionLog(store, log, MEANING_SESSION_KEY);

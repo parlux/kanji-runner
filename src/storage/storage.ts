@@ -1,8 +1,11 @@
+import { meaningProgress } from "../core/progression";
 import { defaultProgress, MAX_BOX } from "../core/srs";
 import type { ItemProgress, Progress } from "../core/types";
 
 export const STORAGE_KEY = "kanji-runner:v1";
 export const SCHEMA_VERSION = 1;
+/** Meaning mode keeps its own progress; it never shares `STORAGE_KEY`. */
+export const MEANING_STORAGE_KEY = "kanji-runner:meaning:v1";
 
 /** The slice of `localStorage` used here, so tests can pass a fake. */
 export type KeyValueStore = Pick<Storage, "getItem" | "setItem">;
@@ -59,14 +62,21 @@ export function migrate(raw: unknown): Progress | null {
   return out;
 }
 
-/** Stored progress, or defaults when missing, corrupt or unreadable. Never throws. */
-export function loadProgress(store: KeyValueStore): Progress {
+/**
+ * Stored progress under `key`, or `fresh()` when missing, corrupt or
+ * unreadable. Never throws.
+ */
+export function loadProgress(
+  store: KeyValueStore,
+  key: string = STORAGE_KEY,
+  fresh: () => Progress = defaultProgress,
+): Progress {
   try {
-    const text = store.getItem(STORAGE_KEY);
-    if (text === null) return defaultProgress();
-    return migrate(JSON.parse(text)) ?? defaultProgress();
+    const text = store.getItem(key);
+    if (text === null) return fresh();
+    return migrate(JSON.parse(text)) ?? fresh();
   } catch {
-    return defaultProgress();
+    return fresh();
   }
 }
 
@@ -74,11 +84,21 @@ export function loadProgress(store: KeyValueStore): Progress {
 export function saveProgress(
   store: KeyValueStore,
   progress: Progress,
+  key: string = STORAGE_KEY,
 ): boolean {
   try {
-    store.setItem(STORAGE_KEY, JSON.stringify(progress));
+    store.setItem(key, JSON.stringify(progress));
     return true;
   } catch {
     return false;
   }
 }
+
+/** Meaning-mode progress: its own key, fresh at Kanji 1 (level 2). */
+export const loadMeaningProgress = (store: KeyValueStore): Progress =>
+  loadProgress(store, MEANING_STORAGE_KEY, meaningProgress);
+
+export const saveMeaningProgress = (
+  store: KeyValueStore,
+  progress: Progress,
+): boolean => saveProgress(store, progress, MEANING_STORAGE_KEY);

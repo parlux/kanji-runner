@@ -12,9 +12,9 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 - Storage helpers for the mode flag, its progress and its session log under new keys (`src/storage/`).
 
 **Acceptance criteria:**
-- [ ] Tested: only meaning entries (no kana, reading or word entries, even when their boxes/eligibility would allow them); fresh progress at level 2; place/unlock from Kanji 1.
-- [ ] Tested: new keys round-trip; `kanji-runner:v1` and the owner's session log are never read or written by the helpers.
-- [ ] Golden run and existing tests unchanged.
+- [x] Tested: only meaning entries (no kana, reading or word entries, even when their boxes/eligibility would allow them); fresh progress at level 2; place/unlock from Kanji 1.
+- [x] Tested: new keys round-trip; `kanji-runner:v1` and the owner's session log are never read or written by the helpers.
+- [x] Golden run and existing tests unchanged.
 
 **Verification:** `npm test && npm run lint && npm run build`.
 **Dependencies:** none
