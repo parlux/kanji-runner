@@ -16,4 +16,4 @@ SPEC-3d-depth hard rule: at 390×844 both track edges at the army, and a 3-answe
 Drop the rule for a flatter, closer camera, and have the camera follow the army sideways (genre norm) so the opening you steer into stays in view while the far side is cut off. Needs an interview first: how far it follows, how flat, what happens to the far answers.
 
 ## Interview, 2026-11-13
-Done: `docs/intent/3d-camera-follow.md`. Tasks C1, H2, C2 in `tasks/todo-3d.md` (Phase 11). Test-first: an in-game camera settings screen with sliders (incl. follow), tuned on the phone.
+Done: `docs/intent/3d-camera-follow.md`. Tasks C1, H2, C2 in `tasks/done/todo-3d.md` (Phase 11). Test-first: an in-game camera settings screen with sliders (incl. follow), tuned on the phone.

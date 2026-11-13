@@ -1,6 +1,6 @@
 # Spec: 3D depth and camera (v1.4.1)
 
-Extends `docs/specs/SPEC-3d.md` (v1.4). Everything there still holds unless this spec says otherwise. Intent: `docs/intent/3d-depth.md`. Raised by the owner at Checkpoint H1 (2026-11-12), with a screenshot of a commercial crowd runner as the reference for the *feel* only (genre-inspired; nothing copied).
+Extends `docs/specs/done/SPEC-3d.md` (v1.4). Everything there still holds unless this spec says otherwise. Intent: `docs/intent/3d-depth.md`. Raised by the owner at Checkpoint H1 (2026-11-12), with a screenshot of a commercial crowd runner as the reference for the *feel* only (genre-inspired; nothing copied).
 
 > **Amendment v1.4.2 (owner, 2026-11-13, Task T3c):** overlay text is no longer held back to `VIEW_DISTANCE`. Prompts, labels and counts show from `SHAPE_DISTANCE`, hazed exactly like their object (opaque, colours mixed toward the haze by the object's haze factor; size proportional). This overrides the **Read horizon** rule, the text fade band, and the matching Always/Never/success lines below. 3D may be easier than 2D.
 

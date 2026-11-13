@@ -1,6 +1,6 @@
 # Intent: 3D run
 
-Status: confirmed by the owner, 2026-11-12, after an interview. Extends `docs/intent/kanji-runner.md`. Spec: `docs/specs/SPEC-3d.md`, tasks: `tasks/todo-3d.md`.
+Status: confirmed by the owner, 2026-11-12, after an interview. Extends `docs/intent/kanji-runner.md`. Spec: `docs/specs/done/SPEC-3d.md`, tasks: `tasks/done/todo-3d.md`.
 
 ## Statement of intent
 - **Outcome:** the run becomes one continuous 3D scene: a low, dramatic camera behind a crowd of low-poly figures running down a track. Gates, crates, enemies and saws are 3D. The boss stands at the end of the track and the army runs straight into it; no separate boss scene.

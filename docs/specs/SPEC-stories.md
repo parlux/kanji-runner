@@ -1,6 +1,6 @@
 # Spec: WaniKani stories in Built-in mode (v1.5)
 
-Extends `docs/specs/done/SPEC.md` (v1) through `docs/specs/SPEC-3d.md` (v1.4). Everything there still holds unless this spec says otherwise. Intent: `docs/intent/wk-stories-builtin.md`. Idea: `docs/ideas/wk-stories-builtin.md`.
+Extends `docs/specs/done/SPEC.md` (v1) through `docs/specs/done/SPEC-3d.md` (v1.4). Everything there still holds unless this spec says otherwise. Intent: `docs/intent/wk-stories-builtin.md`. Idea: `docs/ideas/wk-stories-builtin.md`.
 
 ## Objective
 With a WaniKani token saved, the study screen shows WaniKani's meaning and reading mnemonics ("stories") and WaniKani's radicals for every kanji WaniKani has, in **both** modes, whatever the owner's WaniKani progress. Built-in mode's kanji order, pace and runs do not change.

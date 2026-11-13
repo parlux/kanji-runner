@@ -1,6 +1,6 @@
 # Intent: flatter 3D camera that follows the army
 
-Status: confirmed by the owner, 2026-11-13, after an interview. Idea: `docs/ideas/3d-camera-follow.md`. Extends `docs/intent/3d-depth.md`. Spec: `docs/specs/SPEC-3d-depth.md` (amendment v1.4.3).
+Status: confirmed by the owner, 2026-11-13, after an interview. Idea: `docs/ideas/done/3d-camera-follow.md`. Extends `docs/intent/3d-depth.md`. Spec: `docs/specs/done/SPEC-3d-depth.md` (amendment v1.4.3).
 
 ## Statement of intent
 - **Outcome:** a dev settings screen (gear on the start screen, saved on the device) with live sliders for the 3D camera: pitch, distance, FOV, sideways follow (0 = off, centred) and follow smoothing. The owner uses it to find a flatter, closer camera that feels like running with the crowd.

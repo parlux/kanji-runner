@@ -1,6 +1,6 @@
 # Intent: 3D depth and camera
 
-Status: confirmed by the owner, 2026-11-12, after an interview at Checkpoint H1. Extends `docs/intent/3d-run.md`. Spec: `docs/specs/SPEC-3d-depth.md`.
+Status: confirmed by the owner, 2026-11-12, after an interview at Checkpoint H1. Extends `docs/intent/3d-run.md`. Spec: `docs/specs/done/SPEC-3d-depth.md`.
 
 ## Statement of intent
 - **Outcome:** the 3D run looks like the reference crowd runner. You see a long way down the track, and gates, barrels and crowds start as faint far-off shapes that fade in slowly instead of popping in.

@@ -1,6 +1,6 @@
 # 3D run
 
-Status: refined with the owner via interview, 2026-11-12. Confirmed intent: `docs/intent/3d-run.md`. Spec: `docs/specs/SPEC-3d.md`, tasks: `tasks/todo-3d.md`.
+Status: refined with the owner via interview, 2026-11-12. Confirmed intent: `docs/intent/3d-run.md`. Spec: `docs/specs/done/SPEC-3d.md`, tasks: `tasks/done/todo-3d.md`.
 
 ## Problem
 Owner: what's the path to making this look more like the mobile crowd-runner genre (e.g. "Real War (not fake)")? The run is flat 2D: yellow dots in a disc on a dark track, rectangles for crates and walls.

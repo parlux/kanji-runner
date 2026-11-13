@@ -1,6 +1,6 @@
 # Tasks: 3D run (v1.4)
 
-Spec: `docs/specs/SPEC-3d.md` (2026-11-12). Intent: `docs/intent/3d-run.md`. Idea: `docs/ideas/done/3d-run.md`. Starts after v1.3 (runs alongside the owner's Checkpoint G playtest).
+Spec: `docs/specs/done/SPEC-3d.md` (2026-11-12). Intent: `docs/intent/3d-run.md`. Idea: `docs/ideas/done/3d-run.md`. Starts after v1.3 (runs alongside the owner's Checkpoint G playtest).
 Every task: `npm test && npm run lint && npm run build` pass before it is checked off. Test fixtures are synthetic: never commit real WaniKani content.
 
 ## Plan
@@ -85,7 +85,7 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 **Scope:** M
 
 ### Task T3b: Depth haze and flatter camera (owner feedback at H1)
-**Owner, 2026-11-12:** "all objects are appearing too late, rather than 'fading in'. I think our angle is a bit too steep too." 3D also feels faster than 2D. Spec: `docs/specs/SPEC-3d-depth.md` (v1.4.1). Intent: `docs/intent/3d-depth.md`.
+**Owner, 2026-11-12:** "all objects are appearing too late, rather than 'fading in'. I think our angle is a bit too steep too." 3D also feels faster than 2D. Spec: `docs/specs/done/SPEC-3d-depth.md` (v1.4.1). Intent: `docs/intent/3d-depth.md`.
 
 **Description:**
 - Two horizons: solid objects (walls, panes, crates, saws, packs, squads) drawn up to `SHAPE_DISTANCE` (start at 2 × `VIEW_DISTANCE`); overlay text (prompts, labels, counts) still only inside `VIEW_DISTANCE`, fading in from 0 at `VIEW_DISTANCE` to 1 by 0.9 × `VIEW_DISTANCE`.
@@ -121,7 +121,7 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 
 **Verification:** `npm test && npm run lint && npm run build`; browser check; deploy green.
 **Dependencies:** T3b
-**Files:** `src/game/three/{overlay,world}.ts`, `src/game/labels.ts`, `tests/game/world.test.ts`, `docs/specs/SPEC-3d-depth.md`
+**Files:** `src/game/three/{overlay,world}.ts`, `src/game/labels.ts`, `tests/game/world.test.ts`, `docs/specs/done/SPEC-3d-depth.md`
 **Scope:** S
 
 ### Task T3d: Wider crowd that squeezes, army lower (owner feedback at H1, 2026-11-13)
@@ -170,7 +170,7 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 - [x] A big army spreads across most of the road and squeezes through gates and past hazards; the army sits lower on the screen (T3d).
 - [x] The crowd stays wide on open road, no pulsing; fire at gates goes straight ahead (T3e).
 - [x] Camera numbers OK, or the owner says what to change (higher, lower, closer, wider).
-  - Owner, 2026-11-13: OK for now; a flatter camera that follows the army comes after the boss (`docs/ideas/3d-camera-follow.md`).
+  - Owner, 2026-11-13: OK for now; a flatter camera that follows the army comes after the boss (`docs/ideas/done/3d-camera-follow.md`).
 
 ### Task T4: A giant boss at the end of the track
 **Owner, 2026-11-13:** "Can we turn the boss crowd into a big single boss with more hitpoints (matching crowd size I suppose). Like a big scary boss." Confirmed intent: `docs/intent/3d-run.md` (amendment 2026-11-13); spec: SPEC-3d "Boss at the end of the track" (amended).
@@ -229,11 +229,11 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 - [x] The boss feels like the end of the run, not a separate screen; the giant boss looks big and scary.
 - [x] Smooth on the phone with a full crowd.
 - [x] Labels: readable enough, or the owner says what to tune.
-  - Owner, 2026-11-13: very readable with the camera changes; camera still being finalised (`docs/ideas/3d-camera-follow.md`).
+  - Owner, 2026-11-13: very readable with the camera changes; camera still being finalised (`docs/ideas/done/3d-camera-follow.md`).
 - [x] The army can steer during the boss fight (T5b).
 
 ## Phase 11: camera tuning (independent of T4; worktree `camera`)
-Intent: `docs/intent/3d-camera-follow.md`. Spec: SPEC-3d-depth amendment v1.4.3, "Camera tuning". Idea: `docs/ideas/3d-camera-follow.md`. Runs alongside T4; both touch `view.ts`/`scene3d.ts`, so merge main before starting and before the checkpoint.
+Intent: `docs/intent/3d-camera-follow.md`. Spec: SPEC-3d-depth amendment v1.4.3, "Camera tuning". Idea: `docs/ideas/done/3d-camera-follow.md`. Runs alongside T4; both touch `view.ts`/`scene3d.ts`, so merge main before starting and before the checkpoint.
 
 ### Task C1: Camera settings screen with live sliders and sideways follow
 **Description:**
@@ -254,9 +254,10 @@ Intent: `docs/intent/3d-camera-follow.md`. Spec: SPEC-3d-depth amendment v1.4.3,
 **Scope:** M
 
 ### Checkpoint H2: the camera (owner, on the phone, with `?3d`)
-- [ ] The settings screen works mid-run and settings stick.
-- [ ] The owner picks values that feel right (reports pitch, distance, FOV, follow, smoothing) and says what to do about answers that leave the screen, if anything.
+- [x] The settings screen works mid-run and settings stick.
+- [x] The owner picks values that feel right (reports pitch, distance, FOV, follow, smoothing) and says what to do about answers that leave the screen, if anything.
   - Owner, 2026-11-13: pitch 8°, distance 15, FOV 34°, follow 0.4, smoothing 1 s; fog too thick; off-screen answers fine; keep the gear hidden. (Becomes C2.)
+  - Owner, 2026-11-13, after C2 on the phone: "All looks good." Phase 11 done.
 
 ### Task C2: Bake in the chosen camera, longer haze, hidden gear
 **Owner, 2026-11-13, at H2:** best feel with pitch 8°, distance 15, FOV 34°, follow 0.4, smoothing 1 s. "The fog feels too 'thick' like this." Keep the gear hidden; off-screen answers are fine.
