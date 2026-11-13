@@ -19,6 +19,7 @@ import {
 } from "../../core/sim";
 import { HORDE_HIP, makeHordeGeometry } from "./figures";
 import {
+  crowdHalfDepth,
   DIST_SCALE,
   FIGURE_RADIUS,
   HORDE_CAP,
@@ -321,9 +322,11 @@ export function createHorde(scene: Scene): Horde {
         sh.cw = (span.right - span.left) * TRACK_W;
         sh.cx = worldX((span.left + span.right) / 2);
         sh.area = (HORDE_GAP * size) ** 2;
-        s.z0 = worldZ(pos, 0);
+        // the core meets the army at its centre; drawn, a stream crashes into its front rows
+        const converge = packConverge(run, i);
+        s.z0 = worldZ(pos + crowdHalfDepth(run.army) * converge, 0);
         s.front.set(sh.cx, s.z0 + dist * DIST_SCALE, sh.cw, sh.pw);
-        s.back.set(sh.px, sh.area, packConverge(run, i), size);
+        s.back.set(sh.px, sh.area, converge, size);
       }
       for (const s of slots) {
         if (dist - s.killedAt >= DIE_DIST) s.hi = s.was;
