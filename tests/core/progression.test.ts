@@ -213,9 +213,23 @@ describe("levelCard", () => {
       needed: 24,
       toUnlock: 10,
       gained: 4,
+      learnedNow: levelKeys(2, [], KANJI)
+        .slice(10, 14)
+        .map((k) => k.split(":")[0]),
       unlocked: null,
       last: false,
     });
+  });
+
+  it("lists nothing learned when nothing was", () => {
+    const p = withLearned(2, 10);
+    expect(levelCard(p, p, KANA, KANJI).learnedNow).toEqual([]);
+  });
+
+  it("lists the items that finished the old level on an unlock", () => {
+    const after = applyUnlock(withLearned(2, 24), KANA, KANJI);
+    const card = levelCard(withLearned(2, 23), after, KANA, KANJI);
+    expect(card.learnedNow).toHaveLength(1);
   });
 
   it("has no gain when nothing was learned", () => {

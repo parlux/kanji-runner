@@ -690,7 +690,9 @@ function renderLevelCard(
   const step = compact ? 8 : 10;
   const x = END_PAD;
   const cw = w - 2 * END_PAD;
-  const h = 2 * pad + 22 + step + 14 + step + 16;
+  // a row of the characters learned this run, when there are any
+  const charsH = card.learnedNow.length ? (compact ? 28 : 32) : 0;
+  const h = 2 * pad + 22 + step + 14 + step + 16 + charsH;
   panel(ctx, x, top, cw, h, 12);
   const left = x + 14;
   const right = x + cw - 14;
@@ -767,7 +769,35 @@ function renderLevelCard(
     false,
     bw - noteW - 12,
   );
+  if (charsH) renderLearnedNow(ctx, card.learnedNow, left, right, y + charsH);
   return top + h;
+}
+
+/** Learned-this-run characters in a row from `left`; what doesn't fit becomes "+N". */
+function renderLearnedNow(
+  ctx: Ctx,
+  chars: readonly string[],
+  left: number,
+  right: number,
+  y: number,
+): void {
+  const size = 22;
+  const gap = 10;
+  ctx.font = `${size}px ${FONT}`;
+  const widths = chars.map((c) => ctx.measureText(c).width);
+  let x = left;
+  for (let i = 0; i < chars.length; i++) {
+    const rest = chars.length - i - 1;
+    // keep room for the "+N" tail whenever something would be left out
+    const tail = rest ? ctx.measureText(`+${rest}`).width + gap : 0;
+    const cw = widths[i] ?? size;
+    if (x + cw + tail > right && i > 0) {
+      put(ctx, `+${chars.length - i}`, x, y, 16, COLORS.dim, "left");
+      return;
+    }
+    put(ctx, chars[i] ?? "", x, y, size, COLORS.good, "left");
+    x += cw + gap;
+  }
 }
 
 /** Accuracy, gates right and best streak, three tiles in a row. Returns their bottom. */

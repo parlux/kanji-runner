@@ -15,7 +15,7 @@ The end-of-run screen shows, at a glance, how the run went and how far it moved 
    - won or lost to the boss: "Army 148 vs boss 96";
    - a tie: "Army 96 vs boss 96 · a tie is a loss";
    - wiped out: "The boss was never reached · gate 9 of 14" (the gate the army died at, of the run's planned rows).
-2. **Level card** (panel, rounded). The level after the run (`levelName`), "`learned` of `total` learned" on the right. A bar: learned before the run in solid good colour, learned this run in the same colour at lower opacity, and the unlock mark at `UNLOCK_SHARE`. Under it: "+N learned this run" on the left (always shown; dim at +0, owner at Checkpoint E) and "M more to unlock <next level>" on the right.
+2. **Level card** (panel, rounded). The level after the run (`levelName`), "`learned` of `total` learned" on the right. A bar: learned before the run in solid good colour, learned this run in the same colour at lower opacity, and the unlock mark at `UNLOCK_SHARE`. Under it: "+N learned this run" on the left (always shown; dim at +0, owner at Checkpoint E), then, when any, a row of the characters newly learned this run in good colour, "+N" for what doesn't fit (owner at Checkpoint E; on an unlock, the ones that finished the old level) and "M more to unlock <next level>" on the right.
    - The run unlocked a level: the card shows the new level (its own bar, nothing gained yet), and the left line reads "<level> unlocked!" in good colour instead of "+N". This replaces today's `unlockedNote` line.
    - Last level: the right line reads "Last level", no unlock mark.
    - Same counting as the start screen's level bar (`levelProgress`, learned = box ≥ `LEARNED_BOX`); meaning mode uses its own progress and kanji meaning keys, as it does today.

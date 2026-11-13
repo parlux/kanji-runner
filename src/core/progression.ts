@@ -22,13 +22,22 @@ export function levelKeys(
   kana: readonly KanaItem[],
   kanji: readonly KanjiItem[],
 ): string[] {
+  return levelItems(level, kana, kanji).map((i) => i.key);
+}
+
+/** A level's characters with their item keys, as `levelKeys` counts them. */
+function levelItems(
+  level: number,
+  kana: readonly KanaItem[],
+  kanji: readonly KanjiItem[],
+): { char: string; key: string }[] {
   if (level < 2)
     return kana
       .filter((k) => kanaLevel(k) === level)
-      .map((k) => itemKey(k.char, "kana"));
+      .map((k) => ({ char: k.char, key: itemKey(k.char, "kana") }));
   return kanji
     .filter((k) => k.level === level)
-    .map((k) => itemKey(k.char, "meaning"));
+    .map((k) => ({ char: k.char, key: itemKey(k.char, "meaning") }));
 }
 
 export type LevelProgress = {
@@ -67,6 +76,12 @@ export type LevelCard = {
   toUnlock: number;
   /** Items this run newly learned on `level`; 0 when the run unlocked a level. */
   gained: number;
+  /**
+   * Characters this run newly learned (box crossed LEARNED_BOX) on the levels
+   * from the one before the run up to `level`, in level order. On an unlock
+   * these are the items that finished the old level.
+   */
+  learnedNow: string[];
   /** The level this run unlocked, else null. */
   unlocked: number | null;
   /** True on the last level: no next level, no unlock mark. */
@@ -95,11 +110,19 @@ export function levelCard(
           p.learned - levelProgress(before, level, kana, kanji).learned,
         )
       : 0;
+  const isLearned = (prog: Progress, key: string): boolean =>
+    (prog.items[key]?.box ?? 0) >= LEARNED_BOX;
+  const learnedNow: string[] = [];
+  for (let l = Math.min(before.unlockedLevel, level); l <= level; l++)
+    for (const i of levelItems(l, kana, kanji))
+      if (isLearned(after, i.key) && !isLearned(before, i.key))
+        learnedNow.push(i.char);
   return {
     level,
     ...p,
     toUnlock: Math.max(0, p.needed - p.learned),
     gained,
+    learnedNow,
     unlocked,
     last: level >= maxLevel(kanji),
   };
