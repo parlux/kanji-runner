@@ -3,6 +3,7 @@ import {
   BoxGeometry,
   BufferAttribute,
   BufferGeometry,
+  CanvasTexture,
   CircleGeometry,
   Color,
   ConeGeometry,
@@ -15,9 +16,11 @@ import {
   Mesh,
   MeshBasicMaterial,
   MeshLambertMaterial,
+  NearestFilter,
   Points,
   PointsMaterial,
   Quaternion,
+  RepeatWrapping,
   SphereGeometry,
   Vector3,
   type Scene,
@@ -31,6 +34,8 @@ import {
   petalX,
   petalY,
   petalZ,
+  WINDOW_H,
+  WINDOW_W,
   wrap,
   wrapZ,
   type Petal,
@@ -57,6 +62,51 @@ const PETAL_SIZE = 0.25;
 /** Props beyond the haze are parked out of sight this far down. */
 const PARKED_Y = -1e4;
 
+/**
+ * Block city's building material: a fogged Lambert whose windows come from a
+ * 32×32 canvas texture made here (white with one blue-grey window). The
+ * pattern repeats by the instance's own size, so every block, whatever its
+ * scale, gets whole windows WINDOW_W × WINDOW_H, on its sides only.
+ */
+function windowMaterial(): MeshLambertMaterial {
+  const cv = document.createElement("canvas");
+  cv.width = cv.height = 32;
+  const cx = cv.getContext("2d");
+  if (cx) {
+    cx.fillStyle = "#fff";
+    cx.fillRect(0, 0, 32, 32);
+    cx.fillStyle = "#7d93b8";
+    cx.fillRect(6, 6, 20, 18);
+  }
+  const map = new CanvasTexture(cv);
+  map.wrapS = map.wrapT = RepeatWrapping;
+  map.magFilter = NearestFilter;
+  const material = new MeshLambertMaterial({ flatShading: true });
+  material.onBeforeCompile = (shader) => {
+    shader.uniforms.winMap = { value: map };
+    shader.vertexShader = shader.vertexShader
+      .replace("#include <common>", "#include <common>\nvarying vec2 vWin;")
+      .replace(
+        "#include <begin_vertex>",
+        `#include <begin_vertex>
+        vec3 isc = vec3(length(instanceMatrix[0].xyz), length(instanceMatrix[1].xyz), length(instanceMatrix[2].xyz));
+        vec3 lp = position + vec3(0.5, 0.0, 0.5);
+        float u = abs(normal.x) > 0.5 ? lp.z * isc.z : lp.x * isc.x;
+        vWin = abs(normal.y) > 0.5 ? vec2(0.0) : vec2(u / ${WINDOW_W.toFixed(1)}, lp.y * isc.y / ${WINDOW_H.toFixed(1)});`,
+      );
+    shader.fragmentShader = shader.fragmentShader
+      .replace(
+        "#include <common>",
+        "#include <common>\nvarying vec2 vWin;\nuniform sampler2D winMap;",
+      )
+      .replace(
+        "#include <color_fragment>",
+        "#include <color_fragment>\n        diffuseColor.rgb *= texture2D(winMap, vWin).rgb;",
+      );
+  };
+  return material;
+}
+
 /** Each shape's unit geometry, made once and shared by every look. */
 function shapeGeometry(shape: Shape): BufferGeometry {
   switch (shape) {
@@ -77,11 +127,14 @@ function shapeGeometry(shape: Shape): BufferGeometry {
     }
     case "hill":
     case "puff":
+    case "blimp":
       return new IcosahedronGeometry(1, 1);
     case "box":
+    case "block":
       // a unit box standing on y = 0
       return new BoxGeometry(1, 1, 1).translate(0, 0.5, 0);
     case "roof":
+    case "fin":
       // a four-sided pyramid on y = 0, its edges square with a box's
       return new ConeGeometry(1, 1, 4)
         .rotateY(Math.PI / 4)
@@ -90,6 +143,28 @@ function shapeGeometry(shape: Shape): BufferGeometry {
       return new ConeGeometry(1, 1, 7);
     case "sun":
       return new CircleGeometry(1, 32);
+    case "awning": {
+      // a thin slab, its +X edge a unit higher than its -X edge
+      const g = new BoxGeometry(1, 0.2, 1);
+      const pos = g.getAttribute("position");
+      for (let i = 0; i < pos.count; i++)
+        pos.setY(i, pos.getY(i) + pos.getX(i) * 1.2);
+      return g;
+    }
+    case "flag": {
+      // a triangle on a vertical edge at z = 0 pointing towards −Z, seen from both sides
+      const front = [0, -0.5, 0, 0, 0.5, 0, 0, 0, -1];
+      const back = [0, 0.5, 0, 0, -0.5, 0, 0, 0, -1];
+      const g = new BufferGeometry();
+      g.setAttribute(
+        "position",
+        new BufferAttribute(new Float32Array([...front, ...back]), 3),
+      );
+      g.computeVertexNormals();
+      return g;
+    }
+    case "balloon":
+      return new IcosahedronGeometry(1, 1);
   }
 }
 
@@ -98,7 +173,14 @@ type Layer = {
   /** Each instance's starting Z and resting Y (props) or starting X and drift (backdrop). */
   a: Float32Array;
   b: Float32Array;
+  /** Flags: each one's full length (it flutters by scale); balloons: each one's resting Y (it bobs). */
+  c?: Float32Array;
 };
+
+/** Flags flutter this fast (rad/s) and this much (a fraction of their length); balloons bob this much (world units). */
+const FLUTTER_RATE = 5;
+const FLUTTER_AMOUNT = 0.18;
+const BOB_AMOUNT = 1;
 
 /** One instanced mesh for `parts` (all one shape), coloured per instance. */
 function instanced(
@@ -198,7 +280,8 @@ export function createScenery(scene: Scene): Scenery {
   };
   const fogged = new MeshLambertMaterial({ flatShading: true });
   const clear = new MeshLambertMaterial({ flatShading: true, fog: false });
-  // clouds glow a little, so their shaded undersides stay light
+  const windowed = windowMaterial();
+  // clouds, the sun, Block city's skyline and blimp glow a little, so their shaded sides stay light
   const glowing = new MeshLambertMaterial({
     flatShading: true,
     fog: false,
@@ -227,18 +310,29 @@ export function createScenery(scene: Scene): Scenery {
       petals: null,
     };
     for (const [shape, parts] of byShape(props)) {
-      const mesh = instanced(geometry(shape), fogged, parts);
+      const mesh = instanced(
+        geometry(shape),
+        shape === "block" ? windowed : fogged,
+        parts,
+      );
       group.add(mesh);
       meshes.props.push({
         mesh,
         a: Float32Array.from(parts, (p) => p.z),
         b: Float32Array.from(parts, (p) => p.y),
+        ...(shape === "flag" && { c: Float32Array.from(parts, (p) => p.sz) }),
       });
     }
     for (const [shape, parts] of byShape(backdrop)) {
       const mesh = instanced(
         geometry(shape),
-        shape === "puff" || shape === "sun" ? glowing : clear,
+        shape === "puff" ||
+          shape === "sun" ||
+          shape === "box" ||
+          shape === "blimp" ||
+          shape === "fin"
+          ? glowing
+          : clear,
         parts,
       );
       group.add(mesh);
@@ -247,6 +341,9 @@ export function createScenery(scene: Scene): Scenery {
           mesh,
           a: Float32Array.from(parts, (p) => p.x),
           b: Float32Array.from(parts, (p) => p.drift),
+          ...(shape === "balloon" && {
+            c: Float32Array.from(parts, (p) => p.y),
+          }),
         });
     }
     if (petals.length > 0) {
@@ -279,12 +376,18 @@ export function createScenery(scene: Scene): Scenery {
     update(runDist, clock, cullZ, eye) {
       sky.position.copy(eye);
       if (!shown) return;
-      for (const { mesh, a, b } of shown.props) {
+      for (const { mesh, a, b, c } of shown.props) {
         const e = mesh.instanceMatrix.array;
         for (let i = 0; i < a.length; i++) {
           const z = wrapZ(a[i] as number, runDist);
           e[i * 16 + 13] = z < cullZ ? PARKED_Y : (b[i] as number);
           e[i * 16 + 14] = z;
+          if (c)
+            e[i * 16 + 10] =
+              (c[i] as number) *
+              (1 +
+                FLUTTER_AMOUNT *
+                  Math.sin(clock * FLUTTER_RATE + (a[i] as number) * 0.9));
         }
         mesh.instanceMatrix.needsUpdate = true;
       }
@@ -300,14 +403,19 @@ export function createScenery(scene: Scene): Scenery {
         }
         pos.needsUpdate = true;
       }
-      for (const { mesh, a, b } of shown.drifting) {
+      for (const { mesh, a, b, c } of shown.drifting) {
         const e = mesh.instanceMatrix.array;
-        for (let i = 0; i < a.length; i++)
+        for (let i = 0; i < a.length; i++) {
           e[i * 16 + 12] = wrap(
             (a[i] as number) + clock * (b[i] as number),
             -DRIFT_WRAP,
             2 * DRIFT_WRAP,
           );
+          if (c)
+            e[i * 16 + 13] =
+              (c[i] as number) +
+              BOB_AMOUNT * Math.sin(clock * 0.8 + (a[i] as number));
+        }
         mesh.instanceMatrix.needsUpdate = true;
       }
     },

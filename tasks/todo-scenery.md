@@ -46,22 +46,30 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 ### Task S2: Spring village
 **Description:** cherry trees, stone lanterns along the kerbs, small houses set back, a snow-capped mountain and soft sun in the backdrop, and a pink horizon. Falling petals as one `Points` layer (≤ 300) moving with the run, kept off the track's text area or faint (see the spec).
 **Acceptance criteria:**
-- [ ] Tested: the layout clears the track; the pick now covers both looks.
-- [ ] Browser check as in S1 with `?scenery=spring`, including a screenshot with petals in front of a gate; draw calls and frame time logged within the limits.
+- [x] Tested: the layout clears the track; the pick now covers both looks; petals are one layer of 260 (≤ 300) and never hang below 6 world units over the track, at any time.
+- [x] Browser check as in S1 with `?scenery=spring`, including a screenshot with petals in front of a gate; draw calls and frame time logged within the limits.
+  - Headless (Chrome for Testing, loaded machine, so noisy), 200 crowd, median of 3 × 240 frames, run in turn with Countryside: draw calls 16 (no scenery) → 25 (+9: sky dome, trunks, crowns, boxes, roofs, peaks, sun, clouds, petals); frame time 3.6-4.1 ms at 390×844 and 6.1-6.9 ms at 1280×800, against 3.1 / 5.1 ms with no scenery in S1 (1.2-1.35×) and the same as Countryside measured alongside (3.4-3.7 / 6.1-6.8 ms).
+  - Looks: snow cap and sun sized to show on a phone's narrow sky; the mountain stands at z = -360 (far plane 400).
 **Verification:** as S1. **Dependencies:** S1. **Files:** `scenery.ts`, `sceneryMeshes.ts`, tests. **Scope:** S
 
 ### Task S3: Race day
 **Description:** stepped grandstands on both sides with instanced spectators coloured per instance, roofs, flags on poles along the kerbs alternating kerb orange and army blue (flutter by scale), balloons in the sky and a deeper blue sky.
 **Acceptance criteria:**
-- [ ] Tested: the layout clears the track; the pick covers three looks.
-- [ ] Browser check as in S1 with `?scenery=stadium`; draw calls and frame time logged within the limits.
+- [x] Tested: the layout clears the track; the pick covers three looks.
+- [x] Browser check as in S1 with `?scenery=stadium`; draw calls and frame time logged within the limits.
+  - Screenshots (run, both edges, boss, at 390×844 and 1280×800) checked; gates and labels read as before; the stands leave the track and a strip of sky.
+  - Headless (Chrome for Testing, loaded machine), 200 crowd, median of 3 × 240 frames: draw calls 16 (no scenery) → 22 (+6: sky dome, boxes for tiers, spectators and poles, awnings, flags, balloons, clouds); frame time 3.9-4.1 ms at 390×844 (1.3×) and 7.0-7.1 ms at 1280×800 (1.4×) against 3.1 / 5.1 ms with no scenery; Countryside alongside 3.3 / 6.4 ms. About 3,000 instances in the box mesh (stands and crowd).
+  - Flags flutter by scaling their length (per-frame matrix write); balloons drift sideways and bob (they do not rise); the roof slopes up towards the back. All from the scene clock, so they stand still when paused.
 **Verification:** as S1. **Dependencies:** S1. **Files:** as S2. **Scope:** S
 
 ### Task S4: Block city
 **Description:** pastel block buildings with a window texture made in code, in a near-continuous row on both sides; pavement strips; street lamps along the kerbs; a pale skyline backdrop; a slowly drifting blimp.
 **Acceptance criteria:**
-- [ ] Tested: the layout clears the track (buildings start beyond the pavement); the pick covers four looks.
-- [ ] Browser check as in S1 with `?scenery=city`; draw calls and frame time logged within the limits.
+- [x] Tested: the layout clears the track (buildings start beyond the pavement); the pick covers four looks.
+- [x] Browser check as in S1 with `?scenery=city`; draw calls and frame time logged within the limits.
+  - Screenshots (run, both edges, boss, at 390×844 and 1280×800) checked; gates and labels read as before; tall blocks leave a strip of sky and the track clear.
+  - Headless (Chrome for Testing, loaded machine), 200 crowd, median of 3 × 240 frames: draw calls 16 (no scenery) → 23 (+7: sky dome, blocks, boxes for pavement and lamps, skyline, blimp body, fin, clouds); frame time 3.5-3.8 ms at 390×844 (1.2×) and 7.1-7.5 ms at 1280×800 (about 1.4-1.5×) against 3.1 / 5.1 ms with no scenery in S1; Countryside alongside 3.4-3.7 / 6.3-7.0 ms (city about 1.1× that).
+  - Windows: a `block` shape with its own material; a small `onBeforeCompile` tweak computes the window UVs from each instance's own scale (sides only, one window per 2 × 2.4 world units; block sizes are multiples, so windows fit), from one 32×32 `CanvasTexture`. No extra draw call per size. Two rows of blocks per side tile the wrap exactly (gaps absorb the remainder). Lamp arms reach outward over the pavement, never over the kerb. The skyline and blimp glow a little (emissive) so they stay pale.
 **Verification:** as S1. **Dependencies:** S1. **Files:** as S2. **Scope:** S
 
 ### Task S5: Cloud road
