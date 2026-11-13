@@ -216,8 +216,8 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 - 3D: the crowd, its count and its fire follow the army; the boss's cannon fire aims at where the crowd is now. 2D (`?2d`): the army moves too if the 2D boss scene draws it at `run.x`; otherwise leave 2D as is and say so.
 
 **Acceptance criteria:**
-- [ ] Tested: in the boss scene, steering moves `run.x` as in the run (and is clamped); the clash result and timings are unchanged for the same inputs.
-- [ ] Browser check at 390×844: the army steered to the left and to the right mid-fight, the boss's fire following it. Screenshots in the scratchpad.
+- [x] Tested: in the boss scene, steering moves `run.x` as in the run (and is clamped); the clash result and timings are unchanged for the same inputs.
+- [x] Browser check at 390×844: the army steered to the left and to the right mid-fight, the boss's fire following it. Screenshots in the scratchpad.
 
 **Verification:** `npm test && npm run lint && npm run build`; browser check; deploy green.
 **Dependencies:** T5
