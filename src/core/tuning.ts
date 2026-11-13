@@ -152,25 +152,33 @@ export const PACK_MAX = 200;
  * HP = KILL_SECONDS × FIRE_PER_SOLDIER × expected army.
  */
 export const KILL_SECONDS = 2.5;
+/**
+ * A whole pack's width as a share of the track (1 = the whole track). It
+ * narrows towards crowdWidth(remaining strength) as it is shot (see packSpan).
+ */
+export const PACK_WIDTH = 1.0;
 /** Enemy figures are drawn this size of a soldier (a view value; the core ignores it). */
 export const HORDE_SCALE = 0.7;
 
 /**
  * Horde tuning a run is built with (v1.10 rework): the dev panel changes it,
  * from the next run. `hordeK` and `packMax` set the head count (packCount),
- * `killSeconds` the pack HP (see KILL_SECONDS), `hordeScale` the figure size
+ * `killSeconds` the pack HP (see KILL_SECONDS), `packWidth` its width (see
+ * PACK_WIDTH), `hordeScale` the figure size
  * (view only). Defaults: HORDE_DEFAULTS.
  */
 export type HordeTuning = {
   readonly hordeK: number;
   readonly packMax: number;
   readonly killSeconds: number;
+  readonly packWidth: number;
   readonly hordeScale: number;
 };
 export const HORDE_DEFAULTS: HordeTuning = {
   hordeK: HORDE_K,
   packMax: PACK_MAX,
   killSeconds: KILL_SECONDS,
+  packWidth: PACK_WIDTH,
   hordeScale: HORDE_SCALE,
 };
 /**

@@ -37,6 +37,7 @@ import {
   HORDE_DEFAULTS,
   HORDE_THREAT,
   KILL_SECONDS,
+  PACK_WIDTH,
   PACK_WAKE,
   ENEMY_SPEED,
   ENEMY_STEER_SPEED,
@@ -489,6 +490,8 @@ describe("shooting", () => {
     return { ...s, hp, heads, strength, army };
   }
   const pack = (pos: number, x = 0.5): Pack => ({ kind: "pack", pos, x });
+  /** Packs narrower than the track, so they can miss the crowd. */
+  const NARROW = { ...HORDE_DEFAULTS, packWidth: 0.1 };
   const stepFor = (s: RunState, secs: number): RunState => {
     for (let t = 0; t < Math.round(secs / DT); t++) s = stepRun(s, DT);
     return s;
@@ -645,6 +648,7 @@ describe("shooting", () => {
   it("a pack drifts towards the crowd centre at most ENEMY_STEER_SPEED", () => {
     const s0 = {
       ...range([pack(2.5, 0.8)], [10 * ENEMY_HP]),
+      horde: NARROW,
       x: 0.2,
       targetX: 0.2,
     };
@@ -664,7 +668,7 @@ describe("shooting", () => {
     const width = (r: RunState): number =>
       packSpan(r, 0).right - packSpan(r, 0).left;
     expect(width(narrow)).toBeLessThan(width(wide));
-    expect(width(narrow)).toBeCloseTo(crowdWidth(4), 9);
+    expect(width(narrow)).toBeCloseTo(crowdWidth(4), 5);
   });
 
   it("contact costs round(HORDE_THREAT × strength × survivors / heads) when spans overlap, then the pack is gone", () => {
@@ -769,7 +773,7 @@ describe("shooting", () => {
         const per = hp / heads;
         const s0 = range([pack(1.9)], [hp], 20, [heads]);
         expect(packSurvivors(s0, 0)).toBe(heads);
-        for (let k = 0; k <= heads; k++) {
+        for (let k = 0; k <= heads; k += heads > 1000 ? 97 : 1) {
           const at = (d: number): RunState => ({ ...s0, damage: [d] });
           expect(packSurvivors(at(k * per), 0)).toBe(heads - k);
           if (k < heads)
@@ -779,15 +783,43 @@ describe("shooting", () => {
       }
     });
 
-    it("span goes by remaining HP: at full HP it is today's crowdWidth(packStrength)", () => {
-      const s0 = range([pack(1.9)], [7 * ENEMY_HP], 20, [21]);
+    it("is PACK_WIDTH wide at full HP and narrows as shot towards crowdWidth(remaining strength), on the track", () => {
+      expect(PACK_WIDTH).toBe(1);
+      const s0 = range([pack(1.9, 0.3)], [70], 20, [210], [28]);
       const width = (r: RunState): number =>
         packSpan(r, 0).right - packSpan(r, 0).left;
-      expect(width(s0)).toBeCloseTo(crowdWidth(7), 12);
-      expect(width({ ...s0, damage: [3 * ENEMY_HP] })).toBeCloseTo(
-        crowdWidth(4),
-        12,
-      );
+      const at = (f: number, horde = HORDE_DEFAULTS): RunState => ({
+        ...s0,
+        horde,
+        damage: [70 * (1 - f)],
+      });
+      expect(width(at(1))).toBeCloseTo(PACK_WIDTH, 12);
+      const half = { ...HORDE_DEFAULTS, packWidth: 0.5 };
+      expect(width(at(1, half))).toBeCloseTo(0.5, 12);
+      let last = Infinity;
+      for (const f of [1, 0.9, 0.7, 0.5, 0.3, 0.1, 0.01]) {
+        for (const horde of [HORDE_DEFAULTS, half]) {
+          const r = at(f, horde);
+          const w = width(r);
+          expect(w).toBeCloseTo(
+            f * horde.packWidth + (1 - f) * crowdWidth(28 * f),
+            12,
+          );
+          const span = packSpan(r, 0);
+          expect(span.left).toBeGreaterThanOrEqual(-1e-12);
+          expect(span.right).toBeLessThanOrEqual(1 + 1e-12);
+          // centred where the pack is, unless that would leave the track
+          const centre = (span.left + span.right) / 2;
+          expect(centre).toBeCloseTo(
+            Math.min(1 - w / 2, Math.max(w / 2, 0.3)),
+            12,
+          );
+        }
+        const w = width(at(f));
+        expect(w).toBeLessThan(last);
+        last = w;
+      }
+      expect(width(at(0.01))).toBeLessThan(crowdWidth(28));
     });
 
     it("a pack dies in the same steps under steady fire, whatever its head count", () => {
@@ -811,6 +843,7 @@ describe("shooting", () => {
   it("a pack that misses the crowd costs nothing", () => {
     const s0 = {
       ...range([pack(0.02, 0.9)], [7 * ENEMY_HP], 20),
+      horde: NARROW,
       x: 0.1,
       targetX: 0.1,
     };

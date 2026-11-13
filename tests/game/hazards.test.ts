@@ -64,4 +64,19 @@ describe("drawing the horde", () => {
     hazards.update({ ...b, dist: 1 }, 0, false);
     expect(enemies.count).toBe(PACK_MAX - 10);
   });
+
+  it("stays sane with a 20,000-head pack: capped, no NaN, kills past the cap ignored", () => {
+    const { hazards, enemies } = setup();
+    const a = { ...horde([2], 0), heads: [20_000] };
+    hazards.update(a, 0, false);
+    expect(enemies.count).toBe(PACK_MAX);
+    // 1,000 killed, then most of the pack
+    for (const damage of [2, 30]) {
+      hazards.update({ ...a, damage: [damage], dist: 0.01 }, 0, false);
+      expect(enemies.count).toBeLessThanOrEqual(2 * PACK_MAX);
+      expect(Array.from(enemies.instanceMatrix.array).some(Number.isNaN)).toBe(
+        false,
+      );
+    }
+  });
 });

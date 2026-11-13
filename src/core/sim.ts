@@ -295,10 +295,23 @@ export function packStrengthLeft(s: RunState, i: number): number {
   return ((s.strength[i] ?? 0) * Math.max(0, hp - (s.damage[i] ?? 0))) / hp;
 }
 
-/** Pack i's span: its centre ± half the width of a crowd of its remaining strength. */
+/**
+ * Pack i's width: horde.packWidth while whole, narrowing as it is shot towards
+ * the width of a crowd of its remaining strength. With f the share of hit
+ * points left: f × packWidth + (1 − f) × crowdWidth(strength × f), at most 1.
+ */
+export function packWidth(s: RunState, i: number): number {
+  const hp = s.hp[i] ?? 0;
+  const f = hp > 0 ? Math.max(0, hp - (s.damage[i] ?? 0)) / hp : 0;
+  const w =
+    f * s.horde.packWidth + (1 - f) * crowdWidth(packStrengthLeft(s, i));
+  return Math.min(1, Math.max(0, w));
+}
+
+/** Pack i's span: packWidth wide, centred on the pack, kept on the track. */
 export function packSpan(s: RunState, i: number): Span {
-  const x = s.packs[i]?.x ?? 0.5;
-  const w = crowdWidth(packStrengthLeft(s, i));
+  const w = packWidth(s, i);
+  const x = clampOnTrack(s.packs[i]?.x ?? 0.5, w);
   return { left: x - w / 2, right: x + w / 2 };
 }
 
@@ -321,10 +334,9 @@ function movePacks(s: RunState, dt: number): RunState {
       -ENEMY_STEER_SPEED * dt,
       Math.min(ENEMY_STEER_SPEED * dt, s.x - p.x),
     );
-    const w = crowdWidth(packStrengthLeft(s, i));
     return {
       pos: p.pos - ENEMY_SPEED * dt,
-      x: clampOnTrack(p.x + drift, w),
+      x: clampOnTrack(p.x + drift, packWidth(s, i)),
     };
   });
   return { ...s, packs };

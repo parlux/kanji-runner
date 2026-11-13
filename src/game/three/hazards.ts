@@ -109,7 +109,7 @@ export function createHazards(scene: Scene, fx: Fx) {
         if (was > n) {
           // the rim figures just killed start to fall where they stood
           hordeLayout(was, span.right - span.left, layout);
-          for (let k = n; k < was; k++) {
+          for (let k = n; k < Math.min(was, PACK_MAX); k++) {
             const d = 4 * nextDying;
             dying[d] = cx + (layout[2 * k] as number);
             dying[d + 1] = layout[2 * k + 1] as number;
