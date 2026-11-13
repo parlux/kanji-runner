@@ -360,8 +360,7 @@ function threats(s: RunState): (Threat | null)[] {
     if ((s.hp[i] ?? 0) <= 0 || isShattered(s, i)) return null;
     if (h.kind === "block")
       return { pos: h.pos, span: { left: h.left, right: h.right } };
-    if (h.kind === "pack")
-      return { pos: hazardPos(s, i), span: packSpan(s) };
+    if (h.kind === "pack") return { pos: hazardPos(s, i), span: packSpan(s) };
     return null;
   });
 }
