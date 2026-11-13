@@ -13,6 +13,7 @@ import { WORDS, kanaNeeded } from "../../src/core/words";
 import {
   seededBox,
   builtInPool,
+  meaningPool,
   unlockedPool,
   wanikaniPool,
   type Entry,
@@ -404,5 +405,54 @@ describe("words in the Built-in pool", () => {
       const item = WORDS.find((x) => x.word === r.prompt);
       expect(item?.glosses[0]).toBe(r.answer);
     }
+  });
+});
+
+describe("meaningPool", () => {
+  const progress = (): Progress => {
+    const p = defaultProgress();
+    p.unlockedLevel = 3;
+    for (const k of KANJI.filter((k) => k.level <= 3))
+      p.items[itemKey(k.char, "meaning")] = {
+        box: MAX_BOX,
+        seen: 5,
+        correct: 5,
+        wrong: 0,
+        lastSeen: 1,
+      };
+    return p;
+  };
+
+  it("holds only meaning entries of unlocked kanji levels", () => {
+    const p = progress();
+    const pool = meaningPool(p, KANJI);
+    expect(pool.entries.length).toBe(KANJI.filter((k) => k.level <= 3).length);
+    for (const e of pool.entries) {
+      expect(e.type).toBe("meaning");
+      expect((e.item as KanjiItem).level).toBeLessThanOrEqual(3);
+    }
+    // Built-in would add readings (box 5) and kana here
+    expect(
+      unlockedPool(p, KANA, KANJI, WORDS).some((e) => e.type !== "meaning"),
+    ).toBe(true);
+  });
+
+  it("draws distractors from kanji only", () => {
+    const pool = meaningPool(progress(), KANJI);
+    expect(pool.kana).toEqual([]);
+    expect(pool.words).toEqual([]);
+    expect(pool.allWords).toEqual([]);
+    expect(pool.kanji.every((k) => k.level <= 4)).toBe(true);
+  });
+
+  it("uses Built-in selection rules", () => {
+    const p = progress();
+    const pool = meaningPool(p, KANJI);
+    const e = pool.entries[0] as Entry;
+    expect(pool.known(e)).toBe(true);
+    expect(pool.box(e)).toBe(MAX_BOX);
+    expect(pool.current(pool.entries[pool.entries.length - 1] as Entry)).toBe(
+      true,
+    );
   });
 });

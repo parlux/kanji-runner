@@ -7,7 +7,9 @@ import {
   levelName,
   levelProgress,
   maxLevel,
+  meaningProgress,
   place,
+  placeMeaning,
 } from "../../src/core/progression";
 import { defaultProgress, itemKey } from "../../src/core/srs";
 import { WORDS } from "../../src/core/words";
@@ -164,5 +166,38 @@ describe("words and progression", () => {
     const q = withLearned(2, 23);
     for (const w of WORDS) q.items[wordKey(w)] = rec(5);
     expect(applyUnlock(q, KANA, KANJI).unlockedLevel).toBe(2);
+  });
+});
+
+describe("meaning-mode progress", () => {
+  it("starts fresh at Kanji 1 (level 2) with no records", () => {
+    const p = meaningProgress();
+    expect(p.unlockedLevel).toBe(2);
+    expect(p.items).toEqual({});
+    expect(levelName(p.unlockedLevel)).toBe("Kanji 1");
+  });
+
+  it("places from Kanji 1 up and never creates kana records", () => {
+    const none = placeMeaning(meaningProgress(), 1, KANJI);
+    expect(none.unlockedLevel).toBe(2);
+    expect(none.items).toEqual({});
+    // below the floor behaves like the floor
+    expect(placeMeaning(meaningProgress(), -1, KANJI).unlockedLevel).toBe(2);
+    const p = placeMeaning(meaningProgress(), 4, KANJI);
+    expect(p.unlockedLevel).toBe(5);
+    const keys = Object.keys(p.items);
+    expect(keys.length).toBe(90);
+    expect(keys.every((k) => k.endsWith(":meaning"))).toBe(true);
+  });
+
+  it("unlocks by the 80% rule from Kanji 1, counting meanings only", () => {
+    const p = meaningProgress();
+    for (const key of levelKeys(2, [], KANJI).slice(0, 24))
+      p.items[key] = rec(2);
+    expect(applyUnlock(p, [], KANJI).unlockedLevel).toBe(3);
+    const short = meaningProgress();
+    for (const key of levelKeys(2, [], KANJI).slice(0, 23))
+      short.items[key] = rec(2);
+    expect(applyUnlock(short, [], KANJI).unlockedLevel).toBe(2);
   });
 });

@@ -1,6 +1,6 @@
 import { kanaLevel } from "./run";
 import { maxLevel } from "./kanji";
-import { itemKey, LEARNED_BOX } from "./srs";
+import { defaultProgress, itemKey, LEARNED_BOX } from "./srs";
 import type { KanaItem, KanjiItem, Progress, WordItem } from "./types";
 
 /** Placement marks items at this box: known, but drawn rarely (weight 2). */
@@ -120,4 +120,25 @@ export function place(
       Object.entries(items).filter(([key]) => !unplaced.has(key)),
     ),
   };
+}
+
+/** Meaning mode starts at Kanji 1; kana levels do not exist for it. */
+export const MEANING_START_LEVEL = 2;
+
+/** Fresh meaning-mode progress: unlocked from Kanji 1 (level 2). */
+export function meaningProgress(): Progress {
+  return { ...defaultProgress(), unlockedLevel: MEANING_START_LEVEL };
+}
+
+/**
+ * Meaning-mode placement: "I know up to level N" with N ≥ 1 (1 = none, start at
+ * Kanji 1). Passes no kana, so it creates no kana records; the lowest result is
+ * level 2. Same rules as `place` otherwise.
+ */
+export function placeMeaning(
+  progress: Progress,
+  level: number,
+  kanji: readonly KanjiItem[],
+): Progress {
+  return place(progress, Math.max(1, level), [], kanji);
 }

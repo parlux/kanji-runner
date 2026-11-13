@@ -109,6 +109,33 @@ export function builtInPool(
   };
 }
 
+/**
+ * Meaning mode (for a Chinese reader): kanji meaning entries of the unlocked
+ * levels only, never kana, readings or words, whatever the boxes say. Selection
+ * rules as Built-in. Distractors draw on kanji up to the next level.
+ */
+export function meaningPool(
+  progress: Progress,
+  kanji: readonly KanjiItem[],
+): Pool {
+  const entries: Entry[] = kanji
+    .filter((k) => k.level <= progress.unlockedLevel)
+    .map((k) => ({
+      key: itemKey(k.char, "meaning"),
+      type: "meaning",
+      item: k,
+    }));
+  const next = progress.unlockedLevel + 1;
+  return {
+    ...builtInSelection(progress, entries),
+    kana: [],
+    kanji: kanji.filter((k) => k.level <= next),
+    words: NONE_WORDS,
+    allWords: NONE_WORDS,
+    similar: () => NONE,
+  };
+}
+
 /** What WaniKani mode needs per kanji; `WkExtras` from `src/wanikani` fits. */
 export type WkPoolExtras = {
   /** WaniKani SRS stage, 1–9. */
