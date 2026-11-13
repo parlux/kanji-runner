@@ -4,11 +4,12 @@ import {
   fireLimit,
   hazardPos,
   isShattered,
+  packHeadsLeft,
   packSpan,
   packSurvivors,
   type RunState,
 } from "../../core/sim";
-import { ENEMY_HP, FIRE_RANGE } from "../../core/tuning";
+import { FIRE_RANGE } from "../../core/tuning";
 import { makeCrowdMesh } from "./figures";
 import { FX_COLOURS, type Fx } from "./fx";
 import {
@@ -87,8 +88,7 @@ export function createHazards(scene: Scene, fx: Fx) {
         const cx = worldX((span.left + span.right) / 2);
         const cz = worldZ(hazardPos(run, i), run.dist);
         const drawn = crowdLayout(Math.min(n, MAX_PER_PACK), layout);
-        const left =
-          (((run.hp[i] ?? 0) - (run.damage[i] ?? 0)) / ENEMY_HP) * (drawn / n);
+        const left = packHeadsLeft(run, i) * (drawn / n);
         for (let k = 0; k < drawn && ne < MAX_PACK_FIGURES; k++) {
           const s = packFigureScale(k, left);
           if (s <= 0) continue;
@@ -107,7 +107,7 @@ export function createHazards(scene: Scene, fx: Fx) {
         }
         if (run.target === i) {
           // enemies popping off the pack's rim
-          const r = (crowdWidth(n) * TRACK_W) / 2;
+          const r = ((span.right - span.left) * TRACK_W) / 2;
           for (let k = 0; k < 4; k++) {
             const t = (run.dist * 2.5 + k / 4) % 1;
             const a = k * 2.39996 + Math.floor(run.dist * 2.5) * 1.3;

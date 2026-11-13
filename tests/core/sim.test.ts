@@ -15,7 +15,12 @@ import {
   type RunState,
 } from "../../src/core/sim";
 import { crowdWidth } from "../../src/core/crowd";
-import { firepower } from "../../src/core/fire";
+import {
+  expectedArmy,
+  firepower,
+  packCount,
+  packStrength,
+} from "../../src/core/fire";
 import { kanaRun } from "./kana-run";
 import {
   buildTrack,
@@ -462,18 +467,22 @@ describe("shooting", () => {
     left: 0,
     right: 1,
   });
-  /** One far-off question, the given hazards, and chosen hit points. */
+  /**
+   * One far-off question, the given hazards, and chosen hit points; packs get
+   * one enemy per ENEMY_HP unless `heads` says otherwise.
+   */
   function range(
     hazards: (Block | Saw | Pack)[],
     hp: number[],
     army = 20,
+    heads = hp.map((h) => Math.round(h / ENEMY_HP)),
   ): RunState {
     const s = createRunState(kanaRun(1), {
       questions: [100],
       hazards,
       charges: [],
     });
-    return { ...s, hp, army };
+    return { ...s, hp, heads, army };
   }
   const pack = (pos: number, x = 0.5): Pack => ({ kind: "pack", pos, x });
   const stepFor = (s: RunState, secs: number): RunState => {
@@ -660,6 +669,75 @@ describe("shooting", () => {
       expect(s.army).toBe(20 - loss);
       expect(s.lastClip?.loss ?? 0).toBe(loss);
     }
+  });
+
+  describe("hordes", () => {
+    it("packs start with packCount heads sharing today's HP: ENEMY_HP × packStrength", () => {
+      const rows = kanaRun(1);
+      const track = buildTrack(1, ROWS_PER_RUN, false);
+      const s = createRunState(rows, track);
+      const expected = expectedArmy(rows, track.charges);
+      let packs = 0;
+      track.hazards.forEach((h, i) => {
+        if (h.kind !== "pack") return expect(s.heads[i]).toBe(0);
+        packs++;
+        const q = track.questions.filter((p) => p < h.pos).length;
+        const e = expected[Math.min(q, expected.length - 1)] ?? 0;
+        expect(s.hp[i]).toBe(ENEMY_HP * packStrength(e));
+        expect(s.heads[i]).toBe(packCount(e));
+        expect(packSurvivors(s, i)).toBe(packCount(e));
+      });
+      expect(packs).toBeGreaterThan(0);
+    });
+
+    it("survivors drop by one per per-enemy HP of damage, exactly", () => {
+      for (const [strength, heads] of [
+        [6, 15],
+        [7, 21],
+        [41, 200],
+        [133, 200],
+      ] as const) {
+        const hp = strength * ENEMY_HP;
+        const per = hp / heads;
+        const s0 = range([pack(1.9)], [hp], 20, [heads]);
+        expect(packSurvivors(s0, 0)).toBe(heads);
+        for (let k = 0; k <= heads; k++) {
+          const at = (d: number): RunState => ({ ...s0, damage: [d] });
+          expect(packSurvivors(at(k * per), 0)).toBe(heads - k);
+          if (k < heads)
+            expect(packSurvivors(at((k + 0.5) * per), 0)).toBe(heads - k);
+        }
+        expect(packSurvivors({ ...s0, damage: [hp] }, 0)).toBe(0);
+      }
+    });
+
+    it("span goes by remaining HP: at full HP it is today's crowdWidth(packStrength)", () => {
+      const s0 = range([pack(1.9)], [7 * ENEMY_HP], 20, [21]);
+      const width = (r: RunState): number =>
+        packSpan(r, 0).right - packSpan(r, 0).left;
+      expect(width(s0)).toBeCloseTo(crowdWidth(7), 12);
+      expect(width({ ...s0, damage: [3 * ENEMY_HP] })).toBeCloseTo(
+        crowdWidth(4),
+        12,
+      );
+    });
+
+    it("a pack dies in the same steps under steady fire, whatever its head count", () => {
+      const steps = (heads: number): number => {
+        let s = range([pack(1.9)], [12 * ENEMY_HP], 20, [heads]);
+        let n = 0;
+        while (packSurvivors(s, 0) > 0 && n < 10_000) {
+          s = stepRun(s, DT);
+          n++;
+        }
+        return n;
+      };
+      const today = steps(12);
+      expect(today).toBeGreaterThan(1);
+      expect(today).toBeLessThan(10_000);
+      expect(steps(36)).toBe(today);
+      expect(steps(200)).toBe(today);
+    });
   });
 
   it("a pack that misses the crowd costs nothing", () => {

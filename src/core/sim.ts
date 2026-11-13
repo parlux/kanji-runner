@@ -9,6 +9,7 @@ import {
 import {
   expectedArmy,
   firepower,
+  hazardHeads,
   hazardHp,
   pickTarget,
   type Threat,
@@ -104,6 +105,8 @@ export type RunState = {
   results: boolean[];
   /** Hit points per hazard (0 = can't be shot). */
   hp: number[];
+  /** Enemies per hazard at the start (packCount for packs, 0 otherwise); each has hp / heads. */
+  heads: number[];
   /** Damage dealt so far per hazard; a block is shattered once this reaches its hp. */
   damage: number[];
   /** Per hazard: where its enemy pack is now (null for blocks and saws). */
@@ -151,6 +154,7 @@ export function createRunState(
   track: Track,
   reask: ReaskConfig | null = null,
 ): RunState {
+  const expected = expectedArmy(rows, track.charges);
   return {
     rows,
     track,
@@ -163,7 +167,8 @@ export function createRunState(
     streak: 0,
     bestStreak: 0,
     results: [],
-    hp: hazardHp(track, expectedArmy(rows, track.charges)),
+    hp: hazardHp(track, expected),
+    heads: hazardHeads(track, expected),
     damage: track.hazards.map(() => 0),
     packs: track.hazards.map((h) =>
       h.kind === "pack" ? { pos: h.pos, x: h.x } : null,
@@ -256,10 +261,20 @@ export function isShattered(s: RunState, i: number): boolean {
   return hp > 0 && (s.damage[i] ?? 0) >= hp;
 }
 
-/** Enemies left in pack i (0 once it is shot to nothing). */
+/** Pack i's enemies left as a fraction: remaining hit points over each enemy's (hp / heads). */
+export function packHeadsLeft(s: RunState, i: number): number {
+  const hp = s.hp[i] ?? 0;
+  const heads = s.heads[i] ?? 0;
+  if (hp <= 0) return 0;
+  return (Math.max(0, hp - (s.damage[i] ?? 0)) * heads) / hp;
+}
+
+/**
+ * Enemies left in pack i, rounded up so the count drops only when one really
+ * dies: the head count while untouched, 0 once it is shot to nothing.
+ */
 export function packSurvivors(s: RunState, i: number): number {
-  const left = ((s.hp[i] ?? 0) - (s.damage[i] ?? 0)) / ENEMY_HP;
-  return Math.max(0, Math.ceil(left - 1e-9));
+  return Math.max(0, Math.ceil(packHeadsLeft(s, i) - 1e-6));
 }
 
 /**

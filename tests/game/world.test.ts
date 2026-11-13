@@ -211,6 +211,9 @@ describe("crowd spread and squeeze", () => {
       },
       // the pack has run in from 18 to 17
       packs: [null, null, { pos: 17, x: 0.5 }],
+      hp: [0, 3, 3],
+      heads: [0, 0, 15],
+      damage: [0, 0, 0],
     };
     for (const pos of [10, 13, 15, 17, 20]) {
       const g = clipGaps({ ...run, dist: pos });
@@ -254,6 +257,7 @@ describe("crowd spread and squeeze", () => {
       dist: 0,
       track: { questions: [50], charges: [], hazards },
       hp: hazards.map(() => 3),
+      heads: hazards.map(() => 15),
       damage: hazards.map(() => 0),
       packs: hazards.map(() => null),
       ...over,
