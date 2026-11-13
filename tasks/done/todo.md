@@ -1,6 +1,6 @@
 # Tasks: Kanji Runner
 
-Plan: `tasks/done/plan.md`. Spec: `docs/specs/SPEC.md` (revision 4).
+Plan: `tasks/done/plan.md`. Spec: `docs/specs/done/SPEC.md` (revision 4).
 Every task: `npm test && npm run lint && npm run build` pass before it is checked off.
 
 ## Phase 1: Playable slice (done)
@@ -331,7 +331,7 @@ Placement to Katakana gives Kanji 1, but runs are still mostly basic hiragana: 1
 
 **Verification:** `npm test`. Phone-sized browser check.
 **Dependencies:** T8
-**Files:** `docs/specs/SPEC.md`, `src/core/progression.ts`, `src/game/{scenes,start,render}.ts`, `src/main.ts`, `tests/core/progression.test.ts`, `tests/game/scenes.test.ts`
+**Files:** `docs/specs/done/SPEC.md`, `src/core/progression.ts`, `src/game/{scenes,start,render}.ts`, `src/main.ts`, `tests/core/progression.test.ts`, `tests/game/scenes.test.ts`
 **Scope:** S
 
 ### Checkpoint B

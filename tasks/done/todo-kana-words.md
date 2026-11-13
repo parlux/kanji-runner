@@ -1,6 +1,6 @@
 # Tasks: Katakana loanwords (v1.6)
 
-Spec: `docs/specs/SPEC-kana-words.md` (2026-11-13). Intent: `docs/intent/kana-words.md`. Idea: `docs/ideas/done/kana-words.md`. Done: Checkpoint J approved by the owner, 2026-11-13.
+Spec: `docs/specs/done/SPEC-kana-words.md` (2026-11-13). Intent: `docs/intent/kana-words.md`. Idea: `docs/ideas/done/kana-words.md`. Done: Checkpoint J approved by the owner, 2026-11-13.
 Every task: `npm test && npm run lint && npm run build` pass before it is checked off. Test fixtures are synthetic: never commit real WaniKani content.
 
 ## Plan

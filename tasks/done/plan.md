@@ -1,6 +1,6 @@
 # Implementation Plan: Kanji Runner
 
-Spec: `docs/specs/SPEC.md` (revision 4, approved 2026-11-07). Tasks: `tasks/done/todo.md`. Rework rationale: `docs/ideas/done/crowd-runner-rework.md`. Shooting rationale: `docs/ideas/done/shooting.md`. Crates: `docs/ideas/done/crates.md`.
+Spec: `docs/specs/done/SPEC.md` (revision 4, approved 2026-11-07). Tasks: `tasks/done/todo.md`. Rework rationale: `docs/ideas/done/crowd-runner-rework.md`. Shooting rationale: `docs/ideas/done/shooting.md`. Crates: `docs/ideas/done/crates.md`.
 
 ## Overview
 Build the game in vertical slices:

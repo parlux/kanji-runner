@@ -1,6 +1,6 @@
 # Tasks: Ask again (v1.2, WaniKani mode)
 
-Spec: `docs/specs/SPEC-reask.md` (approved 2026-11-08, open questions at their defaults). Idea and interview: `docs/ideas/done/guessing-and-rust.md`. Starts after v1.1 Checkpoint E.
+Spec: `docs/specs/done/SPEC-reask.md` (approved 2026-11-08, open questions at their defaults). Idea and interview: `docs/ideas/done/guessing-and-rust.md`. Starts after v1.1 Checkpoint E.
 Every task: `npm test && npm run lint && npm run build` pass before it is checked off. Test fixtures are synthetic: never commit real WaniKani content.
 
 ## Plan

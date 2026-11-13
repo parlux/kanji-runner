@@ -1,6 +1,6 @@
 # Spec: Katakana loanwords (v1.6)
 
-Extends `docs/specs/SPEC.md` (v1) through `docs/specs/SPEC-stories.md` (v1.5). Everything there still holds unless this spec says otherwise. Intent: `docs/intent/kana-words.md`. Idea: `docs/ideas/done/kana-words.md`.
+Extends `docs/specs/done/SPEC.md` (v1) through `docs/specs/SPEC-stories.md` (v1.5). Everything there still holds unless this spec says otherwise. Intent: `docs/intent/kana-words.md`. Idea: `docs/ideas/done/kana-words.md`.
 
 **Changes SPEC.md Out of Scope:** "vocabulary" is now partly in scope: katakana loanwords only. Multi-kanji words stay out.
 

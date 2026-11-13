@@ -1,6 +1,6 @@
 # Spec: the other half after a right answer (v1.6)
 
-Extends `docs/specs/SPEC.md` (v1) through `docs/specs/SPEC-stories.md` (v1.5). Everything there still holds unless this spec says otherwise. Intent: `docs/intent/answer-reveal.md`. Idea: `docs/ideas/answer-reveal.md`.
+Extends `docs/specs/done/SPEC.md` (v1) through `docs/specs/SPEC-stories.md` (v1.5). Everything there still holds unless this spec says otherwise. Intent: `docs/intent/answer-reveal.md`. Idea: `docs/ideas/answer-reveal.md`.
 
 ## Objective
 Each right kanji answer briefly shows the half of the kanji that wasn't asked, so meaning gates also teach readings and reading gates also teach meanings. Display only: no change to the sim, scoring, selection or records.

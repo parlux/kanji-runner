@@ -1,6 +1,6 @@
 # WaniKani integration
 
-Status: confirmed by owner, 2026-11-07 (during Task 13). Spiked the same day. Input for `docs/specs/SPEC-wanikani.md`.
+Status: confirmed by owner, 2026-11-07 (during Task 13). Spiked the same day. Input for `docs/specs/done/SPEC-wanikani.md`.
 
 ## Problem Statement
 How might the game drill the kanji the owner is learning on WaniKani, and teach them after a miss with WaniKani's own mnemonics, without bundling WaniKani content or touching their WaniKani schedule?

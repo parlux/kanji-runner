@@ -1,6 +1,6 @@
 # Tasks: WaniKani mode and study screen (v1.1)
 
-Spec: `docs/specs/SPEC-wanikani.md`. Idea and spike: `docs/ideas/done/wanikani.md`. Starts after v1 Checkpoint D.
+Spec: `docs/specs/done/SPEC-wanikani.md`. Idea and spike: `docs/ideas/done/wanikani.md`. Starts after v1 Checkpoint D.
 Every task: `npm test && npm run lint && npm run build` pass before it is checked off. Test fixtures are synthetic: never commit real WaniKani content.
 
 ## Phase 5: Study screen (both modes)

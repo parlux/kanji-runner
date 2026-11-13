@@ -1,6 +1,6 @@
 # Lucky guesses and coming back rusty
 
-Status: confirmed by owner, 2026-11-08, after an interview. Idea 1 goes ahead in WaniKani mode only: spec `docs/specs/SPEC-reask.md`. Ideas 2 and 3 are parked.
+Status: confirmed by owner, 2026-11-08, after an interview. Idea 1 goes ahead in WaniKani mode only: spec `docs/specs/done/SPEC-reask.md`. Ideas 2 and 3 are parked.
 
 ## Decisions (owner, 2026-11-08)
 1. **The problem is the game's record, not in-the-moment feedback.** A lucky guess moves a kanji up a box, so it is shown less and never learned.

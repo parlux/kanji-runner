@@ -10,5 +10,5 @@
 
 ## Open vs done
 - Top level of `tasks/` and `docs/ideas/` = open. Finished = `done/` subfolder.
-- Specs stay in `docs/specs/` (later specs extend earlier ones).
-- When the owner ticks a round's final checkpoint: `git mv` its task list and idea(s) into `done/`, fix links.
+- Specs: same split, `docs/specs/` = open, `docs/specs/done/` = finished (later specs extend earlier ones, so links into `done/` are normal).
+- When the owner ticks a round's final checkpoint: `git mv` its task list, idea(s) and spec(s) into `done/`, fix links.
