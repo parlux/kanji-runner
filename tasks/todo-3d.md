@@ -1,6 +1,6 @@
 # Tasks: 3D run (v1.4)
 
-Spec: `docs/specs/SPEC-3d.md` (2026-11-12). Intent: `docs/intent/3d-run.md`. Idea: `docs/ideas/3d-run.md`. Starts after v1.3 (runs alongside the owner's Checkpoint G playtest).
+Spec: `docs/specs/SPEC-3d.md` (2026-11-12). Intent: `docs/intent/3d-run.md`. Idea: `docs/ideas/done/3d-run.md`. Starts after v1.3 (runs alongside the owner's Checkpoint G playtest).
 Every task: `npm test && npm run lint && npm run build` pass before it is checked off. Test fixtures are synthetic: never commit real WaniKani content.
 
 ## Plan
@@ -216,8 +216,8 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 - 3D: the crowd, its count and its fire follow the army; the boss's cannon fire aims at where the crowd is now. 2D (`?2d`): the army moves too if the 2D boss scene draws it at `run.x`; otherwise leave 2D as is and say so.
 
 **Acceptance criteria:**
-- [ ] Tested: in the boss scene, steering moves `run.x` as in the run (and is clamped); the clash result and timings are unchanged for the same inputs.
-- [ ] Browser check at 390×844: the army steered to the left and to the right mid-fight, the boss's fire following it. Screenshots in the scratchpad.
+- [x] Tested: in the boss scene, steering moves `run.x` as in the run (and is clamped); the clash result and timings are unchanged for the same inputs.
+- [x] Browser check at 390×844: the army steered to the left and to the right mid-fight, the boss's fire following it. Screenshots in the scratchpad.
 
 **Verification:** `npm test && npm run lint && npm run build`; browser check; deploy green.
 **Dependencies:** T5
@@ -225,11 +225,12 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 **Scope:** S
 
 ### Checkpoint H: v1.4 (owner, on the phone)
-- [ ] A run looks and feels like a crowd runner: figures bob, the crowd swells and thins.
-- [ ] The boss feels like the end of the run, not a separate screen; the giant boss looks big and scary.
-- [ ] Smooth on the phone with a full crowd.
-- [ ] Labels: readable enough, or the owner says what to tune.
-- [ ] The army can steer during the boss fight (T5b).
+- [x] A run looks and feels like a crowd runner: figures bob, the crowd swells and thins.
+- [x] The boss feels like the end of the run, not a separate screen; the giant boss looks big and scary.
+- [x] Smooth on the phone with a full crowd.
+- [x] Labels: readable enough, or the owner says what to tune.
+  - Owner, 2026-11-13: very readable with the camera changes; camera still being finalised (`docs/ideas/3d-camera-follow.md`).
+- [x] The army can steer during the boss fight (T5b).
 
 ## Phase 11: camera tuning (independent of T4; worktree `camera`)
 Intent: `docs/intent/3d-camera-follow.md`. Spec: SPEC-3d-depth amendment v1.4.3, "Camera tuning". Idea: `docs/ideas/3d-camera-follow.md`. Runs alongside T4; both touch `view.ts`/`scene3d.ts`, so merge main before starting and before the checkpoint.
