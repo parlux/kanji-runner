@@ -72,6 +72,14 @@ export function plannedRows(s: RunState): readonly GateRow[] {
   return s.reask?.planned ?? s.rows;
 }
 
+/**
+ * Where an army that died stopped: the gate it died at (1-based, the number of
+ * answered gates) out of the run's planned gates. For "gate 9 of 14".
+ */
+export function gateReached(s: RunState): { gate: number; of: number } {
+  return { gate: s.results.length, of: plannedRows(s).length };
+}
+
 export type RunStatus = "running" | "finished" | "dead";
 
 export type RunState = {
@@ -90,6 +98,8 @@ export type RunState = {
   targetX: number;
   army: number;
   streak: number;
+  /** The run's longest streak of correct answers (re-asks count like any gate). */
+  bestStreak: number;
   /** Per resolved row: was it answered correctly. */
   results: boolean[];
   /** Hit points per hazard (0 = can't be shot). */
@@ -151,6 +161,7 @@ export function createRunState(
     targetX: 0.5,
     army: STARTING_ARMY,
     streak: 0,
+    bestStreak: 0,
     results: [],
     hp: hazardHp(track, expectedArmy(rows, track.charges)),
     damage: track.hazards.map(() => 0),
@@ -467,6 +478,7 @@ function resolveRow(s: RunState): RunState {
     ...s,
     army,
     streak,
+    bestStreak: Math.max(s.bestStreak, streak),
     next: nextIndex,
     results: [...s.results, correct],
     lastClip: clip > 0 ? { loss: clip, dist: s.dist } : s.lastClip,
