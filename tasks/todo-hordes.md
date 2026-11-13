@@ -21,9 +21,12 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 ### Task H1: Horde numbers in the core
 **Description:** `HORDE_K`, `PACK_MAX`, `HORDE_THREAT` in `tuning.ts`; `packCount` in `fire.ts`; per-enemy HP, `packSurvivors`, `packSpan` (by remaining HP) and `contactLoss` in `sim.ts`, as in the spec. 2D shows the new counts with its current look.
 **Acceptance criteria:**
-- [ ] Tested: `packCount` scales and clamps; pack HP equals today's; survivors drop one per per-enemy HP; the span at full HP equals today's; contact loss matches the formula; time to die under steady fire is unchanged.
-- [ ] Balance bands hold; final army before and after logged here.
-- [ ] Golden snapshot updated only for pack-contact changes, with the reason in the commit.
+- [x] Tested: `packCount` scales and clamps; pack HP equals today's; survivors drop one per per-enemy HP; the span at full HP equals today's; contact loss matches the formula; time to die under steady fire is unchanged.
+  - Head count is stored per hazard in run state (`heads`, from `hazardHeads` at build); each enemy has `hp / heads`. Tests in `tests/core/fire.test.ts` (`packCount`, `hazardHeads`) and `tests/core/sim.test.ts` ("hordes", contact formula).
+- [x] Balance bands hold; final army before and after logged here.
+  - 200 seeds, `botBossRun` final army (mean) and win rate, before → after: 100% 1537.16 → 1537.16 (win 1.00 → 1.00); 80% 276.89 → 277.50 (0.49 → 0.49); 50% 17.36 → 17.37 (0.06 → 0.06); 100% at skill 0.5 1118.86 → 1118.88 (1.00 → 1.00). `botRun` 50%: all 200 die, before and after. `HORDE_THREAT` stays 1; the small rise comes from contact rounding (round instead of ceil of the remaining strength).
+- [x] Golden snapshot updated only for pack-contact changes, with the reason in the commit.
+  - Not updated: the run golden snapshots built rows only, not the sim, so it didn't change (noted in slice 2's commit).
 **Verification:** `npm test && npm run lint && npm run build`. **Dependencies:** none. **Files:** `src/core/{tuning,fire,sim}.ts`, `src/game/render.ts` (only if the count display needs it), `tests/core/*`. **Scope:** S (highest risk: balance; use opus)
 
 ### Task H2: Draw the whole horde, `?fps`
