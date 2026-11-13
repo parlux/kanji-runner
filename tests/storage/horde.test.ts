@@ -72,8 +72,35 @@ describe("horde storage", () => {
     expect(() => saveHorde(bad, tuned)).not.toThrow();
   });
 
-  it("the default settings build the default tuning", () => {
+  it("the default settings build the default tuning: the owner's 500 enemies, 2.5 s, size 1, width 0.8", () => {
+    expect(DEFAULT_HORDE_SETTINGS).toEqual({
+      count: 500,
+      scale: 1,
+      killSeconds: 2.5,
+      width: 0.8,
+    });
     expect(hordeTuning(DEFAULT_HORDE_SETTINGS)).toEqual(HORDE_DEFAULTS);
+    expect(HORDE_DEFAULTS).toEqual({
+      hordeK: 7.5,
+      packMax: 500,
+      killSeconds: 2.5,
+      packWidth: 0.8,
+      hordeScale: 1,
+    });
+  });
+
+  it("an old save (200 enemies, the earlier defaults) stays valid and builds as before", () => {
+    const old = { count: 200, scale: 0.7, killSeconds: 1, width: 1 };
+    const store = new Map([[HORDE_KEY, JSON.stringify(old)]]);
+    const loaded = loadHorde({ getItem: (k) => store.get(k) ?? null });
+    expect(loaded).toEqual(old);
+    expect(hordeTuning(old)).toEqual({
+      hordeK: 3,
+      packMax: 200,
+      killSeconds: 1,
+      packWidth: 1,
+      hordeScale: 0.7,
+    });
   });
 
   it("a bigger count raises the cap and K so normal runs reach it", () => {

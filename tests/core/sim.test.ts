@@ -1070,7 +1070,7 @@ describe("shooting", () => {
     });
 
     it("its mouth is PACK_WIDTH wide, centred where the pack is and on the track, whole or shot", () => {
-      expect(PACK_WIDTH).toBe(1);
+      expect(PACK_WIDTH).toBe(0.8);
       const s0 = range([pack(1.9, 0.3)], [70], 20, [210], [28]);
       const half = { ...HORDE_DEFAULTS, packWidth: 0.5 };
       for (const f of [1, 0.5, 0.01])

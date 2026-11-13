@@ -32,13 +32,13 @@ export const DEFAULT_HORDE_SETTINGS: HordeSettings = {
 
 /**
  * The tuning a run is built with. `count` is the biggest pack (packMax). The
- * default K and cap reach 200 at an expected army of about 67 (the late
- * packs of a normal run), so a bigger count scales K by the same ratio and
- * the late packs hit the cap; a count at or under the default leaves K alone.
+ * default K and cap reach the cap at an expected army of about 67 (the late
+ * packs of a normal run), so K scales with the count by the same ratio and
+ * the late packs hit the cap (a saved 200 gets K = 3, as before).
  */
 export function hordeTuning(s: HordeSettings): HordeTuning {
   return {
-    hordeK: HORDE_K * Math.max(1, s.count / HORDE_DEFAULTS.packMax),
+    hordeK: (HORDE_K * s.count) / HORDE_DEFAULTS.packMax,
     packMax: s.count,
     killSeconds: s.killSeconds,
     packWidth: s.width,

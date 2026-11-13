@@ -142,21 +142,23 @@ export const ENEMY_X_MARGIN = 0.2;
 /**
  * Hordes (v1.10): a pack's head count = clamp(round(HORDE_K × expected army),
  * ENEMY_MIN, PACK_MAX). Its hit points (see KILL_SECONDS) are shared evenly.
+ * The owner's default (Checkpoint M2) is a 500 pack; K scales with it (3 per
+ * 200), so the late packs of a normal run (expected army about 67) reach it.
  */
-export const HORDE_K = 3;
-export const PACK_MAX = 200;
+export const PACK_MAX = 500;
+export const HORDE_K = 3 * (PACK_MAX / 200);
 /**
  * Seconds an army of the expected size takes to mow down a whole pack: pack
  * HP = KILL_SECONDS × FIRE_PER_SOLDIER × expected army.
  */
-export const KILL_SECONDS = 1.0;
+export const KILL_SECONDS = 2.5;
 /**
  * A pack's crowd's width (its mouth) as a share of the track (1 = the
  * whole track), at the pack's own x. Its stream is as wide as the army.
  */
-export const PACK_WIDTH = 1.0;
+export const PACK_WIDTH = 0.8;
 /** Enemy figures are drawn this size of a soldier (a view value; the core ignores it). */
-export const HORDE_SCALE = 0.7;
+export const HORDE_SCALE = 1.0;
 
 /**
  * Horde tuning a run is built with (v1.10 rework): the dev panel changes it,
