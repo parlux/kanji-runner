@@ -24,15 +24,15 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 ### Task K2: Start-screen switch and wiring
 **Description:**
 - "Meanings only" switch on the start screen; turning it on swaps in the mode's progress and log, uses the meaning-mode pool and the Built-in kanji list, turns sync and WaniKani off; turning it off reloads the owner's save.
-- In the mode: no answer reveal, no Study button or study cards; level picker without kana levels.
+- In the mode: no Study button or study cards; level picker without kana levels.
 
 **Acceptance criteria:**
-- [x] Browser check at 390×844 and 390×667, 3D (and one `?2d` run screenshot): switch on, place high, run shows only kanji with English answers, no reveal, loss end screen without Study; switch off, owner's progress and session panel unchanged. Screenshots in the scratchpad. (The reveal is being removed outright, by the orchestrator.)
+- [x] Browser check at 390×844 and 390×667, 3D (and one `?2d` run screenshot): switch on, place high, run shows only kanji with English answers, loss end screen without Study; switch off, owner's progress and session panel unchanged. Screenshots in the scratchpad. (The reveal is being removed outright, by the orchestrator.)
 - [x] Tested or checked: no sync push/pull and no write to `kanji-runner:v1` while the mode is on.
 - [x] Golden run and existing tests unchanged; deploy green.
 
 **Verification:** `npm test && npm run lint && npm run build`; browser check; deploy green.
-**Dependencies:** K1, v1.6 R1 (reveal exists to turn off)
+**Dependencies:** K1
 **Files:** `src/main.ts`, `src/game/start.ts`, `src/game/render.ts`, `src/game/scenes.ts`, tests
 **Scope:** M
 

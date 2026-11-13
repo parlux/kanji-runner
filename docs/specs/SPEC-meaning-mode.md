@@ -1,6 +1,6 @@
 # Spec: kanji meaning mode (v1.7)
 
-Extends `docs/specs/done/SPEC.md` (v1) through `docs/specs/SPEC-reveal.md` (v1.6). Everything there still holds unless this spec says otherwise. Intent: `docs/intent/kanji-meaning-mode.md`. Idea: `docs/ideas/kanji-meaning-mode.md`.
+Extends `docs/specs/done/SPEC.md` (v1) through `docs/specs/done/SPEC-stories.md` (v1.5; v1.6 reveal was dropped). Everything there still holds unless this spec says otherwise. Intent: `docs/intent/kanji-meaning-mode.md`. Idea: `docs/ideas/kanji-meaning-mode.md`.
 
 ## Objective
 A second way to play for someone who reads Chinese but no Japanese: kanji prompts, English meaning answers, nothing else. It has its own progress on the device and never touches the owner's.
@@ -27,7 +27,6 @@ A second way to play for someone who reads Chinese but no Japanese: kanji prompt
 - Levels: the existing level picker and `place`, offering Kanji 1 and up (no Hiragana/Katakana choices). Unlock by the existing 80% rule (`applyUnlock`; kanji levels already count meaning keys only).
 
 ### What's shown
-- No answer reveal (v1.6) in this mode.
 - End screen: the missed list as today (meaning gates already show kanji + meaning) and the session panel from this mode's log. No "Study" button and no study cards.
 - Level names as today ("Kanji N").
 

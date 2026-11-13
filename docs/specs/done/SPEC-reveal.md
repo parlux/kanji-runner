@@ -1,6 +1,8 @@
 # Spec: the other half after a right answer (v1.6)
 
-Extends `docs/specs/done/SPEC.md` (v1) through `docs/specs/done/SPEC-stories.md` (v1.5). Everything there still holds unless this spec says otherwise. Intent: `docs/intent/answer-reveal.md`. Idea: `docs/ideas/answer-reveal.md`.
+**Dropped by the owner, 2026-11-13:** after trying it, the reveal was too hard to read quickly mid-run, and the other half is already on the pause screen. The code was reverted (R1 commits 269153c, 1c03a2e, 72b8f68); this doc is kept as a record.
+
+Extends `docs/specs/done/SPEC.md` (v1) through `docs/specs/done/SPEC-stories.md` (v1.5). Everything there still holds unless this spec says otherwise. Intent: `docs/intent/answer-reveal.md`. Idea: `docs/ideas/done/answer-reveal.md`.
 
 ## Objective
 Each right kanji answer briefly shows the half of the kanji that wasn't asked, so meaning gates also teach readings and reading gates also teach meanings. Display only: no change to the sim, scoring, selection or records.

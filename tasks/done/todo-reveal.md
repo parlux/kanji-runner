@@ -1,6 +1,8 @@
 # Tasks: the other half after a right answer (v1.6)
 
-Spec: `docs/specs/SPEC-reveal.md` (2026-11-13). Intent: `docs/intent/answer-reveal.md`. Idea: `docs/ideas/answer-reveal.md`. Started 2026-11-13.
+**Dropped by the owner, 2026-11-13:** after trying it, the reveal was too hard to read quickly mid-run, and the other half is already on the pause screen. The code was reverted (R1 commits 269153c, 1c03a2e, 72b8f68); this doc is kept as a record.
+
+Spec: `docs/specs/done/SPEC-reveal.md` (2026-11-13). Intent: `docs/intent/answer-reveal.md`. Idea: `docs/ideas/done/answer-reveal.md`. Started 2026-11-13.
 Every task: `npm test && npm run lint && npm run build` pass before it is checked off.
 
 ## Phase 12: Answer reveal
