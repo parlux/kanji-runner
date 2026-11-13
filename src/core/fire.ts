@@ -9,7 +9,6 @@ import type { Track } from "./track";
 import {
   BASE_REWARD,
   BLOCK_HP_K,
-  ENEMY_HP,
   ENEMY_K,
   ENEMY_MIN,
   HORDE_DEFAULTS,
@@ -85,15 +84,33 @@ function expectedAt(
 }
 
 /**
- * Hit points per hazard, from the expected army after the questions before it:
- * blocks BLOCK_HP_K × that, packs ENEMY_HP per enemy. Saws get 0 (unshootable).
+ * Hit points per hazard, from the expected army e after the questions before
+ * it: blocks BLOCK_HP_K × e; packs killSeconds × FIRE_PER_SOLDIER × e, so an
+ * army of e facing the whole pack mows it down in killSeconds. Saws get 0
+ * (unshootable).
  */
-export function hazardHp(track: Track, expected: readonly number[]): number[] {
+export function hazardHp(
+  track: Track,
+  expected: readonly number[],
+  horde: HordeTuning = HORDE_DEFAULTS,
+): number[] {
   return track.hazards.map((h) => {
     if (h.kind === "saw") return 0;
     const e = expectedAt(track, expected, h.pos);
-    return h.kind === "block" ? BLOCK_HP_K * e : ENEMY_HP * packStrength(e);
+    return h.kind === "block"
+      ? BLOCK_HP_K * e
+      : horde.killSeconds * firepower(e);
   });
+}
+
+/** Per hazard: packStrength of the expected army before a pack (its contact threat), 0 otherwise. */
+export function hazardStrength(
+  track: Track,
+  expected: readonly number[],
+): number[] {
+  return track.hazards.map((h) =>
+    h.kind === "pack" ? packStrength(expectedAt(track, expected, h.pos)) : 0,
+  );
 }
 
 /** Enemies per hazard at the start: packCount for packs, 0 for blocks and saws. */

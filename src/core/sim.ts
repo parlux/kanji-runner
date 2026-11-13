@@ -11,6 +11,7 @@ import {
   firepower,
   hazardHeads,
   hazardHp,
+  hazardStrength,
   pickTarget,
   type Threat,
 } from "./fire";
@@ -33,7 +34,6 @@ import {
   BASE_REWARD,
   BASE_SPEED,
   CRATE_REWARD_K,
-  ENEMY_HP,
   HORDE_THREAT,
   ENEMY_SPEED,
   ENEMY_STEER_SPEED,
@@ -110,6 +110,8 @@ export type RunState = {
   hp: number[];
   /** Enemies per hazard at the start (packCount for packs, 0 otherwise); each has hp / heads. */
   heads: number[];
+  /** Per hazard: a pack's pre-horde strength (packStrength), what its width and contact go by; 0 otherwise. */
+  strength: number[];
   /** Damage dealt so far per hazard; a block is shattered once this reaches its hp. */
   damage: number[];
   /** Per hazard: where its enemy pack is now (null for blocks and saws). */
@@ -174,8 +176,9 @@ export function createRunState(
     streak: 0,
     bestStreak: 0,
     results: [],
-    hp: hazardHp(track, expected),
+    hp: hazardHp(track, expected, horde),
     heads: hazardHeads(track, expected, horde),
+    strength: hazardStrength(track, expected),
     damage: track.hazards.map(() => 0),
     packs: track.hazards.map((h) =>
       h.kind === "pack" ? { pos: h.pos, x: h.x } : null,
@@ -285,12 +288,11 @@ export function packSurvivors(s: RunState, i: number): number {
   return Math.max(0, Math.ceil(packHeadsLeft(s, i) - 1e-6));
 }
 
-/**
- * Pack i's remaining hit points as a pre-horde strength (enemies of ENEMY_HP):
- * what its width and contact threat go by, so a horde is denser, not wider.
- */
+/** Pack i's pre-horde strength scaled by its remaining hit points. */
 export function packStrengthLeft(s: RunState, i: number): number {
-  return Math.max(0, ((s.hp[i] ?? 0) - (s.damage[i] ?? 0)) / ENEMY_HP);
+  const hp = s.hp[i] ?? 0;
+  if (hp <= 0) return 0;
+  return ((s.strength[i] ?? 0) * Math.max(0, hp - (s.damage[i] ?? 0))) / hp;
 }
 
 /** Pack i's span: its centre ± half the width of a crowd of its remaining strength. */
@@ -457,14 +459,20 @@ export function stepRun(s: RunState, dt: number, pace = 1): RunState {
 
 /**
  * Soldiers lost when pack i reaches the crowd, if their spans overlap:
- * round(HORDE_THREAT × its remaining strength).
+ * round(HORDE_THREAT × its strength × survivors / heads), at most the army.
  */
 function contactLoss(s: RunState, i: number): number {
   const w = crowdWidth(s.army);
   const p = packSpan(s, i);
   const overlap =
     Math.min(s.x + w / 2, p.right) - Math.max(s.x - w / 2, p.left) > 0;
-  const loss = Math.round(HORDE_THREAT * packStrengthLeft(s, i));
+  const heads = s.heads[i] ?? 0;
+  const loss =
+    heads > 0
+      ? Math.round(
+          (HORDE_THREAT * (s.strength[i] ?? 0) * packSurvivors(s, i)) / heads,
+        )
+      : 0;
   return overlap ? Math.min(s.army, loss) : 0;
 }
 

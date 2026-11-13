@@ -143,34 +143,41 @@ export const PACK_WAKE = 4 * VIEW_DISTANCE;
 export const ENEMY_X_MARGIN = 0.2;
 /**
  * Hordes (v1.10): a pack's head count = clamp(round(HORDE_K × expected army),
- * ENEMY_MIN, PACK_MAX). Its total hit points stay ENEMY_HP × packStrength, shared
- * evenly, so more heads only means weaker enemies.
+ * ENEMY_MIN, PACK_MAX). Its hit points (see KILL_SECONDS) are shared evenly.
  */
 export const HORDE_K = 3;
 export const PACK_MAX = 200;
+/**
+ * Seconds an army of the expected size takes to mow down a whole pack: pack
+ * HP = KILL_SECONDS × FIRE_PER_SOLDIER × expected army.
+ */
+export const KILL_SECONDS = 2.5;
 /** Enemy figures are drawn this size of a soldier (a view value; the core ignores it). */
 export const HORDE_SCALE = 0.7;
 
 /**
  * Horde tuning a run is built with (v1.10 rework): the dev panel changes it,
  * from the next run. `hordeK` and `packMax` set the head count (packCount),
- * `hordeScale` is the figure size (view only). Defaults: HORDE_DEFAULTS.
+ * `killSeconds` the pack HP (see KILL_SECONDS), `hordeScale` the figure size
+ * (view only). Defaults: HORDE_DEFAULTS.
  */
 export type HordeTuning = {
   readonly hordeK: number;
   readonly packMax: number;
+  readonly killSeconds: number;
   readonly hordeScale: number;
 };
 export const HORDE_DEFAULTS: HordeTuning = {
   hordeK: HORDE_K,
   packMax: PACK_MAX,
+  killSeconds: KILL_SECONDS,
   hordeScale: HORDE_SCALE,
 };
 /**
- * Contact costs round(HORDE_THREAT × remaining pack HP / ENEMY_HP) soldiers, in
- * (0, 1]. At 1 a pack is as dangerous as a pre-horde one.
+ * Contact costs min(army, round(HORDE_THREAT × packStrength(expected) ×
+ * survivors / heads)) soldiers: an intact pack HORDE_THREAT × today's strength.
  */
-export const HORDE_THREAT = 1;
+export const HORDE_THREAT = 0.2;
 
 // Boss (T9). See boss.ts.
 /** Boss size = round(BOSS_K × expected army). */

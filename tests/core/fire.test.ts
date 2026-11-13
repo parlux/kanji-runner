@@ -4,6 +4,7 @@ import {
   firepower,
   hazardHeads,
   hazardHp,
+  hazardStrength,
   packCount,
   packStrength,
   pickTarget,
@@ -13,13 +14,13 @@ import { kanaRun } from "./kana-run";
 import type { Block, Pack, Saw, Track } from "../../src/core/track";
 import {
   BLOCK_HP_K,
-  ENEMY_HP,
   ENEMY_K,
   ENEMY_MIN,
   FIRE_PER_SOLDIER,
   FIRE_RANGE,
   HORDE_DEFAULTS,
   HORDE_K,
+  KILL_SECONDS,
   PACK_MAX,
   STARTING_ARMY,
 } from "../../src/core/tuning";
@@ -84,7 +85,15 @@ describe("hazardHp", () => {
       BLOCK_HP_K * 8,
       0,
       BLOCK_HP_K * 11,
-      ENEMY_HP * packStrength(11),
+      KILL_SECONDS * firepower(11),
+    ]);
+    const slow = { ...HORDE_DEFAULTS, killSeconds: 6 };
+    expect(hazardHp(track, [5, 8, 11, 40], slow)[3]).toBe(6 * firepower(11));
+    expect(hazardStrength(track, [5, 8, 11, 40])).toEqual([
+      0,
+      0,
+      0,
+      packStrength(11),
     ]);
   });
 });

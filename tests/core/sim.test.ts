@@ -36,6 +36,7 @@ import {
   ENEMY_HP,
   HORDE_DEFAULTS,
   HORDE_THREAT,
+  KILL_SECONDS,
   PACK_WAKE,
   ENEMY_SPEED,
   ENEMY_STEER_SPEED,
@@ -478,13 +479,14 @@ describe("shooting", () => {
     hp: number[],
     army = 20,
     heads = hp.map((h) => Math.round(h / ENEMY_HP)),
+    strength = hp.map((h) => h / ENEMY_HP),
   ): RunState {
     const s = createRunState(kanaRun(1), {
       questions: [100],
       hazards,
       charges: [],
     });
-    return { ...s, hp, heads, army };
+    return { ...s, hp, heads, strength, army };
   }
   const pack = (pos: number, x = 0.5): Pack => ({ kind: "pack", pos, x });
   const stepFor = (s: RunState, secs: number): RunState => {
@@ -665,39 +667,75 @@ describe("shooting", () => {
     expect(width(narrow)).toBeCloseTo(crowdWidth(4), 9);
   });
 
-  it("contact costs round(HORDE_THREAT × remaining HP / ENEMY_HP) when spans overlap, then the pack is gone", () => {
+  it("contact costs round(HORDE_THREAT × strength × survivors / heads) when spans overlap, then the pack is gone", () => {
     expect(HORDE_THREAT).toBeGreaterThan(0);
     expect(HORDE_THREAT).toBeLessThanOrEqual(1);
-    for (const shot of [0, 3, 2.6, 3.4, 6.6]) {
-      const s0 = {
-        ...range([pack(0.02)], [7 * ENEMY_HP], 20),
-        damage: [shot * ENEMY_HP],
-      };
-      const loss = Math.round(HORDE_THREAT * (7 - shot));
-      const s = stepRun(s0, DT);
-      expect(s.nextHazard).toBe(1);
-      expect(s.army).toBe(20 - loss);
-      expect(s.lastClip?.loss ?? 0).toBe(loss);
+    for (const [strength, heads, army] of [
+      [7, 7, 20],
+      [40, 200, 300],
+      [133, 20_000, 1000],
+    ] as const) {
+      const hp = 2.5 * strength;
+      for (const shot of [0, 0.1, 0.37, 0.5, 0.9, 0.999]) {
+        const s0 = {
+          ...range([pack(0.02)], [hp], army, [heads], [strength]),
+          damage: [shot * hp],
+        };
+        const survivors = packSurvivors(s0, 0);
+        expect(survivors).toBe(Math.ceil(heads * (1 - shot) - 1e-6));
+        const loss = Math.round((HORDE_THREAT * strength * survivors) / heads);
+        const s = stepRun(s0, DT);
+        expect(s.nextHazard).toBe(1);
+        expect(s.army).toBe(army - loss);
+        expect(s.lastClip?.loss ?? 0).toBe(loss);
+      }
     }
+    // a whole intact pack costs HORDE_THREAT × its strength
+    const s = stepRun(range([pack(0.02)], [400], 1000, [200], [160]), DT);
+    expect(s.army).toBe(1000 - Math.round(HORDE_THREAT * 160));
   });
 
   describe("hordes", () => {
-    it("packs start with packCount heads sharing today's HP: ENEMY_HP × packStrength", () => {
+    it("packs start with packCount heads sharing KILL_SECONDS × the expected army's firepower", () => {
       const rows = kanaRun(1);
       const track = buildTrack(1, ROWS_PER_RUN, false);
       const s = createRunState(rows, track);
       const expected = expectedArmy(rows, track.charges);
       let packs = 0;
       track.hazards.forEach((h, i) => {
-        if (h.kind !== "pack") return expect(s.heads[i]).toBe(0);
+        if (h.kind !== "pack") {
+          expect(s.strength[i]).toBe(0);
+          return expect(s.heads[i]).toBe(0);
+        }
         packs++;
         const q = track.questions.filter((p) => p < h.pos).length;
         const e = expected[Math.min(q, expected.length - 1)] ?? 0;
-        expect(s.hp[i]).toBe(ENEMY_HP * packStrength(e));
+        expect(s.hp[i]).toBeCloseTo(KILL_SECONDS * firepower(e), 9);
+        expect(s.strength[i]).toBe(packStrength(e));
         expect(s.heads[i]).toBe(packCount(e));
         expect(packSurvivors(s, i)).toBe(packCount(e));
       });
       expect(packs).toBeGreaterThan(0);
+    });
+
+    it("a full pack under the expected army's steady fire dies in KILL_SECONDS (± 10%)", () => {
+      for (const [expected, heads] of [
+        [5, 15],
+        [40, 120],
+        [300, 200],
+        [300, 20_000],
+      ] as const) {
+        const hp = KILL_SECONDS * firepower(expected);
+        let s = range([pack(1.9)], [hp], expected, [heads]);
+        let t = 0;
+        // held in front of the army, so only the fire counts
+        while (packSurvivors(s, 0) > 0 && t < 10) {
+          s = stepRun({ ...s, packs: [{ pos: s.dist + 1.9, x: 0.5 }] }, DT);
+          t += DT;
+        }
+        expect(t).toBeGreaterThan(0.9 * KILL_SECONDS);
+        expect(t).toBeLessThan(1.1 * KILL_SECONDS);
+      }
     });
 
     it("is built with HORDE_DEFAULTS unless given a tuning, which changes the heads", () => {
@@ -794,7 +832,7 @@ describe("shooting", () => {
 
   it("enemy losses never change streak or results, and an army reaching 0 ends the run", () => {
     const s0 = {
-      ...range([pack(0.02)], [50 * ENEMY_HP], 5),
+      ...range([pack(0.02)], [500 * ENEMY_HP], 5),
       streak: 3,
       results: [true, false],
     };
