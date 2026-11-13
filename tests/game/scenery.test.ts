@@ -1,7 +1,14 @@
 import { describe, expect, it } from "vitest";
 import {
   builtLooks,
+  BLOCK_X,
   FENCE_STEP,
+  LAMP_STEP,
+  WALK_STEP,
+  WALK_W,
+  WALK_X,
+  WINDOW_H,
+  WINDOW_W,
   FLAG_STEP,
   STAND_STEP,
   HAZE_FAR_Z,
@@ -116,11 +123,8 @@ describe("race day", () => {
     backdrop: [],
   };
 
-  it("is built, and the pick covers three looks", () => {
-    expect(builtLooks()).toEqual(["country", "spring", "stadium"]);
-    const seen = new Set<string>();
-    for (let seed = 0; seed < 100; seed++) seen.add(sceneryFor(seed));
-    expect(seen.size).toBe(3);
+  it("is built", () => {
+    expect(builtLooks()).toContain("stadium");
   });
 
   it("tiles stands and flags without a seam", () => {
@@ -153,6 +157,56 @@ describe("race day", () => {
       expect(b.y - b.sy).toBeGreaterThanOrEqual(15);
       expect(b.drift).not.toBe(0);
     }
+  });
+});
+
+describe("block city", () => {
+  const { props } = LOOKS.city?.layout() ?? { props: [] };
+  const blocks = props.filter((p) => p.shape === "block");
+
+  it("is built, and the pick covers four looks", () => {
+    expect(builtLooks()).toEqual(["country", "spring", "stadium", "city"]);
+    const seen = new Set<string>();
+    for (let seed = 0; seed < 100; seed++) seen.add(sceneryFor(seed));
+    expect(seen.size).toBe(4);
+  });
+
+  it("tiles pavement and lamps without a seam", () => {
+    expect(PROP_SPAN % WALK_STEP).toBe(0);
+    expect(PROP_SPAN % LAMP_STEP).toBe(0);
+  });
+
+  it("starts the buildings beyond the pavement, and the pavement clears the kerbs", () => {
+    expect(blocks.length).toBeGreaterThan(50);
+    for (const b of blocks)
+      expect(Math.abs(b.x) - b.sx / 2).toBeGreaterThanOrEqual(BLOCK_X);
+    for (const p of props.filter((q) => q.shape === "box" && q.sy === 0.12))
+      expect(Math.abs(p.x) - p.sx / 2).toBeGreaterThanOrEqual(5.5);
+    expect(BLOCK_X).toBeGreaterThanOrEqual(WALK_X + WALK_W / 2);
+  });
+
+  it("fills each row to the seam: near-continuous, no overlap", () => {
+    for (const s of [-1, 1]) {
+      const row = blocks
+        .filter((b) => Math.sign(b.x) === s && Math.abs(b.x) - b.sx / 2 < 12)
+        .sort((a, b) => a.z - b.z);
+      let prevEnd = PROP_FAR;
+      for (const b of row) {
+        expect(b.z - b.sz / 2).toBeGreaterThanOrEqual(prevEnd - 1e-9);
+        expect(b.z - b.sz / 2 - prevEnd).toBeLessThan(4);
+        prevEnd = b.z + b.sz / 2;
+      }
+      expect(PROP_NEAR - prevEnd).toBeLessThan(4);
+    }
+  });
+
+  it("sizes blocks in whole windows and colours them from the pastels", () => {
+    for (const b of blocks) {
+      expect(b.sy / WINDOW_H).toBeCloseTo(Math.round(b.sy / WINDOW_H));
+      expect(b.sx % WINDOW_W).toBe(0);
+      expect(b.sz % WINDOW_W).toBe(0);
+    }
+    expect(new Set(blocks.map((b) => b.colour)).size).toBeGreaterThanOrEqual(6);
   });
 });
 

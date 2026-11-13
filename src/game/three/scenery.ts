@@ -36,7 +36,8 @@ export type Shape =
   | "sun"
   | "awning"
   | "flag"
-  | "balloon";
+  | "balloon"
+  | "block";
 
 /**
  * One instance of a shape: its place (world units; `z` is where it starts,
@@ -168,6 +169,110 @@ export const TIERS = 6;
 const CROWD_COLOURS = [
   0xff5a5a, 0xffc94a, 0x3d7bff, 0xffffff, 0x50d27a, 0xff8fd0, 0x9b6bff,
 ];
+
+/** Block city: street lamps and pavement tiles are laid every 12 (divides PROP_SPAN). */
+export const LAMP_STEP = 12;
+export const LAMP_X = 6.2;
+export const WALK_STEP = 12;
+/** The pavement runs from the kerb's outer edge: centred at this |x|, this wide. */
+export const WALK_X = 7;
+export const WALK_W = 3;
+/** Building row 1 starts at this |x| (beyond the pavement). */
+export const BLOCK_X = 9;
+/** A window is this wide and high (world units): block sizes are multiples, so the pattern fits. */
+export const WINDOW_W = 2;
+export const WINDOW_H = 2.4;
+const PASTELS = [
+  0xffb5a7, 0xffd6a5, 0xfdffb6, 0xcaffbf, 0x9bf6ff, 0xa0c4ff, 0xbdb2ff,
+  0xffc6ff,
+];
+
+/**
+ * One side's row of blocks from `inner` outwards: depths from `depths` (and
+ * widths from `widths`) fill PROP_SPAN exactly, the leftover spread as small
+ * gaps, so the row tiles the wrap with no hole at the seam.
+ */
+function blockRow(
+  rng: Rng,
+  s: number,
+  inner: number,
+  widths: number[],
+  depths: number[],
+  floors: [number, number],
+  props: Part[],
+): void {
+  const ds: number[] = [];
+  let total = 0;
+  for (;;) {
+    const d = pick(rng, depths);
+    if (total + d + (ds.length + 1) > PROP_SPAN) break;
+    ds.push(d);
+    total += d;
+  }
+  const weights = ds.map(() => range(rng, 0.4, 2.5));
+  const wsum = weights.reduce((a, b) => a + b, 0);
+  let z = PROP_FAR;
+  ds.forEach((d, i) => {
+    const w = pick(rng, widths);
+    const h =
+      WINDOW_H * (floors[0] + Math.floor(rng() * (floors[1] - floors[0] + 1)));
+    props.push(
+      part(
+        "block",
+        s * (inner + w / 2 + range(rng, 0, 1.5)),
+        0,
+        z + d / 2,
+        1,
+        pick(rng, PASTELS),
+        { sx: w, sy: h, sz: d },
+      ),
+    );
+    z += d + ((PROP_SPAN - total) * (weights[i] as number)) / wsum;
+  });
+}
+
+/** Block city: pastel blocks in near-continuous rows, pavement and street lamps by the road. */
+function cityLayout(): Layout {
+  const rng = createRng(31);
+  const props: Part[] = [];
+  const backdrop: Part[] = [];
+  for (let z = PROP_FAR; z < PROP_NEAR; z += WALK_STEP)
+    for (const s of [-1, 1])
+      props.push(
+        part("box", s * WALK_X, 0, z + WALK_STEP / 2, 1, 0xe4e7ee, {
+          sx: WALK_W,
+          sy: 0.12,
+          sz: WALK_STEP,
+        }),
+      );
+  for (let z = PROP_FAR; z < PROP_NEAR; z += LAMP_STEP)
+    for (const s of [-1, 1]) {
+      const zl = z + LAMP_STEP / 2;
+      props.push(
+        part("box", s * LAMP_X, 0, zl, 1, 0x4a5568, {
+          sx: 0.14,
+          sy: 3.6,
+          sz: 0.14,
+        }),
+        // the arm and lamp reach out over the pavement, never over the kerb
+        part("box", s * (LAMP_X + 0.4), 3.5, zl, 1, 0x4a5568, {
+          sx: 0.9,
+          sy: 0.08,
+          sz: 0.08,
+        }),
+        part("box", s * (LAMP_X + 0.8), 3.2, zl, 1, 0xfff3b0, {
+          sx: 0.35,
+          sy: 0.2,
+          sz: 0.3,
+        }),
+      );
+    }
+  for (const s of [-1, 1]) {
+    blockRow(rng, s, BLOCK_X, [6, 8, 10], [6, 8, 10], [3, 9], props);
+    blockRow(rng, s, 24, [14, 16, 18, 20, 22], [8, 10, 12], [5, 12], props);
+  }
+  return { props, backdrop, petals: [] };
+}
 
 /** Countryside: trees, bushes and a white fence by the road; hills and drifting clouds beyond. */
 function countryLayout(): Layout {
@@ -513,6 +618,12 @@ export const LOOKS: Partial<Record<LookId, Look>> = {
     sky: { top: 0x4aa8f0, horizon: 0xd4eeff, below: 0xd4eeff },
     ground: 0x6cc35c,
     layout: stadiumLayout,
+  },
+  city: {
+    id: "city",
+    sky: { top: 0x6cc0f5, horizon: 0xe2f2ff, below: 0xe2f2ff },
+    ground: 0xbfc6d4,
+    layout: cityLayout,
   },
 };
 

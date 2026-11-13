@@ -3,6 +3,7 @@ import {
   BoxGeometry,
   BufferAttribute,
   BufferGeometry,
+  CanvasTexture,
   CircleGeometry,
   Color,
   ConeGeometry,
@@ -15,9 +16,11 @@ import {
   Mesh,
   MeshBasicMaterial,
   MeshLambertMaterial,
+  NearestFilter,
   Points,
   PointsMaterial,
   Quaternion,
+  RepeatWrapping,
   SphereGeometry,
   Vector3,
   type Scene,
@@ -31,6 +34,8 @@ import {
   petalX,
   petalY,
   petalZ,
+  WINDOW_H,
+  WINDOW_W,
   wrap,
   wrapZ,
   type Petal,
@@ -57,6 +62,51 @@ const PETAL_SIZE = 0.25;
 /** Props beyond the haze are parked out of sight this far down. */
 const PARKED_Y = -1e4;
 
+/**
+ * Block city's building material: a fogged Lambert whose windows come from a
+ * 32×32 canvas texture made here (white with one blue-grey window). The
+ * pattern repeats by the instance's own size, so every block, whatever its
+ * scale, gets whole windows WINDOW_W × WINDOW_H, on its sides only.
+ */
+function windowMaterial(): MeshLambertMaterial {
+  const cv = document.createElement("canvas");
+  cv.width = cv.height = 32;
+  const cx = cv.getContext("2d");
+  if (cx) {
+    cx.fillStyle = "#fff";
+    cx.fillRect(0, 0, 32, 32);
+    cx.fillStyle = "#7d93b8";
+    cx.fillRect(6, 6, 20, 18);
+  }
+  const map = new CanvasTexture(cv);
+  map.wrapS = map.wrapT = RepeatWrapping;
+  map.magFilter = NearestFilter;
+  const material = new MeshLambertMaterial({ flatShading: true });
+  material.onBeforeCompile = (shader) => {
+    shader.uniforms.winMap = { value: map };
+    shader.vertexShader = shader.vertexShader
+      .replace("#include <common>", "#include <common>\nvarying vec2 vWin;")
+      .replace(
+        "#include <begin_vertex>",
+        `#include <begin_vertex>
+        vec3 isc = vec3(length(instanceMatrix[0].xyz), length(instanceMatrix[1].xyz), length(instanceMatrix[2].xyz));
+        vec3 lp = position + vec3(0.5, 0.0, 0.5);
+        float u = abs(normal.x) > 0.5 ? lp.z * isc.z : lp.x * isc.x;
+        vWin = abs(normal.y) > 0.5 ? vec2(0.0) : vec2(u / ${WINDOW_W.toFixed(1)}, lp.y * isc.y / ${WINDOW_H.toFixed(1)});`,
+      );
+    shader.fragmentShader = shader.fragmentShader
+      .replace(
+        "#include <common>",
+        "#include <common>\nvarying vec2 vWin;\nuniform sampler2D winMap;",
+      )
+      .replace(
+        "#include <color_fragment>",
+        "#include <color_fragment>\n        diffuseColor.rgb *= texture2D(winMap, vWin).rgb;",
+      );
+  };
+  return material;
+}
+
 /** Each shape's unit geometry, made once and shared by every look. */
 function shapeGeometry(shape: Shape): BufferGeometry {
   switch (shape) {
@@ -79,6 +129,7 @@ function shapeGeometry(shape: Shape): BufferGeometry {
     case "puff":
       return new IcosahedronGeometry(1, 1);
     case "box":
+    case "block":
       // a unit box standing on y = 0
       return new BoxGeometry(1, 1, 1).translate(0, 0.5, 0);
     case "roof":
@@ -227,6 +278,7 @@ export function createScenery(scene: Scene): Scenery {
   };
   const fogged = new MeshLambertMaterial({ flatShading: true });
   const clear = new MeshLambertMaterial({ flatShading: true, fog: false });
+  const windowed = windowMaterial();
   // clouds glow a little, so their shaded undersides stay light
   const glowing = new MeshLambertMaterial({
     flatShading: true,
@@ -256,7 +308,11 @@ export function createScenery(scene: Scene): Scenery {
       petals: null,
     };
     for (const [shape, parts] of byShape(props)) {
-      const mesh = instanced(geometry(shape), fogged, parts);
+      const mesh = instanced(
+        geometry(shape),
+        shape === "block" ? windowed : fogged,
+        parts,
+      );
       group.add(mesh);
       meshes.props.push({
         mesh,
