@@ -73,7 +73,7 @@ export function createHazards(scene: Scene, fx: Fx) {
         !isShattered(run, ti)
       ) {
         // enemies popping off the targeted pack's rim
-        const span = packSpan(run);
+        const span = packSpan(run, ti);
         const cx = worldX((span.left + span.right) / 2);
         const cz = worldZ(hazardPos(run, ti), run.dist);
         const r = ((span.right - span.left) * TRACK_W) / 2;
@@ -100,7 +100,7 @@ export function createHazards(scene: Scene, fx: Fx) {
         (target?.kind === "block" || target?.kind === "pack")
       ) {
         const cw = crowdWidth(run.army);
-        const span = target.kind === "block" ? target : packSpan(run);
+        const span = target.kind === "block" ? target : packSpan(run, i);
         // aim at the middle of where the crowd and the target overlap
         const lo = Math.max(span.left, run.x - cw / 2);
         const hi = Math.min(span.right, run.x + cw / 2);

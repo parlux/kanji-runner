@@ -1110,7 +1110,7 @@ function renderRun(ctx: Ctx, w: number, h: number, run: RunState): void {
     if (h.kind === "pack") {
       // gone once it has met the crowd or been shot to nothing
       if (i < run.nextHazard || isShattered(run, i)) continue;
-      const span = packSpan(run);
+      const span = packSpan(run, i);
       const cx = ((span.left + span.right) / 2) * w;
       const r = (((span.right - span.left) * w) / 2) * scale;
       renderArmy(ctx, cx, y, r, packSurvivors(run, i), COLORS.enemy, scale);
@@ -1439,7 +1439,7 @@ function renderFire(
     ctx.globalAlpha = 1;
   } else {
     const cw = crowdWidth(run.army);
-    const span = target.kind === "block" ? target : packSpan(run);
+    const span = target.kind === "block" ? target : packSpan(run, i);
     // aim at the middle of where the crowd and the target overlap
     const left = Math.max(span.left, run.x - cw / 2);
     const right = Math.min(span.right, run.x + cw / 2);

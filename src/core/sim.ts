@@ -37,7 +37,6 @@ import {
   HORDE_AREA,
   HORDE_THREAT,
   ENEMY_SPEED,
-  ENEMY_STEER_SPEED,
   FIRE_RANGE,
   GATE_GROW_PER_DAMAGE,
   MAX_SPEED_MUL,
@@ -45,6 +44,7 @@ import {
   PACK_MERGE_SPEED,
   PACK_WAKE,
   REASK_MAX,
+  STREAM_DISTANCE,
   STARTING_ARMY,
   STEER_EASE,
   SQUAD_DEFECT_GAIN,
@@ -294,43 +294,42 @@ export function packSurvivors(s: RunState, i: number): number {
   return Math.max(0, Math.ceil(packHeadsLeft(s, i) - 1e-6));
 }
 
-/** Pack i's pre-horde strength scaled by its remaining hit points. */
-export function packStrengthLeft(s: RunState, i: number): number {
-  const hp = s.hp[i] ?? 0;
-  if (hp <= 0) return 0;
-  return ((s.strength[i] ?? 0) * Math.max(0, hp - (s.damage[i] ?? 0))) / hp;
-}
-
 /**
- * Pack i's width: horde.packWidth while whole, narrowing as it is shot towards
- * the width of a crowd of its remaining strength. With f the share of hit
- * points left: f × packWidth + (1 − f) × crowdWidth(strength × f), at most 1.
- */
-export function packWidth(s: RunState, i: number): number {
-  const hp = s.hp[i] ?? 0;
-  const f = hp > 0 ? Math.max(0, hp - (s.damage[i] ?? 0)) / hp : 0;
-  const w =
-    f * s.horde.packWidth + (1 - f) * crowdWidth(packStrengthLeft(s, i));
-  return Math.min(1, Math.max(0, w));
-}
-
-/**
- * Pack i's funnel mouth (its far end, where it is widest): packWidth wide,
- * centred on the pack, kept on the track. The view draws it; nothing hits.
+ * Pack i's mouth: the wide pack as it charges down the track, horde.packWidth
+ * wide, centred where it is, kept on the track. It doesn't follow the army,
+ * and doesn't narrow as it is shot (it thins from the front).
  */
 export function packMouth(s: RunState, i: number): Span {
-  const w = packWidth(s, i);
+  const w = Math.min(1, Math.max(0, s.horde.packWidth));
   const x = clampOnTrack(s.packs[i]?.x ?? 0.5, w);
   return { left: x - w / 2, right: x + w / 2 };
 }
 
 /**
- * A pack's span where it can hit and be hit: its column, as wide as the army
- * and centred on it (a pack homes in; it can't be dodged).
+ * How far (0..1) pack i has poured into a stream at the army: 0 while it is
+ * waiting or more than STREAM_DISTANCE ahead, rising to 1 as its front
+ * reaches the army; 1 once it has started streaming in.
  */
-export function packSpan(s: RunState): Span {
+export function packConverge(s: RunState, i: number): number {
+  if ((s.arrived[i] ?? 0) > 0) return 1;
+  if (!packAwake(s, i)) return 0;
+  const ahead = hazardPos(s, i) - s.dist;
+  return Math.min(1, Math.max(0, 1 - ahead / STREAM_DISTANCE));
+}
+
+/**
+ * Pack i's span where it can hit and be hit: its mouth far away, closing
+ * within STREAM_DISTANCE into a column as wide as the army and centred on it
+ * (packConverge), so whatever reaches the army can't be dodged.
+ */
+export function packSpan(s: RunState, i: number): Span {
+  const m = packMouth(s, i);
+  const t = packConverge(s, i);
   const w = crowdWidth(s.army);
-  return { left: s.x - w / 2, right: s.x + w / 2 };
+  return {
+    left: m.left + (s.x - w / 2 - m.left) * t,
+    right: m.right + (s.x + w / 2 - m.right) * t,
+  };
 }
 
 /** Where hazard i is now: packs move, everything else stays put. */
@@ -417,8 +416,8 @@ function arrive(s: RunState, i: number, n: number): RunState {
 }
 
 /**
- * Charging packs run at the army and their mouths drift towards the crowd
- * centre. A pack whose front reaches the army stays there and streams in:
+ * Charging packs run at the army, staying where they are across the track
+ * (their span closes onto the army near it: packSpan). A pack whose front reaches the army stays there and streams in:
  * the stretch of column that would run past it arrives (packDensity enemies
  * per track unit). A pack right behind another that still has enemies joins
  * the back of its column, catching up at PACK_MERGE_SPEED, so the two make
@@ -429,10 +428,6 @@ function movePacks(s: RunState, dt: number): RunState {
   for (let i = s.nextHazard; i < s.packs.length; i++) {
     const p = next.packs[i];
     if (!p || !packAwake(s, i)) continue;
-    const drift = Math.max(
-      -ENEMY_STEER_SPEED * dt,
-      Math.min(ENEMY_STEER_SPEED * dt, s.x - p.x),
-    );
     let pos = p.pos - ENEMY_SPEED * dt;
     const k = i - 1;
     const lead = next.packs[k];
@@ -448,10 +443,7 @@ function movePacks(s: RunState, dt: number): RunState {
       );
     const over = Math.max(0, s.dist - pos);
     const packs = [...next.packs];
-    packs[i] = {
-      pos: Math.max(pos, s.dist),
-      x: clampOnTrack(p.x + drift, packWidth(s, i)),
-    };
+    packs[i] = { pos: Math.max(pos, s.dist), x: p.x };
     next = { ...next, packs };
     if (over > 0) next = arrive(next, i, over * packDensity(next, i));
   }
@@ -464,7 +456,8 @@ function threats(s: RunState): (Threat | null)[] {
     if ((s.hp[i] ?? 0) <= 0 || isShattered(s, i)) return null;
     if (h.kind === "block")
       return { pos: h.pos, span: { left: h.left, right: h.right } };
-    if (h.kind === "pack") return { pos: hazardPos(s, i), span: packSpan(s) };
+    if (h.kind === "pack")
+      return { pos: hazardPos(s, i), span: packSpan(s, i) };
     return null;
   });
 }

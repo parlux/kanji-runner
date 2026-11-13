@@ -5,6 +5,7 @@ import {
   gateOpenings,
   hazardPos,
   isShattered,
+  packConverge,
   packLength,
   packStreaming,
   rowOpenings,
@@ -43,11 +44,11 @@ import {
   HORDE_DEFAULTS,
   HORDE_THREAT,
   PACK_COLUMN_MAX,
+  STREAM_DISTANCE,
   KILL_SECONDS,
   PACK_WIDTH,
   PACK_WAKE,
   ENEMY_SPEED,
-  ENEMY_STEER_SPEED,
   ROWS_PER_RUN,
   STARTING_ARMY,
   STEER_MAX_SPEED,
@@ -652,30 +653,30 @@ describe("shooting", () => {
     expect(passed.packs[0]?.pos ?? 6).toBeLessThan(6);
   });
 
-  it("a pack drifts towards the crowd centre at most ENEMY_STEER_SPEED", () => {
+  it("a pack stays where it is across the track as it charges (it doesn't follow the army)", () => {
     const s0 = {
-      ...range([pack(2.5, 0.8)], [10 * ENEMY_HP]),
+      ...range([pack(5, 0.8)], [10 * ENEMY_HP]),
       horde: NARROW,
       x: 0.2,
       targetX: 0.2,
     };
-    const s = stepFor(s0, 0.5);
-    expect(s.packs[0]?.x).toBeCloseTo(0.8 - ENEMY_STEER_SPEED * 0.5, 6);
+    const s = stepFor({ ...s0, targetX: 0.6 }, 0.5);
+    expect(s.packs[0]?.pos).toBeLessThan(5);
+    expect(s.packs[0]?.x).toBe(0.8);
+    expect(packSpan(s, 0)).toEqual(packMouth(s0, 0));
   });
 
-  it("fire kills one enemy per ENEMY_HP and the pack's mouth narrows", () => {
+  it("fire kills one enemy per ENEMY_HP; the pack thins from the front, never narrows", () => {
     const s0 = range([pack(1.9)], [1e6 * ENEMY_HP], 20);
     const s = stepFor(s0, 0.5);
     expect(s.target).toBe(0);
     expect(s.damage[0]).toBeCloseTo(firepower(20) * 0.5, 6);
     const killed = Math.floor((s.damage[0] ?? 0) / ENEMY_HP);
     expect(packSurvivors(s, 0)).toBe(1e6 - killed);
-    const wide = { ...s, damage: [0] };
     const narrow = { ...s, damage: [(1e6 - 4) * ENEMY_HP] };
-    const width = (r: RunState): number =>
-      packMouth(r, 0).right - packMouth(r, 0).left;
-    expect(width(narrow)).toBeLessThan(width(wide));
-    expect(width(narrow)).toBeCloseTo(crowdWidth(4), 5);
+    expect(packMouth(narrow, 0)).toEqual(packMouth(s, 0));
+    expect(packSpan(narrow, 0)).toEqual(packSpan(s, 0));
+    expect(packLength(narrow, 0)).toBeLessThan(packLength(s, 0));
   });
 
   describe("stream contact", () => {
@@ -920,43 +921,22 @@ describe("shooting", () => {
       }
     });
 
-    it("its mouth is PACK_WIDTH wide at full HP and narrows as shot towards crowdWidth(remaining strength), on the track", () => {
+    it("its mouth is PACK_WIDTH wide, centred where the pack is and on the track, whole or shot", () => {
       expect(PACK_WIDTH).toBe(1);
       const s0 = range([pack(1.9, 0.3)], [70], 20, [210], [28]);
-      const width = (r: RunState): number =>
-        packMouth(r, 0).right - packMouth(r, 0).left;
-      const at = (f: number, horde = HORDE_DEFAULTS): RunState => ({
-        ...s0,
-        horde,
-        damage: [70 * (1 - f)],
-      });
-      expect(width(at(1))).toBeCloseTo(PACK_WIDTH, 12);
       const half = { ...HORDE_DEFAULTS, packWidth: 0.5 };
-      expect(width(at(1, half))).toBeCloseTo(0.5, 12);
-      let last = Infinity;
-      for (const f of [1, 0.9, 0.7, 0.5, 0.3, 0.1, 0.01]) {
-        for (const horde of [HORDE_DEFAULTS, half]) {
-          const r = at(f, horde);
-          const w = width(r);
-          expect(w).toBeCloseTo(
-            f * horde.packWidth + (1 - f) * crowdWidth(28 * f),
-            12,
-          );
-          const span = packMouth(r, 0);
+      for (const f of [1, 0.5, 0.01])
+        for (const horde of [HORDE_DEFAULTS, half, NARROW]) {
+          const span = packMouth({ ...s0, horde, damage: [70 * (1 - f)] }, 0);
+          const w = horde.packWidth;
+          expect(span.right - span.left).toBeCloseTo(w, 12);
           expect(span.left).toBeGreaterThanOrEqual(-1e-12);
           expect(span.right).toBeLessThanOrEqual(1 + 1e-12);
-          // centred where the pack is, unless that would leave the track
-          const centre = (span.left + span.right) / 2;
-          expect(centre).toBeCloseTo(
+          expect((span.left + span.right) / 2).toBeCloseTo(
             Math.min(1 - w / 2, Math.max(w / 2, 0.3)),
             12,
           );
         }
-        const w = width(at(f));
-        expect(w).toBeLessThan(last);
-        last = w;
-      }
-      expect(width(at(0.01))).toBeLessThan(crowdWidth(28));
     });
 
     it("a pack dies in the same steps under steady fire, whatever its head count", () => {
@@ -977,33 +957,46 @@ describe("shooting", () => {
     });
   });
 
-  it("a pack's span is the army's column: as wide as the army, centred on it, following it (no dodging)", () => {
+  it("a pack's span is its mouth beyond STREAM_DISTANCE, closing into the army's column (as wide as the army, centred on it) at contact", () => {
     for (const [army, x, packX] of [
       [20, 0.1, 0.9],
       [200, 0.5, 0.2],
       [5, 0.85, 0.5],
     ] as const) {
       const s0 = {
-        ...range([pack(2.5, packX)], [7 * ENEMY_HP], army),
+        ...range([pack(5, packX)], [1e9], army),
         horde: NARROW,
         x,
         targetX: x,
       };
-      for (const s of [s0, stepFor({ ...s0, targetX: 1 - x }, 0.3)]) {
-        const span = packSpan(s);
-        expect(span.right - span.left).toBeCloseTo(crowdWidth(s.army), 12);
-        expect((span.left + span.right) / 2).toBeCloseTo(s.x, 12);
-      }
+      const at = (ahead: number): RunState => ({
+        ...s0,
+        packs: [{ pos: ahead, x: packX }],
+      });
+      expect(packConverge(at(STREAM_DISTANCE + 0.5), 0)).toBe(0);
+      expect(packSpan(at(STREAM_DISTANCE + 0.5), 0)).toEqual(packMouth(s0, 0));
+      expect(packConverge(at(STREAM_DISTANCE / 2), 0)).toBeCloseTo(0.5, 12);
+      const w = crowdWidth(army);
+      const col = packSpan(at(0), 0);
+      expect(packConverge(at(0), 0)).toBe(1);
+      expect(col.left).toBeCloseTo(x - w / 2, 12);
+      expect(col.right).toBeCloseTo(x + w / 2, 12);
+      // waiting behind a wall it stays wide
+      const walled = {
+        ...at(1),
+        track: { ...s0.track, questions: [0.5, 100] },
+      };
+      expect(packConverge(walled, 0)).toBe(0);
     }
     // a narrow pack far to the side still reaches the army
-    const s = stepRun(
+    const s = stepFor(
       {
-        ...range([pack(0.02, 0.9)], [7 * ENEMY_HP], 20),
+        ...range([pack(1, 0.9)], [1e9], 20, [20], [20]),
         horde: NARROW,
         x: 0.1,
         targetX: 0.1,
       },
-      DT,
+      1,
     );
     expect(s.army).toBeLessThan(20);
   });

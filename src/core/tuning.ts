@@ -130,8 +130,6 @@ export const ENEMY_K = 0.6;
 export const ENEMY_MIN = 3;
 /** Extra approach speed on top of the scroll, in track units per second. */
 export const ENEMY_SPEED = 0.5;
-/** Sideways drift towards the crowd centre, in track widths per second. */
-export const ENEMY_STEER_SPEED = 0.15;
 /** Damage that kills one enemy. */
 export const ENEMY_HP = 1;
 /**
@@ -153,9 +151,9 @@ export const PACK_MAX = 200;
  */
 export const KILL_SECONDS = 1.0;
 /**
- * A whole pack's funnel mouth (its far end) as a share of the track (1 = the
- * whole track). It narrows towards crowdWidth(remaining strength) as it is
- * shot (see packMouth). It hits as a column at the army's width (packSpan).
+ * A pack's width far away (its mouth) as a share of the track (1 = the
+ * whole track). It stays this wide as it is shot (it thins from the front),
+ * and closes into a stream at the army's width within STREAM_DISTANCE.
  */
 export const PACK_WIDTH = 1.0;
 /** Enemy figures are drawn this size of a soldier (a view value; the core ignores it). */
@@ -202,6 +200,12 @@ export const HORDE_AREA = 0.36 ** 2 / 100;
  * (at least CALM_DISTANCE beyond the pack).
  */
 export const PACK_COLUMN_MAX = 1.2;
+/**
+ * Within this far (track units) of the army a charging pack pours inward
+ * into a stream as wide as the army, centred on it (see packConverge);
+ * further out it stays spread wide where it is.
+ */
+export const STREAM_DISTANCE = 2.5;
 /** A pack that wakes behind another still charging catches up with that column's tail this much faster (track units per second). */
 export const PACK_MERGE_SPEED = 2.5;
 

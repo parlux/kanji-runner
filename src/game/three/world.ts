@@ -5,7 +5,6 @@ import {
   plannedRows,
   speedMul,
   isShattered,
-  packSpan,
   packSurvivors,
   type ChargeView,
   type RunState,
@@ -210,9 +209,9 @@ export function clipGaps(run: RunState): { ahead: number; behind: number } {
       h.kind === "saw"
         ? hazardSpan(h, h.pos)
         : h.kind === "pack"
-          ? // a pack counts until it is shot out; one that streamed in met the crowd
+          ? // a pack closes onto the army: in its path until it is shot out (one that streamed in met it)
             packSurvivors(run, i) || (run.arrived[i] ?? 0) > 0
-            ? packSpan(run)
+            ? { left, right }
             : null
           : isShattered(run, i)
             ? null
