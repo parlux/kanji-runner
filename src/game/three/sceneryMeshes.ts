@@ -3,6 +3,7 @@ import {
   BoxGeometry,
   BufferAttribute,
   BufferGeometry,
+  CircleGeometry,
   Color,
   ConeGeometry,
   CylinderGeometry,
@@ -14,6 +15,8 @@ import {
   Mesh,
   MeshBasicMaterial,
   MeshLambertMaterial,
+  Points,
+  PointsMaterial,
   Quaternion,
   SphereGeometry,
   Vector3,
@@ -25,8 +28,12 @@ import {
   DRIFT_WRAP,
   FENCE_STEP,
   LOOKS,
+  petalX,
+  petalY,
+  petalZ,
   wrap,
   wrapZ,
+  type Petal,
   type Look,
   type LookId,
   type Part,
@@ -44,6 +51,9 @@ import {
 const SKY_R = 360;
 /** Light every cloud puff gives off, on top of the sun's. */
 const CLOUD_GLOW = 0x8a96a8;
+/** Petals: a blossom pink, this big (world units). */
+const PETAL_COLOUR = 0xff9ec0;
+const PETAL_SIZE = 0.25;
 /** Props beyond the haze are parked out of sight this far down. */
 const PARKED_Y = -1e4;
 
@@ -68,6 +78,18 @@ function shapeGeometry(shape: Shape): BufferGeometry {
     case "hill":
     case "puff":
       return new IcosahedronGeometry(1, 1);
+    case "box":
+      // a unit box standing on y = 0
+      return new BoxGeometry(1, 1, 1).translate(0, 0.5, 0);
+    case "roof":
+      // a four-sided pyramid on y = 0, its edges square with a box's
+      return new ConeGeometry(1, 1, 4)
+        .rotateY(Math.PI / 4)
+        .translate(0, 0.5, 0);
+    case "peak":
+      return new ConeGeometry(1, 1, 7);
+    case "sun":
+      return new CircleGeometry(1, 32);
   }
 }
 
@@ -116,7 +138,13 @@ const byShape = (parts: Part[]): Map<Shape, Part[]> => {
   return out;
 };
 
-type LookMeshes = { group: Group; props: Layer[]; drifting: Layer[] };
+type PetalLayer = { petals: Petal[]; points: Points };
+type LookMeshes = {
+  group: Group;
+  props: Layer[];
+  drifting: Layer[];
+  petals: PetalLayer | null;
+};
 
 export type Scenery = {
   /** Shows look `id` (hiding the others) and returns it. */
@@ -177,14 +205,27 @@ export function createScenery(scene: Scene): Scenery {
     emissive: CLOUD_GLOW,
   });
 
+  const petalMaterial = new PointsMaterial({
+    color: PETAL_COLOUR,
+    size: PETAL_SIZE,
+    transparent: true,
+    opacity: 0.9,
+    depthWrite: false,
+  });
+
   const looks = new Map<LookId, LookMeshes>();
   for (const id of builtLooks()) {
     const look = LOOKS[id];
     if (!look) continue;
-    const { props, backdrop } = look.layout();
+    const { props, backdrop, petals } = look.layout();
     const group = new Group();
     group.visible = false;
-    const meshes: LookMeshes = { group, props: [], drifting: [] };
+    const meshes: LookMeshes = {
+      group,
+      props: [],
+      drifting: [],
+      petals: null,
+    };
     for (const [shape, parts] of byShape(props)) {
       const mesh = instanced(geometry(shape), fogged, parts);
       group.add(mesh);
@@ -197,7 +238,7 @@ export function createScenery(scene: Scene): Scenery {
     for (const [shape, parts] of byShape(backdrop)) {
       const mesh = instanced(
         geometry(shape),
-        shape === "puff" ? glowing : clear,
+        shape === "puff" || shape === "sun" ? glowing : clear,
         parts,
       );
       group.add(mesh);
@@ -207,6 +248,17 @@ export function createScenery(scene: Scene): Scenery {
           a: Float32Array.from(parts, (p) => p.x),
           b: Float32Array.from(parts, (p) => p.drift),
         });
+    }
+    if (petals.length > 0) {
+      const geo = new BufferGeometry();
+      geo.setAttribute(
+        "position",
+        new BufferAttribute(new Float32Array(petals.length * 3), 3),
+      );
+      const points = new Points(geo, petalMaterial);
+      points.frustumCulled = false;
+      group.add(points);
+      meshes.petals = { petals, points };
     }
     scene.add(group);
     looks.set(id, meshes);
@@ -235,6 +287,18 @@ export function createScenery(scene: Scene): Scenery {
           e[i * 16 + 14] = z;
         }
         mesh.instanceMatrix.needsUpdate = true;
+      }
+      if (shown.petals) {
+        const { petals, points } = shown.petals;
+        const pos = points.geometry.getAttribute("position");
+        const e = pos.array as Float32Array;
+        for (let i = 0; i < petals.length; i++) {
+          const p = petals[i] as Petal;
+          e[i * 3] = petalX(p, clock);
+          e[i * 3 + 1] = petalY(p, clock);
+          e[i * 3 + 2] = petalZ(p, runDist);
+        }
+        pos.needsUpdate = true;
       }
       for (const { mesh, a, b } of shown.drifting) {
         const e = mesh.instanceMatrix.array;

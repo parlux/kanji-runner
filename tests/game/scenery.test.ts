@@ -4,6 +4,13 @@ import {
   FENCE_STEP,
   HAZE_FAR_Z,
   LOOKS,
+  MAX_PETALS,
+  petalX,
+  petalY,
+  petalZ,
+  PETAL_FAR,
+  PETAL_NEAR,
+  PETAL_TRACK_MIN_Y,
   PROP_FAR,
   PROP_NEAR,
   PROP_SPAN,
@@ -37,7 +44,8 @@ describe("scenery pick", () => {
     expect(sceneryParam("")).toBeNull();
     expect(sceneryParam("?scenery=moon")).toBeNull();
     expect(sceneryParam("?scenery=")).toBeNull();
-    for (const id of ["spring", "stadium", "sky", "city"] as const)
+    expect(sceneryParam("?scenery=spring")).toBe("spring");
+    for (const id of ["stadium", "sky", "city"] as const)
       expect(sceneryParam(`?scenery=${id}`)).toBe(LOOKS[id] ? id : null);
   });
 });
@@ -97,4 +105,37 @@ describe("look layouts", () => {
       expect(look.layout()).toEqual(look.layout());
     });
   }
+});
+
+describe("spring petals", () => {
+  const petals = LOOKS.spring?.layout().petals ?? [];
+
+  it("are one layer of at most 300", () => {
+    expect(petals.length).toBeGreaterThan(0);
+    expect(petals.length).toBeLessThanOrEqual(MAX_PETALS);
+  });
+
+  it("never hang low over the track, at any time", () => {
+    for (const p of petals)
+      for (let clock = 0; clock < 200; clock += 0.37) {
+        const x = petalX(p, clock);
+        if (Math.abs(x) < TRACK_W / 2 + 0.8)
+          expect(petalY(p, clock)).toBeGreaterThanOrEqual(PETAL_TRACK_MIN_Y);
+      }
+  });
+
+  it("stay in range and scroll with the run", () => {
+    for (const p of petals) {
+      for (const d of [0, 3.3, 99.9, 1234.5]) {
+        expect(petalZ(p, d)).toBeGreaterThanOrEqual(PETAL_FAR);
+        expect(petalZ(p, d)).toBeLessThan(PETAL_NEAR);
+      }
+      expect(petalY(p, 3)).toBeLessThan(p.hi);
+      expect(petalY(p, 3)).toBeGreaterThanOrEqual(p.lo);
+    }
+  });
+
+  it("the other looks have none", () => {
+    expect(LOOKS.country?.layout().petals).toEqual([]);
+  });
 });

@@ -1,5 +1,5 @@
 import { createRng, type Rng } from "../../core/rng";
-import { DIST_SCALE, HAZE_MAX } from "./world";
+import { DIST_SCALE, HAZE_MAX, TRACK_W } from "./world";
 
 /**
  * Pure data for the 3D run's scenery: which look a run gets, and each look's
@@ -23,7 +23,17 @@ export type LookId = (typeof LOOK_IDS)[number];
 
 /** A part's mesh: each shape is one instanced mesh per layer (props, backdrop). */
 export type Shape =
-  "trunk" | "crown" | "pine" | "bush" | "fence" | "hill" | "puff";
+  | "trunk"
+  | "crown"
+  | "pine"
+  | "bush"
+  | "fence"
+  | "hill"
+  | "puff"
+  | "box"
+  | "roof"
+  | "peak"
+  | "sun";
 
 /**
  * One instance of a shape: its place (world units; `z` is where it starts,
@@ -43,11 +53,29 @@ export type Part = {
   drift: number;
 };
 
+/**
+ * One falling petal: it starts at (`x`, `y`, `z`), falls `fall` units per
+ * second within [`lo`, `hi`) and sways `sway` sideways. Positions come from
+ * `petalX/Y/Z`, which are pure, so they stand still when the clock does.
+ */
+export type Petal = {
+  x: number;
+  y: number;
+  z: number;
+  lo: number;
+  hi: number;
+  fall: number;
+  sway: number;
+  phase: number;
+};
+
 export type Layout = {
   /** Roadside props: scroll with the run, fogged. */
   props: Part[];
   /** Beyond the haze: never scrolls, drawn without fog. */
   backdrop: Part[];
+  /** Falling petals (one `Points` layer, at most `MAX_PETALS`); none for most looks. */
+  petals: Petal[];
 };
 
 /**
@@ -75,6 +103,20 @@ export const wrap = (v: number, lo: number, span: number): number =>
 /** A prop's world Z with the army at `runDist`: scrolled towards the camera, wrapped into [PROP_FAR, PROP_NEAR). */
 export const wrapZ = (z0: number, runDist: number): number =>
   wrap(z0 + runDist * DIST_SCALE, PROP_FAR, PROP_SPAN);
+
+/** Petals scroll within this Z range (world units), nearer than the props' far end. */
+export const PETAL_NEAR = 8;
+export const PETAL_FAR = -78;
+export const MAX_PETALS = 300;
+/** Petals over the track's column stay at least this high, so they never cross a gate's text. */
+export const PETAL_TRACK_MIN_Y = 6;
+
+export const petalZ = (p: Petal, runDist: number): number =>
+  wrap(p.z + runDist * DIST_SCALE, PETAL_FAR, PETAL_NEAR - PETAL_FAR);
+export const petalY = (p: Petal, clock: number): number =>
+  wrap(p.y - clock * p.fall, p.lo, p.hi - p.lo);
+export const petalX = (p: Petal, clock: number): number =>
+  p.x + Math.sin(clock * 0.7 + p.phase) * p.sway;
 
 const range = (rng: Rng, a: number, b: number): number => a + rng() * (b - a);
 const pick = <T>(rng: Rng, items: readonly T[]): T =>
@@ -107,6 +149,9 @@ const part = (
 export const FENCE_X = 6.6;
 /** One fence section's length: it divides PROP_SPAN, so the wrap has no seam. */
 export const FENCE_STEP = 4;
+/** Spring village's stone lanterns: every 12 (divides PROP_SPAN), at this x. */
+export const LANTERN_STEP = 12;
+export const LANTERN_X = 6.8;
 
 /** Countryside: trees, bushes and a white fence by the road; hills and drifting clouds beyond. */
 function countryLayout(): Layout {
@@ -198,7 +243,112 @@ function countryLayout(): Layout {
       );
     }
   }
-  return { props, backdrop };
+  return { props, backdrop, petals: [] };
+}
+
+/** Spring village: cherry trees, stone lanterns and small houses by the road; a snowy mountain, a pale sun and clouds beyond; petals. */
+function springLayout(): Layout {
+  const rng = createRng(11);
+  const props: Part[] = [];
+  const backdrop: Part[] = [];
+  const stone = 0xc4c0b8;
+  for (let z = PROP_FAR; z < PROP_NEAR; z += LANTERN_STEP)
+    for (const s of [-1, 1]) {
+      const x = s * LANTERN_X;
+      props.push(
+        part("box", x, 0, z, 1, stone, { sx: 0.7, sy: 0.25, sz: 0.7 }),
+        part("box", x, 0.25, z, 1, 0xd2cec6, { sx: 0.3, sy: 0.8, sz: 0.3 }),
+        part("box", x, 1.05, z, 1, 0xfff3c4, { sx: 0.5, sy: 0.45, sz: 0.5 }),
+        part("roof", x, 1.5, z, 1, 0x8c8880, { sx: 0.65, sy: 0.4, sz: 0.65 }),
+      );
+    }
+  for (let i = 0; i < 60; i++) {
+    const x = side(rng) * range(rng, 8, 34);
+    const z = range(rng, PROP_FAR, PROP_NEAR);
+    const s = range(rng, 0.9, 1.4);
+    props.push(part("trunk", x, 0, z, s, 0x6b4a3a, { rot: rng() * 6 }));
+    const puffs = 3 + Math.floor(rng() * 2);
+    for (let k = 0; k < puffs; k++) {
+      const a = (k / puffs) * Math.PI * 2 + rng();
+      const r = range(rng, 0.9, 1.3) * s;
+      props.push(
+        part(
+          "crown",
+          x + Math.cos(a) * 0.8 * s,
+          (2.3 + (k % 2) * 0.5) * s,
+          z + Math.sin(a) * 0.8 * s,
+          r,
+          pick(rng, [0xffb7d0, 0xffa6c4, 0xffc8da, 0xf79bbb]),
+          { rot: rng() * 6 },
+        ),
+      );
+    }
+  }
+  for (let i = 0; i < 26; i++) {
+    const w = range(rng, 3, 5);
+    const d = range(rng, 3, 4.5);
+    const x = side(rng) * range(rng, 14, 40);
+    const z = range(rng, PROP_FAR, PROP_NEAR);
+    const rot = range(rng, -0.2, 0.2);
+    props.push(
+      part("box", x, 0, z, 1, 0xf5efe4, { sx: w, sy: 2.2, sz: d, rot }),
+      part("roof", x, 2.2, z, 1, pick(rng, [0x3e4a5c, 0x5a3e3e, 0x2f3b4a]), {
+        sx: w * 0.82,
+        sy: 1.6,
+        sz: d * 0.82,
+        rot,
+      }),
+    );
+  }
+  // one big snowy mountain, two lesser peaks, a pale sun and a few clouds
+  backdrop.push(
+    part("peak", 34, 34, -360, 1, 0x8fa3c4, { sx: 128, sy: 94, sz: 128 }),
+    part("peak", 34, 66, -359.5, 1, 0xffffff, { sx: 41, sy: 31, sz: 41 }),
+    part("peak", -146, 27, -345, 1, 0xa6b6d2, { sx: 84, sy: 60, sz: 84 }),
+    part("peak", 180, 22, -345, 1, 0xa6b6d2, { sx: 72, sy: 51, sz: 72 }),
+    part("sun", -100, 80, -355, 16, 0xfff1f4),
+  );
+  for (let i = 0; i < 5; i++) {
+    const scale = range(rng, 1.5, 2.4);
+    const cx = range(rng, -160, 160);
+    const cy = range(rng, 45, 80);
+    const cz = range(rng, -200, -320);
+    const n = 3 + Math.floor(rng() * 3);
+    for (let k = 0; k < n; k++) {
+      const r = range(rng, 2, 3.4) * scale;
+      backdrop.push(
+        part(
+          "puff",
+          cx + ((k - n / 2) * 2.6 + range(rng, -0.6, 0.6)) * scale,
+          cy + range(rng, -0.4, 1.2) * scale,
+          cz + range(rng, -1, 1) * scale,
+          r,
+          0xffffff,
+          { sy: r * 0.7, drift: 1.5 },
+        ),
+      );
+    }
+  }
+  // petals: a few high over the track, the rest at the sides at any height
+  const petals: Petal[] = [];
+  for (let i = 0; i < 260; i++) {
+    const over = i < 80;
+    const lo = over ? PETAL_TRACK_MIN_Y + 0.5 : 0.2;
+    const hi = over ? 14 : 12;
+    petals.push({
+      x: over
+        ? range(rng, -TRACK_W / 2, TRACK_W / 2)
+        : side(rng) * range(rng, TRACK_W / 2 + 1.8, 30),
+      y: range(rng, lo, hi),
+      z: range(rng, PETAL_FAR, PETAL_NEAR),
+      lo,
+      hi,
+      fall: range(rng, 0.5, 1.2),
+      sway: range(rng, 0.2, 0.6),
+      phase: rng() * Math.PI * 2,
+    });
+  }
+  return { props, backdrop, petals };
 }
 
 /** The built looks. Later looks add an entry here and a layout function. */
@@ -208,6 +358,12 @@ export const LOOKS: Partial<Record<LookId, Look>> = {
     sky: { top: 0x5fb8f5, horizon: 0xd8f0ff, below: 0xd8f0ff },
     ground: 0x7fcf6a,
     layout: countryLayout,
+  },
+  spring: {
+    id: "spring",
+    sky: { top: 0x7ec4f0, horizon: 0xfde8ef, below: 0xfde8ef },
+    ground: 0x9fd68a,
+    layout: springLayout,
   },
 };
 
