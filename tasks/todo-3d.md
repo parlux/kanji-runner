@@ -225,9 +225,9 @@ Intent: `docs/intent/3d-camera-follow.md`. Spec: SPEC-3d-depth amendment v1.4.3,
 - Unchanged: `src/core`, golden run, haze, `SHAPE_DISTANCE`, text rules, 2D.
 
 **Acceptance criteria:**
-- [ ] Tested: no saved settings → pose identical to today's at 390×844 and 1280×800 (existing aim/hard-rule tests pass unchanged); today's pose → settings → pose round trip; follow 0 keeps x = 0; follow 1 settles on the army's x; the easing is continuous and the same at 30 and 60 fps; storage round trip and bad-data fallback.
-- [ ] Browser check at 390×844 with `?3d`: the gear on the start screen and the pause card opens the panel; a run at today's camera, at pitch ~20° with follow 0, and at pitch ~20° with follow 0.6 while steering to an outer opening (filmstrips); labels stay on their gates with follow on; Reset restores today's camera; settings survive a reload. Screenshots in the scratchpad.
-- [ ] Frame time unchanged (logged with a 200 crowd).
+- [x] Tested: no saved settings → pose identical to today's at 390×844 and 1280×800 (existing aim/hard-rule tests pass unchanged); today's pose → settings → pose round trip; follow 0 keeps x = 0; follow 1 settles on the army's x; the easing is continuous and the same at 30 and 60 fps; storage round trip and bad-data fallback.
+- [x] Browser check at 390×844 with `?3d`: the gear on the start screen and the pause card opens the panel; a run at today's camera, at pitch ~20° with follow 0, and at pitch ~20° with follow 0.6 while steering to an outer opening (filmstrips); labels stay on their gates with follow on; Reset restores today's camera; settings survive a reload. Screenshots in the scratchpad.
+- [x] Frame time unchanged (logged with a 200 crowd).
 
 **Verification:** `npm test && npm run lint && npm run build`; browser check; deploy green.
 **Dependencies:** T3e

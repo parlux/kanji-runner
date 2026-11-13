@@ -6,7 +6,7 @@ export const CAMERA_KEY = "kanji-runner:camera";
 /** Loose sanity bounds for saved values (the sliders are tighter, per screen). */
 const BOUNDS: Record<keyof CameraSettings, [number, number]> = {
   pitch: [8, 45],
-  distance: [2, 80],
+  distance: [2, 300],
   fov: [20, 75],
   follow: [0, 1],
   smoothing: [0, 1],

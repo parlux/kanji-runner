@@ -27,6 +27,12 @@ import { createStoryStore } from "./wanikani/storystore";
 import { createWkClient } from "./wanikani/client";
 import { openStudy, studyOpen } from "./game/study";
 import { syncPauseCard } from "./game/pausecard";
+import {
+  cameraPanelOpen,
+  openCameraPanel,
+  syncCameraGear,
+} from "./game/camerasettings";
+import { loadCamera, saveCamera } from "./storage/camera";
 import { KANA } from "./core/kana";
 import { KANJI } from "./core/kanji";
 import { missedItems } from "./core/run";
@@ -56,6 +62,7 @@ if (canvas3d && new URLSearchParams(window.location.search).has("3d"))
   void import("./game/three/scene3d").then(({ createView3d }) => {
     view3d = createView3d(canvas3d);
     if (!view3d) return;
+    view3d.setCamera(camera);
     canvas3d.style.display = "block";
     resize();
   });
@@ -90,6 +97,24 @@ const adopt = (p: Progress): void => {
 };
 void sync.pull().then(adopt);
 
+// tuned camera (dev tool, 3D only): saved on this device; null is today's camera
+let camera = loadCamera(localStorage);
+const openCamera = (): void =>
+  void import("./game/three/view").then(({ defaultCameraSettings }) => {
+    openCameraPanel({
+      defaults:
+        view3d?.cameraDefaults() ??
+        defaultCameraSettings(window.innerWidth / window.innerHeight),
+      current: camera,
+      onChange: (next) => {
+        camera = next;
+        saveCamera(localStorage, camera);
+        view3d?.setCamera(camera);
+      },
+      onClose: () => {},
+    });
+  });
+
 // speed preset: this device only, changed on the start screen
 let speed = loadSpeed(localStorage);
 
@@ -106,7 +131,7 @@ const wk = createWkState({
     }),
 });
 const overlayOpen = (): boolean =>
-  studyOpen() || tokenFormOpen() || loginOpen();
+  studyOpen() || tokenFormOpen() || loginOpen() || cameraPanelOpen();
 const wkList = () => (session.persist ? wk.list() : null);
 const showTokenForm = (error?: string): void =>
   openTokenForm({
@@ -272,5 +297,12 @@ startLoop(
       speedLabel(speed),
     );
     pauseCard();
+    // the camera gear: on the start screen (picker closed) and on a paused run
+    syncCameraGear(
+      !overlayOpen() &&
+        ((scene.kind === "start" && scene.pick === undefined) ||
+          (scene.kind === "run" && scene.paused)),
+      openCamera,
+    );
   },
 );

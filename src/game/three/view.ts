@@ -11,7 +11,7 @@ import {
 
 /**
  * Camera and look constants for the 3D run. The camera is low and close
- * behind the army, centred on the track (it does not follow steering), and
+ * behind the army, centred on the track (unless tuned settings make it follow steering), and
  * aimed so the track runs up the screen into the haze: the army low on the
  * screen (80% down), the far line near the top. Lowering the army (T3d) kept
  * the T3b pitch by moving the camera up and back with a narrower view. Narrow screens move the camera farther
