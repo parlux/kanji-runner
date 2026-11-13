@@ -22,7 +22,8 @@ import {
   VIEW_DISTANCE,
 } from "../core/tuning";
 import { KANJI } from "../core/kanji";
-import { missedItems } from "../core/run";
+import type { KanjiItem } from "../core/types";
+import { missedItems, revealFor } from "../core/run";
 import {
   levelName,
   levelProgress,
@@ -60,6 +61,7 @@ import {
 import { renderBossText, renderTrackText } from "./three/overlay";
 import {
   drawLabel,
+  drawReveal,
   fitSize,
   FONT,
   LABEL_MIN_PX,
@@ -74,6 +76,8 @@ import {
 const CLIP_POPUP_DIST = 0.8;
 /** How long (in track distance) answer feedback stays up. */
 const ANSWER_FEEDBACK_DIST = 1.0;
+/** The reveal stays solid for this share of the feedback span, then fades. */
+const REVEAL_HOLD = 0.6;
 /** How long (in track distance) a shatter burst lasts. */
 const SHATTER_DIST = 0.6;
 /** How long (in track distance) a crate's "+N" and its recruits running in last. */
@@ -130,7 +134,7 @@ export function render(
   // with a 3D view, the run and boss are drawn behind this canvas: draw only the overlay
   if (view3d && scene.kind === "run") {
     ctx.clearRect(0, 0, w, h);
-    renderRunOverlay(ctx, w, h, scene.run, view3d);
+    renderRunOverlay(ctx, w, h, scene.run, view3d, session.wk?.kanji ?? KANJI);
     if (scene.paused) renderPaused(ctx, w, h, scene.run.results.length > 0);
     return;
   }
@@ -146,7 +150,7 @@ export function render(
     return renderEnd(ctx, w, h, scene.run, scene.seed, scene.boss, session);
   if (scene.kind === "boss")
     return renderBoss(ctx, w, h, scene.run.army, scene.boss, scene.t);
-  renderRun(ctx, w, h, scene.run);
+  renderRun(ctx, w, h, scene.run, session.wk?.kanji ?? KANJI);
   if (scene.paused) renderPaused(ctx, w, h, scene.run.results.length > 0);
 }
 
@@ -176,6 +180,7 @@ function renderRunOverlay(
   h: number,
   run: RunState,
   { project, haze, boss }: TrackView,
+  kanji: readonly KanjiItem[],
 ): void {
   if (boss) renderBossText(ctx, boss, project, haze);
   renderTrackText(ctx, run, project, haze);
@@ -206,6 +211,7 @@ function renderRunOverlay(
       centre.x,
       centre.y,
       radius,
+      kanji,
       outlinedText,
       back.y - 16,
     );
@@ -815,11 +821,17 @@ function renderBossOverlay(
     dist: view.boss?.armyDist ?? scene.run.dist,
     army: fight.army,
   };
-  renderRunOverlay(ctx, w, h, run, view);
+  renderRunOverlay(ctx, w, h, run, view, []);
   if (fight.ending) renderBossBanner(ctx, w, h, scene.run.army, scene.boss);
 }
 
-function renderRun(ctx: Ctx, w: number, h: number, run: RunState): void {
+function renderRun(
+  ctx: Ctx,
+  w: number,
+  h: number,
+  run: RunState,
+  kanji: readonly KanjiItem[],
+): void {
   // where VIEW_DISTANCE lands; the track carries on above it to the top edge
   const horizonY = h * 0.22;
   const armyY = h * 0.82;
@@ -999,7 +1011,7 @@ function renderRun(ctx: Ctx, w: number, h: number, run: RunState): void {
 
   renderCrateRecruits(ctx, w, run, armyY, radius, depthY);
   renderArmy(ctx, run.x * w, armyY, radius, run.army);
-  renderArmyPopups(ctx, w, run, run.x * w, armyY, radius);
+  renderArmyPopups(ctx, w, run, run.x * w, armyY, radius, kanji);
   renderHud(ctx, w, run);
 }
 
@@ -1013,6 +1025,7 @@ function renderArmyPopups(
   cx: number,
   armyY: number,
   radius: number,
+  kanji: readonly KanjiItem[],
   draw: Draw = text,
   clipY = armyY - radius * 0.6 - 24,
 ): void {
@@ -1051,6 +1064,15 @@ function renderArmyPopups(
           : "";
       if (tag) draw(ctx, tag, px, py + 22, 18, color);
       ctx.globalAlpha = 1;
+      // the other half of a right kanji answer, centred above the army and
+      // kept on screen; clear of the +N pop-up (to the right) and the count
+      const row = run.rows[run.next - 1];
+      const reveal = row ? revealFor(row, kanji, a.correct) : null;
+      if (reveal) {
+        ctx.globalAlpha = t < REVEAL_HOLD ? 1 : (1 - t) / (1 - REVEAL_HOLD);
+        drawReveal(ctx, reveal, cx, clipY - 12, w, draw !== text);
+        ctx.globalAlpha = 1;
+      }
     }
   }
 }

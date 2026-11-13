@@ -95,10 +95,11 @@ export function labelLayout(
   s: string,
   size: number,
   maxWidth: number,
+  floor = LABEL_FLOOR_PX,
 ): { lines: string[]; size: number } {
   let best = { lines: [s], size: fitSize(ctx, s, size, maxWidth) };
   for (const inWord of [false, true]) {
-    if (best.size >= LABEL_FLOOR_PX) break;
+    if (best.size >= floor) break;
     for (const [a, b] of labelSplits(s, inWord)) {
       const two = Math.min(
         fitSize(ctx, a, size, maxWidth),
@@ -186,4 +187,130 @@ export function outlinedText(
   ctx.strokeText(s, x, y);
   ctx.fillStyle = tint(color);
   ctx.fillText(s, x, y);
+}
+
+/** Reveal colours: on'yomi, kun'yomi (okurigana greyed as on gates), and the meaning. */
+export const REVEAL_COLORS = { on: "#8ec5ff", kun: "#ffd27a" };
+/** Sizes (px) of the revealed kanji and of its readings or meaning. */
+const REVEAL_KANJI_PX = 34;
+const REVEAL_BODY_PX = 22;
+/** Smallest the revealed text shrinks to before a long meaning wraps. */
+const REVEAL_MIN_PX = 18;
+
+type Run = { s: string; color: string };
+
+/**
+ * The reveal after a right answer, centred on `cx` (shifted to stay within `screenW`) with its
+ * bottom line at `y`: the kanji then its readings (coloured by kind,
+ * okurigana grey) or meaning on one line, or the kanji above the text if
+ * that would not fit. Returns the height used (px).
+ */
+export function drawReveal(
+  ctx: Ctx,
+  reveal: {
+    char: string;
+    readings: { text: string; kind: "on" | "kun" }[];
+    meaning: string;
+  },
+  cx: number,
+  y: number,
+  screenW: number,
+  outline: boolean,
+): number {
+  const maxWidth = screenW - 16;
+  const body: Run[][] = [];
+  let bodySize = REVEAL_BODY_PX;
+  const sep = { s: " · ", color: TEXT_COLORS.dim };
+  if (reveal.meaning) {
+    const l = labelLayout(
+      ctx,
+      reveal.meaning,
+      REVEAL_BODY_PX,
+      maxWidth - REVEAL_KANJI_PX - 12,
+      REVEAL_MIN_PX,
+    );
+    bodySize = l.size;
+    for (const line of l.lines)
+      body.push([{ s: line, color: TEXT_COLORS.text }]);
+  } else {
+    const line: Run[] = [];
+    reveal.readings.forEach((r, i) => {
+      if (i > 0) line.push(sep);
+      for (const run of labelRuns(r.text))
+        line.push({
+          s: run.s,
+          color:
+            run.color === TEXT_COLORS.dim ? run.color : REVEAL_COLORS[r.kind],
+        });
+    });
+    body.push(line);
+  }
+  const width = (runs: Run[], px: number): number => {
+    ctx.font = `${Math.round(px)}px ${FONT}`;
+    return runs.reduce((a, r) => a + ctx.measureText(r.s).width, 0);
+  };
+  const widest = Math.max(...body.map((l) => width(l, bodySize)));
+  ctx.font = `${REVEAL_KANJI_PX}px ${FONT}`;
+  const kanjiW = ctx.measureText(reveal.char).width;
+  // readings never wrap: they shrink; then they sit under the kanji if still too wide
+  let rowFits = kanjiW + 12 + widest <= maxWidth;
+  if (!reveal.meaning && !rowFits) {
+    const shrunk = Math.max(
+      REVEAL_MIN_PX,
+      (bodySize * (maxWidth - kanjiW - 12)) / widest,
+    );
+    if (shrunk * widest <= (maxWidth - kanjiW - 12) * bodySize) {
+      bodySize = shrunk;
+      rowFits = true;
+    }
+  }
+  const draw = (runs: Run[], px: number, left: number, cy: number): void => {
+    ctx.font = `${Math.round(px)}px ${FONT}`;
+    ctx.textAlign = "left";
+    ctx.textBaseline = "middle";
+    let at = left;
+    for (const r of runs) {
+      if (outline) {
+        ctx.strokeStyle = TEXT_COLORS.outline;
+        ctx.lineWidth = 3;
+        ctx.lineJoin = "round";
+        ctx.strokeText(r.s, at, cy);
+      }
+      ctx.fillStyle = r.color;
+      ctx.fillText(r.s, at, cy);
+      at += ctx.measureText(r.s).width;
+    }
+  };
+  const kanji = [{ s: reveal.char, color: TEXT_COLORS.text }];
+  // centred on the army, but shifted to stay on screen
+  const span = rowFits
+    ? kanjiW + 12 + Math.max(...body.map((l) => width(l, bodySize)))
+    : Math.max(kanjiW, ...body.map((l) => width(l, bodySize)));
+  const x = Math.min(Math.max(cx, 8 + span / 2), screenW - 8 - span / 2);
+  const lineH = bodySize * 1.1;
+  const bodyH = lineH * body.length;
+  if (rowFits) {
+    const total =
+      kanjiW + 12 + Math.max(...body.map((l) => width(l, bodySize)));
+    const h = Math.max(REVEAL_KANJI_PX * 1.1, bodyH);
+    const cy = y - h / 2;
+    draw(kanji, REVEAL_KANJI_PX, x - total / 2, cy);
+    const left = x - total / 2 + kanjiW + 12;
+    body.forEach((l, n) =>
+      draw(l, bodySize, left, cy + (n - (body.length - 1) / 2) * lineH),
+    );
+    return h;
+  }
+  // stacked: the kanji above, the text under it, each centred
+  body.forEach((l, n) => {
+    const cy = y - bodyH + (n + 0.5) * lineH;
+    draw(l, bodySize, x - width(l, bodySize) / 2, cy);
+  });
+  draw(
+    kanji,
+    REVEAL_KANJI_PX,
+    x - kanjiW / 2,
+    y - bodyH - REVEAL_KANJI_PX * 0.55,
+  );
+  return bodyH + REVEAL_KANJI_PX * 1.1;
 }
