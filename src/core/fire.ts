@@ -12,6 +12,8 @@ import {
   ENEMY_HP,
   ENEMY_K,
   ENEMY_MIN,
+  HORDE_K,
+  PACK_MAX,
   FIRE_PER_SOLDIER,
   FIRE_RANGE,
   STARTING_ARMY,
@@ -58,6 +60,24 @@ export function packStrength(expected: number): number {
   return Math.max(ENEMY_MIN, Math.round(ENEMY_K * expected));
 }
 
+/** Head count of a pack met when the expected army is `expected`: a horde of weak enemies. */
+export function packCount(expected: number): number {
+  return Math.min(
+    PACK_MAX,
+    Math.max(ENEMY_MIN, Math.round(HORDE_K * expected)),
+  );
+}
+
+/** The expected army when hazard h is met: after the questions before it. */
+function expectedAt(
+  track: Track,
+  expected: readonly number[],
+  pos: number,
+): number {
+  const q = track.questions.filter((p) => p < pos).length;
+  return expected[Math.min(q, expected.length - 1)] ?? 0;
+}
+
 /**
  * Hit points per hazard, from the expected army after the questions before it:
  * blocks BLOCK_HP_K × that, packs ENEMY_HP per enemy. Saws get 0 (unshootable).
@@ -65,10 +85,19 @@ export function packStrength(expected: number): number {
 export function hazardHp(track: Track, expected: readonly number[]): number[] {
   return track.hazards.map((h) => {
     if (h.kind === "saw") return 0;
-    const q = track.questions.filter((p) => p < h.pos).length;
-    const e = expected[Math.min(q, expected.length - 1)] ?? 0;
+    const e = expectedAt(track, expected, h.pos);
     return h.kind === "block" ? BLOCK_HP_K * e : ENEMY_HP * packStrength(e);
   });
+}
+
+/** Enemies per hazard at the start: packCount for packs, 0 for blocks and saws. */
+export function hazardHeads(
+  track: Track,
+  expected: readonly number[],
+): number[] {
+  return track.hazards.map((h) =>
+    h.kind === "pack" ? packCount(expectedAt(track, expected, h.pos)) : 0,
+  );
 }
 
 /** Where a shootable threat is now: its track position and its span across the track. */

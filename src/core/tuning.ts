@@ -138,6 +138,13 @@ export const ENEMY_HP = 1;
 export const ENEMY_DAMAGE = 1;
 /** Pack start centres are drawn from [ENEMY_X_MARGIN, 1 − ENEMY_X_MARGIN]. */
 export const ENEMY_X_MARGIN = 0.2;
+/**
+ * Hordes (v1.10): a pack's head count = clamp(round(HORDE_K × expected army),
+ * ENEMY_MIN, PACK_MAX). Its total hit points stay ENEMY_HP × packStrength, shared
+ * evenly, so more heads only means weaker enemies.
+ */
+export const HORDE_K = 3;
+export const PACK_MAX = 200;
 
 // Boss (T9). See boss.ts.
 /** Boss size = round(BOSS_K × expected army). */
