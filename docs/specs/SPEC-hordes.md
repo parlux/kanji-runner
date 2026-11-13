@@ -36,6 +36,21 @@ Enemy packs become hordes of many weak enemies that the army mows down, with spe
 - `?fps` shows a small frame-rate readout (a rolling average over about 1 s) in a corner, for the owner's phone check. It isn't shown without the flag, and it isn't in 2D.
 - If the limit is missed: make the effects cheaper first (pool sizes, fewer pieces, LOD distance), then lower `PACK_MAX`.
 
+## Rework after Checkpoint M1 (owner, 2026-11-14)
+Owner: "even at 200 it doesn't feel like a horde. It still looks like a static red blip that just explodes as soon as you shoot it. I think they also move too late. Can we add a slider to adjust the size/scale of the enemy. Honestly I'd like to see what 2000 looks like, maybe even 20,000."
+Owner's choices: a big pack takes **about 2–3 s** to mow down; a horde **fills the track**; a dev panel has sliders for **enemy count, figure size, kill time and pack width**.
+
+These rules replace the matching ones above:
+- **Charge from the haze:** a pack starts running at the army as soon as it is drawn (`PACK_WAKE` = the default shape distance, 12 track units), not at `VIEW_DISTANCE` (3). Speed and steering are unchanged.
+- **Kill time:** pack HP = `KILL_SECONDS × FIRE_PER_SOLDIER × expected` (start `KILL_SECONDS` = 2.5), so an army of the expected size facing the whole pack mows it down in about that long. Per-enemy HP = pack HP / head count.
+- **Width:** pack width = `PACK_WIDTH` (a share of the track, start 1.0, the whole track), shrinking towards today's `crowdWidth` as it is shot down (so a dying horde narrows, still in the same spot). With full width, every pack reaches the army, so contact replaces dodging as the threat.
+- **Threat stays light:** soldiers lost on contact = `min(army, round(HORDE_THREAT × packStrength(expected) × survivors / heads))`: a fully intact pack costs today's pack strength, and a pack shot to 10% costs 10% of that. Tune `HORDE_THREAT` so the bot balance bands still hold.
+- **Count:** `PACK_MAX` up to 20,000 (dev slider, log scale 200–20,000). The shipped default is picked by the owner at Checkpoint M2.
+- **Runtime tuning:** `HORDE_K`/`PACK_MAX`, `KILL_SECONDS`, `PACK_WIDTH` and `HORDE_SCALE` (figure size) come from a `HordeTuning` object (defaults in `tuning.ts`) that the run is built with, so the core stays pure and the dev panel can change them. Panel changes apply from the next run.
+- **Drawing up to 20,000:** one `InstancedMesh` whose figures are animated on the GPU: per-instance attributes (layout offset, phase, death time), with stride, bob, drift, the shrink-out and the pack's position computed in the vertex shader from a few uniforms per pack. Per frame the CPU writes only uniforms and changed death times, never 20,000 matrices. Draw calls: still ≤ 4 extra.
+- **Performance:** frame time logged at 200, 2,000 and 20,000 (a 200 army, a pack being shot, the busiest look, 390×844). 2,000 must stay ≤ 1.3× today's pack scene; 20,000 is logged for the owner to judge (it may be too slow for the phone; that's what the slider is for).
+- **Dev panel:** a "Horde" sheet styled like the camera panel (`camerasettings.ts`), opened from the same hidden gear. Sliders: enemy count, figure size, kill time, pack width; a reset button; saved on this device only (like `storage/camera.ts`).
+
 ## Code layout
 - `src/core/tuning.ts`: `HORDE_K`, `PACK_MAX`, `HORDE_THREAT`.
 - `src/core/fire.ts`: `packCount`, and `hazardHp` unchanged in value.

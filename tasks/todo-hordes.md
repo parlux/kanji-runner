@@ -43,18 +43,44 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 **Verification:** as H1, plus the browser check. **Dependencies:** H1. **Files:** `src/game/three/{hazards,world,scene3d,view}.ts`, tests. **Scope:** M
 
 ### Checkpoint M1: horde on the Pixel 7 (owner)
-- [ ] Packs feel like a horde to mow down; still a small threat when misaligned.
-- [ ] `?fps` stays smooth while a big pack dies.
-- [ ] Note the count (`PACK_MAX`) and look before the kill effects are built.
+Owner, 2026-11-14: not a horde yet. "Still looks like a static red blip that just explodes as soon as you shoot it. I think they also move too late." Wants sliders and to see 2,000, maybe 20,000. Choices: 2–3 s to mow down, fills the track, sliders for count, figure size, kill time and width. See the spec's "Rework after Checkpoint M1". Tasks H3–H5 below; the old kill-effects task is now H6.
 
-### Task H3: Spectacular kills
+### Task H3: Horde rework in the core
+**Description:** as the spec's rework: `HordeTuning` (count factor and `PACK_MAX`, `KILL_SECONDS`, `PACK_WIDTH`, `HORDE_SCALE`) with defaults in `tuning.ts`, passed into the run build (default when absent). Packs wake at `PACK_WAKE` (12). Pack HP by `KILL_SECONDS`, width by `PACK_WIDTH` narrowing as shot, contact by survivors × today's strength × `HORDE_THREAT`. 2D keeps its look with the new numbers. Current 3D keeps working (draws up to its cap).
+**Acceptance criteria:**
+- [ ] Tested: packs move from 12 ahead; a full pack under the expected army's fire dies in `KILL_SECONDS` ± 10%; width at full HP = `PACK_WIDTH` and narrows as shot; contact formula; tuning overrides change the run, defaults match the constants.
+- [ ] Balance bands hold (tune `HORDE_THREAT`); final army and win rate before/after logged here.
+**Verification:** `npm test && npm run lint && npm run build`. **Dependencies:** H2. **Files:** `src/core/{tuning,fire,sim,run?}.ts`, tests. **Scope:** M (highest risk: balance; use opus)
+
+### Task H4: GPU-animated horde, up to 20,000
+**Description:** replace the per-figure matrix writes for pack enemies with one `InstancedMesh` animated in the vertex shader (per-instance layout offset, phase, death time; per-pack uniforms for position, width, depth and survivors). Layout fills the pack's span and is deep. Shrink-out on death is kept. Figure size from `HORDE_SCALE`.
+**Acceptance criteria:**
+- [ ] Tested: layout for 200, 2,000 and 20,000 stays inside the span; buffers allocated once at the max; no per-frame allocation; per-frame CPU work does not grow with the head count (only uniforms and changed death times).
+- [ ] Browser at 390×844 with 200, 2,000 and 20,000 enemies: approaching, half shot, nearly dead; Countryside and Race day; gates and labels readable. Screenshots in the scratchpad.
+- [ ] Frame time and draw calls logged at 200 / 2,000 / 20,000 (2,000 ≤ 1.3× today's pack scene; ≤ 4 extra draw calls).
+**Verification:** as H3, plus browser. **Dependencies:** H3. **Files:** `src/game/three/{hazards,horde,world,figures}.ts`, tests. **Scope:** M (use opus)
+
+### Task H5: Horde dev panel
+**Description:** a "Horde" sheet like the camera panel, opened from the hidden gear: sliders for enemy count (log 200–20,000), figure size, kill time, pack width; reset; saved on this device (`storage/horde.ts`); applied from the next run.
+**Acceptance criteria:**
+- [ ] Tested: storage round-trip, malformed or out-of-range saves fall back to defaults; the run is built with the saved tuning.
+- [ ] Browser: the sheet opens and closes, values show, a changed count shows up in the next run.
+- [ ] Deploy green (checkpoint follows).
+**Verification:** as H4. **Dependencies:** H4. **Files:** `src/game/hordesettings.ts`, `src/storage/horde.ts`, wiring, tests. **Scope:** S
+
+### Checkpoint M2: horde tuning on the Pixel 7 (owner)
+- [ ] Packs charge from the haze and take a few seconds to mow down.
+- [ ] Try counts up to 20,000 with `?fps`; pick the default count, figure size, kill time and width.
+- [ ] The chosen defaults are smooth on the phone.
+
+### Task H6: Spectacular kills
 **Description:** `kills.ts`: a pooled kill-effect ring. Each kill knocks the figure back or topples it with a spark burst in the enemy colour. Kills are found by comparing survivors between frames. The final burst of a pack is bigger than today's. Fewer pieces beyond about half the shape distance. Effects freeze when paused.
 **Acceptance criteria:**
 - [ ] Tested: the pool never grows; kill detection counts drops correctly, including across pause and a new run; LOD piece counts.
-- [ ] Browser as in H2, plus a gate behind a dying pack (labels stay readable). Screenshots in the scratchpad.
-- [ ] Frame time logged against H2 and against today's pack scene (≤ 1.3× today's). On a miss: shrink the effects first, then `PACK_MAX`, and log what changed.
+- [ ] Browser as in H4 at the owner's default count, plus a gate behind a dying pack (labels stay readable). Screenshots in the scratchpad.
+- [ ] Frame time logged against H4 and against today's pack scene (≤ 1.3× today's). On a miss: shrink the effects first, then `PACK_MAX`, and log what changed.
 - [ ] Deploy green.
-**Verification:** as H2. **Dependencies:** H2. **Files:** `src/game/three/{kills,hazards,fx}.ts`, tests. **Scope:** M
+**Verification:** as H2. **Dependencies:** H5 and the owner's defaults from M2. **Files:** `src/game/three/{kills,hazards,horde,fx}.ts`, tests. **Scope:** M
 
 ### Checkpoint M: v1.10 (owner, on the Pixel 7)
 - [ ] Mowing down a pack looks spectacular.
