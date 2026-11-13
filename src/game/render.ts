@@ -678,7 +678,7 @@ function renderEnd(
   renderEndButtons(ctx, buttons);
 }
 
-/** The level card: level and learned count, the bar, "+N this run" and what's left to unlock. Returns its bottom. */
+/** The level card: level and learned count, the bar, "+N learned this run" (dim at +0) and what's left to unlock. Returns its bottom. */
 function renderLevelCard(
   ctx: Ctx,
   w: number,
@@ -738,22 +738,18 @@ function renderLevelCard(
   const gainedNote =
     card.unlocked !== null
       ? `${levelName(card.unlocked)} unlocked!`
-      : card.gained > 0
-        ? `+${card.gained} this run`
-        : "";
-  const noteW = gainedNote
-    ? put(
-        ctx,
-        gainedNote,
-        left,
-        y,
-        13,
-        COLORS.good,
-        "left",
-        card.unlocked !== null,
-        bw / 2,
-      )
-    : 0;
+      : `+${card.gained} learned this run`;
+  const noteW = put(
+    ctx,
+    gainedNote,
+    left,
+    y,
+    13,
+    card.unlocked === null && card.gained === 0 ? COLORS.dim : COLORS.good,
+    "left",
+    card.unlocked !== null,
+    bw / 2,
+  );
   const next = levelName(card.level + 1);
   const unlock = card.last
     ? "Last level"
