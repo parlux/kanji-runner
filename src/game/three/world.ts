@@ -691,6 +691,75 @@ export function packFigureScale(k: number, left: number): number {
   return 0.4 + 0.6 * (left - k);
 }
 
+/** Most figures drawn per pack (the count slider's top): the horde mesh is sized for this once. */
+export const HORDE_CAP = 20_000;
+/**
+ * A whole pack's centre-to-centre gap between figures, in soldier sizes
+ * (times the figure size): its depth grows with the count to keep it, up to
+ * HORDE_DEPTH_MAX, after which a bigger horde just gets denser.
+ */
+export const HORDE_GAP = 0.36;
+/** A whole pack is at least this share of its width deep... */
+export const HORDE_DEPTH_MIN = 0.4;
+/** ...and at most this deep (world units): well short of the gap between gate rows. */
+export const HORDE_DEPTH_MAX = 1.2 * TRACK_W;
+/** How far each figure sits off its spiral point, in spiral spacings (each way). */
+export const HORDE_JITTER = 0.3;
+
+/** A whole pack's depth (world units) for `heads` figures `width` world units wide, figure size `scale`. */
+export function hordeDepth(
+  heads: number,
+  width: number,
+  scale: number,
+): number {
+  const gap = HORDE_GAP * scale;
+  const d = (4 * heads * gap * gap) / (Math.PI * Math.max(width, 1e-3));
+  return Math.min(HORDE_DEPTH_MAX, Math.max(HORDE_DEPTH_MIN * width, d));
+}
+
+/**
+ * The spiral's scale (world units per spiral unit) across and along the
+ * track for a pack's `n` figures left of `heads`: they fill its span now
+ * (`span` track units wide, the widest figure inside it) and a depth that
+ * shrinks with √(n / heads) from the whole pack's (`full` track units wide).
+ */
+export function hordeScales(
+  n: number,
+  heads: number,
+  span: number,
+  full: number,
+  scale: number,
+): { sx: number; sz: number } {
+  if (n <= 0 || heads <= 0) return { sx: 0, sz: 0 };
+  const halfW = Math.max(0, (span * TRACK_W) / 2 - FIGURE_RADIUS * scale);
+  const halfD =
+    (hordeDepth(heads, full * TRACK_W, scale) / 2) * Math.sqrt(n / heads);
+  const reach = Math.sqrt(n) + HORDE_JITTER;
+  return { sx: halfW / reach, sz: halfD / reach };
+}
+
+/** An integer hash (PCG) to 0..1; the horde shader has the same. */
+export function hordeHash(v: number): number {
+  const s = (Math.imul(v >>> 0, 747796405) + 2891336453) >>> 0;
+  const w = Math.imul((s >>> ((s >>> 28) + 4)) ^ s, 277803737) >>> 0;
+  return (((w >>> 22) ^ w) >>> 0) / 4294967296;
+}
+
+/**
+ * Figure k's offset (spiral units) from its pack's centre: a sunflower
+ * spiral, so the first n points evenly fill a disc of radius √n whatever n
+ * is (the rim falls first), jittered a little. Times the pack's scales it is
+ * the figure's place; the horde shader computes the same from its index.
+ */
+export function hordeOffset(k: number): { x: number; z: number } {
+  const r = Math.sqrt(k + 0.5);
+  const a = 2 * Math.PI * ((k * 0.381966011) % 1);
+  return {
+    x: r * Math.cos(a) + HORDE_JITTER * (2 * hordeHash(2 * k) - 1),
+    z: r * Math.sin(a) + HORDE_JITTER * (2 * hordeHash(2 * k + 1) - 1),
+  };
+}
+
 /**
  * The giant boss: one enemy figure this many times a soldier's size (fixed,
  * whatever its HP), standing on the track's centre past the last question.
