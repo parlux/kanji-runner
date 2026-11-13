@@ -75,9 +75,13 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 ### Task S5: Cloud road
 **Description:** no ground; the track gets an underside slab and pillars; a scrolling cloud sea below and a far cloud backdrop; floating grassy islands with trees beside the road; a sky with a white below-horizon colour.
 **Acceptance criteria:**
-- [ ] Tested: the layout clears the track; the pick covers all five looks evenly (each 10–30% over seeds 0–999).
-- [ ] Browser check as in S1 with `?scenery=sky`, including the boss approach and fight (boss stands on the track; nothing looks cut off). Draw calls and frame time logged within the limits.
-- [ ] Deploy green.
+- [x] Tested: the layout clears the track; the pick covers all five looks evenly (each 10–30% over seeds 0–999).
+  - Islands (rock, grass top and trees) keep their full extent at |x| ≥ 8; the cloud sea's tops stay at y ≤ -2, under the deck; island bobbing is a pure function of the scene clock.
+- [x] Browser check as in S1 with `?scenery=sky`, including the boss approach and fight (boss stands on the track; nothing looks cut off). Draw calls and frame time logged within the limits.
+  - Screenshots (run, both edges, boss approach and fight in a real `kind: "boss"` scene, at 390×844 and 1280×800) checked; gates and labels read as before; the boss stands on the deck; the far end of the deck fades into the haze.
+  - The track sits on a deck (`scene3d.ts`, shown only with no ground): a slab 1.4 deep reaching 0.9 past each kerb, so the camera sees a purple ledge and the road reads as a bridge, and a pair of pillars every 24 under the ledge edges. From the default camera the pillars stay hidden under the deck and in the cloud sea.
+  - Headless (Chrome for Testing), 200 crowd, median of 3 × 240 frames, run in turn with Countryside: draw calls (counted at the WebGL calls, which count Countryside as 23) 25 for Cloud road, Countryside + 2 (about +10 over no scenery); frame time 3.4-3.5 ms at 390×844 and 5.2 ms at 1280×800 (1.1× / 1.03× of S1's 3.1 / 5.1 ms with no scenery); Countryside alongside 3.1-3.3 / 5.4-5.5 ms.
+- [x] Deploy green.
 **Verification:** as S1. **Dependencies:** S1. **Files:** `scenery.ts`, `sceneryMeshes.ts`, `scene3d.ts` (ground and underside toggles), tests. **Scope:** M
 
 ### Checkpoint L: v1.8 (owner, on the phone)

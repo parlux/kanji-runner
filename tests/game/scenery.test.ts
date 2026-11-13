@@ -2,6 +2,10 @@ import { describe, expect, it } from "vitest";
 import {
   builtLooks,
   BLOCK_X,
+  bobY,
+  BOB_AMOUNT,
+  CLOUD_SEA_TOP,
+  ISLE_MIN_X,
   DRIFT_WRAP,
   FENCE_STEP,
   LAMP_STEP,
@@ -56,8 +60,8 @@ describe("scenery pick", () => {
     expect(sceneryParam("?scenery=")).toBeNull();
     expect(sceneryParam("?scenery=spring")).toBe("spring");
     expect(sceneryParam("?scenery=stadium")).toBe("stadium");
-    for (const id of ["sky", "city"] as const)
-      expect(sceneryParam(`?scenery=${id}`)).toBe(LOOKS[id] ? id : null);
+    expect(sceneryParam("?scenery=sky")).toBe("sky");
+    expect(sceneryParam("?scenery=city")).toBe("city");
   });
 });
 
@@ -165,11 +169,17 @@ describe("block city", () => {
   const { props } = LOOKS.city?.layout() ?? { props: [] };
   const blocks = props.filter((p) => p.shape === "block");
 
-  it("is built, and the pick covers four looks", () => {
-    expect(builtLooks()).toEqual(["country", "spring", "stadium", "city"]);
+  it("is built, and the pick covers all five looks", () => {
+    expect(builtLooks()).toEqual([
+      "country",
+      "spring",
+      "stadium",
+      "sky",
+      "city",
+    ]);
     const seen = new Set<string>();
     for (let seed = 0; seed < 100; seed++) seen.add(sceneryFor(seed));
-    expect(seen.size).toBe(4);
+    expect(seen.size).toBe(5);
   });
 
   it("tiles pavement and lamps without a seam", () => {
@@ -223,6 +233,66 @@ describe("block city", () => {
       expect(b.sz % WINDOW_W).toBe(0);
     }
     expect(new Set(blocks.map((b) => b.colour)).size).toBeGreaterThanOrEqual(6);
+  });
+});
+
+describe("cloud road", () => {
+  const look = LOOKS.sky;
+  const { props, backdrop } = look?.layout() ?? { props: [], backdrop: [] };
+  const clearX = TRACK_W / 2 + 0.8;
+
+  it("has no ground and a white sky below the horizon", () => {
+    expect(look?.ground).toBeNull();
+    expect(look?.sky.below).toBe(0xffffff);
+  });
+
+  it("each look gets 10-30% of seeds 0-999", () => {
+    const counts = new Map<string, number>();
+    for (let seed = 0; seed < 1000; seed++) {
+      const id = sceneryFor(seed);
+      counts.set(id, (counts.get(id) ?? 0) + 1);
+    }
+    expect(counts.size).toBe(5);
+    for (const n of counts.values()) {
+      expect(n).toBeGreaterThanOrEqual(100);
+      expect(n).toBeLessThanOrEqual(300);
+    }
+  });
+
+  it("keeps every island, with its trees, clear of the track", () => {
+    const isles = props.filter((p) => p.shape === "isle");
+    expect(isles.length).toBe(22);
+    for (const i of isles) {
+      expect(Math.abs(i.x) - i.sx).toBeGreaterThanOrEqual(ISLE_MIN_X - 1e-9);
+      expect(Math.abs(i.x) - i.sx).toBeGreaterThanOrEqual(clearX);
+    }
+    for (const p of props.filter((q) => q.bob !== undefined))
+      expect(Math.abs(p.x) - p.sx).toBeGreaterThanOrEqual(clearX);
+  });
+
+  it("keeps the cloud sea below the track's underside", () => {
+    const sea = props.filter((p) => p.shape === "puff");
+    expect(sea.length).toBeGreaterThan(150);
+    for (const p of sea) expect(p.y + p.sy).toBeLessThanOrEqual(CLOUD_SEA_TOP);
+  });
+
+  it("bobs islands gently with the clock, and they stand still when it does", () => {
+    for (const t of [0, 1.3, 77.7])
+      expect(Math.abs(bobY(2, t))).toBeLessThanOrEqual(BOB_AMOUNT);
+    expect(bobY(2, 5)).toBe(bobY(2, 5));
+    const isle = props.find((p) => p.shape === "isle");
+    const parts = props.filter((p) => p.bob === isle?.bob);
+    expect(parts.length).toBeGreaterThanOrEqual(3);
+  });
+
+  it("has far clouds below the horizon and a sun, beyond the haze", () => {
+    const clouds = backdrop.filter((p) => p.shape === "puff");
+    expect(clouds.length).toBeGreaterThan(40);
+    for (const c of clouds) {
+      expect(c.y).toBeLessThan(0);
+      expect(Math.abs(c.x)).toBeLessThan(DRIFT_WRAP);
+    }
+    expect(backdrop.filter((p) => p.shape === "sun").length).toBe(1);
   });
 });
 

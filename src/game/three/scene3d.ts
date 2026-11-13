@@ -1,6 +1,8 @@
 import {
   BoxGeometry,
+  CylinderGeometry,
   DirectionalLight,
+  Group,
   Fog,
   HemisphereLight,
   InstancedMesh,
@@ -83,6 +85,20 @@ const DASH_GAP = 6;
 const DASH_LINES = [1 / 3, 2 / 3];
 const EDGE_W = 0.35;
 const EDGE_H = 0.25;
+/**
+ * With no ground (Cloud road): the track's underside slab, this deep, its top
+ * this far below the track and reaching this far out past each kerb (a ledge
+ * the camera can see, so the road reads as a bridge), and a pair of pillars
+ * every PILLAR_STEP, this tall, under the ledges' edges and down into the clouds.
+ */
+const SLAB_D = 1.4;
+const SLAB_DROP = 0.12;
+const SLAB_LEDGE = 0.9;
+const SLAB_HALF = TRACK_W / 2 + EDGE_W + SLAB_LEDGE;
+const PILLAR_STEP = 24;
+const PILLAR_H = 12;
+const UNDERSIDE = 0x8c7b9e;
+const PILLAR = 0xb6a8c8;
 
 /** Run cycle: strides per second, hop height, forward lean and side sway (radians). */
 const STRIDE_HZ = 2.4;
@@ -252,6 +268,40 @@ export function createView3d(canvas: HTMLCanvasElement): View3d | null {
     scene.add(edge);
   }
 
+  const m = new Matrix4();
+  // with no ground, the track shows its underside: a slab and pillars into the clouds
+  const underside = new Group();
+  underside.visible = false;
+  scene.add(underside);
+  const slab = new Mesh(
+    new BoxGeometry(2 * SLAB_HALF, SLAB_D, length),
+    new MeshLambertMaterial({ color: UNDERSIDE }),
+  );
+  slab.position.set(0, -SLAB_DROP - SLAB_D / 2, centreZ);
+  underside.add(slab);
+  const pillarRows = Math.ceil(length / PILLAR_STEP) + 1;
+  const pillars = new InstancedMesh(
+    new CylinderGeometry(0.8, 1.1, PILLAR_H, 8),
+    new MeshLambertMaterial({ color: PILLAR }),
+    2 * pillarRows,
+  );
+  pillars.frustumCulled = false;
+  underside.add(pillars);
+  const layPillars = (dist: number): void => {
+    const shift = (dist * DIST_SCALE) % PILLAR_STEP;
+    let i = 0;
+    for (let k = 0; k < pillarRows; k++)
+      for (const side of [-1, 1]) {
+        m.makeTranslation(
+          side * SLAB_HALF,
+          -SLAB_DROP - SLAB_D - PILLAR_H / 2,
+          TRACK_BEHIND - k * PILLAR_STEP + shift,
+        );
+        pillars.setMatrixAt(i++, m);
+      }
+    pillars.instanceMatrix.needsUpdate = true;
+  };
+
   // dashed lane lines, scrolled by the run's distance so speed reads
   const period = DASH_LEN + DASH_GAP;
   const perLine = Math.ceil(length / period) + 1;
@@ -261,7 +311,6 @@ export function createView3d(canvas: HTMLCanvasElement): View3d | null {
     perLine * DASH_LINES.length,
   );
   scene.add(dashes);
-  const m = new Matrix4();
   const layDashes = (dist: number): void => {
     const shift = (dist * DIST_SCALE) % period;
     let i = 0;
@@ -284,6 +333,7 @@ export function createView3d(canvas: HTMLCanvasElement): View3d | null {
     fog.color.setHex(look.sky.horizon);
     setHazeColour(look.sky.horizon);
     ground.visible = look.ground !== null;
+    underside.visible = look.ground === null;
     if (look.ground !== null) ground.material.color.setHex(look.ground);
   };
 
@@ -371,6 +421,7 @@ export function createView3d(canvas: HTMLCanvasElement): View3d | null {
       haze = hazeFor(pose, runDist, shapeDistance());
       layDashes(runDist);
       showLook(forcedLook ?? sceneryFor(s.seed));
+      if (underside.visible) layPillars(runDist);
       scenery.update(
         runDist,
         clock,

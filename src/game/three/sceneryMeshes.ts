@@ -27,6 +27,7 @@ import {
 } from "three";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import {
+  bobY,
   builtLooks,
   DRIFT_WRAP,
   FENCE_STEP,
@@ -165,6 +166,12 @@ function shapeGeometry(shape: Shape): BufferGeometry {
     }
     case "balloon":
       return new IcosahedronGeometry(1, 1);
+    case "isle":
+      // an upside-down cone: its flat top at y = 0, its point at y = −1
+      return new ConeGeometry(1, 1, 7).rotateX(Math.PI).translate(0, -0.5, 0);
+    case "disc":
+      // a flat cylinder centred on y = 0
+      return new CylinderGeometry(1, 1, 1, 7);
   }
 }
 
@@ -175,6 +182,8 @@ type Layer = {
   b: Float32Array;
   /** Flags: each one's full length (it flutters by scale); balloons: each one's resting Y (it bobs). */
   c?: Float32Array;
+  /** Bobbing props (Cloud road's islands): each one's bob phase. */
+  d?: Float32Array;
 };
 
 /** Flags flutter this fast (rad/s) and this much (a fraction of their length); balloons bob this much (world units). */
@@ -279,6 +288,11 @@ export function createScenery(scene: Scene): Scenery {
     return g;
   };
   const fogged = new MeshLambertMaterial({ flatShading: true });
+  // Cloud road's cloud sea: glowing like the backdrop clouds, but hazed with the props
+  const foggedGlow = new MeshLambertMaterial({
+    flatShading: true,
+    emissive: CLOUD_GLOW,
+  });
   const clear = new MeshLambertMaterial({ flatShading: true, fog: false });
   const windowed = windowMaterial();
   // clouds, the sun, Block city's skyline and blimp glow a little, so their shaded sides stay light
@@ -312,7 +326,7 @@ export function createScenery(scene: Scene): Scenery {
     for (const [shape, parts] of byShape(props)) {
       const mesh = instanced(
         geometry(shape),
-        shape === "block" ? windowed : fogged,
+        shape === "block" ? windowed : shape === "puff" ? foggedGlow : fogged,
         parts,
       );
       group.add(mesh);
@@ -321,6 +335,9 @@ export function createScenery(scene: Scene): Scenery {
         a: Float32Array.from(parts, (p) => p.z),
         b: Float32Array.from(parts, (p) => p.y),
         ...(shape === "flag" && { c: Float32Array.from(parts, (p) => p.sz) }),
+        ...(parts.some((p) => p.bob !== undefined) && {
+          d: Float32Array.from(parts, (p) => p.bob ?? NaN),
+        }),
       });
     }
     for (const [shape, parts] of byShape(backdrop)) {
@@ -376,11 +393,15 @@ export function createScenery(scene: Scene): Scenery {
     update(runDist, clock, cullZ, eye) {
       sky.position.copy(eye);
       if (!shown) return;
-      for (const { mesh, a, b, c } of shown.props) {
+      for (const { mesh, a, b, c, d } of shown.props) {
         const e = mesh.instanceMatrix.array;
         for (let i = 0; i < a.length; i++) {
           const z = wrapZ(a[i] as number, runDist);
-          e[i * 16 + 13] = z < cullZ ? PARKED_Y : (b[i] as number);
+          const ph = d ? (d[i] as number) : NaN;
+          e[i * 16 + 13] =
+            z < cullZ
+              ? PARKED_Y
+              : (b[i] as number) + (ph === ph ? bobY(ph, clock) : 0);
           e[i * 16 + 14] = z;
           if (c)
             e[i * 16 + 10] =
