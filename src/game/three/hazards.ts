@@ -48,9 +48,15 @@ const COLOURS = {
   band: new Color(0xf0c27a),
 };
 const STRIDE_HZ = 2.4;
+/**
+ * A killed enemy topples back and shrinks away over this much run distance
+ * (about a third of a second), from a ring of DYING_MAX figures made once.
+ */
+const DIE_DIST = 0.45;
+const DYING_MAX = 64;
 
 export function createHazards(scene: Scene, fx: Fx) {
-  const enemies = makeCrowdMesh("enemy", MAX_PACK_FIGURES);
+  const enemies = makeCrowdMesh("enemy", MAX_PACK_FIGURES + DYING_MAX);
   const recruits = makeCrowdMesh("soldier", MAX_RECRUITS);
   scene.add(enemies, recruits);
   const layout = new Float32Array(2 * PACK_MAX);
@@ -60,6 +66,12 @@ export function createHazards(scene: Scene, fx: Fx) {
   const rot = new Euler();
   const q = new Quaternion();
   const { bullet } = FX_COLOURS;
+  // per pack: the enemies drawn last frame (−1 not seen yet), for this track
+  let seenTrack: RunState["track"] | null = null;
+  let seen = new Int16Array(0);
+  // dying figures: world x, z offset from the pack, the pack's track distance, run distance at death
+  const dying = new Float32Array(4 * DYING_MAX);
+  let nextDying = 0;
 
   return {
     /**
@@ -75,18 +87,38 @@ export function createHazards(scene: Scene, fx: Fx) {
         armyX + (lanes > 1 ? l / (lanes - 1) - 0.5 : 0) * 2 * half;
       const { hazards } = run.track;
       let ne = 0;
+      if (run.track !== seenTrack) {
+        // a new run: nothing seen, nothing dying
+        seenTrack = run.track;
+        if (seen.length < hazards.length) seen = new Int16Array(hazards.length);
+        seen.fill(-1);
+        for (let d = 0; d < DYING_MAX; d++) dying[4 * d + 3] = -Infinity;
+      }
 
       for (let i = 0; i < hazards.length; i++) {
         const hz = hazards[i];
-        if (hz?.kind !== "pack" || i < run.nextHazard || isShattered(run, i))
-          continue;
+        if (hz?.kind !== "pack" || i < run.nextHazard) continue;
         const ahead = hazardPos(run, i) - run.dist;
         if (ahead > shapeDistance()) continue;
-        const n = packSurvivors(run, i);
-        if (n <= 0) continue;
+        const n = isShattered(run, i) ? 0 : packSurvivors(run, i);
         const span = packSpan(run, i);
         const cx = worldX((span.left + span.right) / 2);
         const cz = worldZ(hazardPos(run, i), run.dist);
+        const was = seen[i] as number;
+        seen[i] = n;
+        if (was > n) {
+          // the rim figures just killed start to fall where they stood
+          hordeLayout(was, span.right - span.left, layout);
+          for (let k = n; k < was; k++) {
+            const d = 4 * nextDying;
+            dying[d] = cx + (layout[2 * k] as number);
+            dying[d + 1] = layout[2 * k + 1] as number;
+            dying[d + 2] = hazardPos(run, i);
+            dying[d + 3] = run.dist;
+            nextDying = (nextDying + 1) % DYING_MAX;
+          }
+        }
+        if (n <= 0) continue;
         const drawn = hordeLayout(n, span.right - span.left, layout);
         const left = packHeadsLeft(run, i) * (drawn / n);
         for (let k = 0; k < drawn && ne < MAX_PACK_FIGURES; k++) {
@@ -120,6 +152,23 @@ export function createHazards(scene: Scene, fx: Fx) {
             );
           }
         }
+      }
+      for (let d = 0; d < DYING_MAX; d++) {
+        const t = (run.dist - (dying[4 * d + 3] as number)) / DIE_DIST;
+        if (!(t >= 0 && t < 1)) continue;
+        // knocked back, toppling over backwards as it shrinks away
+        pos.set(
+          dying[4 * d] as number,
+          Math.sin(Math.PI * t) * 0.15,
+          worldZ(dying[4 * d + 2] as number, run.dist) +
+            (dying[4 * d + 1] as number) -
+            0.6 * t,
+        );
+        rot.set(-0.18 - 1.5 * t, Math.PI, 0);
+        q.setFromEuler(rot);
+        scl.setScalar(HORDE_SCALE * (1 - t * t));
+        m.compose(pos, q, scl);
+        enemies.setMatrixAt(ne++, m);
       }
       enemies.count = ne;
       enemies.instanceMatrix.needsUpdate = true;
