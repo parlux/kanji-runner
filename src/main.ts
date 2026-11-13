@@ -35,6 +35,11 @@ import {
   openCameraPanel,
   syncCameraGear,
 } from "./game/camerasettings";
+import {
+  DEFAULT_HORDE_SETTINGS,
+  hordeTuning,
+  loadHorde,
+} from "./storage/horde";
 import { loadCamera, loadGear, saveCamera, saveGear } from "./storage/camera";
 import { KANA } from "./core/kana";
 import { KANJI } from "./core/kanji";
@@ -154,6 +159,9 @@ const openCamera = (): void =>
     });
   });
 
+// tuned horde (dev tool): saved on this device, applied from the next run; null is the defaults
+const horde = loadHorde(localStorage);
+
 // speed preset: this device only, changed in settings
 let speed = loadSpeed(localStorage);
 
@@ -257,7 +265,13 @@ const study = (): void => {
 const act = (action: Action): void => {
   if (overlayOpen()) return;
   if (action === "study") return study();
-  const next = handleAction(scene, action, newSeed, session);
+  const next = handleAction(
+    scene,
+    action,
+    newSeed,
+    session,
+    hordeTuning(horde ?? DEFAULT_HORDE_SETTINGS),
+  );
   // placement changes progress: save it right away, under this mode's key
   const keys = persistence(session);
   if (next.session !== session && keys)

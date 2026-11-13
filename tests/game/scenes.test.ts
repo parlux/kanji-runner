@@ -17,7 +17,12 @@ import {
   setTarget,
   type RunState,
 } from "../../src/core/sim";
-import { CLASH_SECONDS, REASK_MAX_BOX } from "../../src/core/tuning";
+import {
+  CLASH_SECONDS,
+  HORDE_DEFAULTS,
+  REASK_MAX_BOX,
+} from "../../src/core/tuning";
+import { hordeTuning } from "../../src/storage/horde";
 import { syntheticList } from "../core/wk-fixture";
 import { kanaRun } from "../core/kana-run";
 import { STEP } from "../../src/game/loop";
@@ -774,5 +779,24 @@ describe("pause during a pack's stream", () => {
     const on = updateScene({ ...paused, paused: false }, STEP, 0);
     if (on.kind !== "run") throw new Error("the run ended");
     expect(on.run.arrived[0]).toBeGreaterThan(scene.run.arrived[0] ?? 0);
+  });
+});
+
+describe("horde tuning", () => {
+  it("a new run is built with the given tuning (defaults when absent)", () => {
+    const session = createSession(defaultProgress(), null);
+    const start = { kind: "start" } as const;
+    const tuned = hordeTuning({
+      count: 2000,
+      scale: 1,
+      killSeconds: 2,
+      width: 0.5,
+    });
+    const a = handleAction(start, "confirm", () => 5, session, tuned).scene;
+    const b = handleAction(start, "confirm", () => 5, session).scene;
+    if (a.kind !== "run" || b.kind !== "run") throw new Error("no run");
+    expect(a.run.horde).toEqual(tuned);
+    expect(b.run.horde).toEqual(HORDE_DEFAULTS);
+    expect(Math.max(...a.run.heads)).toBeGreaterThan(Math.max(...b.run.heads));
   });
 });
