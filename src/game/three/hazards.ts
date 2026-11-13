@@ -138,7 +138,10 @@ export function createHazards(scene: Scene, fx: Fx) {
           const isCrate = dead.kind === "block";
           const c = isCrate
             ? spanWorld(dead.left, dead.right)
-            : { x: worldX(run.packs[sh.index]?.x ?? 0.5), w: 1.2 };
+            : (() => {
+                const p = packSpan(run, sh.index);
+                return { x: worldX((p.left + p.right) / 2), w: 1.2 };
+              })();
           const cz = worldZ(hazardPos(run, sh.index), run.dist);
           for (let k = 0; k < BURST_PIECES; k++) {
             const p = burstPiece(k, t, c.w / 2);

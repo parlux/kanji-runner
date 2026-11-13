@@ -7,13 +7,13 @@ import {
   Vector4,
   type Scene,
 } from "three";
-import { crowdWidth } from "../../core/crowd";
 import {
   hazardPos,
   isShattered,
-  packAwake,
+  packConverge,
   packHeadsLeft,
   packMouth,
+  packSpan,
   packSurvivors,
   type RunState,
 } from "../../core/sim";
@@ -37,12 +37,15 @@ import {
 /**
  * The enemy packs, every figure animated on the GPU. Each pack in view gets
  * a slot: one instanced mesh of up to HORDE_CAP figures whose places come
- * from the instance index (as `hordePlace`: a column at the army's width
- * funnelling back to the pack's span) and a few uniforms, so a frame costs
+ * from the instance index (as `hordePlace`: the core's span at the front,
+ * the pack spread wide where it is far away and, within STREAM_DISTANCE, a
+ * stream at the army's width funnelling back to the pack's mouth) and a few
+ * uniforms, so a frame costs
  * the same at 200 or 20,000. The only per-figure data is its death: when
  * survivors drop from `was` to n, figures n..was − 1 (the front rows) get
  * the run distance and the world place they stood on, uploaded as that one
- * range, and fall there while the rest step up.
+ * range, and fall there while the rest step up; those that reached the
+ * army vanish into it.
  */
 
 /** Packs drawn at once (two fit within the shape horizon). */
@@ -51,11 +54,8 @@ export const HORDE_SLOTS = 2;
 export const DIE_DIST = 0.45;
 /** Strides per second of clock. */
 const STRIDE_HZ = 3;
-/** A waiting pack mills about, drawing in this far (0..1) towards its column; a charging one forms it fully. */
-export const MILL_FORM = 0.3;
-/** Seconds (clock) a charging pack takes to form its column, and a waiting one to draw in. */
-const FORM_TIME = 0.4;
-const MILL_TIME = 3;
+/** A figure that reached the army: its death is set this far in the past, so it is gone at once (no fall). */
+const ARRIVED = -1e9;
 
 const f = (x: number): string => x.toFixed(6);
 
@@ -169,11 +169,8 @@ type Slot = {
   killedAt: number;
   /** The pack's front, world z with the army at distance 0, as last drawn. */
   z0: number;
-  /** How formed its column is (0 milling .. 1). */
-  form: number;
-  /** Its track distance and the clock last frame. */
-  pos: number;
-  clock: number;
+  /** Its enemies that had reached the army last frame (whole ones). */
+  arrived: number;
 };
 
 export type Horde = {
@@ -233,9 +230,7 @@ export function createHorde(scene: Scene): Horde {
       hi: 0,
       killedAt: -Infinity,
       z0: 0,
-      form: 0,
-      pos: 0,
-      clock: 0,
+      arrived: 0,
     });
   }
 
@@ -244,13 +239,17 @@ export function createHorde(scene: Scene): Horde {
   let order = new Int32Array(0);
 
   const o = { x: 0, z: 0 };
-  /** Survivors drop to n: the front figures between fall from now, where they stood last frame. */
-  const kill = (s: Slot, n: number, dist: number): void => {
+  /**
+   * Survivors drop to n: the front `gone` of the figures between reached the
+   * army and vanish into it; the rest were shot and fall from now, where they
+   * stood last frame.
+   */
+  const kill = (s: Slot, n: number, dist: number, gone: number): void => {
     if (n < s.was) {
       const a = s.death.array as Float32Array;
       for (let k = n; k < s.was; k++) {
         hordePlace(k, s.was, s.shape, s.back.w, o);
-        a[3 * k] = dist;
+        a[3 * k] = k >= s.was - gone ? ARRIVED : dist;
         a[3 * k + 1] = o.x;
         a[3 * k + 2] = s.z0 - o.z;
       }
@@ -287,8 +286,6 @@ export function createHorde(scene: Scene): Horde {
           s.hazard = -1;
           s.was = 0;
         }
-      const armyX = worldX(run.x);
-      const armyW = crowdWidth(run.army) * TRACK_W;
       for (let i = run.nextHazard; i < hazards.length; i++) {
         if (hazards[i]?.kind !== "pack") continue;
         const pos = hazardPos(run, i);
@@ -303,36 +300,30 @@ export function createHorde(scene: Scene): Horde {
           if (s.hazard >= 0 || dist - s.killedAt < DIE_DIST) continue;
           s.hazard = i;
           s.was = s.hi = n;
-          s.form = 0;
-          s.pos = pos;
-          s.clock = clock;
+          s.arrived = 0;
         }
-        kill(s, n, dist);
-        // a charging pack forms its column; a waiting one mills, drawing in slowly
-        const charging = packAwake(run, i);
-        const target = charging ? 1 : Math.max(s.form, MILL_FORM);
-        const dt = Math.max(0, clock - s.clock);
-        s.form +=
-          (target - s.form) *
-          (1 - Math.exp(-dt / (charging ? FORM_TIME : MILL_TIME)));
-        s.pos = pos;
-        s.clock = clock;
+        const arrived = Math.floor((run.arrived[i] ?? 0) + 1e-6);
+        kill(s, n, dist, arrived - s.arrived);
+        s.arrived = arrived;
         s.state.x = n;
         // heads past the cap are not drawn: then every drawn figure is whole
         s.state.y =
           heads < (run.heads[i] ?? 0) ? 1 : packHeadsLeft(run, i) - (n - 1);
         if (n === 0) continue;
-        const span = packMouth(run, i);
+        // spread wide where it is (milling) far away; within STREAM_DISTANCE
+        // its front closes into a stream at the army's width: the core's span
+        const mouth = packMouth(run, i);
+        const span = packSpan(run, i);
         const size = run.horde.hordeScale;
         const sh = s.shape;
-        sh.pw = (span.right - span.left) * TRACK_W;
-        sh.px = worldX((span.left + span.right) / 2);
-        sh.cw = sh.pw + (armyW - sh.pw) * s.form;
-        sh.cx = sh.px + (armyX - sh.px) * s.form;
+        sh.pw = (mouth.right - mouth.left) * TRACK_W;
+        sh.px = worldX((mouth.left + mouth.right) / 2);
+        sh.cw = (span.right - span.left) * TRACK_W;
+        sh.cx = worldX((span.left + span.right) / 2);
         sh.area = (HORDE_GAP * size) ** 2;
         s.z0 = worldZ(pos, 0);
         s.front.set(sh.cx, s.z0 + dist * DIST_SCALE, sh.cw, sh.pw);
-        s.back.set(sh.px, sh.area, s.form, size);
+        s.back.set(sh.px, sh.area, packConverge(run, i), size);
       }
       for (const s of slots) {
         if (dist - s.killedAt >= DIE_DIST) s.hi = s.was;

@@ -1473,10 +1473,12 @@ function renderFire(
       const span =
         dead.kind === "block"
           ? dead
-          : {
-              left: run.packs[sh.index]?.x ?? 0.5,
-              right: run.packs[sh.index]?.x ?? 0.5,
-            };
+          : (() => {
+              // where its front was: its span's centre
+              const p = packSpan(run, sh.index);
+              const c = (p.left + p.right) / 2;
+              return { left: c, right: c };
+            })();
       const cx = ((span.left + span.right) / 2) * w;
       const cy =
         depthY(hazardPos(run, sh.index) - run.dist) -
