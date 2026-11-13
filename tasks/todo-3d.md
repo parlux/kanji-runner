@@ -237,6 +237,26 @@ Intent: `docs/intent/3d-camera-follow.md`. Spec: SPEC-3d-depth amendment v1.4.3,
 ### Checkpoint H2: the camera (owner, on the phone, with `?3d`)
 - [ ] The settings screen works mid-run and settings stick.
 - [ ] The owner picks values that feel right (reports pitch, distance, FOV, follow, smoothing) and says what to do about answers that leave the screen, if anything.
+  - Owner, 2026-11-13: pitch 8°, distance 15, FOV 34°, follow 0.4, smoothing 1 s; fog too thick; off-screen answers fine; keep the gear hidden. (Becomes C2.)
 
-### Task C2: Bake in the chosen camera
-Shaped at H2. Likely: the owner's values become the defaults (the hard rule and aim tests replaced by tests pinning the new pose at 390×844 and 1280×800); the settings screen stays as a hidden tuning screen or becomes a simple preset; any off-screen-answer fix the owner asks for.
+### Task C2: Bake in the chosen camera, longer haze, hidden gear
+**Owner, 2026-11-13, at H2:** best feel with pitch 8°, distance 15, FOV 34°, follow 0.4, smoothing 1 s. "The fog feels too 'thick' like this." Keep the gear hidden; off-screen answers are fine.
+**Cause of the thick fog:** at pitch 8° the haze band (3 → 6 ahead) is squeezed into 7% of the screen (45% → 38% from the top), and the track beyond 6 is solid haze up to the horizon at 27%.
+
+**Description:**
+- **Defaults:** the owner's values are the 3D camera at every aspect (no saved settings → `poseFromSettings` of them, army at `AIM.armyY`). The old fitted camera (`fitCameraTo`, `CAMERA_BACK`, `CAMERA_MIN_HEIGHT`, `EDGE_MARGIN`) goes if nothing else needs it; the hard rule and aim-band tests are replaced (spec below). Reset returns to the owner's values.
+- **Wider ranges:** pitch from 3°, smoothing up to 2 s; distance slider in absolute units around the new default (about 6–60).
+- **Longer haze:** `SHAPE_DISTANCE` raised to about 4 × `VIEW_DISTANCE` (12) as the default, kept below the re-ask gap (the existing test still pins it). Haze clear up to `VIEW_DISTANCE`, total at `SHAPE_DISTANCE`, as now. Check the culling, text haze and squads still follow `SHAPE_DISTANCE`, and the frame time with more drawn.
+- **Haze slider:** a sixth setting, "haze" = the shape horizon in track distance (range `VIEW_DISTANCE` + 1 to the re-ask safe maximum), saved and reset with the others. If making it live is invasive (objects culled by a constant), stop and report instead.
+- **Hidden gear:** the gear is not shown by default. Tapping the build stamp at the bottom of the start screen 5 times within 3 s toggles it on/off, remembered on the device. When shown, it works as in C1.
+- Unchanged: `src/core`, golden run, 2D, text rules, follow maths.
+
+**Acceptance criteria:**
+- [ ] Tested: default pose = the owner's settings at 390×844 and 1280×800 (army at 80%); `SHAPE_DISTANCE` default below the re-ask gap and the haze slider's maximum too; haze total at the horizon in use and none at `VIEW_DISTANCE`; storage accepts the wider ranges and the haze setting, old saved data without it still loads; gear toggle remembered.
+- [ ] Browser check at 390×844 (3D default): a run with the defaults (filmstrip of a gate approaching from far off, showing a gradual haze, no thick band); steering to an outer opening with follow; the gear hidden, then shown after 5 taps; the haze slider at its ends. Screenshots in the scratchpad.
+- [ ] Frame time logged with a 200 crowd and everything within the new `SHAPE_DISTANCE` drawn, compared with C1.
+
+**Verification:** `npm test && npm run lint && npm run build`; browser check; deploy green (merge into `main`).
+**Dependencies:** C1, H2
+**Files:** `src/game/three/{world,view,scene3d,walls,hazards,squads,overlay}.ts`, `src/game/camerasettings.ts`, `src/storage/camera.ts`, `src/game/start.ts`, `src/main.ts`, tests
+**Scope:** M
