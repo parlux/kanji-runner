@@ -12,7 +12,7 @@ import {
   hazardPos,
   isShattered,
   packHeadsLeft,
-  packSpan,
+  packMouth,
   packSurvivors,
   type RunState,
 } from "../../core/sim";
@@ -321,7 +321,7 @@ export function createHorde(scene: Scene): Horde {
         s.state.y =
           heads < (run.heads[i] ?? 0) ? 1 : packHeadsLeft(run, i) - (n - 1);
         if (n === 0) continue;
-        const span = packSpan(run, i);
+        const span = packMouth(run, i);
         const size = run.horde.hordeScale;
         const sh = s.shape;
         sh.pw = (span.right - span.left) * TRACK_W;

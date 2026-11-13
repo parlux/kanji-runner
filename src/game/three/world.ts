@@ -212,7 +212,7 @@ export function clipGaps(run: RunState): { ahead: number; behind: number } {
         : isShattered(run, i) || (h.kind === "pack" && !packSurvivors(run, i))
           ? null
           : h.kind === "pack"
-            ? packSpan(run, i)
+            ? packSpan(run)
             : { left: h.left, right: h.right };
     if (span && span.right > left && span.left < right) near(hazardPos(run, i));
   });

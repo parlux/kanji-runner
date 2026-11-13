@@ -151,10 +151,11 @@ export const PACK_MAX = 200;
  * Seconds an army of the expected size takes to mow down a whole pack: pack
  * HP = KILL_SECONDS × FIRE_PER_SOLDIER × expected army.
  */
-export const KILL_SECONDS = 2.5;
+export const KILL_SECONDS = 1.0;
 /**
- * A whole pack's width as a share of the track (1 = the whole track). It
- * narrows towards crowdWidth(remaining strength) as it is shot (see packSpan).
+ * A whole pack's funnel mouth (its far end) as a share of the track (1 = the
+ * whole track). It narrows towards crowdWidth(remaining strength) as it is
+ * shot (see packMouth). It hits as a column at the army's width (packSpan).
  */
 export const PACK_WIDTH = 1.0;
 /** Enemy figures are drawn this size of a soldier (a view value; the core ignores it). */

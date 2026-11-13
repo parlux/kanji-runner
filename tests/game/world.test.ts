@@ -265,7 +265,7 @@ describe("crowd spread and squeeze", () => {
     });
     const ahead = (r: RunState): number => clipGaps(r).ahead;
 
-    it("ignores a crate, saw and pack in another lane; counts them in the crowd's path", () => {
+    it("ignores a crate and saw in another lane; counts them in the crowd's path, and every pack (it homes in)", () => {
       // a 200 crowd spreads over 0.225..0.775
       const off = withHazards(
         [
@@ -275,7 +275,15 @@ describe("crowd spread and squeeze", () => {
         ],
         { packs: [null, null, { pos: 11, x: 0.93 }] },
       );
-      expect(ahead(off)).toBe(50);
+      expect(ahead(off)).toBe(11);
+      const lanes = withHazards(
+        [
+          { kind: "block", pos: 5, left: 0.05, right: 0.15 },
+          { kind: "saw", pos: 8, mid: 0.9, amp: 0.02, phase: 0 },
+        ],
+        { packs: [null, null] },
+      );
+      expect(ahead(lanes)).toBe(50);
       const on = withHazards([
         { kind: "block", pos: 5, left: 0.45, right: 0.55 },
       ]);

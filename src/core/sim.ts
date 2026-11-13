@@ -308,11 +308,23 @@ export function packWidth(s: RunState, i: number): number {
   return Math.min(1, Math.max(0, w));
 }
 
-/** Pack i's span: packWidth wide, centred on the pack, kept on the track. */
-export function packSpan(s: RunState, i: number): Span {
+/**
+ * Pack i's funnel mouth (its far end, where it is widest): packWidth wide,
+ * centred on the pack, kept on the track. The view draws it; nothing hits.
+ */
+export function packMouth(s: RunState, i: number): Span {
   const w = packWidth(s, i);
   const x = clampOnTrack(s.packs[i]?.x ?? 0.5, w);
   return { left: x - w / 2, right: x + w / 2 };
+}
+
+/**
+ * A pack's span where it can hit and be hit: its column, as wide as the army
+ * and centred on it (a pack homes in; it can't be dodged).
+ */
+export function packSpan(s: RunState): Span {
+  const w = crowdWidth(s.army);
+  return { left: s.x - w / 2, right: s.x + w / 2 };
 }
 
 /** Where hazard i is now: packs move, everything else stays put. */
@@ -349,7 +361,7 @@ function threats(s: RunState): (Threat | null)[] {
     if (h.kind === "block")
       return { pos: h.pos, span: { left: h.left, right: h.right } };
     if (h.kind === "pack")
-      return { pos: hazardPos(s, i), span: packSpan(s, i) };
+      return { pos: hazardPos(s, i), span: packSpan(s) };
     return null;
   });
 }
@@ -475,7 +487,7 @@ export function stepRun(s: RunState, dt: number, pace = 1): RunState {
  */
 function contactLoss(s: RunState, i: number): number {
   const w = crowdWidth(s.army);
-  const p = packSpan(s, i);
+  const p = packSpan(s);
   const overlap =
     Math.min(s.x + w / 2, p.right) - Math.max(s.x - w / 2, p.left) > 0;
   const heads = s.heads[i] ?? 0;
