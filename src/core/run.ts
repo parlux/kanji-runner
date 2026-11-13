@@ -211,35 +211,3 @@ export function missedItems(
   });
   return out;
 }
-
-/** The other half of a kanji, shown after a right answer: its main readings (on'yomi, then kun'yomi) or its meaning. */
-export type Reveal = {
-  char: string;
-  readings: { text: string; kind: "on" | "kun" }[];
-  meaning: string;
-};
-
-/**
- * What to show after a right answer: a meaning gate reveals the main
- * readings, a reading gate the meaning. Nothing for wrong answers, kana and
- * word gates, or a kanji missing from `kanji`.
- */
-export function revealFor(
-  row: GateRow,
-  kanji: readonly KanjiItem[],
-  correct: boolean,
-): Reveal | null {
-  if (!correct || (row.type !== "meaning" && row.type !== "reading"))
-    return null;
-  const k = kanji.find((x) => x.char === row.prompt);
-  if (!k) return null;
-  const meaning = k.glosses[0] ?? "";
-  if (row.type === "reading")
-    return meaning ? { char: k.char, readings: [], meaning } : null;
-  const readings = mainReadings(k).map((r) => ({
-    text: showReading(r),
-    kind: (k.on && r.base === k.on && !r.okurigana ? "on" : "kun") as
-      "on" | "kun",
-  }));
-  return readings.length ? { char: k.char, readings, meaning: "" } : null;
-}

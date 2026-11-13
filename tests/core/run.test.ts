@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildRun, missedItems, revealFor } from "../../src/core/run";
+import { buildRun, missedItems } from "../../src/core/run";
 import { showReading } from "../../src/core/distractors";
 import { KANJI } from "../../src/core/kanji";
 import { KANA } from "../../src/core/kana";
@@ -134,52 +134,5 @@ describe("missedItems", () => {
 
   it("is empty for a clean run and ignores unanswered rows", () => {
     expect(missedItems(rows, [true, true], [], kanji)).toEqual([]);
-  });
-});
-
-describe("revealFor", () => {
-  const k = KANJI.find((x) => x.on && x.kun) as KanjiItem;
-  const gate = (type: GateRow["type"], prompt: string): GateRow => ({
-    type,
-    prompt,
-    options: ["a", "b"],
-    answerIndex: 0,
-    answer: "a",
-  });
-
-  it("a meaning gate reveals the main readings in order with their kinds", () => {
-    const r = revealFor(gate("meaning", k.char), KANJI, true);
-    expect(r?.char).toBe(k.char);
-    expect(r?.meaning).toBe("");
-    expect(r?.readings.map((x) => x.kind)).toEqual(["on", "kun"]);
-    expect(r?.readings.map((x) => x.text)).toEqual([
-      k.on,
-      showReading(k.kun as NonNullable<KanjiItem["kun"]>),
-    ]);
-  });
-
-  it("keeps okurigana in the kun'yomi text", () => {
-    const o = KANJI.find((x) => x.kun?.okurigana) as KanjiItem;
-    const r = revealFor(gate("meaning", o.char), KANJI, true);
-    expect(r?.readings.at(-1)).toEqual({
-      text: showReading(o.kun as NonNullable<KanjiItem["kun"]>),
-      kind: "kun",
-    });
-  });
-
-  it("a reading gate reveals the meaning", () => {
-    expect(revealFor(gate("reading", k.char), KANJI, true)).toEqual({
-      char: k.char,
-      readings: [],
-      meaning: k.glosses[0],
-    });
-  });
-
-  it("shows nothing for wrong answers, kana, words or unknown kanji", () => {
-    expect(revealFor(gate("meaning", k.char), KANJI, false)).toBeNull();
-    expect(revealFor(gate("reading", k.char), KANJI, false)).toBeNull();
-    expect(revealFor(gate("kana", "あ"), KANJI, true)).toBeNull();
-    expect(revealFor(gate("word", k.char), KANJI, true)).toBeNull();
-    expect(revealFor(gate("meaning", "𠮟"), [], true)).toBeNull();
   });
 });
