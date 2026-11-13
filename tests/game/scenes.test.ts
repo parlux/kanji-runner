@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { KANA } from "../../src/core/kana";
 import { KANJI } from "../../src/core/kanji";
 import { levelKeys } from "../../src/core/progression";
+import { crowdWidth } from "../../src/core/crowd";
 import { bossSize } from "../../src/core/boss";
 import { builtInPool, wanikaniPool } from "../../src/core/pool";
 import { buildPoolRun, missedItems } from "../../src/core/run";
@@ -313,6 +314,52 @@ describe("boss", () => {
   it("ignores input during the clash", () => {
     const boss: Scene = { kind: "boss", seed: 7, run: run.run, boss: 3, t: 0 };
     expect(handleAction(boss, "confirm", () => 1, session).scene).toBe(boss);
+  });
+
+  it("steers during the clash as in the run, clamped, without changing the result", () => {
+    const fin = { ...run.run, status: "finished" as const };
+    const boss: Scene = { kind: "boss", seed: 7, run: fin, boss: 3, t: 0 };
+    const live: Scene = { ...run, run: { ...fin, status: "running" } };
+    let a: Scene = boss;
+    let b: Scene = live;
+    for (let i = 0; i < 20; i++) {
+      a = updateScene(a, STEP, -1);
+      b = updateScene(b, STEP, -1);
+    }
+    if (a.kind !== "boss" || b.kind !== "run") throw new Error("kind");
+    expect(a.run.x).toBeLessThan(fin.x);
+    expect(a.run.x).toBeCloseTo(b.run.x, 9);
+    expect(a.run.dist).toBe(fin.dist);
+    // far left: stops at the track edge, a crowd's half width in
+    if (a.kind !== "boss") throw new Error("kind");
+    let edge = a.run;
+    for (let i = 0; i < 100; i++) {
+      const n = updateScene({ ...a, t: 0 }, STEP, -1, -1);
+      if (n.kind !== "boss") throw new Error("kind");
+      a = n;
+      edge = n.run;
+    }
+    const w = crowdWidth(fin.army);
+    expect(edge.x).toBeCloseTo(w / 2, 6);
+    // same timings and result as unsteered
+    const count = (sc: Scene, steer: number): [number, Scene] => {
+      let n = 0;
+      while (sc.kind === "boss") {
+        sc = updateScene(sc, STEP, steer);
+        n++;
+      }
+      return [n, sc];
+    };
+    const [n0, e0] = count(boss, 0);
+    const [n1, e1] = count(boss, 1);
+    expect(n1).toBe(n0);
+    if (e0.kind !== "end" || e1.kind !== "end") throw new Error("end");
+    expect(e1.boss).toEqual(e0.boss);
+  });
+
+  it("ignores taps during the clash", () => {
+    const boss: Scene = { kind: "boss", seed: 7, run: run.run, boss: 3, t: 0 };
+    expect(handleAction(boss, "pause", () => 1, session).scene).toBe(boss);
   });
 
   const reached = (

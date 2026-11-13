@@ -241,7 +241,7 @@ export function updateScene(
   dragDx = 0,
   pace = 1,
 ): Scene {
-  if (scene.kind === "boss") return stepBoss(scene, dt);
+  if (scene.kind === "boss") return stepBoss(scene, dt, steer, dragDx);
   if (scene.kind !== "run" || scene.paused) return scene;
   const dx = steer * STEER_MAX_SPEED * dt + dragDx;
   let run = dx ? nudgeTarget(scene.run, dx) : scene.run;
@@ -259,12 +259,29 @@ export function updateScene(
   return { ...scene, run };
 }
 
+/**
+ * Steering after the run is finished, look-only: the run's own target nudge and
+ * easing (sim's, so same speed and clamp), run for a step that doesn't scroll.
+ * Only `targetX` and `x` are taken from it.
+ */
+function steerOnly(run: RunState, dt: number, dx: number): RunState {
+  const live = { ...run, status: "running" as const };
+  const { x, targetX } = stepRun(dx ? nudgeTarget(live, dx) : live, dt, 0);
+  return x === run.x && targetX === run.targetX ? run : { ...run, x, targetX };
+}
+
 /** The sides close in, the clash plays out, the result holds, then the end screen. */
-function stepBoss(scene: Extract<Scene, { kind: "boss" }>, dt: number): Scene {
+function stepBoss(
+  scene: Extract<Scene, { kind: "boss" }>,
+  dt: number,
+  steer: number,
+  dragDx: number,
+): Scene {
   const t = scene.t + dt;
+  const run = steerOnly(scene.run, dt, steer * STEER_MAX_SPEED * dt + dragDx);
   if (t < CLASH_APPROACH_SECONDS + CLASH_SECONDS + CLASH_HOLD_SECONDS)
-    return { ...scene, t };
-  const { seed, run, boss } = scene;
+    return { ...scene, run, t };
+  const { seed, boss } = scene;
   return {
     kind: "end",
     seed,
