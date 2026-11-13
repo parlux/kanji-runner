@@ -1,6 +1,6 @@
 # Tasks: kanji meaning mode (v1.7)
 
-Spec: `docs/specs/SPEC-meaning-mode.md` (2026-11-13). Intent: `docs/intent/kanji-meaning-mode.md`. Idea: `docs/ideas/kanji-meaning-mode.md`. Queued: starts when the owner says so (after v1.6 reveal).
+Spec: `docs/specs/SPEC-meaning-mode.md` (2026-11-13). Intent: `docs/intent/kanji-meaning-mode.md`. Idea: `docs/ideas/kanji-meaning-mode.md`. Started 2026-11-13.
 Every task: `npm test && npm run lint && npm run build` pass before it is checked off.
 
 ## Phase 13: Meaning mode
