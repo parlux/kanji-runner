@@ -1,6 +1,6 @@
 # Spec: 3D run (v1.4)
 
-Extends `docs/specs/SPEC.md` (v1) through `docs/specs/SPEC-session.md` (v1.3). Everything there still holds unless this spec says otherwise. It overrides v1's "3D art" out-of-scope line. Intent: `docs/intent/3d-run.md`. Idea: `docs/ideas/3d-run.md`. Extended by `docs/specs/SPEC-3d-depth.md` (v1.4.1: two horizons, haze, lower camera).
+Extends `docs/specs/SPEC.md` (v1) through `docs/specs/SPEC-session.md` (v1.3). Everything there still holds unless this spec says otherwise. It overrides v1's "3D art" out-of-scope line. Intent: `docs/intent/3d-run.md`. Idea: `docs/ideas/done/3d-run.md`. Extended by `docs/specs/SPEC-3d-depth.md` (v1.4.1: two horizons, haze, lower camera).
 
 ## Objective
 Draw the run and the boss clash as one continuous 3D scene in the crowd-runner style: a low camera behind a crowd of low-poly figures running down a bright track. Gameplay does not change.

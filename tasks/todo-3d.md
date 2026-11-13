@@ -1,6 +1,6 @@
 # Tasks: 3D run (v1.4)
 
-Spec: `docs/specs/SPEC-3d.md` (2026-11-12). Intent: `docs/intent/3d-run.md`. Idea: `docs/ideas/3d-run.md`. Starts after v1.3 (runs alongside the owner's Checkpoint G playtest).
+Spec: `docs/specs/SPEC-3d.md` (2026-11-12). Intent: `docs/intent/3d-run.md`. Idea: `docs/ideas/done/3d-run.md`. Starts after v1.3 (runs alongside the owner's Checkpoint G playtest).
 Every task: `npm test && npm run lint && npm run build` pass before it is checked off. Test fixtures are synthetic: never commit real WaniKani content.
 
 ## Plan
@@ -230,7 +230,7 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 - [x] Smooth on the phone with a full crowd.
 - [x] Labels: readable enough, or the owner says what to tune.
   - Owner, 2026-11-13: very readable with the camera changes; camera still being finalised (`docs/ideas/3d-camera-follow.md`).
-- [ ] The army can steer during the boss fight (T5b).
+- [x] The army can steer during the boss fight (T5b).
 
 ## Phase 11: camera tuning (independent of T4; worktree `camera`)
 Intent: `docs/intent/3d-camera-follow.md`. Spec: SPEC-3d-depth amendment v1.4.3, "Camera tuning". Idea: `docs/ideas/3d-camera-follow.md`. Runs alongside T4; both touch `view.ts`/`scene3d.ts`, so merge main before starting and before the checkpoint.
