@@ -17,8 +17,6 @@ import {
   CLASH_APPROACH_SECONDS,
   CLASH_HOLD_SECONDS,
   CLASH_SECONDS,
-  PACK_MAX,
-  HORDE_SCALE,
   SAW_W,
   VIEW_DISTANCE,
 } from "../../core/tuning";
@@ -622,121 +620,52 @@ export function burstPiece(
 export const recruitProgress = (k: number, n: number, t: number): number =>
   Math.min(1, Math.max(0, (t * 1.6 - k / (n * 2)) / 0.8));
 
-/** Pack figures are drawn this size of a soldier (the default; a run carries its own in `horde.hordeScale`). */
-export { HORDE_SCALE };
-/** A pack's figures stand this many times deeper (along the track) than wide: deeper than an army. */
-export const HORDE_DEPTH = 3;
-
-/**
- * The horde's figure pattern, made once: a loosely jittered hex grid in unit
- * spacing, ordered from the centre out by elliptic radius (HORDE_DEPTH deep),
- * so the first n points always fill an ellipse and the rim falls first.
- * `HORDE_REACH[k]` is the widest |x| among the first k + 1 points.
- */
-const HORDE_PATTERN = new Float32Array(2 * PACK_MAX);
-const HORDE_REACH = new Float32Array(PACK_MAX);
-{
-  const rowH = Math.sqrt(3) / 2;
-  const span = Math.ceil(Math.sqrt(PACK_MAX)) + 2;
-  const pts: [number, number, number][] = [];
-  for (let j = -span * 2; j <= span * 2; j++)
-    for (let i = -span; i <= span; i++) {
-      const h = Math.sin(i * 12.9898 + j * 78.233) * 43758.5453;
-      const u = h - Math.floor(h);
-      const x = i + (j & 1) / 2 + (u - 0.5) * 0.3;
-      const z = j * rowH + (((u * 7.31) % 1) - 0.5) * 0.3;
-      pts.push([x, z, x * x + (z / HORDE_DEPTH) ** 2]);
-    }
-  pts.sort((a, b) => a[2] - b[2] || a[1] - b[1] || a[0] - b[0]);
-  let reach = 0;
-  for (let k = 0; k < PACK_MAX; k++) {
-    const [x, z] = pts[k] ?? [0, 0];
-    HORDE_PATTERN[2 * k] = x;
-    HORDE_PATTERN[2 * k + 1] = z;
-    reach = Math.max(reach, Math.abs(x));
-    HORDE_REACH[k] = reach;
-  }
-}
-
-/**
- * Each of a pack's `heads` figures' offset from its centre, written as (x, z)
- * pairs into `out` (capped at its length and PACK_MAX); returns the count.
- * The first `heads` points of the horde pattern, scaled so the widest figure
- * (HORDE_SCALE in size) is inside `width` (track units): the same pack is as
- * dense as it gets smaller, and higher indices sit at the rim.
- */
-export function hordeLayout(
-  heads: number,
-  width: number,
-  out: Float32Array,
-): number {
-  const n = Math.max(0, Math.min(Math.floor(heads), out.length >> 1, PACK_MAX));
-  if (n === 0) return 0;
-  const r = Math.max(0, (width * TRACK_W) / 2 - FIGURE_RADIUS * HORDE_SCALE);
-  const reach = HORDE_REACH[n - 1] as number;
-  // one figure, or one column: as far apart as the width allows a row
-  const s = r / Math.max(reach, 0.5);
-  for (let k = 0; k < 2 * n; k++) out[k] = (HORDE_PATTERN[k] as number) * s;
-  return n;
-}
-
-/**
- * Scale (0..1) of figure k in a pack with `left` enemies' worth of hit points
- * left: whole figures stand, the last one shrinks as it takes damage, the
- * rest are gone.
- */
-export function packFigureScale(k: number, left: number): number {
-  if (k + 1 <= left) return 1;
-  if (k >= left) return 0;
-  return 0.4 + 0.6 * (left - k);
-}
-
 /** Most figures drawn per pack (the count slider's top): the horde mesh is sized for this once. */
 export const HORDE_CAP = 20_000;
-/**
- * A whole pack's centre-to-centre gap between figures, in soldier sizes
- * (times the figure size): its depth grows with the count to keep it, up to
- * HORDE_DEPTH_MAX, after which a bigger horde just gets denser.
- */
+/** Centre-to-centre gap between a pack's figures, in soldier sizes (times the figure size). */
 export const HORDE_GAP = 0.36;
-/** A whole pack is at least this share of its width deep... */
-export const HORDE_DEPTH_MIN = 0.4;
-/** ...and at most this deep (world units): well short of the gap between gate rows. */
-export const HORDE_DEPTH_MAX = 1.2 * TRACK_W;
-/** How far each figure sits off its spiral point, in spiral spacings (each way). */
+/** A charging pack's column: this long (world units) at the army's width, several rows... */
+export const HORDE_COLUMN = 3;
+/** ...then a funnel this long (world units) widening to the pack's span, then the span's width on back. */
+export const HORDE_FUNNEL = 8;
+/** How far each figure strays from its lattice place, in gaps (each way). */
 export const HORDE_JITTER = 0.3;
 
-/** A whole pack's depth (world units) for `heads` figures `width` world units wide, figure size `scale`. */
-export function hordeDepth(
-  heads: number,
-  width: number,
-  scale: number,
-): number {
-  const gap = HORDE_GAP * scale;
-  const d = (4 * heads * gap * gap) / (Math.PI * Math.max(width, 1e-3));
-  return Math.min(HORDE_DEPTH_MAX, Math.max(HORDE_DEPTH_MIN * width, d));
+/**
+ * A pack's shape (world units): a column `cw` wide centred on `cx` at the
+ * front, a funnel widening to `pw` wide centred on `px`, then that width on
+ * back; `area` per figure. A milling pack has the column as wide as the rest.
+ */
+export type HordeShape = {
+  cx: number;
+  cw: number;
+  px: number;
+  pw: number;
+  area: number;
+};
+
+/** Distance back from a pack's front (world units) where the area from the front reaches `a`. */
+export function hordeDepthAt(a: number, sh: HordeShape): number {
+  const { cw, pw } = sh;
+  const column = cw * HORDE_COLUMN;
+  if (a <= column) return a / Math.max(cw, 1e-6);
+  const b = a - column;
+  const funnel = ((cw + pw) / 2) * HORDE_FUNNEL;
+  if (b <= funnel) {
+    const slope = (pw - cw) / HORDE_FUNNEL;
+    // the root of slope / 2 × t² + cw × t = b, stable when the slope is 0
+    return (
+      HORDE_COLUMN +
+      (2 * b) /
+        Math.max(1e-6, cw + Math.sqrt(Math.max(0, cw * cw + 2 * slope * b)))
+    );
+  }
+  return HORDE_COLUMN + HORDE_FUNNEL + (b - funnel) / Math.max(pw, 1e-6);
 }
 
-/**
- * The spiral's scale (world units per spiral unit) across and along the
- * track for a pack's `n` figures left of `heads`: they fill its span now
- * (`span` track units wide, the widest figure inside it) and a depth that
- * shrinks with √(n / heads) from the whole pack's (`full` track units wide).
- */
-export function hordeScales(
-  n: number,
-  heads: number,
-  span: number,
-  full: number,
-  scale: number,
-): { sx: number; sz: number } {
-  if (n <= 0 || heads <= 0) return { sx: 0, sz: 0 };
-  const halfW = Math.max(0, (span * TRACK_W) / 2 - FIGURE_RADIUS * scale);
-  const halfD =
-    (hordeDepth(heads, full * TRACK_W, scale) / 2) * Math.sqrt(n / heads);
-  const reach = Math.sqrt(n) + HORDE_JITTER;
-  return { sx: halfW / reach, sz: halfD / reach };
-}
+/** How far (0 column .. 1 the span) a pack has widened at `z` back from its front. */
+export const hordeFlare = (z: number): number =>
+  Math.min(1, Math.max(0, (z - HORDE_COLUMN) / HORDE_FUNNEL));
 
 /** An integer hash (PCG) to 0..1; the horde shader has the same. */
 export function hordeHash(v: number): number {
@@ -746,18 +675,35 @@ export function hordeHash(v: number): number {
 }
 
 /**
- * Figure k's offset (spiral units) from its pack's centre: a sunflower
- * spiral, so the first n points evenly fill a disc of radius √n whatever n
- * is (the rim falls first), jittered a little. Times the pack's scales it is
- * the figure's place; the horde shader computes the same from its index.
+ * Figure k's place in a pack of `n` alive, figure size `scale`: world X in
+ * `out.x`, distance back from the front (world units) in `out.z`. Figures
+ * fill the shape front to back by area, highest index at the front (it dies
+ * first, and the rest step up), each across its row at a golden-ratio
+ * fraction (an even lattice), jittered a little. The horde shader does the
+ * same from its index.
  */
-export function hordeOffset(k: number): { x: number; z: number } {
-  const r = Math.sqrt(k + 0.5);
-  const a = 2 * Math.PI * ((k * 0.381966011) % 1);
-  return {
-    x: r * Math.cos(a) + HORDE_JITTER * (2 * hordeHash(2 * k) - 1),
-    z: r * Math.sin(a) + HORDE_JITTER * (2 * hordeHash(2 * k + 1) - 1),
-  };
+export function hordePlace(
+  k: number,
+  n: number,
+  sh: HordeShape,
+  scale: number,
+  out: { x: number; z: number } = { x: 0, z: 0 },
+): { x: number; z: number } {
+  const gap = HORDE_GAP * scale;
+  const z = hordeDepthAt((n - 0.5 - k) * sh.area, sh);
+  const f = hordeFlare(z);
+  const w = sh.cw + (sh.pw - sh.cw) * f;
+  const across =
+    ((k * 0.6180339887) % 1) -
+    0.5 +
+    (HORDE_JITTER * gap * (2 * hordeHash(2 * k) - 1)) / Math.max(w, gap);
+  const u = Math.min(0.5, Math.max(-0.5, across));
+  out.x =
+    sh.cx +
+    (sh.px - sh.cx) * f +
+    u * Math.max(0, w - 2 * FIGURE_RADIUS * scale);
+  out.z = Math.max(0, z + HORDE_JITTER * gap * (2 * hordeHash(2 * k + 1) - 1));
+  return out;
 }
 
 /**

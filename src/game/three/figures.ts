@@ -90,6 +90,45 @@ export function makeCrowdMesh(kind: FigureKind, max: number): InstancedMesh {
   return mesh;
 }
 
+/** Hip height of a horde figure (figure units): its legs swing about it. */
+export const HORDE_HIP = 0.2;
+
+/**
+ * A horde enemy (figure units, standing on y = 0): the enemy figure on two
+ * short legs, about as tall, with a per-vertex `leg` attribute (−1 left,
+ * 1 right, 0 body and head) for the shader's stride. 72 triangles.
+ */
+export function makeHordeGeometry(): BufferGeometry {
+  const { body, head } = COLOURS.enemy;
+  const len = 0.16;
+  const torso = new CapsuleGeometry(BODY_R, len, 1, 6).toNonIndexed();
+  torso.translate(0, HORDE_HIP - 0.04 + len / 2 + BODY_R, 0);
+  const top = HORDE_HIP - 0.04 + len + 2 * BODY_R;
+  const face = new IcosahedronGeometry(HEAD_R, 0);
+  face.translate(0, top + HEAD_R * 0.8, 0);
+  const legs = [-1, 1].map((side) => {
+    const g = new CylinderGeometry(0.035, 0.03, HORDE_HIP + 0.04, 4, 1, true);
+    g.translate(side * 0.055, (HORDE_HIP + 0.04) / 2, 0);
+    return g.toNonIndexed();
+  });
+  const sides = [0, 0, -1, 1];
+  const counts = [torso, face, ...legs].map(
+    (g) => g.getAttribute("position").count,
+  );
+  const merged = merge([
+    [torso, body],
+    [face, head],
+    [legs[0] as BufferGeometry, body],
+    [legs[1] as BufferGeometry, body],
+  ]);
+  const leg: number[] = [];
+  counts.forEach((n, p) => {
+    for (let i = 0; i < n; i++) leg.push(sides[p] as number);
+  });
+  merged.setAttribute("leg", new Float32BufferAttribute(leg, 1));
+  return merged;
+}
+
 /** The boss's gun metal and its muzzle's glow. */
 const GUN = { metal: 0x3b3f4a, muzzle: 0xffb03a } as const;
 /** The muzzle of the boss's arm cannon, in figure units (it points at +Z, toward the army). */

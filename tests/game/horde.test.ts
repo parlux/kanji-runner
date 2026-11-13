@@ -1,68 +1,229 @@
+import { Scene, type InstancedBufferAttribute, type Vector4 } from "three";
 import { describe, expect, it } from "vitest";
+import { crowdWidth } from "../../src/core/crowd";
+import { createRunState, type RunState } from "../../src/core/sim";
+import type { Track } from "../../src/core/track";
 import { HORDE_SCALE } from "../../src/core/tuning";
+import { createHorde, DIE_DIST, MILL_FORM } from "../../src/game/three/horde";
 import {
   FIGURE_RADIUS,
   HORDE_CAP,
-  HORDE_DEPTH_MAX,
-  hordeDepth,
-  hordeOffset,
-  hordeScales,
+  HORDE_COLUMN,
+  HORDE_GAP,
+  hordePlace,
+  type HordeShape,
   TRACK_W,
 } from "../../src/game/three/world";
 
-describe("horde layout", () => {
-  const scale = HORDE_SCALE;
+const scale = HORDE_SCALE;
+const area = (HORDE_GAP * scale) ** 2;
+/** A charging pack: a column at a 200 army's width on the left, funnelling to `pw` wide in the middle. */
+const shape = (pw: number): HordeShape => ({
+  cx: -2,
+  cw: crowdWidth(200) * TRACK_W,
+  px: 0,
+  pw,
+  area,
+});
 
-  it("keeps 200, 2,000 and 20,000 figures inside the span and the depth, whole or shot down", () => {
+describe("horde layout", () => {
+  it("keeps 200, 2,000 and 20,000 figures inside the funnel and on the track, whole or shot down", () => {
+    const o = { x: 0, z: 0 };
     for (const heads of [200, 2_000, 20_000])
-      for (const share of [1, 0.5, 0.05, 1 / heads])
-        for (const span of [1, 0.4, 0.08]) {
+      for (const share of [1, 0.5, 0.05])
+        for (const pw of [TRACK_W, 4, 1]) {
+          const sh = shape(pw);
           const n = Math.max(1, Math.round(heads * share));
-          const { sx, sz } = hordeScales(n, heads, span, 1, scale);
-          const half = (span * TRACK_W) / 2;
-          const deep = hordeDepth(heads, TRACK_W, scale) / 2;
-          let wide = 0;
-          let far = 0;
+          const lo = Math.min(sh.cx - sh.cw / 2, sh.px - sh.pw / 2);
+          const hi = Math.max(sh.cx + sh.cw / 2, sh.px + sh.pw / 2);
+          let left = Infinity;
+          let right = -Infinity;
+          let back = 0;
+          let front = Infinity;
           for (let k = 0; k < n; k++) {
-            const o = hordeOffset(k);
-            wide = Math.max(wide, Math.abs(o.x * sx));
-            far = Math.max(far, Math.abs(o.z * sz));
+            hordePlace(k, n, sh, scale, o);
+            left = Math.min(left, o.x);
+            right = Math.max(right, o.x);
+            back = Math.max(back, o.z);
+            front = Math.min(front, o.z);
           }
-          expect(wide + FIGURE_RADIUS * scale).toBeLessThan(half + 1e-6);
-          expect(far).toBeLessThanOrEqual(deep + 1e-6);
+          expect(front).toBeGreaterThanOrEqual(0);
+          const r = FIGURE_RADIUS * scale;
+          expect(left - r).toBeGreaterThanOrEqual(lo - 1e-6);
+          expect(right + r).toBeLessThanOrEqual(hi + 1e-6);
+          expect(Number.isFinite(back)).toBe(true);
         }
   });
 
-  it("is deep but well short of a gate row, and denser as the count grows", () => {
-    const d200 = hordeDepth(200, TRACK_W, scale);
-    const d2k = hordeDepth(2_000, TRACK_W, scale);
-    const d20k = hordeDepth(20_000, TRACK_W, scale);
-    expect(d200).toBeGreaterThanOrEqual(0.4 * TRACK_W);
-    expect(d2k).toBeGreaterThan(d200);
-    expect(d20k).toBe(HORDE_DEPTH_MAX);
-    expect(HORDE_DEPTH_MAX).toBeLessThanOrEqual(1.2 * TRACK_W);
-    expect(2_000 / d2k).toBeGreaterThan(200 / d200);
-    expect(20_000 / d20k).toBeGreaterThan(2_000 / d2k);
+  it("is a column at the army's width at the front, as wide as the span at the back", () => {
+    const sh = shape(TRACK_W);
+    const o = { x: 0, z: 0 };
+    const n = 2_000;
+    for (let k = n - 1; k >= 0; k--) {
+      hordePlace(k, n, sh, scale, o);
+      if (o.z < HORDE_COLUMN * 0.8)
+        expect(Math.abs(o.x - sh.cx)).toBeLessThanOrEqual(sh.cw / 2);
+    }
+    // the back rows reach across the whole track
+    let wide = 0;
+    for (let k = 0; k < 100; k++)
+      wide = Math.max(wide, Math.abs(hordePlace(k, n, sh, scale, o).x));
+    expect(wide).toBeGreaterThan(0.4 * TRACK_W);
   });
 
-  it("does not stack a 200 pack's figures", () => {
-    const { sx, sz } = hordeScales(200, 200, 1, 1, scale);
-    let closest = Infinity;
-    for (let a = 0; a < 200; a++)
-      for (let b = a + 1; b < 200; b++) {
-        const p = hordeOffset(a);
-        const q = hordeOffset(b);
-        closest = Math.min(
-          closest,
-          Math.hypot((p.x - q.x) * sx, (p.z - q.z) * sz),
-        );
-      }
-    expect(closest).toBeGreaterThan(FIGURE_RADIUS * scale);
+  it("runs further back the bigger it is: into the haze at 20,000", () => {
+    const sh = shape(TRACK_W);
+    const length = (n: number) => hordePlace(0, n, sh, scale).z;
+    expect(length(2_000)).toBeGreaterThan(length(200));
+    expect(length(20_000)).toBeGreaterThan(5 * length(2_000));
+    expect(length(20_000)).toBeGreaterThan(100);
   });
 
-  it("is finite up to the cap, and empty for no figures", () => {
-    const o = hordeOffset(HORDE_CAP - 1);
-    expect(Number.isFinite(o.x) && Number.isFinite(o.z)).toBe(true);
-    expect(hordeScales(0, 200, 1, 1, scale)).toEqual({ sx: 0, sz: 0 });
+  it("puts the figures that die first (the highest) at the front", () => {
+    const sh = shape(TRACK_W);
+    const n = 2_000;
+    const front = hordePlace(n - 1, n, sh, scale).z;
+    expect(front).toBeLessThan(HORDE_GAP);
+    expect(hordePlace(n - 50, n, sh, scale).z).toBeLessThan(
+      hordePlace(n - 1000, n, sh, scale).z,
+    );
+    // when the front falls the rest step up
+    expect(hordePlace(0, n - 100, sh, scale).z).toBeLessThan(
+      hordePlace(0, n, sh, scale).z,
+    );
+  });
+});
+
+const rows = [
+  {
+    type: "reading" as const,
+    prompt: "山",
+    options: ["やま", "かわ"],
+    answerIndex: 0,
+    answer: "やま",
+  },
+];
+
+/** A run with packs of `heads` (40 HP each) at these distances ahead, `damage` dealt to each. */
+function horde(at: number[], damage: number, heads = 200): RunState {
+  const track: Track = {
+    questions: [9],
+    hazards: at.map((pos) => ({ kind: "pack" as const, pos, x: 0.5 })),
+    charges: [],
+  };
+  const run = createRunState(rows, track);
+  run.army = 200;
+  run.hp = at.map(() => 40);
+  run.heads = at.map(() => heads);
+  run.damage = at.map(() => damage);
+  return run;
+}
+
+function setup() {
+  const h = createHorde(new Scene());
+  const slot = (k: number) => {
+    const mesh = h.meshes[k];
+    if (!mesh) throw new Error("no slot");
+    const u = mesh.userData.uniforms as Record<string, Vector4>;
+    return {
+      count: mesh.visible ? mesh.geometry.instanceCount : 0,
+      death: mesh.geometry.getAttribute("death") as InstancedBufferAttribute,
+      front: u.front as Vector4,
+      back: u.back as Vector4,
+      state: u.state as Vector4,
+    };
+  };
+  return { h, slot };
+}
+
+describe("drawing the horde", () => {
+  it("draws every live enemy of a pack, and two packs at once", () => {
+    const { h, slot } = setup();
+    h.update(horde([2, 3], 0), 0);
+    expect(slot(0).count).toBe(200);
+    expect(slot(1).count).toBe(200);
+    // a third pack waits for a slot
+    h.update(horde([2, 3, 4], 0), 0);
+    expect(slot(0).count + slot(1).count).toBe(400);
+  });
+
+  it("sizes its buffers once, at the cap, and keeps them across frames and runs", () => {
+    const { h, slot } = setup();
+    const before = slot(0).death.array;
+    expect(before.length).toBe(3 * HORDE_CAP);
+    h.update(horde([2], 0, 20_000), 0);
+    h.update({ ...horde([2], 30, 20_000), dist: 0.01 }, 0.1);
+    h.update(horde([2], 0), 0);
+    expect(slot(0).death.array).toBe(before);
+    expect(slot(0).count).toBe(200);
+  });
+
+  it("writes only the killed figures' deaths: nothing on a frame without kills", () => {
+    const { h, slot } = setup();
+    const a = horde([2], 0, 20_000);
+    h.update(a, 0);
+    const { death } = slot(0);
+    death.clearUpdateRanges();
+    // a frame later, nothing killed: only uniforms change
+    h.update({ ...a, dist: 0.01 }, 0.02);
+    expect(death.updateRanges).toHaveLength(0);
+    // 20,000 heads on 40 HP: 0.1 damage kills 50
+    h.update({ ...a, dist: 0.02, damage: [0.1] }, 0.04);
+    expect(death.updateRanges).toEqual([{ start: 3 * 19_950, count: 3 * 50 }]);
+    expect(slot(0).state.x).toBe(19_950);
+    expect(Array.from(death.array).some(Number.isNaN)).toBe(false);
+  });
+
+  it("lets killed figures fall for a moment, then stops drawing them", () => {
+    const { h, slot } = setup();
+    const a = horde([2], 0);
+    h.update(a, 0);
+    // 10 of 200 killed (0.2 HP each)
+    h.update({ ...a, damage: [2], dist: 0.01 }, 0.02);
+    expect(slot(0).count).toBe(200);
+    expect(slot(0).state.x).toBe(190);
+    h.update({ ...a, damage: [2], dist: 0.01 + DIE_DIST }, 0.5);
+    expect(slot(0).count).toBe(190);
+  });
+
+  it("forms a column at the army's width when charging, and mills about when waiting", () => {
+    const { h, slot } = setup();
+    const a = horde([3], 0);
+    const pw = TRACK_W;
+    const armyW = crowdWidth(200) * TRACK_W;
+    // waiting: the pack stays put
+    for (let t = 0; t <= 2; t += 0.1) h.update(a, t);
+    expect(slot(0).back.z).toBeLessThanOrEqual(MILL_FORM + 1e-9);
+    expect(slot(0).front.z).toBeGreaterThan(armyW);
+    // charging: it moves at the army
+    let pos = 3;
+    for (let t = 2; t <= 4; t += 0.1) {
+      pos -= 0.01;
+      const r = horde([pos], 0);
+      h.update({ ...r, track: a.track }, t);
+    }
+    expect(slot(0).back.z).toBeGreaterThan(0.95);
+    expect(slot(0).front.z).toBeCloseTo(armyW, 0);
+    expect(slot(0).front.w).toBeCloseTo(pw, 6);
+  });
+
+  it("stands still while paused (the clock and distance stop)", () => {
+    const { h, slot } = setup();
+    const a = horde([3], 0);
+    h.update(a, 1);
+    const form = slot(0).back.z;
+    h.update({ ...a, packs: [{ pos: 2.9, x: 0.5 }] as RunState["packs"] }, 1);
+    expect(slot(0).back.z).toBe(form);
+  });
+
+  it("starts empty on a new run", () => {
+    const { h, slot } = setup();
+    const a = horde([2], 0);
+    h.update(a, 0);
+    h.update({ ...a, damage: [2], dist: 0.01 }, 0.02);
+    const b = horde([2], 0, 50);
+    h.update(b, 0);
+    expect(slot(0).count).toBe(50);
+    expect(slot(1).count).toBe(0);
   });
 });
