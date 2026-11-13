@@ -624,50 +624,50 @@ export const recruitProgress = (k: number, n: number, t: number): number =>
 
 /** Most figures drawn per pack (the count slider's top): the horde mesh is sized for this once. */
 export const HORDE_CAP = 20_000;
-/** Centre-to-centre gap between a pack's figures, in soldier sizes (times the figure size). */
-export const HORDE_GAP = 0.36;
-/** A charging pack's column: this long (world units) at the army's width, several rows... */
-export const HORDE_COLUMN = 3;
-/** ...then a funnel this long (world units) widening to the pack's span, then the span's width on back. */
-export const HORDE_FUNNEL = 8;
-/** How far each figure strays from its lattice place, in gaps (each way). */
-export const HORDE_JITTER = 0.3;
+/** How far each crowd figure stands off its lattice place, in crowd gaps (each way). */
+export const HORDE_JITTER = 0.15;
+/** How far a waiting figure wanders from its place, in crowd gaps (each way, at most twice this). */
+export const HORDE_WANDER = 0.2;
+/** A figure that leaves the crowd swings into its lane of the stream over this much running (world units)... */
+export const STREAM_TURN = 6;
+/** ...and, within this far of the army (world units), runs on into its front rows (the core meets it at its centre). */
+export const STREAM_CRASH = 25;
 
 /**
- * A pack's shape (world units): a column `cw` wide centred on `cx` at the
- * front, a funnel widening to `pw` wide centred on `px`, then that width on
- * back; `area` per figure. A milling pack has the column as wide as the rest.
+ * One pack's drawing state (world units, the army at Z = 0; the uniforms the
+ * horde shader gets): the stream's lane (`laneX`, `laneW`: the army's width,
+ * on the army), the core's stream head at `headZ`; the crowd, its mouth's
+ * left edge at `left`, `cols` across `gx` apart and rows `gz` apart from its
+ * front, `run` back of the head (how far the head has run from it);
+ * figures `size`, `n` alive of `n0`, the column's `step` per figure, `off`
+ * the army's half depth, `clock` for the wander. `stride` walks a row's
+ * columns in a scattered order.
  */
-export type HordeShape = {
-  cx: number;
-  cw: number;
-  px: number;
-  pw: number;
-  area: number;
+export type HordeLayout = {
+  laneX: number;
+  laneW: number;
+  headZ: number;
+  left: number;
+  gx: number;
+  gz: number;
+  run: number;
+  size: number;
+  n: number;
+  n0: number;
+  cols: number;
+  stride: number;
+  step: number;
+  off: number;
+  clock: number;
 };
 
-/** Distance back from a pack's front (world units) where the area from the front reaches `a`. */
-export function hordeDepthAt(a: number, sh: HordeShape): number {
-  const { cw, pw } = sh;
-  const column = cw * HORDE_COLUMN;
-  if (a <= column) return a / Math.max(cw, 1e-6);
-  const b = a - column;
-  const funnel = ((cw + pw) / 2) * HORDE_FUNNEL;
-  if (b <= funnel) {
-    const slope = (pw - cw) / HORDE_FUNNEL;
-    // the root of slope / 2 × t² + cw × t = b, stable when the slope is 0
-    return (
-      HORDE_COLUMN +
-      (2 * b) /
-        Math.max(1e-6, cw + Math.sqrt(Math.max(0, cw * cw + 2 * slope * b)))
-    );
-  }
-  return HORDE_COLUMN + HORDE_FUNNEL + (b - funnel) / Math.max(pw, 1e-6);
+/** A stride through `cols` columns that visits each once: about 0.62 of them, coprime with `cols`. */
+export function hordeStride(cols: number): number {
+  const gcd = (a: number, b: number): number => (b === 0 ? a : gcd(b, a % b));
+  let st = Math.max(1, Math.round(cols * 0.618));
+  while (cols > 1 && gcd(st, cols) !== 1) st++;
+  return st;
 }
-
-/** How far (0 column .. 1 the span) a pack has widened at `z` back from its front. */
-export const hordeFlare = (z: number): number =>
-  Math.min(1, Math.max(0, (z - HORDE_COLUMN) / HORDE_FUNNEL));
 
 /** An integer hash (PCG) to 0..1; the horde shader has the same. */
 export function hordeHash(v: number): number {
@@ -676,35 +676,66 @@ export function hordeHash(v: number): number {
   return (((w >>> 22) ^ w) >>> 0) / 4294967296;
 }
 
+/** Where figure k is: world X and Z (the army at 0), and `t`, how far (0..1) it has turned into the stream. */
+export type HordeSpot = { x: number; z: number; t: number };
+
 /**
- * Figure k's place in a pack of `n` alive, figure size `scale`: world X in
- * `out.x`, distance back from the front (world units) in `out.z`. Figures
- * fill the shape front to back by area, highest index at the front (it dies
- * first, and the rest step up), each across its row at a golden-ratio
- * fraction (an even lattice), jittered a little. The horde shader does the
- * same from its index.
+ * Figure k's place (the horde shader does the same from its index). Its
+ * crowd spot: row ⌊R / cols⌋ back from the crowd's front, R = n0 − 1 − k
+ * (the highest index stands at the front), a scattered column in the row,
+ * jittered and, while it waits, wandering. Its stream slot: (n − 1 − k) ×
+ * step behind the head (the core's column, so the rest step up as the front
+ * dies or arrives). It stands in the crowd while its slot is further back
+ * than its spot; once the head has run far enough, it leaves the crowd and
+ * runs in its slot, turning into its lane of the army-wide stream over
+ * STREAM_TURN and running on into the army's front rows near it.
  */
 export function hordePlace(
   k: number,
-  n: number,
-  sh: HordeShape,
-  scale: number,
-  out: { x: number; z: number } = { x: 0, z: 0 },
-): { x: number; z: number } {
-  const gap = HORDE_GAP * scale;
-  const z = hordeDepthAt((n - 0.5 - k) * sh.area, sh);
-  const f = hordeFlare(z);
-  const w = sh.cw + (sh.pw - sh.cw) * f;
-  const across =
-    ((k * 0.6180339887) % 1) -
-    0.5 +
-    (HORDE_JITTER * gap * (2 * hordeHash(2 * k) - 1)) / Math.max(w, gap);
-  const u = Math.min(0.5, Math.max(-0.5, across));
-  out.x =
-    sh.cx +
-    (sh.px - sh.cx) * f +
-    u * Math.max(0, w - 2 * FIGURE_RADIUS * scale);
-  out.z = Math.max(0, z + HORDE_JITTER * gap * (2 * hordeHash(2 * k + 1) - 1));
+  L: HordeLayout,
+  out: HordeSpot = { x: 0, z: 0, t: 0 },
+): HordeSpot {
+  const R = L.n0 - 1 - k;
+  const row = Math.floor(R / L.cols);
+  const col = ((R % L.cols) * L.stride) % L.cols;
+  const g = Math.min(L.gx, L.gz);
+  const r1 = hordeHash(2 * k);
+  const r2 = hordeHash(2 * k + 1);
+  const ph1 = 6.2831853 * r2;
+  const ph2 = 6.2831853 * r1;
+  const wander = HORDE_WANDER * g;
+  const wx =
+    wander * (Math.sin(L.clock * (0.5 + 0.6 * r1) + ph1) - Math.sin(ph1));
+  const wz =
+    wander * (Math.cos(L.clock * (0.4 + 0.5 * r2) + ph2) - Math.cos(ph2));
+  const rad = FIGURE_RADIUS * L.size;
+  const right = L.left + L.cols * L.gx;
+  const cx = Math.min(
+    right - rad,
+    Math.max(
+      L.left + rad,
+      L.left +
+        (col + 0.5 + (row % 2 === 1 ? 0.25 : -0.25)) * L.gx +
+        HORDE_JITTER * g * (2 * r1 - 1) +
+        wx,
+    ),
+  );
+  const cz = HORDE_JITTER * g * (2 * r2 - 1) + wz;
+  const spot = L.run + row * L.gz;
+  const slot = (L.n - 1 - k) * L.step;
+  const ahead = -L.headZ;
+  const e = spot - slot;
+  const t =
+    e <= 0
+      ? 0
+      : Math.min(1, e / Math.max(1e-3, Math.min(STREAM_TURN, spot + ahead)));
+  const lane =
+    L.laneX + (((k * 0.6180339887) % 1) - 0.5) * Math.max(0, L.laneW - 2 * rad);
+  const crash = Math.min(1, Math.max(0, 1 - (ahead + slot) / STREAM_CRASH));
+  const back = e <= 0 ? spot + cz : slot + (1 - t) * cz + L.off * crash * t;
+  out.x = cx + (lane - cx) * t;
+  out.z = L.headZ - back;
+  out.t = t;
   return out;
 }
 

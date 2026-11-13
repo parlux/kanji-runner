@@ -7,29 +7,33 @@ import {
   Vector4,
   type Scene,
 } from "three";
+import { crowdWidth } from "../../core/crowd";
 import {
+  crowdFront,
+  crowdOf,
   hazardPos,
   isShattered,
-  packAwake,
   packHeadsLeft,
   packMouth,
-  packSpan,
   packSurvivors,
   type RunState,
 } from "../../core/sim";
+import { PACK_COLUMN_MAX } from "../../core/tuning";
 import { HORDE_HIP, makeHordeGeometry } from "./figures";
 import {
   crowdHalfDepth,
   DIST_SCALE,
   FIGURE_RADIUS,
   HORDE_CAP,
-  HORDE_COLUMN,
-  HORDE_FUNNEL,
-  HORDE_GAP,
   HORDE_JITTER,
+  HORDE_WANDER,
   hordePlace,
-  type HordeShape,
+  hordeStride,
+  type HordeLayout,
+  type HordeSpot,
   shapeDistance,
+  STREAM_CRASH,
+  STREAM_TURN,
   TRACK_W,
   worldX,
   worldZ,
@@ -38,11 +42,10 @@ import {
 /**
  * The enemy packs, every figure animated on the GPU. Each pack in view gets
  * a slot: one instanced mesh of up to HORDE_CAP figures whose places come
- * from the instance index (as `hordePlace`: the core's span at the front,
- * the pack spread wide where it is far away and, within STREAM_DISTANCE, a
- * stream at the army's width funnelling back to the pack's mouth) and a few
- * uniforms, so a frame costs
- * the same at 200 or 20,000. The only per-figure data is its death: when
+ * from the instance index (as `hordePlace`: a loose crowd milling where
+ * it stands, emptying from its front into a stream that runs at the army,
+ * as wide as it, from the moment the pack wakes) and a few uniforms, so a
+ * frame costs the same at 200 or 20,000. The only per-figure data is its death: when
  * survivors drop from `was` to n, figures n..was − 1 (the front rows) get
  * the run distance and the world place they stood on, uploaded as that one
  * range, and fall there while the rest step up; those that reached the
@@ -64,9 +67,11 @@ const f = (x: number): string => x.toFixed(6);
 const VERTEX_HEAD = `
 attribute float leg;
 attribute vec3 death;
-uniform vec4 hordeFront;
-uniform vec4 hordeBack;
+uniform vec4 hordeLane;
+uniform vec4 hordeCrowd;
+uniform vec4 hordeCount;
 uniform vec4 hordeState;
+uniform float hordeSize;
 uint hordeHash(uint v) {
   uint s = v * 747796405u + 2891336453u;
   uint w = ((s >> ((s >> 28u) + 4u)) ^ s) * 277803737u;
@@ -76,53 +81,55 @@ float hordeRand(uint v) { return float(hordeHash(v)) / 4294967296.0; }
 `;
 const VERTEX_BODY = `
 {
-  // hordeFront: column centre x, front world z, column width, span width
-  // hordeBack: span centre x, area per figure, form (0 milling .. 1 a column), figure size
+  // as hordePlace (world.ts)
+  // hordeLane: lane centre x, lane width, head z, the army's half depth
+  // hordeCrowd: mouth's left edge, gx, gz, run (how far back of the head the crowd's front is)
+  // hordeCount: n0, cols, stride, step
   // hordeState: alive, front figure's share left, run distance, clock
   // death: run distance, world x and z (with the army at distance 0) where it fell
   uint id = uint(gl_InstanceID);
   float k = float(gl_InstanceID);
-  float size = hordeBack.w;
-  float gap = ${f(HORDE_GAP)} * size;
-  float form = hordeBack.z;
-  float mill = 1.0 - form;
+  float size = hordeSize;
+  float n0 = hordeCount.x;
+  float cols = hordeCount.y;
+  float R = n0 - 1.0 - k;
+  float row = floor(R / cols);
+  float col = mod(mod(R, cols) * hordeCount.z, cols);
+  float gx = hordeCrowd.y;
+  float gz = hordeCrowd.z;
+  float g = min(gx, gz);
   float r1 = hordeRand(2u * id);
   float r2 = hordeRand(2u * id + 1u);
-  // as hordePlace: front to back by area, across at a golden-ratio fraction
-  float cw = hordeFront.z;
-  float pw = hordeFront.w;
-  float a = (hordeState.x - 0.5 - k) * hordeBack.y;
-  float column = cw * ${f(HORDE_COLUMN)};
-  float z;
-  if (a <= column) {
-    z = a / max(cw, 1e-6);
-  } else {
-    float b = a - column;
-    float funnel = (cw + pw) * 0.5 * ${f(HORDE_FUNNEL)};
-    if (b <= funnel) {
-      float slope = (pw - cw) / ${f(HORDE_FUNNEL)};
-      z = ${f(HORDE_COLUMN)} + 2.0 * b / max(1e-6, cw + sqrt(max(0.0, cw * cw + 2.0 * slope * b)));
-    } else {
-      z = ${f(HORDE_COLUMN + HORDE_FUNNEL)} + (b - funnel) / max(pw, 1e-6);
-    }
-  }
-  float fl = clamp((z - ${f(HORDE_COLUMN)}) / ${f(HORDE_FUNNEL)}, 0.0, 1.0);
-  float w = mix(cw, pw, fl);
-  float u = clamp(fract(k * 0.6180339887) - 0.5 + ${f(HORDE_JITTER)} * gap * (2.0 * r1 - 1.0) / max(w, gap), -0.5, 0.5);
-  vec2 off = vec2(
-    mix(hordeFront.x, hordeBack.x, fl) + u * max(0.0, w - ${f(2 * FIGURE_RADIUS)} * size),
-    hordeFront.y - max(0.0, z + ${f(HORDE_JITTER)} * gap * (2.0 * r2 - 1.0))
-  );
-  // a waiting pack mills about: each figure wanders a little and turns
+  float ph1 = 6.2831853 * r2;
+  float ph2 = 6.2831853 * r1;
   float clock = hordeState.w;
-  off += mill * 0.8 * gap * vec2(sin(clock * 0.9 + 6.2831853 * r2), cos(clock * 0.7 + 6.2831853 * r1));
-  float yaw = 3.14159265 + mill * 0.9 * sin(clock * 0.5 + 6.2831853 * r1);
-  float stride = 6.2831853 * (clock * ${f(STRIDE_HZ)} + r1);
+  float wander = ${f(HORDE_WANDER)} * g;
+  float wx = wander * (sin(clock * (0.5 + 0.6 * r1) + ph1) - sin(ph1));
+  float wz = wander * (cos(clock * (0.4 + 0.5 * r2) + ph2) - cos(ph2));
+  float rad = ${f(FIGURE_RADIUS)} * size;
+  float left = hordeCrowd.x;
+  float cx = clamp(
+    left + (col + 0.5 + (mod(row, 2.0) > 0.5 ? 0.25 : -0.25)) * gx + ${f(HORDE_JITTER)} * g * (2.0 * r1 - 1.0) + wx,
+    left + rad, left + cols * gx - rad);
+  float cz = ${f(HORDE_JITTER)} * g * (2.0 * r2 - 1.0) + wz;
+  float spot = hordeCrowd.w + row * gz;
+  float slot = (hordeState.x - 1.0 - k) * hordeCount.w;
+  float ahead = -hordeLane.z;
+  float e = spot - slot;
+  float form = e <= 0.0 ? 0.0 : min(1.0, e / max(1e-3, min(${f(STREAM_TURN)}, spot + ahead)));
+  float lane = hordeLane.x + (fract(k * 0.6180339887) - 0.5) * max(0.0, hordeLane.y - 2.0 * rad);
+  float crash = clamp(1.0 - (ahead + slot) / ${f(STREAM_CRASH)}, 0.0, 1.0);
+  float back = e <= 0.0 ? spot + cz : slot + (1.0 - form) * cz + hordeLane.w * crash * form;
+  vec2 off = vec2(mix(cx, lane, form), hordeLane.z - back);
+  float mill = 1.0 - form;
+  // waiting, each figure turns about now and then; in the stream it faces the army
+  float yaw = 3.14159265 + mill * 1.4 * sin(clock * 0.3 * (0.5 + r1) + ph1);
+  float stride = 6.2831853 * (clock * ${f(STRIDE_HZ)} * mix(0.35, 1.0, form) + r1);
   float s = size;
   float lean = -0.2 * form + 0.06 * sin(2.0 * stride);
   float sway = 0.1 * sin(stride);
-  float swing = mix(0.3, 0.75, form) * sin(stride);
-  vec3 lift = vec3(0.0, abs(sin(stride)) * mix(0.03, 0.08, form) * size, 0.0);
+  float swing = mix(0.25, 0.75, form) * sin(stride);
+  vec3 lift = vec3(0.0, abs(sin(stride)) * mix(0.02, 0.08, form) * size, 0.0);
   if (k >= hordeState.x) {
     // knocked back, toppling over backwards as it shrinks away
     float t = (hordeState.z - death.x) / ${f(DIE_DIST)};
@@ -144,7 +151,7 @@ const VERTEX_BODY = `
   float sl = swing * leg;
   float hy = p.y - ${f(HORDE_HIP)};
   p.yz = vec2(${f(HORDE_HIP)} + hy * cos(sl) - p.z * sin(sl), hy * sin(sl) + p.z * cos(sl));
-  // sway (z), face the army (y), lean into the run (x)
+  // sway (z), face (y), lean into the run (x)
   p.xy = vec2(p.x * cos(sway) - p.y * sin(sway), p.x * sin(sway) + p.y * cos(sway));
   p.xz = vec2(p.x * cos(yaw) + p.z * sin(yaw), -p.x * sin(yaw) + p.z * cos(yaw));
   p.yz = vec2(p.y * cos(lean) - p.z * sin(lean), p.y * sin(lean) + p.z * cos(lean));
@@ -155,11 +162,15 @@ const VERTEX_BODY = `
 type Slot = {
   mesh: Mesh<InstancedBufferGeometry, MeshLambertMaterial>;
   death: InstancedBufferAttribute;
-  front: Vector4;
-  back: Vector4;
+  lane: Vector4;
+  crowd: Vector4;
+  count: Vector4;
   state: Vector4;
-  /** The pack's shape as last drawn. */
-  shape: HordeShape;
+  size: { value: number };
+  /** The pack's layout as last drawn (the shader's uniforms). */
+  lay: HordeLayout;
+  /** Run distance it was last drawn at. */
+  drawnAt: number;
   /** The pack drawn here (hazard index), −1 for none. */
   hazard: number;
   /** Figures alive last frame. */
@@ -168,16 +179,14 @@ type Slot = {
   hi: number;
   /** Run distance of the last kill. */
   killedAt: number;
-  /** The pack's front, world z with the army at distance 0, as last drawn. */
-  z0: number;
   /** Its enemies that had reached the army last frame (whole ones). */
   arrived: number;
 };
 
 export type Horde = {
-  /** Places the packs in view for the run as it is now (`clock` drives the stride; both stand still while paused). */
+  /** Places the packs in view for the run as it is now (`clock` drives the stride and the wander; both stand still while paused). */
   update(run: RunState, clock: number): void;
-  /** The slots' meshes (for tests; `userData.uniforms` holds their front, back and state). */
+  /** The slots' meshes (for tests; `userData.uniforms` holds their lane, crowd, count and state, and `userData.layout` the HordeLayout). */
   readonly meshes: readonly Mesh<InstancedBufferGeometry>[];
 };
 
@@ -195,17 +204,21 @@ export function createHorde(scene: Scene): Horde {
     death.setUsage(DynamicDrawUsage);
     geometry.setAttribute("death", death);
     geometry.instanceCount = 0;
-    const front = new Vector4();
-    const back = new Vector4();
+    const lane = new Vector4();
+    const crowd = new Vector4();
+    const count = new Vector4(1, 1, 1, 0);
     const state = new Vector4();
+    const size = { value: 1 };
     const material = new MeshLambertMaterial({
       vertexColors: true,
       flatShading: true,
     });
     material.onBeforeCompile = (shader) => {
-      shader.uniforms.hordeFront = { value: front };
-      shader.uniforms.hordeBack = { value: back };
+      shader.uniforms.hordeLane = { value: lane };
+      shader.uniforms.hordeCrowd = { value: crowd };
+      shader.uniforms.hordeCount = { value: count };
       shader.uniforms.hordeState = { value: state };
+      shader.uniforms.hordeSize = size;
       shader.vertexShader = shader.vertexShader
         .replace("#include <common>", `#include <common>\n${VERTEX_HEAD}`)
         .replace(
@@ -214,7 +227,25 @@ export function createHorde(scene: Scene): Horde {
         );
     };
     const mesh = new Mesh(geometry, material);
-    mesh.userData.uniforms = { front, back, state };
+    const lay: HordeLayout = {
+      laneX: 0,
+      laneW: 0,
+      headZ: 0,
+      left: 0,
+      gx: 1,
+      gz: 1,
+      run: 0,
+      size: 1,
+      n: 0,
+      n0: 1,
+      cols: 1,
+      stride: 1,
+      step: 0,
+      off: 0,
+      clock: 0,
+    };
+    mesh.userData.uniforms = { lane, crowd, count, state };
+    mesh.userData.layout = lay;
     // figures are placed in the shader; the geometry's bounds mean nothing
     mesh.frustumCulled = false;
     mesh.visible = false;
@@ -222,15 +253,17 @@ export function createHorde(scene: Scene): Horde {
     slots.push({
       mesh,
       death,
-      front,
-      back,
+      lane,
+      crowd,
+      count,
       state,
-      shape: { cx: 0, cw: 0, px: 0, pw: 0, area: 0 },
+      size,
+      lay,
+      drawnAt: 0,
       hazard: -1,
       was: 0,
       hi: 0,
       killedAt: -Infinity,
-      z0: 0,
       arrived: 0,
     });
   }
@@ -239,7 +272,7 @@ export function createHorde(scene: Scene): Horde {
   // per hazard: its pack's place among the packs (it picks the slot)
   let order = new Int32Array(0);
 
-  const o = { x: 0, z: 0 };
+  const o: HordeSpot = { x: 0, z: 0, t: 0 };
   /**
    * Survivors drop to n: the front `gone` of the figures between reached the
    * army and vanish into it; the rest were shot and fall from now, where they
@@ -249,10 +282,10 @@ export function createHorde(scene: Scene): Horde {
     if (n < s.was) {
       const a = s.death.array as Float32Array;
       for (let k = n; k < s.was; k++) {
-        hordePlace(k, s.was, s.shape, s.back.w, o);
+        hordePlace(k, s.lay, o);
         a[3 * k] = k >= s.was - gone ? ARRIVED : dist;
         a[3 * k + 1] = o.x;
-        a[3 * k + 2] = s.z0 - o.z;
+        a[3 * k + 2] = o.z - s.drawnAt * DIST_SCALE;
       }
       s.death.addUpdateRange(3 * n, 3 * (s.was - n));
       s.death.needsUpdate = true;
@@ -290,9 +323,11 @@ export function createHorde(scene: Scene): Horde {
       for (let i = run.nextHazard; i < hazards.length; i++) {
         if (hazards[i]?.kind !== "pack") continue;
         const pos = hazardPos(run, i);
-        if (pos - dist > shapeDistance()) continue;
+        if (Math.min(pos, crowdFront(run, i)) - dist > shapeDistance())
+          continue;
         const s = slots[(order[i] as number) % HORDE_SLOTS] as Slot;
-        const heads = Math.min(HORDE_CAP, run.heads[i] ?? 0);
+        const all = run.heads[i] ?? 0;
+        const heads = Math.min(HORDE_CAP, all);
         const n = isShattered(run, i)
           ? 0
           : Math.min(HORDE_CAP, packSurvivors(run, i));
@@ -308,34 +343,39 @@ export function createHorde(scene: Scene): Horde {
         s.arrived = arrived;
         s.state.x = n;
         // heads past the cap are not drawn: then every drawn figure is whole
-        s.state.y =
-          heads < (run.heads[i] ?? 0) ? 1 : packHeadsLeft(run, i) - (n - 1);
+        s.state.y = heads < all ? 1 : packHeadsLeft(run, i) - (n - 1);
         if (n === 0) continue;
-        // spread wide where it is (milling) far away; within STREAM_DISTANCE
-        // its front closes into a stream at the army's width: the core's span
+        // the crowd where it stands (its mouth, at its own x); the stream on the army
         const mouth = packMouth(run, i);
-        const span = packSpan(run, i);
-        const size = run.horde.hordeScale;
-        const sh = s.shape;
-        sh.pw = (mouth.right - mouth.left) * TRACK_W;
-        sh.px = worldX((mouth.left + mouth.right) / 2);
-        sh.cw = (span.right - span.left) * TRACK_W;
-        sh.cx = worldX((span.left + span.right) / 2);
-        sh.area = (HORDE_GAP * size) ** 2;
-        // the core meets the army at its centre; drawn, a stream crashes into its front rows
-        const converge =
-          packAwake(run, i) || (run.arrived[i] ?? 0) > 0
-            ? Math.min(1, Math.max(0, 1 - (pos - dist) / 2.5))
-            : 0;
-        s.z0 = worldZ(pos + crowdHalfDepth(run.army) * converge, 0);
-        s.front.set(sh.cx, s.z0 + dist * DIST_SCALE, sh.cw, sh.pw);
-        s.back.set(sh.px, sh.area, converge, size);
+        const c = crowdOf(run, i);
+        const L = s.lay;
+        L.laneX = worldX(run.x);
+        L.laneW = crowdWidth(run.army) * TRACK_W;
+        L.headZ = worldZ(pos, dist);
+        L.off = crowdHalfDepth(run.army) * DIST_SCALE;
+        L.left = worldX(mouth.left);
+        L.gx = c.gx * TRACK_W;
+        L.gz = c.gz * DIST_SCALE;
+        L.run = (crowdFront(run, i) - pos) * DIST_SCALE;
+        L.size = run.horde.hordeScale;
+        L.n = n;
+        L.n0 = heads;
+        if (L.cols !== c.cols) L.stride = hordeStride(c.cols);
+        L.cols = c.cols;
+        L.step = (PACK_COLUMN_MAX * DIST_SCALE) / Math.max(1, all);
+        L.clock = clock;
+        s.drawnAt = dist;
+        s.lane.set(L.laneX, L.laneW, L.headZ, L.off);
+        s.crowd.set(L.left, L.gx, L.gz, L.run);
+        s.count.set(L.n0, L.cols, L.stride, L.step);
+        s.size.value = L.size;
       }
       for (const s of slots) {
         if (dist - s.killedAt >= DIE_DIST) s.hi = s.was;
         if (s.hazard < 0) s.state.x = 0;
         s.state.z = dist;
         s.state.w = clock;
+        s.lay.clock = clock;
         const count = Math.max(s.was, s.hi);
         s.mesh.geometry.instanceCount = count;
         s.mesh.visible = count > 0;
