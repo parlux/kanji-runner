@@ -29,7 +29,7 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 **Acceptance criteria:**
 - [x] Tested: button hit rects at 390×844 and 390×667, with and without Study.
 - [x] Browser check, 390×844 and 390×667, 3D plus one `?2d`: win with 2 misses, wiped out with 5+ misses, a tie, an unlock, meaning mode. No overlaps; each button goes to the right place by tap and key. Screenshots in the scratchpad.
-- [ ] Golden run and existing tests unchanged apart from end-screen expectations (done); deploy green (pending: deploys run from `main`, after the merge).
+- [x] Golden run and existing tests unchanged apart from end-screen expectations; deploy green.
 
 **Verification:** `npm test && npm run lint && npm run build`; browser check; deploy green.
 **Dependencies:** E1
