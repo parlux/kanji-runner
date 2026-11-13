@@ -55,8 +55,11 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 ### Task S3: Race day
 **Description:** stepped grandstands on both sides with instanced spectators coloured per instance, roofs, flags on poles along the kerbs alternating kerb orange and army blue (flutter by scale), balloons in the sky and a deeper blue sky.
 **Acceptance criteria:**
-- [ ] Tested: the layout clears the track; the pick covers three looks.
-- [ ] Browser check as in S1 with `?scenery=stadium`; draw calls and frame time logged within the limits.
+- [x] Tested: the layout clears the track; the pick covers three looks.
+- [x] Browser check as in S1 with `?scenery=stadium`; draw calls and frame time logged within the limits.
+  - Screenshots (run, both edges, boss, at 390×844 and 1280×800) checked; gates and labels read as before; the stands leave the track and a strip of sky.
+  - Headless (Chrome for Testing, loaded machine), 200 crowd, median of 3 × 240 frames: draw calls 16 (no scenery) → 22 (+6: sky dome, boxes for tiers, spectators and poles, awnings, flags, balloons, clouds); frame time 3.9-4.1 ms at 390×844 (1.3×) and 7.0-7.1 ms at 1280×800 (1.4×) against 3.1 / 5.1 ms with no scenery; Countryside alongside 3.3 / 6.4 ms. About 3,000 instances in the box mesh (stands and crowd).
+  - Flags flutter by scaling their length (per-frame matrix write); balloons drift sideways and bob (they do not rise); the roof slopes up towards the back. All from the scene clock, so they stand still when paused.
 **Verification:** as S1. **Dependencies:** S1. **Files:** as S2. **Scope:** S
 
 ### Task S4: Block city
