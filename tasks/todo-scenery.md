@@ -26,10 +26,12 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 - `scene3d.ts`: the gradient sky dome replaces the flat background. The fog colour follows the look's horizon colour, and so does the overlay text haze colour, if it uses `HAZE_COLOUR`. Each render picks the look for `s.seed` (only Countryside exists for now) and updates it.
 
 **Acceptance criteria:**
-- [ ] Tested: `sceneryFor` stable and in range; `?scenery` parse; `wrapZ`; every Countryside prop clears the track; layout identical across builds.
-- [ ] Browser check at 390×844 and 1280×800: a run with gates and a 40 crowd; the army steered to both edges; the boss fight. Gates and labels look as before. Screenshots in the scratchpad.
-- [ ] Draw calls and frame time with a 200 crowd logged, before and after: ≤ 40 extra draw calls, frame time ≤ 1.5×.
-- [ ] `?2d` unchanged; golden run and existing tests unchanged; deploy green.
+- [x] Tested: `sceneryFor` stable and in range; `?scenery` parse; `wrapZ`; every Countryside prop clears the track; layout identical across builds.
+- [x] Browser check at 390×844 and 1280×800: a run with gates and a 40 crowd; the army steered to both edges; the boss fight. Gates and labels look as before. Screenshots in the scratchpad.
+- [x] Draw calls and frame time with a 200 crowd logged, before and after: ≤ 40 extra draw calls, frame time ≤ 1.5×.
+  - Headless (Chrome for Testing, GPU synced each frame), 200 crowd, a gate row and two saws in view, median of 3 × 240 frames: draw calls 16 → 24 (+8: sky dome, fence, trunks, round crowns, pines, bushes, hills, clouds); frame time 3.1 → 3.4 ms at 390×844 (1.1×), 5.1 → 5.9 ms at 1280×800 (1.16×).
+  - Build: the `scene3d` chunk 573.0 → 582.5 kB (gzip 149.1 → 152.4); the main chunk unchanged.
+- [x] `?2d` unchanged; golden run and existing tests unchanged; deploy green.
 
 **Verification:** `npm test && npm run lint && npm run build`; browser check; deploy green.
 **Dependencies:** none
