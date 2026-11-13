@@ -41,7 +41,7 @@ Owner: "even at 200 it doesn't feel like a horde. It still looks like a static r
 Owner's choices: a big pack takes **about 2–3 s** to mow down; a horde **fills the track**; a dev panel has sliders for **enemy count, figure size, kill time and pack width**.
 
 These rules replace the matching ones above:
-- **Charge from the haze:** a pack starts running at the army as soon as it is drawn (`PACK_WAKE` = the default shape distance, 12 track units), not at `VIEW_DISTANCE` (3). Speed and steering are unchanged.
+- **Charge from the haze:** a pack starts running at the army as soon as it is drawn (`PACK_WAKE` = the default shape distance, 12 track units), not at `VIEW_DISTANCE` (3). Speed and steering are unchanged. A pack waits while an unanswered wall stands between it and the army, so it never runs through a wall (where it can't be shot).
 - **Kill time:** pack HP = `KILL_SECONDS × FIRE_PER_SOLDIER × expected` (start `KILL_SECONDS` = 2.5), so an army of the expected size facing the whole pack mows it down in about that long. Per-enemy HP = pack HP / head count.
 - **Width:** pack width = `PACK_WIDTH` (a share of the track, start 1.0, the whole track), shrinking towards today's `crowdWidth` as it is shot down (so a dying horde narrows, still in the same spot). With full width, every pack reaches the army, so contact replaces dodging as the threat.
 - **Threat stays light:** soldiers lost on contact = `min(army, round(HORDE_THREAT × packStrength(expected) × survivors / heads))`: a fully intact pack costs today's pack strength, and a pack shot to 10% costs 10% of that. Tune `HORDE_THREAT` so the bot balance bands still hold.
