@@ -347,14 +347,9 @@ export function createView3d(canvas: HTMLCanvasElement): View3d | null {
         run.gateTarget = null;
       }
       runDist = run.dist;
-      // the run follows the army sideways; the boss scene eases back to centre
+      // the camera follows the army sideways, in the run and the boss fight
       const { follow, smoothing } = tuned ?? DEFAULT_CAMERA;
-      camX = followStep(
-        camX,
-        s.kind === "run" ? followTarget(follow, s.run.x) : 0,
-        dt,
-        smoothing,
-      );
+      camX = followStep(camX, followTarget(follow, run.x), dt, smoothing);
       fitCamera(camera, w / h, fit, camX);
       haze = hazeFor(pose, runDist, shapeDistance());
       layDashes(runDist);
