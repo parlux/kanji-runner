@@ -11,9 +11,9 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 - Draw it near the army in the shared answer-feedback code (`renderArmyPopups` in `render.ts`, used by the 3D overlay too), for `ANSWER_FEEDBACK_DIST`, fading out; placed per the spec so it never covers the next prompt or labels.
 
 **Acceptance criteria:**
-- [x] Tested: meaning gate → readings (order and kinds), reading gate → meaning, wrong / kana / loanword / unknown → nothing.
-- [x] Browser check at 390×844 in 3D and with `?2d` (and 1280×800 in 3D): right meaning answers (on'yomi + kun'yomi, okurigana), a right reading answer, a wrong answer, a long meaning; the next prompt and labels uncovered. Screenshots in the scratchpad.
-- [x] Golden run and existing tests unchanged.
+- [ ] Tested: meaning gate → readings (order and kinds), reading gate → meaning, wrong / kana / loanword / unknown → nothing.
+- [ ] Browser check at 390×844 in 3D and with `?2d` (and 1280×800 in 3D): right meaning answers (on'yomi + kun'yomi, okurigana), a right reading answer, a wrong answer, a long meaning; the next prompt and labels uncovered. Screenshots in the scratchpad.
+- [ ] Golden run and existing tests unchanged.
 
 **Verification:** `npm test && npm run lint && npm run build`; browser check; deploy green.
 **Dependencies:** none
