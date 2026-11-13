@@ -28,6 +28,8 @@ export function startLayout(w: number, h: number) {
     /** The Built-in / WaniKani switch, two halves. */
     modeBuiltin: { x, y: h * 0.6, w: bw / 2, h: 40 },
     modeWk: { x: x + bw / 2, y: h * 0.6, w: bw / 2, h: 40 },
+    /** The build stamp, bottom centre: five quick taps toggle the camera gear. */
+    stamp: { x: w / 2 - 80, y: h - 20, w: 160, h: 20 },
     /** Opens the token form. */
     token: { x, y: h * 0.6 + 52, w: bw, h: 40 },
   };
@@ -95,6 +97,29 @@ export function syncTap(
 /** Whether a start screen tap (picker closed) hits the speed pill. */
 export function speedTap(w: number, h: number, x: number, y: number): boolean {
   return inside(startLayout(w, h).speed, x, y);
+}
+
+/** Taps on the build stamp that toggle the camera gear, and the seconds they must come within. */
+export const STAMP_TAPS = 5;
+export const STAMP_WINDOW = 3;
+
+/** Whether a start screen tap (picker closed) hits the build stamp. */
+export function stampTap(w: number, h: number, x: number, y: number): boolean {
+  return inside(startLayout(w, h).stamp, x, y);
+}
+
+/**
+ * Adds a stamp tap at time `now` (s) to the recent `taps`: the taps within
+ * STAMP_WINDOW, and whether this one is the STAMP_TAPS-th (which starts over).
+ */
+export function stampTapped(
+  taps: readonly number[],
+  now: number,
+): { taps: number[]; toggle: boolean } {
+  const recent = [...taps, now].filter((t) => now - t <= STAMP_WINDOW);
+  return recent.length >= STAMP_TAPS
+    ? { taps: [], toggle: true }
+    : { taps: recent, toggle: false };
 }
 
 /** What a start screen tap does about WaniKani: switch the mode or open the token form. */

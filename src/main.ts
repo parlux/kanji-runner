@@ -14,6 +14,8 @@ import {
 import {
   hits,
   speedTap,
+  stampTap,
+  stampTapped,
   startTap,
   studyButton,
   syncTap,
@@ -32,7 +34,7 @@ import {
   openCameraPanel,
   syncCameraGear,
 } from "./game/camerasettings";
-import { loadCamera, saveCamera } from "./storage/camera";
+import { loadCamera, loadGear, saveCamera, saveGear } from "./storage/camera";
 import { KANA } from "./core/kana";
 import { KANJI } from "./core/kanji";
 import { missedItems } from "./core/run";
@@ -104,6 +106,9 @@ void sync.pull().then(adopt);
 
 // tuned camera (dev tool, 3D only): saved on this device; null is the default camera
 let camera = loadCamera(localStorage);
+// the gear is hidden: five taps on the start screen's build stamp toggle it, remembered
+let gearShown = loadGear(localStorage);
+let stampTaps: number[] = [];
 const openCamera = (): void =>
   void import("./game/three/world").then(({ DEFAULT_CAMERA }) => {
     openCameraPanel({
@@ -236,6 +241,15 @@ const takeDrag = bindDrag(canvas, (x, y) => {
     else openLogin(sync, adopt);
     return;
   }
+  if (scene.pick === undefined && stampTap(w, h, x, y)) {
+    const t = stampTapped(stampTaps, performance.now() / 1000);
+    stampTaps = t.taps;
+    if (t.toggle) {
+      gearShown = !gearShown;
+      saveGear(localStorage, gearShown);
+    }
+    return;
+  }
   if (scene.pick === undefined && speedTap(w, h, x, y)) {
     speed = nextSpeed(speed);
     saveSpeed(localStorage, speed);
@@ -306,7 +320,8 @@ startLoop(
     pauseCard();
     // the camera gear: on the start screen (picker closed) and on a paused run
     syncCameraGear(
-      !overlayOpen() &&
+      gearShown &&
+        !overlayOpen() &&
         ((scene.kind === "start" && scene.pick === undefined) ||
           (scene.kind === "run" && scene.paused)),
       openCamera,

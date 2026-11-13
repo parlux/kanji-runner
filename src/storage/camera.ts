@@ -56,3 +56,26 @@ export function saveCamera(
     // blocked or full storage: the tuning lasts this session only
   }
 }
+
+/** Whether the camera gear is shown (a hidden dev tool: five taps on the build stamp toggle it). */
+export const GEAR_KEY = "kanji-runner:camera-gear";
+
+export function loadGear(store: Pick<Storage, "getItem">): boolean {
+  try {
+    return store.getItem(GEAR_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+export function saveGear(
+  store: Pick<Storage, "setItem" | "removeItem">,
+  shown: boolean,
+): void {
+  try {
+    if (shown) store.setItem(GEAR_KEY, "1");
+    else store.removeItem(GEAR_KEY);
+  } catch {
+    // blocked or full storage: the toggle lasts this session only
+  }
+}

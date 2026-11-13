@@ -279,6 +279,7 @@ function renderStart(
     COLORS.dim,
   );
   text(ctx, "© EDRDG, CC BY-SA 4.0 · edrdg.org", w / 2, h - 26, 12, COLORS.dim);
+  text(ctx, `build ${__BUILD__}`, w / 2, h - 9, 10, COLORS.dim);
 }
 
 /** WaniKani mode's title and due line, in place of the level bar. */

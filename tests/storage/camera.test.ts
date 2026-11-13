@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { CAMERA_KEY, loadCamera, saveCamera } from "../../src/storage/camera";
+import {
+  CAMERA_KEY,
+  loadCamera,
+  loadGear,
+  saveCamera,
+  saveGear,
+} from "../../src/storage/camera";
 import {
   DEFAULT_CAMERA,
   type CameraSettings,
@@ -91,5 +97,32 @@ describe("camera settings storage", () => {
     };
     expect(loadCamera(blocked)).toBeNull();
     expect(() => saveCamera(blocked, tuned)).not.toThrow();
+  });
+});
+
+describe("camera gear toggle", () => {
+  it("is hidden by default and remembered", () => {
+    const store = memory();
+    expect(loadGear(store)).toBe(false);
+    saveGear(store, true);
+    expect(loadGear(store)).toBe(true);
+    saveGear(store, false);
+    expect(loadGear(store)).toBe(false);
+  });
+
+  it("is hidden on a blocked store", () => {
+    const blocked = {
+      getItem: () => {
+        throw new Error("blocked");
+      },
+      setItem: () => {
+        throw new Error("blocked");
+      },
+      removeItem: () => {
+        throw new Error("blocked");
+      },
+    };
+    expect(loadGear(blocked)).toBe(false);
+    expect(() => saveGear(blocked, true)).not.toThrow();
   });
 });

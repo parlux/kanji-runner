@@ -270,9 +270,9 @@ Intent: `docs/intent/3d-camera-follow.md`. Spec: SPEC-3d-depth amendment v1.4.3,
 - Unchanged: `src/core`, golden run, 2D, text rules, follow maths.
 
 **Acceptance criteria:**
-- [ ] Tested: default pose = the owner's settings at 390×844 and 1280×800 (army at 80%); `SHAPE_DISTANCE` default below the re-ask gap and the haze slider's maximum too; haze total at the horizon in use and none at `VIEW_DISTANCE`; storage accepts the wider ranges and the haze setting, old saved data without it still loads; gear toggle remembered.
-- [ ] Browser check at 390×844 (3D default): a run with the defaults (filmstrip of a gate approaching from far off, showing a gradual haze, no thick band); steering to an outer opening with follow; the gear hidden, then shown after 5 taps; the haze slider at its ends. Screenshots in the scratchpad.
-- [ ] Frame time logged with a 200 crowd and everything within the new `SHAPE_DISTANCE` drawn, compared with C1.
+- [x] Tested: default pose = the owner's settings at 390×844 and 1280×800 (army at 80%); `SHAPE_DISTANCE` default below the re-ask gap and the haze slider's maximum too; haze total at the horizon in use and none at `VIEW_DISTANCE`; storage accepts the wider ranges and the haze setting, old saved data without it still loads; gear toggle remembered.
+- [x] Browser check at 390×844 (3D default): a run with the defaults (filmstrip of a gate approaching from far off, showing a gradual haze, no thick band); steering to an outer opening with follow; the gear hidden, then shown after 5 taps; the haze slider at its ends. Screenshots in the scratchpad.
+- [x] Frame time logged with a 200 crowd and everything within the new `SHAPE_DISTANCE` drawn, compared with C1.
 
 **Verification:** `npm test && npm run lint && npm run build`; browser check; deploy green (merge into `main`).
 **Dependencies:** C1, H2
