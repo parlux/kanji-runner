@@ -1,6 +1,6 @@
 # Spec: Session progress (v1.3)
 
-Extends `docs/specs/done/SPEC.md` (v1), `docs/specs/done/SPEC-wanikani.md` (v1.1) and `docs/specs/done/SPEC-reask.md` (v1.2). Everything there still holds unless this spec says otherwise. Idea and interview: `docs/ideas/session-progress.md`.
+Extends `docs/specs/done/SPEC.md` (v1), `docs/specs/done/SPEC-wanikani.md` (v1.1) and `docs/specs/done/SPEC-reask.md` (v1.2). Everything there still holds unless this spec says otherwise. Idea and interview: `docs/ideas/done/session-progress.md`.
 
 ## Objective
 Show the owner, after every run, what they have fixed so far in the current sitting, even when the run was lost.

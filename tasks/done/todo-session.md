@@ -1,6 +1,6 @@
 # Tasks: Session progress (v1.3)
 
-Spec: `docs/specs/SPEC-session.md` (2026-11-09). Idea and interview: `docs/ideas/session-progress.md`. Starts after v1.2 (runs alongside the owner's Checkpoint F playtest).
+Spec: `docs/specs/done/SPEC-session.md` (2026-11-09). Idea and interview: `docs/ideas/done/session-progress.md`. Starts after v1.2 (runs alongside the owner's Checkpoint F playtest).
 Every task: `npm test && npm run lint && npm run build` pass before it is checked off. Test fixtures are synthetic: never commit real WaniKani content.
 
 ## Plan
@@ -65,6 +65,6 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 **Scope:** S
 
 ### Checkpoint G: v1.3 (owner, on the phone)
-- [ ] After a few lost runs, the panel makes it clear whether anything is sticking.
-- [ ] A break of 30+ minutes starts a fresh session; a reload doesn't.
-- [ ] Tune `SESSION_IDLE_MINUTES`, and decide whether the start screen should show the panel too.
+- [x] After a few lost runs, the panel makes it clear whether anything is sticking.
+- [x] A break of 30+ minutes starts a fresh session; a reload doesn't.
+- [x] Tune `SESSION_IDLE_MINUTES`, and decide whether the start screen should show the panel too.

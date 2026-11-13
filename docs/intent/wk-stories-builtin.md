@@ -1,6 +1,6 @@
 # Intent: WaniKani stories in Built-in mode
 
-Status: confirmed by the owner, 2026-11-12, after an interview. Extends `docs/intent/kanji-runner.md`. Idea: `docs/ideas/wk-stories-builtin.md`. Spec: `docs/specs/SPEC-stories.md`, tasks: `tasks/todo-stories.md`.
+Status: confirmed by the owner, 2026-11-12, after an interview. Extends `docs/intent/kanji-runner.md`. Idea: `docs/ideas/done/wk-stories-builtin.md`. Spec: `docs/specs/done/SPEC-stories.md`, tasks: `tasks/done/todo-stories.md`.
 
 ## Statement of intent
 - **Outcome:** on the study screen in Built-in mode, every kanji card shows WaniKani's meaning and reading stories (mnemonics), and the "parts" row becomes WaniKani's radicals with their WaniKani names (an image when a radical has no character).

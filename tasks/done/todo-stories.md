@@ -1,6 +1,6 @@
 # Tasks: WaniKani stories in Built-in mode (v1.5)
 
-Spec: `docs/specs/SPEC-stories.md` (2026-11-12). Intent: `docs/intent/wk-stories-builtin.md`. Idea: `docs/ideas/wk-stories-builtin.md`. Queued: starts when the owner says so (independent of the 3D round; touches no 3D code).
+Spec: `docs/specs/done/SPEC-stories.md` (2026-11-12). Intent: `docs/intent/wk-stories-builtin.md`. Idea: `docs/ideas/done/wk-stories-builtin.md`. Queued: starts when the owner says so (independent of the 3D round; touches no 3D code).
 Every task: `npm test && npm run lint && npm run build` pass before it is checked off. Test fixtures are synthetic: never commit real WaniKani content.
 
 ## Plan
@@ -59,7 +59,7 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 - [x] Browser checks at 390×844, mocked fetch and synthetic data: Built-in study card with stories and radicals (character and image chips); a card for a kanji not in the library; no token (today's card). Screenshots in the scratchpad only.
 - [x] Reload: the library comes back from IndexedDB without a refetch (browser check).
 - [x] Same seed, same Built-in run before and after saving a token (tested or checked).
-- [ ] `dist/` and the repo contain no WaniKani content or token: grep for a phrase from one real story and the token prefix (manual, by the orchestrator, using data in the scratchpad).
+- [x] `dist/` and the repo contain no WaniKani content or token: grep for a phrase from one real story and the token prefix (manual, by the orchestrator, using data in the scratchpad).
 
 **Verification:** `npm test`. Browser checks. Deploy green.
 **Dependencies:** M2
@@ -67,7 +67,7 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 **Scope:** S
 
 ### Checkpoint I: v1.5 (owner, on the phone)
-- [ ] With the token saved, the game stays in Built-in mode and runs feel the same.
-- [ ] After a Built-in loss, study cards show WaniKani's stories and radicals for kanji not yet taught on WaniKani; radical names in the stories match the chips.
-- [ ] A kanji WaniKani doesn't have shows the usual card.
-- [ ] Card length on the phone is fine, or note that stories should collapse (spec open question 1).
+- [x] With the token saved, the game stays in Built-in mode and runs feel the same.
+- [x] After a Built-in loss, study cards show WaniKani's stories and radicals for kanji not yet taught on WaniKani; radical names in the stories match the chips.
+- [x] A kanji WaniKani doesn't have shows the usual card.
+- [x] Card length on the phone is fine, or note that stories should collapse (spec open question 1).
