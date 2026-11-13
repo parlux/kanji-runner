@@ -197,10 +197,10 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 **Description:** Make 3D the default for the run and boss; `?2d` forces the old renderer; fall back to 2D when WebGL fails. Fix rough edges from T1–T4 reviews. Final performance pass on a phone-sized viewport (DPR cap, no per-frame allocations).
 
 **Acceptance criteria:**
-- [ ] Default is 3D; `?2d` and a WebGL failure both give the old 2D run (browser check; the failure simulated).
-- [ ] Start, end, study, pause, login and token screens unchanged (browser check).
-- [ ] A full run from start to end screen in 3D at 390×844 (screenshots), frame time logged.
-- [ ] Deploy green.
+- [x] Default is 3D; `?2d` and a WebGL failure both give the old 2D run (browser check; the failure simulated).
+- [x] Start, end, study, pause, login and token screens unchanged (browser check).
+- [x] A full run from start to end screen in 3D at 390×844 (screenshots), frame time logged.
+- [x] Deploy green.
 
 **Verification:** `npm test && npm run lint && npm run build`; browser check; deploy green.
 **Dependencies:** T4

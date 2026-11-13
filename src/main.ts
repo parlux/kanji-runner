@@ -55,17 +55,22 @@ if (!canvas) throw new Error("Missing #game canvas");
 const ctx = canvas.getContext("2d");
 if (!ctx) throw new Error("Canvas 2D not supported");
 
-// `?3d`: the run is drawn in 3D on a WebGL canvas behind #game (2D if WebGL fails)
+// The run is drawn in 3D on a WebGL canvas behind #game; `?2d` forces the old
+// 2D renderer, and it is used too when WebGL fails (`?3d` is the default, harmless)
 let view3d: View3d | null = null;
 const canvas3d = document.querySelector<HTMLCanvasElement>("#world");
-if (canvas3d && new URLSearchParams(window.location.search).has("3d"))
-  void import("./game/three/scene3d").then(({ createView3d }) => {
-    view3d = createView3d(canvas3d);
-    if (!view3d) return;
-    view3d.setCamera(camera);
-    canvas3d.style.display = "block";
-    resize();
-  });
+if (canvas3d && !new URLSearchParams(window.location.search).has("2d"))
+  void import("./game/three/scene3d")
+    .then(({ createView3d }) => {
+      view3d = createView3d(canvas3d);
+      if (!view3d) return;
+      view3d.setCamera(camera);
+      canvas3d.style.display = "block";
+      resize();
+    })
+    .catch(() => {
+      view3d = null;
+    });
 
 function resize(): void {
   if (!canvas || !ctx) return;
