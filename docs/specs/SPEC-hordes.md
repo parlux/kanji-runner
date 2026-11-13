@@ -51,6 +51,16 @@ These rules replace the matching ones above:
 - **Performance:** frame time logged at 200, 2,000 and 20,000 (a 200 army, a pack being shot, the busiest look, 390×844). 2,000 must stay ≤ 1.3× today's pack scene; 20,000 is logged for the owner to judge (it may be too slow for the phone; that's what the slider is for).
 - **Dev panel:** a "Horde" sheet styled like the camera panel (`camerasettings.ts`), opened from the same hidden gear. Sliders: enemy count, figure size, kill time, pack width; a reset button; saved on this device only (like `storage/camera.ts`).
 
+## Column design (owner, 2026-11-14, agreed in discussion)
+Owner: "the horde funnels toward you, forming a column which maybe lines up with firing width, then basically it's just mowing down that column ... maybe 1s is plenty." These rules replace the matching ones above (and the horde stretch, which is dropped):
+- **Funnel and column:** a pack is wide at the far end and funnels into a column **as wide as the army** (`crowdWidth(army)`, centred on the army) that charges at it. Dodging is dropped: the column homes in, in the core as well as on screen.
+- **Front rows die first;** the column shortens from the front.
+- **Waiting packs mill** (behind an unanswered wall) and draw in, so a pack never looks static.
+- **Kill time:** default `KILL_SECONDS` = 1.0 (slider 0.5–3).
+- **Stream contact:** when the column's front reaches the army, enemies crash in row by row while the army keeps shooting the rest. Each one that arrives costs `HORDE_THREAT × strength / heads` soldiers (accumulated, rounded as whole soldiers are lost). The pack is done when shot out or fully arrived. Damage stays light overall; the balance bands hold.
+- **Back-to-back packs** merge: a pack that wakes while another is still charging joins the back of the same column.
+- **Kill effects** (H6) come per row, as a front of sparks where rows die, not one burst per enemy.
+
 ## Code layout
 - `src/core/tuning.ts`: `HORDE_K`, `PACK_MAX`, `HORDE_THREAT`.
 - `src/core/fire.ts`: `packCount`, and `hazardHp` unchanged in value.

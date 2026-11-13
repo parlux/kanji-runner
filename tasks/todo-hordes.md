@@ -66,16 +66,24 @@ Owner, 2026-11-14: not a horde yet. "Still looks like a static red blip that jus
   - Headless (Chrome for Testing, GPU synced each frame), 200 army, a charging pack shot from half to nearly dead, a gate row in view, median of 3 × 240 frames, run twice. Today's pack scene (9ed777a): Countryside 3.6-4.0 ms, Race day 3.4-3.8 ms. After: 200 3.2-3.4 / 3.3-3.7 ms; 2,000 3.8-4.0 / 4.0-4.1 ms (≤ 1.1×); 20,000 13.8-13.9 / 14.3 ms (for the owner to judge). Draw calls unchanged (20 Countryside, 18 Race day; a second pack in view adds 1).
 **Verification:** as H3, plus browser. **Dependencies:** H3. **Files:** `src/game/three/{hazards,horde,world,figures}.ts`, tests. **Scope:** M (use opus)
 
+### Task H3b: Column in the core (stream contact, 1 s, merge)
+**Description:** as the spec's "Column design": the core's pack span becomes the army-wide column (homing on the army, no dodging); `KILL_SECONDS` default 1.0; stream contact (enemies arrive row by row and cost soldiers as they arrive while fire continues); a pack that wakes while another is still charging joins the back of its column (one target, one stream). Feed the core's column width into the 3D horde uniform so the drawn column and the hit column match. 2D keeps its look with the new numbers.
+**Acceptance criteria:**
+- [ ] Tested: span equals the army's width and follows it; a full pack under the expected army's fire dies in ~1 s; stream contact loses soldiers gradually and stops when the pack is shot out; a pack that arrives untouched costs `HORDE_THREAT × strength` in total; merged packs form one column; pause holds everything.
+- [ ] Balance bands hold (retune `HORDE_THREAT` if needed); before/after logged here.
+- [ ] Browser: a column streaming into the army at 200 and 2,000; drawn and hit columns line up. Screenshots in the scratchpad.
+**Verification:** tests (`npx vitest run --maxWorkers=2` under load), lint, build. **Dependencies:** H4. **Files:** `src/core/{tuning,fire,sim}.ts`, `src/game/three/{hazards,horde}.ts`, `src/game/render.ts`, tests. **Scope:** M (highest risk: balance; use opus)
+
 ### Task H5: Horde dev panel
-**Description:** a "Horde" sheet like the camera panel, opened from the hidden gear: sliders for enemy count (log 200–20,000), figure size, kill time, pack width; reset; saved on this device (`storage/horde.ts`); applied from the next run.
+**Description:** a "Horde" sheet like the camera panel, opened from the hidden gear: sliders for enemy count (log 200–20,000), figure size, kill time (0.5–3 s), pack width (the far, funnel-mouth width); reset; saved on this device (`storage/horde.ts`); applied from the next run.
 **Acceptance criteria:**
 - [ ] Tested: storage round-trip, malformed or out-of-range saves fall back to defaults; the run is built with the saved tuning.
 - [ ] Browser: the sheet opens and closes, values show, a changed count shows up in the next run.
 - [ ] Deploy green (checkpoint follows).
-**Verification:** as H4. **Dependencies:** H4. **Files:** `src/game/hordesettings.ts`, `src/storage/horde.ts`, wiring, tests. **Scope:** S
+**Verification:** as H4. **Dependencies:** H3b. **Files:** `src/game/hordesettings.ts`, `src/storage/horde.ts`, wiring, tests. **Scope:** S
 
 ### Checkpoint M2: horde tuning on the Pixel 7 (owner)
-- [ ] Packs charge from the haze and take a few seconds to mow down.
+- [ ] Packs mill, funnel into a column and stream in; mowing it down feels like blasting through a horde.
 - [ ] Try counts up to 20,000 with `?fps`; pick the default count, figure size, kill time and width.
 - [ ] The chosen defaults are smooth on the phone.
 
