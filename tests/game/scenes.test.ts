@@ -10,6 +10,8 @@ import type { SessionLog } from "../../src/core/session";
 import { studyCards } from "../../src/core/study";
 import { itemKey, defaultProgress } from "../../src/core/srs";
 import {
+  createRunState,
+  packStreaming,
   plannedRows,
   rowOpenings,
   setTarget,
@@ -17,6 +19,7 @@ import {
 } from "../../src/core/sim";
 import { CLASH_SECONDS, REASK_MAX_BOX } from "../../src/core/tuning";
 import { syntheticList } from "../core/wk-fixture";
+import { kanaRun } from "../core/kana-run";
 import { STEP } from "../../src/game/loop";
 import {
   adoptProgress,
@@ -746,5 +749,30 @@ describe("session log in the session", () => {
   it("adoptProgress keeps the log", () => {
     const s = createSession(defaultProgress(), null, stored);
     expect(adoptProgress(s, defaultProgress()).log).toBe(stored);
+  });
+});
+
+describe("pause during a pack's stream", () => {
+  it("holds everything: the stream, the losses, the fire and the packs", () => {
+    let run = createRunState(kanaRun(1), {
+      questions: [100],
+      hazards: [{ kind: "pack", pos: 0.3, x: 0.5 }],
+      charges: [],
+    });
+    run = { ...run, army: 1000, hp: [1e12], heads: [200], strength: [160] };
+    let scene: Scene = { kind: "run", seed: 1, run, paused: false };
+    while (scene.kind === "run" && !packStreaming(scene.run, 0))
+      scene = updateScene(scene, STEP, 0);
+    scene = updateScene(scene, STEP, 0);
+    if (scene.kind !== "run") throw new Error("the run ended");
+    expect(packStreaming(scene.run, 0)).toBe(true);
+    const paused: Scene = { ...scene, paused: true };
+    let held: Scene = paused;
+    for (let n = 0; n < 60; n++) held = updateScene(held, STEP, 1);
+    expect(held).toBe(paused);
+    // unpaused, it streams on
+    const on = updateScene({ ...paused, paused: false }, STEP, 0);
+    if (on.kind !== "run") throw new Error("the run ended");
+    expect(on.run.arrived[0]).toBeGreaterThan(scene.run.arrived[0] ?? 0);
   });
 });

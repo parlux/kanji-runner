@@ -34,12 +34,15 @@ import {
   BASE_REWARD,
   BASE_SPEED,
   CRATE_REWARD_K,
+  HORDE_AREA,
   HORDE_THREAT,
   ENEMY_SPEED,
   ENEMY_STEER_SPEED,
   FIRE_RANGE,
   GATE_GROW_PER_DAMAGE,
   MAX_SPEED_MUL,
+  PACK_COLUMN_MAX,
+  PACK_MERGE_SPEED,
   PACK_WAKE,
   REASK_MAX,
   STARTING_ARMY,
@@ -112,8 +115,10 @@ export type RunState = {
   heads: number[];
   /** Per hazard: a pack's pre-horde strength (packStrength), what its width and contact go by; 0 otherwise. */
   strength: number[];
-  /** Damage dealt so far per hazard; a block is shattered once this reaches its hp. */
+  /** Damage dealt so far per hazard; a block is shattered once this reaches its hp. Enemies that reach the army count as damage too (see `arrived`). */
   damage: number[];
+  /** Per hazard: a pack's enemies that have streamed into the army so far (fractional). */
+  arrived: number[];
   /** Per hazard: where its enemy pack is now (null for blocks and saws). */
   packs: (PackState | null)[];
   /** Hazard being fired at this step, if any. */
@@ -180,6 +185,7 @@ export function createRunState(
     heads: hazardHeads(track, expected, horde),
     strength: hazardStrength(track, expected),
     damage: track.hazards.map(() => 0),
+    arrived: track.hazards.map(() => 0),
     packs: track.hazards.map((h) =>
       h.kind === "pack" ? { pos: h.pos, x: h.x } : null,
     ),
@@ -333,25 +339,123 @@ export function hazardPos(s: RunState, i: number): number {
 }
 
 /**
- * Packs within PACK_WAKE run at the army and drift towards the crowd centre.
- * A pack waits while an unanswered wall stands between it and the army: it
- * never runs through a wall (and can't be shot through one either).
+ * Enemies per track unit along pack i's column: its figures' spacing
+ * (HORDE_AREA × hordeScale²) at the army's width, packed tighter when needed
+ * so the whole pack fits in PACK_COLUMN_MAX.
+ */
+export function packDensity(s: RunState, i: number): number {
+  const area = HORDE_AREA * s.horde.hordeScale ** 2;
+  return Math.max(
+    (s.heads[i] ?? 0) / PACK_COLUMN_MAX,
+    crowdWidth(s.army) / area,
+  );
+}
+
+/** How far back (track units) pack i's column runs from its front: its enemies left over packDensity. */
+export function packLength(s: RunState, i: number): number {
+  return packHeadsLeft(s, i) / packDensity(s, i);
+}
+
+/**
+ * Whether pack i is charging: not yet passed, within PACK_WAKE, and no
+ * unanswered wall between it and the army (it never runs through a wall,
+ * and can't be shot through one either).
+ */
+export function packAwake(s: RunState, i: number): boolean {
+  const p = s.packs[i];
+  return (
+    !!p &&
+    i >= s.nextHazard &&
+    p.pos - s.dist <= PACK_WAKE &&
+    p.pos < fireLimit(s)
+  );
+}
+
+/** Whether pack i's front has reached the army and its enemies stream in. */
+export function packStreaming(s: RunState, i: number): boolean {
+  const p = s.packs[i];
+  return !!p && i >= s.nextHazard && p.pos <= s.dist && packSurvivors(s, i) > 0;
+}
+
+/** Soldiers pack i has cost so far: round(HORDE_THREAT × strength × arrived / heads). */
+export function packLoss(s: RunState, i: number): number {
+  const heads = s.heads[i] ?? 0;
+  return heads > 0
+    ? Math.round(
+        (HORDE_THREAT * (s.strength[i] ?? 0) * (s.arrived[i] ?? 0)) / heads,
+      )
+    : 0;
+}
+
+/**
+ * n more of pack i's enemies reach the army: they leave the pack (as
+ * damage, so the survivors drop) and cost soldiers as the running total of
+ * packLoss rises.
+ */
+function arrive(s: RunState, i: number, n: number): RunState {
+  const left = packHeadsLeft(s, i);
+  const k = Math.min(n, left);
+  if (k <= 0) return s;
+  const hp = s.hp[i] ?? 0;
+  const heads = s.heads[i] ?? 0;
+  const damage = [...s.damage];
+  const arrived = [...s.arrived];
+  damage[i] =
+    k >= left ? hp : Math.min(hp, (damage[i] ?? 0) + (k * hp) / heads);
+  arrived[i] = (arrived[i] ?? 0) + k;
+  const before = packLoss(s, i);
+  const next = { ...s, damage, arrived };
+  const loss = Math.min(s.army, packLoss(next, i) - before);
+  if (loss <= 0) return next;
+  const army = s.army - loss;
+  return {
+    ...next,
+    army,
+    lastClip: { loss, dist: s.dist },
+    status: army <= 0 ? "dead" : s.status,
+  };
+}
+
+/**
+ * Charging packs run at the army and their mouths drift towards the crowd
+ * centre. A pack whose front reaches the army stays there and streams in:
+ * the stretch of column that would run past it arrives (packDensity enemies
+ * per track unit). A pack right behind another that still has enemies joins
+ * the back of its column, catching up at PACK_MERGE_SPEED, so the two make
+ * one target and one stream.
  */
 function movePacks(s: RunState, dt: number): RunState {
-  const wall = fireLimit(s);
-  const packs = s.packs.map((p, i) => {
-    if (!p || i < s.nextHazard || p.pos - s.dist > PACK_WAKE || p.pos >= wall)
-      return p;
+  let next = s;
+  for (let i = s.nextHazard; i < s.packs.length; i++) {
+    const p = next.packs[i];
+    if (!p || !packAwake(s, i)) continue;
     const drift = Math.max(
       -ENEMY_STEER_SPEED * dt,
       Math.min(ENEMY_STEER_SPEED * dt, s.x - p.x),
     );
-    return {
-      pos: p.pos - ENEMY_SPEED * dt,
+    let pos = p.pos - ENEMY_SPEED * dt;
+    const k = i - 1;
+    const lead = next.packs[k];
+    if (
+      k >= s.nextHazard &&
+      lead &&
+      packAwake(s, k) &&
+      packSurvivors(next, k) > 0
+    )
+      pos = Math.max(
+        lead.pos + packLength(next, k),
+        p.pos - (ENEMY_SPEED + PACK_MERGE_SPEED) * dt,
+      );
+    const over = Math.max(0, s.dist - pos);
+    const packs = [...next.packs];
+    packs[i] = {
+      pos: Math.max(pos, s.dist),
       x: clampOnTrack(p.x + drift, packWidth(s, i)),
     };
-  });
-  return { ...s, packs };
+    next = { ...next, packs };
+    if (over > 0) next = arrive(next, i, over * packDensity(next, i));
+  }
+  return next;
 }
 
 /** What can be shot now: intact blocks and packs with enemies left. */
@@ -473,7 +577,13 @@ export function stepRun(s: RunState, dt: number, pace = 1): RunState {
     const hazard = next.track.hazards[next.nextHazard];
     const pos = hazardPos(next, next.nextHazard);
     const rowPos = next.track.questions[next.next] ?? Infinity;
-    if (hazard && pos <= rowPos && pos <= next.dist)
+    // a pack streaming in holds the hazards behind it until it is done
+    if (
+      hazard &&
+      pos <= rowPos &&
+      pos <= next.dist &&
+      !(hazard.kind === "pack" && packStreaming(next, next.nextHazard))
+    )
       next = passHazard(next, hazard);
     else if (rowPos <= next.dist) next = resolveRow(next);
     else return next;
@@ -481,36 +591,16 @@ export function stepRun(s: RunState, dt: number, pace = 1): RunState {
 }
 
 /**
- * Soldiers lost when pack i reaches the crowd, if their spans overlap:
- * round(HORDE_THREAT × its strength × survivors / heads), at most the army.
- */
-function contactLoss(s: RunState, i: number): number {
-  const w = crowdWidth(s.army);
-  const p = packSpan(s);
-  const overlap =
-    Math.min(s.x + w / 2, p.right) - Math.max(s.x - w / 2, p.left) > 0;
-  const heads = s.heads[i] ?? 0;
-  const loss =
-    heads > 0
-      ? Math.round(
-          (HORDE_THREAT * (s.strength[i] ?? 0) * packSurvivors(s, i)) / heads,
-        )
-      : 0;
-  return overlap ? Math.min(s.army, loss) : 0;
-}
-
-/**
  * Losses only: hazards never touch the streak or results. Shattered blocks
- * don't clip, and a pack is gone after contact, hit or miss.
+ * don't clip. A pack is passed once it is shot out or has streamed in (its
+ * losses came as it arrived; see movePacks).
  */
 function passHazard(s: RunState, h: Hazard): RunState {
   const i = s.nextHazard;
-  const clip =
-    h.kind === "pack"
-      ? contactLoss(s, i)
-      : isShattered(s, i)
-        ? 0
-        : clipLoss(s.army, s.x, crowdWidth(s.army), [hazardSpan(h, s.dist)]);
+  if (h.kind === "pack") return { ...s, nextHazard: i + 1 };
+  const clip = isShattered(s, i)
+    ? 0
+    : clipLoss(s.army, s.x, crowdWidth(s.army), [hazardSpan(h, s.dist)]);
   const army = s.army - clip;
   return {
     ...s,

@@ -3,7 +3,11 @@ import {
   crateReward,
   createRunState,
   gateOpenings,
+  hazardPos,
   isShattered,
+  packLength,
+  packStreaming,
+  rowOpenings,
   packMouth,
   packSpan,
   packSurvivors,
@@ -35,8 +39,10 @@ import {
   CRATE_REWARD_K,
   CROWD_MAX_W,
   ENEMY_HP,
+  HORDE_AREA,
   HORDE_DEFAULTS,
   HORDE_THREAT,
+  PACK_COLUMN_MAX,
   KILL_SECONDS,
   PACK_WIDTH,
   PACK_WAKE,
@@ -672,32 +678,162 @@ describe("shooting", () => {
     expect(width(narrow)).toBeCloseTo(crowdWidth(4), 5);
   });
 
-  it("contact costs round(HORDE_THREAT × strength × survivors / heads) when spans overlap, then the pack is gone", () => {
-    expect(HORDE_THREAT).toBeGreaterThan(0);
-    expect(HORDE_THREAT).toBeLessThanOrEqual(1);
-    for (const [strength, heads, army] of [
-      [7, 7, 20],
-      [40, 200, 300],
-      [133, 20_000, 1000],
-    ] as const) {
-      const hp = 2.5 * strength;
-      for (const shot of [0, 0.1, 0.37, 0.5, 0.9, 0.999]) {
-        const s0 = {
-          ...range([pack(0.02)], [hp], army, [heads], [strength]),
-          damage: [shot * hp],
-        };
-        const survivors = packSurvivors(s0, 0);
-        expect(survivors).toBe(Math.ceil(heads * (1 - shot) - 1e-6));
-        const loss = Math.round((HORDE_THREAT * strength * survivors) / heads);
-        const s = stepRun(s0, DT);
-        expect(s.nextHazard).toBe(1);
-        expect(s.army).toBe(army - loss);
-        expect(s.lastClip?.loss ?? 0).toBe(loss);
+  describe("stream contact", () => {
+    /** Steps until pack 0 is passed (or the run ends), recording the army and the losses per step. */
+    const stream = (s0: RunState, max = 5) => {
+      let s = s0;
+      const losses: number[] = [];
+      const states: RunState[] = [];
+      for (let n = 0; n < max / DT && s.nextHazard === 0; n++) {
+        const next = stepRun(s, DT);
+        losses.push(s.army - next.army);
+        states.push(next);
+        s = next;
+        if (s.status !== "running") break;
       }
-    }
-    // a whole intact pack costs HORDE_THREAT × its strength
-    const s = stepRun(range([pack(0.02)], [400], 1000, [200], [160]), DT);
-    expect(s.army).toBe(1000 - Math.round(HORDE_THREAT * 160));
+      return { s, losses, states };
+    };
+
+    it("a pack that arrives untouched costs HORDE_THREAT × strength in total, a few soldiers at a time", () => {
+      for (const [heads, strength] of [
+        [200, 160],
+        [2_000, 133],
+        [20_000, 100],
+        [15, 7],
+      ] as const) {
+        // so many hit points that the fire never kills one
+        const s0 = range([pack(0.3)], [1e12], 1000, [heads], [strength]);
+        const { s, losses, states } = stream(s0);
+        expect(s.nextHazard).toBe(1);
+        expect(1000 - s.army).toBe(Math.round(HORDE_THREAT * strength));
+        // each enemy that arrives costs HORDE_THREAT × strength / heads (the running total rounded)
+        for (const r of states)
+          expect(1000 - r.army).toBe(
+            Math.round((HORDE_THREAT * strength * (r.arrived[0] ?? 0)) / heads),
+          );
+        if (HORDE_THREAT * strength >= 10)
+          expect(losses.filter((l) => l > 0).length).toBeGreaterThanOrEqual(5);
+      }
+    });
+
+    it("the front stays at the army while enemies stream in, and the survivors drop as they arrive", () => {
+      const s0 = range([pack(0.3)], [1e12], 1000, [200], [160]);
+      const { states } = stream(s0);
+      const streaming = states.filter((r) => packStreaming(r, 0));
+      expect(streaming.length).toBeGreaterThan(5);
+      for (const r of streaming) {
+        expect(hazardPos(r, 0)).toBe(r.dist);
+        expect(packSurvivors(r, 0)).toBe(
+          Math.ceil(200 - (r.arrived[0] ?? 0) - 1e-6),
+        );
+      }
+    });
+
+    it("stops costing soldiers when the pack is shot out mid-stream", () => {
+      // 100 soldiers fire 100 HP/s: 12 HP lasts 0.12 s, the stream about 0.2 s
+      const s0 = range([pack(0.001)], [12], 100, [200], [100]);
+      const { s, states } = stream(s0);
+      expect(s.nextHazard).toBe(1);
+      const lost = 100 - s.army;
+      expect(lost).toBeGreaterThan(0);
+      expect(lost).toBeLessThan(Math.round(HORDE_THREAT * 100));
+      const out = states.findIndex((r) => packSurvivors(r, 0) === 0);
+      expect(out).toBeGreaterThan(0);
+      expect(states[out]?.lastShatter?.index).toBe(0);
+      // nothing is lost after it is shot out
+      for (const r of states.slice(out)) expect(r.army).toBe(s.army);
+      expect(stepFor(s, 0.5).army).toBe(s.army);
+    });
+
+    it("fits a pack's column in PACK_COLUMN_MAX: even 20,000 stream in within PACK_COLUMN_MAX / the closing speed", () => {
+      const scale = HORDE_DEFAULTS.hordeScale;
+      for (const heads of [3, 200, 2_000, 20_000]) {
+        const s0 = range([pack(0.001)], [1e12], 1000, [heads], [100]);
+        const natural = (heads * HORDE_AREA * scale ** 2) / crowdWidth(1000);
+        expect(packLength(s0, 0)).toBeCloseTo(
+          Math.min(natural, PACK_COLUMN_MAX),
+          9,
+        );
+        const { s, states } = stream(s0);
+        expect(s.nextHazard).toBe(1);
+        const secs = states.length * DT;
+        expect(secs).toBeLessThanOrEqual(
+          Math.min(natural, PACK_COLUMN_MAX) / (BASE_SPEED + ENEMY_SPEED) +
+            2 * DT,
+        );
+      }
+    });
+
+    it("holds the hazards behind a streaming pack until it is done", () => {
+      const s0 = range(
+        [pack(0.001), wide(0.05)],
+        [1e12, 1e12],
+        1000,
+        [20_000, 0],
+        [100, 0],
+      );
+      let s = s0;
+      while (packStreaming(s, 0) || s.dist < 0.01) {
+        expect(s.nextHazard).toBe(0);
+        s = stepRun(s, DT);
+      }
+      expect(s.nextHazard).toBeGreaterThanOrEqual(1);
+    });
+
+    it("merges a pack charging right behind another into one column: one target, one stream", () => {
+      const s0 = range(
+        [pack(2), pack(4)],
+        [1e12, 1e12],
+        1000,
+        [200, 200],
+        [100, 100],
+      );
+      let s = s0;
+      let joined = false;
+      let gap = Infinity;
+      let lastFirst = -1;
+      for (let n = 0; n < 5 / DT && s.nextHazard < 2; n++) {
+        s = stepRun(s, DT);
+        if (s.nextHazard === 0) {
+          const tail = hazardPos(s, 0) + packLength(s, 0);
+          if (Math.abs(hazardPos(s, 1) - tail) < 1e-9) joined = true;
+          // the pack in front takes the fire
+          if (s.target !== null) expect(s.target).toBe(0);
+        }
+        if (s.nextHazard === 1 && lastFirst < 0) lastFirst = n;
+        if (lastFirst >= 0 && gap === Infinity && packStreaming(s, 1))
+          gap = n - lastFirst;
+      }
+      expect(joined).toBe(true);
+      // the second streams in right after the first
+      expect(gap).toBeLessThanOrEqual(1);
+      expect(s.nextHazard).toBe(2);
+      expect(1000 - s.army).toBe(2 * Math.round(HORDE_THREAT * 100));
+    });
+
+    it("a 2,000 or 20,000 pack never streams across a wall in a real run", () => {
+      for (const packMax of [2_000, 20_000])
+        for (const seed of [1, 2, 3]) {
+          const tuning = { ...HORDE_DEFAULTS, hordeK: 10_000, packMax };
+          let s = createRunState(
+            kanaRun(seed),
+            buildTrack(seed, ROWS_PER_RUN, false),
+            null,
+            tuning,
+          );
+          s = { ...s, army: 5000 };
+          for (let n = 0; n < 200 / DT && s.status === "running"; n++) {
+            const row = s.rows[s.next];
+            const o = rowOpenings(s, s.next)[row?.answerIndex ?? 0];
+            const next = stepRun(setTarget(s, o?.centre ?? 0.5), DT);
+            if (next.next > s.next)
+              for (let i = s.nextHazard; i < s.packs.length; i++)
+                expect(packStreaming(s, i)).toBe(false);
+            s = next;
+          }
+          expect(s.status).toBe("finished");
+        }
+    });
   });
 
   describe("hordes", () => {
@@ -888,7 +1024,7 @@ describe("shooting", () => {
       streak: 3,
       results: [true, false],
     };
-    const s = stepRun(s0, DT);
+    const s = stepFor(s0, 1);
     expect(s.army).toBe(0);
     expect(s.status).toBe("dead");
     expect(s.streak).toBe(3);

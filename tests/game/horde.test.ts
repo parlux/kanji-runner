@@ -188,7 +188,9 @@ describe("drawing the horde", () => {
 
   it("forms a column at the army's width when charging, and mills about when waiting", () => {
     const { h, slot } = setup();
-    const a = horde([3], 0);
+    const r0 = horde([3], 0);
+    // an unanswered wall between it and the army
+    const a = { ...r0, track: { ...r0.track, questions: [1, 9] } };
     const pw = TRACK_W;
     const armyW = crowdWidth(200) * TRACK_W;
     // waiting: the pack stays put
@@ -200,7 +202,8 @@ describe("drawing the horde", () => {
     for (let t = 2; t <= 4; t += 0.1) {
       pos -= 0.01;
       const r = horde([pos], 0);
-      h.update({ ...r, track: a.track }, t);
+      // the wall answered
+      h.update({ ...r, track: a.track, next: 1 }, t);
     }
     expect(slot(0).back.z).toBeGreaterThan(0.95);
     expect(slot(0).front.z).toBeCloseTo(armyW, 0);

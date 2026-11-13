@@ -11,6 +11,7 @@ import { crowdWidth } from "../../core/crowd";
 import {
   hazardPos,
   isShattered,
+  packAwake,
   packHeadsLeft,
   packMouth,
   packSurvivors,
@@ -308,7 +309,7 @@ export function createHorde(scene: Scene): Horde {
         }
         kill(s, n, dist);
         // a charging pack forms its column; a waiting one mills, drawing in slowly
-        const charging = pos < s.pos - 1e-9;
+        const charging = packAwake(run, i);
         const target = charging ? 1 : Math.max(s.form, MILL_FORM);
         const dt = Math.max(0, clock - s.clock);
         s.form +=

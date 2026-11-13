@@ -209,10 +209,13 @@ export function clipGaps(run: RunState): { ahead: number; behind: number } {
     const span =
       h.kind === "saw"
         ? hazardSpan(h, h.pos)
-        : isShattered(run, i) || (h.kind === "pack" && !packSurvivors(run, i))
-          ? null
-          : h.kind === "pack"
+        : h.kind === "pack"
+          ? // a pack counts until it is shot out; one that streamed in met the crowd
+            packSurvivors(run, i) || (run.arrived[i] ?? 0) > 0
             ? packSpan(run)
+            : null
+          : isShattered(run, i)
+            ? null
             : { left: h.left, right: h.right };
     if (span && span.right > left && span.left < right) near(hazardPos(run, i));
   });

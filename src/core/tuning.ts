@@ -183,10 +183,27 @@ export const HORDE_DEFAULTS: HordeTuning = {
   hordeScale: HORDE_SCALE,
 };
 /**
- * Contact costs min(army, round(HORDE_THREAT × packStrength(expected) ×
- * survivors / heads)) soldiers: an intact pack HORDE_THREAT × today's strength.
+ * Stream contact: each enemy that reaches the army costs HORDE_THREAT ×
+ * packStrength(expected) / heads soldiers (the running total rounded), so a
+ * pack that arrives untouched costs HORDE_THREAT × today's strength.
  */
 export const HORDE_THREAT = 0.2;
+/**
+ * Track area (track widths × track units) one enemy takes in a pack's column
+ * at figure size 1: the view's figure gap (0.36 world units) squared over
+ * the track's 10 × 10 world units. Times hordeScale², it sets how many
+ * enemies arrive per track unit the column runs into the army.
+ */
+export const HORDE_AREA = 0.36 ** 2 / 100;
+/**
+ * Longest a pack's column runs in the core (track units): a bigger pack is
+ * packed tighter, so its stream into the army lasts at most this over the
+ * closing speed (about half a second) and always ends before the next wall
+ * (at least CALM_DISTANCE beyond the pack).
+ */
+export const PACK_COLUMN_MAX = 1.2;
+/** A pack that wakes behind another still charging catches up with that column's tail this much faster (track units per second). */
+export const PACK_MERGE_SPEED = 2.5;
 
 // Boss (T9). See boss.ts.
 /** Boss size = round(BOSS_K × expected army). */
