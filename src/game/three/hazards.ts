@@ -24,7 +24,7 @@ import {
   MAX_RECRUITS,
   packFigureScale,
   recruitProgress,
-  SHAPE_DISTANCE,
+  shapeDistance,
   SHATTER_DIST,
   spanWorld,
   TRACK_W,
@@ -80,7 +80,7 @@ export function createHazards(scene: Scene, fx: Fx) {
         if (hz?.kind !== "pack" || i < run.nextHazard || isShattered(run, i))
           continue;
         const ahead = hazardPos(run, i) - run.dist;
-        if (ahead > SHAPE_DISTANCE) continue;
+        if (ahead > shapeDistance()) continue;
         const n = packSurvivors(run, i);
         if (n <= 0) continue;
         const span = packSpan(run, i);

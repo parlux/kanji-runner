@@ -11,7 +11,7 @@ import {
   SHAPE_DISTANCE,
   WALL_H,
 } from "../../src/game/three/world";
-import { cameraFit } from "../../src/game/three/view";
+import { cameraFor } from "../../src/game/three/view";
 import { kanaRun } from "../core/kana-run";
 
 type Draw = { s: string; fill: string; stroke: string };
@@ -41,7 +41,7 @@ const hex = `#${HAZE_COLOUR.toString(16).padStart(6, "0")}`;
 describe("track text haze", () => {
   const w = 390;
   const h = 844;
-  const fit = cameraFit(w / h);
+  const fit = cameraFor(null);
   const run = createRunState(kanaRun(1), buildTrack(1, ROWS_PER_RUN));
   const wall = run.track.questions[0] as number;
 

@@ -17,14 +17,7 @@ import {
 } from "three";
 import type { RunState } from "../../core/sim";
 import type { Scene } from "../scenes";
-import {
-  cameraFor,
-  defaultCameraSettings,
-  fitCamera,
-  LOOK,
-  makeCamera,
-  MAX_DPR,
-} from "./view";
+import { cameraFor, fitCamera, LOOK, makeCamera, MAX_DPR } from "./view";
 import { makeCrowdMesh, type FigureKind } from "./figures";
 import { createWalls } from "./walls";
 import { createSquads } from "./squads";
@@ -42,7 +35,10 @@ import {
   spreadWidth,
   DIST_SCALE,
   MAX_DRAWN_SOLDIERS,
+  DEFAULT_CAMERA,
   fogRange,
+  setShapeDistance,
+  shapeDistance,
   followStep,
   followTarget,
   TRACK_W,
@@ -70,10 +66,8 @@ export type View3d = {
   project: Projector;
   /** Haze at a track point, as the fog gives the scene (for the overlay text). */
   haze: Haze;
-  /** Tuned camera settings, or null for today's fitted camera. */
+  /** Tuned camera settings (including the haze), or null for the defaults. */
   setCamera(settings: CameraSettings | null): void;
-  /** Today's camera for the current screen, as settings (the settings screen's start). */
-  cameraDefaults(): CameraSettings;
 };
 
 /** Track length drawn ahead of and behind the army (world units); it runs on into the haze. */
@@ -291,7 +285,7 @@ export function createView3d(canvas: HTMLCanvasElement): View3d | null {
   // how spread out the crowd is (1 open road, 0 squeezed), eased over time
   let share = 1;
   let tuned: CameraSettings | null = null;
-  let fit: CameraFit = cameraFor(1, null);
+  let fit: CameraFit = cameraFor(null);
   // the camera's sideways position (world X), eased towards the follow target
   let camX = 0;
   let pose = fit.pose;
@@ -306,17 +300,18 @@ export function createView3d(canvas: HTMLCanvasElement): View3d | null {
     armyDist: 0,
     alpha: 1,
   };
-  let haze: Haze = hazeFor(pose, 0);
+  let haze: Haze = hazeFor(pose, 0, shapeDistance());
   // animation time: stands still while the run is paused
   let clock = 0;
   let last = performance.now();
   const v = new Vector3();
   // poses the camera for the screen and settings; the haze follows the pose
   const refit = (): void => {
-    fit = cameraFor(w / h, tuned);
+    fit = cameraFor(tuned);
     pose = fit.pose;
+    setShapeDistance((tuned ?? DEFAULT_CAMERA).haze);
     fitCamera(camera, w / h, fit, camX);
-    const range = fogRange(pose);
+    const range = fogRange(pose, shapeDistance());
     fog.near = range.near;
     fog.far = range.far;
   };
@@ -331,7 +326,6 @@ export function createView3d(canvas: HTMLCanvasElement): View3d | null {
       tuned = settings;
       refit();
     },
-    cameraDefaults: () => defaultCameraSettings(w / h),
     render(s, pace = 1) {
       const now = performance.now();
       const dt = Math.min(0.1, (now - last) / 1000);
@@ -354,15 +348,15 @@ export function createView3d(canvas: HTMLCanvasElement): View3d | null {
       }
       runDist = run.dist;
       // the run follows the army sideways; the boss scene eases back to centre
-      const follow = tuned?.follow ?? 0;
+      const { follow, smoothing } = tuned ?? DEFAULT_CAMERA;
       camX = followStep(
         camX,
         s.kind === "run" ? followTarget(follow, s.run.x) : 0,
         dt,
-        tuned?.smoothing ?? 0,
+        smoothing,
       );
       fitCamera(camera, w / h, fit, camX);
-      haze = hazeFor(pose, runDist);
+      haze = hazeFor(pose, runDist, shapeDistance());
       layDashes(runDist);
       fx.begin();
       walls.update(run);

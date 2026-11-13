@@ -4,7 +4,7 @@ import { makeCrowdMesh } from "./figures";
 import { FX_COLOURS, type Fx } from "./fx";
 import {
   crowdLayout,
-  SHAPE_DISTANCE,
+  shapeDistance,
   squadPlace,
   WALL_BEHIND,
   worldX,
@@ -55,15 +55,15 @@ export function createSquads(scene: Scene, fx: Fx) {
       let near = false;
       for (const i of run.track.charges) {
         const ahead = (run.track.questions[i] ?? Infinity) - run.dist;
-        if (ahead >= -WALL_BEHIND - 2 && ahead <= SHAPE_DISTANCE) near = true;
+        if (ahead >= -WALL_BEHIND - 2 && ahead <= shapeDistance()) near = true;
       }
       for (const c of near ? viewOf(run).charges : []) {
         const ahead = c.pos - run.dist;
         if (ahead < -WALL_BEHIND - 2) continue;
-        if (ahead > SHAPE_DISTANCE) break;
+        if (ahead > shapeDistance()) break;
         for (const s of c.squads) {
           const p = squadPlace(run.dist, run.x, c, s);
-          if (!p || p.dist - run.dist > SHAPE_DISTANCE) continue;
+          if (!p || p.dist - run.dist > shapeDistance()) continue;
           const cx = worldX(p.x);
           const cz = worldZ(p.dist, run.dist);
           const n = crowdLayout(s.count, layout);

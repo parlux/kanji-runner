@@ -31,7 +31,7 @@ type Field = {
   unit: string;
   step: number;
   digits: number;
-  range: (d: CameraSettings) => [number, number];
+  range: () => [number, number];
 };
 
 const FIELDS: Field[] = [
@@ -49,10 +49,7 @@ const FIELDS: Field[] = [
     unit: "",
     step: 0.1,
     digits: 1,
-    range: (d) => [
-      d.distance * CAMERA_LIMITS.distance.min,
-      d.distance * CAMERA_LIMITS.distance.max,
-    ],
+    range: () => [CAMERA_LIMITS.distance.min, CAMERA_LIMITS.distance.max],
   },
   {
     key: "fov",
@@ -78,6 +75,14 @@ const FIELDS: Field[] = [
     digits: 2,
     range: () => [CAMERA_LIMITS.smoothing.min, CAMERA_LIMITS.smoothing.max],
   },
+  {
+    key: "haze",
+    label: "Haze (distance)",
+    unit: "",
+    step: 0.5,
+    digits: 1,
+    range: () => [CAMERA_LIMITS.haze.min, CAMERA_LIMITS.haze.max],
+  },
 ];
 
 let panelEl: HTMLElement | null = null;
@@ -95,7 +100,7 @@ const installCss = (): void => {
 export const cameraPanelOpen = (): boolean => panelEl !== null;
 
 /**
- * Opens the panel. `defaults` is today's camera as settings (what Reset
+ * Opens the panel. `defaults` is the default camera as settings (what Reset
  * returns to); `current` the saved settings or null. Each change calls
  * `onChange` with the new settings, Reset with null.
  */
@@ -126,7 +131,7 @@ export function openCameraPanel(opts: {
     value.textContent = `${n.toFixed(f.digits)}${f.unit}`;
   };
   for (const f of FIELDS) {
-    const [lo, hi] = f.range(opts.defaults);
+    const [lo, hi] = f.range();
     const label = document.createElement("label");
     const name = document.createElement("span");
     name.textContent = f.label;

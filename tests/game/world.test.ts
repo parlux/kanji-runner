@@ -49,7 +49,7 @@ import {
   spreadWidth,
   SQUEEZE_DIST,
   BOSS_RANGE,
-  BOSS_SHOWN,
+  bossShown,
   BOSS_TOP,
   bossArmyDist,
   bossFightAt,
@@ -60,7 +60,10 @@ import {
   followStep,
   followTarget,
   poseFromSettings,
-  settingsFromFit,
+  DEFAULT_CAMERA,
+  HAZE_MAX,
+  setShapeDistance,
+  shapeDistance,
   type CameraSettings,
 } from "../../src/game/three/world";
 import { clashAt } from "../../src/core/boss";
@@ -83,15 +86,8 @@ import { createRunState, stepRun, type RunState } from "../../src/core/sim";
 import { buildTrack } from "../../src/core/track";
 import { ROWS_PER_RUN } from "../../src/core/tuning";
 import { kanaRun } from "../core/kana-run";
-import { gateOpenings } from "../../src/core/gates";
 import { hazardSpan, type Saw } from "../../src/core/track";
-import {
-  AIM,
-  CAMERA_MIN_HEIGHT,
-  cameraFit,
-  cameraFor,
-  defaultCameraSettings,
-} from "../../src/game/three/view";
+import { AIM, cameraFor } from "../../src/game/three/view";
 
 const pose: CameraPose = { height: 4, back: 12, lookAhead: 20, lookHeight: 0 };
 
@@ -373,7 +369,7 @@ describe("crowd spread and squeeze", () => {
 });
 
 describe("haze and horizons", () => {
-  const poses = [pose, cameraFit(390 / 844).pose, cameraFit(1280 / 800).pose];
+  const poses = [pose, cameraFor(null).pose, cameraFor(null).pose];
   const haze = (p: CameraPose, ahead: number, y: number): number =>
     hazeAt(fogRange(p), viewDepth(p, y, worldZ(ahead, 0)));
 
@@ -407,88 +403,71 @@ describe("haze and horizons", () => {
   });
 });
 
-describe("camera fit", () => {
+describe("default camera", () => {
   const sizes: [number, number][] = [
     [390, 844],
     [1280, 800],
   ];
   const viewZ = worldZ(VIEW_DISTANCE, 0);
-  const farZ = worldZ(SHAPE_DISTANCE, 0);
   const pitchOf = (p: CameraPose): number =>
     (Math.atan2(p.height - p.lookHeight, p.back + p.lookAhead) * 180) / Math.PI;
 
+  it("is the owner's pick: pitch 8, distance 15, FOV 34, follow 0.4, smoothing 1", () => {
+    expect(DEFAULT_CAMERA).toMatchObject({
+      pitch: 8,
+      distance: 15,
+      fov: 34,
+      follow: 0.4,
+      smoothing: 1,
+    });
+    const fit = cameraFor(null);
+    expect(fit).toEqual(poseFromSettings(DEFAULT_CAMERA, AIM.armyY));
+    expect(pitchOf(fit.pose)).toBeCloseTo(8, 9);
+    expect(Math.hypot(fit.pose.height, fit.pose.back)).toBeCloseTo(15, 9);
+    expect(fit.fov).toBe(34);
+  });
+
   for (const [w, h] of sizes)
-    it(`at ${w}×${h} puts the army 80% down, the far line near the top and both edges in view`, () => {
+    it(`at ${w}×${h} puts the army 80% down and the read line above it`, () => {
       const aspect = w / h;
-      const fit = cameraFit(aspect);
+      const fit = cameraFor(null);
       const army = screenAt(fit, aspect, 0, 0, 0).y;
-      const far = screenAt(fit, aspect, 0, 0, farZ).y;
-      expect(army).toBeCloseTo(AIM.armyY, 6);
-      expect(far).toBeCloseTo(AIM.farY, 6);
       expect(army).toBeCloseTo(0.8, 6);
-      expect(far).toBeGreaterThanOrEqual(0.05);
-      expect(far).toBeLessThanOrEqual(0.15);
-      // the read line sits between them
       const view = screenAt(fit, aspect, 0, 0, viewZ).y;
-      expect(view).toBeGreaterThan(far);
       expect(view).toBeLessThan(army);
-      // sky (and the hazed track beyond the far line) is about a tenth at most
-      expect(far).toBeLessThanOrEqual(0.12);
-      for (const x of [0, 1]) {
-        const p = screenAt(fit, aspect, worldX(x), 0, 0).x;
-        expect(p).toBeGreaterThan(0);
-        expect(p).toBeLessThan(1);
-      }
+      expect(view).toBeGreaterThan(0.2);
+      // the far line (the shape horizon) is above the read line, below the top
+      const far = screenAt(fit, aspect, 0, 0, worldZ(SHAPE_DISTANCE, 0)).y;
+      expect(far).toBeLessThan(view);
+      expect(far).toBeGreaterThan(0);
       // the biggest crowd's near edge stays on screen
       const nearZ = (CROWD_MAX_W / 2) * CROWD_DEPTH * TRACK_W;
       expect(screenAt(fit, aspect, 0, 0, nearZ).y).toBeLessThan(1);
       // real perspective: the track at the read line is narrower than at the army
       const nearW = screenAt(fit, aspect, worldX(1), 0, 0).x - 0.5;
       const farW = screenAt(fit, aspect, worldX(1), 0, viewZ).x - 0.5;
-      expect(farW).toBeLessThan(nearW * 0.7);
+      expect(farW).toBeLessThan(nearW * 0.9);
     });
 
-  it("keeps a 3-answer wall's outer openings on screen at 390×844 from VIEW_DISTANCE to the army", () => {
-    const aspect = 390 / 844;
-    const fit = cameraFit(aspect);
-    const openings = gateOpenings(3);
-    const outer = [openings[0], openings[2]];
-    for (let ahead = 0; ahead <= VIEW_DISTANCE; ahead += 0.25)
-      for (const o of outer)
-        for (const x of [o?.left ?? 0, o?.right ?? 1])
-          for (const y of [0, WALL_H]) {
-            const p = screenAt(fit, aspect, worldX(x), y, worldZ(ahead, 0));
-            expect(p.x).toBeGreaterThan(0);
-            expect(p.x).toBeLessThan(1);
-            expect(p.y).toBeGreaterThan(0);
-            expect(p.y).toBeLessThan(1);
-          }
+  it("matches the owner's measurements at 390×844 (height 4.7, back 14.2)", () => {
+    const { pose } = cameraFor(null);
+    expect(pose.height).toBeCloseTo(4.73, 1);
+    expect(pose.back).toBeCloseTo(14.23, 1);
   });
 
-  it("keeps T3b's pitch with the army lower: 28.7° at 390×844, 25.7° at 1280×800", () => {
-    expect(pitchOf(cameraFit(390 / 844).pose)).toBeCloseTo(28.7, 1);
-    expect(pitchOf(cameraFit(1280 / 800).pose)).toBeCloseTo(25.7, 1);
-  });
-
-  it("is flatter than T1b's camera on a phone and on a wide screen", () => {
-    // T1b's camera pitched 40.7° down at 390×844 and 29.7° at 1280×800
-    expect(pitchOf(cameraFit(390 / 844).pose)).toBeLessThan(40.7 - 8);
-    expect(pitchOf(cameraFit(1280 / 800).pose)).toBeLessThan(29.7);
-  });
-
-  it("moves the camera back (not steeper) only when the screen is too narrow", () => {
-    const wide = cameraFit(1280 / 800).pose;
-    const narrow = cameraFit(390 / 844).pose;
-    expect(wide.height).toBe(CAMERA_MIN_HEIGHT);
-    expect(narrow.height).toBeGreaterThan(CAMERA_MIN_HEIGHT);
-    expect(narrow.height / narrow.back).toBeCloseTo(wide.height / wide.back, 6);
+  it("spreads the haze over most of the screen: the gate at VIEW_DISTANCE is well below the horizon", () => {
+    const fit = cameraFor(null);
+    const at = (d: number): number =>
+      screenAt(fit, 390 / 844, 0, 0, worldZ(d, 0)).y;
+    // clear at the read line, total at the shape horizon: a wide band, not a sliver
+    expect(at(VIEW_DISTANCE) - at(SHAPE_DISTANCE)).toBeGreaterThan(0.08);
   });
 });
 
 describe("walls and their text", () => {
   const w = 390;
   const h = 844;
-  const fit = cameraFit(w / h);
+  const fit = cameraFor(null);
 
   it("projects a wall smaller the farther away it is", () => {
     const project = projectorFor(fit, w, h, 5);
@@ -501,11 +480,11 @@ describe("walls and their text", () => {
     }
   });
 
-  it("matches the live camera's placement of the army and the far line", () => {
+  it("matches the live camera's placement of the army and the shape horizon", () => {
     const project = projectorFor(fit, w, h, 2);
     expect((project(0.5, 2, 0)?.y ?? 0) / h).toBeCloseTo(AIM.armyY, 6);
     expect((project(0.5, 2 + SHAPE_DISTANCE, 0)?.y ?? 0) / h).toBeCloseTo(
-      AIM.farY,
+      screenAt(fit, w / h, 0, 0, worldZ(SHAPE_DISTANCE, 0)).y,
       6,
     );
     expect(project(0.5, 2 - 10, 0)).toBeNull();
@@ -513,7 +492,7 @@ describe("walls and their text", () => {
 
   it("gives overlay text the haze the fog gives the object at that point", () => {
     const run = 7;
-    for (const p of [pose, cameraFit(390 / 844).pose]) {
+    for (const p of [pose, cameraFor(null).pose]) {
       const haze = hazeFor(p, run);
       for (const ahead of [
         0.5,
@@ -723,19 +702,16 @@ describe("the giant boss", () => {
     expect(bossFightAt(20, 30, end + 9).ending?.u).toBe(1);
   });
 
-  it("comes out of the haze: total at BOSS_SHOWN up to its top, clear at the firing stop", () => {
-    for (const aspect of [390 / 844, 1280 / 800]) {
-      const fit = cameraFit(aspect);
-      const haze = hazeFor(fit.pose, 0);
-      expect(haze(BOSS_SHOWN, BOSS_TOP)).toBe(1);
-      expect(haze(BOSS_SHOWN, 0)).toBe(1);
-      expect(haze(BOSS_RANGE, BOSS_TOP)).toBe(0);
-    }
+  it("comes out of the haze: total at bossShown() up to its top, clear at the firing stop", () => {
+    const haze = hazeFor(cameraFor(null).pose, 0);
+    expect(haze(bossShown(), BOSS_TOP)).toBe(1);
+    expect(haze(bossShown(), 0)).toBe(1);
+    expect(haze(BOSS_RANGE, BOSS_TOP)).toBe(0);
   });
 
   it("is whole on screen at the firing stop, with room for its HP above", () => {
     for (const aspect of [390 / 844, 1280 / 800]) {
-      const fit = cameraFit(aspect);
+      const fit = cameraFor(null);
       const z = worldZ(BOSS_RANGE, 0);
       const top = screenAt(fit, aspect, 0, BOSS_TOP, z).y;
       const foot = screenAt(fit, aspect, 0, 0, z).y;
@@ -752,23 +728,6 @@ describe("the giant boss", () => {
 describe("camera settings", () => {
   const aspects = [390 / 844, 1280 / 800];
 
-  it("with no saved settings is exactly today's fitted camera", () => {
-    for (const a of aspects) expect(cameraFor(a, null)).toEqual(cameraFit(a));
-  });
-
-  it("round-trips today's pose through settings", () => {
-    for (const a of aspects) {
-      const fit = cameraFit(a);
-      const s = defaultCameraSettings(a);
-      expect(s.follow).toBe(0);
-      const back = poseFromSettings(s, AIM.armyY);
-      expect(back.fov).toBeCloseTo(fit.fov, 9);
-      for (const k of ["height", "back", "lookAhead", "lookHeight"] as const)
-        expect(back.pose[k]).toBeCloseTo(fit.pose[k], 6);
-      expect(settingsFromFit(back).pitch).toBeCloseTo(s.pitch, 9);
-    }
-  });
-
   it("keeps the army at the aim height and the chosen pitch, FOV and distance", () => {
     const s: CameraSettings = {
       pitch: 20,
@@ -776,10 +735,12 @@ describe("camera settings", () => {
       fov: 50,
       follow: 0,
       smoothing: 0.2,
+      haze: 10,
     };
     const fit = poseFromSettings(s, AIM.armyY);
     const { pose } = fit;
-    expect(screenAt(fit, 0.5, 0, 0, 0).y).toBeCloseTo(AIM.armyY, 6);
+    for (const a of aspects)
+      expect(screenAt(fit, a, 0, 0, 0).y).toBeCloseTo(AIM.armyY, 6);
     expect(Math.hypot(pose.height, pose.back)).toBeCloseTo(12, 9);
     expect(
       (Math.atan2(pose.height, pose.back + pose.lookAhead) * 180) / Math.PI,
@@ -787,36 +748,69 @@ describe("camera settings", () => {
     expect(fit.fov).toBe(50);
   });
 
-  it("keeps the haze total at SHAPE_DISTANCE and clear at VIEW_DISTANCE across tuned extremes", () => {
-    for (const a of aspects) {
-      const d = defaultCameraSettings(a);
-      for (const pitch of [8, 20, 45])
-        for (const dm of [0.4, 1, 2])
-          for (const fov of [20, 45, 75]) {
+  it("keeps the haze total at the horizon in use and clear at VIEW_DISTANCE across tuned extremes", () => {
+    const d = DEFAULT_CAMERA;
+    for (const pitch of [3, 8, 45])
+      for (const distance of [6, 15, 60])
+        for (const fov of [20, 34, 75])
+          for (const horizon of [VIEW_DISTANCE + 1, SHAPE_DISTANCE, HAZE_MAX]) {
             const { pose } = poseFromSettings(
-              { ...d, pitch, distance: d.distance * dm, fov },
+              { ...d, pitch, distance, fov },
               AIM.armyY,
             );
-            const range = fogRange(pose);
+            const range = fogRange(pose, horizon);
             expect(range.far).toBeGreaterThan(range.near);
             for (const y of [0, WALL_H, FOG_TOP_H]) {
               const at = (dist: number): number =>
                 hazeAt(range, viewDepth(pose, y, worldZ(dist, 0)));
-              expect(at(SHAPE_DISTANCE)).toBeGreaterThan(0.97);
+              expect(at(horizon)).toBeGreaterThan(0.97);
               expect(at(VIEW_DISTANCE)).toBeLessThan(0.05);
             }
           }
+  });
+
+  it("has the default haze at SHAPE_DISTANCE, 4 × VIEW_DISTANCE, below the re-ask gap and the slider's maximum", () => {
+    expect(DEFAULT_CAMERA.haze).toBe(SHAPE_DISTANCE);
+    expect(SHAPE_DISTANCE).toBe(4 * VIEW_DISTANCE);
+    expect(shapeDistance()).toBe(SHAPE_DISTANCE);
+    expect(SHAPE_DISTANCE).toBeLessThan(HAZE_MAX);
+    expect(HAZE_MAX).toBeLessThan(
+      REASK_GAP_MIN * (CALM_DISTANCE + 2 * HAZARD_SPACING),
+    );
+    expect(CAMERA_LIMITS.haze).toEqual({
+      min: VIEW_DISTANCE + 1,
+      max: HAZE_MAX,
+    });
+  });
+
+  it("sets the live shape horizon within the slider's range", () => {
+    try {
+      setShapeDistance(15);
+      expect(shapeDistance()).toBe(15);
+      expect(bossShown()).toBe(16);
+      setShapeDistance(100);
+      expect(shapeDistance()).toBe(HAZE_MAX);
+      setShapeDistance(0);
+      expect(shapeDistance()).toBe(VIEW_DISTANCE + 1);
+    } finally {
+      setShapeDistance(SHAPE_DISTANCE);
     }
   });
 
-  it("offers slider ranges around today's values", () => {
-    expect(CAMERA_LIMITS.pitch).toEqual({ min: 8, max: 45 });
-    for (const a of aspects) {
-      const s = defaultCameraSettings(a);
-      expect(s.pitch).toBeGreaterThan(CAMERA_LIMITS.pitch.min);
-      expect(s.pitch).toBeLessThan(CAMERA_LIMITS.pitch.max);
-      expect(s.fov).toBeGreaterThan(CAMERA_LIMITS.fov.min);
-      expect(s.fov).toBeLessThan(CAMERA_LIMITS.fov.max);
+  it("offers the wider slider ranges around the defaults", () => {
+    expect(CAMERA_LIMITS.pitch.min).toBe(3);
+    expect(CAMERA_LIMITS.smoothing.max).toBe(2);
+    expect(CAMERA_LIMITS.distance).toEqual({ min: 6, max: 60 });
+    for (const k of [
+      "pitch",
+      "distance",
+      "fov",
+      "follow",
+      "smoothing",
+      "haze",
+    ] as const) {
+      expect(DEFAULT_CAMERA[k]).toBeGreaterThanOrEqual(CAMERA_LIMITS[k].min);
+      expect(DEFAULT_CAMERA[k]).toBeLessThanOrEqual(CAMERA_LIMITS[k].max);
     }
   });
 });

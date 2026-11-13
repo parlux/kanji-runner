@@ -14,7 +14,7 @@ import {
   CRATE_D,
   CRATE_H,
   sawPlace,
-  SHAPE_DISTANCE,
+  shapeDistance,
   spanWorld,
   WALL_BEHIND,
   worldZ,
@@ -99,7 +99,7 @@ export function createProps(scene: Scene) {
         const ahead = hazardPos(run, i) - run.dist;
         if (ahead < -WALL_BEHIND) break;
         // never beyond the shape horizon
-        if (ahead > SHAPE_DISTANCE) continue;
+        if (ahead > shapeDistance()) continue;
         const z = worldZ(h.pos, run.dist);
         if (h.kind === "block") {
           if (isShattered(run, i) || nc >= MAX_CRATES) continue;

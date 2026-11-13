@@ -3,7 +3,7 @@ import { BOSS_MUZZLE, makeBossMesh } from "./figures";
 import { FX_COLOURS, type Fx } from "./fx";
 import {
   BOSS_SCALE,
-  BOSS_SHOWN,
+  bossShown,
   BOSS_TOP,
   type BossFight,
   DIST_SCALE,
@@ -64,7 +64,7 @@ export function createBoss(scene: Scene, fx: Fx) {
       fight: BossFight | null,
       clock: number,
     ): BossTop {
-      mesh.visible = at - runDist <= BOSS_SHOWN;
+      mesh.visible = at - runDist <= bossShown();
       let dist = at;
       let lift = 0;
       let tip = 0;

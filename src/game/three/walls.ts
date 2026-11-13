@@ -10,7 +10,7 @@ import {
 } from "three";
 import { rowOpenings, wallSolids, type RunState } from "../../core/sim";
 import {
-  SHAPE_DISTANCE,
+  shapeDistance,
   TRACK_W,
   WALL_BEHIND,
   WALL_H,
@@ -84,7 +84,7 @@ export function createWalls(scene: Scene) {
         const ahead = (questions[i] ?? Infinity) - run.dist;
         if (ahead < -WALL_BEHIND) break;
         // never a row beyond the shape horizon
-        if (ahead > SHAPE_DISTANCE || rows >= MAX_WALLS) continue;
+        if (ahead > shapeDistance() || rows >= MAX_WALLS) continue;
         rows++;
         const z = worldZ(questions[i] as number, run.dist) - WALL_T / 2;
         const openings = rowOpenings(run, i);

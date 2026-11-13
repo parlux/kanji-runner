@@ -24,7 +24,7 @@ import {
   CRATE_H,
   FIGURE_TOP,
   HAZE_COLOUR,
-  SHAPE_DISTANCE,
+  shapeDistance,
   type Haze,
   squadPlace,
   LABEL_K,
@@ -148,7 +148,7 @@ function renderHazardText(
   if (!hz || hz.kind === "saw") return;
   const pos = hazardPos(run, i);
   const ahead = pos - run.dist;
-  if (ahead < -WALL_BEHIND || ahead > SHAPE_DISTANCE) return;
+  if (ahead < -WALL_BEHIND || ahead > shapeDistance()) return;
   if (hz.kind === "pack") {
     if (i < run.nextHazard || isShattered(run, i)) return;
     const n = packSurvivors(run, i);
@@ -212,7 +212,7 @@ function renderWall(
 ): void {
   const pos = run.track.questions[i] ?? Infinity;
   const ahead = pos - run.dist;
-  if (ahead < -WALL_BEHIND || ahead > SHAPE_DISTANCE) return;
+  if (ahead < -WALL_BEHIND || ahead > shapeDistance()) return;
   const row = run.rows[i];
   if (!row) return;
   const passed = i < run.next;
@@ -277,7 +277,7 @@ export function renderBossText(
   project: Projector,
   haze: Haze,
 ): void {
-  if (boss.dist - boss.armyDist > SHAPE_DISTANCE || boss.alpha <= 0) return;
+  if (boss.dist - boss.armyDist > shapeDistance() || boss.alpha <= 0) return;
   const foot = project(0.5, boss.dist, 0);
   const head = project(0.5, boss.dist, BOSS_TOP);
   const top = project(0.5, boss.dist, boss.height);

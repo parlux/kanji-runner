@@ -41,11 +41,21 @@ export const FIGURE_RADIUS = 0.12;
 /** A crowd is this many times deeper (along the track) than it is wide. */
 export const CROWD_DEPTH = 1.8;
 /**
- * The shape horizon (track distance ahead of the army): solid objects are
- * drawn up to here, faint in the haze, and so is their text.
- * Must stay below the closest a re-ask can replace a row (tested).
+ * The default shape horizon (track distance ahead of the army): solid objects
+ * are drawn up to here, faint in the haze, and so is their text. The camera's
+ * "haze" setting changes it live (`shapeDistance`). Must stay below the
+ * closest a re-ask can replace a row (tested): `HAZE_MAX` is the safe limit.
  */
-export const SHAPE_DISTANCE = 2 * VIEW_DISTANCE;
+export const SHAPE_DISTANCE = 4 * VIEW_DISTANCE;
+/** The farthest the haze slider goes: just inside the closest a re-ask can replace a row. */
+export const HAZE_MAX = 21;
+let horizon = SHAPE_DISTANCE;
+/** The shape horizon in use (the haze setting; `SHAPE_DISTANCE` until changed). */
+export const shapeDistance = (): number => horizon;
+/** Sets the shape horizon in use (clamped to the haze slider's range). */
+export const setShapeDistance = (d: number): void => {
+  horizon = Math.min(HAZE_MAX, Math.max(VIEW_DISTANCE + 1, d));
+};
 /** The distance haze colour (the fog's), as 0xrrggbb. */
 export const HAZE_COLOUR = 0xd4eeff;
 /** Tallest thing on the track (world units): the haze hides it whole at SHAPE_DISTANCE. */
@@ -256,11 +266,14 @@ export function viewDepth(pose: CameraPose, y: number, z: number): number {
 
 /**
  * Linear haze range (view depths): none up to VIEW_DISTANCE ahead, then
- * thickening steadily until it is total at SHAPE_DISTANCE for anything up to
- * FOG_TOP_H tall, so a shape crossing the shape horizon is already gone.
+ * thickening steadily until it is total at the shape horizon (`horizon`) for
+ * anything up to FOG_TOP_H tall, so a shape crossing it is already gone.
  */
-export function fogRange(pose: CameraPose): { near: number; far: number } {
-  const z = worldZ(SHAPE_DISTANCE, 0);
+export function fogRange(
+  pose: CameraPose,
+  horizon = SHAPE_DISTANCE,
+): { near: number; far: number } {
+  const z = worldZ(horizon, 0);
   return {
     near: viewDepth(pose, 0, worldZ(VIEW_DISTANCE, 0)),
     far: Math.min(viewDepth(pose, 0, z), viewDepth(pose, FOG_TOP_H, z)),
@@ -280,22 +293,18 @@ export function hazeAt(
 export type Haze = (dist: number, height: number) => number;
 
 /** The haze at track points for a camera `pose` with the army at `runDist`: what the fog gives the scene. */
-export function hazeFor(pose: CameraPose, runDist: number): Haze {
-  const range = fogRange(pose);
+export function hazeFor(
+  pose: CameraPose,
+  runDist: number,
+  horizon = SHAPE_DISTANCE,
+): Haze {
+  const range = fogRange(pose, horizon);
   return (dist, height) =>
     hazeAt(range, viewDepth(pose, height, worldZ(dist, runDist)));
 }
 
 /** A posed camera and its vertical field of view (degrees). */
 export type CameraFit = { pose: CameraPose; fov: number };
-
-/** Where the camera is asked to put things, as shares of the screen height from the top. */
-export type CameraAim = {
-  /** The army (track centre at the army). */
-  armyY: number;
-  /** The far line: track centre at SHAPE_DISTANCE ahead, where the haze is total. */
-  farY: number;
-};
 
 /** Screen position of a world point, as shares of the screen (0..1 from the left / top). */
 export function screenAt(
@@ -322,75 +331,11 @@ export function screenAt(
 }
 
 /**
- * Pitch and field of view for a camera `height` up and `back` behind the
- * army that put the army at `aim.armyY` and the far line at `aim.farY`.
- */
-export function aimCamera(
-  height: number,
-  back: number,
-  aim: CameraAim,
-): CameraFit {
-  const va = 1 - 2 * aim.armyY;
-  const vf = 1 - 2 * aim.farY;
-  // depression angles of the army and of the far line
-  const da = Math.atan2(height, back);
-  const df = Math.atan2(height, back - worldZ(SHAPE_DISTANCE, 0));
-  // tan(pitch − da) / tan(pitch − df) rises with pitch: bisect it to va / vf
-  let lo = df;
-  let hi = da;
-  for (let k = 0; k < 60; k++) {
-    const p = (lo + hi) / 2;
-    if (Math.tan(p - da) / Math.tan(p - df) < va / vf) lo = p;
-    else hi = p;
-  }
-  const pitch = (lo + hi) / 2;
-  const tanV = Math.tan(pitch - da) / va;
-  return {
-    pose: {
-      height,
-      back,
-      lookAhead: height / Math.tan(pitch) - back,
-      lookHeight: 0,
-    },
-    fov: (2 * Math.atan(tanV) * 180) / Math.PI,
-  };
-}
-
-/**
- * The camera for a screen of this aspect: `height` up and `back` behind the
- * army, aimed per `aimCamera`. When both track edges (plus `margin`, up to a
- * wall's top) don't fit at the army, it moves farther back along the same
- * slope, with a narrower field of view, rather than going steeper.
- */
-export function fitCameraTo(
-  aspect: number,
-  back: number,
-  height: number,
-  aim: CameraAim,
-  margin: number,
-): CameraFit {
-  const edge = (TRACK_W / 2) * margin;
-  const fits = (fit: CameraFit): boolean =>
-    screenAt(fit, aspect, edge, 0, 0).x <= 1 &&
-    screenAt(fit, aspect, edge, WALL_H, 0).x <= 1;
-  const near = aimCamera(height, back, aim);
-  if (fits(near)) return near;
-  let lo = 1;
-  let hi = 16;
-  for (let k = 0; k < 40; k++) {
-    const s = (lo + hi) / 2;
-    if (fits(aimCamera(height * s, back * s, aim))) hi = s;
-    else lo = s;
-  }
-  return aimCamera(height * hi, back * hi, aim);
-}
-
-/**
- * Tunable camera settings (Task C1). `pitch` is the view direction's
- * downward tilt (degrees), `distance` the camera-to-army distance (world
- * units), `fov` the vertical field of view (degrees), `follow` how much of the
- * army's sideways position the camera takes (0..1) and `smoothing` the
- * seconds it takes to close most of the gap (0 = instant).
+ * Tunable camera settings. `pitch` is the view direction's downward tilt
+ * (degrees), `distance` the camera-to-army distance (world units), `fov` the
+ * vertical field of view (degrees), `follow` how much of the army's sideways
+ * position the camera takes (0..1), `smoothing` the seconds it takes to close
+ * most of the gap (0 = instant) and `haze` the shape horizon (track distance).
  */
 export type CameraSettings = {
   pitch: number;
@@ -398,19 +343,28 @@ export type CameraSettings = {
   fov: number;
   follow: number;
   smoothing: number;
+  haze: number;
 };
 
-/** Slider ranges. Distance is a multiple of today's camera distance for the screen. */
+/** The camera at every screen size, and what Reset returns to (the owner's pick at Checkpoint H2). */
+export const DEFAULT_CAMERA: CameraSettings = {
+  pitch: 8,
+  distance: 15,
+  fov: 34,
+  follow: 0.4,
+  smoothing: 1,
+  haze: SHAPE_DISTANCE,
+};
+
+/** Slider ranges (distance in world units, haze in track distance). */
 export const CAMERA_LIMITS = {
-  pitch: { min: 8, max: 45 },
-  distance: { min: 0.4, max: 2 },
+  pitch: { min: 3, max: 45 },
+  distance: { min: 6, max: 60 },
   fov: { min: 20, max: 75 },
   follow: { min: 0, max: 1 },
-  smoothing: { min: 0, max: 1 },
+  smoothing: { min: 0, max: 2 },
+  haze: { min: VIEW_DISTANCE + 1, max: HAZE_MAX },
 } as const;
-
-/** Follow smoothing the settings screen starts with. */
-export const DEFAULT_SMOOTHING = 0.25;
 
 const RAD = Math.PI / 180;
 
@@ -433,18 +387,6 @@ export function poseFromSettings(s: CameraSettings, armyY: number): CameraFit {
       lookHeight: 0,
     },
     fov: s.fov,
-  };
-}
-
-/** A fitted camera expressed as settings (follow 0, default smoothing); `poseFromSettings` inverts it. */
-export function settingsFromFit(fit: CameraFit): CameraSettings {
-  const { pose } = fit;
-  return {
-    pitch: Math.atan2(pose.height, pose.back + pose.lookAhead) / RAD,
-    distance: Math.hypot(pose.height, pose.back),
-    fov: fit.fov,
-    follow: 0,
-    smoothing: DEFAULT_SMOOTHING,
   };
 }
 
@@ -691,8 +633,8 @@ export const BOSS_SCALE = 5.5;
 export const BOSS_TOP = FIGURE_TOP * BOSS_SCALE;
 /** Track distance from the army's firing stop to the boss. */
 export const BOSS_RANGE = 1.1;
-/** Haze reaches the boss's top this far beyond SHAPE_DISTANCE (it is taller than FOG_TOP_H): it is drawn from here in. */
-export const BOSS_SHOWN = SHAPE_DISTANCE + 1;
+/** The boss is drawn from this far ahead: haze reaches its top just beyond the shape horizon (it is taller than FOG_TOP_H). */
+export const bossShown = (): number => shapeDistance() + 1;
 
 /** Where the army stops to fire and where the boss stands (track distances). */
 export type BossPlace = { stop: number; boss: number };

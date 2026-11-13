@@ -1,20 +1,25 @@
-import type { CameraSettings } from "../game/three/world";
+import {
+  CAMERA_LIMITS,
+  DEFAULT_CAMERA,
+  type CameraSettings,
+} from "../game/three/world";
 
-/** Tuned camera settings live on this device only; absent means today's camera. */
+/** Tuned camera settings live on this device only; absent means the default camera. */
 export const CAMERA_KEY = "kanji-runner:camera";
 
-/** Loose sanity bounds for saved values (the sliders are tighter, per screen). */
+/** Loose sanity bounds for saved values: the slider ranges, so anything the sliders gave loads. */
 const BOUNDS: Record<keyof CameraSettings, [number, number]> = {
-  pitch: [8, 45],
-  distance: [2, 300],
-  fov: [20, 75],
-  follow: [0, 1],
-  smoothing: [0, 1],
+  pitch: [CAMERA_LIMITS.pitch.min, CAMERA_LIMITS.pitch.max],
+  distance: [CAMERA_LIMITS.distance.min, CAMERA_LIMITS.distance.max],
+  fov: [CAMERA_LIMITS.fov.min, CAMERA_LIMITS.fov.max],
+  follow: [CAMERA_LIMITS.follow.min, CAMERA_LIMITS.follow.max],
+  smoothing: [CAMERA_LIMITS.smoothing.min, CAMERA_LIMITS.smoothing.max],
+  haze: [CAMERA_LIMITS.haze.min, CAMERA_LIMITS.haze.max],
 };
 
 const KEYS = Object.keys(BOUNDS) as (keyof CameraSettings)[];
 
-/** The saved settings, or null (today's camera) when missing, malformed or out of range. Never throws. */
+/** The saved settings (haze missing in older saves: the default), or null (the default camera) when missing, malformed or out of range. Never throws. */
 export function loadCamera(
   store: Pick<Storage, "getItem">,
 ): CameraSettings | null {
@@ -25,7 +30,9 @@ export function loadCamera(
     if (typeof v !== "object" || v === null) return null;
     const out: Partial<CameraSettings> = {};
     for (const k of KEYS) {
-      const n = (v as Record<string, unknown>)[k];
+      const n =
+        (v as Record<string, unknown>)[k] ??
+        (k === "haze" ? DEFAULT_CAMERA.haze : undefined);
       const [lo, hi] = BOUNDS[k];
       if (typeof n !== "number" || !Number.isFinite(n) || n < lo || n > hi)
         return null;

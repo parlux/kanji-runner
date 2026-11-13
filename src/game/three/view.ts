@@ -1,38 +1,24 @@
 import { PerspectiveCamera } from "three";
 import {
-  fitCameraTo,
+  DEFAULT_CAMERA,
   HAZE_COLOUR,
   poseFromSettings,
-  settingsFromFit,
-  type CameraAim,
   type CameraFit,
   type CameraSettings,
 } from "./world";
 
 /**
- * Camera and look constants for the 3D run. The camera is low and close
- * behind the army, centred on the track (unless tuned settings make it follow steering), and
- * aimed so the track runs up the screen into the haze: the army low on the
- * screen (80% down), the far line near the top. Lowering the army (T3d) kept
- * the T3b pitch by moving the camera up and back with a narrower view. Narrow screens move the camera farther
- * back along the same slope (narrower view), not steeper, so both edges and
- * every gate's outer openings stay in view.
+ * Camera and look constants for the 3D run. The camera is the tuned
+ * `DEFAULT_CAMERA` (the owner's pick: low, 8° down, 15 away, narrow view) at
+ * every screen size, or the settings saved on the device. It puts the army 80%
+ * down the screen and follows its sideways steering (follow, smoothing); the
+ * track runs up the screen into the haze.
  */
 
-/** How far behind the army the camera stands on wide screens (world units). */
-export const CAMERA_BACK = 13.85;
-/** Lowest camera height (world units); wide screens use it. */
-export const CAMERA_MIN_HEIGHT = 11.1;
-/** Where the army and the far line (SHAPE_DISTANCE) sit, as shares of the screen height from the top. */
-export const AIM: CameraAim = { armyY: 0.8, farY: 0.1 };
-/** Both track edges stay in view at the army with this much to spare. */
-export const EDGE_MARGIN = 1.06;
+/** Where the army sits, as a share of the screen height from the top. */
+export const AIM = { armyY: 0.8 } as const;
 /** Most device pixels per CSS pixel the 3D canvas draws. */
 export const MAX_DPR = 2;
-
-/** The camera for a screen of this aspect (width / height). */
-export const cameraFit = (aspect: number): CameraFit =>
-  fitCameraTo(aspect, CAMERA_BACK, CAMERA_MIN_HEIGHT, AIM, EDGE_MARGIN);
 
 /** Bright daylight colours (original; genre-inspired only). */
 export const LOOK = {
@@ -45,21 +31,14 @@ export const LOOK = {
   marking: 0xc9b8e6,
 } as const;
 
-/** The run's camera; `fitCamera` poses it for the screen. */
+/** The run's camera; `fitCamera` poses it. */
 export function makeCamera(): PerspectiveCamera {
   return new PerspectiveCamera(45, 1, 0.5, 400);
 }
 
-/** Today's camera for a screen aspect, as the settings screen's starting values. */
-export const defaultCameraSettings = (aspect: number): CameraSettings =>
-  settingsFromFit(cameraFit(aspect));
-
-/** The camera for `aspect`: today's fitted one, or the tuned `settings` (no edge rule). */
-export const cameraFor = (
-  aspect: number,
-  settings: CameraSettings | null,
-): CameraFit =>
-  settings ? poseFromSettings(settings, AIM.armyY) : cameraFit(aspect);
+/** The camera for the saved `settings`, or the defaults. */
+export const cameraFor = (settings: CameraSettings | null): CameraFit =>
+  poseFromSettings(settings ?? DEFAULT_CAMERA, AIM.armyY);
 
 /**
  * Poses and fits the camera to `aspect`, shifted sideways by `x` (camera and

@@ -102,14 +102,12 @@ const adopt = (p: Progress): void => {
 };
 void sync.pull().then(adopt);
 
-// tuned camera (dev tool, 3D only): saved on this device; null is today's camera
+// tuned camera (dev tool, 3D only): saved on this device; null is the default camera
 let camera = loadCamera(localStorage);
 const openCamera = (): void =>
-  void import("./game/three/view").then(({ defaultCameraSettings }) => {
+  void import("./game/three/world").then(({ DEFAULT_CAMERA }) => {
     openCameraPanel({
-      defaults:
-        view3d?.cameraDefaults() ??
-        defaultCameraSettings(window.innerWidth / window.innerHeight),
+      defaults: DEFAULT_CAMERA,
       current: camera,
       onChange: (next) => {
         camera = next;
