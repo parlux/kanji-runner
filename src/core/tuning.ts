@@ -134,6 +134,11 @@ export const ENEMY_SPEED = 0.5;
 export const ENEMY_STEER_SPEED = 0.15;
 /** Damage that kills one enemy. */
 export const ENEMY_HP = 1;
+/**
+ * A pack starts running at the army this far ahead (track units): where the 3D
+ * view starts drawing it (its default shape distance, 4 × VIEW_DISTANCE).
+ */
+export const PACK_WAKE = 4 * VIEW_DISTANCE;
 /** Pack start centres are drawn from [ENEMY_X_MARGIN, 1 − ENEMY_X_MARGIN]. */
 export const ENEMY_X_MARGIN = 0.2;
 /**

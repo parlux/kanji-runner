@@ -36,6 +36,7 @@ import {
   ENEMY_HP,
   HORDE_DEFAULTS,
   HORDE_THREAT,
+  PACK_WAKE,
   ENEMY_SPEED,
   ENEMY_STEER_SPEED,
   ROWS_PER_RUN,
@@ -620,15 +621,23 @@ describe("shooting", () => {
     expect(s.results).toEqual([true, false]);
   });
 
-  it("a pack runs at the army ENEMY_SPEED faster than the scroll once visible", () => {
-    const far = range([pack(VIEW_DISTANCE + 1)], [10 * ENEMY_HP]);
-    expect(stepFor(far, 0.1).packs[0]?.pos).toBe(VIEW_DISTANCE + 1);
-    const near = range([pack(VIEW_DISTANCE - 0.1)], [10 * ENEMY_HP]);
+  it("a pack runs at the army ENEMY_SPEED faster than the scroll from PACK_WAKE (12) ahead", () => {
+    expect(PACK_WAKE).toBe(12);
+    const far = range([pack(PACK_WAKE + 1)], [10 * ENEMY_HP]);
+    expect(stepFor(far, 0.1).packs[0]?.pos).toBe(PACK_WAKE + 1);
+    const near = range([pack(PACK_WAKE - 0.1)], [10 * ENEMY_HP]);
     const s = stepFor(near, 0.1);
-    expect(s.packs[0]?.pos).toBeCloseTo(
-      VIEW_DISTANCE - 0.1 - ENEMY_SPEED * 0.1,
-      6,
-    );
+    expect(s.packs[0]?.pos).toBeCloseTo(PACK_WAKE - 0.1 - ENEMY_SPEED * 0.1, 6);
+  });
+
+  it("a pack waits behind an unanswered wall, and runs once it is passed", () => {
+    const s0 = range([pack(6)], [10 * ENEMY_HP]);
+    const walled = { ...s0, track: { ...s0.track, questions: [0.3, 100] } };
+    const waiting = stepFor(walled, 0.1);
+    expect(waiting.packs[0]?.pos).toBe(6);
+    const passed = stepFor(waiting, 0.3);
+    expect(passed.next).toBe(1);
+    expect(passed.packs[0]?.pos ?? 6).toBeLessThan(6);
   });
 
   it("a pack drifts towards the crowd centre at most ENEMY_STEER_SPEED", () => {

@@ -40,6 +40,7 @@ import {
   FIRE_RANGE,
   GATE_GROW_PER_DAMAGE,
   MAX_SPEED_MUL,
+  PACK_WAKE,
   REASK_MAX,
   STARTING_ARMY,
   STEER_EASE,
@@ -304,10 +305,16 @@ export function hazardPos(s: RunState, i: number): number {
   return s.packs[i]?.pos ?? s.track.hazards[i]?.pos ?? Infinity;
 }
 
-/** Visible packs run at the army and drift towards the crowd centre. */
+/**
+ * Packs within PACK_WAKE run at the army and drift towards the crowd centre.
+ * A pack waits while an unanswered wall stands between it and the army: it
+ * never runs through a wall (and can't be shot through one either).
+ */
 function movePacks(s: RunState, dt: number): RunState {
+  const wall = fireLimit(s);
   const packs = s.packs.map((p, i) => {
-    if (!p || i < s.nextHazard || p.pos - s.dist > VIEW_DISTANCE) return p;
+    if (!p || i < s.nextHazard || p.pos - s.dist > PACK_WAKE || p.pos >= wall)
+      return p;
     const drift = Math.max(
       -ENEMY_STEER_SPEED * dt,
       Math.min(ENEMY_STEER_SPEED * dt, s.x - p.x),
