@@ -63,6 +63,13 @@ Owner: "the horde funnels toward you, forming a column which maybe lines up with
 
 **Owner refinement (2026-11-14, during H3b; overrides the above where they differ):** far away a pack does **not** follow the army: it stays spread wide (its `packWidth` mouth, at its own x) and mills, while waiting and while charging. Only within `STREAM_DISTANCE` (2.5 track units) does its front pour inward into a stream as wide as the army, centred on it, the outer ones following behind; then it crashes in row by row while fire mows the front. The core's hit span follows the same shape (wide far away, converging to the army-wide column at contact). Deaths: no shrinking disc; the pack thins from the front and shot figures fall where they stood. Visual check count: 2,000.
 
+## Scattered crowd and early stream (owner at Checkpoint M2, 2026-11-14)
+Owner's defaults: **count 500, kill time 2.5 s, figure size 1.0, pack width 0.8**. Owner: "I still prefer the slightly spread out look while they're waiting, that milling about, then they kinda see you and start streaming", and "loose scattered crowd". These rules replace the matching ones above:
+- **Waiting:** a loose, scattered crowd: visible gaps between figures (roughly like the sparse H3-era look), across `packWidth` of the track and deep down it, each figure wandering on its own. Not a compact blob and not a thin strip.
+- **"They see you":** when a pack wakes, the stream starts at once: the front peels off and runs at the army as an army-wide stream; the crowd empties into it from the front. The stream homes on the army; the crowd behind stays where it is, feeding it.
+- **Fire reaches the stream:** the army can shoot the stream from where it starts (a pack-only fire range, up to the wake distance, never past an unanswered wall), so a 2.5 s kill time can play out.
+- Stream contact, light damage, merging and front-first deaths stay as in "Column design". The balance bands must hold at the new defaults.
+
 ## Code layout
 - `src/core/tuning.ts`: `HORDE_K`, `PACK_MAX`, `HORDE_THREAT`.
 - `src/core/fire.ts`: `packCount`, and `hazardHp` unchanged in value.

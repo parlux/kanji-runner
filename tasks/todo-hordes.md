@@ -94,6 +94,22 @@ Owner, 2026-11-14: not a horde yet. "Still looks like a static red blip that jus
 - [ ] Try counts up to 20,000 with `?fps`; pick the default count, figure size, kill time and width.
 - [ ] The chosen defaults are smooth on the phone.
 
+Owner, 2026-11-14: defaults count 500, kill time 2.5 s, figure size 1.0×, pack width 0.8. Prefers a loose scattered crowd while waiting, then streaming once they see you (Task H5b).
+
+### Task H5b: Scattered crowd, early stream, owner defaults
+**Description:** as the spec's "Scattered crowd and early stream": defaults 500 / 2.5 s / 1.0 / 0.8 (`HORDE_DEFAULTS` and the panel's defaults); a waiting pack is a loose scattered crowd that wanders; on waking the front streams at the army at once and the crowd empties into the stream; the army's fire reaches the stream from where it starts. Core and view agree on the stream's front and width.
+**Acceptance criteria:**
+- [ ] Tested: defaults; scattered layout spacing (min gap) and extent at 200 / 500 / 2,000; the stream starts at waking and is fed from the crowd's front; fire reaches the stream from its start (never past an unanswered wall); stream contact and merge still hold; pause holds everything.
+- [ ] Balance bands hold at the new defaults (retune `HORDE_THREAT` if needed); before/after and mean loss per pack logged here.
+- [ ] Browser at 390×844, 500 enemies: waiting, just woken, mid-stream, nearly done; Countryside and Block city; gates readable. Frame time at 500 and 2,000 logged. Screenshots in the scratchpad.
+- [ ] Deploy green.
+**Verification:** tests (`npx vitest run --maxWorkers=2`), lint, build. **Dependencies:** H5. **Files:** `src/core/{tuning,sim}.ts`, `src/game/three/{horde,hazards,world}.ts`, `src/storage/horde.ts`, tests. **Scope:** M (use opus)
+
+### Checkpoint M3: scattered crowd and stream on the Pixel 7 (owner)
+- [ ] Waiting packs look like a loose crowd milling about; they see you and stream in.
+- [ ] 2.5 s of mowing feels right; damage still light.
+- [ ] Smooth with `?fps` at 500.
+
 ### Task H6: Spectacular kills
 **Description:** `kills.ts`: a pooled kill-effect ring. Each kill knocks the figure back or topples it with a spark burst in the enemy colour. Kills are found by comparing survivors between frames. The final burst of a pack is bigger than today's. Fewer pieces beyond about half the shape distance. Effects freeze when paused.
 **Acceptance criteria:**
@@ -101,7 +117,7 @@ Owner, 2026-11-14: not a horde yet. "Still looks like a static red blip that jus
 - [ ] Browser as in H4 at the owner's default count, plus a gate behind a dying pack (labels stay readable). Screenshots in the scratchpad.
 - [ ] Frame time logged against H4 and against today's pack scene (≤ 1.3× today's). On a miss: shrink the effects first, then `PACK_MAX`, and log what changed.
 - [ ] Deploy green.
-**Verification:** as H2. **Dependencies:** H5 and the owner's defaults from M2. **Files:** `src/game/three/{kills,hazards,horde,fx}.ts`, tests. **Scope:** M
+**Verification:** as H2. **Dependencies:** H5b and Checkpoint M3. **Files:** `src/game/three/{kills,hazards,horde,fx}.ts`, tests. **Scope:** M
 
 ### Checkpoint M: v1.10 (owner, on the Pixel 7)
 - [ ] Mowing down a pack looks spectacular.
