@@ -61,8 +61,12 @@ export function createHazards(scene: Scene, fx: Fx) {
   const { bullet } = FX_COLOURS;
 
   return {
-    /** Places packs, fire and bursts for the run as it is now; `fighting` is a squad firefight (it takes the fire). */
-    update(run: RunState, clock: number, fighting: boolean) {
+    /**
+     * Places packs, fire and bursts for the run as it is now; `fighting` is a
+     * squad firefight or the boss fight (it takes the fire). Fire straight
+     * ahead stops at the next wall, or at the boss (track distance `boss`).
+     */
+    update(run: RunState, clock: number, fighting: boolean, boss = Infinity) {
       const armyX = worldX(run.x);
       const lanes = Math.min(5, 1 + Math.floor(Math.sqrt(run.army) / 3));
       const half = Math.min(1.2, lanes * 0.25);
@@ -142,7 +146,7 @@ export function createHazards(scene: Scene, fx: Fx) {
         const f = 0.6 + 0.4 * Math.sin(run.dist * 80);
         fx.spark(tx, 0.5, tz, 0.5 * f, FX_COLOURS.flash);
       } else {
-        const wallZ = worldZ(fireLimit(run), run.dist);
+        const wallZ = worldZ(Math.min(fireLimit(run), boss), run.dist);
         for (let l = 0; l < lanes; l++)
           fx.stream(
             laneX(l),

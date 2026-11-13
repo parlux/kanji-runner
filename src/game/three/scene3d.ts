@@ -30,6 +30,7 @@ import { createSquads } from "./squads";
 import { createFx } from "./fx";
 import { createProps } from "./props";
 import { createHazards } from "./hazards";
+import { createBoss } from "./boss";
 import {
   clipGaps,
   crowdLayout,
@@ -51,12 +52,19 @@ import {
   type Haze,
   type Projector,
   hazeFor,
+  bossArmyDist,
+  bossFightAt,
+  bossHp,
+  bossPlace,
+  type BossView,
 } from "./world";
 
 export type View3d = {
   resize(w: number, h: number): void;
-  /** Draws the run or the boss clash; the scene is only read. */
-  render(scene: Extract<Scene, { kind: "run" | "boss" }>): void;
+  /** Draws the run or the boss clash at speed preset `pace`; the scene is only read. */
+  render(scene: Extract<Scene, { kind: "run" | "boss" }>, pace?: number): void;
+  /** The boss as the last render drew it, for its HP in the overlay. */
+  boss(): BossView;
   /** Projects with the camera of the last render. */
   project: Projector;
   /** Haze at a track point, as the fog gives the scene (for the overlay text). */
@@ -87,6 +95,8 @@ const GROW_S = 0.35;
 const DROP_S = 0.45;
 /** How fast figures ease to their new place when the crowd's layout changes (per second). */
 const SETTLE_RATE = 8;
+/** How fast the crowd's run cycle eases out when it stops to fire at the boss (per second). */
+const HALT_RATE = 6;
 
 /** A cheap fixed pseudo-random number in [0, 1) per figure index, for its stride phase. */
 const phaseOf = (k: number): number => {
@@ -123,6 +133,7 @@ function createCrowd(kind: FigureKind) {
     /**
      * Places the crowd for an army centred at track x `x` (world Z `cz`),
      * `share` spread out, at animation time `now` (s); `dt` eases layout changes.
+     * `running` (0..1) scales the run cycle: 0 stands still.
      */
     update(
       army: number,
@@ -131,6 +142,7 @@ function createCrowd(kind: FigureKind) {
       share: number,
       now: number,
       dt: number,
+      running = 1,
     ) {
       if (army !== lastArmy) {
         lastArmy = army;
@@ -172,8 +184,8 @@ function createCrowd(kind: FigureKind) {
           const g = Math.min(1, (now - (bornAt[k] as number)) / GROW_S);
           // ease out with a little overshoot, so a new figure pops in
           const s = 1 + 2.2 * (g - 1) ** 3 + 1.2 * (g - 1) ** 2;
-          pos.set(x, Math.abs(Math.sin(stride)) * HOP, z);
-          rot.set(-LEAN, 0, Math.sin(stride) * SWAY);
+          pos.set(x, Math.abs(Math.sin(stride)) * HOP * running, z);
+          rot.set(-LEAN * running, 0, Math.sin(stride) * SWAY * running);
           scl.setScalar(s);
         } else {
           // left behind as the crowd runs on: tips over backwards and shrinks
@@ -270,6 +282,7 @@ export function createView3d(canvas: HTMLCanvasElement): View3d | null {
   const hazards = createHazards(scene, fx);
   const army = createCrowd("soldier");
   scene.add(army.mesh);
+  const boss = createBoss(scene, fx);
 
   let w = 1;
   let h = 1;
@@ -281,6 +294,16 @@ export function createView3d(canvas: HTMLCanvasElement): View3d | null {
   // the camera's sideways position (world X), eased towards the follow target
   let camX = 0;
   let pose = fit.pose;
+  // the crowd's run cycle (1 running, 0 stopped at the boss), eased
+  let running = 1;
+  let bossView: BossView = {
+    dist: Infinity,
+    height: 0,
+    hp: 0,
+    size: 0,
+    armyDist: 0,
+    alpha: 1,
+  };
   let haze: Haze = hazeFor(pose, 0);
   // animation time: stands still while the run is paused
   let clock = 0;
@@ -307,13 +330,28 @@ export function createView3d(canvas: HTMLCanvasElement): View3d | null {
       refit();
     },
     cameraDefaults: () => defaultCameraSettings(w / h),
-    render(s) {
+    render(s, pace = 1) {
       const now = performance.now();
       const dt = Math.min(0.1, (now - last) / 1000);
       last = now;
       const paused = s.kind === "run" && s.paused;
       if (!paused) clock += dt;
-      runDist = s.run.dist;
+      const place = bossPlace(s.run.track, pace);
+      const size = s.kind === "boss" ? s.boss : bossHp(s.run, s.seed);
+      // in the boss scene the army runs on to the firing stop, the fight as clashAt has it
+      const fight =
+        s.kind === "boss" ? bossFightAt(s.run.army, s.boss, s.t) : null;
+      const run =
+        s.kind === "boss"
+          ? {
+              ...s.run,
+              dist: bossArmyDist(s.run.dist, s.run.track, pace, s.t),
+              army: fight?.army ?? 0,
+              target: null,
+              gateTarget: null,
+            }
+          : s.run;
+      runDist = run.dist;
       // the run follows the army sideways; the boss scene eases back to centre
       const follow = tuned?.follow ?? 0;
       camX = followStep(
@@ -326,19 +364,44 @@ export function createView3d(canvas: HTMLCanvasElement): View3d | null {
       haze = hazeFor(pose, runDist);
       layDashes(runDist);
       fx.begin();
-      if (s.kind === "run") {
-        walls.update(s.run);
-        const fighting = squads.update(s.run, clock);
-        props.update(s.run);
-        hazards.update(s.run, clock, fighting);
-      }
+      walls.update(run);
+      const fighting = squads.update(run, clock);
+      props.update(run);
+      hazards.update(
+        run,
+        clock,
+        fighting || (fight !== null && run.dist >= place.stop),
+        place.boss,
+      );
+      const top = boss.update(
+        place.boss,
+        place.stop,
+        runDist,
+        run.x,
+        run.army,
+        fight,
+        clock,
+      );
       fx.end();
-      const gaps = clipGaps(s.run);
+      const toppled = fight?.ending?.kind === "topple" ? fight.ending.u : 0;
+      bossView = {
+        dist: top.dist,
+        height: top.height,
+        hp: fight?.hp ?? size,
+        size,
+        armyDist: runDist,
+        alpha: 1 - Math.min(1, toppled * 2),
+      };
+      const gaps = clipGaps(run);
       const pdt = paused ? 0 : dt;
-      share = stepShare(share, s.run.army, gaps.ahead, gaps.behind, pdt);
-      army.update(s.run.army, s.run.x, 0, share, clock, pdt);
+      share = stepShare(share, run.army, gaps.ahead, gaps.behind, pdt);
+      const halted = fight !== null && run.dist >= place.stop;
+      running +=
+        ((halted ? 0 : 1) - running) * (1 - Math.exp(-HALT_RATE * pdt));
+      army.update(run.army, run.x, 0, share, clock, pdt, running);
       renderer.render(scene, camera);
     },
+    boss: () => bossView,
     haze: (dist, height) => haze(dist, height),
     project(x, dist, height) {
       v.set(worldX(x), height, worldZ(dist, runDist)).project(camera);

@@ -184,9 +184,9 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 - Unchanged: `src/core` (`bossSize`, `clashAt`, timings), results, records, the golden run, the camera, the 2D boss (still a crowd). Boss swings/attacks are later.
 
 **Acceptance criteria:**
-- [ ] Tested: boss placement and the firing stop; HP equals the 2D boss size for the same seed; HP and army shown per `clashAt` through the fight.
-- [ ] Browser check at 390×844 with `?3d`: the last wall with the boss behind it in the haze; the run → boss switch (frames just before and after look continuous); the gunfight start and mid-fight; each ending (topple, stomp, standing) with its banner. Screenshots in the scratchpad. Frame time logged mid-fight with a full crowd.
-- [ ] Scenes, timings and records unchanged (existing scene tests pass unchanged).
+- [x] Tested: boss placement and the firing stop; HP equals the 2D boss size for the same seed; HP and army shown per `clashAt` through the fight.
+- [x] Browser check at 390×844 with `?3d`: the last wall with the boss behind it in the haze; the run → boss switch (frames just before and after look continuous); the gunfight start and mid-fight; each ending (topple, stomp, standing) with its banner. Screenshots in the scratchpad. Frame time logged mid-fight with a full crowd.
+- [x] Scenes, timings and records unchanged (existing scene tests pass unchanged).
 
 **Verification:** `npm test && npm run lint && npm run build`; browser check; deploy green.
 **Dependencies:** T3e

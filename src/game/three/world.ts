@@ -690,7 +690,7 @@ export const BOSS_SCALE = 5.5;
 /** The boss's height (world units): the top of its head. */
 export const BOSS_TOP = FIGURE_TOP * BOSS_SCALE;
 /** Track distance from the army's firing stop to the boss. */
-export const BOSS_RANGE = 1.5;
+export const BOSS_RANGE = 1.1;
 /** Haze reaches the boss's top this far beyond SHAPE_DISTANCE (it is taller than FOG_TOP_H): it is drawn from here in. */
 export const BOSS_SHOWN = SHAPE_DISTANCE + 1;
 
@@ -772,3 +772,15 @@ export function bossHp(run: RunState, seed: number): number {
     hpMemo = { rows, seed, hp: bossSize(rows, run.track.charges, seed) };
   return hpMemo.hp;
 }
+
+/** What the overlay needs of the boss: its head top (track distance, height), HP, and where the army is drawn. */
+export type BossView = {
+  dist: number;
+  height: number;
+  hp: number;
+  size: number;
+  /** The army's drawn track distance (it runs on past the run's end to the firing stop). */
+  armyDist: number;
+  /** Opacity of its HP (fades as it topples). */
+  alpha: number;
+};

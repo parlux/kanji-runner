@@ -1,16 +1,20 @@
 import {
+  BoxGeometry,
   BufferGeometry,
   CapsuleGeometry,
   Color,
+  ConeGeometry,
+  CylinderGeometry,
   Float32BufferAttribute,
   IcosahedronGeometry,
   InstancedMesh,
+  Mesh,
   MeshLambertMaterial,
 } from "three";
 
 /**
  * The one figure factory: every figure in the 3D run (soldiers now; enemies,
- * squads and the boss crowd later) gets its geometry and material here, so
+ * squads and the giant boss) gets its geometry and material here, so
  * downloaded models can replace them in one place.
  */
 
@@ -28,21 +32,25 @@ const BODY_LEN = 0.3;
 const HEAD_R = 0.1;
 const HEAD_Y = BODY_LEN + 2 * BODY_R + HEAD_R * 0.8;
 
-/** One flat-shaded mesh: body and head merged, coloured per vertex. */
-function figureGeometry(kind: FigureKind): BufferGeometry {
+/** A figure's body and head, in figure units, standing on y = 0. */
+function figureParts(kind: FigureKind): [BufferGeometry, number][] {
   const body = new CapsuleGeometry(BODY_R, BODY_LEN, 1, 6).toNonIndexed();
   body.translate(0, BODY_LEN / 2 + BODY_R, 0);
   const head = new IcosahedronGeometry(HEAD_R, 0);
   head.translate(0, HEAD_Y, 0);
-  const parts: [BufferGeometry, number][] = [
+  return [
     [body, COLOURS[kind].body],
     [head, COLOURS[kind].head],
   ];
+}
+
+/** One flat-shaded mesh: the parts merged, coloured per vertex. */
+function merge(parts: [BufferGeometry, number][]): BufferGeometry {
   const pos: number[] = [];
   const col: number[] = [];
   const c = new Color();
   for (const [g, colour] of parts) {
-    const p = g.getAttribute("position");
+    const p = (g.index ? g.toNonIndexed() : g).getAttribute("position");
     c.setHex(colour);
     for (let i = 0; i < p.count; i++) {
       pos.push(p.getX(i), p.getY(i), p.getZ(i));
@@ -67,7 +75,7 @@ export function makeCrowdMesh(kind: FigureKind, max: number): InstancedMesh {
   let parts = cache.get(kind);
   if (!parts) {
     parts = {
-      geometry: figureGeometry(kind),
+      geometry: merge(figureParts(kind)),
       material: new MeshLambertMaterial({
         vertexColors: true,
         flatShading: true,
@@ -80,4 +88,37 @@ export function makeCrowdMesh(kind: FigureKind, max: number): InstancedMesh {
   // instances move every frame; the mesh's cached bounds would cull them wrongly
   mesh.frustumCulled = false;
   return mesh;
+}
+
+/** The boss's gun metal and its muzzle's glow. */
+const GUN = { metal: 0x3b3f4a, muzzle: 0xffb03a } as const;
+/** The muzzle of the boss's arm cannon, in figure units (it points at +Z, toward the army). */
+export const BOSS_MUZZLE = { x: 0.19, y: 0.34, z: 0.46 } as const;
+
+/**
+ * The giant boss, in figure units (scale it up): the enemy figure with two
+ * horns and a big arm cannon on its right, pointing forward (+Z).
+ */
+export function makeBossMesh(): Mesh {
+  const { x, y, z } = BOSS_MUZZLE;
+  const parts = figureParts("enemy");
+  const gun = new CylinderGeometry(0.075, 0.09, z, 7);
+  gun.rotateX(Math.PI / 2);
+  gun.translate(x, y, z / 2);
+  const shoulder = new BoxGeometry(0.14, 0.13, 0.16);
+  shoulder.translate(x - 0.03, y + 0.07, 0.02);
+  const muzzle = new CylinderGeometry(0.1, 0.1, 0.05, 7);
+  muzzle.rotateX(Math.PI / 2);
+  muzzle.translate(x, y, z);
+  parts.push([gun, GUN.metal], [shoulder, GUN.metal], [muzzle, GUN.muzzle]);
+  for (const side of [-1, 1]) {
+    const horn = new ConeGeometry(0.03, 0.1, 5);
+    horn.rotateZ(-side * 0.5);
+    horn.translate(side * 0.06, HEAD_Y + HEAD_R * 0.9, 0);
+    parts.push([horn, COLOURS.enemy.head]);
+  }
+  return new Mesh(
+    merge(parts),
+    new MeshLambertMaterial({ vertexColors: true, flatShading: true }),
+  );
 }

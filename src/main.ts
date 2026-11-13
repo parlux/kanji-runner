@@ -282,8 +282,12 @@ startLoop(
     // 3D draws the run and the boss clash; #game then draws only the overlay
     let track: TrackView | undefined;
     if (view3d && (scene.kind === "run" || scene.kind === "boss")) {
-      view3d.render(scene);
-      track = { project: view3d.project, haze: view3d.haze };
+      view3d.render(scene, SPEED_PRESETS[speed]);
+      track = {
+        project: view3d.project,
+        haze: view3d.haze,
+        boss: view3d.boss(),
+      };
     }
     render(
       ctx,

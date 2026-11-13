@@ -1,4 +1,4 @@
-import { clashAt } from "../core/boss";
+import { bossWon, clashAt } from "../core/boss";
 import { crowdWidth } from "../core/crowd";
 import {
   crateReward,
@@ -52,10 +52,12 @@ import {
   PASSED_LABEL_FADE_DIST,
   SQUAD_FADE_DIST,
   TRACK_W,
+  bossFightAt,
+  type BossView,
   type Haze,
   type Projector,
 } from "./three/world";
-import { renderTrackText } from "./three/overlay";
+import { renderBossText, renderTrackText } from "./three/overlay";
 import {
   drawLabel,
   fitSize,
@@ -111,8 +113,8 @@ const TIER_POPUP: Record<StreakTier, string> = {
   triple: "×3",
 };
 
-/** What the 3D view gives the overlay: where things are on screen and how hazy. */
-export type TrackView = { project: Projector; haze: Haze };
+/** What the 3D view gives the overlay: where things are on screen, how hazy, and the boss. */
+export type TrackView = { project: Projector; haze: Haze; boss?: BossView };
 
 export function render(
   ctx: Ctx,
@@ -125,12 +127,16 @@ export function render(
   view3d?: TrackView,
   speed?: string,
 ): void {
-  // with a 3D view, the run is drawn behind this canvas: draw only the overlay
+  // with a 3D view, the run and boss are drawn behind this canvas: draw only the overlay
   if (view3d && scene.kind === "run") {
     ctx.clearRect(0, 0, w, h);
     renderRunOverlay(ctx, w, h, scene.run, view3d);
     if (scene.paused) renderPaused(ctx, w, h, scene.run.results.length > 0);
     return;
+  }
+  if (view3d && scene.kind === "boss") {
+    ctx.clearRect(0, 0, w, h);
+    return renderBossOverlay(ctx, w, h, scene, view3d);
   }
   ctx.fillStyle = COLORS.bg;
   ctx.fillRect(0, 0, w, h);
@@ -169,8 +175,9 @@ function renderRunOverlay(
   w: number,
   h: number,
   run: RunState,
-  { project, haze }: TrackView,
+  { project, haze, boss }: TrackView,
 ): void {
+  if (boss) renderBossText(ctx, boss, project, haze);
   renderTrackText(ctx, run, project, haze);
   const centre = project(run.x, run.dist, 0);
   const half = crowdWidth(run.army) / 2;
@@ -757,26 +764,58 @@ function renderBoss(
     }
     ctx.stroke();
   }
-  if (now.done) {
-    const won = now.army > 0;
-    const msg = won
-      ? "Victory!"
-      : army === boss
-        ? "Tie: the boss holds"
-        : "Defeated";
-    ctx.fillStyle = COLORS.banner;
-    // above the clash, clear of the survivors
-    const by = h * 0.24;
-    ctx.fillRect(0, by - 36, w, 72);
-    text(
-      ctx,
-      msg,
-      w / 2,
-      by,
-      fitSize(ctx, msg, 40, w - 32),
-      won ? COLORS.good : COLORS.bad,
-    );
-  }
+  if (now.done) renderBossBanner(ctx, w, h, army, boss);
+}
+
+/** The clash's result over the scene: Victory, Defeated, or a tie (the boss holds). */
+function renderBossBanner(
+  ctx: Ctx,
+  w: number,
+  h: number,
+  army: number,
+  boss: number,
+): void {
+  const won = bossWon(army, boss);
+  const msg = won
+    ? "Victory!"
+    : army === boss
+      ? "Tie: the boss holds"
+      : "Defeated";
+  ctx.fillStyle = COLORS.banner;
+  // above the clash, clear of the survivors
+  const by = h * 0.24;
+  ctx.fillRect(0, by - 36, w, 72);
+  text(
+    ctx,
+    msg,
+    w / 2,
+    by,
+    fitSize(ctx, msg, 40, w - 32),
+    won ? COLORS.good : COLORS.bad,
+  );
+}
+
+/**
+ * The 3D boss fight's overlay: the run's overlay for the army as drawn
+ * (running on to the firing stop, losing soldiers per clashAt), the boss's
+ * HP, and the result banner once the clash is over. No title: the switch
+ * from the run is invisible.
+ */
+function renderBossOverlay(
+  ctx: Ctx,
+  w: number,
+  h: number,
+  scene: Extract<Scene, { kind: "boss" }>,
+  view: TrackView,
+): void {
+  const fight = bossFightAt(scene.run.army, scene.boss, scene.t);
+  const run = {
+    ...scene.run,
+    dist: view.boss?.armyDist ?? scene.run.dist,
+    army: fight.army,
+  };
+  renderRunOverlay(ctx, w, h, run, view);
+  if (fight.ending) renderBossBanner(ctx, w, h, scene.run.army, scene.boss);
 }
 
 function renderRun(ctx: Ctx, w: number, h: number, run: RunState): void {

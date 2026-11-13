@@ -62,7 +62,8 @@ export function createFx(scene: Scene) {
      * `count` tracers flying from (ax, az) to (bx, bz) in world units, `speed`
      * lengths per second, `offset` apart in phase. `fade` (0..1 of the way
      * along) is where a tracer starts shrinking to nothing; `minZ` drops those
-     * beyond it (never past a wall).
+     * beyond it (never past a wall). `ay` / `by` are the heights at each
+     * end; `size` scales each tracer.
      */
     stream(
       ax: number,
@@ -76,9 +77,12 @@ export function createFx(scene: Scene) {
       clock: number,
       fade = 1,
       minZ = -Infinity,
+      ay = TRACER_Y,
+      by = TRACER_Y,
+      size = 1,
     ) {
-      from.set(ax, TRACER_Y, az);
-      dir.set(bx - ax, 0, bz - az);
+      from.set(ax, ay, az);
+      dir.set(bx - ax, by - ay, bz - az);
       const len = dir.length();
       if (len < 1e-6) return;
       dir.multiplyScalar(1 / len);
@@ -87,7 +91,7 @@ export function createFx(scene: Scene) {
         const t = (k / count + clock * speed + offset) % 1;
         pos.copy(from).addScaledVector(dir, len * t);
         if (pos.z < minZ) continue;
-        const s = fade < 1 ? Math.min(1, (1 - t) / (1 - fade)) : 1;
+        const s = size * (fade < 1 ? Math.min(1, (1 - t) / (1 - fade)) : 1);
         scl.set(s, s, s);
         m.compose(pos, q, scl);
         tracers.setMatrixAt(nt, m);
