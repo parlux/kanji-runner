@@ -39,9 +39,9 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 **Scope:** M (highest risk: sets the structure and the performance budget for every look)
 
 ### Checkpoint L1: Countryside on the phone (owner)
-- [ ] The run feels less empty and still smooth on the phone.
-- [ ] Gates and text read as well as before.
-- [ ] Note any change to the look before the other four are built.
+- [x] The run feels less empty and still smooth on the phone.
+- [x] Gates and text read as well as before.
+- [x] Note any change to the look before the other four are built. (Owner, 2026-11-13: "Looks good, carry on"; no changes.)
 
 ### Task S2: Spring village
 **Description:** cherry trees, stone lanterns along the kerbs, small houses set back, a snow-capped mountain and soft sun in the backdrop, and a pink horizon. Falling petals as one `Points` layer (≤ 300) moving with the run, kept off the track's text area or faint (see the spec).
