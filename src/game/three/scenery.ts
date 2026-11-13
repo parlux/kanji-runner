@@ -302,11 +302,11 @@ function springLayout(): Layout {
   }
   // one big snowy mountain, two lesser peaks, a pale sun and a few clouds
   backdrop.push(
-    part("peak", 34, 34, -360, 1, 0x8fa3c4, { sx: 128, sy: 94, sz: 128 }),
-    part("peak", 34, 66, -359.5, 1, 0xffffff, { sx: 41, sy: 31, sz: 41 }),
-    part("peak", -146, 27, -345, 1, 0xa6b6d2, { sx: 84, sy: 60, sz: 84 }),
-    part("peak", 180, 22, -345, 1, 0xa6b6d2, { sx: 72, sy: 51, sz: 72 }),
-    part("sun", -100, 80, -355, 16, 0xfff1f4),
+    part("peak", 34, 22, -360, 1, 0x8fa3c4, { sx: 95, sy: 70, sz: 95 }),
+    part("peak", 34, 45.5, -359.5, 1, 0xffffff, { sx: 31, sy: 23, sz: 31 }),
+    part("peak", -120, 18, -345, 1, 0xa6b6d2, { sx: 70, sy: 50, sz: 70 }),
+    part("peak", 150, 14, -345, 1, 0xa6b6d2, { sx: 60, sy: 42, sz: 60 }),
+    part("sun", -60, 55, -355, 14, 0xfff1f4),
   );
   for (let i = 0; i < 5; i++) {
     const scale = range(rng, 1.5, 2.4);

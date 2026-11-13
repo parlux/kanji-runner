@@ -46,8 +46,10 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 ### Task S2: Spring village
 **Description:** cherry trees, stone lanterns along the kerbs, small houses set back, a snow-capped mountain and soft sun in the backdrop, and a pink horizon. Falling petals as one `Points` layer (≤ 300) moving with the run, kept off the track's text area or faint (see the spec).
 **Acceptance criteria:**
-- [ ] Tested: the layout clears the track; the pick now covers both looks.
-- [ ] Browser check as in S1 with `?scenery=spring`, including a screenshot with petals in front of a gate; draw calls and frame time logged within the limits.
+- [x] Tested: the layout clears the track; the pick now covers both looks; petals are one layer of 260 (≤ 300) and never hang below 6 world units over the track, at any time.
+- [x] Browser check as in S1 with `?scenery=spring`, including a screenshot with petals in front of a gate; draw calls and frame time logged within the limits.
+  - Headless (Chrome for Testing, loaded machine, so noisy), 200 crowd, median of 3 × 240 frames, run in turn with Countryside: draw calls 16 (no scenery) → 25 (+9: sky dome, trunks, crowns, boxes, roofs, peaks, sun, clouds, petals); frame time 3.6-4.1 ms at 390×844 and 6.1-6.9 ms at 1280×800, against 3.1 / 5.1 ms with no scenery in S1 (1.2-1.35×) and the same as Countryside measured alongside (3.4-3.7 / 6.1-6.8 ms).
+  - Looks: snow cap and sun sized to show on a phone's narrow sky; the mountain stands at z = -360 (far plane 400).
 **Verification:** as S1. **Dependencies:** S1. **Files:** `scenery.ts`, `sceneryMeshes.ts`, tests. **Scope:** S
 
 ### Task S3: Race day
