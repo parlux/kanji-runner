@@ -61,6 +61,8 @@ Owner: "the horde funnels toward you, forming a column which maybe lines up with
 - **Back-to-back packs** merge: a pack that wakes while another is still charging joins the back of the same column.
 - **Kill effects** (H6) come per row, as a front of sparks where rows die, not one burst per enemy.
 
+**Owner refinement (2026-11-14, during H3b; overrides the above where they differ):** far away a pack does **not** follow the army: it stays spread wide (its `packWidth` mouth, at its own x) and mills, while waiting and while charging. Only within `STREAM_DISTANCE` (2.5 track units) does its front pour inward into a stream as wide as the army, centred on it, the outer ones following behind; then it crashes in row by row while fire mows the front. The core's hit span follows the same shape (wide far away, converging to the army-wide column at contact). Deaths: no shrinking disc; the pack thins from the front and shot figures fall where they stood. Visual check count: 2,000.
+
 ## Code layout
 - `src/core/tuning.ts`: `HORDE_K`, `PACK_MAX`, `HORDE_THREAT`.
 - `src/core/fire.ts`: `packCount`, and `hazardHp` unchanged in value.
