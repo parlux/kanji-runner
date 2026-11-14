@@ -60,9 +60,13 @@ export function expectedArmy(
  * actual army is bigger, expected^(1 − PACK_ADAPT) × army^PACK_ADAPT (part
  * of the way to it, on a log scale). See PACK_ADAPT.
  */
-export function packArmy(expected: number, army: number): number {
+export function packArmy(
+  expected: number,
+  army: number,
+  adapt = PACK_ADAPT,
+): number {
   if (!(army > expected) || expected <= 0) return expected;
-  return expected ** (1 - PACK_ADAPT) * army ** PACK_ADAPT;
+  return expected ** (1 - adapt) * army ** adapt;
 }
 
 /** Enemies in a pack met when the expected army is `expected`. */
