@@ -204,9 +204,13 @@ Notes: the snap came in the last half second before the wipe-out, not from the c
 ### Task H5g: Packs only on the 3rd beat
 **Description:** owner, 2026-11-14: packs never right behind a gate ("it just doesn't work when the enemy is right behind the gate"; "only the 3rd beat would be best feel"; walking through gates was considered and rejected: fire stops at walls, it would cover the answers, and it pressures reading). In `buildTrack`: after question 2, each gap rolls once (`PACK_GAP_CHANCE`) for a pack; a gap with a pack has 3 beats and the 3rd is the pack; beats 1–2 are never packs. Tune `PACK_GAP_CHANCE` so packs per run ≈ today's.
 **Acceptance criteria:**
-- [ ] Tested: no pack is the 1st or 2nd beat after a question; a pack gap has 3 beats; packs per run (mean over seeds) within ±10% of before; the seeded layout is deterministic.
-- [ ] Balance bands hold; before/after win rates, loss per pack and the time each pack is under fire logged here.
-- [ ] Golden/track snapshots updated only for the layout change, with the reason in the commit. Deploy green.
+- [x] Tested: no pack is the 1st or 2nd beat after a question; a pack gap has 3 beats; packs per run (mean over seeds) within ±10% of before; the seeded layout is deterministic.
+  - `PACK_GAP_CHANCE` 0.75 (`ENEMY_CHANCE` removed), `PACK_BEAT` 3. Packs per 14-question run, 1,000 seeds: 8.98 → 8.97. Tests in track.test.ts (1,000 seeds). A run is longer: gaps average 2.875 beats after question 2 instead of 2.5, so the run-time test bound went 70 → 80 s (max was 74 s).
+- [x] Balance bands hold; before/after win rates, loss per pack and the time each pack is under fire logged here.
+  - Boss win rate, 200 seeds, before → after: 80% 0.47 → 0.57 (band 0.4–0.7); 100% 1.00 → 1.00; 50% 0.055 → 0.08 (< 0.1); 100% at skill 0.5 1.00 → 1.00. Mean final army (finished-run bot) 80%: 265.8 → 321.9; 100%: 1489.5 → 1601.5.
+  - Loss per pack (army lost while a pack is awake and alive): 100% 5.20 → 0.80 soldiers, 80% 2.01 → 0.40. Time each pack is under fire (steps where the army damages it): 100% 2.02 → 3.25 s, 80% 2.18 → 3.26 s (packs now wake 9 past the wall, so the full 3.5 s kill is spent before they arrive).
+- [x] Golden/track snapshots updated only for the layout change, with the reason in the commit. Deploy green.
+  - No snapshot changed (the golden run does not use `buildTrack`).
 **Verification:** tests (`npx vitest run --maxWorkers=2`), lint, build. **Dependencies:** H5f. **Files:** `src/core/{track,tuning}.ts`, tests. **Scope:** S
 
 ### Task H6: Spectacular kills
