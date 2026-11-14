@@ -1,11 +1,10 @@
 import { bossSize, bossWon, clashAt } from "../../core/boss";
 import { crowdWidth } from "../../core/crowd";
+import { hazardPos, packSurvivors } from "../../core/horde";
 import {
-  hazardPos,
   plannedRows,
   speedMul,
   isShattered,
-  packSurvivors,
   type ChargeView,
   type RunState,
   type SquadView,

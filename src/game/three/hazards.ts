@@ -1,6 +1,7 @@
 import { Color, Euler, Matrix4, Quaternion, Vector3, type Scene } from "three";
 import { crowdWidth } from "../../core/crowd";
-import { hazardPos, packSpan, type RunState } from "../../core/sim";
+import { hazardPos, packSpan } from "../../core/horde";
+import type { RunState } from "../../core/sim";
 import { fireLimit } from "../../core/state";
 import { FIRE_RANGE } from "../../core/tuning";
 import { makeCrowdMesh } from "./figures";

@@ -1,16 +1,14 @@
 import { Scene, type InstancedBufferAttribute, type Vector4 } from "three";
 import { describe, expect, it } from "vitest";
 import { crowdWidth } from "../../src/core/crowd";
+import { createRunState, stepRun, type RunState } from "../../src/core/sim";
 import {
-  createRunState,
   crowdFront,
   enemiesWon,
   packCrowd,
   packMouth,
   packSpan,
-  stepRun,
-  type RunState,
-} from "../../src/core/sim";
+} from "../../src/core/horde";
 import type { Track } from "../../src/core/track";
 import {
   HORDE_DEFAULTS,

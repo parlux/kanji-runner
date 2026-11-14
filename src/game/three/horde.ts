@@ -12,16 +12,14 @@ import {
   crowdFront,
   crowdOf,
   hazardPos,
-  isShattered,
   packHeadsLeft,
   packMelee,
   packContact,
   packMouth,
   packSurvivors,
-  speedMul,
   streamSpan,
-  type RunState,
-} from "../../core/sim";
+} from "../../core/horde";
+import { isShattered, speedMul, type RunState } from "../../core/sim";
 import { crowdWidth } from "../../core/crowd";
 import { BASE_SPEED, ENEMY_SPEED, PACK_COLUMN_MAX } from "../../core/tuning";
 import { HORDE_HIP, makeHordeGeometry } from "./figures";

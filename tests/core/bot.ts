@@ -4,14 +4,13 @@ import { firepower } from "../../src/core/fire";
 import { createRng } from "../../src/core/rng";
 import {
   createRunState,
-  hazardPos,
   rowOpenings,
   setTarget,
   speedMul,
   stepRun,
-  streamSpan,
   type RunState,
 } from "../../src/core/sim";
+import { hazardPos, streamSpan } from "../../src/core/horde";
 import type { ReaskConfig } from "../../src/core/reask";
 import { buildTrack, hazardSpan } from "../../src/core/track";
 import type { GateRow } from "../../src/core/types";

@@ -1,12 +1,11 @@
 import { packCount } from "../../src/core/fire";
 import {
   createRunState,
-  enemiesWon,
   nudgeTarget,
-  packSurvivors,
   stepRun,
   type RunState,
 } from "../../src/core/sim";
+import { enemiesWon, packSurvivors } from "../../src/core/horde";
 import type { Track } from "../../src/core/track";
 import {
   CHEER_SECONDS,

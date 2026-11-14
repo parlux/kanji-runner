@@ -3,8 +3,18 @@ import {
   crateReward,
   createRunState,
   gateOpenings,
-  hazardPos,
   isShattered,
+  rowOpenings,
+  wallSolids,
+  nearestOpening,
+  nudgeTarget,
+  setTarget,
+  stepRun,
+  type Opening,
+  type RunState,
+} from "../../src/core/sim";
+import {
+  hazardPos,
   crowdFront,
   crowdOf,
   packCrowd,
@@ -14,21 +24,13 @@ import {
   packMelee,
   packStreamLeft,
   packStreaming,
-  rowOpenings,
   packMouth,
   packSpan,
   packContact,
   packFireShare,
   streamSpan,
   packSurvivors,
-  wallSolids,
-  nearestOpening,
-  nudgeTarget,
-  setTarget,
-  stepRun,
-  type Opening,
-  type RunState,
-} from "../../src/core/sim";
+} from "../../src/core/horde";
 import { crowdWidth } from "../../src/core/crowd";
 import {
   expectedArmy,

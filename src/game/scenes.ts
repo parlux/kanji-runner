@@ -17,12 +17,12 @@ import { KANA } from "../core/kana";
 import { KANJI } from "../core/kanji";
 import {
   createRunState,
-  enemiesWon,
   nudgeTarget,
   plannedRows,
   stepRun,
   type RunState,
 } from "../core/sim";
+import { enemiesWon } from "../core/horde";
 import { buildTrack } from "../core/track";
 import { logRun, type SessionLog } from "../core/session";
 import { recordRun } from "../core/srs";

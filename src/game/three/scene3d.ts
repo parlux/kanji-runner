@@ -16,7 +16,8 @@ import {
   Vector3,
   WebGLRenderer,
 } from "three";
-import { packMelee, type RunState } from "../../core/sim";
+import { packMelee } from "../../core/horde";
+import type { RunState } from "../../core/sim";
 import type { Scene } from "../scenes";
 import { cameraFor, fitCamera, LOOK, makeCamera, MAX_DPR } from "./view";
 import { sceneryFor, type LookId } from "./scenery";

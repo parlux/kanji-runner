@@ -1,14 +1,13 @@
 import { isCharge } from "../../core/track";
 import {
   crateReward,
-  hazardPos,
   isShattered,
-  packSurvivors,
   rowOpenings,
   viewOf,
   type ChargeView,
   type RunState,
 } from "../../core/sim";
+import { hazardPos, packSurvivors } from "../../core/horde";
 import {
   drawLabel,
   fitSize,

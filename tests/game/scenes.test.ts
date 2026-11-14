@@ -11,13 +11,12 @@ import { studyCards } from "../../src/core/study";
 import { itemKey, defaultProgress } from "../../src/core/srs";
 import {
   createRunState,
-  enemiesWon,
-  packStreaming,
   plannedRows,
   rowOpenings,
   setTarget,
   type RunState,
 } from "../../src/core/sim";
+import { enemiesWon, packStreaming } from "../../src/core/horde";
 import {
   CHEER_SECONDS,
   CLASH_SECONDS,
