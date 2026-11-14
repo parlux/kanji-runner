@@ -623,7 +623,7 @@ function wakePacks(s: RunState): RunState {
     woke[i] = true;
     const per = next.horde.killSeconds * FIRE_PER_SOLDIER;
     const expected = per > 0 ? (next.hp[i] ?? 0) / per : 0;
-    const army = packArmy(expected, next.army, next.horde.packAdapt);
+    const army = packArmy(expected, next.army);
     if (army === expected) {
       next = { ...next, woke };
       continue;

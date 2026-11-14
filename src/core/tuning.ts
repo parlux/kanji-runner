@@ -183,8 +183,6 @@ export type HordeTuning = {
   readonly killSeconds: number;
   readonly packWidth: number;
   readonly hordeScale: number;
-  /** PACK_ADAPT for this run when set. */
-  readonly packAdapt?: number;
 };
 export const HORDE_DEFAULTS: HordeTuning = {
   hordeK: HORDE_K,

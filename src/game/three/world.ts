@@ -43,20 +43,14 @@ export const FIGURE_RADIUS = 0.12;
 export const CROWD_DEPTH = 1.8;
 /**
  * The default shape horizon (track distance ahead of the army): solid objects
- * are drawn up to here, faint in the haze, and so is their text. The camera's
- * "haze" setting changes it live (`shapeDistance`). Must stay below the
+ * are drawn up to here, faint in the haze, and so is their text. Must stay below the
  * closest a re-ask can replace a row (tested): `HAZE_MAX` is the safe limit.
  */
 export const SHAPE_DISTANCE = 4 * VIEW_DISTANCE;
 /** The farthest the haze slider goes: just inside the closest a re-ask can replace a row. */
 export const HAZE_MAX = 21;
-let horizon = SHAPE_DISTANCE;
-/** The shape horizon in use (the haze setting; `SHAPE_DISTANCE` until changed). */
-export const shapeDistance = (): number => horizon;
-/** Sets the shape horizon in use (clamped to the haze slider's range). */
-export const setShapeDistance = (d: number): void => {
-  horizon = Math.min(HAZE_MAX, Math.max(VIEW_DISTANCE + 1, d));
-};
+/** The shape horizon in use (`SHAPE_DISTANCE`). */
+export const shapeDistance = (): number => SHAPE_DISTANCE;
 /** The default distance haze colour (the fog's), as 0xrrggbb. */
 export const HAZE_COLOUR = 0xd4eeff;
 let hazeHex = HAZE_COLOUR;

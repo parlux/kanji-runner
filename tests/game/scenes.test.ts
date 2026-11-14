@@ -21,7 +21,6 @@ import {
 import {
   CHEER_SECONDS,
   CLASH_SECONDS,
-  HORDE_DEFAULTS,
   REASK_MAX_BOX,
 } from "../../src/core/tuning";
 import { syntheticList } from "../core/wk-fixture";
@@ -840,25 +839,5 @@ describe("the enemies win", () => {
     for (let n = 0; n < 10 && s.kind === "run"; n++)
       s = updateScene(s, STEP, 0);
     expect(s.kind).toBe("end");
-  });
-});
-
-describe("horde tuning", () => {
-  it("a new run is built with the given tuning (defaults when absent)", () => {
-    const session = createSession(defaultProgress());
-    const start = { kind: "start" } as const;
-    const tuned = {
-      ...HORDE_DEFAULTS,
-      hordeK: 10_000,
-      packMax: 2000,
-      killSeconds: 2,
-      packWidth: 0.5,
-    };
-    const a = handleAction(start, "confirm", () => 5, session, tuned).scene;
-    const b = handleAction(start, "confirm", () => 5, session).scene;
-    if (a.kind !== "run" || b.kind !== "run") throw new Error("no run");
-    expect(a.run.horde).toEqual(tuned);
-    expect(b.run.horde).toEqual(HORDE_DEFAULTS);
-    expect(Math.max(...a.run.heads)).toBeGreaterThan(Math.max(...b.run.heads));
   });
 });

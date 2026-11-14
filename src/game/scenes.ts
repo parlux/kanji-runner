@@ -31,10 +31,8 @@ import {
   CLASH_APPROACH_SECONDS,
   CLASH_HOLD_SECONDS,
   CLASH_SECONDS,
-  HORDE_DEFAULTS,
   ROWS_PER_RUN,
   STEER_MAX_SPEED,
-  type HordeTuning,
 } from "../core/tuning";
 import type { KanaItem, Progress } from "../core/types";
 import type { WkList } from "../wanikani/parse";
@@ -111,30 +109,20 @@ export function adoptProgress(session: Session, synced: Progress): Session {
  * A new run. WaniKani runs have re-asks on (built with `reaskRun`, same rows
  * as `buildPoolRun`); Built-in runs have none and are unchanged.
  */
-function newRun(seed: number, session: Session, horde: HordeTuning): Scene {
+function newRun(seed: number, session: Session): Scene {
   const track = buildTrack(seed, ROWS_PER_RUN);
   const { progress, kana, wk } = session;
   let run: RunState;
   if (session.meaning) {
     const pool = meaningPool(progress, KANJI);
-    run = createRunState(
-      buildPoolRun(seed, progress, pool),
-      track,
-      null,
-      horde,
-    );
+    run = createRunState(buildPoolRun(seed, progress, pool), track, null);
   } else if (wk) {
     const pool = wanikaniPool(progress, kana, wk);
     const { rows, reask } = reaskRun(seed, progress, pool);
-    run = createRunState(rows, track, reask, horde);
+    run = createRunState(rows, track, reask);
   } else {
     const pool = builtInPool(progress, kana, KANJI, WORDS);
-    run = createRunState(
-      buildPoolRun(seed, progress, pool),
-      track,
-      null,
-      horde,
-    );
+    run = createRunState(buildPoolRun(seed, progress, pool), track, null);
   }
   return { kind: "run", seed, run, paused: false };
 }
@@ -216,13 +204,12 @@ function startAction(
   action: Action,
   newSeed: () => number,
   session: Session,
-  horde: HordeTuning = HORDE_DEFAULTS,
 ): { scene: Scene; session: Session } {
   const { pick } = scene;
   if (pick === undefined) {
     if (action === "confirm") {
       const next = { ...session, unlocked: null, before: null };
-      return { scene: newRun(newSeed(), next, horde), session: next };
+      return { scene: newRun(newSeed(), next), session: next };
     }
     // placement is off in WaniKani mode: WaniKani's level gates the pool
     if (
@@ -271,17 +258,16 @@ export function handleAction(
   action: Action,
   newSeed: () => number,
   session: Session,
-  horde: HordeTuning = HORDE_DEFAULTS,
 ): { scene: Scene; session: Session } {
   switch (scene.kind) {
     case "start":
-      return startAction(scene, action, newSeed, session, horde);
+      return startAction(scene, action, newSeed, session);
     case "boss":
       return { scene, session };
     // Play again starts the next run as the start screen's Play does; Home goes back
     case "end":
       if (action === "confirm")
-        return startAction({ kind: "start" }, action, newSeed, session, horde);
+        return startAction({ kind: "start" }, action, newSeed, session);
       return {
         scene: action === "back" ? { kind: "start" } : scene,
         session,

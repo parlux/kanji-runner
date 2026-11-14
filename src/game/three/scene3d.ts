@@ -41,7 +41,6 @@ import {
   MAX_DRAWN_SOLDIERS,
   DEFAULT_CAMERA,
   fogRange,
-  setShapeDistance,
   shapeDistance,
   followStep,
   followTarget,
@@ -393,7 +392,6 @@ export function createView3d(canvas: HTMLCanvasElement): View3d | null {
   const refit = (): void => {
     fit = cameraFor();
     pose = fit.pose;
-    setShapeDistance(DEFAULT_CAMERA.haze);
     fitCamera(camera, w / h, fit, camX);
     const range = fogRange(pose, shapeDistance());
     fog.near = range.near;

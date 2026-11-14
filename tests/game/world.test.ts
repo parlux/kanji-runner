@@ -60,7 +60,6 @@ import {
   poseFromSettings,
   DEFAULT_CAMERA,
   HAZE_MAX,
-  setShapeDistance,
   shapeDistance,
   type CameraSettings,
 } from "../../src/game/three/world";
@@ -780,20 +779,6 @@ describe("camera settings", () => {
     expect(HAZE_MAX).toBeLessThan(
       REASK_GAP_MIN * (CALM_DISTANCE + 2 * HAZARD_SPACING),
     );
-  });
-
-  it("sets the live shape horizon within its range", () => {
-    try {
-      setShapeDistance(15);
-      expect(shapeDistance()).toBe(15);
-      expect(bossShown()).toBe(16);
-      setShapeDistance(100);
-      expect(shapeDistance()).toBe(HAZE_MAX);
-      setShapeDistance(0);
-      expect(shapeDistance()).toBe(VIEW_DISTANCE + 1);
-    } finally {
-      setShapeDistance(SHAPE_DISTANCE);
-    }
   });
 });
 
