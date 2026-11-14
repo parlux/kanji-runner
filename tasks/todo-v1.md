@@ -148,8 +148,8 @@ Checks:
 - Split `tests/core/sim.test.ts` (1,517 lines) to match.
 
 **Acceptance criteria:**
-- [ ] Golden snapshot, `npm run check` and `npm run test:slow` pass unchanged.
-- [ ] Every `core/` file is ≤ 600 lines.
+- [x] Golden snapshot, `npm run check` and `npm run test:slow` pass unchanged.
+- [x] Every `core/` file is ≤ 600 lines.
 
 **Scope:** M
 
