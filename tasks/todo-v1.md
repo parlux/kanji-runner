@@ -41,10 +41,14 @@ Checks:
 - `.github/workflows/deploy.yml` runs `npm run check` and `npm run test:slow`.
 
 **Acceptance criteria:**
-- [ ] `npm test` takes ≤ 20 s and `npm run check` takes ≤ 40 s on the dev Mac (log both).
-- [ ] `npm run test:slow` runs every case that runs today: same test count, same seed counts.
-- [ ] 10 consecutive `npm test` runs pass, and 2 consecutive `test:slow` runs pass.
-- [ ] CI is green.
+- [x] `npm test` takes ≤ 20 s and `npm run check` takes ≤ 40 s on the dev Mac (log both).
+  - `npm test` 12.6-16.6 s; `npm run check` 25.8 s with warm caches (49 s on a cold first run). See `docs/metrics.md`.
+- [x] `npm run test:slow` runs every case that runs today: same test count, same seed counts.
+  - 780 of 780 tests, same seeds (the old sweeps are the slow tier).
+- [x] 10 consecutive `npm test` runs pass, and 2 consecutive `test:slow` runs pass.
+  - 10 of 10 and 2 of 2 passed.
+- [x] CI is green.
+  - Run 43646571947 (build with `check` and `test:slow`, deploy) passed.
 
 **Files:** `package.json`, `vite.config.ts`, `.gitignore`, `.github/workflows/deploy.yml`, `tests/core/*` (sweeps), a new `tests/sweep.ts`.
 **Scope:** M
