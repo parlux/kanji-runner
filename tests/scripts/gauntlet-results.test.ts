@@ -28,7 +28,7 @@ const run: GauntletResults = {
     },
     {
       wave: 2,
-      preset: GAUNTLET[7] as WavePreset,
+      preset: GAUNTLET.at(-1) as WavePreset,
       killSeconds: null,
       reached: 200,
       lost: 20,
@@ -102,7 +102,7 @@ describe("gauntlet-results script", () => {
     );
     expect(lines[1]).toMatch(/^#\s+army\s+for\s+enem\s+kill/);
     expect(lines[2]).toMatch(
-      /^1\s+60\s+60\s+200\s+3\.5s\s+0\.8\s+1\s+1\s+\| 2\.48s\s+200\s+0\s+0\s+58\s+baseline: army 60, its pack$/,
+      /^1\s+60\s+60\s+200\s+3\.5s\s+0\.8\s+1\s+1\s+\| 2\.48s\s+200\s+0\s+0\s+58\s+baseline: army 60, its pack, held line$/,
     );
     // the answers and the note under each wave
     expect(lines[3]).toBe(

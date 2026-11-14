@@ -96,7 +96,7 @@ describe("gauntlet results", () => {
       /^1\. Pace: Too fast, Converging: Natural \| army 60 \(pack for 60\), 200 enemies, kill 3\.5s/,
     );
     expect(lines[1]).toMatch(
-      /measured: kill 3\.\d+s, 200 enemies, reached \d+, lost 0, \d+ fps \| baseline: army 60, its pack \| note: a bit quick$/,
+      /measured: kill 3\.\d+s, 200 enemies, reached \d+, lost 0, \d+ fps \| baseline: army 60, its pack, held line \| note: a bit quick$/,
     );
     expect(lines[2]).toMatch(/^2\. - \| /);
   });

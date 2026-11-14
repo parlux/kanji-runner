@@ -12,6 +12,7 @@ const CSS = `
 .kr-gx .label { text-align: center; text-shadow: 0 2px 6px #000, 0 0 2px #000; }
 .kr-gx .label b { display: block; font-size: 64px; font-weight: 800; }
 .kr-gx .label span { font-size: 18px; }
+.kr-gx .label .hint { font-size: 17px; font-weight: 600; margin: 14px 24px 0; }
 .kr-gx .card { box-sizing: border-box; width: 100%; max-width: 360px;
   max-height: 100%; overflow-y: auto; display: flex; flex-direction: column;
   gap: 10px; padding: 18px; background: #1d2230; border: 1px solid #5a6478; }
@@ -138,6 +139,10 @@ export function createGauntletUi(h: GauntletUiHandlers): {
         { className: "label" },
         el("b", { textContent: `Wave ${g.index + 1}` }),
         el("span", { textContent: `of ${g.presets.length}` }),
+        el("p", {
+          className: "hint",
+          textContent: g.presets[g.index]?.hint ?? "",
+        }),
       ),
     );
   };

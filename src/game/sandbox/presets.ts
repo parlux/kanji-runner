@@ -27,6 +27,8 @@ export type WavePreset = {
   x: number;
   /** What the wave tests, for the log (never shown while playing). */
   note: string;
+  /** What to try, shown under the "Wave N" label. */
+  hint?: string;
 };
 
 /** Today's defaults: a late pack of a normal run (expected army about 60, at the 200 cap). */
@@ -48,43 +50,49 @@ const wave = (w: Partial<WavePreset> & { note: string }): WavePreset => ({
 });
 
 /**
- * The gauntlet, in order (round 2, after the owner's round 1: 3.5 s kills,
- * full adapt, melee contact). Each wave's note says what it tests.
+ * The gauntlet, in order (round 3, after the owner's round 2: straight-ahead
+ * fire, delayed tracking with dodging, no snap when woken close, the enemies
+ * cheer a win). Each wave's note says what it tests; its hint, shown under
+ * the "Wave N" label, says what to try.
  */
 export const GAUNTLET: readonly WavePreset[] = [
-  wave({ note: "baseline: army 60, its pack" }),
   wave({
-    ahead: 2,
-    note: "woken close, as behind a wall in a run: reached",
-    x: 0.4,
+    note: "baseline: army 60, its pack, held line",
+    hint: "Stay on them: your fire goes straight ahead",
   }),
   wave({
-    army: 150,
-    note: "strong army 150 (2.5x): tougher enemies, same pace",
+    army: 25,
+    note: "dodge: a sidestep at the last moment (25 vs a pack for 60)",
+    hint: "Let them come close, then sidestep fast: make them miss",
+  }),
+  wave({
+    army: 25,
+    x: 0.4,
+    note: "weave: side to side as they come (25 vs a pack for 60)",
+    hint: "Weave side to side as they come",
+  }),
+  wave({
+    ahead: 2,
+    x: 0.3,
+    note: "woken close, off to one side: no snapping into line",
+    hint: "They start close and off to the side: watch them come across",
   }),
   wave({
     army: 300,
-    note: "strong army 300 (5x): tougher enemies, same pace",
-    x: 0.6,
-  }),
-  wave({
-    army: 600,
-    note: "strong army 600 (10x): tougher enemies, same pace",
-  }),
-  wave({
-    army: 40,
-    ahead: 3,
-    note: "mid army (40 vs a pack for 60) reached briefly",
-    x: 0.45,
+    x: 0.7,
+    note: "strong army 300 (5x), its pack off to one side: straight-ahead fire, same pace",
+    hint: "Mow them down: your fire goes where you face",
   }),
   wave({
     army: 20,
-    note: "weak army (20 vs a pack for 60) reached: melee",
     x: 0.55,
+    note: "weak army (20 vs a pack for 60) held: melee",
+    hint: "Hold your line: melee",
   }),
   wave({
     army: 8,
-    note: "outmatched (8 vs a pack for 60): melee can wipe you out",
+    note: "outmatched (8 vs a pack for 60): they win and cheer",
+    hint: "Outmatched: hold your line and let them win",
   }),
 ];
 

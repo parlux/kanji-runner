@@ -4,6 +4,7 @@ import {
   CHEER_SECONDS,
   HORDE_DEFAULTS,
   PACK_ADAPT,
+  STEER_MAX_SPEED,
 } from "../../src/core/tuning";
 import {
   AFTER_SECONDS,
@@ -37,9 +38,9 @@ function playWave(g: Gauntlet, max = 60): Gauntlet {
 }
 
 describe("gauntlet presets", () => {
-  it("the shipped list is valid and 8–10 waves long", () => {
+  it("the shipped list is valid and 6–10 waves long", () => {
     expect(presetErrors(GAUNTLET)).toEqual([]);
-    expect(GAUNTLET.length).toBeGreaterThanOrEqual(8);
+    expect(GAUNTLET.length).toBeGreaterThanOrEqual(6);
     expect(GAUNTLET.length).toBeLessThanOrEqual(10);
   });
 
@@ -57,34 +58,73 @@ describe("gauntlet presets", () => {
       expect({ ...p, army: BASE.army, ahead: undefined, x: 0.5 }).toEqual({
         ...BASE,
         note: p.note,
+        hint: p.hint,
       });
   });
 
-  it("round 2: baseline, strong armies (150, 300, 600), a weak army reached, an outmatched one, a mid one reached briefly; each labelled", () => {
-    const armies = GAUNTLET.map((p) => p.army);
-    for (const a of [150, 300, 600]) expect(armies).toContain(a);
-    expect(
-      GAUNTLET.some((p) => p.ahead !== undefined && p.army === p.expected),
-    ).toBe(true);
+  it("round 3: baseline, a dodge (sidestep), a weave, woken close, a strong army, a weak army's melee, an outmatched one (they cheer); each labelled, with a hint", () => {
+    expect(GAUNTLET.length).toBe(7);
     expect(new Set(GAUNTLET.map((p) => p.note)).size).toBe(GAUNTLET.length);
+    for (const p of GAUNTLET) expect(p.hint ?? "").not.toBe("");
+    const find = (word: string): number =>
+      GAUNTLET.findIndex((p) => p.note.startsWith(word));
+    for (const w of [
+      "baseline",
+      "dodge",
+      "weave",
+      "woken close",
+      "strong army",
+      "weak army",
+      "outmatched",
+    ])
+      expect(find(w), w).toBeGreaterThanOrEqual(0);
+    expect(GAUNTLET[find("woken close")]?.ahead).toBeDefined();
     const played = GAUNTLET.map((p) => playWave(startGauntlet([p])).log[0]);
-    // strong armies: the same pace as the baseline (full adapt)
+    // the strong army: the same pace as the baseline (full adapt)
     const base = played[0]?.killSeconds ?? 0;
     expect(base).toBeGreaterThan(3);
-    GAUNTLET.forEach((p, i) => {
-      if (p.army > p.expected)
-        expect(played[i]?.killSeconds ?? 0).toBeCloseTo(base, 1);
-    });
+    expect(played[find("strong army")]?.killSeconds ?? 0).toBeCloseTo(base, 1);
+    // held, the weak armies are reached and lose soldiers; only the outmatched one dies
     const weak = GAUNTLET.map((p, i) => ({ p, w: played[i] })).filter(
       ({ p }) => p.army < p.expected,
     );
-    // reached: soldiers lost in melee; one is outmatched and dies, the rest stand
-    expect(weak.length).toBeGreaterThanOrEqual(3);
+    expect(weak.length).toBe(4);
     for (const { w } of weak) expect(w?.reached ?? 0).toBeGreaterThan(50);
     expect(weak.filter(({ w }) => w?.died).length).toBe(1);
+    expect(played[find("outmatched")]?.died).toBe(true);
     expect(weak.filter(({ w }) => !w?.died && (w?.lost ?? 0) > 0).length).toBe(
-      2,
+      3,
     );
+  });
+
+  it("the dodge wave: a full-speed sidestep as they come close makes most of the stream miss, and costs nothing; a weave too", () => {
+    const dodge = GAUNTLET.find((p) => p.note.startsWith("dodge"));
+    if (!dodge) throw new Error("no dodge wave");
+    const play = (steer: (g: Gauntlet) => number) => {
+      let g = startGauntlet([dodge]);
+      while (g.phase !== "rate") g = stepGauntlet(g, DT, steer(g));
+      return g;
+    };
+    const held = play(() => 0);
+    // as the head comes within half a second, steer right at full speed
+    const side = play((g) =>
+      (g.run.packs[0]?.pos ?? 0) - g.run.dist < 1.1 && g.run.targetX < 0.85
+        ? STEER_MAX_SPEED * DT
+        : 0,
+    );
+    const weave = play(
+      (g) =>
+        STEER_MAX_SPEED *
+        DT *
+        Math.sign(Math.sin((2 * Math.PI * g.measure.t) / 1.6)),
+    );
+    expect(held.log[0]?.lost ?? 0).toBeGreaterThan(0);
+    expect(held.run.missed[0] ?? 0).toBeLessThan(1);
+    for (const g of [side, weave]) {
+      expect(g.log[0]?.lost).toBe(0);
+      expect(g.run.missed[0] ?? 0).toBeGreaterThan(50);
+      expect(g.log[0]?.reached ?? 0).toBeLessThan(held.log[0]?.reached ?? 0);
+    }
   });
 
   it("flags bad presets", () => {

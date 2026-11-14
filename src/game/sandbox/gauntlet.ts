@@ -75,7 +75,7 @@ export type Answers = {
 };
 
 /** Seconds the "Wave N" label shows over the waiting crowd before the wave starts. */
-export const INTRO_SECONDS = 2;
+export const INTRO_SECONDS = 3;
 /** Seconds the wave runs on after the pack is gone (its last deaths play out; CHEER_SECONDS when the enemies won). */
 export const AFTER_SECONDS = 1;
 
