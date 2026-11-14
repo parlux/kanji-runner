@@ -74,6 +74,13 @@ Owner's defaults: **count 500, kill time 2.5 s, figure size 1.0, pack width 0.8*
 - **Default count back to 200** (panel count 200: K 3, `PACK_MAX` 200). Kill time 2.5 s, figure size 1.0 and pack width 0.8 stay. Owner: "it's fine with lower numbers as long as the pace of killing them seems reasonable."
 - **Packs follow the army you actually have, part of the way.** Owner: "early waves feel great, but toward end of run if I'm too powerful it just wipes out enemies almost instantly." When a pack wakes, its HP, head count and contact strength are set from an effective army between the expected army and the actual one (`PACK_ADAPT`), never below the expected: an army well above expected mows a pack a bit faster (about 1.5 s instead of 2.5 s) but never in a blink; an army at or below expected sees the same numbers as before. Computed once at waking, from the run state, and stored per pack.
 
+## Gauntlet round 1 findings (owner, 2026-11-14)
+Owner played the gauntlet: wave 3 (3.5 s kill) felt best. Strong armies killed too fast: wave 7 (2.5 s) and 8 (1.8 s) "a bit too quickly", wave 9 (1.1 s) "super quick, bad". Wave 10 (weak army, reached): "I would expect if the army reaches me it stops right in front and keeps attacking until I killed them all or I was dead, rather than just mush into my army and disappear." These rules replace the matching ones above:
+- **Kill time:** default `KILL_SECONDS` = 3.5.
+- **Full adapt:** `PACK_ADAPT` = 1.0 — at waking a pack is sized from the actual army (never below the expected-army numbers), so kill time stays about 3–3.5 s however strong the army is; strength shows as bigger hordes (capped at `packMax`).
+- **Melee contact:** enemies that reach the army stop at its front line and fight; they don't vanish into it. While in melee, both sides lose units every second and the army keeps shooting. It ends when the pack is dead or the army is (game over as usual). Rate: a pack the army's size, with no fire at all, costs the army about a quarter of itself (`MELEE_RATE`, tuned); with fire it is much less. The view shows a red front pressed against the blue front, figures falling on both sides. Packs and walls behind a melee wait (as with the stream).
+- The stream (crowd → army-wide stream) stays; it now ends in a melee front instead of arrivals.
+
 ## Code layout
 - `src/core/tuning.ts`: `HORDE_K`, `PACK_MAX`, `HORDE_THREAT`.
 - `src/core/fire.ts`: `packCount`, and `hazardHp` unchanged in value.
