@@ -214,11 +214,11 @@ Notes: the snap came in the last half second before the wipe-out, not from the c
 **Verification:** tests (`npx vitest run --maxWorkers=2`), lint, build. **Dependencies:** H5f. **Files:** `src/core/{track,tuning}.ts`, tests. **Scope:** S
 
 ### Task H6: Spectacular kills
-**Description:** `kills.ts`: a pooled kill-effect ring. Each kill knocks the figure back or topples it with a spark burst in the enemy colour. Kills are found by comparing survivors between frames. The final burst of a pack is bigger than today's. Fewer pieces beyond about half the shape distance. Effects freeze when paused.
+**Description:** `kills.ts`: pooled kill effects for the current horde (spec: stream, melee, straight-ahead fire; shot figures already fall). Kills happen at the stream's head and in the melee, so effects come **per row as a front of sparks** where the fire lands (not one burst per enemy), plus small hit flashes in the melee on both sides. The pack's last enemy dies with a big final burst. The old ring of sparks around a targeted pack is removed (owner disliked the ring/circle look). Fewer pieces beyond about half the shape distance. Effects freeze when paused. Kills come from the death records the GPU horde already writes.
 **Acceptance criteria:**
 - [ ] Tested: the pool never grows; kill detection counts drops correctly, including across pause and a new run; LOD piece counts.
-- [ ] Browser as in H4 at the owner's default count, plus a gate behind a dying pack (labels stay readable). Screenshots in the scratchpad.
-- [ ] Frame time logged against H4 and against today's pack scene (≤ 1.3× today's). On a miss: shrink the effects first, then `PACK_MAX`, and log what changed.
+- [ ] Browser at 390×844 at the default count (200) and 500: mid-stream kills, a melee, the final burst, a gate behind a dying pack (labels stay readable). Screenshots in the scratchpad.
+- [ ] Frame time logged against H5g and against the pre-horde pack scene (≤ 1.3×); fps on the gauntlet's waves unchanged. On a miss: shrink the effects first, then `PACK_MAX`, and log what changed.
 - [ ] Deploy green.
 **Verification:** as H2. **Dependencies:** H5g. **Files:** `src/game/three/{kills,hazards,horde,fx}.ts`, tests. **Scope:** M
 
