@@ -14,16 +14,12 @@ import {
   CRATE_D,
   CRATE_H,
   CRATE_POPUP_DIST,
-  CROWD_DEPTH,
-  DIST_SCALE,
   MAX_RECRUITS,
   recruitProgress,
   SHATTER_DIST,
   spanWorld,
-  TRACK_W,
-  worldX,
-  worldZ,
-} from "./world";
+} from "./hazardLayout";
+import { CROWD_DEPTH, DIST_SCALE, TRACK_W, worldX, worldZ } from "./world";
 
 /**
  * Enemy packs and their kill effects, the crowd's fire at what it targets,

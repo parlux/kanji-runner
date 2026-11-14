@@ -11,15 +11,8 @@ import {
 import { rowOpenings } from "../../core/walls";
 import { wallSolids } from "../../core/gates";
 import type { RunState } from "../../core/sim";
-import {
-  shapeDistance,
-  TRACK_W,
-  WALL_BEHIND,
-  WALL_H,
-  WALL_T,
-  worldX,
-  worldZ,
-} from "./world";
+import { shapeDistance, TRACK_W, worldX, worldZ } from "./world";
+import { WALL_BEHIND, WALL_H, WALL_T } from "./wallLayout";
 
 /**
  * The run's walls in 3D: solid pieces between the openings, a translucent

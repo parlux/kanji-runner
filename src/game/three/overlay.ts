@@ -12,14 +12,10 @@ import {
   TEXT_COLORS,
   type Tint,
 } from "../labels";
+import { BOSS_TOP, type BossView } from "./bossLayout";
+import { CRATE_H } from "./hazardLayout";
 import {
-  BOSS_TOP,
-  type BossView,
-  CRATE_H,
   FIGURE_TOP,
-  hazeColour,
-  shapeDistance,
-  type Haze,
   squadPlace,
   LABEL_K,
   PASSED_LABEL_FADE_DIST,
@@ -27,8 +23,9 @@ import {
   WALL_BEHIND,
   WALL_H,
   wallPx,
-  type Projector,
-} from "./world";
+} from "./wallLayout";
+import { hazeColour, shapeDistance, type Projector } from "./world";
+import { type Haze } from "./camera";
 
 type Ctx = CanvasRenderingContext2D;
 

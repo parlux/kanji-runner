@@ -1,10 +1,6 @@
 import { PerspectiveCamera } from "three";
-import {
-  DEFAULT_CAMERA,
-  HAZE_COLOUR,
-  poseFromSettings,
-  type CameraFit,
-} from "./world";
+import { DEFAULT_CAMERA, poseFromSettings, type CameraFit } from "./camera";
+import { HAZE_COLOUR } from "./world";
 
 /**
  * Camera and look constants for the 3D run. The camera is the tuned

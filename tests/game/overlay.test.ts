@@ -4,13 +4,9 @@ import { buildTrack } from "../../src/core/track";
 import { ROWS_PER_RUN, VIEW_DISTANCE } from "../../src/core/tuning";
 import { mixHex } from "../../src/game/labels";
 import { renderTrackText } from "../../src/game/three/overlay";
-import {
-  HAZE_COLOUR,
-  hazeFor,
-  projectorFor,
-  SHAPE_DISTANCE,
-  WALL_H,
-} from "../../src/game/three/world";
+import { HAZE_COLOUR, SHAPE_DISTANCE } from "../../src/game/three/world";
+import { hazeFor } from "../../src/game/three/camera";
+import { projectorFor, WALL_H } from "../../src/game/three/wallLayout";
 import { cameraFor } from "../../src/game/three/view";
 import { kanaRun } from "../core/kana-run";
 

@@ -28,6 +28,12 @@ import {
   crowdHalfDepth,
   DIST_SCALE,
   FIGURE_RADIUS,
+  shapeDistance,
+  TRACK_W,
+  worldX,
+  worldZ,
+} from "./world";
+import {
   HORDE_CAP,
   COL_SALT,
   HORDE_JITTER,
@@ -44,7 +50,6 @@ import {
   meleeStep,
   type HordeLayout,
   type HordeSpot,
-  shapeDistance,
   CHEER_HOPS,
   CHEER_JUMP,
   CHEER_SPREAD_SECONDS,
@@ -54,10 +59,7 @@ import {
   STREAM_CRASH,
   STREAM_MEET,
   STREAM_TURN,
-  TRACK_W,
-  worldX,
-  worldZ,
-} from "./world";
+} from "./hordeLayout";
 
 /**
  * The enemy packs, every figure animated on the GPU. Each pack in view gets

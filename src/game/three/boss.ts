@@ -1,15 +1,8 @@
 import type { Scene } from "three";
 import { BOSS_MUZZLE, makeBossMesh } from "./figures";
 import { FX_COLOURS, type Fx } from "./fx";
-import {
-  BOSS_SCALE,
-  bossShown,
-  BOSS_TOP,
-  type BossFight,
-  DIST_SCALE,
-  worldX,
-  worldZ,
-} from "./world";
+import { BOSS_SCALE, bossShown, BOSS_TOP, type BossFight } from "./bossLayout";
+import { DIST_SCALE, worldX, worldZ } from "./world";
 
 /**
  * The giant boss in 3D: one enemy figure from the factory, standing on the

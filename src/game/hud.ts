@@ -6,13 +6,12 @@ import type { Scene, Session } from "./scenes";
 import {
   CROWD_DEPTH,
   DIST_SCALE,
-  FIGURE_TOP,
   TRACK_W,
-  bossFightAt,
-  type BossView,
-  type Haze,
   type Projector,
 } from "./three/world";
+import { FIGURE_TOP } from "./three/wallLayout";
+import { bossFightAt, type BossView } from "./three/bossLayout";
+import { type Haze } from "./three/camera";
 import { renderBossText, renderTrackText } from "./three/overlay";
 import { fitSize, outlinedText, text } from "./labels";
 import { COLORS, type Ctx } from "./draw";

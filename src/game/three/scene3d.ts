@@ -40,25 +40,29 @@ import {
   spreadWidth,
   DIST_SCALE,
   MAX_DRAWN_SOLDIERS,
-  DEFAULT_CAMERA,
-  fogRange,
   shapeDistance,
-  followStep,
-  followTarget,
   setHazeColour,
   TRACK_W,
   worldX,
   worldZ,
+  type Projector,
+} from "./world";
+import {
+  DEFAULT_CAMERA,
+  fogRange,
+  followStep,
+  followTarget,
   type CameraFit,
   type Haze,
-  type Projector,
   hazeFor,
+} from "./camera";
+import {
   bossArmyDist,
   bossFightAt,
   bossHp,
   bossPlace,
   type BossView,
-} from "./world";
+} from "./bossLayout";
 
 export type View3d = {
   resize(w: number, h: number): void;

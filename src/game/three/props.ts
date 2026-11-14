@@ -12,15 +12,9 @@ import {
 import { hazardPos } from "../../core/horde";
 import { isShattered } from "../../core/shooting";
 import type { RunState } from "../../core/sim";
-import {
-  CRATE_D,
-  CRATE_H,
-  sawPlace,
-  shapeDistance,
-  spanWorld,
-  WALL_BEHIND,
-  worldZ,
-} from "./world";
+import { CRATE_D, CRATE_H, sawPlace, spanWorld } from "./hazardLayout";
+import { shapeDistance, worldZ } from "./world";
+import { WALL_BEHIND } from "./wallLayout";
 
 /**
  * The run's crates (blocks) and saws in 3D. Crates are wooden boxes whose top

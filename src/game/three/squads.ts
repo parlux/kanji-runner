@@ -3,14 +3,8 @@ import { rowOpenings } from "../../core/walls";
 import { viewOf, type RunState } from "../../core/sim";
 import { makeCrowdMesh } from "./figures";
 import { FX_COLOURS, type Fx } from "./fx";
-import {
-  crowdLayout,
-  shapeDistance,
-  squadPlace,
-  WALL_BEHIND,
-  worldX,
-  worldZ,
-} from "./world";
+import { crowdLayout, shapeDistance, worldX, worldZ } from "./world";
+import { squadPlace, WALL_BEHIND } from "./wallLayout";
 
 /**
  * Squad charges and fire in 3D: enemy figures standing beyond each opening

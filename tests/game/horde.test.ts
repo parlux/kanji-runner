@@ -21,9 +21,6 @@ import { createHorde, DIE_DIST } from "../../src/game/three/horde";
 import {
   CHEER_WIDTH,
   cheerX,
-  crowdHalfDepth,
-  DIST_SCALE,
-  FIGURE_RADIUS,
   HORDE_CAP,
   HORDE_JITTER,
   HORDE_RAG,
@@ -38,6 +35,11 @@ import {
   hordeStride,
   type HordeLayout,
   type HordeSpot,
+} from "../../src/game/three/hordeLayout";
+import {
+  crowdHalfDepth,
+  DIST_SCALE,
+  FIGURE_RADIUS,
   TRACK_W,
   worldX,
   worldZ,
