@@ -115,10 +115,20 @@ Owner change during H5b: default count back to **200** (K 3); and packs follow t
 - [x] Deploy green.
 **Verification:** tests (`npx vitest run --maxWorkers=2`), lint, build. **Dependencies:** H5. **Files:** `src/core/{tuning,sim}.ts`, `src/game/three/{horde,hazards,world}.ts`, `src/storage/horde.ts`, tests. **Scope:** M (use opus)
 
-### Checkpoint M3: scattered crowd and stream on the Pixel 7 (owner)
+### Task H5c: Horde gauntlet (tuning run) with results saved to the owner's account
+**Description:** as `docs/ideas/horde-sandbox.md`: `?sandbox=horde` (also reachable from the dev gear) runs a gauntlet of numbered waves, no questions or walls, each wave with its own preset (army size, enemy count, kill time, pack width, figure size, `PACK_ADAPT`), from one data file. A big "Wave N" label before each wave; after each, a one-tap rating (Felt right / Too fast / Too slow / Too few / Too many). A per-wave log (preset, measured kill time, soldiers lost, enemies, fps, rating). At the end, results are saved to the owner's Supabase account (new `tuning_results` table with RLS like `progress`; SQL in `supabase/schema.sql`), with Share (Web Share API) and Copy as fallbacks. `scripts/gauntlet-results.ts` prints the latest runs on the laptop using a service-role key from `.env.local` (`SUPABASE_SERVICE_ROLE_KEY`, never committed; says clearly what is missing if absent).
+**Acceptance criteria:**
+- [ ] Tested: preset list valid; wave sequencing; kill time / loss measurement; results payload shape; save fails gracefully when logged out or offline (Share/Copy still work); the script's parsing.
+- [ ] First gauntlet: about 8–10 waves that sweep kill time, enemy count and army size sensibly (one variable at a time around the current defaults), plus a strong-army wave to test `PACK_ADAPT`.
+- [ ] Look: the waiting crowd reads as a loose scattered crowd (more jitter, no straight front row; owner at M2), not a block. Investigate the debug "lost -1" seen in H5b's mid-stream screenshot (negative soldiers lost?) and fix if real.
+- [ ] Browser at 390×844: a full gauntlet played through (crafted or automated), rating buttons, results screen, Share/Copy. Screenshots in the scratchpad.
+- [ ] Deploy green.
+**Verification:** tests (`npx vitest run --maxWorkers=2`), lint, build. **Dependencies:** H5b. **Files:** `src/game/sandbox/*` (new), `src/sync/*`, `supabase/schema.sql`, `scripts/gauntlet-results.ts`, wiring, tests. **Scope:** M (use opus)
+
+### Checkpoint M3: play the gauntlet on the Pixel 7 (owner)
+- [ ] One-time setup: run the new SQL in the Supabase dashboard; add `SUPABASE_SERVICE_ROLE_KEY` to `.env.local` on the laptop.
+- [ ] Play `?sandbox=horde` logged in, rate each wave; the orchestrator reads the results and tunes the defaults.
 - [ ] Waiting packs look like a loose crowd milling about; they see you and stream in.
-- [ ] 2.5 s of mowing feels right; damage still light.
-- [ ] Smooth with `?fps` at 500.
 
 ### Task H6: Spectacular kills
 **Description:** `kills.ts`: a pooled kill-effect ring. Each kill knocks the figure back or topples it with a spark burst in the enemy colour. Kills are found by comparing survivors between frames. The final burst of a pack is bigger than today's. Fewer pieces beyond about half the shape distance. Effects freeze when paused.
@@ -127,7 +137,7 @@ Owner change during H5b: default count back to **200** (K 3); and packs follow t
 - [ ] Browser as in H4 at the owner's default count, plus a gate behind a dying pack (labels stay readable). Screenshots in the scratchpad.
 - [ ] Frame time logged against H4 and against today's pack scene (≤ 1.3× today's). On a miss: shrink the effects first, then `PACK_MAX`, and log what changed.
 - [ ] Deploy green.
-**Verification:** as H2. **Dependencies:** H5b and Checkpoint M3. **Files:** `src/game/three/{kills,hazards,horde,fx}.ts`, tests. **Scope:** M
+**Verification:** as H2. **Dependencies:** Checkpoint M3 (defaults tuned from the gauntlet). **Files:** `src/game/three/{kills,hazards,horde,fx}.ts`, tests. **Scope:** M
 
 ### Checkpoint M: v1.10 (owner, on the Pixel 7)
 - [ ] Mowing down a pack looks spectacular.
