@@ -66,6 +66,24 @@ Tool trial (dev Mac, warm caches unless noted, lines = whole repo):
 - `tsgo`: zero errors on the current code like `tsc`. A deliberate `string`-to-`number` assignment, an unused local and a `noUncheckedIndexedAccess` read gave the same three errors, same positions and codes, on every incremental run. It is a dev preview, so the version is pinned; `typescript` stays for typescript-eslint.
 - `oxlint`: also zero errors on the current code, but with its default rules it missed `no-explicit-any` that ESLint (typescript-eslint strict) reports, so the errors differ. In front of a warm ESLint cache it would save about 1 s. Dropped and uninstalled.
 
+## Task V3: dev tools and URL flags removed (2026-11-15)
+
+Lines removed (`git diff --numstat 9567240 HEAD`, before V3 = V2's last commit):
+
+| Area | Added | Removed |
+|---|---|---|
+| `src` (sandbox 1,061, panels and storage 536, `fps.ts`, sync `saveTuning`, flags) | 74 | 1,839 |
+| `tests` (gauntlet, results, camera, horde, fps tests; `wave.ts` helper and `legacy` test added) | 213 | 1,155 |
+| `scripts` (`gauntlet-results.ts`) | 0 | 178 |
+| `supabase/schema.sql` (`tuning_results`) | 0 | 19 |
+| Total | 287 | 3,191 (net -2,904) |
+
+Expected was about -1,500; the gauntlet's tests and the results script were larger than assumed. `src` alone: net -1,765.
+
+- Tests: 726 pass in the slow tier. `npm run check` 28 s.
+- Left for V4: the `?2d` check in `main.ts` is the only `location.search` read in `src`.
+- The `tuning_results` table was never live (the schema block said so); nothing to drop if it was never run. If the owner did run it, it can be dropped.
+
 ## After v1 (Task V11)
 
 | Metric | Value |

@@ -85,9 +85,9 @@ Checks:
   - `?2d` and `?3d` are V4's.
 
 **Acceptance criteria:**
-- [ ] Golden snapshot unchanged. A phone with saved horde or camera values plays with the code defaults (tested).
-- [ ] Apart from the `?2d` check left for V4, nothing in `src` reads `location.search`. No mention of the sandbox, the gauntlet, the panels or the removed flags is left in `src`, `tests`, `README.md` or `AGENTS.md`.
-- [ ] Lines removed are logged (about −1,500 expected).
+- [x] Golden snapshot unchanged. A phone with saved horde or camera values plays with the code defaults (tested).
+- [x] Apart from the `?2d` check left for V4, nothing in `src` reads `location.search`. No mention of the sandbox, the gauntlet, the panels or the removed flags is left in `src`, `tests`, `README.md` or `AGENTS.md`.
+- [x] Lines removed are logged (about −1,500 expected).
 
 **Scope:** M
 
