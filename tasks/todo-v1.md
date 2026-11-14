@@ -98,9 +98,9 @@ Checks:
 - Delete or rewrite the tests that cover only 2D drawing.
 
 **Acceptance criteria:**
-- [ ] Screenshots at 390×844 (run, boss, end screen) match the ones taken before the change.
-- [ ] With WebGL off, the message shows and nothing throws (tested and screenshot).
-- [ ] Nothing in `src` reads `location.search`. Lines removed are logged.
+- [x] Screenshots at 390×844 (run, boss, end screen) match the ones taken before the change.
+- [x] With WebGL off, the message shows and nothing throws (tested and screenshot).
+- [x] Nothing in `src` reads `location.search`. Lines removed are logged.
 
 **Scope:** M
 

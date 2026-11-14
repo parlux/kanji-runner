@@ -81,7 +81,7 @@ Lines removed (`git diff --numstat 9567240 HEAD`, before V3 = V2's last commit):
 Expected was about -1,500; the gauntlet's tests and the results script were larger than assumed. `src` alone: net -1,765.
 
 - Tests: 726 pass in the slow tier. `npm run check` 28 s.
-- Left for V4: the `?2d` check in `main.ts` is the only `location.search` read in `src`.
+- Left for V4 (done): the `?2d` check in `main.ts`.
 - The `tuning_results` table was never live (the schema block said so); nothing to drop if it was never run. If the owner did run it, it can be dropped.
 
 ## After v1 (Task V11)
@@ -89,3 +89,11 @@ Expected was about -1,500; the gauntlet's tests and the results script were larg
 | Metric | Value |
 |---|---|
 | (filled in by V11) | |
+
+## Task V4: 2D renderer removed (2026-11-15)
+
+`src/game/render.ts` 1,817 -> 1,089 lines (+29/-757); `src/main.ts` +20/-13 (the `?2d` check gone, WebGL state added). Total `git diff --numstat 4bb5994 HEAD` is in the commit. No test covered only 2D drawing, so none was removed; 726 tests pass.
+
+- Screenshots at 390x844 (run, paused run, boss mid-clash, boss banner, end, start) before and after: pause, end and start are byte-identical. Run and boss differ only in the crowd and crate area, which animate in real time (two shots of the same code differ by the same pixel count and box).
+- With WebGL off (`--disable-webgl`), the start screen shows "This device can't run the 3D game" above Play, and tapping Play or pressing Enter does nothing. No exception; three.js logs its own console errors.
+- Nothing in `src` reads `location.search`.

@@ -53,21 +53,26 @@ if (!canvas) throw new Error("Missing #game canvas");
 const ctx = canvas.getContext("2d");
 if (!ctx) throw new Error("Canvas 2D not supported");
 
-// The run is drawn in 3D on a WebGL canvas behind #game; `?2d` forces the old
-// 2D renderer, and it is used too when WebGL fails (`?3d` is the default, harmless)
+// The run is drawn in 3D on a WebGL canvas behind #game. Without WebGL the start
+// screen says so and Play does nothing; the menus stay on #game.
 let view3d: View3d | null = null;
+let webgl: "pending" | "ok" | "failed" = "pending";
 const canvas3d = document.querySelector<HTMLCanvasElement>("#world");
-if (canvas3d && !new URLSearchParams(window.location.search).has("2d"))
-  void import("./game/three/scene3d")
-    .then(({ createView3d }) => {
-      view3d = createView3d(canvas3d);
-      if (!view3d) return;
-      canvas3d.style.display = "block";
-      resize();
-    })
-    .catch(() => {
-      view3d = null;
-    });
+void import("./game/three/scene3d")
+  .then(({ createView3d }) => {
+    view3d = canvas3d ? createView3d(canvas3d) : null;
+    if (!view3d || !canvas3d) {
+      webgl = "failed";
+      return;
+    }
+    webgl = "ok";
+    canvas3d.style.display = "block";
+    resize();
+  })
+  .catch(() => {
+    view3d = null;
+    webgl = "failed";
+  });
 
 function resize(): void {
   if (!canvas || !ctx) return;
@@ -208,6 +213,7 @@ const study = (): void => {
 
 const act = (action: Action): void => {
   if (overlayOpen()) return;
+  if (webgl !== "ok" && scene.kind === "start" && action === "confirm") return;
   if (action === "study") return study();
   const next = handleAction(scene, action, newSeed, session);
   // placement changes progress: save it right away, under this mode's key
@@ -301,6 +307,7 @@ startLoop(
       sync.status(),
       track,
       otherLevel,
+      webgl !== "failed",
     );
     pauseCard();
     syncSettings();
