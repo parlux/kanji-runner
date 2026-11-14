@@ -140,12 +140,13 @@ Owner change during H5b: default count back to **200** (K 3); and packs follow t
 Owner at M3, 2026-11-14 (gauntlet round 1): wave 3 (3.5 s) felt best; strong armies died too fast (7, 8 a bit, 9 bad); wave 10: enemies that reach you should stop and fight, not mush in. Fixed ratings were not useful: add a free-text note. A full auto-tuner was judged overkill. Task H5d below; Checkpoint M4 is round 2 of the gauntlet.
 
 ### Task H5d: 3.5 s kills, full adapt, melee contact; gauntlet round 2
-**Description:** as the spec's "Gauntlet round 1 findings": `KILL_SECONDS` 3.5, `PACK_ADAPT` 1.0, melee contact replacing arrivals (core and view). Gauntlet: a free-text note field on each wave's card (stored in results, printed by the script), and round-2 presets: baseline, strong armies (150, 300, 600), a weak army reached (melee), an outmatched army (melee wipe-out possible), a mid army reached briefly.
+**Description:** as the spec's "Gauntlet round 1 findings": `KILL_SECONDS` 3.5, `PACK_ADAPT` 1.0, melee contact replacing arrivals (core and view). Calmer movement and gradual converging (spec). Gauntlet: the five rating-card questions from the spec plus a free-text note on each wave's card (stored in results, printed by the script), and round-2 presets: baseline, strong armies (150, 300, 600), a weak army reached (melee), an outmatched army (melee wipe-out possible), a mid army reached briefly.
 **Acceptance criteria:**
 - [ ] Tested: defaults; kill time ~3.5 s at 1×, 2×, 5×, 25× expected; melee: enemies stop at the front, both sides lose units per second, fire continues, ends at pack 0 or army 0; a same-size pack with no fire costs ~25% of the army; pause holds; packs/walls behind wait; merge still works.
 - [ ] Balance bands hold (retune `HORDE_THREAT`/`MELEE_RATE`); before/after, mean loss per pack and melee frequency logged here.
 - [ ] Browser at 390×844: melee front (red against blue, falling figures) at army 20 and 100; a strong-army wave; the note field. Screenshots in the scratchpad.
-- [ ] Gauntlet round 2 presets in place; the results script prints notes.
+- [ ] Tested: sideways speed capped below forward speed; wander/stride amplitudes reduced (numbers logged).
+- [ ] Gauntlet round 2 presets in place; the card asks the five questions; the results script prints answers and notes.
 - [ ] Deploy green.
 **Verification:** tests (`npx vitest run --maxWorkers=2`), lint, build. **Dependencies:** H5c. **Files:** `src/core/{tuning,sim}.ts`, `src/game/three/{horde,hazards}.ts`, `src/game/sandbox/*`, `scripts/gauntlet-results.ts`, tests. **Scope:** M (highest risk: balance; use opus)
 

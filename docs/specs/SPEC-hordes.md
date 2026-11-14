@@ -80,6 +80,9 @@ Owner played the gauntlet: wave 3 (3.5 s kill) felt best. Strong armies killed t
 - **Full adapt:** `PACK_ADAPT` = 1.0 — at waking a pack is sized from the actual army (never below the expected-army numbers), so kill time stays about 3–3.5 s however strong the army is; strength shows as bigger hordes (capped at `packMax`).
 - **Melee contact:** enemies that reach the army stop at its front line and fight; they don't vanish into it. While in melee, both sides lose units every second and the army keeps shooting. It ends when the pack is dead or the army is (game over as usual). Rate: a pack the army's size, with no fire at all, costs the army about a quarter of itself (`MELEE_RATE`, tuned); with fire it is much less. The view shows a red front pressed against the blue front, figures falling on both sides. Packs and walls behind a melee wait (as with the stream).
 - The stream (crowd → army-wide stream) stays; it now ends in a melee front instead of arrivals.
+- **Calmer movement** (owner, waves 1–5: "a bit manic, like hyperactive killer zombies"): slower, smaller wander and turns while waiting; a steadier stride while running.
+- **Gradual converging** (owner, waves 4–5: "the lateral movement is soooo fast ... they weirdly line up in the lane super fast"): enemies curve in towards the army over most of their run, with a capped sideways speed well below their forward speed; no snapping into the lane.
+- **Rating card questions** (owner: "give me specific questions"): Pace (too fast / right / too slow), Movement (too manic / right / too sluggish), Converging (snapped / natural / too slow), Size for my army (too small / right / too big), Melee, only if reached (unfair / tense and fair / no threat); plus an optional note.
 
 ## Code layout
 - `src/core/tuning.ts`: `HORDE_K`, `PACK_MAX`, `HORDE_THREAT`.
