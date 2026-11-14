@@ -6,13 +6,14 @@ import type { RunState } from "../../src/core/sim";
 import { defaultProgress, itemKey } from "../../src/core/srs";
 import { WORDS } from "../../src/core/words";
 import { botBossRun, botRun } from "./bot";
+import { forSeeds, itSlow } from "../sweep";
 import { wkRun } from "./wk-run";
 
 /** Died before answering the last question. */
 const diedEarly = (s: RunState): boolean =>
   s.status === "dead" && s.results.length < s.rows.length;
 
-const SEEDS = Array.from({ length: 200 }, (_, seed) => seed);
+const SEEDS = forSeeds(200);
 
 describe("balance bot (perfect steering)", () => {
   it("100% accuracy never dies before the last question", () => {
@@ -57,9 +58,7 @@ describe("balance bot in WaniKani mode, re-asks on (perfect steering)", () => {
     const runs = SEEDS.map((seed) =>
       botRun(seed, { ...wk, wrong: () => false }),
     );
-    expect(SEEDS.filter((seed) => diedEarly(runs[seed] as RunState))).toEqual(
-      [],
-    );
+    expect(SEEDS.filter((_, i) => diedEarly(runs[i] as RunState))).toEqual([]);
     // re-asks are actually placed
     expect(runs.some((s) => (s.reask?.links.length ?? 0) > 0)).toBe(true);
   }, 60_000);
@@ -72,9 +71,9 @@ describe("balance bot in WaniKani mode, re-asks on (perfect steering)", () => {
   }, 60_000);
 });
 
-/** 200 seeds by default; `BALANCE_RUNS=1000 npm test -- balance` runs the full 1,000. */
-const RUNS = Number(process.env.BALANCE_RUNS) || 200;
-const BOSS_SEEDS = Array.from({ length: RUNS }, (_, seed) => seed);
+/** 200 seeds in the slow tier (20 in the fast one); `SLOW=1 BALANCE_RUNS=1000 npm test -- balance` runs the full 1,000. */
+const BOSS_SEEDS = forSeeds(Number(process.env.BALANCE_RUNS) || 200);
+const RUNS = BOSS_SEEDS.length;
 const winRate = (p: number, skill = 1): number =>
   BOSS_SEEDS.filter((seed) => botBossRun(seed, p, skill).won).length / RUNS;
 const SLOW = 600_000;
@@ -88,7 +87,8 @@ describe(`balance bot vs the boss (${RUNS} seeded runs)`, () => {
     SLOW,
   );
 
-  it(
+  // under 10% of 20 seeds is one run: too coarse
+  itSlow(
     "50% accuracy wins less than 10% of the time",
     () => {
       expect(winRate(0.5)).toBeLessThan(0.1);
@@ -96,7 +96,8 @@ describe(`balance bot vs the boss (${RUNS} seeded runs)`, () => {
     SLOW,
   );
 
-  it(
+  // a 40-70% band is too narrow for 20 seeds
+  itSlow(
     "80% accuracy wins 40–70% of the time",
     () => {
       const rate = winRate(0.8);
