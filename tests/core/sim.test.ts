@@ -26,6 +26,7 @@ import { crowdWidth } from "../../src/core/crowd";
 import {
   expectedArmy,
   firepower,
+  packArmy,
   packCount,
   packStrength,
 } from "../../src/core/fire";
@@ -49,6 +50,7 @@ import {
   PACK_COLUMN_MAX,
   STREAM_LEAD,
   PACK_FIRE_RANGE,
+  PACK_ADAPT,
   FIRE_RANGE,
   KILL_SECONDS,
   PACK_WIDTH,
@@ -982,6 +984,99 @@ describe("shooting", () => {
           });
         }
       }
+    });
+  });
+
+  describe("packs follow the army you have", () => {
+    it("packArmy: the expected army, or part of the way (log scale) to a bigger one", () => {
+      expect(PACK_ADAPT).toBe(0.8);
+      for (const e of [5, 40, 300]) {
+        expect(packArmy(e, e)).toBe(e);
+        expect(packArmy(e, e / 2)).toBe(e);
+        expect(packArmy(e, 0)).toBe(e);
+        for (const k of [2, 5, 25])
+          expect(packArmy(e, k * e)).toBeCloseTo(e * k ** PACK_ADAPT, 9);
+        expect(packArmy(e, 3 * e)).toBeGreaterThan(packArmy(e, 2 * e));
+      }
+    });
+
+    /** A just-woken pack sized for expected army e, met by `army`: its numbers after waking, and how long steady fire takes to shoot it out. */
+    const meet = (e: number, army: number) => {
+      const hp = KILL_SECONDS * firepower(e);
+      const s0: RunState = {
+        ...range([pack(1.9)], [hp], army, [packCount(e)], [packStrength(e)]),
+        woke: [false],
+      };
+      let s = stepRun(s0, DT);
+      const woke = s;
+      let t = DT;
+      // held in front of the army, so only the fire counts
+      while (packSurvivors(s, 0) > 0 && t < 10) {
+        s = stepRun({ ...s, packs: [{ pos: s.dist + 1.9, x: 0.5 }] }, DT);
+        t += DT;
+      }
+      return { s0, woke, t };
+    };
+
+    it("an army well above expected mows a pack a bit faster, never in a blink: ~2.5 s at 1×, 2.2 s at 2×, 1.8 s at 5×, 1.3 s at 25×", () => {
+      for (const e of [10, 40, 120])
+        for (const [k, secs] of [
+          [1, 2.5],
+          [2, 2.18],
+          [5, 1.81],
+          [25, 1.31],
+        ] as const) {
+          const { t } = meet(e, k * e);
+          expect(t).toBeGreaterThan(0.9 * secs);
+          expect(t).toBeLessThan(1.1 * secs);
+          expect(t).toBeGreaterThan(1.2);
+        }
+    });
+
+    it("a bigger army meets a bigger horde (capped at packMax) with a matching contact strength, set once at waking", () => {
+      const { s0, woke } = meet(20, 100);
+      const army = packArmy(20, 100);
+      expect(woke.woke[0]).toBe(true);
+      expect(woke.hp[0]).toBeCloseTo(KILL_SECONDS * firepower(army), 9);
+      expect(woke.heads[0]).toBe(packCount(army));
+      expect(woke.heads[0]).toBeGreaterThan(s0.heads[0] ?? 0);
+      expect(woke.strength[0]).toBe(packStrength(army));
+      expect(meet(100, 5000).woke.heads[0]).toBe(HORDE_DEFAULTS.packMax);
+      // set once: a later change of army doesn't resize it
+      const later = stepRun({ ...woke, army: 10_000 }, DT);
+      expect(later.hp[0]).toBe(woke.hp[0]);
+      expect(later.heads[0]).toBe(woke.heads[0]);
+    });
+
+    it("an army at or below expected sees the same numbers as before", () => {
+      for (const k of [1, 0.5, 0.1]) {
+        const { s0, woke } = meet(40, Math.round(k * 40));
+        expect(woke.hp[0]).toBe(s0.hp[0]);
+        expect(woke.heads[0]).toBe(s0.heads[0]);
+        expect(woke.strength[0]).toBe(s0.strength[0]);
+      }
+    });
+
+    it("nothing changes before a pack wakes: behind a wall it keeps its built numbers, whatever the army", () => {
+      const s0 = range([pack(4)], [100], 5000, [40], [24]);
+      const walled = {
+        ...s0,
+        track: { ...s0.track, questions: [1, 100] },
+        woke: [false],
+      };
+      const waiting = stepFor(walled, 0.3);
+      expect(waiting.next).toBe(0);
+      expect(waiting.woke[0]).toBe(false);
+      expect(waiting.hp[0]).toBe(100);
+      expect(waiting.heads[0]).toBe(40);
+      // a real run's packs all wake behind a wall
+      const run = createRunState(
+        kanaRun(1),
+        buildTrack(1, ROWS_PER_RUN, false),
+      );
+      run.track.hazards.forEach((h, i) =>
+        expect(run.woke[i]).toBe(h.kind !== "pack"),
+      );
     });
   });
 

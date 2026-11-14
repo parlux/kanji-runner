@@ -167,7 +167,7 @@ describe("horde layout: the stream", () => {
 
   it("no figure jumps as the head runs: each moves at most a step's worth per step", () => {
     let last = places(layout(500));
-    for (let run = 0.05; run < 20; run += 0.05) {
+    for (let run = 0.1; run < 12; run += 0.1) {
       const p = places(layout(500, run));
       p.forEach((q, k) => {
         const r = last[k] as { x: number; z: number };

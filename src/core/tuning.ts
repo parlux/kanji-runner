@@ -224,6 +224,17 @@ export const PACK_COLUMN_MAX = CROWD_DEPTH_MAX + STREAM_LEAD;
  * Other threats stay within FIRE_RANGE.
  */
 export const PACK_FIRE_RANGE = PACK_WAKE;
+/**
+ * Packs follow the army you actually have, part of the way (owner, during
+ * H5b): when a pack wakes, its HP, head count and contact strength are set
+ * as if the expected army were expected^(1 − PACK_ADAPT) × army^PACK_ADAPT
+ * (never below the expected army). Its kill time is then KILL_SECONDS ×
+ * (expected / army)^(1 − PACK_ADAPT): 2.2 s at twice the expected army,
+ * 1.8 s at 5×, 1.3 s at the 25× a flawless run reaches by the end (0.7
+ * would give 0.95 s there); an army at or below expected sees the old
+ * numbers.
+ */
+export const PACK_ADAPT = 0.8;
 /** A pack that wakes behind another still charging catches up with that column's tail this much faster (track units per second). */
 export const PACK_MERGE_SPEED = 2.5;
 

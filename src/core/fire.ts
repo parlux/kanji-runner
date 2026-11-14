@@ -14,6 +14,7 @@ import {
   HORDE_DEFAULTS,
   FIRE_PER_SOLDIER,
   FIRE_RANGE,
+  PACK_ADAPT,
   STARTING_ARMY,
   type HordeTuning,
 } from "./tuning";
@@ -52,6 +53,16 @@ export function expectedArmy(
     out.push(army);
   });
   return out;
+}
+
+/**
+ * The army a pack is sized for when it wakes: the expected army, or, when the
+ * actual army is bigger, expected^(1 − PACK_ADAPT) × army^PACK_ADAPT (part
+ * of the way to it, on a log scale). See PACK_ADAPT.
+ */
+export function packArmy(expected: number, army: number): number {
+  if (!(army > expected) || expected <= 0) return expected;
+  return expected ** (1 - PACK_ADAPT) * army ** PACK_ADAPT;
 }
 
 /** Enemies in a pack met when the expected army is `expected`. */

@@ -153,14 +153,14 @@ describe("re-asks in the sim", () => {
     for (const seed of SEEDS.slice(0, 30)) {
       const on = wkRun(seed, true);
       const off = wkRun(seed, false);
-      const a = drive(
-        createRunState(on.rows, track(seed), on.reask),
-        () => true,
-      );
-      const b = drive(createRunState(off.rows, track(seed), null), () => true);
+      const a0 = createRunState(on.rows, track(seed), on.reask);
+      const b0 = createRunState(off.rows, track(seed), null);
+      const a = drive(a0, () => true);
+      const b = drive(b0, () => true);
       expect(a.reask?.links.length).toBeGreaterThan(0);
       expect(a.track).toEqual(b.track);
-      expect(a.hp).toEqual(b.hp);
+      // as built (a pack is resized for the army it meets when it wakes, and re-asks change that army)
+      expect(a0.hp).toEqual(b0.hp);
       expect(plannedRows(a)).toEqual(b.rows);
       expect(bossSize(plannedRows(a), a.track.charges, seed)).toBe(
         bossSize(b.rows, b.track.charges, seed),

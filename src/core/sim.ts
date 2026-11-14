@@ -12,6 +12,9 @@ import {
   hazardHeads,
   hazardHp,
   hazardStrength,
+  packArmy,
+  packCount,
+  packStrength,
   pickTarget,
   type Threat,
 } from "./fire";
@@ -38,6 +41,7 @@ import {
   HORDE_GAP_LOOSE,
   HORDE_THREAT,
   ENEMY_SPEED,
+  FIRE_PER_SOLDIER,
   FIRE_RANGE,
   GATE_GROW_PER_DAMAGE,
   MAX_SPEED_MUL,
@@ -169,6 +173,8 @@ export type RunState = {
   damage: number[];
   /** Per hazard: a pack's enemies that have streamed into the army so far (fractional). */
   arrived: number[];
+  /** Per hazard: whether its numbers are settled (a pack is sized for the army when it wakes: see wakePacks). */
+  woke: boolean[];
   /** Per hazard: where its enemy pack is now (null for blocks and saws). */
   packs: (PackState | null)[];
   /** Hazard being fired at this step, if any. */
@@ -219,7 +225,7 @@ export function createRunState(
   horde: HordeTuning = HORDE_DEFAULTS,
 ): RunState {
   const expected = expectedArmy(rows, track.charges);
-  return {
+  const s: RunState = {
     rows,
     track,
     dist: 0,
@@ -236,6 +242,7 @@ export function createRunState(
     strength: hazardStrength(track, expected),
     damage: track.hazards.map(() => 0),
     arrived: track.hazards.map(() => 0),
+    woke: track.hazards.map(() => false),
     // the head starts at the crowd's front (crowdFront)
     packs: track.hazards.map((h) =>
       h.kind === "pack" ? { pos: h.pos - CROWD_DEPTH_MAX / 2, x: h.x } : null,
@@ -250,6 +257,12 @@ export function createRunState(
     status: "running",
     reask: reask && { ...reask, links: [], planned: rows },
     horde,
+  };
+  // a pack already charging at the start (none in a real run: packs come
+  // after a wall) keeps the numbers it was built with
+  return {
+    ...s,
+    woke: track.hazards.map((h, i) => h.kind !== "pack" || packAwake(s, i)),
   };
 }
 
@@ -449,6 +462,35 @@ function arrive(s: RunState, i: number, n: number): RunState {
 }
 
 /**
+ * A pack that has just woken is sized for the army as it is now (packArmy:
+ * part of the way from the expected army to a bigger actual one): its HP,
+ * head count and contact strength. Once, at waking; nothing before.
+ */
+function wakePacks(s: RunState): RunState {
+  let next = s;
+  for (let i = s.nextHazard; i < s.packs.length; i++) {
+    if (next.woke[i] || !packAwake(next, i)) continue;
+    const woke = [...next.woke];
+    woke[i] = true;
+    const per = next.horde.killSeconds * FIRE_PER_SOLDIER;
+    const expected = per > 0 ? (next.hp[i] ?? 0) / per : 0;
+    const army = packArmy(expected, next.army);
+    if (army === expected) {
+      next = { ...next, woke };
+      continue;
+    }
+    const hp = [...next.hp];
+    const heads = [...next.heads];
+    const strength = [...next.strength];
+    hp[i] = army * per;
+    heads[i] = packCount(army, next.horde);
+    strength[i] = Math.max(strength[i] ?? 0, packStrength(army));
+    next = { ...next, woke, hp, heads, strength };
+  }
+  return next;
+}
+
+/**
  * Charging packs run at the army, staying where they are across the track
  * (their span closes onto the army near it: packSpan). A pack whose front reaches the army stays there and streams in:
  * the stretch of column that would run past it arrives (packDensity enemies
@@ -599,6 +641,7 @@ export function stepRun(s: RunState, dt: number, pace = 1): RunState {
   next.targetX = clampOnTrack(s.targetX, w);
   next.x = steerStep(s.x, next.targetX, w, dt);
   next.dist += BASE_SPEED * pace * speedMul(s.dist, s.track) * dt;
+  next = wakePacks(next);
   next = movePacks(next, dt);
   next = fire(next, w, dt);
   // resolve everything passed this step, in track order
