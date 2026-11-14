@@ -27,13 +27,3 @@ export function saveSpeed(store: KeyValueStore, speed: SpeedPreset): void {
     // blocked or full storage: the choice lasts this session only
   }
 }
-
-/** The next preset in Relaxed → Normal → Fast → Relaxed order. */
-export function nextSpeed(speed: SpeedPreset): SpeedPreset {
-  return ORDER[(ORDER.indexOf(speed) + 1) % ORDER.length] ?? DEFAULT_SPEED;
-}
-
-/** The button label for a preset. */
-export function speedLabel(speed: SpeedPreset): string {
-  return `Speed: ${speed.charAt(0).toUpperCase()}${speed.slice(1)}`;
-}

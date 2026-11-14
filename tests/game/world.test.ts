@@ -18,7 +18,6 @@ import {
   SHAPE_DISTANCE,
   MAX_DRAWN_SOLDIERS,
   TRACK_W,
-  trackDist,
   trackX,
   viewDepth,
   worldX,
@@ -89,9 +88,8 @@ import { AIM, cameraFor } from "../../src/game/three/view";
 const pose: CameraPose = { height: 4, back: 12, lookAhead: 20, lookHeight: 0 };
 
 describe("track ↔ world mapping", () => {
-  it("round-trips track x and distance", () => {
+  it("round-trips track x", () => {
     for (const x of [0, 0.13, 0.5, 0.9, 1]) expect(trackX(worldX(x))).toBe(x);
-    for (const d of [0, 1.25, 7.5]) expect(trackDist(worldZ(d, 3), 3)).toBe(d);
   });
 
   it("spans the track width, centred, with the army at Z = 0 running to −Z", () => {

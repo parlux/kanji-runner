@@ -77,9 +77,6 @@ export const trackX = (wx: number): number => wx / TRACK_W + 0.5;
 /** Track distance `dist` → world Z, with the army at `runDist`. */
 export const worldZ = (dist: number, runDist: number): number =>
   -(dist - runDist) * DIST_SCALE;
-/** World Z → track distance, with the army at `runDist`. */
-export const trackDist = (wz: number, runDist: number): number =>
-  runDist - wz / DIST_SCALE;
 
 /** Figures drawn for an army of this size. */
 const drawnCount = (army: number): number =>

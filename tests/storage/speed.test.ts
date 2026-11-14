@@ -1,12 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { SPEED_PRESETS } from "../../src/core/tuning";
-import {
-  loadSpeed,
-  nextSpeed,
-  saveSpeed,
-  SPEED_KEY,
-  speedLabel,
-} from "../../src/storage/speed";
+import { loadSpeed, saveSpeed, SPEED_KEY } from "../../src/storage/speed";
 
 const memory = (init: Record<string, string> = {}) => {
   const data = { ...init };
@@ -44,12 +38,5 @@ describe("speed setting", () => {
     };
     expect(loadSpeed(blocked)).toBe("normal");
     expect(() => saveSpeed(blocked, "fast")).not.toThrow();
-  });
-
-  it("cycles Relaxed → Normal → Fast → Relaxed", () => {
-    expect(nextSpeed("relaxed")).toBe("normal");
-    expect(nextSpeed("normal")).toBe("fast");
-    expect(nextSpeed("fast")).toBe("relaxed");
-    expect(speedLabel("relaxed")).toBe("Speed: Relaxed");
   });
 });

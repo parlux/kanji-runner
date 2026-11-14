@@ -5,7 +5,6 @@ import {
   hazardHeads,
   hazardHp,
   packCount,
-  packStrength,
   pickTarget,
   type Threat,
 } from "../../src/core/fire";
@@ -13,7 +12,6 @@ import { kanaRun } from "./kana-run";
 import type { Block, Pack, Saw, Track } from "../../src/core/track";
 import {
   BLOCK_HP_K,
-  ENEMY_K,
   ENEMY_MIN,
   FIRE_PER_SOLDIER,
   FIRE_RANGE,
@@ -91,14 +89,6 @@ describe("hazardHp", () => {
   });
 });
 
-describe("packStrength", () => {
-  it("is round(ENEMY_K × expected army), at least ENEMY_MIN", () => {
-    expect(packStrength(0)).toBe(ENEMY_MIN);
-    expect(packStrength(1000)).toBe(Math.round(ENEMY_K * 1000));
-    expect(ENEMY_MIN).toBe(3);
-  });
-});
-
 describe("packCount", () => {
   it("is round(HORDE_K × expected army), clamped to [ENEMY_MIN, PACK_MAX]", () => {
     // the owner's default: 200, K 3 per 200
@@ -108,9 +98,8 @@ describe("packCount", () => {
     expect(packCount(5)).toBe(15);
     expect(packCount(10.4)).toBe(Math.round(HORDE_K * 10.4));
     expect(packCount(1000)).toBe(PACK_MAX);
-    // more heads than today's pack, never fewer, until the cap
+    // never fewer heads for a bigger army
     for (const e of [0, 5, 20, 66]) {
-      expect(packCount(e)).toBeGreaterThanOrEqual(packStrength(e));
       expect(packCount(e + 1)).toBeGreaterThanOrEqual(packCount(e));
     }
   });

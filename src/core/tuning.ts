@@ -130,8 +130,6 @@ export const CRATE_REWARD_K = 0.3;
  */
 export const PACK_GAP_CHANCE = 0.75;
 export const PACK_BEAT = 3;
-/** Pack strength = max(ENEMY_MIN, round(ENEMY_K × the expected army at that point)). */
-export const ENEMY_K = 0.6;
 export const ENEMY_MIN = 3;
 /** Extra approach speed on top of the scroll, in track units per second. */
 export const ENEMY_SPEED = 0.5;

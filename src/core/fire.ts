@@ -9,7 +9,6 @@ import type { Track } from "./track";
 import {
   BASE_REWARD,
   BLOCK_HP_K,
-  ENEMY_K,
   ENEMY_MIN,
   HORDE_DEFAULTS,
   FIRE_PER_SOLDIER,
@@ -67,11 +66,6 @@ export function packArmy(
 ): number {
   if (!(army > expected) || expected <= 0) return expected;
   return expected ** (1 - adapt) * army ** adapt;
-}
-
-/** Enemies in a pack met when the expected army is `expected`. */
-export function packStrength(expected: number): number {
-  return Math.max(ENEMY_MIN, Math.round(ENEMY_K * expected));
 }
 
 /**
