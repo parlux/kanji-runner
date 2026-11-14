@@ -9,8 +9,9 @@
  */
 import { existsSync, readFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
-import { RATINGS } from "../src/game/sandbox/gauntlet";
+import type { WaveLog } from "../src/game/sandbox/gauntlet";
 import {
+  answersText,
   parseResults,
   type GauntletResults,
 } from "../src/game/sandbox/results";
@@ -63,11 +64,10 @@ export function parseCount(arg: string | undefined): number {
 const pad = (s: string, n: number): string =>
   s.length >= n ? s : s + " ".repeat(n - s.length);
 
-/** One run as a table: a row per wave, its preset, what it measured and the rating. */
+/** One run as a table: a row per wave, its preset and what it measured; under each, the answers (or an older run's rating) and the note. */
 export function runTable(r: GauntletResults): string {
   const head = [
     "#",
-    "rating",
     "army",
     "for",
     "enem",
@@ -86,7 +86,6 @@ export function runTable(r: GauntletResults): string {
     const p = w.preset;
     return [
       String(w.wave),
-      RATINGS.find((x) => x.id === w.rating)?.label ?? "-",
       String(p.army),
       String(p.expected),
       String(p.enemies),
@@ -113,7 +112,14 @@ export function runTable(r: GauntletResults): string {
   return [
     `${r.createdAt.slice(0, 16).replace("T", " ")} UTC · build ${r.version} · ${r.device}`,
     line(head),
-    ...rows.map(line),
+    ...rows.flatMap((row, i) => {
+      const w = r.waves[i] as WaveLog;
+      return [
+        line(row),
+        `   ${answersText(w)}`,
+        ...(w.note ? [`   note: ${w.note}`] : []),
+      ];
+    }),
   ].join("\n");
 }
 

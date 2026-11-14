@@ -1,7 +1,8 @@
-import { RATINGS, type Gauntlet, type Rating } from "./gauntlet";
+import { QUESTIONS, type Answers, type Gauntlet } from "./gauntlet";
+import { answersText } from "./results";
 import type { SaveResult } from "../../sync/sync";
 
-/** The gauntlet's screens over the run: the "Wave N" label, the rating card and the results. */
+/** The gauntlet's screens over the run: the "Wave N" label, the question card and the results. */
 
 const CSS = `
 .kr-gx { position: fixed; inset: 0; z-index: 10; display: flex;
@@ -23,6 +24,16 @@ const CSS = `
 .kr-gx button.primary { background: #2f6b48; }
 .kr-gx .row { display: flex; gap: 10px; }
 .kr-gx .row button { flex: 1; }
+.kr-gx .q { display: flex; flex-direction: column; gap: 4px; }
+.kr-gx .q span { font-size: 14px; color: #c9cfdb; }
+.kr-gx .q .row { gap: 6px; }
+.kr-gx .q button { padding: 6px 4px; min-height: 46px; font-size: 14px; }
+.kr-gx .q button.on { background: #2f6b48; border-color: #7ddc95; }
+.kr-gx textarea { box-sizing: border-box; width: 100%; min-height: 64px;
+  font: 16px system-ui, sans-serif; padding: 8px; color: #f2f2f2;
+  background: #111; border: 1px solid #8892a8; resize: vertical; }
+.kr-gx .card.ask { gap: 8px; padding: 14px; }
+.kr-gx .card.ask h2 { font-size: 19px; }
 .kr-gx ol { margin: 0; padding-left: 22px; font-size: 13px; color: #c9cfdb; }
 .kr-gx li { margin: 2px 0; }
 `;
@@ -56,7 +67,8 @@ export function saveMessage(result: SaveResult | "saving"): {
 }
 
 export type GauntletUiHandlers = {
-  onRate: (r: Rating) => void;
+  /** The card's answers (blank questions absent) and note. */
+  onRate: (answers: Answers, note: string) => void;
   /** Saves the results; the screen shows what came back. */
   onSave: () => Promise<SaveResult>;
   /** Opens the log-in form; calls back once signed in. */
@@ -105,7 +117,15 @@ export function createGauntletUi(h: GauntletUiHandlers): {
   if (!document.getElementById("kr-gx-css"))
     document.head.append(el("style", { id: "kr-gx-css", textContent: CSS }));
   const root = el("div", { className: "kr-gx" });
-  for (const type of ["pointerdown", "pointerup", "click", "touchstart"])
+  // taps and typing (the note) stay out of the game's steering keys
+  for (const type of [
+    "pointerdown",
+    "pointerup",
+    "click",
+    "touchstart",
+    "keydown",
+    "keyup",
+  ])
     root.addEventListener(type, (e) => e.stopPropagation());
   document.body.append(root);
   let shown = "";
@@ -124,25 +144,53 @@ export function createGauntletUi(h: GauntletUiHandlers): {
 
   const card = (g: Gauntlet) => {
     root.className = "kr-gx dim";
+    const answers = new Map<string, string>();
     const box = el(
       "div",
-      { className: "card" },
+      { className: "card ask" },
       el("h2", { textContent: `Wave ${g.index + 1}: how did it feel?` }),
     );
-    for (const r of RATINGS) {
-      const b = el("button", {
-        textContent: r.label,
-        className: r.id === "right" ? "primary" : "",
+    for (const q of QUESTIONS) {
+      const row = el("div", { className: "row" });
+      const buttons = q.choices.map((c) => {
+        const b = el("button", { textContent: c.label });
+        b.dataset.q = q.id;
+        b.dataset.choice = c.id;
+        // tap to choose, tap again to leave it blank
+        b.onclick = () => {
+          if (answers.get(q.id) === c.id) answers.delete(q.id);
+          else answers.set(q.id, c.id);
+          for (const x of buttons)
+            x.className = answers.get(q.id) === x.dataset.choice ? "on" : "";
+        };
+        return b;
       });
-      b.dataset.rating = r.id;
-      b.onclick = () => {
-        // gone at once, so a second tap can't land on it
-        root.className = "kr-gx";
-        root.replaceChildren();
-        h.onRate(r.id);
-      };
-      box.append(b);
+      row.append(...buttons);
+      box.append(
+        el(
+          "div",
+          { className: "q" },
+          el("span", { textContent: q.label }),
+          row,
+        ),
+      );
     }
+    const note = el("textarea", {
+      placeholder: "Note (optional): what felt off?",
+      rows: 2,
+    });
+    note.setAttribute("enterkeyhint", "done");
+    const next = el("button", {
+      className: "primary",
+      textContent: g.index + 1 < g.presets.length ? "Next wave" : "Finish",
+    });
+    next.onclick = () => {
+      // gone at once, so a second tap can't land on it
+      root.className = "kr-gx";
+      root.replaceChildren();
+      h.onRate(Object.fromEntries(answers) as Answers, note.value);
+    };
+    box.append(note, next);
     root.replaceChildren(box);
   };
 
@@ -179,7 +227,7 @@ export function createGauntletUi(h: GauntletUiHandlers): {
     for (const w of g.log)
       list.append(
         el("li", {
-          textContent: `${RATINGS.find((r) => r.id === w.rating)?.label ?? "-"} · ${
+          textContent: `${answersText(w)} · ${
             w.killSeconds === null ? "reached you" : `${w.killSeconds} s`
           } · lost ${w.lost}`,
         }),

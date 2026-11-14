@@ -23,17 +23,20 @@ const run: GauntletResults = {
       enemies: 200,
       fps: 58,
       died: false,
-      rating: "right",
+      answers: { pace: "right", melee: "fair" },
+      note: "felt good",
     },
     {
       wave: 2,
-      preset: GAUNTLET[9] as WavePreset,
+      preset: GAUNTLET[7] as WavePreset,
       killSeconds: null,
       reached: 200,
       lost: 20,
       enemies: 200,
       fps: 41,
       died: true,
+      answers: null,
+      note: "",
       rating: "fast",
     },
   ],
@@ -97,15 +100,22 @@ describe("gauntlet-results script", () => {
     expect(lines[0]).toBe(
       "2026-11-14 10:30 UTC · build abc · Android 14; Pixel 7 · Chrome 143",
     );
-    expect(lines[1]).toMatch(/^#\s+rating\s+army\s+for\s+enem\s+kill/);
+    expect(lines[1]).toMatch(/^#\s+army\s+for\s+enem\s+kill/);
     expect(lines[2]).toMatch(
-      /^1\s+Felt right\s+60\s+60\s+200\s+3\.5s\s+0\.8\s+1\s+1\s+\| 2\.48s\s+200\s+0\s+0\s+58\s+defaults$/,
+      /^1\s+60\s+60\s+200\s+3\.5s\s+0\.8\s+1\s+1\s+\| 2\.48s\s+200\s+0\s+0\s+58\s+baseline: army 60, its pack$/,
     );
-    expect(lines[3]).toMatch(
-      /Too fast .*\| reached\s+200\s+200\s+20 died\s+41/,
+    // the answers and the note under each wave
+    expect(lines[3]).toBe(
+      "   Pace: Right, Melee (only if reached): Tense and fair",
     );
+    expect(lines[4]).toBe("   note: felt good");
+    expect(lines[5]).toMatch(
+      /^2\s+8\s+60\s+.*\| reached\s+200\s+200\s+20 died\s+41/,
+    );
+    // an older run's rating
+    expect(lines[6]).toBe("   Too fast");
     // columns line up
-    expect(lines[2]?.indexOf("|")).toBe(lines[3]?.indexOf("|"));
+    expect(lines[2]?.indexOf("|")).toBe(lines[5]?.indexOf("|"));
   });
 
   it("formats the REST reply: rows, none, or junk", () => {

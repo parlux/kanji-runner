@@ -162,7 +162,9 @@ const VERTEX_BODY = `
     swing = 0.0;
     yaw = 3.14159265;
     lift = vec3(0.0, sin(3.14159265 * t) * 0.15, -0.6 * t);
-    off = vec2(death.y, death.z + hordeState.z * ${f(DIST_SCALE)});
+    // left where it fell as the army runs on, but never inside the army: the
+    // fallen of a melee drop at its front rows
+    off = vec2(death.y, min(death.z + hordeState.z * ${f(DIST_SCALE)}, -hordeLane.w));
     s *= 1.0 - t * t;
   } else if (k + 1.0 >= hordeState.x) {
     // the front figure shrinks as it takes damage

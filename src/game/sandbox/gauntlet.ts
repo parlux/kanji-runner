@@ -14,15 +14,63 @@ import {
 } from "../../core/tuning";
 import type { WavePreset } from "./presets";
 
-/** The one-tap verdict after each wave. */
-export const RATINGS = [
-  { id: "right", label: "Felt right" },
-  { id: "fast", label: "Too fast" },
-  { id: "slow", label: "Too slow" },
-  { id: "few", label: "Too few" },
-  { id: "many", label: "Too many" },
+/**
+ * The card after each wave (owner, round 1: "give me specific questions"):
+ * five questions of three choices each, any left blank, plus a note.
+ */
+export const QUESTIONS = [
+  {
+    id: "pace",
+    label: "Pace",
+    choices: [
+      { id: "fast", label: "Too fast" },
+      { id: "right", label: "Right" },
+      { id: "slow", label: "Too slow" },
+    ],
+  },
+  {
+    id: "movement",
+    label: "Movement",
+    choices: [
+      { id: "manic", label: "Too manic" },
+      { id: "right", label: "Right" },
+      { id: "sluggish", label: "Too sluggish" },
+    ],
+  },
+  {
+    id: "converging",
+    label: "Converging",
+    choices: [
+      { id: "snapped", label: "Snapped" },
+      { id: "natural", label: "Natural" },
+      { id: "slow", label: "Too slow" },
+    ],
+  },
+  {
+    id: "size",
+    label: "Size for my army",
+    choices: [
+      { id: "small", label: "Too small" },
+      { id: "right", label: "Right" },
+      { id: "big", label: "Too big" },
+    ],
+  },
+  {
+    id: "melee",
+    label: "Melee (only if reached)",
+    choices: [
+      { id: "unfair", label: "Unfair" },
+      { id: "fair", label: "Tense and fair" },
+      { id: "none", label: "No threat" },
+    ],
+  },
 ] as const;
-export type Rating = (typeof RATINGS)[number]["id"];
+export type Question = (typeof QUESTIONS)[number];
+export type QuestionId = Question["id"];
+/** A wave's answers: a choice id per question answered (blank ones absent). */
+export type Answers = {
+  [Q in Question as Q["id"]]?: Q["choices"][number]["id"];
+};
 
 /** Seconds the "Wave N" label shows over the waiting crowd before the wave starts. */
 export const INTRO_SECONDS = 2;
@@ -35,7 +83,7 @@ const PACK_POS = 100;
 /** The track's only question, never reached: keeps the boss and walls out of sight. */
 const FAR = 1e5;
 
-/** What one wave measured, and the owner's rating. */
+/** What one wave measured, and the owner's answers and note. */
 export type WaveLog = {
   wave: number;
   preset: WavePreset;
@@ -51,7 +99,11 @@ export type WaveLog = {
   fps: number;
   /** The army died. */
   died: boolean;
-  rating: Rating | null;
+  /** Null until the card is done. */
+  answers: Answers | null;
+  note: string;
+  /** Round 1's one-tap verdict (older saved runs only). */
+  rating?: string | null;
 };
 
 /** A wave's running measurements. */
@@ -108,7 +160,7 @@ export function waveRun(p: WavePreset): RunState {
     army: p.army,
     hp: [p.killSeconds * FIRE_PER_SOLDIER * p.expected],
     heads: [packCount(p.expected, horde)],
-    dist: PACK_POS - CROWD_DEPTH_MAX / 2 - INTRO_AHEAD,
+    dist: PACK_POS - CROWD_DEPTH_MAX / 2 - (p.ahead ?? INTRO_AHEAD),
   };
 }
 
@@ -181,7 +233,8 @@ export function waveLog(
     enemies: heads,
     fps: m.frameSeconds > 0 ? Math.round(m.frames / m.frameSeconds) : 0,
     died: run.status === "dead",
-    rating: null,
+    answers: null,
+    note: "",
   };
 }
 
@@ -190,7 +243,7 @@ const round2 = (n: number): number => Math.round(n * 100) / 100;
 /**
  * One fixed step: the label counts down; the wave plays (steering `dx`
  * track units, `pace` the speed preset) and is measured until the pack has
- * been gone AFTER_SECONDS, then waits for a rating.
+ * been gone AFTER_SECONDS, then waits for the card.
  */
 export function stepGauntlet(
   g: Gauntlet,
@@ -238,11 +291,11 @@ export function countFrame(g: Gauntlet, seconds: number): Gauntlet {
   };
 }
 
-/** The rating for the wave just played; then the next wave's label, or the end. */
-export function rateWave(g: Gauntlet, rating: Rating): Gauntlet {
+/** The answers and note for the wave just played; then the next wave's label, or the end. */
+export function rateWave(g: Gauntlet, answers: Answers, note = ""): Gauntlet {
   if (g.phase !== "rate") return g;
   const log = g.log.map((w, i) =>
-    i === g.log.length - 1 ? { ...w, rating } : w,
+    i === g.log.length - 1 ? { ...w, answers, note: note.trim() } : w,
   );
   const index = g.index + 1;
   const next = g.presets[index];

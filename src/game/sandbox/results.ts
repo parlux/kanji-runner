@@ -1,5 +1,30 @@
-import type { WaveLog } from "./gauntlet";
-import { RATINGS } from "./gauntlet";
+import { QUESTIONS, type WaveLog } from "./gauntlet";
+
+/** Round 1's one-tap verdicts, to print older saved runs. */
+const RATINGS: Record<string, string> = {
+  right: "Felt right",
+  fast: "Too fast",
+  slow: "Too slow",
+  few: "Too few",
+  many: "Too many",
+};
+
+/**
+ * A wave's verdict in short: its answers ("Pace: Too fast, Melee: Tense
+ * and fair"; blank ones left out) or, for an older run, its rating.
+ */
+export function answersText(w: WaveLog): string {
+  if (w.answers) {
+    const answers = w.answers as Record<string, string | undefined>;
+    const parts = QUESTIONS.flatMap((q) => {
+      const a = answers[q.id];
+      const c = q.choices.find((x) => x.id === a);
+      return c ? [`${q.label}: ${c.label}`] : [];
+    });
+    return parts.length ? parts.join(", ") : "-";
+  }
+  return (w.rating && RATINGS[w.rating]) || "-";
+}
 
 /** One gauntlet run as saved (the `data` of a `tuning_results` row) and shared. */
 export type GauntletResults = {
@@ -43,18 +68,16 @@ export function buildResults(
   };
 }
 
-const ratingLabel = (r: string | null): string =>
-  RATINGS.find((x) => x.id === r)?.label ?? "-";
-
-/** One line per wave: what it was, what it measured, how it felt. */
+/** One line per wave: what it was, what it measured, how it felt (and the note). */
 export function waveLine(w: WaveLog): string {
   const p = w.preset;
   const kill = w.killSeconds === null ? "reached you" : `${w.killSeconds}s`;
   return (
-    `${w.wave}. ${ratingLabel(w.rating)} | army ${p.army} (pack for ${p.expected}), ` +
+    `${w.wave}. ${answersText(w)} | army ${p.army} (pack for ${p.expected}), ` +
     `${p.enemies} enemies, kill ${p.killSeconds}s, width ${p.packWidth}, size ${p.hordeScale}, adapt ${p.packAdapt} ` +
     `| measured: kill ${kill}, ${w.enemies} enemies, reached ${w.reached}, lost ${w.lost}${w.died ? " (died)" : ""}, ${w.fps} fps` +
-    ` | ${p.note}`
+    ` | ${p.note}` +
+    (w.note ? ` | note: ${w.note}` : "")
   );
 }
 
@@ -87,5 +110,10 @@ export function parseResults(data: unknown): GauntletResults | null {
       typeof w.lost === "number",
   );
   if (waves.length !== data.waves.length) return null;
+  // older runs (round 1) have a rating instead of answers and a note
+  for (const w of waves) {
+    if (!isObj(w.answers)) w.answers = null;
+    if (typeof w.note !== "string") w.note = "";
+  }
   return { version, createdAt, device, waves };
 }

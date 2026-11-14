@@ -21,6 +21,8 @@ export type WavePreset = {
   hordeScale: number;
   /** How far the pack follows a bigger army (see PACK_ADAPT). */
   packAdapt: number;
+  /** How far ahead (track units) the crowd's front stands when the wave starts (INTRO_AHEAD when absent; a run's packs wake about 2 out, behind a wall). */
+  ahead?: number;
   /** Where the crowd stands across the track (0..1). */
   x: number;
   /** What the wave tests, for the log (never shown while playing). */
@@ -46,36 +48,43 @@ const wave = (w: Partial<WavePreset> & { note: string }): WavePreset => ({
 });
 
 /**
- * The gauntlet, in order. Edit this list for the next tuning run: one
- * variable at a time around the defaults, plus a strong army for PACK_ADAPT.
+ * The gauntlet, in order (round 2, after the owner's round 1: 3.5 s kills,
+ * full adapt, melee contact). Each wave's note says what it tests.
  */
 export const GAUNTLET: readonly WavePreset[] = [
-  wave({ note: "defaults" }),
-  wave({ killSeconds: 1.5, note: "faster kill (1.5 s)", x: 0.35 }),
-  wave({ killSeconds: 2.5, note: "kill 2.5 s (the old default)", x: 0.65 }),
-  wave({ enemies: 80, note: "fewer enemies (80)" }),
-  wave({ enemies: 500, note: "more enemies (500)", x: 0.4 }),
-  wave({ army: 20, expected: 20, note: "small army (20) and its pack" }),
+  wave({ note: "baseline: army 60, its pack" }),
+  wave({
+    ahead: 2,
+    note: "woken close, as behind a wall in a run: reached",
+    x: 0.4,
+  }),
   wave({
     army: 150,
-    expected: 150,
-    note: "big army (150) and its pack",
+    note: "strong army 150 (2.5x): tougher enemies, same pace",
+  }),
+  wave({
+    army: 300,
+    note: "strong army 300 (5x): tougher enemies, same pace",
     x: 0.6,
   }),
   wave({
-    army: 300,
-    note: "strong army (5× expected), adapt 0.8",
+    army: 600,
+    note: "strong army 600 (10x): tougher enemies, same pace",
   }),
   wave({
-    army: 300,
-    packAdapt: 0.5,
-    note: "strong army (5× expected), adapt 0.5",
+    army: 40,
+    ahead: 3,
+    note: "mid army (40 vs a pack for 60) reached briefly",
     x: 0.45,
   }),
   wave({
     army: 20,
-    note: "weak army (a third of expected): the pack bites",
+    note: "weak army (20 vs a pack for 60) reached: melee",
     x: 0.55,
+  }),
+  wave({
+    army: 8,
+    note: "outmatched (8 vs a pack for 60): melee can wipe you out",
   }),
 ];
 
@@ -95,6 +104,7 @@ export function presetErrors(list: readonly WavePreset[]): string[] {
     if (!pos(p.hordeScale)) bad("hordeScale");
     if (!(p.packAdapt >= 0 && p.packAdapt <= 1)) bad("packAdapt");
     if (!(p.x >= 0 && p.x <= 1)) bad("x");
+    if (p.ahead !== undefined && !(p.ahead > 0 && p.ahead <= 12)) bad("ahead");
   });
   return errors;
 }

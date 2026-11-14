@@ -38,7 +38,7 @@ describe("gauntlet presets", () => {
     expect(GAUNTLET.length).toBeLessThanOrEqual(10);
   });
 
-  it("starts at today's defaults and changes one thing at a time from them", () => {
+  it("starts at today's defaults; every wave keeps the pack's settings and changes only the army or how close it wakes", () => {
     expect(BASE).toMatchObject({
       enemies: HORDE_DEFAULTS.packMax,
       killSeconds: HORDE_DEFAULTS.killSeconds,
@@ -47,41 +47,53 @@ describe("gauntlet presets", () => {
       packAdapt: PACK_ADAPT,
     });
     expect(BASE.army).toBe(BASE.expected);
-    const keys = [
-      "enemies",
-      "killSeconds",
-      "packWidth",
-      "hordeScale",
-      "army",
-    ] as const;
-    for (const p of GAUNTLET) {
-      const changed = keys.filter((k) => p[k] !== BASE[k]);
-      const adapt = p.packAdapt !== BASE.packAdapt;
-      // army size moves with its pack (expected) or alone (a strong army), adapt only with a strong army
-      expect(changed.length + (adapt ? 1 : 0)).toBeLessThanOrEqual(
-        adapt ? 2 : 1,
-      );
-      if (adapt) expect(p.army).toBeGreaterThan(p.expected);
-      if (changed.length === 0)
-        expect(p).toEqual({ ...BASE, x: p.x, note: p.note });
-    }
+    expect(BASE.ahead).toBeUndefined();
+    for (const p of GAUNTLET)
+      expect({ ...p, army: BASE.army, ahead: undefined, x: 0.5 }).toEqual({
+        ...BASE,
+        note: p.note,
+      });
   });
 
-  it("sweeps kill time, enemy count and army size, and has a strong army", () => {
-    const kill = new Set(GAUNTLET.map((p) => p.killSeconds));
-    const enemies = new Set(GAUNTLET.map((p) => p.enemies));
-    const army = new Set(GAUNTLET.map((p) => p.army));
-    expect(kill.size).toBeGreaterThanOrEqual(3);
-    expect(enemies.size).toBeGreaterThanOrEqual(3);
-    expect(army.size).toBeGreaterThanOrEqual(3);
-    expect(GAUNTLET.some((p) => p.army >= 4 * p.expected)).toBe(true);
+  it("round 2: baseline, strong armies (150, 300, 600), a weak army reached, an outmatched one, a mid one reached briefly; each labelled", () => {
+    const armies = GAUNTLET.map((p) => p.army);
+    for (const a of [150, 300, 600]) expect(armies).toContain(a);
+    expect(
+      GAUNTLET.some((p) => p.ahead !== undefined && p.army === p.expected),
+    ).toBe(true);
+    expect(new Set(GAUNTLET.map((p) => p.note)).size).toBe(GAUNTLET.length);
+    const played = GAUNTLET.map((p) => playWave(startGauntlet([p])).log[0]);
+    // strong armies: the same pace as the baseline (full adapt)
+    const base = played[0]?.killSeconds ?? 0;
+    expect(base).toBeGreaterThan(3);
+    GAUNTLET.forEach((p, i) => {
+      if (p.army > p.expected)
+        expect(played[i]?.killSeconds ?? 0).toBeCloseTo(base, 1);
+    });
+    const weak = GAUNTLET.map((p, i) => ({ p, w: played[i] })).filter(
+      ({ p }) => p.army < p.expected,
+    );
+    // reached: soldiers lost in melee; one is outmatched and dies, the rest stand
+    expect(weak.length).toBeGreaterThanOrEqual(3);
+    for (const { w } of weak) expect(w?.reached ?? 0).toBeGreaterThan(50);
+    expect(weak.filter(({ w }) => w?.died).length).toBe(1);
+    expect(weak.filter(({ w }) => !w?.died && (w?.lost ?? 0) > 0).length).toBe(
+      2,
+    );
   });
 
   it("flags bad presets", () => {
     expect(presetErrors([])).toEqual(["no waves"]);
     expect(
-      presetErrors([{ ...BASE, army: 0, packWidth: 1.5, packAdapt: -1 }]),
-    ).toEqual(["wave 1: army", "wave 1: packWidth", "wave 1: packAdapt"]);
+      presetErrors([
+        { ...BASE, army: 0, packWidth: 1.5, packAdapt: -1, ahead: 0 },
+      ]),
+    ).toEqual([
+      "wave 1: army",
+      "wave 1: packWidth",
+      "wave 1: packAdapt",
+      "wave 1: ahead",
+    ]);
   });
 });
 
@@ -110,7 +122,7 @@ describe("waveRun", () => {
 describe("gauntlet sequencing", () => {
   const two = [BASE, { ...BASE, killSeconds: 1.5 }];
 
-  it("shows the label, plays, waits for a rating, then the next wave, then done", () => {
+  it("shows the label, plays, waits for the card, then the next wave, then done", () => {
     let g = startGauntlet(two);
     expect(g.phase).toBe("intro");
     const army = g.run.army;
@@ -121,24 +133,26 @@ describe("gauntlet sequencing", () => {
     g = playWave(g);
     expect(g.phase).toBe("rate");
     expect(g.log).toHaveLength(1);
-    expect(g.log[0]?.rating).toBeNull();
+    expect(g.log[0]?.answers).toBeNull();
     // nothing moves while the card is up
     expect(stepGauntlet(g, DT)).toBe(g);
-    g = rateWave(g, "right");
+    g = rateWave(g, { pace: "right", melee: "fair" }, "  felt good \n");
     expect(g.phase).toBe("intro");
     expect(g.index).toBe(1);
-    expect(g.log[0]?.rating).toBe("right");
-    g = rateWave(playWave(g), "fast");
+    expect(g.log[0]?.answers).toEqual({ pace: "right", melee: "fair" });
+    expect(g.log[0]?.note).toBe("felt good");
+    // all blank is fine
+    g = rateWave(playWave(g), {});
     expect(g.phase).toBe("done");
-    expect(g.log.map((w) => [w.wave, w.rating])).toEqual([
-      [1, "right"],
-      [2, "fast"],
+    expect(g.log.map((w) => [w.wave, w.answers, w.note])).toEqual([
+      [1, { pace: "right", melee: "fair" }, "felt good"],
+      [2, {}, ""],
     ]);
   });
 
-  it("rating outside the card does nothing", () => {
+  it("answering outside the card does nothing", () => {
     const g = startGauntlet(two);
-    expect(rateWave(g, "slow")).toBe(g);
+    expect(rateWave(g, { pace: "slow" })).toBe(g);
   });
 });
 

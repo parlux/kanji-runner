@@ -64,8 +64,8 @@ const finished = (): GauntletResults => {
 };
 
 const ui = createGauntletUi({
-  onRate: (r) => {
-    g = rateWave(g, r);
+  onRate: (answers, note) => {
+    g = rateWave(g, answers, note);
   },
   onSave: () => sync.saveTuning(finished()),
   onLogin: (done) => openLogin(sync, done),

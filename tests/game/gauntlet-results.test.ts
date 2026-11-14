@@ -22,7 +22,10 @@ function played(): Gauntlet {
   let g = startGauntlet(GAUNTLET.slice(0, 2));
   while (g.phase !== "done") {
     while (g.phase !== "rate") g = stepGauntlet(g, 1 / 60);
-    g = rateWave(g, g.index === 0 ? "right" : "many");
+    g =
+      g.index === 0
+        ? rateWave(g, { pace: "fast", converging: "natural" }, "a bit quick")
+        : rateWave(g, {});
   }
   return g;
 }
@@ -59,18 +62,22 @@ describe("gauntlet results", () => {
         "killSeconds",
         "lost",
         "preset",
-        "rating",
+        "answers",
+        "note",
         "reached",
         "wave",
       ].sort(),
     );
     expect(w?.preset).toEqual(GAUNTLET[0]);
-    expect(r.waves.map((x) => x.rating)).toEqual(["right", "many"]);
+    expect(r.waves.map((x) => [x.answers, x.note])).toEqual([
+      [{ pace: "fast", converging: "natural" }, "a bit quick"],
+      [{}, ""],
+    ]);
     // it survives the trip through jsonb
     expect(parseResults(JSON.parse(JSON.stringify(r)))).toEqual(r);
   });
 
-  it("the shared text has a header and a line per wave with the rating and measurements", () => {
+  it("the shared text has a header and a line per wave with the answers, measurements and note", () => {
     const g = played();
     const text = resultsText(
       buildResults(
@@ -86,12 +93,12 @@ describe("gauntlet results", () => {
       "Horde gauntlet 2026-11-14 10:30 UTC · build abc · Android 14; Pixel 7 · Chrome 143",
     );
     expect(lines[1]).toMatch(
-      /^1\. Felt right \| army 60 \(pack for 60\), 200 enemies, kill 3\.5s/,
+      /^1\. Pace: Too fast, Converging: Natural \| army 60 \(pack for 60\), 200 enemies, kill 3\.5s/,
     );
     expect(lines[1]).toMatch(
-      /measured: kill 3\.\d+s, 200 enemies, reached \d+, lost 0, \d+ fps \| defaults$/,
+      /measured: kill 3\.\d+s, 200 enemies, reached \d+, lost 0, \d+ fps \| baseline: army 60, its pack \| note: a bit quick$/,
     );
-    expect(lines[2]).toMatch(/^2\. Too many \| /);
+    expect(lines[2]).toMatch(/^2\. - \| /);
   });
 
   it("parseResults rejects what isn't a gauntlet run", () => {
@@ -103,5 +110,32 @@ describe("gauntlet results", () => {
     expect(
       parseResults({ version: "a", createdAt: "b", device: "c", waves: [] }),
     ).toEqual({ version: "a", createdAt: "b", device: "c", waves: [] });
+  });
+
+  it("an older run (round 1: a rating, no answers or note) still reads and prints", () => {
+    const old = {
+      version: "a",
+      createdAt: "2026-11-14T09:00:00.000Z",
+      device: "c",
+      waves: [
+        {
+          wave: 1,
+          preset: GAUNTLET[0],
+          killSeconds: 2.48,
+          reached: 0,
+          lost: 0,
+          enemies: 200,
+          fps: 58,
+          died: false,
+          rating: "fast",
+        },
+      ],
+    };
+    const r = parseResults(old);
+    expect(r?.waves[0]?.answers).toBeNull();
+    expect(r?.waves[0]?.note).toBe("");
+    expect(resultsText(r as NonNullable<typeof r>).split("\n")[1]).toMatch(
+      /^1\. Too fast \| /,
+    );
   });
 });
