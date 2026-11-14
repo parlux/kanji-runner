@@ -1,6 +1,7 @@
 import { bindDrag, bindKeys, type Action } from "./game/input";
 import { startLoop } from "./game/loop";
-import { render, type TrackView } from "./game/render";
+import { render } from "./game/render";
+import type { TrackView } from "./game/hud";
 import type { KanjiItem, Progress } from "./core/types";
 import {
   adoptProgress,

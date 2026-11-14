@@ -138,7 +138,7 @@ Checks:
 - Split `tests/game/scenes.test.ts` along the same lines if it mirrors them.
 
 **Acceptance criteria:**
-- [ ] No file in `src/game/` (outside `three/`) is over 600 lines. Screenshots match the ones taken before the split.
+- [x] No file in `src/game/` (outside `three/`) is over 600 lines. Screenshots match the ones taken before the split.
 
 **Scope:** M
 
