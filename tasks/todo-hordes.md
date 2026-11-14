@@ -194,9 +194,11 @@ Owner at M4, 2026-11-14 (gauntlet round 2): pace, movement, size, melee right. C
 ### Task H5f: Fix the celebration spread
 **Description:** reproduce gauntlet wave 7 (outmatched): right when the army dies, some enemies (the back rows / not-yet-streamed crowd) snap back and spread in a line across the road. Find the cause and fix it so the cheer starts from where every figure stands (no snapping).
 **Acceptance criteria:**
-- [ ] Reproduced and described; a test pins the fix (no figure jumps more than a small distance on the first cheer frame).
-- [ ] Browser: screenshots of the frame before and the first frames after the wipe-out.
-- [ ] Deploy green.
+- [x] Reproduced and described; a test pins the fix (no figure jumps more than a small distance on the first cheer frame).
+- [x] Browser: screenshots of the frame before and the first frames after the wipe-out.
+- [x] Deploy green.
+
+Notes: the snap came in the last half second before the wipe-out, not from the cheer itself. Each soldier lost narrows the army, so the melee's rows deepen (meleeStep); with about 100 figures counted in the melee its back jumped about 2 world units in one frame, throwing the stream back into the crowd ("snap back to the back"). Figures the core counts in the melee while still standing in the crowd were also put on the melee's lane in one frame: the crowd's back rows snapped into a line. The cheer then stretched that line out across the road. Fixes: the melee's step eases over 0.4 s; a fighting figure comes across no faster than the stream; the cheer spreads a figure only as far as it had come into its lane (the waiting crowd stands where it is and cheers). Test: wave 7 frame by frame (held, and steered off and back): no figure moves more than 0.6 world units a frame before the wipe-out (was 3.7), or 0.3 in the cheer.
 **Verification:** tests (`npx vitest run --maxWorkers=2`), lint, build. **Dependencies:** H5e. **Files:** `src/game/three/{horde,hazards}.ts`, tests. **Scope:** XS
 
 ### Task H6: Spectacular kills
