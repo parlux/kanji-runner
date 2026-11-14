@@ -4,13 +4,12 @@ import {
   HAZE_COLOUR,
   poseFromSettings,
   type CameraFit,
-  type CameraSettings,
 } from "./world";
 
 /**
  * Camera and look constants for the 3D run. The camera is the tuned
  * `DEFAULT_CAMERA` (the owner's pick: low, 8° down, 15 away, narrow view) at
- * every screen size, or the settings saved on the device. It puts the army 80%
+ * every screen size. It puts the army 80%
  * down the screen and follows its sideways steering (follow, smoothing); the
  * track runs up the screen into the haze.
  */
@@ -35,9 +34,9 @@ export function makeCamera(): PerspectiveCamera {
   return new PerspectiveCamera(45, 1, 0.5, 400);
 }
 
-/** The camera for the saved `settings`, or the defaults. */
-export const cameraFor = (settings: CameraSettings | null): CameraFit =>
-  poseFromSettings(settings ?? DEFAULT_CAMERA, AIM.armyY);
+/** The run's camera: `DEFAULT_CAMERA` at the army's place on screen. */
+export const cameraFor = (): CameraFit =>
+  poseFromSettings(DEFAULT_CAMERA, AIM.armyY);
 
 /**
  * Poses and fits the camera to `aspect`, shifted sideways by `x` (camera and

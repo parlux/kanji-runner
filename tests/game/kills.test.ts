@@ -7,13 +7,7 @@ import {
   type RunState,
 } from "../../src/core/sim";
 import type { Track } from "../../src/core/track";
-import {
-  startGauntlet,
-  stepGauntlet,
-  waveRun,
-  type Gauntlet,
-} from "../../src/game/sandbox/gauntlet";
-import { GAUNTLET, type WavePreset } from "../../src/game/sandbox/presets";
+import { startWave, stepWave, WAVES, type Wave, type WaveSpec } from "./wave";
 import { createHorde } from "../../src/game/three/horde";
 import {
   createKills,
@@ -61,23 +55,18 @@ function setup() {
   return { kills, step };
 }
 
-/** Plays gauntlet wave `i` frame by frame with the horde and its kills. */
-function play(i: number) {
+/** Plays a wave frame by frame with the horde and its kills. */
+function play(spec: WaveSpec) {
   const { kills, step } = setup();
-  let g: Gauntlet = {
-    ...startGauntlet(GAUNTLET),
-    index: i,
-    run: waveRun(GAUNTLET[i] as WavePreset),
-    phase: "play",
-  };
+  let g: Wave = startWave(spec);
   const matrices = kills.pieces.instanceMatrix.array;
   let most = 0;
   let mostRings = 0;
   let dead = 0;
   const dt = 1 / 60;
-  for (let f = 0; f < 4000 && g.phase === "play"; f++) {
+  for (let f = 0; f < 4000 && !g.over; f++) {
     const before = g.run;
-    g = stepGauntlet(g, dt, 0);
+    g = stepWave(g, dt);
     // drawn deaths this frame: survivors that dropped, minus those that ran past
     if (g.run.track === before.track) {
       const k = g.run.track.hazards.findIndex((hz) => hz.kind === "pack");
@@ -100,7 +89,7 @@ function play(i: number) {
 
 describe("kill effects (Task H6)", () => {
   it("never grows its pool through a whole wave, and wipes the pack with one final burst", () => {
-    const r = play(0);
+    const r = play(WAVES.held);
     expect(r.same).toBe(true);
     expect(r.kills.pieces.instanceMatrix.count).toBe(MAX_KILL_PIECES);
     expect(r.most).toBeGreaterThan(10);
@@ -115,7 +104,7 @@ describe("kill effects (Task H6)", () => {
   });
 
   it("flashes in the melee when a weak army holds its line", () => {
-    const r = play(5);
+    const r = play(WAVES.weak);
     expect(r.kills.stats.melee).toBeGreaterThan(0);
   });
 

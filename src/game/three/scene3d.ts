@@ -51,7 +51,6 @@ import {
   worldX,
   worldZ,
   type CameraFit,
-  type CameraSettings,
   type Haze,
   type Projector,
   hazeFor,
@@ -73,7 +72,6 @@ export type View3d = {
   /** Haze at a track point, as the fog gives the scene (for the overlay text). */
   haze: Haze;
   /** Tuned camera settings (including the haze), or null for the defaults. */
-  setCamera(settings: CameraSettings | null): void;
 };
 
 /** Track length drawn ahead of and behind the army (world units); it runs on into the haze. */
@@ -373,8 +371,7 @@ export function createView3d(canvas: HTMLCanvasElement): View3d | null {
   let runDist = 0;
   // how spread out the crowd is (1 open road, 0 squeezed), eased over time
   let share = 1;
-  let tuned: CameraSettings | null = null;
-  let fit: CameraFit = cameraFor(null);
+  let fit: CameraFit = cameraFor();
   // the camera's sideways position (world X), eased towards the follow target
   let camX = 0;
   let pose = fit.pose;
@@ -396,11 +393,11 @@ export function createView3d(canvas: HTMLCanvasElement): View3d | null {
   let clock = 0;
   let last = performance.now();
   const v = new Vector3();
-  // poses the camera for the screen and settings; the haze follows the pose
+  // poses the camera for the screen; the haze follows the pose
   const refit = (): void => {
-    fit = cameraFor(tuned);
+    fit = cameraFor();
     pose = fit.pose;
-    setShapeDistance((tuned ?? DEFAULT_CAMERA).haze);
+    setShapeDistance(DEFAULT_CAMERA.haze);
     fitCamera(camera, w / h, fit, camX);
     const range = fogRange(pose, shapeDistance());
     fog.near = range.near;
@@ -411,10 +408,6 @@ export function createView3d(canvas: HTMLCanvasElement): View3d | null {
       w = cw;
       h = ch;
       renderer.setSize(cw, ch, false);
-      refit();
-    },
-    setCamera(settings) {
-      tuned = settings;
       refit();
     },
     render(s, pace = 1) {
@@ -440,7 +433,7 @@ export function createView3d(canvas: HTMLCanvasElement): View3d | null {
       }
       runDist = run.dist;
       // the camera follows the army sideways, in the run and the boss fight
-      const { follow, smoothing } = tuned ?? DEFAULT_CAMERA;
+      const { follow, smoothing } = DEFAULT_CAMERA;
       camX = followStep(camX, followTarget(follow, run.x), dt, smoothing);
       fitCamera(camera, w / h, fit, camX);
       haze = hazeFor(pose, runDist, shapeDistance());

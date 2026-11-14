@@ -29,7 +29,7 @@ export function startLayout(w: number, h: number) {
     plus: { x: x + bw - step, y: pickY - step / 2, w: step, h: step },
     apply: { x, y: h * 0.55, w: bw, h: 52 },
     cancel: { x, y: h * 0.55 + 64, w: bw, h: 44 },
-    /** The build stamp, bottom centre: five quick taps toggle the camera gear. */
+    /** The build stamp, bottom centre (not a button: a tap there starts nothing). */
     stamp: { x: w / 2 - 80, y: h - 20, w: 160, h: 20 },
   };
 }
@@ -153,27 +153,4 @@ export function modeTap(
   if (inside(l.modeNormal, x, y)) return "normal";
   if (inside(l.modeMeaning, x, y)) return "meaning";
   return null;
-}
-
-/** Taps on the build stamp that toggle the camera gear, and the seconds they must come within. */
-export const STAMP_TAPS = 5;
-export const STAMP_WINDOW = 3;
-
-/** Whether a start screen tap (picker closed) hits the build stamp. */
-export function stampTap(w: number, h: number, x: number, y: number): boolean {
-  return inside(startLayout(w, h).stamp, x, y);
-}
-
-/**
- * Adds a stamp tap at time `now` (s) to the recent `taps`: the taps within
- * STAMP_WINDOW, and whether this one is the STAMP_TAPS-th (which starts over).
- */
-export function stampTapped(
-  taps: readonly number[],
-  now: number,
-): { taps: number[]; toggle: boolean } {
-  const recent = [...taps, now].filter((t) => now - t <= STAMP_WINDOW);
-  return recent.length >= STAMP_TAPS
-    ? { taps: [], toggle: true }
-    : { taps: recent, toggle: false };
 }

@@ -24,7 +24,6 @@ import {
   HORDE_DEFAULTS,
   REASK_MAX_BOX,
 } from "../../src/core/tuning";
-import { hordeTuning } from "../../src/storage/horde";
 import { syntheticList } from "../core/wk-fixture";
 import { kanaRun } from "../core/kana-run";
 import { STEP } from "../../src/game/loop";
@@ -886,12 +885,13 @@ describe("horde tuning", () => {
   it("a new run is built with the given tuning (defaults when absent)", () => {
     const session = createSession(defaultProgress(), null);
     const start = { kind: "start" } as const;
-    const tuned = hordeTuning({
-      count: 2000,
-      scale: 1,
+    const tuned = {
+      ...HORDE_DEFAULTS,
+      hordeK: 10_000,
+      packMax: 2000,
       killSeconds: 2,
-      width: 0.5,
-    });
+      packWidth: 0.5,
+    };
     const a = handleAction(start, "confirm", () => 5, session, tuned).scene;
     const b = handleAction(start, "confirm", () => 5, session).scene;
     if (a.kind !== "run" || b.kind !== "run") throw new Error("no run");

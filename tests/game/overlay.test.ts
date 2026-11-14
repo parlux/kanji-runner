@@ -41,7 +41,7 @@ const hex = `#${HAZE_COLOUR.toString(16).padStart(6, "0")}`;
 describe("track text haze", () => {
   const w = 390;
   const h = 844;
-  const fit = cameraFor(null);
+  const fit = cameraFor();
   const run = createRunState(kanaRun(1), buildTrack(1, ROWS_PER_RUN));
   const wall = run.track.questions[0] as number;
 

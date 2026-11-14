@@ -12,16 +12,9 @@ import {
   updateScene,
   type Scene,
 } from "./game/scenes";
-import {
-  endTap,
-  modeTap,
-  settingsTap,
-  stampTap,
-  stampTapped,
-  startTap,
-  syncTap,
-} from "./game/start";
+import { endTap, modeTap, settingsTap, startTap, syncTap } from "./game/start";
 import { SPEED_PRESETS } from "./core/tuning";
+import { removeLegacyKeys } from "./storage/legacy";
 import { loadSpeed, saveSpeed } from "./storage/speed";
 import { openSettings, settingsOpen, syncSettings } from "./game/settings";
 import { openTokenForm, tokenFormOpen } from "./game/wanikani";
@@ -30,20 +23,6 @@ import { createStoryStore } from "./wanikani/storystore";
 import { createWkClient } from "./wanikani/client";
 import { openStudy, studyOpen } from "./game/study";
 import { syncPauseCard } from "./game/pausecard";
-import {
-  cameraPanelOpen,
-  openCameraPanel,
-  syncCameraGear,
-} from "./game/camerasettings";
-import { hordePanelOpen, openHordePanel } from "./game/hordesettings";
-import { GAUNTLET_SEARCH } from "./game/sandbox/param";
-import {
-  DEFAULT_HORDE_SETTINGS,
-  hordeTuning,
-  loadHorde,
-  saveHorde,
-} from "./storage/horde";
-import { loadCamera, loadGear, saveCamera, saveGear } from "./storage/camera";
 import { KANA } from "./core/kana";
 import { KANJI } from "./core/kanji";
 import { missedItems } from "./core/run";
@@ -84,7 +63,6 @@ if (canvas3d && !new URLSearchParams(window.location.search).has("2d"))
     .then(({ createView3d }) => {
       view3d = createView3d(canvas3d);
       if (!view3d) return;
-      view3d.setCamera(camera);
       canvas3d.style.display = "block";
       resize();
     })
@@ -103,6 +81,9 @@ function resize(): void {
 
 window.addEventListener("resize", resize);
 resize();
+
+// dev tools are gone: drop what they saved on this device (camera, gear, horde)
+removeLegacyKeys(localStorage);
 
 const newSeed = (): number => Math.floor(Math.random() * 2 ** 31);
 let scene: Scene = { kind: "start" };
@@ -143,42 +124,6 @@ const adopt = (p: Progress): void => {
 };
 if (syncs()) void sync.pull().then(adopt);
 
-// tuned camera (dev tool, 3D only): saved on this device; null is the default camera
-let camera = loadCamera(localStorage);
-// the gear is hidden: five taps on the start screen's build stamp toggle it, remembered
-let gearShown = loadGear(localStorage);
-let stampTaps: number[] = [];
-const openCamera = (): void =>
-  void import("./game/three/world").then(({ DEFAULT_CAMERA }) => {
-    openCameraPanel({
-      defaults: DEFAULT_CAMERA,
-      current: camera,
-      onChange: (next) => {
-        camera = next;
-        saveCamera(localStorage, camera);
-        view3d?.setCamera(camera);
-      },
-      onClose: () => {},
-      onHorde: openHorde,
-    });
-  });
-const openHorde = (): void =>
-  openHordePanel({
-    defaults: DEFAULT_HORDE_SETTINGS,
-    current: horde,
-    onChange: (next) => {
-      horde = next;
-      saveHorde(localStorage, horde);
-    },
-    onClose: () => {},
-    onGauntlet: () => {
-      window.location.search = GAUNTLET_SEARCH;
-    },
-  });
-
-// tuned horde (dev tool): saved on this device, applied from the next run; null is the defaults
-let horde = loadHorde(localStorage);
-
 // speed preset: this device only, changed in settings
 let speed = loadSpeed(localStorage);
 
@@ -195,12 +140,7 @@ const wk = createWkState({
     }),
 });
 const overlayOpen = (): boolean =>
-  studyOpen() ||
-  tokenFormOpen() ||
-  loginOpen() ||
-  cameraPanelOpen() ||
-  hordePanelOpen() ||
-  settingsOpen();
+  studyOpen() || tokenFormOpen() || loginOpen() || settingsOpen();
 // WaniKani (the token, for stories) is off in a dev sandbox and in meaning mode;
 // runs always use the Built-in list
 const wkOn = (): boolean => session.persist && !session.meaning;
@@ -283,13 +223,7 @@ const study = (): void => {
 const act = (action: Action): void => {
   if (overlayOpen()) return;
   if (action === "study") return study();
-  const next = handleAction(
-    scene,
-    action,
-    newSeed,
-    session,
-    hordeTuning(horde ?? DEFAULT_HORDE_SETTINGS),
-  );
+  const next = handleAction(scene, action, newSeed, session);
   // placement changes progress: save it right away, under this mode's key
   const keys = persistence(session);
   if (next.session !== session && keys)
@@ -328,15 +262,6 @@ const takeDrag = bindDrag(canvas, (x, y) => {
   }
   if (!picking && !session.meaning && syncTap(sync.status(), w, h, x, y))
     return syncAction();
-  if (!picking && stampTap(w, h, x, y)) {
-    const t = stampTapped(stampTaps, performance.now() / 1000);
-    stampTaps = t.taps;
-    if (t.toggle) {
-      gearShown = !gearShown;
-      saveGear(localStorage, gearShown);
-    }
-    return;
-  }
   const action = startTap(scene.pick !== undefined, w, h, x, y, !session.wk);
   if (action) act(action);
 });
@@ -393,13 +318,5 @@ startLoop(
     );
     pauseCard();
     syncSettings();
-    // the camera gear: on the start screen (picker closed) and on a paused run
-    syncCameraGear(
-      gearShown &&
-        !overlayOpen() &&
-        ((scene.kind === "start" && scene.pick === undefined) ||
-          (scene.kind === "run" && scene.paused)),
-      openCamera,
-    );
   },
 );

@@ -152,7 +152,7 @@ describe("the start screen's controls", () => {
     a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
   const mid = (r: Rect) => [r.x + r.w / 2, r.y + r.h / 2] as const;
 
-  it("never overlap, stay on screen, and the switch and gear are hit by a tap", () => {
+  it("never overlap, stay on screen, and the switch and settings are hit by a tap", () => {
     for (const [w, h] of [
       [390, 844],
       [390, 667],
@@ -176,8 +176,6 @@ describe("the start screen's controls", () => {
         for (const b of keys)
           if (a < b)
             expect(overlaps(r, l[b]), `${w}x${h} ${a}/${b}`).toBe(false);
-        // the camera gear (src/game/camerasettings.ts): 44 px at left 12, top 56
-        expect(overlaps(r, { x: 12, y: 56, w: 44, h: 44 })).toBe(false);
       }
       expect(modeTap(w, h, ...mid(l.modeNormal))).toBe("normal");
       expect(modeTap(w, h, ...mid(l.modeMeaning))).toBe("meaning");

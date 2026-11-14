@@ -367,16 +367,6 @@ export const DEFAULT_CAMERA: CameraSettings = {
   haze: SHAPE_DISTANCE,
 };
 
-/** Slider ranges (distance in world units, haze in track distance). */
-export const CAMERA_LIMITS = {
-  pitch: { min: 3, max: 45 },
-  distance: { min: 6, max: 60 },
-  fov: { min: 20, max: 75 },
-  follow: { min: 0, max: 1 },
-  smoothing: { min: 0, max: 2 },
-  haze: { min: VIEW_DISTANCE + 1, max: HAZE_MAX },
-} as const;
-
 const RAD = Math.PI / 180;
 
 /**
