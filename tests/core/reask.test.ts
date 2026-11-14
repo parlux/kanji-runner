@@ -28,6 +28,7 @@ import {
 } from "../../src/core/tuning";
 import { SHAPE_DISTANCE } from "../../src/game/three/world";
 import { syntheticList } from "./wk-fixture";
+import { forSeeds, itSlow } from "../sweep";
 
 const list = syntheticList(60);
 const progress = defaultProgress();
@@ -58,7 +59,7 @@ describe("isTrigger", () => {
 describe("pickTarget", () => {
   it("picks inside the window, and is deterministic", () => {
     const seen = new Set<number>();
-    for (let seed = 0; seed < 200; seed++) {
+    for (const seed of forSeeds(200)) {
       const t = pickTarget(seed, 2, rowsFor(14)) as number;
       expect(t).toBeGreaterThanOrEqual(2 + REASK_GAP_MIN);
       expect(t).toBeLessThanOrEqual(2 + REASK_GAP_MAX);
@@ -71,7 +72,7 @@ describe("pickTarget", () => {
   it("returns null near the end of the run, and clips the window", () => {
     expect(pickTarget(1, 11, rowsFor(14))).toBeNull();
     expect(pickTarget(1, 10, rowsFor(14))).toBe(13);
-    for (let seed = 0; seed < 50; seed++)
+    for (const seed of forSeeds(50))
       expect(pickTarget(seed, 9, rowsFor(14))).toBeLessThan(14);
   });
 
@@ -81,18 +82,17 @@ describe("pickTarget", () => {
       reasks: Array.from({ length: 14 }, (_, i) => i === 6),
     });
     rows.keys = rows.keys.map((k, i) => (i === 2 ? k : i === 7 ? "k2" : k));
-    for (let seed = 0; seed < 50; seed++)
+    for (const seed of forSeeds(50))
       expect(pickTarget(seed, 2, rows)).toBeNull();
     // free one row and it is the only choice
     rows.charges = [];
-    for (let seed = 0; seed < 50; seed++)
-      expect(pickTarget(seed, 2, rows)).toBe(5);
+    for (const seed of forSeeds(50)) expect(pickTarget(seed, 2, rows)).toBe(5);
   });
 
   it("never picks a squad charge in real runs", () => {
     const track = buildTrack(3, ROWS_PER_RUN);
     expect(track.charges.length).toBeGreaterThan(0);
-    for (let seed = 0; seed < 100; seed++)
+    for (const seed of forSeeds(100))
       for (let t = 0; t < ROWS_PER_RUN; t++) {
         const r = pickTarget(
           seed,
@@ -113,7 +113,7 @@ describe("pickTarget", () => {
 describe("reaskRow", () => {
   it("keeps item, type and shown reading; 3 valid options", () => {
     let readings = 0;
-    for (let seed = 0; seed < 300; seed++) {
+    for (const seed of forSeeds(300)) {
       const entries = entriesOf(seed);
       const rows = buildPoolRun(seed, progress, pool);
       entries.forEach((e, i) => {
@@ -153,7 +153,7 @@ describe("reaskRow", () => {
         .similar(e.item.char)
         .map((c) => list.kanji.find((k) => k.char === c)?.glosses[0]),
     );
-    for (let seed = 0; seed < 30; seed++) {
+    for (const seed of forSeeds(30)) {
       const r = reaskRow(createRng(seed), e, first, pool);
       const wrong = r.options.filter((_, j) => j !== r.answerIndex);
       expect(wrong.every((w) => similar.has(w))).toBe(true);
@@ -174,28 +174,33 @@ describe("reaskRow", () => {
       for (const c of row) expect(Math.abs(c / (N / 6) - 1)).toBeLessThan(0.1);
   });
 
-  it("is independent of where the first ask put the answer", () => {
-    // first asks drawn over many seeds, re-ask from a different rng each
-    const counts = Array.from({ length: 3 }, () => [0, 0, 0]);
-    const N = 6000;
-    for (let s = 0; s < N; s++) {
-      const e = entriesOf(s)[8] as Entry;
-      const first = buildPoolRun(s, progress, pool)[8] as GateRow;
-      const r = reaskRow(createRng(s + 77777), e, first, pool);
-      const row = counts[first.answerIndex] as number[];
-      row[r.answerIndex] = (row[r.answerIndex] as number) + 1;
-    }
-    for (const row of counts) {
-      const total = row.reduce((a, b) => a + b, 0);
-      for (const c of row)
-        expect(Math.abs(c / (total / 3) - 1)).toBeLessThan(0.15);
-    }
-  }, 60_000);
+  // a 15% tolerance needs the 6,000 samples
+  itSlow(
+    "is independent of where the first ask put the answer",
+    () => {
+      // first asks drawn over many seeds, re-ask from a different rng each
+      const counts = Array.from({ length: 3 }, () => [0, 0, 0]);
+      const N = 6000;
+      for (let s = 0; s < N; s++) {
+        const e = entriesOf(s)[8] as Entry;
+        const first = buildPoolRun(s, progress, pool)[8] as GateRow;
+        const r = reaskRow(createRng(s + 77777), e, first, pool);
+        const row = counts[first.answerIndex] as number[];
+        row[r.answerIndex] = (row[r.answerIndex] as number) + 1;
+      }
+      for (const row of counts) {
+        const total = row.reduce((a, b) => a + b, 0);
+        for (const c of row)
+          expect(Math.abs(c / (total / 3) - 1)).toBeLessThan(0.15);
+      }
+    },
+    60_000,
+  );
 });
 
 describe("re-asks stay off screen", () => {
   it("every row in a trigger's window is beyond VIEW_DISTANCE when it resolves", () => {
-    for (let seed = 0; seed < 300; seed++) {
+    for (const seed of forSeeds(300)) {
       const { questions } = buildTrack(seed, ROWS_PER_RUN);
       for (let t = 0; t < ROWS_PER_RUN; t++)
         for (let j = t + REASK_GAP_MIN; j <= t + REASK_GAP_MAX; j++) {

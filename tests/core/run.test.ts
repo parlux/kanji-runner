@@ -6,6 +6,7 @@ import { KANA } from "../../src/core/kana";
 import { defaultProgress } from "../../src/core/srs";
 import { ROWS_PER_RUN, TWO_OPTION_ROWS } from "../../src/core/tuning";
 import type { GateRow, KanjiItem, Progress } from "../../src/core/types";
+import { forSeeds } from "../sweep";
 
 describe("kana data", () => {
   it("has 71 hiragana and 71 katakana with romaji", () => {
@@ -44,7 +45,7 @@ describe("buildRun rows", () => {
   });
 
   it("never has duplicate options or a distractor equal to the answer", () => {
-    for (let seed = 0; seed < 500; seed++) {
+    for (const seed of forSeeds(500)) {
       for (const row of kanaRun(seed)) {
         expect(new Set(row.options).size).toBe(row.options.length);
         expect(row.options[row.answerIndex]).toBe(row.answer);

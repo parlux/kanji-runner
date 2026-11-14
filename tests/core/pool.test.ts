@@ -26,6 +26,7 @@ import { MAX_NEW_PER_RUN, ROWS_PER_RUN } from "../../src/core/tuning";
 import type { GateRow, KanjiItem, Progress } from "../../src/core/types";
 import type { WkList } from "../../src/wanikani/parse";
 import { syntheticList } from "./wk-fixture";
+import { forSeeds } from "../sweep";
 
 const list = syntheticList();
 const byChar = new Map(list.kanji.map((k) => [k.char, k]));
@@ -313,7 +314,7 @@ describe("WaniKani pool", () => {
     );
     let dueN = 0;
     let otherN = 0;
-    for (let seed = 0; seed < 1000; seed++)
+    for (const seed of forSeeds(1000, 100))
       for (const e of select(createRng(seed), pool))
         if (e.type !== "kana" && e.type !== "word") {
           if (due.has(e.item.char)) dueN++;

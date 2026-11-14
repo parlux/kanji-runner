@@ -20,6 +20,7 @@ import {
   STEER_MAX_SPEED,
   VIEW_DISTANCE,
 } from "../../src/core/tuning";
+import { stride } from "../sweep";
 
 const QUESTIONS = 14;
 const TRACKS = Array.from({ length: 1000 }, (_, seed) =>
@@ -78,7 +79,7 @@ function longestDeadStretch(t: Track, step = 0.01): number {
 describe("dead time", () => {
   it("never leaves more than 1.5 s (at base speed) with nothing to do outside the calm stretches", () => {
     const worst = Math.max(
-      ...TRACKS.slice(0, 200).map((t) => longestDeadStretch(t)),
+      ...TRACKS.slice(0, stride(200, 40)).map((t) => longestDeadStretch(t)),
     );
     expect(worst / BASE_SPEED).toBeLessThanOrEqual(1.5);
   }, 30_000);

@@ -51,6 +51,7 @@ import {
   worldX,
   worldZ,
 } from "../../src/game/three/world";
+import { SLOW, stride } from "../sweep";
 
 /**
  * A pack of `n0` at the owner's width (0.8) and figure size 1, its crowd's
@@ -180,7 +181,7 @@ describe("horde layout: a scattered crowd", () => {
 describe("horde layout: the stream", () => {
   it("empties the crowd from its front into the stream as the head runs, the rest standing where they are", () => {
     const rest = places(layout(500));
-    for (const run of [0.5, 2, 4, 6]) {
+    for (const run of SLOW ? [0.5, 2, 4, 6] : [0.5, 6]) {
       const p = places(layout(500, run));
       const out = p.map((q) => q.t > 0);
       // fed from the front: a few front rows peel off at once, and once a
@@ -210,7 +211,7 @@ describe("horde layout: the stream", () => {
 
   it("no figure jumps as the head runs: each moves at most a step's worth per step", () => {
     let last = places(layout(500));
-    for (let run = 0.1; run < 12; run += 0.1) {
+    for (let run = 0.1; run < 12; run += stride(0.1, 0.4)) {
       const p = places(layout(500, run));
       p.forEach((q, k) => {
         const r = last[k] as { x: number; z: number };

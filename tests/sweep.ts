@@ -8,10 +8,10 @@ const FAST_SEEDS = 20;
 
 /**
  * Seeds 0..n-1 in the slow tier. In the fast tier a fixed, evenly spread
- * sample of at most 20 of them (deterministic, so never flaky).
+ * sample of at most `fast` (default 20) of them (deterministic, so never flaky).
  */
-export function forSeeds(n: number): number[] {
-  const m = SLOW ? n : Math.min(n, FAST_SEEDS);
+export function forSeeds(n: number, fast = FAST_SEEDS): number[] {
+  const m = SLOW ? n : Math.min(n, fast);
   return Array.from({ length: m }, (_, i) => Math.floor((i * n) / m));
 }
 

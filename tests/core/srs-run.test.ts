@@ -8,6 +8,7 @@ import { defaultProgress, itemKey } from "../../src/core/srs";
 import { buildTrack, isCharge } from "../../src/core/track";
 import { ROWS_PER_RUN, WARM_UPS } from "../../src/core/tuning";
 import type { GateRow, Progress } from "../../src/core/types";
+import { forSeeds } from "../sweep";
 
 const rec = (box: number, seen = 1) => ({
   box,
@@ -36,7 +37,7 @@ describe("buildRun selection", () => {
   });
 
   it("never introduces more than 4 new items, taken in progression order", () => {
-    for (let seed = 0; seed < 200; seed++) {
+    for (const seed of forSeeds(200)) {
       const rng = createRng(seed + 1000);
       // a random scattering of known items across hiragana and katakana
       const boxes: Record<string, number> = {};
@@ -59,7 +60,7 @@ describe("buildRun selection", () => {
     const p = withItems(
       Object.fromEntries(hira.slice(0, 20).map((k) => [`${k.char}:kana`, 1])),
     );
-    for (let seed = 0; seed < 50; seed++) {
+    for (const seed of forSeeds(50)) {
       const keys = buildRun(seed, p, KANA, KANJI).map(keyOf);
       expect(new Set(keys).size).toBe(ROWS_PER_RUN);
     }
@@ -71,7 +72,7 @@ describe("buildRun selection", () => {
       boxes[`${k.char}:kana`] = i < 4 ? 5 : i % 4; // 4 items at box 5, rest ≤ 3
     });
     const p = withItems(boxes);
-    for (let seed = 0; seed < 50; seed++) {
+    for (const seed of forSeeds(50)) {
       const rows = buildRun(seed, p, KANA, KANJI);
       for (const r of rows.slice(0, WARM_UPS))
         expect(p.items[keyOf(r)]?.box).toBe(5);

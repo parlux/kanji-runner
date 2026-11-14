@@ -33,6 +33,7 @@ import {
   wrapZ,
 } from "../../src/game/three/scenery";
 import { TRACK_W } from "../../src/game/three/world";
+import { stride } from "../sweep";
 
 describe("scenery pick", () => {
   it("is stable for a seed and covers every built look roughly evenly", () => {
@@ -306,7 +307,7 @@ describe("spring petals", () => {
 
   it("never hang low over the track, at any time", () => {
     for (const p of petals)
-      for (let clock = 0; clock < 200; clock += 0.37) {
+      for (let clock = 0; clock < 200; clock += stride(0.37, 1.85)) {
         const x = petalX(p, clock);
         if (Math.abs(x) < TRACK_W / 2 + 0.8)
           expect(petalY(p, clock)).toBeGreaterThanOrEqual(PETAL_TRACK_MIN_Y);

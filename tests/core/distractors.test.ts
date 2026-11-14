@@ -15,6 +15,7 @@ import { createRng } from "../../src/core/rng";
 import { WORDS } from "../../src/core/words";
 import type { GateRow, KanjiItem, WordItem } from "../../src/core/types";
 import kanjiData from "../../src/data/kanji.json";
+import { SLOW, forSeeds, stride } from "../sweep";
 
 const KANJI = kanjiData as KanjiItem[];
 const byChar = new Map(KANJI.map((k) => [k.char, k]));
@@ -27,10 +28,16 @@ function poolFor(k: KanjiItem): KanjiItem[] {
   return p;
 }
 
-/** Every kanji with 2 seeds, then every 20th kanji with 40 more seeds. */
+/**
+ * Every kanji with 2 seeds, then every 20th kanji with 40 more seeds
+ * (fast tier: every 20th kanji with 2 seeds, then 4 more).
+ */
 function* cases(): Generator<[KanjiItem, number]> {
-  for (let seed = 0; seed < 2; seed++) for (const k of KANJI) yield [k, seed];
-  for (let seed = 2; seed < 42; seed++)
+  const step = stride(1, 20);
+  for (let seed = 0; seed < 2; seed++)
+    for (let i = 0; i < KANJI.length; i += step)
+      yield [KANJI[i] as KanjiItem, seed];
+  for (let seed = 2; seed < (SLOW ? 42 : 6); seed++)
     for (let i = seed % 20; i < KANJI.length; i += 20)
       yield [KANJI[i] as KanjiItem, seed];
 }
@@ -62,7 +69,7 @@ const wrong = (r: GateRow): string[] =>
 
 describe("kana distractors", () => {
   it("never repeat or include the answer's romaji (many seeds)", () => {
-    for (let seed = 0; seed < 20; seed++) {
+    for (const seed of forSeeds(20, 4)) {
       const rng = createRng(seed);
       for (const k of KANA) {
         const r = kanaRow(rng, k, KANA, 3);
@@ -73,7 +80,7 @@ describe("kana distractors", () => {
   });
 
   it("prefer a look-alike kana over a random one", () => {
-    for (let seed = 0; seed < 50; seed++) {
+    for (const seed of forSeeds(50)) {
       const r = kanaRow(
         createRng(seed),
         { char: "シ", romaji: "shi", script: "katakana" },
@@ -106,7 +113,7 @@ describe("meaning distractors", () => {
     );
     expect(big.length).toBeGreaterThan(1);
     const labels = new Set(big.map((k) => k.glosses[0]));
-    for (let seed = 0; seed < 200; seed++) {
+    for (const seed of forSeeds(200)) {
       const r = meaningRow(createRng(seed), kanji("大"), big, 2);
       expect(r.options).toHaveLength(1); // nothing valid left to add
       expect(wrong(r).some((o) => labels.has(o))).toBe(false);
@@ -116,7 +123,7 @@ describe("meaning distractors", () => {
   it("prefer a kanji sharing a component over a random one", () => {
     // 休 and 体 share ⺅; 山 and 川 share nothing with 休
     const pool = [kanji("休"), kanji("体"), kanji("山"), kanji("川")];
-    for (let seed = 0; seed < 50; seed++) {
+    for (const seed of forSeeds(50)) {
       const r = meaningRow(createRng(seed), kanji("休"), pool, 2);
       expect(wrong(r)).toEqual([kanji("体").glosses[0]]);
     }
@@ -165,7 +172,7 @@ describe("reading distractors", () => {
     // 休 (きゅう) and 体 (たい) share ⺅; 山 and 川 share nothing with 休
     const pool = [kanji("休"), kanji("体"), kanji("山"), kanji("川")];
     const fromBody = mainReadings(kanji("体")).map(showReading);
-    for (let seed = 0; seed < 50; seed++) {
+    for (const seed of forSeeds(50)) {
       const r = readingRow(
         createRng(seed),
         kanji("休"),
@@ -179,7 +186,7 @@ describe("reading distractors", () => {
 
   it("keep to within ±1 kana of the shown reading", () => {
     // 休 shown as きゅう (3 kana)
-    for (let seed = 0; seed < 50; seed++) {
+    for (const seed of forSeeds(50)) {
       const r = readingRow(
         createRng(seed),
         kanji("休"),
@@ -196,7 +203,7 @@ describe("reading distractors", () => {
 describe("wordRow", () => {
   const norm = (g: string) => normGloss(g);
   it("never offers a correct gloss, for every word and pool", () => {
-    for (const w of WORDS) {
+    for (const w of WORDS.filter((_, i) => i % stride(1, 4) === 0)) {
       const own = new Set(w.glosses.map(norm));
       for (const pool of [WORDS.filter((x) => x.level <= w.level + 1), []]) {
         for (let seed = 0; seed < 3; seed++) {

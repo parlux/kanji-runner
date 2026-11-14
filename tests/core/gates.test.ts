@@ -27,6 +27,7 @@ import {
   GATE_MIN_W,
   ROWS_PER_RUN,
 } from "../../src/core/tuning";
+import { forSeeds } from "../sweep";
 
 const width = (o: Opening): number => o.right - o.left;
 const total = (os: Opening[]): number => os.reduce((t, o) => t + width(o), 0);
@@ -100,7 +101,7 @@ describe("growOpening", () => {
   });
 
   it("keeps every rule over many random growth sequences (property)", () => {
-    for (let seed = 0; seed < 200; seed++) {
+    for (const seed of forSeeds(200)) {
       const rng = createRng(seed);
       const n = rng() < 0.5 ? 2 : 3;
       let os = gateOpenings(n);
@@ -136,7 +137,7 @@ describe("nearestOpening with unequal widths", () => {
   });
 
   it("picks the opening the centre is inside, whatever the widths (property)", () => {
-    for (let seed = 0; seed < 200; seed++) {
+    for (const seed of forSeeds(200)) {
       const rng = createRng(seed);
       const n = rng() < 0.5 ? 2 : 3;
       let os = gateOpenings(n);

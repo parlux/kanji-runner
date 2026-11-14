@@ -50,6 +50,7 @@ import {
   syncLabel,
   syncTap,
 } from "../../src/game/start";
+import { forSeeds } from "../sweep";
 
 describe("dev level flag", () => {
   it("reads ?level=N for N ≥ 2 and ignores anything else", () => {
@@ -652,7 +653,7 @@ describe("re-asks in runs", () => {
 
   it("after a WaniKani run, records follow the pair table", () => {
     const cases = new Set<string>();
-    for (const seed of Array.from({ length: 30 }, (_, i) => i)) {
+    for (const seed of forSeeds(30, 12)) {
       // miss row 0; miss its re-ask on every 3rd seed, other re-asks on odd seeds
       const wrong = (q: number, run: RunState) => {
         const of = run.reask?.links.find((l) => l.row === q)?.of;

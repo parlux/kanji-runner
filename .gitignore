@@ -5,3 +5,4 @@ dist
 .data-cache
 *.log
 .DS_Store
+.eslintcache

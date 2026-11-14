@@ -6,14 +6,14 @@ import type { RunState } from "../../src/core/sim";
 import { defaultProgress, itemKey } from "../../src/core/srs";
 import { WORDS } from "../../src/core/words";
 import { botBossRun, botRun } from "./bot";
-import { forSeeds, itSlow } from "../sweep";
+import { SLOW, forSeeds, itSlow } from "../sweep";
 import { wkRun } from "./wk-run";
 
 /** Died before answering the last question. */
 const diedEarly = (s: RunState): boolean =>
   s.status === "dead" && s.results.length < s.rows.length;
 
-const SEEDS = forSeeds(200);
+const SEEDS = forSeeds(200, 10);
 
 describe("balance bot (perfect steering)", () => {
   it("100% accuracy never dies before the last question", () => {
@@ -72,11 +72,11 @@ describe("balance bot in WaniKani mode, re-asks on (perfect steering)", () => {
 });
 
 /** 200 seeds in the slow tier (20 in the fast one); `SLOW=1 BALANCE_RUNS=1000 npm test -- balance` runs the full 1,000. */
-const BOSS_SEEDS = forSeeds(Number(process.env.BALANCE_RUNS) || 200);
+const BOSS_SEEDS = forSeeds(Number(process.env.BALANCE_RUNS) || 200, 10);
 const RUNS = BOSS_SEEDS.length;
 const winRate = (p: number, skill = 1): number =>
   BOSS_SEEDS.filter((seed) => botBossRun(seed, p, skill).won).length / RUNS;
-const SLOW = 600_000;
+const LONG = 600_000;
 
 describe(`balance bot vs the boss (${RUNS} seeded runs)`, () => {
   it(
@@ -84,7 +84,7 @@ describe(`balance bot vs the boss (${RUNS} seeded runs)`, () => {
     () => {
       expect(winRate(1)).toBe(1);
     },
-    SLOW,
+    LONG,
   );
 
   // under 10% of 20 seeds is one run: too coarse
@@ -93,7 +93,7 @@ describe(`balance bot vs the boss (${RUNS} seeded runs)`, () => {
     () => {
       expect(winRate(0.5)).toBeLessThan(0.1);
     },
-    SLOW,
+    LONG,
   );
 
   // a 40-70% band is too narrow for 20 seeds
@@ -104,7 +104,7 @@ describe(`balance bot vs the boss (${RUNS} seeded runs)`, () => {
       expect(rate).toBeGreaterThanOrEqual(0.4);
       expect(rate).toBeLessThanOrEqual(0.7);
     },
-    SLOW,
+    LONG,
   );
 
   it(
@@ -112,19 +112,19 @@ describe(`balance bot vs the boss (${RUNS} seeded runs)`, () => {
     () => {
       expect(winRate(1, 0.5)).toBeGreaterThanOrEqual(0.5);
     },
-    SLOW,
+    LONG,
   );
 
   it(
     "lower steering skill clips: skill 0.5 ends with fewer soldiers",
     () => {
       const total = (skill: number): number =>
-        BOSS_SEEDS.slice(0, 50).reduce(
+        BOSS_SEEDS.slice(0, SLOW ? 50 : 10).reduce(
           (sum, seed) => sum + botBossRun(seed, 1, skill).run.army,
           0,
         );
       expect(total(0.5)).toBeLessThan(total(1));
     },
-    SLOW,
+    LONG,
   );
 });

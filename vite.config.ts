@@ -17,6 +17,9 @@ export default defineConfig(({ command }) => ({
   base: command === "build" ? "/kanji-runner/" : "/",
   define: { __BUILD__: JSON.stringify(buildLabel()) },
   test: {
+    pool: "threads",
+    isolate: false,
+    maxWorkers: 3,
     include: ["tests/**/*.test.ts"],
   },
 }));

@@ -23,6 +23,7 @@ import {
 import { buildTrack, isCharge } from "../../src/core/track";
 import { BASE_REWARD, ROWS_PER_RUN } from "../../src/core/tuning";
 import type { GateRow } from "../../src/core/types";
+import { forSeeds } from "../sweep";
 
 const DT = 1 / 60;
 
@@ -216,7 +217,7 @@ describe("squad view honesty", () => {
   it("before contact, every squad in a charge looks the same apart from label and position (300 seeds)", () => {
     const bad: string[] = [];
     let checked = 0;
-    for (let seed = 0; seed < 300; seed++) {
+    for (const seed of forSeeds(300)) {
       const track = buildTrack(seed, ROWS_PER_RUN);
       let s = createRunState(kanaRun(seed), track);
       const rng = createRng(seed);
@@ -239,7 +240,7 @@ describe("squad view honesty", () => {
   }, 60_000);
 
   it("before contact, the view doesn't change with which answer is correct", () => {
-    for (let seed = 0; seed < 50; seed++) {
+    for (const seed of forSeeds(50)) {
       for (const ahead of [2, 0.5, 1e-6]) {
         const s = beforeCharge(seed, 7, 0.5, 40, ahead);
         const row = s.rows[7] as GateRow;

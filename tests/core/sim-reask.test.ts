@@ -29,9 +29,10 @@ import { SHAPE_DISTANCE } from "../../src/game/three/world";
 import { botRun } from "./bot";
 import { kanaRun } from "./kana-run";
 import { wkPool, wkProgress, wkRun } from "./wk-run";
+import { forSeeds } from "../sweep";
 
 const DT = 1 / 60;
-const SEEDS = Array.from({ length: 100 }, (_, seed) => seed);
+const SEEDS = forSeeds(100, 6);
 
 /**
  * Drives a run to the end through the chosen opening of every wall, with an
@@ -122,7 +123,7 @@ describe("re-asks in the sim", () => {
         expect(s.results[link.row]).toBe(true);
       }
     // only same-key clashes in the window can block these
-    expect(placed).toBeGreaterThan(350);
+    expect(placed).toBeGreaterThan((350 / 400) * SEEDS.length * 4);
   }, 60_000);
 
   it("a right answer at a high box triggers nothing; at a weak box it does", () => {
@@ -191,7 +192,8 @@ describe("re-asks in the sim", () => {
 
   it("feeds recordRun: a pair's record follows the pair table", () => {
     let checked = 0;
-    for (const seed of SEEDS.slice(0, 30)) {
+    const seeds = SEEDS.slice(0, 30);
+    for (const seed of seeds) {
       const s0 = atBox(seed, 1);
       // first asks right, re-asks wrong (a re-ask row is never its own trigger)
       const reaskRows = new Set<number>();
@@ -234,6 +236,6 @@ describe("re-asks in the sim", () => {
       }
       checked++;
     }
-    expect(checked).toBeGreaterThan(20);
+    expect(checked).toBeGreaterThan((20 / 30) * seeds.length);
   });
 });

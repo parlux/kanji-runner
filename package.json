@@ -5,12 +5,16 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
+    "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
+    "test:slow": "SLOW=1 vitest run",
+    "typecheck": "tsc --noEmit --incremental --tsBuildInfoFile node_modules/.cache/tsc.tsbuildinfo",
     "test:watch": "vitest",
-    "lint": "eslint . && prettier --check .",
+    "lint": "eslint --cache . && prettier --check --cache .",
     "format": "prettier --write .",
+    "check:fast": "files=$(git diff --name-only --diff-filter=d HEAD -- '*.ts'; git ls-files -o --exclude-standard -- '*.ts') && { [ -z \"$files\" ] || vitest related --run $files; } && npm run typecheck && npm run lint",
+    "check": "npm test && npm run typecheck && npm run lint && npm run build",
     "data:build": "tsx scripts/build-data.ts"
   },
   "devDependencies": {

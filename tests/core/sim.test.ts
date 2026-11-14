@@ -68,6 +68,7 @@ import {
   STEER_MAX_SPEED,
   VIEW_DISTANCE,
 } from "../../src/core/tuning";
+import { forSeeds } from "../sweep";
 
 const DT = 1 / 60;
 
@@ -472,7 +473,7 @@ describe("hazards", () => {
   }
 
   it("a skilled player can dodge every hazard and finish (50 seeds)", () => {
-    const results = Array.from({ length: 50 }, (_, seed) => skilledRun(seed));
+    const results = forSeeds(50, 10).map((seed) => skilledRun(seed));
     expect(results.filter((r) => r.hazardLoss > 0)).toEqual([]);
   }, 30_000); // 50 full runs at 60 Hz; slow under parallel load
 
