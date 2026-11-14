@@ -57,18 +57,26 @@ export function createHazards(scene: Scene, fx: Fx) {
      * Places packs, fire and bursts for the run as it is now; `fighting` is a
      * squad firefight or the boss fight (it takes the fire). Fire straight
      * ahead stops at the next wall, or at the boss (track distance `boss`).
+     * `cheer`: seconds since the enemies wiped the army out (−1 before).
      */
-    update(run: RunState, clock: number, fighting: boolean, boss = Infinity) {
+    update(
+      run: RunState,
+      clock: number,
+      fighting: boolean,
+      boss = Infinity,
+      cheer = -1,
+    ) {
       const armyX = worldX(run.x);
       const lanes = Math.min(5, 1 + Math.floor(Math.sqrt(run.army) / 3));
       const half = Math.min(1.2, lanes * 0.25);
       const laneX = (l: number): number =>
         armyX + (lanes > 1 ? l / (lanes - 1) - 0.5 : 0) * 2 * half;
       const { hazards } = run.track;
-      horde.update(run, clock);
+      horde.update(run, clock, cheer);
       const ti = run.target;
       if (
         ti !== null &&
+        run.status === "running" &&
         hazards[ti]?.kind === "pack" &&
         !isShattered(run, ti)
       ) {

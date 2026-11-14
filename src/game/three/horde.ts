@@ -46,6 +46,8 @@ import {
   type HordeLayout,
   type HordeSpot,
   shapeDistance,
+  CHEER_HOPS,
+  CHEER_JUMP,
   RUN_PAST_DIST,
   STREAM_ACROSS,
   STREAM_CRASH,
@@ -86,6 +88,7 @@ uniform vec4 hordeState;
 uniform vec3 hordeMelee;
 uniform vec4 hordeArmy;
 uniform float hordeSize;
+uniform float hordeCheer;
 uint hordeHash(uint v) {
   uint s = v * 747796405u + 2891336453u;
   uint w = ((s >> ((s >> 28u) + 4u)) ^ s) * 277803737u;
@@ -152,7 +155,7 @@ const VERTEX_BODY = `
   float crash = clamp(1.0 - (ahead + slot - melee * hordeMelee.y) / ${f(STREAM_CRASH)}, 0.0, 1.0);
   float fight = j < melee ? 1.0 : 0.0;
   float beat = 6.2831853 * (clock * ${f(MELEE_HZ)} * (0.8 + 0.4 * r1) + r2);
-  float lunge = fight * ${f(MELEE_LUNGE)} * size * (1.0 - cos(beat));
+  float lunge = hordeCheer >= 0.0 ? 0.0 : fight * ${f(MELEE_LUNGE)} * size * (1.0 - cos(beat));
   float back = e <= 0.0 ? spot + cz : slot + (1.0 - form) * cz + hordeLane.w * crash * form - lunge;
   vec2 off = vec2(mix(cx, lane, conv), hordeLane.z - back);
   float mill = 1.0 - form;
@@ -165,6 +168,15 @@ const VERTEX_BODY = `
   float sway = 0.1 * sin(stride);
   float swing = mix(0.12, 0.65, form) * sin(stride) * (1.0 - 0.7 * fight);
   vec3 lift = vec3(0.0, abs(sin(stride)) * mix(0.01, 0.07, form) * size, 0.0);
+  if (hordeCheer >= 0.0) {
+    // they won: they stop where they are, jump and cheer, each to its own beat
+    float hop = abs(sin(3.14159265 * (hordeCheer * ${f(CHEER_HOPS)} * (0.85 + 0.3 * r1) + r2)));
+    lift = vec3(0.0, hop * ${f(CHEER_JUMP)} * size, 0.0);
+    lean = 0.2 * hop;
+    swing = 0.4 * hop;
+    sway = 0.25 * sin(6.2831853 * (hordeCheer * 1.3 + r1));
+    yaw = 3.14159265 + 0.4 * sin(6.2831853 * (hordeCheer * 0.7 + r2));
+  }
   if (k >= hordeState.x && death.w > 0.5) {
     // ran past the army: it runs on, past the camera and off
     float d = hordeState.z - death.x;
@@ -216,6 +228,7 @@ type Slot = {
   melee: { value: Vector3 };
   army: Vector4;
   size: { value: number };
+  cheer: { value: number };
   /** The pack's layout as last drawn (the shader's uniforms). */
   lay: HordeLayout;
   /** Run distance it was last drawn at. */
@@ -235,8 +248,12 @@ type Slot = {
 };
 
 export type Horde = {
-  /** Places the packs in view for the run as it is now (`clock` drives the stride and the wander; both stand still while paused). */
-  update(run: RunState, clock: number): void;
+  /**
+   * Places the packs in view for the run as it is now (`clock` drives the
+   * stride and the wander; both stand still while paused). `cheer`: seconds
+   * since the enemies won (they jump and cheer), −1 while they haven't.
+   */
+  update(run: RunState, clock: number, cheer?: number): void;
   /** The slots' meshes (for tests; `userData.uniforms` holds their lane, crowd, count and state, and `userData.layout` the HordeLayout). */
   readonly meshes: readonly Mesh<InstancedBufferGeometry>[];
 };
@@ -262,6 +279,7 @@ export function createHorde(scene: Scene): Horde {
     const melee = { value: new Vector3() };
     const army = new Vector4();
     const size = { value: 1 };
+    const cheer = { value: -1 };
     const material = new MeshLambertMaterial({
       vertexColors: true,
       flatShading: true,
@@ -274,6 +292,7 @@ export function createHorde(scene: Scene): Horde {
       shader.uniforms.hordeMelee = melee;
       shader.uniforms.hordeArmy = { value: army };
       shader.uniforms.hordeSize = size;
+      shader.uniforms.hordeCheer = cheer;
       shader.vertexShader = shader.vertexShader
         .replace("#include <common>", `#include <common>\n${VERTEX_HEAD}`)
         .replace(
@@ -321,6 +340,7 @@ export function createHorde(scene: Scene): Horde {
       melee,
       army,
       size,
+      cheer,
       lay,
       drawnAt: 0,
       hazard: -1,
@@ -397,7 +417,7 @@ export function createHorde(scene: Scene): Horde {
 
   return {
     meshes: slots.map((s) => s.mesh),
-    update(run, clock) {
+    update(run, clock, cheer = -1) {
       const { hazards } = run.track;
       if (run.track !== track) {
         // a new run: every slot empty, nothing falling
@@ -494,6 +514,7 @@ export function createHorde(scene: Scene): Horde {
         if (s.hazard < 0) s.state.x = 0;
         s.state.z = dist;
         s.state.w = clock;
+        s.cheer.value = cheer;
         s.lay.clock = clock;
         const count = Math.max(s.was, s.hi);
         s.mesh.geometry.instanceCount = count;

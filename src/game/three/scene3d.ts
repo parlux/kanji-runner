@@ -462,6 +462,7 @@ export function createView3d(canvas: HTMLCanvasElement): View3d | null {
         clock,
         fighting || (fight !== null && run.dist >= place.stop),
         place.boss,
+        s.kind === "run" ? (s.cheer ?? -1) : -1,
       );
       const top = boss.update(
         place.boss,

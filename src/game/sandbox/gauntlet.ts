@@ -1,6 +1,7 @@
 import { packCount } from "../../core/fire";
 import {
   createRunState,
+  enemiesWon,
   nudgeTarget,
   packSurvivors,
   stepRun,
@@ -8,6 +9,7 @@ import {
 } from "../../core/sim";
 import type { Track } from "../../core/track";
 import {
+  CHEER_SECONDS,
   CROWD_DEPTH_MAX,
   FIRE_PER_SOLDIER,
   type HordeTuning,
@@ -74,8 +76,16 @@ export type Answers = {
 
 /** Seconds the "Wave N" label shows over the waiting crowd before the wave starts. */
 export const INTRO_SECONDS = 2;
-/** Seconds the wave runs on after the pack is gone (its last deaths play out). */
+/** Seconds the wave runs on after the pack is gone (its last deaths play out; CHEER_SECONDS when the enemies won). */
 export const AFTER_SECONDS = 1;
+
+/** Seconds the enemies have cheered (they wiped the army out in a melee), −1 when they haven't. */
+export function cheerOf(g: Gauntlet): number {
+  const { gone, t } = g.measure;
+  return g.phase === "play" && gone !== null && enemiesWon(g.run)
+    ? t - gone
+    : -1;
+}
 /** How far ahead (track units) the crowd's front stands while the label shows: in view, short of waking. */
 export const INTRO_AHEAD = 7;
 /** Where the pack stands when the run is built: far enough that it is not awake yet. */
@@ -243,7 +253,8 @@ const round2 = (n: number): number => Math.round(n * 100) / 100;
 /**
  * One fixed step: the label counts down; the wave plays (steering `dx`
  * track units, `pace` the speed preset) and is measured until the pack has
- * been gone AFTER_SECONDS, then waits for the card.
+ * been gone AFTER_SECONDS (CHEER_SECONDS when the enemies won: they
+ * cheer), then waits for the card.
  */
 export function stepGauntlet(
   g: Gauntlet,
@@ -263,7 +274,8 @@ export function stepGauntlet(
   const preset = g.presets[g.index];
   if (
     measure.gone !== null &&
-    measure.t - measure.gone >= AFTER_SECONDS &&
+    measure.t - measure.gone >=
+      (enemiesWon(run) ? CHEER_SECONDS : AFTER_SECONDS) &&
     preset
   )
     return {

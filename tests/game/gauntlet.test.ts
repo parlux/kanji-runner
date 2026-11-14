@@ -1,8 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { packAwake } from "../../src/core/sim";
-import { HORDE_DEFAULTS, PACK_ADAPT } from "../../src/core/tuning";
+import {
+  CHEER_SECONDS,
+  HORDE_DEFAULTS,
+  PACK_ADAPT,
+} from "../../src/core/tuning";
 import {
   AFTER_SECONDS,
+  cheerOf,
   countFrame,
   INTRO_SECONDS,
   measureStep,
@@ -226,6 +231,32 @@ describe("measurement", () => {
     expect(g.measure.t - (g.measure.gone ?? 0)).toBeLessThan(
       AFTER_SECONDS + 2 * DT,
     );
+  });
+
+  it("an army wiped out in a melee: the enemies cheer CHEER_SECONDS (cheerOf counts it), then the card; nobody cheers otherwise", () => {
+    let g = startGauntlet([{ ...BASE, army: 8, note: "outmatched" }]);
+    let cheered = 0;
+    let last = -1;
+    while (g.phase !== "rate") {
+      g = stepGauntlet(g, DT);
+      const c = cheerOf(g);
+      if (c >= 0) {
+        expect(c).toBeGreaterThanOrEqual(last);
+        cheered++;
+        last = c;
+      }
+    }
+    expect(g.log[0]?.died).toBe(true);
+    expect(cheered * DT).toBeGreaterThanOrEqual(CHEER_SECONDS - 2 * DT);
+    expect(g.measure.t - (g.measure.gone ?? 0)).toBeLessThan(
+      CHEER_SECONDS + 2 * DT,
+    );
+    // a wave the army wins: no cheering
+    let w = startGauntlet([BASE]);
+    while (w.phase !== "rate") {
+      w = stepGauntlet(w, DT);
+      expect(cheerOf(w)).toBe(-1);
+    }
   });
 });
 

@@ -270,6 +270,12 @@ export const TRACK_DELAY = 0.4;
  * at each edge, so a pack woken close can't snap into line.
  */
 export const TRACK_SPEED = 0.3;
+/**
+ * Enemies that win a melee (the army wiped out at its front) stop, jump and
+ * cheer for this long (seconds; it holds while paused) before the end
+ * screen (owner, gauntlet round 2, wave 8: "maybe celebrate?").
+ */
+export const CHEER_SECONDS = 1.5;
 /** A pack that wakes behind another still charging catches up with that column's tail this much faster (track units per second). */
 export const PACK_MERGE_SPEED = 2.5;
 

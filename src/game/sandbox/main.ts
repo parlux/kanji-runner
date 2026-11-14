@@ -10,6 +10,7 @@ import { render, type TrackView } from "../render";
 import { createSession, type Scene } from "../scenes";
 import { createView3d } from "../three/scene3d";
 import {
+  cheerOf,
   countFrame,
   rateWave,
   startGauntlet,
@@ -88,6 +89,7 @@ const scene = (): Extract<Scene, { kind: "run" }> => ({
   seed: SEED,
   run: g.run,
   paused: false,
+  cheer: cheerOf(g),
 });
 
 let last = performance.now();

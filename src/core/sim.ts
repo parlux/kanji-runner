@@ -513,6 +513,14 @@ export function packStreaming(s: RunState, i: number): boolean {
   return !!p && i >= s.nextHazard && p.pos <= s.dist && packSurvivors(s, i) > 0;
 }
 
+/** Whether the enemies won: the army was wiped out by a melee at its front (they cheer: CHEER_SECONDS). */
+export function enemiesWon(s: RunState): boolean {
+  if (s.status !== "dead") return false;
+  for (let i = s.nextHazard; i < s.packs.length; i++)
+    if (packMelee(s, i) > 0) return true;
+  return false;
+}
+
 /** What one of pack i's enemies is worth in soldiers: the army it was sized for over its head count. */
 export function enemyWorth(s: RunState, i: number): number {
   const heads = s.heads[i] ?? 0;

@@ -17,6 +17,7 @@ import { KANA } from "../core/kana";
 import { KANJI } from "../core/kanji";
 import {
   createRunState,
+  enemiesWon,
   nudgeTarget,
   plannedRows,
   stepRun,
@@ -26,6 +27,7 @@ import { buildTrack } from "../core/track";
 import { logRun, type SessionLog } from "../core/session";
 import { recordRun } from "../core/srs";
 import {
+  CHEER_SECONDS,
   CLASH_APPROACH_SECONDS,
   CLASH_HOLD_SECONDS,
   CLASH_SECONDS,
@@ -41,7 +43,14 @@ import type { Action } from "./input";
 export type Scene =
   /** `pick` is set while the placement picker is open: "I know up to level pick". */
   | { kind: "start"; pick?: number }
-  | { kind: "run"; seed: number; run: RunState; paused: boolean }
+  /** `cheer`: seconds the enemies have cheered since they wiped the army out (the run is over; the end screen follows). */
+  | {
+      kind: "run";
+      seed: number;
+      run: RunState;
+      paused: boolean;
+      cheer?: number;
+    }
   /** The clash after the last question: `t` seconds in, against a boss of `boss` units. */
   | { kind: "boss"; seed: number; run: RunState; boss: number; t: number }
   /** `boss` is null when the army died before reaching the boss. */
@@ -327,11 +336,21 @@ export function updateScene(
 ): Scene {
   if (scene.kind === "boss") return stepBoss(scene, dt, steer, dragDx);
   if (scene.kind !== "run" || scene.paused) return scene;
+  const { seed } = scene;
+  if (scene.cheer !== undefined) {
+    const cheer = scene.cheer + dt;
+    return cheer >= CHEER_SECONDS
+      ? { kind: "end", seed, run: scene.run, boss: null }
+      : { ...scene, cheer };
+  }
   const dx = steer * STEER_MAX_SPEED * dt + dragDx;
   let run = dx ? nudgeTarget(scene.run, dx) : scene.run;
   run = stepRun(run, dt, pace);
-  const { seed } = scene;
-  if (run.status === "dead") return { kind: "end", seed, run, boss: null };
+  // wiped out in a melee: the enemies cheer first
+  if (run.status === "dead")
+    return enemiesWon(run)
+      ? { ...scene, run, cheer: 0 }
+      : { kind: "end", seed, run, boss: null };
   if (run.status === "finished")
     return {
       kind: "boss",

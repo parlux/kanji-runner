@@ -11,6 +11,7 @@ import { studyCards } from "../../src/core/study";
 import { itemKey, defaultProgress } from "../../src/core/srs";
 import {
   createRunState,
+  enemiesWon,
   packStreaming,
   plannedRows,
   rowOpenings,
@@ -18,6 +19,7 @@ import {
   type RunState,
 } from "../../src/core/sim";
 import {
+  CHEER_SECONDS,
   CLASH_SECONDS,
   HORDE_DEFAULTS,
   REASK_MAX_BOX,
@@ -786,6 +788,96 @@ describe("pause during a pack's stream", () => {
     const on = updateScene({ ...paused, paused: false }, STEP, 0);
     if (on.kind !== "run") throw new Error("the run ended");
     expect(on.run.arrived[0]).toBeGreaterThan(scene.run.arrived[0] ?? 0);
+  });
+});
+
+describe("the enemies win", () => {
+  /** A run whose army of 5 meets a pack sized for 60 at once, the stream on it. */
+  const doomed = (): Scene => {
+    const run = createRunState(kanaRun(1), {
+      questions: [100],
+      hazards: [{ kind: "pack", pos: 0.05, x: 0.5 }],
+      charges: [],
+    });
+    return {
+      kind: "run",
+      seed: 1,
+      paused: false,
+      run: {
+        ...run,
+        army: 5,
+        hp: [3.5 * 60],
+        heads: [200],
+        packs: [{ pos: 0.05, x: 0.5 }],
+      },
+    };
+  };
+  const untilDead = (s0: Scene): Scene => {
+    let s = s0;
+    for (let n = 0; n < 600 && s.kind === "run" && s.cheer === undefined; n++)
+      s = updateScene(s, STEP, 0);
+    return s;
+  };
+
+  it("wiped out in a melee: the enemies cheer for CHEER_SECONDS (the run over, nothing moves), then the end screen; the run is recorded once, at the end", () => {
+    const session = createSession(defaultProgress(), null);
+    let s = untilDead(doomed());
+    if (s.kind !== "run") throw new Error("no cheer");
+    expect(s.run.status).toBe("dead");
+    expect(enemiesWon(s.run)).toBe(true);
+    expect(s.cheer).toBe(0);
+    const run = s.run;
+    let steps = 0;
+    let recorded = 0;
+    while (s.kind === "run") {
+      const next = updateScene(s, STEP, 1, 0.1);
+      if (afterStep(session, s, next, 1) !== session) recorded++;
+      if (next.kind === "run") {
+        // frozen: steering, the scroll and the packs all hold
+        expect(next.run).toBe(run);
+        expect(next.cheer).toBeCloseTo((s.cheer ?? 0) + STEP, 9);
+      }
+      s = next;
+      steps++;
+    }
+    expect(s.kind).toBe("end");
+    if (s.kind !== "end") return;
+    expect(s.boss).toBe(null);
+    expect(s.run).toBe(run);
+    // about CHEER_SECONDS (a step more when the sum falls just short)
+    expect(steps * STEP).toBeGreaterThanOrEqual(CHEER_SECONDS - 1e-9);
+    expect(steps * STEP).toBeLessThanOrEqual(CHEER_SECONDS + STEP + 1e-9);
+    expect(recorded).toBe(1);
+  });
+
+  it("the cheer holds while paused", () => {
+    const s = untilDead(doomed());
+    if (s.kind !== "run") throw new Error("no cheer");
+    let c: Scene = { ...s, cheer: 0.5 };
+    c = updateScene(c, STEP, 0);
+    const paused: Scene = { ...c, paused: true } as Scene;
+    let held = paused;
+    for (let n = 0; n < 200; n++) held = updateScene(held, STEP, 0);
+    expect(held).toBe(paused);
+  });
+
+  it("an army lost any other way (a wall) goes straight to the end screen", () => {
+    const run = createRunState(kanaRun(1), {
+      questions: [0.02, 100],
+      hazards: [],
+      charges: [],
+    });
+    const scene: Scene = {
+      kind: "run",
+      seed: 1,
+      paused: false,
+      // in the wall itself: clipped to nothing
+      run: { ...run, army: 1, x: 0.02, targetX: 0.02 },
+    };
+    let s: Scene = scene;
+    for (let n = 0; n < 10 && s.kind === "run"; n++)
+      s = updateScene(s, STEP, 0);
+    expect(s.kind).toBe("end");
   });
 });
 

@@ -672,6 +672,10 @@ export const STREAM_MEET = 3;
  */
 export const STREAM_ACROSS =
   (TRACK_SPEED * TRACK_W) / (ENEMY_SPEED * DIST_SCALE);
+/** Enemies that won jump this many times a second (times 0.85 to 1.15, each its own)... */
+export const CHEER_HOPS = 2.2;
+/** ...this high (world units, times their size). */
+export const CHEER_JUMP = 0.35;
 /** An enemy that ran past the army runs on this far (run distance, track units) before it is gone off the screen behind. */
 export const RUN_PAST_DIST = 2;
 /** Enemies in a melee stand this many figure radii apart, packed against the army's front across its width. */
