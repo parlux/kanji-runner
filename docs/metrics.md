@@ -97,3 +97,11 @@ Expected was about -1,500; the gauntlet's tests and the results script were larg
 - Screenshots at 390x844 (run, paused run, boss mid-clash, boss banner, end, start) before and after: pause, end and start are byte-identical. Run and boss differ only in the crowd and crate area, which animate in real time (two shots of the same code differ by the same pixel count and box).
 - With WebGL off (`--disable-webgl`), the start screen shows "This device can't run the 3D game" above Play, and tapping Play or pressing Enter does nothing. No exception; three.js logs its own console errors.
 - Nothing in `src` reads `location.search`.
+
+## Task V5: dead code with knip (2026-11-15)
+
+Source lines (`find src -name '*.ts' | xargs cat | wc -l`, same method as the baseline): 16,153 -> 13,600 after V3-V5 (target was about 13k). Tests 12,829 -> 11,211 lines; 722 tests (719 run + 3 slow-only).
+
+V5 itself: 61 unused exports and 15 unused types un-exported (used only in their own file or not at all); `packAdapt`, `handleAction`'s `horde` parameter, `setShapeDistance`, `packStrength`, `ENEMY_K`, `nextSpeed`, `speedLabel`, `trackDist` and two label constants removed with their tests. No unused files or dependencies were found. `npx knip` reports 0 issues and runs in `npm run check`; golden snapshot unchanged.
+
+Kept on purpose, no ignore entries: exports used only by tests but still tested on their own (e.g. `buildRun`, `drawnWidth`, `projectorFor`, `saveMeaning*`, `HAZE_FAR_Z`), since knip counts test imports as use.

@@ -111,8 +111,8 @@ Checks:
 - Add `knip` to `npm run check` (CI runs it through `check`).
 
 **Acceptance criteria:**
-- [ ] `npx knip` reports 0 issues. Golden snapshot unchanged.
-- [ ] Source lines are logged (target about 13k after V3–V5).
+- [x] `npx knip` reports 0 issues. Golden snapshot unchanged.
+- [x] Source lines are logged (target about 13k after V3–V5).
 
 **Scope:** S
 
