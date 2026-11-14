@@ -59,6 +59,7 @@ import {
   worldX,
   worldZ,
 } from "./world";
+import type { KillSink } from "./kills";
 
 /**
  * The enemy packs, every figure animated on the GPU. Each pack in view gets
@@ -78,6 +79,8 @@ export const HORDE_SLOTS = 2;
 export const DIE_DIST = 0.45;
 /** The melee's rows (its step, meleeStep) follow the army's width over about this many seconds. */
 export const MELEE_BAND_EASE = 0.4;
+/** A killed figure flashes white over this share of its fall. */
+export const HIT_FLASH = 0.3;
 
 const f = (x: number): string => x.toFixed(6);
 
@@ -93,6 +96,7 @@ uniform vec3 hordeMelee;
 uniform vec4 hordeArmy;
 uniform float hordeSize;
 uniform float hordeCheer;
+varying float vHordeHit;
 uint hordeHash(uint v) {
   uint s = v * 747796405u + 2891336453u;
   uint w = ((s >> ((s >> 28u) + 4u)) ^ s) * 277803737u;
@@ -110,6 +114,7 @@ const VERTEX_BODY = `
   // hordeMelee: figures fighting at the army's front, their step, closing / ground speed
   // hordeArmy: the army's x and width (the melee's lane), the share of the stream that meets it, a runner's world z per run distance
   // death: run distance, world x and z (with the army at distance 0) where it fell or ran past; w 1 for ran past
+  vHordeHit = 0.0;
   uint id = uint(gl_InstanceID);
   float k = float(gl_InstanceID);
   float size = hordeSize;
@@ -202,11 +207,13 @@ const VERTEX_BODY = `
     float t = (hordeState.z - death.x) / ${f(DIE_DIST)};
     if (t < 0.0 || t >= 1.0) s = 0.0;
     t = clamp(t, 0.0, 1.0);
-    lean = -0.2 - 1.5 * t;
-    sway = 0.0;
+    // flung back and up, spinning a little, white for a moment as it is hit
+    lean = -0.2 - 1.7 * t;
+    sway = (r1 - 0.5) * 1.2 * t;
     swing = 0.0;
-    yaw = 3.14159265;
-    lift = vec3(0.0, sin(3.14159265 * t) * 0.15, -0.6 * t);
+    yaw = 3.14159265 + (r2 - 0.5) * 3.0 * t;
+    lift = vec3(0.0, sin(3.14159265 * t) * (0.22 + 0.2 * r2), -(0.8 + 0.6 * r1) * t);
+    vHordeHit = 1.0 - smoothstep(0.0, ${f(HIT_FLASH)}, t);
     // left where it fell as the army runs on, but never inside the army: the
     // fallen of a melee drop at its front rows
     off = vec2(death.y, min(death.z + hordeState.z * ${f(DIST_SCALE)}, -hordeLane.w));
@@ -229,6 +236,8 @@ const VERTEX_BODY = `
 `;
 
 type Slot = {
+  /** Its index (the kill sink's slot). */
+  id: number;
   mesh: Mesh<InstancedBufferGeometry, MeshLambertMaterial>;
   death: InstancedBufferAttribute;
   lane: Vector4;
@@ -268,7 +277,7 @@ export type Horde = {
   readonly meshes: readonly Mesh<InstancedBufferGeometry>[];
 };
 
-export function createHorde(scene: Scene): Horde {
+export function createHorde(scene: Scene, sink?: KillSink): Horde {
   const figure = makeHordeGeometry();
   const slots: Slot[] = [];
   for (let n = 0; n < HORDE_SLOTS; n++) {
@@ -309,6 +318,15 @@ export function createHorde(scene: Scene): Horde {
           "#include <begin_vertex>",
           `#include <begin_vertex>\n${VERTEX_BODY}`,
         );
+      shader.fragmentShader = shader.fragmentShader
+        .replace(
+          "#include <common>",
+          "#include <common>\nvarying float vHordeHit;",
+        )
+        .replace(
+          "#include <emissivemap_fragment>",
+          "#include <emissivemap_fragment>\ntotalEmissiveRadiance += vHordeHit * vec3(1.0, 0.92, 0.75);",
+        );
     };
     const mesh = new Mesh(geometry, material);
     const lay: HordeLayout = {
@@ -342,6 +360,7 @@ export function createHorde(scene: Scene): Horde {
     mesh.visible = false;
     scene.add(mesh);
     slots.push({
+      id: n,
       mesh,
       death,
       lane,
@@ -398,6 +417,14 @@ export function createHorde(scene: Scene): Horde {
         a[4 * k + 1] = x;
         a[4 * k + 2] = o.z - s.drawnAt * DIST_SCALE;
         a[4 * k + 3] = past ? 1 : 0;
+        // the front figure (j 0) stood at the front; those within last frame's melee fought there
+        if (!past)
+          sink?.hit(
+            s.id,
+            x,
+            a[4 * k + 2] as number,
+            s.was - 1 - k < s.lay.melee,
+          );
       }
       s.death.addUpdateRange(4 * n, 4 * (s.was - n));
       s.death.needsUpdate = true;
@@ -449,7 +476,10 @@ export function createHorde(scene: Scene): Horde {
       // a pack gone (passed, or met the army): its last figures fall or run past
       for (const s of slots)
         if (s.hazard >= 0 && s.hazard < run.nextHazard) {
+          const before = s.was;
           drop(s, s.hazard, 0, run);
+          // shot out as it went (its last enemy killed)
+          if (before > 0 && isShattered(run, s.hazard)) sink?.wiped(s.id);
           s.hazard = -1;
         }
       for (let i = run.nextHazard; i < hazards.length; i++) {
@@ -474,7 +504,9 @@ export function createHorde(scene: Scene): Horde {
           s.missWas =
             ((run.missed[i] ?? 0) * heads) / Math.max(1, run.heads[i] ?? 0);
         }
+        const before = s.was;
         drop(s, i, n, run);
+        if (n === 0 && before > 0 && isShattered(run, i)) sink?.wiped(s.id);
         s.state.x = n;
         // heads past the cap are not drawn: then every drawn figure is whole
         s.state.y = heads < all ? 1 : packHeadsLeft(run, i) - (n - 1);

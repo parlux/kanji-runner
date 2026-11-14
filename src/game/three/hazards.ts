@@ -1,16 +1,11 @@
 import { Color, Euler, Matrix4, Quaternion, Vector3, type Scene } from "three";
 import { crowdWidth } from "../../core/crowd";
-import {
-  fireLimit,
-  hazardPos,
-  isShattered,
-  packSpan,
-  type RunState,
-} from "../../core/sim";
+import { fireLimit, hazardPos, packSpan, type RunState } from "../../core/sim";
 import { FIRE_RANGE } from "../../core/tuning";
 import { makeCrowdMesh } from "./figures";
 import { FX_COLOURS, type Fx } from "./fx";
 import { createHorde } from "./horde";
+import { createKills } from "./kills";
 import {
   burstPiece,
   BURST_PIECES,
@@ -19,7 +14,6 @@ import {
   CRATE_POPUP_DIST,
   CROWD_DEPTH,
   DIST_SCALE,
-  FIGURE_TOP,
   MAX_RECRUITS,
   recruitProgress,
   SHATTER_DIST,
@@ -30,20 +24,21 @@ import {
 } from "./world";
 
 /**
- * Enemy packs, the crowd's fire at what it targets, kills popping off, the
- * burst of a shattered crate or pack, and recruits running from a shattered
+ * Enemy packs and their kill effects, the crowd's fire at what it targets,
+ * the burst of a shattered crate, and recruits running from a shattered
  * crate into the crowd. Drawn from the sim's state as it is now.
  */
 
 const COLOURS = {
-  enemy: new Color(0xe8456f),
   wood: new Color(0xc08a4a),
   band: new Color(0xf0c27a),
 };
 const STRIDE_HZ = 2.4;
 
 export function createHazards(scene: Scene, fx: Fx) {
-  const horde = createHorde(scene);
+  const kills = createKills();
+  const horde = createHorde(scene, kills);
+  scene.add(kills.pieces, kills.rings);
   const recruits = makeCrowdMesh("soldier", MAX_RECRUITS);
   scene.add(recruits);
   const m = new Matrix4();
@@ -73,31 +68,7 @@ export function createHazards(scene: Scene, fx: Fx) {
         armyX + (lanes > 1 ? l / (lanes - 1) - 0.5 : 0) * 2 * half;
       const { hazards } = run.track;
       horde.update(run, clock, cheer);
-      const ti = run.target;
-      if (
-        ti !== null &&
-        run.status === "running" &&
-        hazards[ti]?.kind === "pack" &&
-        !isShattered(run, ti)
-      ) {
-        // enemies popping off the targeted pack's rim
-        const span = packSpan(run, ti);
-        const cx = worldX((span.left + span.right) / 2);
-        const cz = worldZ(hazardPos(run, ti), run.dist);
-        const r = ((span.right - span.left) * TRACK_W) / 2;
-        for (let k = 0; k < 4; k++) {
-          const t = (run.dist * 2.5 + k / 4) % 1;
-          const a = k * 2.39996 + Math.floor(run.dist * 2.5) * 1.3;
-          fx.spark(
-            cx + (r + 1.2 * t) * Math.cos(a),
-            FIGURE_TOP * 0.6 + 1.4 * t,
-            cz + (r + 1.2 * t) * Math.sin(a) * 0.6 * CROWD_DEPTH,
-            0.28 * (1 - t),
-            COLOURS.enemy,
-          );
-        }
-      }
-
+      kills.update(run, clock);
       // the crowd's fire: straight ahead from each lane (never past the next
       // wall); the lanes that face its target stop there
       const i = run.target;
@@ -141,33 +112,29 @@ export function createHazards(scene: Scene, fx: Fx) {
             fx.stream(x, -0.4, x, tz, 6, 1.6, l * 0.37, bullet, clock);
           else straight(l);
         }
-        // hit flash at the impact point
-        const f = 0.6 + 0.4 * Math.sin(run.dist * 80);
-        fx.spark(tx, 0.5, tz, 0.5 * f, FX_COLOURS.flash);
+        // hit flash at the impact point (a pack's hits flash where its rows die: kills.ts)
+        if (target.kind === "block") {
+          const f = 0.6 + 0.4 * Math.sin(run.dist * 80);
+          fx.spark(tx, 0.5, tz, 0.5 * f, FX_COLOURS.flash);
+        }
       } else for (let l = 0; l < lanes; l++) straight(l);
 
-      // a shattered crate or pack bursts
+      // a shattered crate bursts (a pack's final burst: kills.ts)
       const sh = run.lastShatter;
       const dead = sh ? hazards[sh.index] : undefined;
-      if (sh && (dead?.kind === "block" || dead?.kind === "pack")) {
+      if (sh && dead?.kind === "block") {
         const t = (run.dist - sh.dist) / SHATTER_DIST;
         if (t >= 0 && t < 1) {
-          const isCrate = dead.kind === "block";
-          const c = isCrate
-            ? spanWorld(dead.left, dead.right)
-            : (() => {
-                const p = packSpan(run, sh.index);
-                return { x: worldX((p.left + p.right) / 2), w: 1.2 };
-              })();
+          const c = spanWorld(dead.left, dead.right);
           const cz = worldZ(hazardPos(run, sh.index), run.dist);
           for (let k = 0; k < BURST_PIECES; k++) {
             const p = burstPiece(k, t, c.w / 2);
             fx.spark(
               c.x + p.x,
-              Math.max(0.05, (isCrate ? CRATE_H / 2 : 0.4) + p.y),
-              cz - (isCrate ? CRATE_D / 2 : 0) + p.z * 0.6,
+              Math.max(0.05, CRATE_H / 2 + p.y),
+              cz - CRATE_D / 2 + p.z * 0.6,
               p.size,
-              isCrate ? (k % 2 ? COLOURS.wood : COLOURS.band) : COLOURS.enemy,
+              k % 2 ? COLOURS.wood : COLOURS.band,
             );
           }
         }
