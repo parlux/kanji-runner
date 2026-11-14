@@ -4,11 +4,11 @@ import { hazardPos, packSurvivors } from "../../core/horde";
 import {
   plannedRows,
   speedMul,
-  isShattered,
   type ChargeView,
   type RunState,
   type SquadView,
 } from "../../core/sim";
+import { isShattered } from "../../core/shooting";
 import { hazardSpan, type Saw, type Track } from "../../core/track";
 import {
   BASE_SPEED,

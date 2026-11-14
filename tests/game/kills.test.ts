@@ -1,6 +1,7 @@
 import { Scene } from "three";
 import { describe, expect, it } from "vitest";
-import { createRunState, isShattered, type RunState } from "../../src/core/sim";
+import { createRunState, type RunState } from "../../src/core/sim";
+import { isShattered } from "../../src/core/shooting";
 import { packSurvivors } from "../../src/core/horde";
 import type { Track } from "../../src/core/track";
 import { startWave, stepWave, WAVES, type Wave, type WaveSpec } from "./wave";

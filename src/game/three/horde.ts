@@ -19,7 +19,8 @@ import {
   packSurvivors,
   streamSpan,
 } from "../../core/horde";
-import { isShattered, speedMul, type RunState } from "../../core/sim";
+import { isShattered } from "../../core/shooting";
+import { speedMul, type RunState } from "../../core/sim";
 import { crowdWidth } from "../../core/crowd";
 import { BASE_SPEED, ENEMY_SPEED, PACK_COLUMN_MAX } from "../../core/tuning";
 import { HORDE_HIP, makeHordeGeometry } from "./figures";

@@ -10,7 +10,8 @@ import {
   type Scene,
 } from "three";
 import { hazardPos } from "../../core/horde";
-import { isShattered, type RunState } from "../../core/sim";
+import { isShattered } from "../../core/shooting";
+import type { RunState } from "../../core/sim";
 import {
   CRATE_D,
   CRATE_H,

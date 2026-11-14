@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vitest";
+import { crateReward, isShattered } from "../../src/core/shooting";
 import {
-  crateReward,
   createRunState,
-  isShattered,
   nudgeTarget,
   setTarget,
   stepRun,
