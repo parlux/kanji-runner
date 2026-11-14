@@ -4,7 +4,7 @@ import {
   InstancedBufferGeometry,
   Mesh,
   MeshLambertMaterial,
-  Vector2,
+  Vector3,
   Vector4,
   type Scene,
 } from "three";
@@ -18,9 +18,10 @@ import {
   packMelee,
   packMouth,
   packSurvivors,
+  speedMul,
   type RunState,
 } from "../../core/sim";
-import { PACK_COLUMN_MAX } from "../../core/tuning";
+import { BASE_SPEED, ENEMY_SPEED, PACK_COLUMN_MAX } from "../../core/tuning";
 import { HORDE_HIP, makeHordeGeometry } from "./figures";
 import {
   crowdHalfDepth,
@@ -30,7 +31,11 @@ import {
   COL_SALT,
   HORDE_JITTER,
   HORDE_RAG,
+  HORDE_STRIDE_HZ,
+  HORDE_TURN,
+  HORDE_TURN_RATE,
   HORDE_WANDER,
+  HORDE_WANDER_RATE,
   hordePlace,
   hordeStride,
   MELEE_HZ,
@@ -62,8 +67,6 @@ import {
 export const HORDE_SLOTS = 2;
 /** A killed figure topples back and shrinks away over this much run distance (about a third of a second). */
 export const DIE_DIST = 0.45;
-/** Strides per second of clock. */
-const STRIDE_HZ = 3;
 
 const f = (x: number): string => x.toFixed(6);
 
@@ -75,7 +78,7 @@ uniform vec4 hordeLane;
 uniform vec4 hordeCrowd;
 uniform vec4 hordeCount;
 uniform vec4 hordeState;
-uniform vec2 hordeMelee;
+uniform vec3 hordeMelee;
 uniform float hordeSize;
 uint hordeHash(uint v) {
   uint s = v * 747796405u + 2891336453u;
@@ -91,7 +94,7 @@ const VERTEX_BODY = `
   // hordeCrowd: mouth's left edge, gx, gz, run (how far back of the head the crowd's front is)
   // hordeCount: n0, cols, stride, step
   // hordeState: alive, front figure's share left, run distance, clock
-  // hordeMelee: figures fighting at the army's front, their step
+  // hordeMelee: figures fighting at the army's front, their step, closing / ground speed
   // death: run distance, world x and z (with the army at distance 0) where it fell
   uint id = uint(gl_InstanceID);
   float k = float(gl_InstanceID);
@@ -110,8 +113,9 @@ const VERTEX_BODY = `
   float ph2 = 6.2831853 * r1;
   float clock = hordeState.w;
   float wander = ${f(HORDE_WANDER)} * g;
-  float wx = wander * (sin(clock * (0.5 + 0.6 * r1) + ph1) - sin(ph1));
-  float wz = wander * (cos(clock * (0.4 + 0.5 * r2) + ph2) - cos(ph2));
+  float wc = clock * ${f(HORDE_WANDER_RATE)};
+  float wx = wander * (sin(wc * (0.5 + 0.6 * r1) + ph1) - sin(ph1));
+  float wz = wander * (cos(wc * (0.4 + 0.5 * r2) + ph2) - cos(ph2));
   float rag = floor(hordeRand(uint(col) + ${COL_SALT}u) * ${f(HORDE_RAG + 1)});
   float rad = ${f(FIGURE_RADIUS)} * size;
   float left = hordeCrowd.x;
@@ -125,23 +129,29 @@ const VERTEX_BODY = `
   float slot = min(j, melee) * hordeMelee.y + max(0.0, j - melee) * hordeCount.w;
   float ahead = -hordeLane.z;
   float e = spot - slot;
-  float form = e <= 0.0 ? 0.0 : min(1.0, e / max(1e-3, min(${f(STREAM_TURN)}, spot + ahead)));
-  float lane = hordeLane.x + (fract(k * 0.6180339887) - 0.5) * max(0.0, hordeLane.y - 2.0 * rad);
+  float form = e <= 0.0 ? 0.0 : min(1.0, e / ${f(STREAM_TURN)});
+  float rem = max(0.0, ahead + slot - melee * hordeMelee.y);
+  float u = j < melee ? 1.0 : (e <= 0.0 ? 0.0 : hordeMelee.z * e / (rem + hordeMelee.z * e));
+  float conv = u * u * (3.0 - 2.0 * u);
+  // its lane keeps its place across the crowd (a funnel: no crossing over)
+  float across = clamp((col + 0.5 + (mod(row + rag, 2.0) > 0.5 ? 0.25 : -0.25) + 0.3 * (r1 - 0.5)) / cols, 0.0, 1.0);
+  float lane = hordeLane.x + (across - 0.5) * max(0.0, hordeLane.y - 2.0 * rad);
   float crash = clamp(1.0 - (ahead + slot - melee * hordeMelee.y) / ${f(STREAM_CRASH)}, 0.0, 1.0);
   float fight = j < melee ? 1.0 : 0.0;
   float beat = 6.2831853 * (clock * ${f(MELEE_HZ)} * (0.8 + 0.4 * r1) + r2);
   float lunge = fight * ${f(MELEE_LUNGE)} * size * (1.0 - cos(beat));
   float back = e <= 0.0 ? spot + cz : slot + (1.0 - form) * cz + hordeLane.w * crash * form - lunge;
-  vec2 off = vec2(mix(cx, lane, form), hordeLane.z - back);
+  vec2 off = vec2(mix(cx, lane, conv), hordeLane.z - back);
   float mill = 1.0 - form;
   // waiting, each figure turns about now and then; in the stream it faces the army
-  float yaw = 3.14159265 + mill * 1.4 * sin(clock * 0.3 * (0.5 + r1) + ph1);
-  float stride = 6.2831853 * (clock * ${f(STRIDE_HZ)} * mix(0.35, 1.0, form) + r1);
+  float yaw = 3.14159265 + mill * ${f(HORDE_TURN)} * sin(clock * ${f(HORDE_TURN_RATE)} * (0.5 + r1) + ph1);
+  // a steady stride: a shuffle while waiting, a run once it sets off
+  float stride = 6.2831853 * (clock * ${f(HORDE_STRIDE_HZ)} * (0.9 + 0.2 * r1) + r1);
   float s = size;
   float lean = -0.2 * form + 0.06 * sin(2.0 * stride) - fight * 0.25 * sin(beat);
   float sway = 0.1 * sin(stride);
-  float swing = mix(0.25, 0.75, form) * sin(stride) * (1.0 - 0.7 * fight);
-  vec3 lift = vec3(0.0, abs(sin(stride)) * mix(0.02, 0.08, form) * size, 0.0);
+  float swing = mix(0.12, 0.65, form) * sin(stride) * (1.0 - 0.7 * fight);
+  vec3 lift = vec3(0.0, abs(sin(stride)) * mix(0.01, 0.07, form) * size, 0.0);
   if (k >= hordeState.x) {
     // knocked back, toppling over backwards as it shrinks away
     float t = (hordeState.z - death.x) / ${f(DIE_DIST)};
@@ -178,7 +188,7 @@ type Slot = {
   crowd: Vector4;
   count: Vector4;
   state: Vector4;
-  melee: { value: Vector2 };
+  melee: { value: Vector3 };
   size: { value: number };
   /** The pack's layout as last drawn (the shader's uniforms). */
   lay: HordeLayout;
@@ -219,7 +229,7 @@ export function createHorde(scene: Scene): Horde {
     const crowd = new Vector4();
     const count = new Vector4(1, 1, 1, 0);
     const state = new Vector4();
-    const melee = { value: new Vector2() };
+    const melee = { value: new Vector3() };
     const size = { value: 1 };
     const material = new MeshLambertMaterial({
       vertexColors: true,
@@ -258,6 +268,7 @@ export function createHorde(scene: Scene): Horde {
       clock: 0,
       melee: 0,
       band: 0,
+      closing: 1,
     };
     mesh.userData.uniforms = { lane, crowd, count, state };
     mesh.userData.layout = lay;
@@ -375,11 +386,13 @@ export function createHorde(scene: Scene): Horde {
         // heads past the cap are not drawn: the melee scaled to the drawn ones
         L.melee = Math.min(n, (packMelee(run, i) * heads) / Math.max(1, all));
         L.band = meleeStep(L.laneW, L.size);
+        L.closing =
+          (BASE_SPEED * speedMul(dist, run.track) + ENEMY_SPEED) / ENEMY_SPEED;
         s.drawnAt = dist;
         s.lane.set(L.laneX, L.laneW, L.headZ, L.off);
         s.crowd.set(L.left, L.gx, L.gz, L.run);
         s.count.set(L.n0, L.cols, L.stride, L.step);
-        s.melee.value.set(L.melee, L.band);
+        s.melee.value.set(L.melee, L.band, L.closing);
         s.size.value = L.size;
       }
       for (const s of slots) {

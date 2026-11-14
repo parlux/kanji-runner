@@ -633,9 +633,25 @@ export const HORDE_JITTER = 0.15;
  * (owner at M2: "a loose crowd, not a block").
  */
 export const HORDE_RAG = 2;
-/** How far a waiting figure wanders from its place, in crowd gaps (each way, at most twice this). */
-export const HORDE_WANDER = 0.2;
-/** A figure that leaves the crowd swings into its lane of the stream over this much running (world units)... */
+/**
+ * How far a waiting figure wanders from its place, in crowd gaps (each way,
+ * at most twice this): 0.12, from 0.2 before the owner's "a bit manic"
+ * (gauntlet round 1).
+ */
+export const HORDE_WANDER = 0.12;
+/** Its wander's pace, a share of the H5b pace (calmer: half as fast). */
+export const HORDE_WANDER_RATE = 0.5;
+/** A waiting figure turns about now and then, this far each way (radians; 1.4 before)... */
+export const HORDE_TURN = 0.8;
+/** ...this slowly (radians per second, times 0.5 to 1.5; 0.3 before). */
+export const HORDE_TURN_RATE = 0.15;
+/**
+ * Every figure strides this many times a second, waiting or running (a
+ * small shuffle while it waits); before, the rate changed as it set off,
+ * which sped its legs up wildly for a moment.
+ */
+export const HORDE_STRIDE_HZ = 2.2;
+/** A figure that leaves the crowd breaks into a run over this much running (world units)... */
 export const STREAM_TURN = 6;
 /** ...and, within this far of the army (world units), runs on into its front rows (the core meets it at its centre). */
 export const STREAM_CRASH = 25;
@@ -667,6 +683,8 @@ export function meleeStep(laneW: number, size: number): number {
  * the army's half depth, `clock` for the wander. `stride` walks a row's
  * columns in a scattered order. `melee` of the front figures fight at the
  * army's front, `band` apart (meleeStep), the stream behind them.
+ * `closing`: how much faster the stream closes on the army than it runs
+ * over the ground (the scroll on top of its own speed).
  */
 export type HordeLayout = {
   laneX: number;
@@ -686,7 +704,19 @@ export type HordeLayout = {
   clock: number;
   melee: number;
   band: number;
+  closing: number;
 };
+
+/**
+ * A figure's progress (0..1) along its run from the crowd to the army: `e`
+ * world units run over the ground since it left, `rem` still to close
+ * (army frame), `closing` the ratio of the two speeds. Linear in time.
+ */
+export const streamProgress = (
+  e: number,
+  rem: number,
+  closing: number,
+): number => (e <= 0 ? 0 : (closing * e) / (Math.max(0, rem) + closing * e));
 
 /** A stride through `cols` columns that visits each once: about 0.62 of them, coprime with `cols`. */
 export function hordeStride(cols: number): number {
@@ -706,7 +736,7 @@ export function hordeHash(v: number): number {
   return (((w >>> 22) ^ w) >>> 0) / 4294967296;
 }
 
-/** Where figure k is: world X and Z (the army at 0), and `t`, how far (0..1) it has turned into the stream. */
+/** Where figure k is: world X and Z (the army at 0), and `t`, how far (0..1) it has come across into its lane. */
 export type HordeSpot = { x: number; z: number; t: number };
 
 /**
@@ -719,8 +749,10 @@ export type HordeSpot = { x: number; z: number; t: number };
  * apart behind them (the core's column, so the rest step up as the front
  * dies). It stands in the crowd while its slot is further back
  * than its spot; once the head has run far enough, it leaves the crowd and
- * runs in its slot, turning into its lane of the army-wide stream over
- * STREAM_TURN and running on into the army's front rows near it.
+ * runs in its slot, breaking into a run over STREAM_TURN and curving across
+ * into its lane of the army-wide stream gradually over its whole run
+ * (smoothstep of streamProgress: owner, "they line up in the lane super
+ * fast"), on into the melee's back or the army's front rows.
  */
 export function hordePlace(
   k: number,
@@ -736,10 +768,9 @@ export function hordePlace(
   const ph1 = 6.2831853 * r2;
   const ph2 = 6.2831853 * r1;
   const wander = HORDE_WANDER * g;
-  const wx =
-    wander * (Math.sin(L.clock * (0.5 + 0.6 * r1) + ph1) - Math.sin(ph1));
-  const wz =
-    wander * (Math.cos(L.clock * (0.4 + 0.5 * r2) + ph2) - Math.cos(ph2));
+  const wc = L.clock * HORDE_WANDER_RATE;
+  const wx = wander * (Math.sin(wc * (0.5 + 0.6 * r1) + ph1) - Math.sin(ph1));
+  const wz = wander * (Math.cos(wc * (0.4 + 0.5 * r2) + ph2) - Math.cos(ph2));
   // the column stands back whole rows, on the same staggered lattice
   const rag = Math.floor(hordeHash(col + COL_SALT) * (HORDE_RAG + 1));
   const rad = FIGURE_RADIUS * L.size;
@@ -761,12 +792,21 @@ export function hordePlace(
   const slot = pressed + Math.max(0, j - L.melee) * L.step;
   const ahead = -L.headZ;
   const e = spot - slot;
-  const t =
-    e <= 0
-      ? 0
-      : Math.min(1, e / Math.max(1e-3, Math.min(STREAM_TURN, spot + ahead)));
-  const lane =
-    L.laneX + (((k * 0.6180339887) % 1) - 0.5) * Math.max(0, L.laneW - 2 * rad);
+  // it breaks into a run at once, and comes across into its lane gradually
+  const form = e <= 0 ? 0 : Math.min(1, e / STREAM_TURN);
+  const rem = ahead + slot - L.melee * L.band;
+  const u = j < L.melee ? 1 : streamProgress(e, rem, L.closing);
+  const t = u * u * (3 - 2 * u);
+  // its lane keeps its place across the crowd (a funnel: no crossing over)
+  const across = Math.min(
+    1,
+    Math.max(
+      0,
+      (col + 0.5 + ((row + rag) % 2 === 1 ? 0.25 : -0.25) + 0.3 * (r1 - 0.5)) /
+        L.cols,
+    ),
+  );
+  const lane = L.laneX + (across - 0.5) * Math.max(0, L.laneW - 2 * rad);
   // the stream runs on into the melee's back (the army's front rows when there is none)
   const crash = Math.min(
     1,
@@ -780,7 +820,7 @@ export function hordePlace(
         (1 - Math.cos(6.2831853 * (L.clock * MELEE_HZ * (0.8 + 0.4 * r1) + r2)))
       : 0;
   const back =
-    e <= 0 ? spot + cz : slot + (1 - t) * cz + L.off * crash * t - lunge;
+    e <= 0 ? spot + cz : slot + (1 - form) * cz + L.off * crash * form - lunge;
   out.x = cx + (lane - cx) * t;
   out.z = L.headZ - back;
   out.t = t;

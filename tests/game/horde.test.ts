@@ -24,13 +24,17 @@ import {
   HORDE_CAP,
   HORDE_JITTER,
   HORDE_RAG,
+  HORDE_STRIDE_HZ,
+  HORDE_TURN,
+  HORDE_TURN_RATE,
   HORDE_WANDER,
+  HORDE_WANDER_RATE,
   hordePlace,
   MELEE_LUNGE,
   meleeStep,
   hordeStride,
   type HordeLayout,
-  STREAM_TURN,
+  type HordeSpot,
   TRACK_W,
   worldX,
   worldZ,
@@ -61,6 +65,7 @@ function layout(n0: number, run = 0, clock = 0, n = n0): HordeLayout {
     clock,
     melee: 0,
     band: meleeStep(crowdWidth(200) * TRACK_W, 1),
+    closing: 1,
   };
 }
 const places = (L: HordeLayout) =>
@@ -199,25 +204,110 @@ describe("horde layout: the stream", () => {
     }
   });
 
-  it("runs in the army's lane once turned: as wide as the army, centred on it (the core's span)", () => {
-    const L = layout(500, 15);
+  /**
+   * A pack woken `ahead` world units off, played in time: its head closes on
+   * the army at C (21 world units a second, the scroll and its own run) and
+   * runs over the ground at G (5); per figure, the steepest sideways move
+   * per forward move on screen, and how much of its way across into its
+   * lane it had come halfway along its run.
+   */
+  const charge = (ahead: number) => {
+    const C = 21;
+    const G = 5;
+    const dt = 1 / 60;
+    const base = { ...layout(200), closing: C / G };
+    let worst = 0;
+    const half: number[] = [];
+    const startX: number[] = [];
+    const leftAt: number[] = [];
+    let last: HordeSpot[] = [];
+    for (let time = 0; ahead - C * time > 0; time += dt) {
+      const L = { ...base, headZ: -(ahead - C * time), run: G * time };
+      const p = places(L);
+      p.forEach((q, k) => {
+        const r = last[k];
+        if (q.t === 0) startX[k] = q.x;
+        if (r && r.t > 0 && q.t > 0) {
+          const dz = Math.abs(q.z - r.z);
+          if (dz > 1e-6) worst = Math.max(worst, Math.abs(q.x - r.x) / dz);
+        }
+        const lane = laneOf(k, L);
+        const from = startX[k] ?? q.x;
+        if (q.t > 0 && leftAt[k] === undefined) leftAt[k] = -q.z;
+        // halfway: its distance to the army half what it was when it left
+        const d0 = leftAt[k];
+        if (
+          d0 !== undefined &&
+          half[k] === undefined &&
+          -q.z <= d0 / 2 &&
+          Math.abs(from - lane) > 1
+        )
+          half[k] = 1 - Math.abs(q.x - lane) / Math.abs(from - lane);
+      });
+      last = p;
+    }
+    return { worst, half: half.filter((v) => v !== undefined) };
+  };
+  /** Figure k's lane in the stream: where it is once all the way across. */
+  const laneOf = (k: number, L: HordeLayout) =>
+    hordePlace(k, { ...L, headZ: 0, run: 1e4, melee: L.n }).x;
+
+  it("curves into the army's lane gradually over its run: sideways at most 30% of its speed at the army, about halfway across halfway there", () => {
+    const { worst, half } = charge(120);
+    console.log(
+      "charge 120",
+      worst,
+      Math.min(...half),
+      Math.max(...half),
+      half.length,
+      charge(20).worst,
+    );
+    expect(worst).toBeLessThan(0.3);
+    expect(half.length).toBeGreaterThan(50);
+    for (const h of half) {
+      expect(h).toBeGreaterThan(0.2);
+      expect(h).toBeLessThan(0.8);
+    }
+  });
+
+  it("a pack woken close (2 track units out, behind a wall) still curves in over its whole run, never faster sideways than forwards", () => {
+    expect(charge(20).worst).toBeLessThan(0.7);
+  });
+
+  it("a waiting crowd is calmer: it wanders less far and about 3× slower than in H5b", () => {
+    // H5b: 0.2 gaps each way at up to 0.22 gaps a second per axis
+    expect(HORDE_WANDER).toBe(0.12);
+    expect(HORDE_WANDER_RATE).toBe(0.5);
+    const L0 = layout(500);
+    const g = Math.min(L0.gx, L0.gz);
+    let fastest = 0;
+    let last = places(L0);
+    for (let clock = 0.05; clock < 30; clock += 0.05) {
+      const p = places({ ...L0, clock });
+      p.forEach((q, k) => {
+        const r = last[k] as HordeSpot;
+        fastest = Math.max(fastest, Math.hypot(q.x - r.x, q.z - r.z) / 0.05);
+      });
+      last = p;
+    }
+    expect(fastest / g).toBeLessThan((Math.SQRT2 * 0.2 * 1.1) / 3);
+    expect(fastest).toBeGreaterThan(0);
+    // a steady stride: slower than H5b's 3 a second, and the turns gentler
+    expect(HORDE_STRIDE_HZ).toBeLessThan(3);
+    expect(HORDE_TURN).toBeLessThan(1.4);
+    expect(HORDE_TURN_RATE).toBeLessThan(0.3);
+  });
+
+  it("runs into the army's lane by the time it meets it: as wide as the army, centred on it (the core's span)", () => {
+    const L = { ...layout(500, 40), headZ: 0, closing: 4.2 };
     const lo = L.laneX - L.laneW / 2;
     const hi = L.laneX + L.laneW / 2;
-    let turned = 0;
-    for (const q of places(L))
-      if (q.t === 1) {
-        turned++;
-        expect(q.x).toBeGreaterThanOrEqual(lo - 1e-9);
-        expect(q.x).toBeLessThanOrEqual(hi + 1e-9);
-      }
-    expect(turned).toBeGreaterThan(50);
-    // the front figure is the head, turned within STREAM_TURN of running
+    // the front figure is the head, at the army: in its lane, at its front rows
     const front = hordePlace(499, L);
     expect(front.t).toBe(1);
-    // (−Z is ahead: pulled towards the army's front rows, never past the head)
-    expect(front.z).toBeLessThanOrEqual(L.headZ);
-    expect(front.z).toBeGreaterThanOrEqual(L.headZ - L.off - 1e-9);
-    expect(STREAM_TURN).toBeLessThan(15);
+    expect(front.x).toBeGreaterThanOrEqual(lo - 1e-9);
+    expect(front.x).toBeLessThanOrEqual(hi + 1e-9);
+    expect(front.z).toBeCloseTo(-L.off, 9);
   });
 
   it("at contact the front crashes into the army's front rows; as the front dies the rest step up", () => {
