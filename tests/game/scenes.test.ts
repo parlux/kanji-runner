@@ -32,7 +32,6 @@ import {
   afterStep,
   endLevelCard,
   createSession,
-  devLevel,
   handleAction,
   studyOffered,
   updateScene,
@@ -51,27 +50,11 @@ import {
 } from "../../src/game/start";
 import { forSeeds } from "../sweep";
 
-describe("dev level flag", () => {
-  it("reads ?level=N for N ≥ 2 and ignores anything else", () => {
-    expect(devLevel("?level=4")).toBe(4);
-    expect(devLevel("")).toBeNull();
-    expect(devLevel("?level=1")).toBeNull();
-    expect(devLevel("?level=abc")).toBeNull();
-  });
-
-  it("a dev session is kanji-only at that level and never saved", () => {
-    const stored = defaultProgress();
-    const dev = createSession(stored, 3);
-    expect(dev).toMatchObject({ persist: false, kana: [] });
-    expect(dev.progress.unlockedLevel).toBe(3);
-    expect(stored.unlockedLevel).toBe(0);
-    expect(createSession(stored, null).persist).toBe(true);
-  });
-
+describe("sessions", () => {
   it("a WaniKani session asks only its taught kanji and has no placement", () => {
     const start = { kind: "start" } as const;
     const wk = syntheticList(30) as unknown as NonNullable<Session["wk"]>;
-    const session = { ...createSession(defaultProgress(), null), wk };
+    const session = { ...createSession(defaultProgress()), wk };
     const chars = new Set(wk.kanji.map((k) => k.char));
     const run = handleAction(start, "confirm", () => 5, session).scene;
     if (run.kind !== "run") throw new Error("no run");
@@ -82,29 +65,21 @@ describe("dev level flag", () => {
       expect(handleAction(start, a, () => 1, session).scene).toEqual(start);
   });
 
-  it("starts a kanji run when set, a kana run otherwise", () => {
+  it("starts a kana run for a fresh player", () => {
     const start = { kind: "start" } as const;
-    const stored = defaultProgress();
-    const kanji = handleAction(
-      start,
-      "confirm",
-      () => 1,
-      createSession(stored, 3),
-    ).scene;
     const kana = handleAction(
       start,
       "confirm",
       () => 1,
-      createSession(stored, null),
+      createSession(defaultProgress()),
     ).scene;
-    if (kanji.kind !== "run" || kana.kind !== "run") throw new Error("no run");
-    expect(kanji.run.rows.every((r) => r.type !== "kana")).toBe(true);
+    if (kana.kind !== "run") throw new Error("no run");
     expect(kana.run.rows.every((r) => r.type === "kana")).toBe(true);
   });
 });
 
 describe("afterStep", () => {
-  const session = createSession(defaultProgress(), null);
+  const session = createSession(defaultProgress());
   const run = handleAction(
     { kind: "start" },
     "confirm",
@@ -151,7 +126,7 @@ describe("afterStep", () => {
         lastSeen: 1,
       };
     });
-    const s = { ...createSession(progress, null), progress };
+    const s = { ...createSession(progress), progress };
     const row = {
       type: "meaning" as const,
       prompt: (keys[29] as string).split(":")[0] as string,
@@ -197,7 +172,7 @@ describe("afterStep", () => {
       answerIndex: 0,
       answer: "a",
     };
-    const meaning = createSession(meaningProgress(), null, null, true);
+    const meaning = createSession(meaningProgress(), null, true);
     expect(endLevelCard(meaning)).toMatchObject({ level: 2, gained: 0 });
     const ended: Scene = {
       kind: "end",
@@ -223,7 +198,7 @@ describe("afterStep", () => {
 });
 
 describe("end screen", () => {
-  const session = createSession(defaultProgress(), null);
+  const session = createSession(defaultProgress());
   const end = (): Scene => {
     const run = handleAction(
       { kind: "start" },
@@ -303,7 +278,7 @@ describe("end screen buttons", () => {
 });
 
 describe("placement picker", () => {
-  const fresh = createSession(defaultProgress(), null);
+  const fresh = createSession(defaultProgress());
   const act = (
     scene: Scene,
     session: Session,
@@ -371,7 +346,7 @@ describe("start screen taps", () => {
 });
 
 describe("boss", () => {
-  const session = createSession(defaultProgress(), null);
+  const session = createSession(defaultProgress());
   const start = handleAction({ kind: "start" }, "confirm", () => 7, session);
   if (start.scene.kind !== "run") throw new Error("no run");
   const run = start.scene;
@@ -530,7 +505,7 @@ describe("sync label", () => {
 
 describe("adopting synced progress", () => {
   it("merges, so a run recorded while a sync was in flight is kept", () => {
-    const session = createSession(defaultProgress(), null);
+    const session = createSession(defaultProgress());
     const local = {
       ...session,
       progress: {
@@ -547,18 +522,11 @@ describe("adopting synced progress", () => {
     expect(next.progress.unlockedLevel).toBe(3);
     expect(Object.keys(next.progress.items).sort()).toEqual(["a", "b"]);
   });
-
-  it("leaves a dev session alone", () => {
-    const dev = createSession(defaultProgress(), 4);
-    expect(adoptProgress(dev, { ...defaultProgress(), unlockedLevel: 9 })).toBe(
-      dev,
-    );
-  });
 });
 
 describe("re-asks in runs", () => {
   const wk = syntheticList(60) as unknown as NonNullable<Session["wk"]>;
-  const wkSession = { ...createSession(defaultProgress(), null), wk };
+  const wkSession = { ...createSession(defaultProgress()), wk };
   const start = { kind: "start" } as const;
   const startRun = (seed: number, session: Session) => {
     const scene = handleAction(start, "confirm", () => seed, session).scene;
@@ -591,10 +559,7 @@ describe("re-asks in runs", () => {
   }
 
   it("a Built-in run is unchanged: same seed, same rows, no re-asks", () => {
-    for (const session of [
-      createSession(defaultProgress(), null),
-      createSession(defaultProgress(), 3),
-    ])
+    for (const session of [createSession(defaultProgress())])
       for (const seed of [1, 7, 42]) {
         const { run } = startRun(seed, session);
         const { progress, kana } = session;
@@ -733,28 +698,25 @@ describe("session log in the session", () => {
     return { run, next };
   };
 
-  it("starts from the stored log; a dev sandbox ignores it", () => {
-    expect(createSession(defaultProgress(), null, stored).log).toBe(stored);
-    expect(createSession(defaultProgress(), null).log).toBeNull();
-    expect(createSession(defaultProgress(), 3, stored).log).toBeNull();
+  it("starts from the stored log", () => {
+    expect(createSession(defaultProgress(), stored).log).toBe(stored);
+    expect(createSession(defaultProgress()).log).toBeNull();
   });
 
-  it("logs exactly one run per ending, for losses and wins, in both modes", () => {
-    for (const level of [null, 3]) {
-      const s = createSession(defaultProgress(), level, stored);
-      for (const kind of ["end", "boss"] as const) {
-        const { run, next } = endOf(s, kind, false);
-        const after = afterStep(s, run, next, 1000);
-        expect(after.log?.runs).toBe((s.log?.runs ?? 0) + 1);
-        expect(after.log?.items.length).toBeGreaterThan(0);
-        // a step that is not a run ending leaves the log alone
-        expect(afterStep(after, run, run, 1001).log).toBe(after.log);
-      }
+  it("logs exactly one run per ending, for losses and wins", () => {
+    const s = createSession(defaultProgress(), stored);
+    for (const kind of ["end", "boss"] as const) {
+      const { run, next } = endOf(s, kind, false);
+      const after = afterStep(s, run, next, 1000);
+      expect(after.log?.runs).toBe((s.log?.runs ?? 0) + 1);
+      expect(after.log?.items.length).toBeGreaterThan(0);
+      // a step that is not a run ending leaves the log alone
+      expect(afterStep(after, run, run, 1001).log).toBe(after.log);
     }
   });
 
   it("adoptProgress keeps the log", () => {
-    const s = createSession(defaultProgress(), null, stored);
+    const s = createSession(defaultProgress(), stored);
     expect(adoptProgress(s, defaultProgress()).log).toBe(stored);
   });
 });
@@ -820,7 +782,7 @@ describe("the enemies win", () => {
   };
 
   it("wiped out in a melee: the enemies cheer for CHEER_SECONDS (the run over, nothing moves), then the end screen; the run is recorded once, at the end", () => {
-    const session = createSession(defaultProgress(), null);
+    const session = createSession(defaultProgress());
     let s = untilDead(doomed());
     if (s.kind !== "run") throw new Error("no cheer");
     expect(s.run.status).toBe("dead");
@@ -883,7 +845,7 @@ describe("the enemies win", () => {
 
 describe("horde tuning", () => {
   it("a new run is built with the given tuning (defaults when absent)", () => {
-    const session = createSession(defaultProgress(), null);
+    const session = createSession(defaultProgress());
     const start = { kind: "start" } as const;
     const tuned = {
       ...HORDE_DEFAULTS,

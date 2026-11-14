@@ -29,7 +29,6 @@ import {
   PROP_NEAR,
   PROP_SPAN,
   sceneryFor,
-  sceneryParam,
   wrapZ,
 } from "../../src/game/three/scenery";
 import { TRACK_W } from "../../src/game/three/world";
@@ -51,18 +50,6 @@ describe("scenery pick", () => {
       expect(n).toBeGreaterThan(share * 0.6);
       expect(n).toBeLessThan(share * 1.4);
     }
-  });
-
-  it("is forced by ?scenery, and ignores unknown or unbuilt ids", () => {
-    expect(sceneryParam("?scenery=country")).toBe("country");
-    expect(sceneryParam("?2d&scenery=country")).toBe("country");
-    expect(sceneryParam("")).toBeNull();
-    expect(sceneryParam("?scenery=moon")).toBeNull();
-    expect(sceneryParam("?scenery=")).toBeNull();
-    expect(sceneryParam("?scenery=spring")).toBe("spring");
-    expect(sceneryParam("?scenery=stadium")).toBe("stadium");
-    expect(sceneryParam("?scenery=sky")).toBe("sky");
-    expect(sceneryParam("?scenery=city")).toBe("city");
   });
 });
 

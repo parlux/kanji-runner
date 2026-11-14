@@ -647,7 +647,7 @@ describe("the giant boss", () => {
   });
 
   it("has the 2D boss's size as HP, for the same seed", () => {
-    const session = createSession(defaultProgress(), null);
+    const session = createSession(defaultProgress());
     for (const seed of [1, 7, 42]) {
       const start = handleAction(
         { kind: "start" },

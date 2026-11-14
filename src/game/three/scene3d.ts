@@ -19,7 +19,7 @@ import {
 import { packMelee, type RunState } from "../../core/sim";
 import type { Scene } from "../scenes";
 import { cameraFor, fitCamera, LOOK, makeCamera, MAX_DPR } from "./view";
-import { sceneryFor, sceneryParam, type LookId } from "./scenery";
+import { sceneryFor, type LookId } from "./scenery";
 import { createScenery } from "./sceneryMeshes";
 import { makeCrowdMesh, type FigureKind } from "./figures";
 import { createWalls } from "./walls";
@@ -28,7 +28,6 @@ import { createFx } from "./fx";
 import { createProps } from "./props";
 import { createHazards } from "./hazards";
 import { createBoss } from "./boss";
-import { createFpsReadout } from "./fps";
 import {
   clipGaps,
   crowdHalfDepth,
@@ -342,8 +341,6 @@ export function createView3d(canvas: HTMLCanvasElement): View3d | null {
   };
 
   const scenery = createScenery(scene);
-  // `?scenery=<id>` forces a look; otherwise the run's seed picks it
-  const forcedLook = sceneryParam(window.location.search);
   let lookId: LookId | null = null;
   const showLook = (id: LookId): void => {
     if (id === lookId) return;
@@ -364,7 +361,6 @@ export function createView3d(canvas: HTMLCanvasElement): View3d | null {
   const army = createCrowd("soldier");
   scene.add(army.mesh);
   const boss = createBoss(scene, fx);
-  const fps = createFpsReadout();
 
   let w = 1;
   let h = 1;
@@ -412,7 +408,6 @@ export function createView3d(canvas: HTMLCanvasElement): View3d | null {
     },
     render(s, pace = 1) {
       const now = performance.now();
-      fps?.frame(now);
       const dt = Math.min(0.1, (now - last) / 1000);
       last = now;
       const paused = s.kind === "run" && s.paused;
@@ -438,7 +433,7 @@ export function createView3d(canvas: HTMLCanvasElement): View3d | null {
       fitCamera(camera, w / h, fit, camX);
       haze = hazeFor(pose, runDist, shapeDistance());
       layDashes(runDist);
-      showLook(forcedLook ?? sceneryFor(s.seed));
+      showLook(sceneryFor(s.seed));
       if (underside.visible) layPillars(runDist);
       scenery.update(
         runDist,

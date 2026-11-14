@@ -33,23 +33,16 @@ const act = (
     session,
   });
 
-const meaning = (): Session =>
-  createSession(meaningProgress(), null, null, true);
+const meaning = (): Session => createSession(meaningProgress(), null, true);
 
 describe("meaning-mode session", () => {
-  it("is kana-free, persisted and Built-in", () => {
+  it("is kana-free and Built-in", () => {
     expect(meaning()).toMatchObject({
       meaning: true,
-      persist: true,
       kana: [],
       wk: null,
     });
-    expect(createSession(defaultProgress(), null).meaning).toBe(false);
-    // a dev sandbox is never meaning mode
-    expect(createSession(meaningProgress(), 5, null, true)).toMatchObject({
-      meaning: false,
-      persist: false,
-    });
+    expect(createSession(defaultProgress()).meaning).toBe(false);
   });
 
   it("runs ask only kanji meanings of the unlocked levels, even with a WaniKani list", () => {
@@ -124,7 +117,7 @@ describe("meaning-mode session", () => {
 
 describe("persistence", () => {
   it("owner session: owner keys, synced", () => {
-    expect(persistence(createSession(defaultProgress(), null))).toEqual({
+    expect(persistence(createSession(defaultProgress()))).toEqual({
       progress: STORAGE_KEY,
       log: SESSION_KEY,
       sync: true,
@@ -140,10 +133,6 @@ describe("persistence", () => {
     });
     expect(p?.progress).not.toBe(STORAGE_KEY);
     expect(p?.log).not.toBe(SESSION_KEY);
-  });
-
-  it("dev sandbox: nothing", () => {
-    expect(persistence(createSession(defaultProgress(), 4))).toBeNull();
   });
 });
 

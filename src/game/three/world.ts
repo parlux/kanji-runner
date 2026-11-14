@@ -628,7 +628,7 @@ export const HORDE_RAG = 2;
 /**
  * How far a waiting figure wanders from its place, in crowd gaps (each way,
  * at most twice this): 0.12, from 0.2 before the owner's "a bit manic"
- * (gauntlet round 1).
+ * (horde round 1).
  */
 export const HORDE_WANDER = 0.12;
 /** Its wander's pace, a share of the H5b pace (calmer: half as fast). */

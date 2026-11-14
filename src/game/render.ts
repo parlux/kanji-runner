@@ -261,8 +261,7 @@ function renderStart(
   // sync shows only when it needs attention; meaning mode never syncs
   if (!session.meaning && syncAlert(sync)) renderSyncLabel(ctx, w, h, sync);
   text(ctx, "Kanji Runner", w / 2, h * 0.17, Math.min(52, w / 8));
-  // a dev sandbox has no modes: no switch
-  if (session.persist) renderModeSwitch(ctx, w, h, session, otherLevel);
+  renderModeSwitch(ctx, w, h, session, otherLevel);
   renderLevel(ctx, w, h * 0.46, session);
   unlockedNote(ctx, w, h * 0.46 + 92, session, 22);
   renderPlay(ctx, l.play);
@@ -1327,7 +1326,7 @@ function renderHud(
   run: RunState,
   draw: Draw = text,
 ): void {
-  // no questions (the horde gauntlet): no question count
+  // no questions: no question count
   if (run.rows.length > 0)
     draw(
       ctx,

@@ -1,4 +1,4 @@
-/** Keys of removed dev tools (tuned camera, camera gear, tuned horde): dropped on load so a phone plays the code defaults. */
+/** Keys of settings that no longer exist (tuned camera, gear, horde): dropped on load so a phone plays the code defaults. */
 export const LEGACY_KEYS = [
   "kanji-runner:camera",
   "kanji-runner:camera-gear",

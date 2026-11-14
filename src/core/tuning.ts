@@ -180,7 +180,7 @@ export type HordeTuning = {
   readonly killSeconds: number;
   readonly packWidth: number;
   readonly hordeScale: number;
-  /** PACK_ADAPT for this run when set (the horde gauntlet sweeps it). */
+  /** PACK_ADAPT for this run when set. */
   readonly packAdapt?: number;
 };
 export const HORDE_DEFAULTS: HordeTuning = {
@@ -191,7 +191,7 @@ export const HORDE_DEFAULTS: HordeTuning = {
   hordeScale: HORDE_SCALE,
 };
 /**
- * Melee (owner, gauntlet round 1: enemies that reach you "stop right in
+ * Melee (owner, horde round 1: enemies that reach you "stop right in
  * front and keep attacking until I killed them all or I was dead"; replaces
  * the stream's arrivals and HORDE_THREAT). Enemies that reach the army stand
  * at its front (packMelee) and fight: each second the army loses
@@ -248,7 +248,7 @@ export const PACK_COLUMN_MAX = CROWD_DEPTH_MAX + STREAM_LEAD;
 export const PACK_FIRE_RANGE = PACK_WAKE;
 /**
  * Packs follow the army you actually have (owner, during H5b; full adapt
- * after gauntlet round 1): when a pack wakes, its HP, head count and melee
+ * after horde round 1): when a pack wakes, its HP, head count and melee
  * worth are set as if the expected army were
  * expected^(1 − PACK_ADAPT) × army^PACK_ADAPT (never below the expected
  * army). Its kill time is then KILL_SECONDS × (expected / army)^(1 − PACK_ADAPT):
@@ -258,7 +258,7 @@ export const PACK_FIRE_RANGE = PACK_WAKE;
  */
 export const PACK_ADAPT = 1.0;
 /**
- * Delayed, limited tracking (owner, gauntlet round 2: "they follow too fast
+ * Delayed, limited tracking (owner, horde round 2: "they follow too fast
  * when I move side to side, there should be a delay ... I should be able to
  * miss if I move too fast to the side"). An awake pack's stream aims at
  * where the army was: its aim follows the army's x with this lag (a
@@ -278,7 +278,7 @@ export const TRACK_SPEED = 0.3;
 /**
  * Enemies that win a melee (the army wiped out at its front) stop, jump and
  * cheer for this long (seconds; it holds while paused) before the end
- * screen (owner, gauntlet round 2, wave 8: "maybe celebrate?").
+ * screen (owner, horde round 2, wave 8: "maybe celebrate?").
  */
 export const CHEER_SECONDS = 1.5;
 /** A pack that wakes behind another still charging catches up with that column's tail this much faster (track units per second). */

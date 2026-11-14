@@ -13,7 +13,6 @@ import {
   CROWD_DEPTH_MAX,
   FIRE_PER_SOLDIER,
   HORDE_DEFAULTS,
-  PACK_ADAPT,
   type HordeTuning,
 } from "../../src/core/tuning";
 
@@ -43,7 +42,6 @@ const tuning: HordeTuning = {
   killSeconds: HORDE_DEFAULTS.killSeconds,
   packWidth: HORDE_DEFAULTS.packWidth,
   hordeScale: HORDE_DEFAULTS.hordeScale,
-  packAdapt: PACK_ADAPT,
 };
 
 /** The run a wave plays: no questions or walls, one default pack sized for an army of 60, the crowd waiting. */

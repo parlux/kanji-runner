@@ -11,7 +11,7 @@ import { DIST_SCALE, HAZE_MAX, TRACK_W } from "./world";
  * only drifts sideways.
  */
 
-/** Every look's id, as `?scenery=<id>` names it. */
+/** Every look's id. */
 export const LOOK_IDS = [
   "country",
   "spring",
@@ -809,12 +809,6 @@ export function sceneryFor(seed: number): LookId {
   // a stream of its own, so the pick doesn't follow the track's own randomness
   const u = createRng((seed ^ 0x5ce4e7) >>> 0)();
   return built[Math.floor(u * built.length)] as LookId;
-}
-
-/** The look `?scenery=<id>` forces, or null (absent, unknown or not built yet). */
-export function sceneryParam(search: string): LookId | null {
-  const id = new URLSearchParams(search).get("scenery");
-  return LOOK_IDS.find((l) => l === id && LOOKS[l]) ?? null;
 }
 
 /** Haze is at most this far ahead (world units): props past it are always hidden, so PROP_FAR lies beyond it. */

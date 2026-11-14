@@ -59,20 +59,10 @@ export type Scene =
 /** How the boss clash went: the boss's size and whether the army won (a tie is a loss). */
 export type BossResult = { size: number; won: boolean };
 
-/**
- * Dev flag `?level=N` (N ≥ 2): kanji levels 2..N count as unlocked, and runs
- * ask meaning and reading gates. Null for normal kana runs.
- */
-export function devLevel(search: string): number | null {
-  const n = Number(new URLSearchParams(search).get("level"));
-  return Number.isInteger(n) && n >= 2 ? n : null;
-}
-
 /** What runs are built from this page load, and whether results are saved. */
 export type Session = {
   progress: Progress;
   kana: readonly KanaItem[];
-  persist: boolean;
   /** The level the last run unlocked, shown until the next run starts. */
   unlocked: number | null;
   /**
@@ -86,52 +76,34 @@ export type Session = {
   log: SessionLog | null;
   /**
    * "Meanings only": kanji meaning gates of the Built-in list, its own save,
-   * never synced, no reveal or study cards. Never set in a dev sandbox.
+   * never synced, no reveal or study cards.
    */
   meaning: boolean;
 };
 
-/**
- * A normal session plays and saves the stored progress. A dev `?level=N`
- * session is a sandbox: kanji only, levels 2..N unlocked, SRS updates kept in
- * memory for the page's lifetime but never saved, so real progress is untouched.
- */
+/** A session plays and saves the stored progress (in "Meanings only": its own save). */
 export function createSession(
   stored: Progress,
-  level: number | null,
   storedLog: SessionLog | null = null,
   meaning = false,
 ): Session {
-  return level === null
-    ? {
-        progress: stored,
-        kana: meaning ? [] : KANA,
-        persist: true,
-        unlocked: null,
-        before: null,
-        wk: null,
-        log: storedLog,
-        meaning,
-      }
-    : {
-        progress: { ...stored, unlockedLevel: level },
-        kana: [],
-        persist: false,
-        unlocked: null,
-        before: null,
-        wk: null,
-        log: null,
-        meaning: false,
-      };
+  return {
+    progress: stored,
+    kana: meaning ? [] : KANA,
+    unlocked: null,
+    before: null,
+    wk: null,
+    log: storedLog,
+    meaning,
+  };
 }
 
 /**
  * The session with synced progress merged in. Merging (not replacing) keeps a
- * run that finished while the sync was in flight. A dev session never syncs,
- * and neither does meaning mode: synced (the owner's) progress is never adopted into it.
+ * run that finished while the sync was in flight. Meaning mode never syncs: synced (the owner's) progress is never adopted into it.
  */
 export function adoptProgress(session: Session, synced: Progress): Session {
-  if (!session.persist || session.meaning) return session;
+  if (session.meaning) return session;
   return { ...session, progress: mergeProgress(session.progress, synced) };
 }
 

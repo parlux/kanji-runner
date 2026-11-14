@@ -6,7 +6,6 @@ import {
   adoptProgress,
   afterStep,
   createSession,
-  devLevel,
   handleAction,
   studyOffered,
   updateScene,
@@ -82,42 +81,29 @@ function resize(): void {
 window.addEventListener("resize", resize);
 resize();
 
-// dev tools are gone: drop what they saved on this device (camera, gear, horde)
+// drop the old tuned camera, gear and horde values saved on this device
 removeLegacyKeys(localStorage);
 
 const newSeed = (): number => Math.floor(Math.random() * 2 ** 31);
 let scene: Scene = { kind: "start" };
-const dev = devLevel(window.location.search);
 // "Meanings only" plays its own save; the owner's is not read or written then.
-// A dev `?level=N` sandbox ignores the switch.
 const loadSession = (meaning: boolean) =>
-  meaning && dev === null
+  meaning
     ? createSession(
         loadMeaningProgress(localStorage),
-        null,
         loadMeaningSessionLog(localStorage),
         true,
       )
-    : createSession(
-        loadProgress(localStorage),
-        dev,
-        loadSessionLog(localStorage),
-      );
+    : createSession(loadProgress(localStorage), loadSessionLog(localStorage));
 let session = loadSession(loadMeaningMode(localStorage));
-// the other mode's level, for the start screen's mode switch (none in a dev sandbox)
-const otherLevelOf = (meaning: boolean): number | null =>
-  dev !== null
-    ? null
-    : (meaning ? loadProgress : loadMeaningProgress)(localStorage)
-        .unlockedLevel;
+// the other mode's level, for the start screen's mode switch
+const otherLevelOf = (meaning: boolean): number =>
+  (meaning ? loadProgress : loadMeaningProgress)(localStorage).unlockedLevel;
 let otherLevel = otherLevelOf(session.meaning);
-const syncs = (): boolean => persistence(session)?.sync ?? false;
+const syncs = (): boolean => persistence(session).sync;
 
-// a dev `?level=N` sandbox never syncs; meaning mode neither pulls nor pushes
-const sync = createSyncFromEnv(
-  localStorage,
-  session.persist ? import.meta.env : {},
-);
+// meaning mode neither pulls nor pushes
+const sync = createSyncFromEnv(localStorage, import.meta.env);
 // adoptProgress ignores meaning mode, so an in-flight pull never lands in it
 const adopt = (p: Progress): void => {
   session = adoptProgress(session, p);
@@ -127,7 +113,7 @@ if (syncs()) void sync.pull().then(adopt);
 // speed preset: this device only, changed in settings
 let speed = loadSpeed(localStorage);
 
-// WaniKani: token, cache and mode live on this device only; a dev sandbox skips it
+// WaniKani: token, cache and mode live on this device only
 const wk = createWkState({
   store: localStorage,
   storyStore: createStoryStore(),
@@ -141,9 +127,9 @@ const wk = createWkState({
 });
 const overlayOpen = (): boolean =>
   studyOpen() || tokenFormOpen() || loginOpen() || settingsOpen();
-// WaniKani (the token, for stories) is off in a dev sandbox and in meaning mode;
+// WaniKani (the token, for stories) is off in meaning mode;
 // runs always use the Built-in list
-const wkOn = (): boolean => session.persist && !session.meaning;
+const wkOn = (): boolean => !session.meaning;
 const showTokenForm = (error?: string): void =>
   openTokenForm({
     saved: wk.token(),
@@ -188,7 +174,7 @@ const showSettings = (): void =>
       speed,
       wkLabel: wk.view().label,
       hasToken: wk.token() !== null,
-      sync: session.persist && !session.meaning ? sync.status() : null,
+      sync: !session.meaning ? sync.status() : null,
     }),
     onSpeed: (s) => {
       speed = s;
@@ -250,7 +236,7 @@ const takeDrag = bindDrag(canvas, (x, y) => {
   const h = window.innerHeight;
   const picking = scene.pick !== undefined;
   if (!picking && settingsTap(w, h, x, y)) return showSettings();
-  const mode = !picking && session.persist ? modeTap(w, h, x, y) : null;
+  const mode = !picking ? modeTap(w, h, x, y) : null;
   if (mode && (mode === "meaning") !== session.meaning) {
     // switch modes: load the other save; nothing carries over
     const on = mode === "meaning";
