@@ -58,6 +58,7 @@ type FakeOpts = {
   session?: Resp;
   select?: Resp;
   upsert?: Resp;
+  insert?: Resp;
   signIn?: Resp;
 };
 
@@ -66,6 +67,7 @@ const SESSION = ok({ session: { user: { id: "u1" } } });
 /** A stand-in for the slice of SupabaseClient that sync uses. */
 function fakeClient(opts: FakeOpts = {}) {
   const upserts: unknown[] = [];
+  const inserts: [string, unknown][] = [];
   const queries: unknown[] = [];
   let session = opts.session ?? SESSION;
   const client = {
@@ -81,7 +83,11 @@ function fakeClient(opts: FakeOpts = {}) {
         return { error: null };
       }),
     },
-    from: vi.fn(() => ({
+    from: vi.fn((table: string) => ({
+      insert: async (row: unknown) => {
+        inserts.push([table, row]);
+        return opts.insert ?? { data: null, error: null, status: 201 };
+      },
       select: () => ({
         eq: (col: string, val: string) => ({
           maybeSingle: async () => {
@@ -99,6 +105,7 @@ function fakeClient(opts: FakeOpts = {}) {
   return {
     client,
     upserts,
+    inserts,
     queries,
     factory: () => Promise.resolve(client as unknown as SupabaseClient),
   };
@@ -367,5 +374,70 @@ describe("sync disabled (env vars missing)", () => {
     });
     expect(sync.enabled).toBe(true);
     expect(sync.status()).toBe("offline");
+  });
+});
+
+describe("saveTuning", () => {
+  const data = { version: "abc", waves: [] };
+
+  it("inserts one tuning_results row of the user's (user_id from auth.uid())", async () => {
+    const { sync, inserts, seen } = setup();
+    await expect(sync.saveTuning(data)).resolves.toBe("saved");
+    expect(inserts).toEqual([["tuning_results", { data }]]);
+    // the progress sync status is left alone
+    expect(seen).toEqual([]);
+  });
+
+  it("logged out: login, nothing sent", async () => {
+    const { sync, inserts } = setup({ session: ok({ session: null }) });
+    await expect(sync.saveTuning(data)).resolves.toBe("login");
+    expect(inserts).toEqual([]);
+  });
+
+  it("offline: offline, no client created", async () => {
+    const factory = vi.fn(fakeClient().factory);
+    const sync = createSync({
+      client: factory,
+      store: fakeStore(local),
+      isOnline: () => false,
+    });
+    await expect(sync.saveTuning(data)).resolves.toBe("offline");
+    expect(factory).not.toHaveBeenCalled();
+  });
+
+  it("network error or a missing table: offline; row-level security refusal: login", async () => {
+    await expect(
+      setup({ insert: NETWORK }).sync.saveTuning(data),
+    ).resolves.toBe("offline");
+    const missing = {
+      data: null,
+      error: { message: "relation does not exist", code: "42P01" },
+      status: 404,
+    };
+    await expect(
+      setup({ insert: missing }).sync.saveTuning(data),
+    ).resolves.toBe("offline");
+    const rls = {
+      data: null,
+      error: { message: "row-level security", code: "42501" },
+      status: 403,
+    };
+    await expect(setup({ insert: rls }).sync.saveTuning(data)).resolves.toBe(
+      "login",
+    );
+  });
+
+  it("no Supabase config: disabled", async () => {
+    const sync = createSync({ client: null, store: fakeStore(local) });
+    await expect(sync.saveTuning(data)).resolves.toBe("disabled");
+  });
+
+  it("a client that fails to load: offline, never throws", async () => {
+    const sync = createSync({
+      client: () => Promise.reject(new Error("chunk")),
+      store: fakeStore(local),
+      isOnline: () => true,
+    });
+    await expect(sync.saveTuning(data)).resolves.toBe("offline");
   });
 });

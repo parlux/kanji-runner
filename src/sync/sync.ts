@@ -32,7 +32,15 @@ export type Sync = {
   signIn(email: string, password: string): Promise<SignInResult>;
   /** Drops the session on this device. Local progress is kept. */
   signOut(): Promise<void>;
+  /**
+   * Saves one horde gauntlet run (dev tool) as a new `tuning_results` row
+   * of the signed-in user. Never throws; leaves the sync status alone.
+   */
+  saveTuning(data: unknown): Promise<SaveResult>;
 };
+
+/** How saving a tuning run went: `login` when signed out, `offline` on any other failure. */
+export type SaveResult = "saved" | "disabled" | "login" | "offline";
 
 export type SyncOptions = {
   /** Creates the client on first use; null disables sync. */
@@ -42,6 +50,7 @@ export type SyncOptions = {
 };
 
 const TABLE = "progress";
+const TUNING_TABLE = "tuning_results";
 
 type ErrorLike = { status?: number; code?: string; name?: string } | null;
 
@@ -189,6 +198,23 @@ export function createSync(options: SyncOptions): Sync {
     setStatus("login");
   };
 
+  const saveTuning = async (data: unknown): Promise<SaveResult> => {
+    if (!factory) return "disabled";
+    if (!isOnline()) return "offline";
+    try {
+      const client = await getClient();
+      await userId(client);
+      // user_id defaults to auth.uid(); row-level security checks it
+      const { error, status } = await client
+        .from(TUNING_TABLE)
+        .insert({ data });
+      if (error) return classify(error, status);
+      return "saved";
+    } catch (e) {
+      return e instanceof SyncFailure ? e.status : "offline";
+    }
+  };
+
   return {
     enabled: factory !== null,
     status: () => current,
@@ -200,6 +226,7 @@ export function createSync(options: SyncOptions): Sync {
     push: () => sync(true),
     signIn,
     signOut,
+    saveTuning,
   };
 }
 
