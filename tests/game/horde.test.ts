@@ -23,6 +23,7 @@ import {
   FIGURE_RADIUS,
   HORDE_CAP,
   HORDE_JITTER,
+  HORDE_RAG,
   HORDE_WANDER,
   hordePlace,
   hordeStride,
@@ -73,6 +74,23 @@ describe("horde layout: a scattered crowd", () => {
     }
   });
 
+  it("has no straight front row: columns stand back by different whole rows (up to HORDE_RAG)", () => {
+    for (const n0 of [200, 500, 2_000]) {
+      const L = layout(n0);
+      const p = places(L);
+      // each column's front figure: the nearest one in its x band
+      const fronts = new Map<number, number>();
+      for (const q of p) {
+        const c = Math.floor((q.x - L.left) / L.gx);
+        fronts.set(c, Math.max(fronts.get(c) ?? -Infinity, q.z));
+      }
+      const zs = [...fronts.values()];
+      const spread = Math.max(...zs) - Math.min(...zs);
+      expect(spread).toBeGreaterThan(1.2 * L.gz);
+      expect(spread).toBeLessThan((HORDE_RAG + 1) * L.gz);
+    }
+  });
+
   it("stands 200, 500 and 2,000 apart (min gap) across the mouth and down the track, deeper with more", () => {
     let lastDepth = 0;
     for (const [n0, minGap] of [
@@ -101,7 +119,7 @@ describe("horde layout: a scattered crowd", () => {
       const j = HORDE_JITTER * Math.min(L.gx, L.gz);
       expect(Math.min(...zs)).toBeGreaterThanOrEqual(-j - 1e-9);
       expect(Math.max(...zs)).toBeLessThanOrEqual(
-        c.depth * DIST_SCALE + j + 1e-9,
+        c.depth * DIST_SCALE + HORDE_RAG * L.gz + j + 1e-9,
       );
       expect(Math.max(...zs)).toBeGreaterThan(
         0.9 * c.depth * DIST_SCALE - L.gz,

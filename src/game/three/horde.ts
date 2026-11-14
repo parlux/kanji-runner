@@ -25,7 +25,9 @@ import {
   DIST_SCALE,
   FIGURE_RADIUS,
   HORDE_CAP,
+  COL_SALT,
   HORDE_JITTER,
+  HORDE_RAG,
   HORDE_WANDER,
   hordePlace,
   hordeStride,
@@ -106,12 +108,13 @@ const VERTEX_BODY = `
   float wander = ${f(HORDE_WANDER)} * g;
   float wx = wander * (sin(clock * (0.5 + 0.6 * r1) + ph1) - sin(ph1));
   float wz = wander * (cos(clock * (0.4 + 0.5 * r2) + ph2) - cos(ph2));
+  float rag = floor(hordeRand(uint(col) + ${COL_SALT}u) * ${f(HORDE_RAG + 1)});
   float rad = ${f(FIGURE_RADIUS)} * size;
   float left = hordeCrowd.x;
   float cx = clamp(
-    left + (col + 0.5 + (mod(row, 2.0) > 0.5 ? 0.25 : -0.25)) * gx + ${f(HORDE_JITTER)} * g * (2.0 * r1 - 1.0) + wx,
+    left + (col + 0.5 + (mod(row + rag, 2.0) > 0.5 ? 0.25 : -0.25)) * gx + ${f(HORDE_JITTER)} * g * (2.0 * r1 - 1.0) + wx,
     left + rad, left + cols * gx - rad);
-  float cz = ${f(HORDE_JITTER)} * g * (2.0 * r2 - 1.0) + wz;
+  float cz = ${f(HORDE_JITTER)} * g * (2.0 * r2 - 1.0) + wz + rag * gz;
   float spot = hordeCrowd.w + row * gz;
   float slot = (hordeState.x - 1.0 - k) * hordeCount.w;
   float ahead = -hordeLane.z;

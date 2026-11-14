@@ -626,6 +626,13 @@ export const recruitProgress = (k: number, n: number, t: number): number =>
 export const HORDE_CAP = 20_000;
 /** How far each crowd figure stands off its lattice place, in crowd gaps (each way). */
 export const HORDE_JITTER = 0.15;
+/**
+ * Each column of a waiting crowd stands back 0 to this many whole rows
+ * (its own random pick, keeping the staggered lattice, so no two figures
+ * come closer), so neither its front nor its back is a straight line
+ * (owner at M2: "a loose crowd, not a block").
+ */
+export const HORDE_RAG = 2;
 /** How far a waiting figure wanders from its place, in crowd gaps (each way, at most twice this). */
 export const HORDE_WANDER = 0.2;
 /** A figure that leaves the crowd swings into its lane of the stream over this much running (world units)... */
@@ -669,6 +676,9 @@ export function hordeStride(cols: number): number {
   return st;
 }
 
+/** Offsets a column's hash (its ragged stand-back) from the figures'. */
+export const COL_SALT = 0x9e37;
+
 /** An integer hash (PCG) to 0..1; the horde shader has the same. */
 export function hordeHash(v: number): number {
   const s = (Math.imul(v >>> 0, 747796405) + 2891336453) >>> 0;
@@ -708,6 +718,8 @@ export function hordePlace(
     wander * (Math.sin(L.clock * (0.5 + 0.6 * r1) + ph1) - Math.sin(ph1));
   const wz =
     wander * (Math.cos(L.clock * (0.4 + 0.5 * r2) + ph2) - Math.cos(ph2));
+  // the column stands back whole rows, on the same staggered lattice
+  const rag = Math.floor(hordeHash(col + COL_SALT) * (HORDE_RAG + 1));
   const rad = FIGURE_RADIUS * L.size;
   const right = L.left + L.cols * L.gx;
   const cx = Math.min(
@@ -715,12 +727,12 @@ export function hordePlace(
     Math.max(
       L.left + rad,
       L.left +
-        (col + 0.5 + (row % 2 === 1 ? 0.25 : -0.25)) * L.gx +
+        (col + 0.5 + ((row + rag) % 2 === 1 ? 0.25 : -0.25)) * L.gx +
         HORDE_JITTER * g * (2 * r1 - 1) +
         wx,
     ),
   );
-  const cz = HORDE_JITTER * g * (2 * r2 - 1) + wz;
+  const cz = HORDE_JITTER * g * (2 * r2 - 1) + wz + rag * L.gz;
   const spot = L.run + row * L.gz;
   const slot = (L.n - 1 - k) * L.step;
   const ahead = -L.headZ;
