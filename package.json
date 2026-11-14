@@ -13,7 +13,7 @@
     "test:watch": "vitest",
     "lint": "eslint --cache . && prettier --check --cache .",
     "format": "prettier --write .",
-    "check:fast": "files=$(git diff --name-only --diff-filter=d HEAD -- '*.ts'; git ls-files -o --exclude-standard -- '*.ts') && { [ -z \"$files\" ] || vitest related --run $files; } && npm run typecheck && npm run lint",
+    "check:fast": "scripts/check-fast.sh",
     "check": "npm test && npm run typecheck && npm run lint && npm run build",
     "data:build": "tsx scripts/build-data.ts"
   },
