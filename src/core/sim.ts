@@ -11,10 +11,8 @@ import {
   firepower,
   hazardHeads,
   hazardHp,
-  hazardStrength,
   packArmy,
   packCount,
-  packStrength,
   pickTarget,
   type Threat,
 } from "./fire";
@@ -39,7 +37,8 @@ import {
   CRATE_REWARD_K,
   CROWD_DEPTH_MAX,
   HORDE_GAP_LOOSE,
-  HORDE_THREAT,
+  MELEE_HIT,
+  MELEE_RATE,
   ENEMY_SPEED,
   FIRE_PER_SOLDIER,
   FIRE_RANGE,
@@ -167,12 +166,14 @@ export type RunState = {
   hp: number[];
   /** Enemies per hazard at the start (packCount for packs, 0 otherwise); each has hp / heads. */
   heads: number[];
-  /** Per hazard: a pack's pre-horde strength (packStrength), what its width and contact go by; 0 otherwise. */
-  strength: number[];
-  /** Damage dealt so far per hazard; a block is shattered once this reaches its hp. Enemies that reach the army count as damage too (see `arrived`). */
+  /** Damage dealt so far per hazard (fire and melee); a block is shattered once this reaches its hp. */
   damage: number[];
-  /** Per hazard: a pack's enemies that have streamed into the army so far (fractional). */
+  /** Per hazard: a pack's enemies that have reached the army's front so far (fractional, a running total). */
   arrived: number[];
+  /** Per hazard: a pack's enemies at the army's front now, fighting it (fractional; see MELEE_RATE). */
+  melee: number[];
+  /** Per hazard: soldiers its melee has cost so far (fractional; whole soldiers are lost as it rises). */
+  meleeLoss: number[];
   /** Per hazard: whether its numbers are settled (a pack is sized for the army when it wakes: see wakePacks). */
   woke: boolean[];
   /** Per hazard: where its enemy pack is now (null for blocks and saws). */
@@ -239,9 +240,10 @@ export function createRunState(
     results: [],
     hp: hazardHp(track, expected, horde),
     heads: hazardHeads(track, expected, horde),
-    strength: hazardStrength(track, expected),
     damage: track.hazards.map(() => 0),
     arrived: track.hazards.map(() => 0),
+    melee: track.hazards.map(() => 0),
+    meleeLoss: track.hazards.map(() => 0),
     woke: track.hazards.map(() => false),
     // the head starts at the crowd's front (crowdFront)
     packs: track.hazards.map((h) =>
@@ -396,9 +398,22 @@ export function packDensity(s: RunState, i: number): number {
   return (s.heads[i] ?? 0) / PACK_COLUMN_MAX;
 }
 
-/** How far back (track units) pack i's column runs from its front: its enemies left over packDensity. */
+/**
+ * How far back (track units) pack i's stream runs from its front: its
+ * enemies left that are not yet at the army's front, over packDensity.
+ */
 export function packLength(s: RunState, i: number): number {
-  return packHeadsLeft(s, i) / packDensity(s, i);
+  return packStreamLeft(s, i) / packDensity(s, i);
+}
+
+/** Pack i's enemies left still in its stream (not yet at the army's front). */
+export function packStreamLeft(s: RunState, i: number): number {
+  return Math.max(0, packHeadsLeft(s, i) - (s.melee[i] ?? 0));
+}
+
+/** Pack i's enemies at the army's front now (never more than are left). */
+export function packMelee(s: RunState, i: number): number {
+  return Math.min(s.melee[i] ?? 0, packHeadsLeft(s, i));
 }
 
 /**
@@ -416,55 +431,94 @@ export function packAwake(s: RunState, i: number): boolean {
   );
 }
 
-/** Whether pack i's front has reached the army and its enemies stream in. */
+/** Whether pack i's front has reached the army: its enemies stream into a melee at the army's front until it is dead. */
 export function packStreaming(s: RunState, i: number): boolean {
   const p = s.packs[i];
   return !!p && i >= s.nextHazard && p.pos <= s.dist && packSurvivors(s, i) > 0;
 }
 
-/** Soldiers pack i has cost so far: round(HORDE_THREAT × strength × arrived / heads). */
-export function packLoss(s: RunState, i: number): number {
+/** What one of pack i's enemies is worth in soldiers: the army it was sized for over its head count. */
+export function enemyWorth(s: RunState, i: number): number {
   const heads = s.heads[i] ?? 0;
-  return heads > 0
-    ? Math.round(
-        (HORDE_THREAT * (s.strength[i] ?? 0) * (s.arrived[i] ?? 0)) / heads,
-      )
-    : 0;
+  const per = s.horde.killSeconds * FIRE_PER_SOLDIER;
+  return heads > 0 && per > 0 ? (s.hp[i] ?? 0) / per / heads : 0;
 }
 
 /**
- * n more of pack i's enemies reach the army: they leave the pack (as
- * damage, so the survivors drop) and cost soldiers as the running total of
- * packLoss rises.
+ * n more of pack i's enemies reach the army's front from its stream: they
+ * stop there and join the melee (never more than the stream has left).
  */
 function arrive(s: RunState, i: number, n: number): RunState {
-  const left = packHeadsLeft(s, i);
-  const k = Math.min(n, left);
+  const k = Math.min(n, packStreamLeft(s, i));
   if (k <= 0) return s;
-  const hp = s.hp[i] ?? 0;
-  const heads = s.heads[i] ?? 0;
-  const damage = [...s.damage];
   const arrived = [...s.arrived];
-  damage[i] =
-    k >= left ? hp : Math.min(hp, (damage[i] ?? 0) + (k * hp) / heads);
+  const melee = [...s.melee];
   arrived[i] = (arrived[i] ?? 0) + k;
-  const before = packLoss(s, i);
-  const next = { ...s, damage, arrived };
-  const loss = Math.min(s.army, packLoss(next, i) - before);
-  if (loss <= 0) return next;
-  const army = s.army - loss;
-  return {
-    ...next,
-    army,
-    lastClip: { loss, dist: s.dist },
-    status: army <= 0 ? "dead" : s.status,
-  };
+  melee[i] = packMelee(s, i) + k;
+  return { ...s, arrived, melee };
+}
+
+/**
+ * dt seconds of melee at the army's front (see MELEE_RATE): every pack with
+ * enemies there costs MELEE_RATE × their worth in soldiers per second (a
+ * running total; whole soldiers are lost as it rises), and the army fights
+ * back, firepower(army) × dt of damage to the nearest pack there, which
+ * kills from its front (the melee) first. Fire comes on top (see fire).
+ * An army at 0 is dead.
+ */
+export function meleeStep(s: RunState, dt: number): RunState {
+  let next = s;
+  let fought = false;
+  for (let i = s.nextHazard; i < s.packs.length; i++) {
+    const m = packMelee(next, i);
+    if (m <= 0) continue;
+    if (!fought) {
+      // the army fights back at the nearest pack at its front
+      fought = true;
+      const hp = next.hp[i] ?? 0;
+      const heads = next.heads[i] ?? 0;
+      const reach = heads > 0 ? (m * hp) / heads : 0;
+      const damage = [...next.damage];
+      const dealt = Math.min(
+        hp,
+        (damage[i] ?? 0) + Math.min(reach, MELEE_HIT * firepower(s.army) * dt),
+      );
+      damage[i] = dealt;
+      next = {
+        ...next,
+        damage,
+        lastShatter:
+          dealt >= hp ? { index: i, dist: s.dist } : next.lastShatter,
+      };
+    }
+    const meleeLoss = [...next.meleeLoss];
+    const was = meleeLoss[i] ?? 0;
+    const now = was + MELEE_RATE * m * enemyWorth(next, i) * dt;
+    meleeLoss[i] = now;
+    const loss = Math.min(
+      next.army,
+      Math.floor(now + 1e-9) - Math.floor(was + 1e-9),
+    );
+    next = { ...next, meleeLoss };
+    if (loss > 0) {
+      const army = next.army - loss;
+      next = {
+        ...next,
+        army,
+        lastClip: { loss, dist: s.dist },
+        status: army <= 0 ? "dead" : next.status,
+      };
+    }
+  }
+  if (next === s) return s;
+  const melee = next.melee.map((m, i) => Math.min(m, packHeadsLeft(next, i)));
+  return { ...next, melee };
 }
 
 /**
  * A pack that has just woken is sized for the army as it is now (packArmy:
- * part of the way from the expected army to a bigger actual one): its HP,
- * head count and contact strength. Once, at waking; nothing before.
+ * part of the way from the expected army to a bigger actual one): its HP
+ * and head count (so its melee worth too). Once, at waking; nothing before.
  */
 function wakePacks(s: RunState): RunState {
   let next = s;
@@ -481,19 +535,18 @@ function wakePacks(s: RunState): RunState {
     }
     const hp = [...next.hp];
     const heads = [...next.heads];
-    const strength = [...next.strength];
     hp[i] = army * per;
     heads[i] = packCount(army, next.horde);
-    strength[i] = Math.max(strength[i] ?? 0, packStrength(army));
-    next = { ...next, woke, hp, heads, strength };
+    next = { ...next, woke, hp, heads };
   }
   return next;
 }
 
 /**
  * Charging packs run at the army, staying where they are across the track
- * (their span closes onto the army near it: packSpan). A pack whose front reaches the army stays there and streams in:
- * the stretch of column that would run past it arrives (packDensity enemies
+ * (their span closes onto the army near it: packSpan). A pack whose front
+ * reaches the army stays there and streams into a melee at its front: the
+ * stretch of column that would run past it arrives (packDensity enemies
  * per track unit). A pack right behind another that still has enemies joins
  * the back of its column, catching up at PACK_MERGE_SPEED, so the two make
  * one target and one stream.
@@ -643,6 +696,7 @@ export function stepRun(s: RunState, dt: number, pace = 1): RunState {
   next.dist += BASE_SPEED * pace * speedMul(s.dist, s.track) * dt;
   next = wakePacks(next);
   next = movePacks(next, dt);
+  next = meleeStep(next, dt);
   next = fire(next, w, dt);
   // resolve everything passed this step, in track order
   for (;;) {
@@ -650,7 +704,14 @@ export function stepRun(s: RunState, dt: number, pace = 1): RunState {
     const hazard = next.track.hazards[next.nextHazard];
     const pos = hazardPos(next, next.nextHazard);
     const rowPos = next.track.questions[next.next] ?? Infinity;
-    // a pack streaming in holds the hazards behind it until it is done
+    // a melee reaching the next wall or hazard is fought out first (track order)
+    if (
+      hazard?.kind === "pack" &&
+      packStreaming(next, next.nextHazard) &&
+      Math.min(rowPos, nextObstacle(next)) <= next.dist
+    )
+      next = settleMelee(next, next.nextHazard);
+    // a pack streaming in (or in melee) holds the hazards behind it until it is dead
     if (
       hazard &&
       pos <= rowPos &&
@@ -663,10 +724,55 @@ export function stepRun(s: RunState, dt: number, pace = 1): RunState {
   }
 }
 
+/** Track position of the first block or saw after the next hazard (packs behind a melee queue behind it). */
+function nextObstacle(s: RunState): number {
+  for (let j = s.nextHazard + 1; j < s.track.hazards.length; j++) {
+    const h = s.track.hazards[j];
+    if (h && h.kind !== "pack") return h.pos;
+  }
+  return Infinity;
+}
+
+/** Step of a melee fought out at once (settleMelee), in seconds. */
+const SETTLE_DT = 1 / 60;
+/** Most steps a melee fought out at once can take (it never needs this many). */
+const SETTLE_MAX = 60 * 60;
+
+/**
+ * The cap on a melee's length, for track order: when the army reaches the
+ * next wall or hazard while pack i is still fighting at its front, the rest
+ * of its stream joins the melee and it is fought out at once, as meleeStep
+ * and fire would (the army's fire all on it), until the pack or the army is
+ * dead. Rare in a real run (see the balance log in tasks/todo-hordes.md).
+ */
+function settleMelee(s: RunState, i: number): RunState {
+  let next = arrive(s, i, Infinity);
+  for (
+    let k = 0;
+    k < SETTLE_MAX && packSurvivors(next, i) > 0 && next.status === "running";
+    k++
+  ) {
+    next = meleeStep(next, SETTLE_DT);
+    const hp = next.hp[i] ?? 0;
+    const damage = [...next.damage];
+    const dealt = Math.min(
+      hp,
+      (damage[i] ?? 0) + firepower(next.army) * SETTLE_DT,
+    );
+    damage[i] = dealt;
+    next = {
+      ...next,
+      damage,
+      lastShatter: dealt >= hp ? { index: i, dist: s.dist } : next.lastShatter,
+    };
+  }
+  return next;
+}
+
 /**
  * Losses only: hazards never touch the streak or results. Shattered blocks
- * don't clip. A pack is passed once it is shot out or has streamed in (its
- * losses came as it arrived; see movePacks).
+ * don't clip. A pack is passed once it is dead (its losses came in its
+ * melee; see meleeStep).
  */
 function passHazard(s: RunState, h: Hazard): RunState {
   const i = s.nextHazard;

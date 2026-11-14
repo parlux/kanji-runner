@@ -118,16 +118,6 @@ export function hazardHp(
   });
 }
 
-/** Per hazard: packStrength of the expected army before a pack (its contact threat), 0 otherwise. */
-export function hazardStrength(
-  track: Track,
-  expected: readonly number[],
-): number[] {
-  return track.hazards.map((h) =>
-    h.kind === "pack" ? packStrength(expectedAt(track, expected, h.pos)) : 0,
-  );
-}
-
 /** Enemies per hazard at the start: packCount for packs, 0 for blocks and saws. */
 export function hazardHeads(
   track: Track,

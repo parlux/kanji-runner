@@ -19,7 +19,7 @@ export type HordeSettings = {
 export const HORDE_LIMITS = {
   count: { min: 200, max: 20000 },
   scale: { min: 0.4, max: 1.5 },
-  killSeconds: { min: 0.5, max: 3 },
+  killSeconds: { min: 0.5, max: 5 },
   width: { min: 0.3, max: 1 },
 } as const;
 

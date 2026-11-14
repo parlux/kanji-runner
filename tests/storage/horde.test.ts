@@ -49,7 +49,7 @@ describe("horde storage", () => {
       JSON.stringify({ ...tuned, count: 199 }),
       JSON.stringify({ ...tuned, count: 20001 }),
       JSON.stringify({ ...tuned, scale: 0.1 }),
-      JSON.stringify({ ...tuned, killSeconds: 4 }),
+      JSON.stringify({ ...tuned, killSeconds: 6 }),
       JSON.stringify({ ...tuned, width: "wide" }),
       JSON.stringify({ ...tuned, width: null }),
     ])
@@ -72,18 +72,18 @@ describe("horde storage", () => {
     expect(() => saveHorde(bad, tuned)).not.toThrow();
   });
 
-  it("the default settings build the default tuning: the owner's 200 enemies, 2.5 s, size 1, width 0.8", () => {
+  it("the default settings build the default tuning: the owner's 200 enemies, 3.5 s, size 1, width 0.8", () => {
     expect(DEFAULT_HORDE_SETTINGS).toEqual({
       count: 200,
       scale: 1,
-      killSeconds: 2.5,
+      killSeconds: 3.5,
       width: 0.8,
     });
     expect(hordeTuning(DEFAULT_HORDE_SETTINGS)).toEqual(HORDE_DEFAULTS);
     expect(HORDE_DEFAULTS).toEqual({
       hordeK: 3,
       packMax: 200,
-      killSeconds: 2.5,
+      killSeconds: 3.5,
       packWidth: 0.8,
       hordeScale: 1,
     });

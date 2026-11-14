@@ -153,7 +153,7 @@ export const HORDE_K = 3 * (PACK_MAX / 200);
  * Seconds an army of the expected size takes to mow down a whole pack: pack
  * HP = KILL_SECONDS × FIRE_PER_SOLDIER × expected army.
  */
-export const KILL_SECONDS = 2.5;
+export const KILL_SECONDS = 3.5;
 /**
  * A pack's crowd's width (its mouth) as a share of the track (1 = the
  * whole track), at the pack's own x. Its stream is as wide as the army.
@@ -186,11 +186,24 @@ export const HORDE_DEFAULTS: HordeTuning = {
   hordeScale: HORDE_SCALE,
 };
 /**
- * Stream contact: each enemy that reaches the army costs HORDE_THREAT ×
- * packStrength(expected) / heads soldiers (the running total rounded), so a
- * pack that arrives untouched costs HORDE_THREAT × today's strength.
+ * Melee (owner, gauntlet round 1: enemies that reach you "stop right in
+ * front and keep attacking until I killed them all or I was dead"; replaces
+ * the stream's arrivals and HORDE_THREAT). Enemies that reach the army stand
+ * at its front (RunState.melee) and fight: each second the army loses
+ * MELEE_RATE soldiers per soldier's worth of enemies there (an enemy is
+ * worth the army its pack was sized for over its head count), and deals
+ * MELEE_HIT × firepower(army) of damage to them, on top of its fire. So a
+ * pack the army's size fighting it out with no fire at all costs about a
+ * quarter of the army (tested); with fire much less, and an army far
+ * smaller than its pack can be wiped out. No cap on how many fight at once.
  */
-export const HORDE_THREAT = 0.2;
+export const MELEE_RATE = 0.26;
+/**
+ * The army's melee damage as a share of its firepower. A long melee holds
+ * back the crates and saws behind it (and takes the fire), so a hard-hitting
+ * army keeps the run's balance: at 1 the 80% bot won 0.34 of its runs.
+ */
+export const MELEE_HIT = 2;
 /**
  * A waiting pack is a loose, scattered crowd (owner at Checkpoint M2): its
  * figures stand this far apart (track units, times the figure size), about
@@ -227,16 +240,16 @@ export const PACK_COLUMN_MAX = CROWD_DEPTH_MAX + STREAM_LEAD;
  */
 export const PACK_FIRE_RANGE = PACK_WAKE;
 /**
- * Packs follow the army you actually have, part of the way (owner, during
- * H5b): when a pack wakes, its HP, head count and contact strength are set
- * as if the expected army were expected^(1 − PACK_ADAPT) × army^PACK_ADAPT
- * (never below the expected army). Its kill time is then KILL_SECONDS ×
- * (expected / army)^(1 − PACK_ADAPT): 2.2 s at twice the expected army,
- * 1.8 s at 5×, 1.3 s at the 25× a flawless run reaches by the end (0.7
- * would give 0.95 s there); an army at or below expected sees the old
- * numbers.
+ * Packs follow the army you actually have (owner, during H5b; full adapt
+ * after gauntlet round 1): when a pack wakes, its HP, head count and melee
+ * worth are set as if the expected army were
+ * expected^(1 − PACK_ADAPT) × army^PACK_ADAPT (never below the expected
+ * army). Its kill time is then KILL_SECONDS × (expected / army)^(1 − PACK_ADAPT):
+ * at 1.0, KILL_SECONDS however strong the army is (strength shows as a
+ * bigger horde, up to packMax); an army at or below expected sees the
+ * numbers the pack was built with.
  */
-export const PACK_ADAPT = 0.8;
+export const PACK_ADAPT = 1.0;
 /** A pack that wakes behind another still charging catches up with that column's tail this much faster (track units per second). */
 export const PACK_MERGE_SPEED = 2.5;
 

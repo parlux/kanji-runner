@@ -8,7 +8,11 @@ import {
   crowdFront,
   crowdOf,
   packCrowd,
+  enemyWorth,
+  meleeStep,
   packLength,
+  packMelee,
+  packStreamLeft,
   packStreaming,
   rowOpenings,
   packMouth,
@@ -28,7 +32,6 @@ import {
   firepower,
   packArmy,
   packCount,
-  packStrength,
 } from "../../src/core/fire";
 import { kanaRun } from "./kana-run";
 import {
@@ -46,7 +49,6 @@ import {
   CROWD_DEPTH_MAX,
   HORDE_GAP_LOOSE,
   HORDE_DEFAULTS,
-  HORDE_THREAT,
   PACK_COLUMN_MAX,
   STREAM_LEAD,
   PACK_FIRE_RANGE,
@@ -495,7 +497,6 @@ describe("shooting", () => {
     hp: number[],
     army = 20,
     heads = hp.map((h) => Math.round(h / ENEMY_HP)),
-    strength = hp.map((h) => h / ENEMY_HP),
   ): RunState {
     const s = createRunState(kanaRun(1), {
       questions: [100],
@@ -506,7 +507,7 @@ describe("shooting", () => {
     const packs = hazards.map((h) =>
       h.kind === "pack" ? { pos: h.pos, x: h.x } : null,
     );
-    return { ...s, hp, heads, strength, army, packs };
+    return { ...s, hp, heads, army, packs };
   }
   const pack = (pos: number, x = 0.5): Pack => ({ kind: "pack", pos, x });
   /** Packs narrower than the track, so they can miss the crowd. */
@@ -695,6 +696,11 @@ describe("shooting", () => {
 
   describe("stream contact", () => {
     /** Steps until pack 0 is passed (or the run ends), recording the army and the losses per step. */
+    /** Each enemy worth next to nothing (the army it was sized for over its heads), so a test pack costs no soldiers. */
+    const calm = (s: RunState): RunState => ({
+      ...s,
+      horde: { ...s.horde, killSeconds: 1e15 },
+    });
     const stream = (s0: RunState, max = 5) => {
       let s = s0;
       const losses: number[] = [];
@@ -709,98 +715,162 @@ describe("shooting", () => {
       return { s, losses, states };
     };
 
-    it("a pack that arrives untouched costs HORDE_THREAT × strength in total, a few soldiers at a time", () => {
-      for (const [heads, strength] of [
-        [200, 160],
-        [2_000, 133],
-        [20_000, 100],
-        [15, 7],
-      ] as const) {
-        // so many hit points that the fire never kills one
-        const s0 = range([pack(0.3)], [1e12], 1000, [heads], [strength]);
-        const { s, losses, states } = stream(s0);
-        expect(s.nextHazard).toBe(1);
-        expect(1000 - s.army).toBe(Math.round(HORDE_THREAT * strength));
-        // each enemy that arrives costs HORDE_THREAT × strength / heads (the running total rounded)
-        for (const r of states)
-          expect(1000 - r.army).toBe(
-            Math.round((HORDE_THREAT * strength * (r.arrived[0] ?? 0)) / heads),
-          );
-        if (HORDE_THREAT * strength >= 10)
-          expect(losses.filter((l) => l > 0).length).toBeGreaterThanOrEqual(5);
-      }
-    });
-
-    it("the front stays at the army while enemies stream in, and the survivors drop as they arrive", () => {
-      const s0 = range([pack(0.3)], [1e12], 1000, [200], [160]);
-      const { states } = stream(s0);
+    it("enemies that reach the army stop at its front and fight: they stay alive there, the stream feeds them, the front stays at the army", () => {
+      // so many hit points that nothing dies, each enemy worth next to nothing
+      const s0 = calm(range([pack(0.3)], [1e12], 1000, [200]));
+      const { states } = stream(s0, 2);
       const streaming = states.filter((r) => packStreaming(r, 0));
       expect(streaming.length).toBeGreaterThan(5);
       for (const r of streaming) {
         expect(hazardPos(r, 0)).toBe(r.dist);
-        expect(packSurvivors(r, 0)).toBe(
-          Math.ceil(200 - (r.arrived[0] ?? 0) - 1e-6),
-        );
+        // nobody vanishes into the army: all 200 are still alive
+        expect(packSurvivors(r, 0)).toBe(200);
+        expect(packMelee(r, 0)).toBeCloseTo(r.arrived[0] ?? 0, 6);
+        expect(packMelee(r, 0) + packStreamLeft(r, 0)).toBeCloseTo(200, 4);
+      }
+      // the whole stream is at the front within its length / the closing speed
+      const last = states.at(-1) as RunState;
+      expect(packMelee(last, 0)).toBeCloseTo(200, 4);
+      expect(last.nextHazard).toBe(0);
+    });
+
+    it("melee: both sides lose units every second; whole soldiers, from a running total of MELEE_RATE × the enemies' worth", () => {
+      const s0 = range([pack(0.001)], [3.5 * 300], 300, [200]);
+      const { states } = stream(s0, 0.6);
+      let lostSteps = 0;
+      let prev = s0;
+      for (const r of states) {
+        expect(Number.isInteger(r.army)).toBe(true);
+        expect(r.army - Math.round(r.army)).toBe(0);
+        // the army's loss is the whole part of the running total
+        expect(300 - r.army).toBe(Math.floor((r.meleeLoss[0] ?? 0) + 1e-9));
+        if (r.army < prev.army) lostSteps++;
+        prev = r;
+      }
+      expect(lostSteps).toBeGreaterThanOrEqual(5);
+      // enemies die too, from the front (the melee) first
+      const end = states.at(-1) as RunState;
+      expect(packSurvivors(end, 0)).toBeLessThan(200);
+      expect(enemyWorth(end, 0)).toBeCloseTo(300 / 200, 9);
+    });
+
+    it("a pack the army's size fighting it out at the front with no fire costs about a quarter of the army", () => {
+      for (const army of [20, 60, 300, 1500]) {
+        let s: RunState = {
+          ...range([pack(0)], [KILL_SECONDS * firepower(army)], army, [
+            Math.min(200, 3 * army),
+          ]),
+          woke: [true],
+        };
+        s = { ...s, melee: [s.heads[0] ?? 0] };
+        let t = 0;
+        while (packSurvivors(s, 0) > 0 && s.army > 0 && t < 30) {
+          s = meleeStep(s, DT);
+          t += DT;
+        }
+        expect(packSurvivors(s, 0)).toBe(0);
+        const share = (army - s.army) / army;
+        expect(share).toBeGreaterThan(0.2);
+        expect(share).toBeLessThan(0.3);
       }
     });
 
-    it("stops costing soldiers when the pack is shot out mid-stream", () => {
-      // 100 soldiers fire 100 HP/s: 12 HP lasts 0.12 s, the stream about 0.2 s
-      const s0 = range([pack(0.001)], [12], 100, [200], [100]);
+    it("an army far smaller than its pack can be wiped out in melee; fire keeps going all the while", () => {
+      // 10 soldiers against a pack sized for 60
+      let s = range([pack(0.3)], [KILL_SECONDS * firepower(60)], 10, [200]);
+      let fired = 0;
+      let meleeSteps = 0;
+      for (let n = 0; n < 20 / DT && s.status === "running"; n++) {
+        const next = stepRun(s, DT);
+        if (packMelee(s, 0) > 0) {
+          meleeSteps++;
+          if (next.target === 0) fired++;
+        }
+        s = next;
+      }
+      expect(s.status).toBe("dead");
+      expect(s.army).toBe(0);
+      expect(packSurvivors(s, 0)).toBeGreaterThan(0);
+      expect(meleeSteps).toBeGreaterThan(10);
+      expect(fired).toBeGreaterThanOrEqual(meleeSteps - 1);
+    });
+
+    it("a melee ends when the pack is dead: nothing is lost after, and the pack is passed", () => {
+      const s0 = range([pack(0.001)], [3.5 * 100], 100, [200]);
       const { s, states } = stream(s0);
       expect(s.nextHazard).toBe(1);
       const lost = 100 - s.army;
       expect(lost).toBeGreaterThan(0);
-      expect(lost).toBeLessThan(Math.round(HORDE_THREAT * 100));
+      // with fire, far less than the quarter a fight with no fire costs
+      expect(lost).toBeLessThan(25);
       const out = states.findIndex((r) => packSurvivors(r, 0) === 0);
       expect(out).toBeGreaterThan(0);
       expect(states[out]?.lastShatter?.index).toBe(0);
-      // nothing is lost after it is shot out
       for (const r of states.slice(out)) expect(r.army).toBe(s.army);
       expect(stepFor(s, 0.5).army).toBe(s.army);
     });
 
+    it("pause holds a melee: no step, no change", () => {
+      const s0 = range([pack(0.001)], [3.5 * 100], 100, [200]);
+      const mid = stream(s0, 0.4).s;
+      expect(packMelee(mid, 0)).toBeGreaterThan(0);
+      // a paused game never steps the run; a run that is over never changes
+      const over = { ...mid, status: "dead" as const };
+      expect(stepRun(over, DT)).toBe(over);
+    });
+
     it("every pack's column is PACK_COLUMN_MAX long (its deepest crowd plus STREAM_LEAD): even 20,000 stream in within that / the closing speed", () => {
       for (const heads of [3, 200, 500, 2_000, 20_000]) {
-        const s0 = range([pack(0.001)], [1e12], 1000, [heads], [100]);
+        const s0 = calm(range([pack(0.001)], [1e12], 1000, [heads]));
         const length = PACK_COLUMN_MAX;
         expect(packLength(s0, 0)).toBeCloseTo(length, 9);
         expect(crowdOf(s0, 0).depth + STREAM_LEAD).toBeLessThanOrEqual(
           length + 1e-12,
         );
-        const { s, states } = stream(s0);
-        expect(s.nextHazard).toBe(1);
-        const secs = states.length * DT;
+        const { states } = stream(s0, 3);
+        // the whole column is at the army's front by then
+        const secs = states.findIndex((r) => packStreamLeft(r, 0) <= 1e-6) * DT;
+        expect(secs).toBeGreaterThan(0);
         expect(secs).toBeLessThanOrEqual(
           length / (BASE_SPEED + ENEMY_SPEED) + 2 * DT,
         );
       }
     });
 
-    it("holds the hazards behind a streaming pack until it is done", () => {
+    it("holds the hazards behind a melee until it is dead; one reached mid-melee has it fought out first", () => {
       const s0 = range(
-        [pack(0.001), wide(0.05)],
-        [1e12, 1e12],
+        [pack(0.001), wide(0.5)],
+        [3.5 * 1000, 1e12],
         1000,
-        [20_000, 0],
-        [100, 0],
+        [200, 0],
       );
       let s = s0;
+      let held = 0;
       while (packStreaming(s, 0) || s.dist < 0.01) {
         expect(s.nextHazard).toBe(0);
+        if (packMelee(s, 0) > 0) held++;
         s = stepRun(s, DT);
       }
+      expect(held).toBeGreaterThan(5);
       expect(s.nextHazard).toBeGreaterThanOrEqual(1);
+      expect(packSurvivors(s, 0)).toBe(0);
+      // fought out before the block: never past it
+      expect(s.dist).toBeLessThan(0.5 + 2 * BASE_SPEED * DT);
+      // a wall reached mid-melee: fought out first, then the wall
+      const w0: RunState = {
+        ...range([pack(0.001)], [1e9], 1000, [200]),
+        track: { questions: [0.3, 100], hazards: [pack(0.001)], charges: [] },
+      };
+      let w = w0;
+      while (w.next === 0 && w.status === "running") {
+        const next = stepRun(w, DT);
+        if (next.next > 0) expect(packSurvivors(next, 0)).toBe(0);
+        w = next;
+      }
     });
 
     it("merges a pack charging right behind another into one column: one target, one stream", () => {
-      const s0 = range(
-        [pack(2), pack(4)],
-        [1e12, 1e12],
-        1000,
-        [200, 200],
-        [100, 100],
-      );
+      const s0 = range([pack(2), pack(4)], [3000, 3000], 1000, [200, 200]);
       let s = s0;
       let joined = false;
       let gap = Infinity;
@@ -821,7 +891,7 @@ describe("shooting", () => {
       // the second streams in right after the first
       expect(gap).toBeLessThanOrEqual(1);
       expect(s.nextHazard).toBe(2);
-      expect(1000 - s.army).toBe(2 * Math.round(HORDE_THREAT * 100));
+      expect(1000 - s.army).toBeGreaterThan(0);
     });
 
     it("a 2,000 or 20,000 pack never streams across a wall in a real run", () => {
@@ -902,7 +972,7 @@ describe("shooting", () => {
 
     it("the stream starts the moment the pack wakes: its head leaves the crowd's front and can be shot from there", () => {
       // a pack 7 ahead (well beyond FIRE_RANGE), behind a wall at 0.3
-      const s0 = range([pack(7)], [1e9], 100, [500], [60]);
+      const s0 = range([pack(7)], [1e9], 100, [500]);
       const walled = { ...s0, track: { ...s0.track, questions: [0.3, 100] } };
       const waiting = stepFor(walled, 0.1);
       expect(waiting.packs[0]?.pos).toBe(7);
@@ -935,67 +1005,73 @@ describe("shooting", () => {
       expect(stepRun(later, DT).target).toBe(1);
     });
 
-    it("in a real run, the army can fire at each pack for at least 1.7 s (from waking until it has streamed in; 2.2 s at the start's speed), and its whole column streams in before the next wall", () => {
-      for (const killSeconds of [1, 2.5]) {
-        const tuning = {
-          ...HORDE_DEFAULTS,
-          killSeconds,
-          hordeK: 7.5,
-          packMax: 500,
-          packWidth: 0.8,
-          hordeScale: 1,
+    it("in a real run, the army can fire at each lone pack from waking until its whole stream is at its front for at least 1.7 s (2.2 s at the start's speed)", () => {
+      // packs that never die from fire (each enemy worth what it is in a
+      // normal run): the window is as long as it gets; crates break at once
+      const tuning = {
+        ...HORDE_DEFAULTS,
+        killSeconds: 1e9,
+        hordeK: 7.5,
+        packMax: 500,
+      };
+      let least = Infinity;
+      for (const seed of [1, 2, 3, 4]) {
+        let s = createRunState(
+          kanaRun(seed),
+          buildTrack(seed, ROWS_PER_RUN, false),
+          null,
+          tuning,
+        );
+        s = {
+          ...s,
+          hp: s.hp.map((h, i) =>
+            s.track.hazards[i]?.kind === "pack" ? h : h && 1e-9,
+          ),
+          army: 60,
         };
-        for (const seed of [1, 2, 3, 4]) {
-          let s = createRunState(
-            kanaRun(seed),
-            buildTrack(seed, ROWS_PER_RUN, false),
-            null,
-            tuning,
+        const fired = s.hp.map(() => 0);
+        for (let n = 0; n < 200 / DT && s.status === "running"; n++) {
+          const row = s.rows[s.next];
+          const o = rowOpenings(s, s.next)[row?.answerIndex ?? 0];
+          let next = stepRun(
+            setTarget({ ...s, army: 60 }, o?.centre ?? 0.5),
+            DT,
           );
-          // so many hit points that nothing dies: the window is as long as it gets
-          // (crates break at once, so only the packs take fire)
-          s = {
-            ...s,
-            hp: s.hp.map((h, i) =>
-              s.track.hazards[i]?.kind === "pack" ? h * 1e6 : h && 1e-9,
-            ),
-            army: 60,
-          };
-          const fired = s.hp.map(() => 0);
-          for (let n = 0; n < 200 / DT && s.status === "running"; n++) {
-            const row = s.rows[s.next];
-            const o = rowOpenings(s, s.next)[row?.answerIndex ?? 0];
-            const next = stepRun(
-              setTarget({ ...s, army: 60 }, o?.centre ?? 0.5),
-              DT,
-            );
-            if (next.target !== null)
-              fired[next.target] = (fired[next.target] ?? 0) + DT;
-            if (next.next > s.next)
-              for (let i = s.nextHazard; i < s.packs.length; i++)
-                expect(packStreaming(s, i)).toBe(false);
-            s = next;
-          }
-          expect(s.status).toBe("finished");
-          s.track.hazards.forEach((h, i) => {
-            // a pack right behind another shares its time; a lone one gets its own
-            if (h.kind === "pack" && s.track.hazards[i - 1]?.kind !== "pack")
-              expect(fired[i]).toBeGreaterThan(1.7);
-          });
+          const t = next.target;
+          if (t !== null && packStreamLeft(next, t) > 0)
+            fired[t] = (fired[t] ?? 0) + DT;
+          // once the whole stream is at the front, the test ends the melee
+          const damage = next.damage.map((d, i) =>
+            next.track.hazards[i]?.kind === "pack" &&
+            (next.arrived[i] ?? 0) > 0 &&
+            packStreamLeft(next, i) <= 1e-9
+              ? (next.hp[i] ?? 0)
+              : d,
+          );
+          next = { ...next, damage };
+          s = next;
         }
+        expect(s.status).toBe("finished");
+        s.track.hazards.forEach((h, i) => {
+          // a pack right behind another shares its time; a lone one gets its own
+          if (h.kind === "pack" && s.track.hazards[i - 1]?.kind !== "pack")
+            least = Math.min(least, fired[i] ?? 0);
+        });
       }
+      expect(least).toBeGreaterThan(1.7);
     });
   });
 
   describe("packs follow the army you have", () => {
     it("packArmy: the expected army, or part of the way (log scale) to a bigger one", () => {
-      expect(PACK_ADAPT).toBe(0.8);
+      expect(PACK_ADAPT).toBe(1);
       for (const e of [5, 40, 300]) {
         expect(packArmy(e, e)).toBe(e);
         expect(packArmy(e, e / 2)).toBe(e);
         expect(packArmy(e, 0)).toBe(e);
         for (const k of [2, 5, 25])
-          expect(packArmy(e, k * e)).toBeCloseTo(e * k ** PACK_ADAPT, 9);
+          for (const adapt of [0.5, 0.8, PACK_ADAPT])
+            expect(packArmy(e, k * e, adapt)).toBeCloseTo(e * k ** adapt, 9);
         expect(packArmy(e, 3 * e)).toBeGreaterThan(packArmy(e, 2 * e));
       }
     });
@@ -1004,7 +1080,7 @@ describe("shooting", () => {
     const meet = (e: number, army: number) => {
       const hp = KILL_SECONDS * firepower(e);
       const s0: RunState = {
-        ...range([pack(1.9)], [hp], army, [packCount(e)], [packStrength(e)]),
+        ...range([pack(1.9)], [hp], army, [packCount(e)]),
         woke: [false],
       };
       let s = stepRun(s0, DT);
@@ -1018,29 +1094,24 @@ describe("shooting", () => {
       return { s0, woke, t };
     };
 
-    it("an army well above expected mows a pack a bit faster, never in a blink: ~2.5 s at 1×, 2.2 s at 2×, 1.8 s at 5×, 1.3 s at 25×", () => {
+    it("however strong the army, a pack takes about KILL_SECONDS (3.5 s) to mow down: at 1×, 2×, 5× and 25× expected", () => {
+      expect(KILL_SECONDS).toBe(3.5);
       for (const e of [10, 40, 120])
-        for (const [k, secs] of [
-          [1, 2.5],
-          [2, 2.18],
-          [5, 1.81],
-          [25, 1.31],
-        ] as const) {
+        for (const k of [1, 2, 5, 25]) {
           const { t } = meet(e, k * e);
-          expect(t).toBeGreaterThan(0.9 * secs);
-          expect(t).toBeLessThan(1.1 * secs);
-          expect(t).toBeGreaterThan(1.2);
+          expect(t).toBeGreaterThan(0.95 * KILL_SECONDS);
+          expect(t).toBeLessThan(1.05 * KILL_SECONDS);
         }
     });
 
-    it("a bigger army meets a bigger horde (capped at packMax) with a matching contact strength, set once at waking", () => {
+    it("a bigger army meets a bigger horde (capped at packMax), each enemy worth more, set once at waking", () => {
       const { s0, woke } = meet(20, 100);
       const army = packArmy(20, 100);
       expect(woke.woke[0]).toBe(true);
       expect(woke.hp[0]).toBeCloseTo(KILL_SECONDS * firepower(army), 9);
       expect(woke.heads[0]).toBe(packCount(army));
       expect(woke.heads[0]).toBeGreaterThan(s0.heads[0] ?? 0);
-      expect(woke.strength[0]).toBe(packStrength(army));
+      expect(enemyWorth(woke, 0)).toBeCloseTo(army / packCount(army), 9);
       expect(meet(100, 5000).woke.heads[0]).toBe(HORDE_DEFAULTS.packMax);
       // set once: a later change of army doesn't resize it
       const later = stepRun({ ...woke, army: 10_000 }, DT);
@@ -1053,12 +1124,11 @@ describe("shooting", () => {
         const { s0, woke } = meet(40, Math.round(k * 40));
         expect(woke.hp[0]).toBe(s0.hp[0]);
         expect(woke.heads[0]).toBe(s0.heads[0]);
-        expect(woke.strength[0]).toBe(s0.strength[0]);
       }
     });
 
     it("nothing changes before a pack wakes: behind a wall it keeps its built numbers, whatever the army", () => {
-      const s0 = range([pack(4)], [100], 5000, [40], [24]);
+      const s0 = range([pack(4)], [100], 5000, [40]);
       const walled = {
         ...s0,
         track: { ...s0.track, questions: [1, 100] },
@@ -1088,15 +1158,11 @@ describe("shooting", () => {
       const expected = expectedArmy(rows, track.charges);
       let packs = 0;
       track.hazards.forEach((h, i) => {
-        if (h.kind !== "pack") {
-          expect(s.strength[i]).toBe(0);
-          return expect(s.heads[i]).toBe(0);
-        }
+        if (h.kind !== "pack") return expect(s.heads[i]).toBe(0);
         packs++;
         const q = track.questions.filter((p) => p < h.pos).length;
         const e = expected[Math.min(q, expected.length - 1)] ?? 0;
         expect(s.hp[i]).toBeCloseTo(KILL_SECONDS * firepower(e), 9);
-        expect(s.strength[i]).toBe(packStrength(e));
         expect(s.heads[i]).toBe(packCount(e));
         expect(packSurvivors(s, i)).toBe(packCount(e));
       });
@@ -1166,7 +1232,7 @@ describe("shooting", () => {
 
     it("its mouth is PACK_WIDTH wide, centred where the pack is and on the track, whole or shot", () => {
       expect(PACK_WIDTH).toBe(0.8);
-      const s0 = range([pack(1.9, 0.3)], [70], 20, [210], [28]);
+      const s0 = range([pack(1.9, 0.3)], [70], 20, [210]);
       const half = { ...HORDE_DEFAULTS, packWidth: 0.5 };
       for (const f of [1, 0.5, 0.01])
         for (const horde of [HORDE_DEFAULTS, half, NARROW]) {
@@ -1233,7 +1299,7 @@ describe("shooting", () => {
     // a narrow pack far to the side still reaches the army
     const s = stepFor(
       {
-        ...range([pack(1, 0.9)], [1e9], 20, [20], [20]),
+        ...range([pack(1, 0.9)], [1e9], 20, [20]),
         horde: NARROW,
         x: 0.1,
         targetX: 0.1,

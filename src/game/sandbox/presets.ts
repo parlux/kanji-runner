@@ -52,7 +52,7 @@ const wave = (w: Partial<WavePreset> & { note: string }): WavePreset => ({
 export const GAUNTLET: readonly WavePreset[] = [
   wave({ note: "defaults" }),
   wave({ killSeconds: 1.5, note: "faster kill (1.5 s)", x: 0.35 }),
-  wave({ killSeconds: 3.5, note: "slower kill (3.5 s)", x: 0.65 }),
+  wave({ killSeconds: 2.5, note: "kill 2.5 s (the old default)", x: 0.65 }),
   wave({ enemies: 80, note: "fewer enemies (80)" }),
   wave({ enemies: 500, note: "more enemies (500)", x: 0.4 }),
   wave({ army: 20, expected: 20, note: "small army (20) and its pack" }),

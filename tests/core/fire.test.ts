@@ -4,7 +4,6 @@ import {
   firepower,
   hazardHeads,
   hazardHp,
-  hazardStrength,
   packCount,
   packStrength,
   pickTarget,
@@ -89,12 +88,6 @@ describe("hazardHp", () => {
     ]);
     const slow = { ...HORDE_DEFAULTS, killSeconds: 6 };
     expect(hazardHp(track, [5, 8, 11, 40], slow)[3]).toBe(6 * firepower(11));
-    expect(hazardStrength(track, [5, 8, 11, 40])).toEqual([
-      0,
-      0,
-      0,
-      packStrength(11),
-    ]);
   });
 });
 

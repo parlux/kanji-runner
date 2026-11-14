@@ -764,7 +764,14 @@ describe("pause during a pack's stream", () => {
       hazards: [{ kind: "pack", pos: 0.3, x: 0.5 }],
       charges: [],
     });
-    run = { ...run, army: 1000, hp: [1e12], heads: [200], strength: [160] };
+    // nothing dies, and each enemy is worth next to nothing (no losses)
+    run = {
+      ...run,
+      army: 1000,
+      hp: [1e12],
+      heads: [200],
+      horde: { ...run.horde, killSeconds: 1e15 },
+    };
     let scene: Scene = { kind: "run", seed: 1, run, paused: false };
     while (scene.kind === "run" && !packStreaming(scene.run, 0))
       scene = updateScene(scene, STEP, 0);

@@ -322,17 +322,20 @@ describe("drawing the horde", () => {
     expect(slot(0).count).toBe(190);
   });
 
-  it("figures that reach the army vanish into it; shot ones fall", () => {
+  it("figures that reach the army fight at its front: killed ones fall there, none vanish", () => {
     const { h, slot } = setup();
     const a = { ...horde([0.5], 0), packs: [{ pos: 0, x: 0.5 }] };
     h.update(a, 0);
-    // 5 arrive (5 × 0.2 HP of damage), then 3 are shot
-    h.update({ ...a, damage: [1], arrived: [5], dist: 0.01 }, 0.02);
+    // 5 at the front, then 3 of them killed
+    h.update({ ...a, arrived: [5], melee: [5], dist: 0.01 }, 0.02);
+    expect(slot(0).state.x).toBe(200);
+    h.update(
+      { ...a, damage: [0.6], arrived: [5], melee: [5], dist: 0.02 },
+      0.04,
+    );
     const d = slot(0).death.array;
-    for (let k = 195; k < 200; k++) expect(d[3 * k]).toBeLessThan(-1e6);
-    h.update({ ...a, damage: [1.6], arrived: [5], dist: 0.02 }, 0.04);
-    for (let k = 192; k < 195; k++) expect(d[3 * k]).toBeCloseTo(0.02, 6);
-    expect(slot(0).state.x).toBe(192);
+    for (let k = 197; k < 200; k++) expect(d[3 * k]).toBeCloseTo(0.02, 6);
+    expect(slot(0).state.x).toBe(197);
   });
 
   it("stands still while paused (the clock and distance stop); the clock alone makes the crowd mill", () => {

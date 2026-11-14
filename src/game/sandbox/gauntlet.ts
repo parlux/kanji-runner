@@ -1,4 +1,4 @@
-import { packCount, packStrength } from "../../core/fire";
+import { packCount } from "../../core/fire";
 import {
   createRunState,
   nudgeTarget,
@@ -108,7 +108,6 @@ export function waveRun(p: WavePreset): RunState {
     army: p.army,
     hp: [p.killSeconds * FIRE_PER_SOLDIER * p.expected],
     heads: [packCount(p.expected, horde)],
-    strength: [packStrength(p.expected)],
     dist: PACK_POS - CROWD_DEPTH_MAX / 2 - INTRO_AHEAD,
   };
 }

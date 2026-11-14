@@ -99,7 +99,7 @@ describe("gauntlet-results script", () => {
     );
     expect(lines[1]).toMatch(/^#\s+rating\s+army\s+for\s+enem\s+kill/);
     expect(lines[2]).toMatch(
-      /^1\s+Felt right\s+60\s+60\s+200\s+2\.5s\s+0\.8\s+1\s+0\.8\s+\| 2\.48s\s+200\s+0\s+0\s+58\s+defaults$/,
+      /^1\s+Felt right\s+60\s+60\s+200\s+3\.5s\s+0\.8\s+1\s+1\s+\| 2\.48s\s+200\s+0\s+0\s+58\s+defaults$/,
     );
     expect(lines[3]).toMatch(
       /Too fast .*\| reached\s+200\s+200\s+20 died\s+41/,

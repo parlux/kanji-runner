@@ -257,7 +257,6 @@ describe("crowd spread and squeeze", () => {
       track: { questions: [50], charges: [], hazards },
       hp: hazards.map(() => 3),
       heads: hazards.map(() => 15),
-      strength: hazards.map(() => 3),
       horde: { ...base.horde, packWidth: 0.1 },
       damage: hazards.map(() => 0),
       packs: hazards.map(() => null),

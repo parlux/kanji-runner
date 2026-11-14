@@ -86,10 +86,10 @@ describe("gauntlet results", () => {
       "Horde gauntlet 2026-11-14 10:30 UTC · build abc · Android 14; Pixel 7 · Chrome 143",
     );
     expect(lines[1]).toMatch(
-      /^1\. Felt right \| army 60 \(pack for 60\), 200 enemies, kill 2\.5s/,
+      /^1\. Felt right \| army 60 \(pack for 60\), 200 enemies, kill 3\.5s/,
     );
     expect(lines[1]).toMatch(
-      /measured: kill 2\.\d+s, 200 enemies, reached 0, lost 0, \d+ fps \| defaults$/,
+      /measured: kill 3\.\d+s, 200 enemies, reached \d+, lost 0, \d+ fps \| defaults$/,
     );
     expect(lines[2]).toMatch(/^2\. Too many \| /);
   });

@@ -50,8 +50,7 @@ import {
  * frame costs the same at 200 or 20,000. The only per-figure data is its death: when
  * survivors drop from `was` to n, figures n..was − 1 (the front rows) get
  * the run distance and the world place they stood on, uploaded as that one
- * range, and fall there while the rest step up; those that reached the
- * army vanish into it.
+ * range, and fall there while the rest step up.
  */
 
 /** Packs drawn at once (two fit within the shape horizon). */
@@ -60,8 +59,6 @@ export const HORDE_SLOTS = 2;
 export const DIE_DIST = 0.45;
 /** Strides per second of clock. */
 const STRIDE_HZ = 3;
-/** A figure that reached the army: its death is set this far in the past, so it is gone at once (no fall). */
-const ARRIVED = -1e9;
 
 const f = (x: number): string => x.toFixed(6);
 
@@ -182,8 +179,6 @@ type Slot = {
   hi: number;
   /** Run distance of the last kill. */
   killedAt: number;
-  /** Its enemies that had reached the army last frame (whole ones). */
-  arrived: number;
 };
 
 export type Horde = {
@@ -267,7 +262,6 @@ export function createHorde(scene: Scene): Horde {
       was: 0,
       hi: 0,
       killedAt: -Infinity,
-      arrived: 0,
     });
   }
 
@@ -276,17 +270,13 @@ export function createHorde(scene: Scene): Horde {
   let order = new Int32Array(0);
 
   const o: HordeSpot = { x: 0, z: 0, t: 0 };
-  /**
-   * Survivors drop to n: the front `gone` of the figures between reached the
-   * army and vanish into it; the rest were shot and fall from now, where they
-   * stood last frame.
-   */
-  const kill = (s: Slot, n: number, dist: number, gone: number): void => {
+  /** Survivors drop to n: the figures between were killed and fall from now, where they stood last frame. */
+  const kill = (s: Slot, n: number, dist: number): void => {
     if (n < s.was) {
       const a = s.death.array as Float32Array;
       for (let k = n; k < s.was; k++) {
         hordePlace(k, s.lay, o);
-        a[3 * k] = k >= s.was - gone ? ARRIVED : dist;
+        a[3 * k] = dist;
         a[3 * k + 1] = o.x;
         a[3 * k + 2] = o.z - s.drawnAt * DIST_SCALE;
       }
@@ -339,11 +329,8 @@ export function createHorde(scene: Scene): Horde {
           if (s.hazard >= 0 || dist - s.killedAt < DIE_DIST) continue;
           s.hazard = i;
           s.was = s.hi = n;
-          s.arrived = 0;
         }
-        const arrived = Math.floor((run.arrived[i] ?? 0) + 1e-6);
-        kill(s, n, dist, arrived - s.arrived);
-        s.arrived = arrived;
+        kill(s, n, dist);
         s.state.x = n;
         // heads past the cap are not drawn: then every drawn figure is whole
         s.state.y = heads < all ? 1 : packHeadsLeft(run, i) - (n - 1);
