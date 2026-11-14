@@ -21,7 +21,7 @@ import { kanaRun } from "./kana-run";
 /** Safety margin: only go for a crate if the fire left would break it this many times over. */
 const CRATE_MARGIN = 1.25;
 /** With s = 0, aim misses by up to this much (track widths) on every beat. */
-export const AIM_SPREAD = 0.3;
+const AIM_SPREAD = 0.3;
 
 /** Can the army break crate i before reaching it, if it lines up now? */
 function canBreak(s: RunState, i: number): boolean {
@@ -104,7 +104,7 @@ export function botRun(seed: number, opts: BotOptions): RunState {
 }
 
 /** Wrong answers at random with accuracy p, seeded per run. */
-export function accuracy(seed: number, p: number): (q: number) => boolean {
+function accuracy(seed: number, p: number): (q: number) => boolean {
   const rng = createRng(seed * 104729 + 3);
   const misses = Array.from({ length: ROWS_PER_RUN }, () => rng() >= p);
   return (q) => misses[q] ?? false;

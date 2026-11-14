@@ -4,7 +4,7 @@ import type { KanjiItem } from "../core/types";
 /** Success or a plain error message; the parser never throws. */
 export type Result<T> = { ok: true; value: T } | { ok: false; error: string };
 
-export type WkReading = {
+type WkReading = {
   /** Hiragana; kun'yomi may contain "." marking okurigana. */
   reading: string;
   primary: boolean;
@@ -12,7 +12,7 @@ export type WkReading = {
 };
 
 /** One taught kanji, trimmed to what the game uses. JSON-serialisable. */
-export type WkCacheKanji = {
+type WkCacheKanji = {
   id: number;
   char: string;
   /** WaniKani's level, for display. */
@@ -178,7 +178,7 @@ export function trim(
 }
 
 /** Per-kanji WaniKani data kept beside the list, not in `KanjiItem`. */
-export type WkExtras = {
+type WkExtras = {
   srsStage: number;
   /** `available_at <= now`. */
   due: boolean;

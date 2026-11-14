@@ -12,13 +12,7 @@ import { DIST_SCALE, HAZE_MAX, TRACK_W } from "./world";
  */
 
 /** Every look's id. */
-export const LOOK_IDS = [
-  "country",
-  "spring",
-  "stadium",
-  "sky",
-  "city",
-] as const;
+const LOOK_IDS = ["country", "spring", "stadium", "sky", "city"] as const;
 export type LookId = (typeof LOOK_IDS)[number];
 
 /** A part's mesh: each shape is one instanced mesh per layer (props, backdrop). */
@@ -79,7 +73,7 @@ export type Petal = {
   phase: number;
 };
 
-export type Layout = {
+type Layout = {
   /** Roadside props: scroll with the run, fogged. */
   props: Part[];
   /** Beyond the haze: never scrolls, drawn without fog. */
@@ -108,7 +102,7 @@ export const DRIFT_WRAP = 220;
 
 /** Bobbing props rise and fall this much (world units) at this rate (rad/s). */
 export const BOB_AMOUNT = 0.4;
-export const BOB_RATE = 0.9;
+const BOB_RATE = 0.9;
 /** A bobbing prop's lift above its resting Y at time `clock` (s); stands still when the clock does. */
 export const bobY = (phase: number, clock: number): number =>
   BOB_AMOUNT * Math.sin(clock * BOB_RATE + phase);
@@ -163,29 +157,29 @@ const part = (
 });
 
 /** Fence posts sit this far out from the track's centre (just beyond the kerb). */
-export const FENCE_X = 6.6;
+const FENCE_X = 6.6;
 /** One fence section's length: it divides PROP_SPAN, so the wrap has no seam. */
 export const FENCE_STEP = 4;
 /** Spring village's stone lanterns: every 12 (divides PROP_SPAN), at this x. */
-export const LANTERN_STEP = 12;
-export const LANTERN_X = 6.8;
+const LANTERN_STEP = 12;
+const LANTERN_X = 6.8;
 
 /** Race day: stand segments, posts and flags are laid in steps that divide PROP_SPAN. */
 export const STAND_STEP = 12;
 export const FLAG_STEP = 12;
-export const FLAG_X = 6.4;
+const FLAG_X = 6.4;
 /** Stepped stands: tiers start at this |x|, are this wide and this much higher each. */
-export const STAND_X = 9;
-export const TIER_W = 1.4;
-export const TIER_H = 0.8;
-export const TIERS = 6;
+const STAND_X = 9;
+const TIER_W = 1.4;
+const TIER_H = 0.8;
+const TIERS = 6;
 const CROWD_COLOURS = [
   0xff5a5a, 0xffc94a, 0x3d7bff, 0xffffff, 0x50d27a, 0xff8fd0, 0x9b6bff,
 ];
 
 /** Block city: street lamps and pavement tiles are laid every 12 (divides PROP_SPAN). */
 export const LAMP_STEP = 12;
-export const LAMP_X = 6.2;
+const LAMP_X = 6.2;
 export const WALK_STEP = 12;
 /** The pavement runs from the kerb's outer edge: centred at this |x|, this wide. */
 export const WALK_X = 7;

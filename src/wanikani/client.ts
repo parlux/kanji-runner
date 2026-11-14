@@ -3,7 +3,7 @@ import { trim, type WkCache } from "./parse";
 import { buildLibrary, storyLevel, type StoryLibrary } from "./stories";
 
 export const WK_BASE = "https://api.wanikani.com/v2/";
-export const WK_REVISION = "20170710";
+const WK_REVISION = "20170710";
 /** Minimum gap between fetch attempts. */
 export const WK_THROTTLE_MS = 5 * 60 * 1000;
 const MAX_PAGES = 50;

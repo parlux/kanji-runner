@@ -3,7 +3,7 @@ import { defaultProgress, MAX_BOX } from "../core/srs";
 import type { ItemProgress, Progress } from "../core/types";
 
 export const STORAGE_KEY = "kanji-runner:v1";
-export const SCHEMA_VERSION = 1;
+const SCHEMA_VERSION = 1;
 /** Meaning mode keeps its own progress; it never shares `STORAGE_KEY`. */
 export const MEANING_STORAGE_KEY = "kanji-runner:meaning:v1";
 

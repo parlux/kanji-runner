@@ -26,7 +26,7 @@ import {
 } from "../wanikani/storystore";
 
 /** What the start screen shows about WaniKani. */
-export type WkView = {
+type WkView = {
   hasToken: boolean;
   /** The mode runs use: WaniKani only when there is data for it. */
   mode: WkMode;

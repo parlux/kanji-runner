@@ -4,7 +4,7 @@ import { defaultProgress, itemKey, LEARNED_BOX } from "./srs";
 import type { KanaItem, KanjiItem, Progress, WordItem } from "./types";
 
 /** Placement marks items at this box: known, but drawn rarely (weight 2). */
-export const PLACED_BOX = 4;
+const PLACED_BOX = 4;
 /** The next level unlocks when this share of the current level is learned. */
 export const UNLOCK_SHARE = 0.8;
 
@@ -14,7 +14,6 @@ export const levelName = (level: number): string =>
 
 // moved to dependency-free modules so words.ts can use them without a cycle
 export { maxLevel } from "./kanji";
-export { LEARNED_BOX } from "./srs";
 
 /** Item keys of a level for its primary gate type: kana, or kanji meaning. */
 export function levelKeys(
@@ -196,7 +195,7 @@ export function place(
 }
 
 /** Meaning mode starts at Kanji 1; kana levels do not exist for it. */
-export const MEANING_START_LEVEL = 2;
+const MEANING_START_LEVEL = 2;
 
 /** Fresh meaning-mode progress: unlocked from Kanji 1 (level 2). */
 export function meaningProgress(): Progress {

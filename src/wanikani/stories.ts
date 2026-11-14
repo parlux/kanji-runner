@@ -2,7 +2,7 @@ import type { Story, StoryRadical } from "../core/study";
 import type { Result } from "./parse";
 
 /** One kanji's story entry: mnemonics and radicals in WaniKani's order. */
-export type StoryKanji = {
+type StoryKanji = {
   meaning?: string;
   reading?: string;
   radicals: StoryRadical[];

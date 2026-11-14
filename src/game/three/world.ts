@@ -88,7 +88,7 @@ export const trackDist = (wz: number, runDist: number): number =>
   runDist - wz / DIST_SCALE;
 
 /** Figures drawn for an army of this size. */
-export const drawnCount = (army: number): number =>
+const drawnCount = (army: number): number =>
   Math.max(0, Math.min(Math.floor(army), MAX_DRAWN_SOLDIERS));
 
 /**
@@ -110,15 +110,15 @@ export function crowdLayout(army: number, out: Float32Array): number {
 }
 
 /** Open-road spread: the drawn crowd is SPREAD_K × √army of the track wide, up to SPREAD_MAX_W (look only). */
-export const SPREAD_K = 0.05;
-export const SPREAD_MAX_W = 0.55;
+const SPREAD_K = 0.05;
+const SPREAD_MAX_W = 0.55;
 /**
  * The crowd pulls in to its true width over this much track before anything
  * that can clip it, and spreads out again over SPREAD_OUT_DIST once its rear
  * is past (both counted from where the crowd's front, or rear, meets it).
  */
 export const SQUEEZE_DIST = 0.8;
-export const SPREAD_OUT_DIST = 0.4;
+const SPREAD_OUT_DIST = 0.4;
 
 /** How wide (track share) the crowd is drawn on open road: wider than `crowdWidth`, never narrower. */
 export const spreadWidth = (army: number): number =>
@@ -224,8 +224,8 @@ export function clipGaps(run: RunState): { ahead: number; behind: number } {
 }
 
 /** Most the spread share may change per second: out towards open road, and in towards a squeeze. */
-export const SHARE_OUT_RATE = 2.5;
-export const SHARE_IN_RATE = 8;
+const SHARE_OUT_RATE = 2.5;
+const SHARE_IN_RATE = 8;
 
 /**
  * One frame of the spread share (0 squeezed .. 1 spread), `prev` last frame.
@@ -418,7 +418,7 @@ export const WALL_BEHIND = 2;
 /** How far (track distance) beyond its wall a charge's squads stand. */
 export const SQUAD_BEYOND = 0.45;
 /** How far (track distance) the squad run into steps back as the firefight starts. */
-export const SQUAD_STEP_BACK = 0.25;
+const SQUAD_STEP_BACK = 0.25;
 /** Answer labels and prompts are this many times the projected wall height. */
 export const LABEL_K = 0.55;
 export const PROMPT_K = 0.8;
@@ -426,17 +426,14 @@ export const PROMPT_K = 0.8;
 /** How long (in track distance) a charge's firefight plays after contact. */
 export const FIREFIGHT_DIST = 1.2;
 /** Fraction of the firefight both sides fire before the chosen squad's outcome shows. */
-export const FIREFIGHT_REVEAL = 0.2;
+const FIREFIGHT_REVEAL = 0.2;
 /** How long (in track distance) the squads not run into take to fall back after contact. */
-export const SQUAD_FADE_DIST = 0.3;
+const SQUAD_FADE_DIST = 0.3;
 /** How far (in track distance) past a wall its answer labels take to fade out. */
 export const PASSED_LABEL_FADE_DIST = 0.15;
 
 /** How far through its firefight a charge is: 0 at contact, 1 when it ends. */
-export function firefightProgress(
-  runDist: number,
-  contactDist: number,
-): number {
+function firefightProgress(runDist: number, contactDist: number): number {
   const t = (runDist - contactDist) / FIREFIGHT_DIST;
   return Math.min(1, Math.max(0, t));
 }
@@ -702,7 +699,7 @@ export function cheerX(
 /** An enemy that ran past the army runs on this far (run distance, track units) before it is gone off the screen behind. */
 export const RUN_PAST_DIST = 2;
 /** Enemies in a melee stand this many figure radii apart, packed against the army's front across its width. */
-export const MELEE_GAP = 2.3;
+const MELEE_GAP = 2.3;
 /** A fighting figure lunges at the army and back this far (world units, times its size)... */
 export const MELEE_LUNGE = 0.07;
 /** ...this many times a second. */
@@ -766,11 +763,8 @@ export type HordeLayout = {
  * world units run over the ground since it left, `rem` still to close
  * (army frame), `closing` the ratio of the two speeds. Linear in time.
  */
-export const streamProgress = (
-  e: number,
-  rem: number,
-  closing: number,
-): number => (e <= 0 ? 0 : (closing * e) / (Math.max(0, rem) + closing * e));
+const streamProgress = (e: number, rem: number, closing: number): number =>
+  e <= 0 ? 0 : (closing * e) / (Math.max(0, rem) + closing * e);
 
 /** A stride through `cols` columns that visits each once: about 0.62 of them, coprime with `cols`. */
 export function hordeStride(cols: number): number {
@@ -784,7 +778,7 @@ export function hordeStride(cols: number): number {
 export const COL_SALT = 0x9e37;
 
 /** An integer hash (PCG) to 0..1; the horde shader has the same. */
-export function hordeHash(v: number): number {
+function hordeHash(v: number): number {
   const s = (Math.imul(v >>> 0, 747796405) + 2891336453) >>> 0;
   const w = Math.imul((s >>> ((s >>> 28) + 4)) ^ s, 277803737) >>> 0;
   return (((w >>> 22) ^ w) >>> 0) / 4294967296;
@@ -945,7 +939,7 @@ export function bossArmyDist(
 }
 
 /** How the fight ends in 3D: Victory topples the boss, Defeated stomps it forward, a Tie leaves it standing. */
-export type BossEnding = "topple" | "stomp" | "stand";
+type BossEnding = "topple" | "stomp" | "stand";
 
 /** What is shown `t` seconds into the boss scene. */
 export type BossFight = {

@@ -140,6 +140,9 @@ export const ENEMY_HP = 1;
 /**
  * A pack starts running at the army this far ahead (track units): where the 3D
  * view starts drawing it (its default shape distance, 4 × VIEW_DISTANCE).
+ *
+ * Also how far ahead the army fires at an awake pack (never past an unanswered
+ * wall; nothing beyond one wakes). Other threats stay within FIRE_RANGE.
  */
 export const PACK_WAKE = 4 * VIEW_DISTANCE;
 /** Pack start centres are drawn from [ENEMY_X_MARGIN, 1 − ENEMY_X_MARGIN]. */
@@ -165,7 +168,7 @@ export const KILL_SECONDS = 3.5;
  */
 export const PACK_WIDTH = 0.8;
 /** Enemy figures are drawn this size of a soldier (a view value; the core ignores it). */
-export const HORDE_SCALE = 1.0;
+const HORDE_SCALE = 1.0;
 
 /**
  * Horde tuning a run is built with (v1.10 rework): the dev panel changes it,
@@ -240,12 +243,6 @@ export const STREAM_LEAD = 0.6;
  * wall (CALM_DISTANCE).
  */
 export const PACK_COLUMN_MAX = CROWD_DEPTH_MAX + STREAM_LEAD;
-/**
- * The army's fire reaches an awake pack's stream from where it starts: up to
- * this far ahead (never past an unanswered wall; nothing beyond one wakes).
- * Other threats stay within FIRE_RANGE.
- */
-export const PACK_FIRE_RANGE = PACK_WAKE;
 /**
  * Packs follow the army you actually have (owner, during H5b; full adapt
  * after horde round 1): when a pack wakes, its HP, head count and melee

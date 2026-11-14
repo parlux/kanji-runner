@@ -1,5 +1,5 @@
 /** The inline tags WaniKani mnemonics use; every other tag is dropped. */
-export const MNEMONIC_TAGS = [
+const MNEMONIC_TAGS = [
   "radical",
   "kanji",
   "reading",
@@ -7,7 +7,7 @@ export const MNEMONIC_TAGS = [
   "ja",
   "em",
 ] as const;
-export type MnemonicTag = (typeof MNEMONIC_TAGS)[number];
+type MnemonicTag = (typeof MNEMONIC_TAGS)[number];
 
 /** A run of plain text and the (innermost known) tag it sits in, if any. */
 export type MnemonicSegment = { text: string; tag: MnemonicTag | null };

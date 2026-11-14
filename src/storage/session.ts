@@ -24,7 +24,7 @@ function toItem(v: unknown): SessionItem | null {
  * times or run count, or non-array lists). Single bad items and non-string
  * `fixedThisRun` entries are dropped.
  */
-export function parseSessionLog(raw: unknown): SessionLog | null {
+function parseSessionLog(raw: unknown): SessionLog | null {
   if (!isObject(raw)) return null;
   const { startedAt, lastRunAt, runs, items, fixedThisRun } = raw;
   if (!isTime(startedAt) || !isTime(lastRunAt)) return null;

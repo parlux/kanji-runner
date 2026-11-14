@@ -1,5 +1,4 @@
-export const TOKEN_URL =
-  "https://www.wanikani.com/settings/personal_access_tokens";
+const TOKEN_URL = "https://www.wanikani.com/settings/personal_access_tokens";
 
 /** A saved token shown back only as its last 4 characters, e.g. `••••9f3a`. */
 export function maskToken(token: string): string {

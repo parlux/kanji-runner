@@ -45,7 +45,7 @@ const tuning: HordeTuning = {
 };
 
 /** The run a wave plays: no questions or walls, one default pack sized for an army of 60, the crowd waiting. */
-export function waveRun(w: WaveSpec): RunState {
+function waveRun(w: WaveSpec): RunState {
   const track: Track = {
     questions: [FAR],
     hazards: [{ kind: "pack", pos: PACK_POS, x: w.x }],

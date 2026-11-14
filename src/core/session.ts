@@ -1,7 +1,7 @@
 import { SESSION_IDLE_MINUTES } from "./tuning";
 import type { GateRow, GateType } from "./types";
 
-export type SessionItemState = "missing" | "fixed";
+type SessionItemState = "missing" | "fixed";
 
 export type SessionItem = {
   prompt: string;

@@ -28,28 +28,28 @@ import { crowdHalfDepth, DIST_SCALE, shapeDistance, worldZ } from "./world";
  */
 
 /** Events alive at once (the oldest is replaced). */
-export const MAX_KILL_EVENTS = 48;
+const MAX_KILL_EVENTS = 48;
 /** Pieces drawn at once; over it, extras are dropped. */
 export const MAX_KILL_PIECES = 320;
 /** Shockwave rings drawn at once. */
 export const MAX_KILL_RINGS = 4;
 /** A row's kills are gathered over this long (seconds) into one event. */
-export const KILL_PULSE = 0.08;
+const KILL_PULSE = 0.08;
 /** Seconds each effect lasts. */
-export const ROW_LIFE = 0.55;
-export const BAND_LIFE = 0.14;
-export const MELEE_LIFE = 0.22;
-export const BURST_LIFE = 1.0;
-export const FLASH_LIFE = 0.16;
-export const RING_LIFE = 0.6;
+const ROW_LIFE = 0.55;
+const BAND_LIFE = 0.14;
+const MELEE_LIFE = 0.22;
+const BURST_LIFE = 1.0;
+const FLASH_LIFE = 0.16;
+const RING_LIFE = 0.6;
 /** Most chips per row event, melee flashes per event, and pieces in the final burst (near). */
 export const ROW_CHIPS = 16;
 /** Most flashes in a row's front. */
-export const BAND_FLASHES = 8;
-export const MELEE_FLASHES = 6;
+const BAND_FLASHES = 8;
+const MELEE_FLASHES = 6;
 export const FINAL_PIECES = 48;
 /** Within this far (world units) in front of the next wall, effects stay low and fade fast. */
-export const NEAR_GATE = 6;
+const NEAR_GATE = 6;
 
 const GRAVITY = 9;
 

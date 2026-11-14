@@ -44,9 +44,8 @@ import {
   FIRE_RANGE,
   GATE_GROW_PER_DAMAGE,
   MAX_SPEED_MUL,
-  PACK_FIRE_RANGE,
-  PACK_MERGE_SPEED,
   PACK_WAKE,
+  PACK_MERGE_SPEED,
   REASK_MAX,
   PACK_COLUMN_MAX,
   STARTING_ARMY,
@@ -69,7 +68,7 @@ import type { GateRow } from "./types";
  * TRACK_DELAY), `streamW` its width where it meets the army's line. A pack
  * without them (tests) is a stream as wide as the army at its mouth's centre.
  */
-export type PackState = {
+type PackState = {
   pos: number;
   x: number;
   streamX?: number;
@@ -132,7 +131,7 @@ export { gateOpenings, nearestOpening, wallSolids, type Opening };
  * Re-asks in this run (WaniKani mode): the config it was built with, the
  * entry each row asks now, and the links placed so far. Fits `ReaskRecord`.
  */
-export type ReaskState = ReaskConfig & {
+type ReaskState = ReaskConfig & {
   links: readonly ReaskLink[];
   /** The rows as built at the start, before any re-ask. */
   planned: readonly GateRow[];
@@ -154,7 +153,7 @@ export function gateReached(s: RunState): { gate: number; of: number } {
   return { gate: s.results.length, of: plannedRows(s).length };
 }
 
-export type RunStatus = "running" | "finished" | "dead";
+type RunStatus = "running" | "finished" | "dead";
 
 export type RunState = {
   rows: GateRow[];
@@ -404,7 +403,7 @@ export function packMouth(s: RunState, i: number): Span {
 }
 
 /** The army's span across the track. */
-export function armySpan(s: RunState): Span {
+function armySpan(s: RunState): Span {
   const w = crowdWidth(s.army);
   return { left: s.x - w / 2, right: s.x + w / 2 };
 }
@@ -468,7 +467,7 @@ export function hazardPos(s: RunState, i: number): number {
  * head, or (drawn) in the crowd until the head has run far enough for that
  * place to be nearer than its own: the crowd empties from its front.
  */
-export function packDensity(s: RunState, i: number): number {
+function packDensity(s: RunState, i: number): number {
   return (s.heads[i] ?? 0) / PACK_COLUMN_MAX;
 }
 
@@ -497,7 +496,7 @@ export function packMelee(s: RunState, i: number): number {
  * unanswered wall between it and the army (it never runs through a wall,
  * and can't be shot through one either).
  */
-export function packAwake(s: RunState, i: number): boolean {
+function packAwake(s: RunState, i: number): boolean {
   const p = s.packs[i];
   return (
     !!p &&
@@ -712,7 +711,7 @@ function threats(s: RunState): (Threat | null)[] {
       return {
         pos: hazardPos(s, i),
         span: packSpan(s, i),
-        range: PACK_FIRE_RANGE,
+        range: PACK_WAKE,
       };
     return null;
   });

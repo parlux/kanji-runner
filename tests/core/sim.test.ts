@@ -54,12 +54,11 @@ import {
   HORDE_DEFAULTS,
   PACK_COLUMN_MAX,
   STREAM_LEAD,
-  PACK_FIRE_RANGE,
+  PACK_WAKE,
   PACK_ADAPT,
   FIRE_RANGE,
   KILL_SECONDS,
   PACK_WIDTH,
-  PACK_WAKE,
   TRACK_DELAY,
   TRACK_SPEED,
   ENEMY_SPEED,
@@ -1001,10 +1000,10 @@ describe("shooting", () => {
       expect(woke.damage[0]).toBeGreaterThan(0);
     });
 
-    it("fire reaches an awake pack up to PACK_FIRE_RANGE, never past an unanswered wall; nearer threats still go first", () => {
-      const far = range([pack(PACK_FIRE_RANGE + 0.5)], [1e9], 100);
+    it("fire reaches an awake pack up to PACK_WAKE, never past an unanswered wall; nearer threats still go first", () => {
+      const far = range([pack(PACK_WAKE + 0.5)], [1e9], 100);
       expect(stepRun(far, DT).target).toBeNull();
-      const near = range([pack(PACK_FIRE_RANGE - 0.5)], [1e9], 100);
+      const near = range([pack(PACK_WAKE - 0.5)], [1e9], 100);
       expect(stepRun(near, DT).target).toBe(0);
       const walled = {
         ...near,

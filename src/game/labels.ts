@@ -25,12 +25,8 @@ export function mixHex(a: string, b: string, t: number): string {
   return out;
 }
 
-/** Smallest a question prompt is drawn (px), however far away its wall is. */
-export const PROMPT_MIN_PX = 34;
 /** Side room (px, both sides together) a prompt leaves when fitted to a width. */
 export const PROMPT_MARGIN = 16;
-/** Smallest an answer label is drawn (px), unless it must shrink to fit its opening. */
-export const LABEL_MIN_PX = 18;
 
 /** `size`, or smaller if needed so `s` fits in `maxWidth`. */
 export function fitSize(
@@ -45,10 +41,10 @@ export function fitSize(
 }
 
 /** Below this an answer label wraps to two lines rather than shrinking further. */
-export const LABEL_FLOOR_PX = 14;
+const LABEL_FLOOR_PX = 14;
 
 /** A label split into runs: kun'yomi okurigana あ(げる) is greyed. */
-export function labelRuns(s: string): { s: string; color: string }[] {
+function labelRuns(s: string): { s: string; color: string }[] {
   const m = /^(.*?)(\(.+\))$/.exec(s);
   if (!m) return [{ s, color: TEXT_COLORS.text }];
   return [
@@ -90,7 +86,7 @@ function labelSplits(s: string, inWord: boolean): [string, string][] {
  * natural breaks first and breaking inside a word only if those still fall
  * below the floor.
  */
-export function labelLayout(
+function labelLayout(
   ctx: Ctx,
   s: string,
   size: number,

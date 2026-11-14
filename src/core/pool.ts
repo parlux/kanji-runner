@@ -137,7 +137,7 @@ export function meaningPool(
 }
 
 /** What WaniKani mode needs per kanji; `WkExtras` from `src/wanikani` fits. */
-export type WkPoolExtras = {
+type WkPoolExtras = {
   /** WaniKani SRS stage, 1–9. */
   srsStage: number;
   /** Available for review on WaniKani now. */

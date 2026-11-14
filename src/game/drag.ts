@@ -2,7 +2,7 @@ import { DRAG_GAIN } from "../core/tuning";
 
 /** A touch shorter than this, that moved less than TAP_MAX_MOVE, is a tap. */
 export const TAP_MAX_MS = 250;
-export const TAP_MAX_MOVE = 8;
+const TAP_MAX_MOVE = 8;
 
 /**
  * Pure relative-drag tracker. Only the first pointer down steers. Movement is

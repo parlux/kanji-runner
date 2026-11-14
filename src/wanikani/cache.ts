@@ -2,9 +2,9 @@ import type { KeyValueStore as ReadWrite } from "../storage/storage";
 import { parseCache, type WkCache } from "./parse";
 
 /** Device-local WaniKani state. Never part of `Progress` or sync. */
-export const WK_TOKEN_KEY = "kanji-runner:wk-token";
+const WK_TOKEN_KEY = "kanji-runner:wk-token";
 export const WK_CACHE_KEY = "kanji-runner:wk-cache";
-export const WK_MODE_KEY = "kanji-runner:wk-mode";
+const WK_MODE_KEY = "kanji-runner:wk-mode";
 
 export type WkMode = "builtin" | "wanikani";
 

@@ -56,7 +56,7 @@ export type ItemProgress = {
 };
 
 /** Win = the army beat the boss; loss = it died first, or the boss won (a tie is a loss). */
-export type RunStats = { runs: number; wins: number; losses: number };
+type RunStats = { runs: number; wins: number; losses: number };
 
 /** Everything persisted: the one contract for storage, run building and sync. */
 export type Progress = {

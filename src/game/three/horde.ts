@@ -78,9 +78,9 @@ export const HORDE_SLOTS = 2;
 /** A killed figure topples back and shrinks away over this much run distance (about a third of a second). */
 export const DIE_DIST = 0.45;
 /** The melee's rows (its step, meleeStep) follow the army's width over about this many seconds. */
-export const MELEE_BAND_EASE = 0.4;
+const MELEE_BAND_EASE = 0.4;
 /** A killed figure flashes white over this share of its fall. */
-export const HIT_FLASH = 0.3;
+const HIT_FLASH = 0.3;
 
 const f = (x: number): string => x.toFixed(6);
 

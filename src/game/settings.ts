@@ -2,7 +2,7 @@ import type { SpeedPreset } from "../core/tuning";
 import type { SyncStatus } from "../sync/sync";
 
 /** What the settings panel shows; read again every frame while it is open. */
-export type SettingsView = {
+type SettingsView = {
   speed: SpeedPreset;
   /** The WaniKani line, e.g. `WaniKani · level 14 · 3 due`; null with no token. */
   wkLabel: string | null;
@@ -73,7 +73,7 @@ function el<K extends keyof HTMLElementTagNameMap>(
   return node;
 }
 
-export function closeSettings(): void {
+function closeSettings(): void {
   open?.overlay.remove();
   open = null;
 }
