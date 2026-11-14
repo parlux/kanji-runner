@@ -28,15 +28,10 @@ import {
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import {
   bobY,
-  builtLooks,
   DRIFT_WRAP,
-  FENCE_STEP,
-  LOOKS,
   petalX,
   petalY,
   petalZ,
-  WINDOW_H,
-  WINDOW_W,
   wrap,
   wrapZ,
   type Petal,
@@ -45,6 +40,9 @@ import {
   type Part,
   type Shape,
 } from "./scenery";
+import { builtLooks, LOOKS } from "./looks";
+import { FENCE_STEP } from "./lookCountry";
+import { WINDOW_H, WINDOW_W } from "./lookCity";
 
 /**
  * Meshes for the scenery looks in `scenery.ts`: every built look is made once,

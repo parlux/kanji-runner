@@ -1,23 +1,23 @@
 import { describe, expect, it } from "vitest";
 import {
   builtLooks,
+  HAZE_FAR_Z,
+  LOOKS,
+  sceneryFor,
+} from "../../src/game/three/looks";
+import {
   BLOCK_X,
-  bobY,
-  BOB_AMOUNT,
-  CLOUD_SEA_TOP,
-  ISLE_MIN_X,
-  DRIFT_WRAP,
-  FENCE_STEP,
   LAMP_STEP,
   WALK_STEP,
   WALK_W,
   WALK_X,
   WINDOW_H,
   WINDOW_W,
-  FLAG_STEP,
-  STAND_STEP,
-  HAZE_FAR_Z,
-  LOOKS,
+} from "../../src/game/three/lookCity";
+import {
+  bobY,
+  BOB_AMOUNT,
+  DRIFT_WRAP,
   MAX_PETALS,
   petalX,
   petalY,
@@ -28,9 +28,11 @@ import {
   PROP_FAR,
   PROP_NEAR,
   PROP_SPAN,
-  sceneryFor,
   wrapZ,
 } from "../../src/game/three/scenery";
+import { CLOUD_SEA_TOP, ISLE_MIN_X } from "../../src/game/three/lookSky";
+import { FENCE_STEP } from "../../src/game/three/lookCountry";
+import { FLAG_STEP, STAND_STEP } from "../../src/game/three/lookStadium";
 import { TRACK_W } from "../../src/game/three/world";
 import { stride } from "../sweep";
 
