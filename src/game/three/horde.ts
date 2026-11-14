@@ -48,6 +48,7 @@ import {
   shapeDistance,
   CHEER_HOPS,
   CHEER_JUMP,
+  CHEER_SPREAD_SECONDS,
   CHEER_WIDTH,
   RUN_PAST_DIST,
   STREAM_ACROSS,
@@ -75,6 +76,8 @@ import {
 export const HORDE_SLOTS = 2;
 /** A killed figure topples back and shrinks away over this much run distance (about a third of a second). */
 export const DIE_DIST = 0.45;
+/** The melee's rows (its step, meleeStep) follow the army's width over about this many seconds. */
+export const MELEE_BAND_EASE = 0.4;
 
 const f = (x: number): string => x.toFixed(6);
 
@@ -151,7 +154,7 @@ const VERTEX_BODY = `
   float laneW = mix(hordeLane.y, hordeArmy.y, meet);
   float lane = laneC + (across - 0.5) * max(0.0, laneW - 2.0 * rad);
   float reach = abs(lane - cx);
-  float v = fighting || reach < 1e-9 ? u : min(u, ${f(STREAM_ACROSS)} * max(0.0, e) / (1.5 * reach));
+  float v = reach < 1e-9 ? u : min(u, ${f(STREAM_ACROSS)} * max(0.0, e) / (1.5 * reach));
   float conv = v * v * (3.0 - 2.0 * v);
   float crash = clamp(1.0 - (ahead + slot - melee * hordeMelee.y) / ${f(STREAM_CRASH)}, 0.0, 1.0);
   float fight = j < melee ? 1.0 : 0.0;
@@ -178,8 +181,11 @@ const VERTEX_BODY = `
     sway = 0.25 * sin(6.2831853 * (hordeCheer * 1.3 + r1));
     yaw = 3.14159265 + 0.4 * sin(6.2831853 * (hordeCheer * 0.7 + r2));
     // and the press spreads out across the track as they celebrate
+    // (as cheerX, world.ts: out from its lane's centre, from where it stands)
     float wide = max(1.0, ${f(CHEER_WIDTH)} / max(laneW, 0.1));
-    off.x = laneC + (off.x - laneC) * mix(1.0, wide, smoothstep(0.0, 0.8, hordeCheer));
+    float d = abs(off.x - laneC);
+    float far = min(d * wide, max(d, ${f(CHEER_WIDTH / 2)}));
+    off.x = laneC + sign(off.x - laneC) * mix(d, far, conv * smoothstep(0.0, ${f(CHEER_SPREAD_SECONDS)}, hordeCheer));
   }
   if (k >= hordeState.x && death.w > 0.5) {
     // ran past the army: it runs on, past the camera and off
@@ -327,6 +333,7 @@ export function createHorde(scene: Scene): Horde {
       armyX: 0,
       armyW: 0,
       contact: 1,
+      cheer: -1,
     };
     mesh.userData.uniforms = { lane, crowd, count, state, army };
     mesh.userData.layout = lay;
@@ -456,10 +463,13 @@ export function createHorde(scene: Scene): Horde {
         const n = isShattered(run, i)
           ? 0
           : Math.min(HORDE_CAP, packSurvivors(run, i));
+        // seconds since the slot was last laid out (0 when paused)
+        let dt = Math.max(0, clock - s.lay.clock);
         if (s.hazard !== i) {
           // a nearer pack holds the slot, or the last one's figures still fall
           if (s.hazard >= 0 || busy(s, dist)) continue;
           s.hazard = i;
+          dt = Infinity;
           s.was = s.hi = n;
           s.missWas =
             ((run.missed[i] ?? 0) * heads) / Math.max(1, run.heads[i] ?? 0);
@@ -496,7 +506,12 @@ export function createHorde(scene: Scene): Horde {
         L.armyX = worldX(run.x);
         L.armyW = crowdWidth(run.army) * TRACK_W;
         L.contact = packContact(run, i);
-        L.band = meleeStep(L.armyW, L.size);
+        // eased: the melee's rows deepen as the army narrows (each soldier
+        // lost), and a hundred figures deep that would throw the whole stream
+        // back at once, into the crowd (Task H5f)
+        L.band +=
+          (meleeStep(L.armyW, L.size) - L.band) *
+          (1 - Math.exp(-dt / MELEE_BAND_EASE));
         L.closing =
           (BASE_SPEED * speedMul(dist, run.track) + ENEMY_SPEED) / ENEMY_SPEED;
         s.drawnAt = dist;
@@ -519,6 +534,7 @@ export function createHorde(scene: Scene): Horde {
         s.state.z = dist;
         s.state.w = clock;
         s.cheer.value = cheer;
+        s.lay.cheer = cheer;
         s.lay.clock = clock;
         const count = Math.max(s.was, s.hi);
         s.mesh.geometry.instanceCount = count;

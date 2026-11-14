@@ -4,6 +4,7 @@ import { crowdWidth } from "../../src/core/crowd";
 import {
   createRunState,
   crowdFront,
+  enemiesWon,
   packCrowd,
   packMouth,
   packSpan,
@@ -17,8 +18,18 @@ import {
   PACK_WAKE,
   TRACK_SPEED,
 } from "../../src/core/tuning";
+import {
+  cheerOf,
+  startGauntlet,
+  stepGauntlet,
+  waveRun,
+  type Gauntlet,
+} from "../../src/game/sandbox/gauntlet";
+import { GAUNTLET, type WavePreset } from "../../src/game/sandbox/presets";
 import { createHorde, DIE_DIST } from "../../src/game/three/horde";
 import {
+  CHEER_WIDTH,
+  cheerX,
   crowdHalfDepth,
   DIST_SCALE,
   FIGURE_RADIUS,
@@ -70,6 +81,7 @@ function layout(n0: number, run = 0, clock = 0, n = n0): HordeLayout {
     armyX: -2,
     armyW: crowdWidth(200) * TRACK_W,
     contact: 1,
+    cheer: -1,
   };
 }
 const places = (L: HordeLayout) =>
@@ -582,5 +594,78 @@ describe("drawing the horde", () => {
     h.update(b, 0);
     expect(slot(0).count).toBe(50);
     expect(slot(1).count).toBe(0);
+  });
+});
+
+describe("the enemies cheer a win (Task H5f)", () => {
+  /**
+   * Gauntlet wave 7 (outmatched) frame by frame through the wipe-out, held
+   * (and once steered off and back), each figure's place from the drawn
+   * layout: the biggest move of any figure from one frame to the next, over
+   * the last second before the army dies, and over the cheer.
+   */
+  function wave7(dx: number) {
+    const h = createHorde(new Scene());
+    const lay = () => h.meshes[0]?.userData.layout as HordeLayout;
+    const preset = GAUNTLET[6] as WavePreset;
+    let g: Gauntlet = {
+      ...startGauntlet(GAUNTLET),
+      index: 6,
+      run: waveRun(preset),
+      phase: "play",
+    };
+    const dt = 1 / 60;
+    let before = 0;
+    let cheering = 0;
+    let wipe = -1;
+    let prev: HordeSpot[] = [];
+    let width = 0;
+    for (let f = 0; f < 4000 && g.phase === "play"; f++) {
+      g = stepGauntlet(g, dt, f < 30 ? dx / 30 : f < 60 ? -dx / 30 : 0);
+      const cheer = cheerOf(g);
+      h.update(g.run, f * dt, cheer);
+      if (wipe < 0 && g.run.status === "dead") wipe = f;
+      const now = places(lay());
+      const move = Math.max(
+        0,
+        ...now.map((q, k) => {
+          const p = prev[k];
+          return p ? Math.hypot(q.x - p.x, q.z - p.z) : 0;
+        }),
+      );
+      if (cheer >= 0) {
+        cheering = Math.max(cheering, move);
+        width = Math.max(width, ...now.map((q) => Math.abs(q.x)));
+      } else if (g.run.status === "running" && g.run.army <= preset.army)
+        before = Math.max(before, move);
+      prev = now;
+    }
+    return { before, cheering, wipe, width, won: enemiesWon(g.run) };
+  }
+
+  it("no figure snaps into a line as the army dies, or when the cheer starts", () => {
+    for (const dx of [0, 0.25]) {
+      const r = wave7(dx);
+      expect(r.won).toBe(true);
+      expect(r.wipe).toBeGreaterThan(0);
+      // a figure runs about 0.3 world units a frame; nothing jumps sideways
+      expect(r.before).toBeLessThan(0.6);
+      expect(r.cheering).toBeLessThan(0.3);
+      // they spread out, about half the track, and stay on it
+      expect(r.width).toBeGreaterThan(CHEER_WIDTH / 2 - 0.5);
+      expect(r.width).toBeLessThan(TRACK_W / 2);
+    }
+  });
+
+  it("cheerX starts where the figure stands and spreads it out from its lane", () => {
+    expect(cheerX(0.2, 0, 0.6, 1, -1)).toBe(0.2);
+    expect(cheerX(0.2, 0, 0.6, 1, 0)).toBeCloseTo(0.2, 9);
+    expect(cheerX(0.2, 0, 0.6, 1, 5)).toBeCloseTo(0.2 * (CHEER_WIDTH / 0.6), 9);
+    expect(cheerX(-0.4, 0, 0.6, 1, 5)).toBeCloseTo(-CHEER_WIDTH / 2, 9);
+    // a figure already out beyond the spread stays where it is
+    expect(cheerX(4, 0, 0.6, 1, 5)).toBeCloseTo(4, 9);
+    // one still waiting in the crowd too; one half across goes half as far
+    expect(cheerX(1, 0, 0.6, 0, 5)).toBe(1);
+    expect(cheerX(1, 0, 0.6, 0.5, 5)).toBeCloseTo(1.75, 9);
   });
 });

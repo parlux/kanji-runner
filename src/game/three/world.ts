@@ -676,8 +676,39 @@ export const STREAM_ACROSS =
 export const CHEER_HOPS = 2.2;
 /** ...this high (world units, times their size). */
 export const CHEER_JUMP = 0.6;
-/** ...and spread out across the track, this wide (world units, about half the track) over their first 0.8 s. */
+/**
+ * ...and spread out across the track, this wide (world units, about half the
+ * track) over their first CHEER_SPREAD_SECONDS: each moves out from its lane's
+ * centre (never in, and never past CHEER_WIDTH / 2 unless it already stood
+ * further out), as far as it had come into its lane: the melee and the
+ * stream spread, the crowd still waiting stands where it is. The cheer
+ * starts from where every figure stands.
+ */
 export const CHEER_WIDTH = 5;
+export const CHEER_SPREAD_SECONDS = 0.8;
+
+/**
+ * Where a cheering figure stands across the track: `x` as it stood, `laneC`
+ * and `laneW` its lane's centre and width, `t` how far (0..1) it had come
+ * across into it, `cheer` seconds since the enemies won (−1 before: x as it
+ * is). The horde shader does the same.
+ */
+export function cheerX(
+  x: number,
+  laneC: number,
+  laneW: number,
+  t: number,
+  cheer: number,
+): number {
+  if (cheer < 0) return x;
+  const wide = Math.max(1, CHEER_WIDTH / Math.max(laneW, 0.1));
+  const u = Math.min(1, cheer / CHEER_SPREAD_SECONDS);
+  const d = Math.abs(x - laneC);
+  const out = Math.min(d * wide, Math.max(d, CHEER_WIDTH / 2));
+  return (
+    laneC + Math.sign(x - laneC) * (d + (out - d) * t * u * u * (3 - 2 * u))
+  );
+}
 /** An enemy that ran past the army runs on this far (run distance, track units) before it is gone off the screen behind. */
 export const RUN_PAST_DIST = 2;
 /** Enemies in a melee stand this many figure radii apart, packed against the army's front across its width. */
@@ -736,6 +767,8 @@ export type HordeLayout = {
   armyX: number;
   armyW: number;
   contact: number;
+  /** Seconds since the enemies won (they cheer: cheerX), −1 before. */
+  cheer: number;
 };
 
 /**
@@ -848,10 +881,13 @@ export function hordePlace(
   // coming across no faster than the core's stream: its curve (a smoothstep,
   // steepest at 1.5 × the way across per unit of progress) stretched, when
   // it is short of time, so that it never comes across faster than
-  // TRACK_SPEED; then it doesn't reach its lane in time (it runs past)
+  // TRACK_SPEED; then it doesn't reach its lane in time (it runs past). A
+  // fighting figure too: the core can count it in the melee while it still
+  // stands in the crowd (the drawn melee reaches back past it); it stays
+  // where it stands and doesn't snap into the melee's line (Task H5f)
   const reach = Math.abs(lane - cx);
   const v =
-    fighting || reach < 1e-9
+    reach < 1e-9
       ? u
       : Math.min(u, (STREAM_ACROSS * Math.max(0, e)) / (1.5 * reach));
   const t = v * v * (3 - 2 * v);
@@ -869,7 +905,7 @@ export function hordePlace(
       : 0;
   const back =
     e <= 0 ? spot + cz : slot + (1 - form) * cz + L.off * crash * form - lunge;
-  out.x = cx + (lane - cx) * t;
+  out.x = cheerX(cx + (lane - cx) * t, laneC, laneW, t, L.cheer);
   out.z = L.headZ - back;
   out.t = t;
   return out;
