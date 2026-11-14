@@ -189,7 +189,7 @@ export const HORDE_DEFAULTS: HordeTuning = {
  * Melee (owner, gauntlet round 1: enemies that reach you "stop right in
  * front and keep attacking until I killed them all or I was dead"; replaces
  * the stream's arrivals and HORDE_THREAT). Enemies that reach the army stand
- * at its front (RunState.melee) and fight: each second the army loses
+ * at its front (packMelee) and fight: each second the army loses
  * MELEE_RATE soldiers per soldier's worth of enemies there (an enemy is
  * worth the army its pack was sized for over its head count), and deals
  * MELEE_HIT × firepower(army) of damage to them, on top of its fire. So a
@@ -201,7 +201,9 @@ export const MELEE_RATE = 0.26;
 /**
  * The army's melee damage as a share of its firepower. A long melee holds
  * back the crates and saws behind it (and takes the fire), so a hard-hitting
- * army keeps the run's balance: at 1 the 80% bot won 0.34 of its runs.
+ * army keeps the run's balance: at 1 the 80% bot won 0.38 of its runs
+ * (0.43 at 2). Fire and melee kill from the front, so an army of its
+ * pack's size meets a thin press, one bigger than it a deep one.
  */
 export const MELEE_HIT = 2;
 /**

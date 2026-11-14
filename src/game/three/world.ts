@@ -639,6 +639,23 @@ export const HORDE_WANDER = 0.2;
 export const STREAM_TURN = 6;
 /** ...and, within this far of the army (world units), runs on into its front rows (the core meets it at its centre). */
 export const STREAM_CRASH = 25;
+/** Enemies in a melee stand this many figure radii apart, packed against the army's front across its width. */
+export const MELEE_GAP = 2.3;
+/** A fighting figure lunges at the army and back this far (world units, times its size)... */
+export const MELEE_LUNGE = 0.07;
+/** ...this many times a second. */
+export const MELEE_HZ = 1.6;
+
+/**
+ * The melee's step (world units per figure): figures MELEE_GAP radii
+ * apart, as many to a row as fit across the lane (`laneW` wide), so the
+ * melee is a press of rows against the army's front that grows as the
+ * stream feeds it and shrinks as it dies.
+ */
+export function meleeStep(laneW: number, size: number): number {
+  const g = MELEE_GAP * FIGURE_RADIUS * size;
+  return (g * g) / Math.max(g, laneW - 2 * FIGURE_RADIUS * size);
+}
 
 /**
  * One pack's drawing state (world units, the army at Z = 0; the uniforms the
@@ -648,7 +665,8 @@ export const STREAM_CRASH = 25;
  * front, `run` back of the head (how far the head has run from it);
  * figures `size`, `n` alive of `n0`, the column's `step` per figure, `off`
  * the army's half depth, `clock` for the wander. `stride` walks a row's
- * columns in a scattered order.
+ * columns in a scattered order. `melee` of the front figures fight at the
+ * army's front, `band` apart (meleeStep), the stream behind them.
  */
 export type HordeLayout = {
   laneX: number;
@@ -666,6 +684,8 @@ export type HordeLayout = {
   step: number;
   off: number;
   clock: number;
+  melee: number;
+  band: number;
 };
 
 /** A stride through `cols` columns that visits each once: about 0.62 of them, coprime with `cols`. */
@@ -693,9 +713,11 @@ export type HordeSpot = { x: number; z: number; t: number };
  * Figure k's place (the horde shader does the same from its index). Its
  * crowd spot: row ⌊R / cols⌋ back from the crowd's front, R = n0 − 1 − k
  * (the highest index stands at the front), a scattered column in the row,
- * jittered and, while it waits, wandering. Its stream slot: (n − 1 − k) ×
- * step behind the head (the core's column, so the rest step up as the front
- * dies or arrives). It stands in the crowd while its slot is further back
+ * jittered and, while it waits, wandering. Its stream slot: its place
+ * from the front j = n − 1 − k; the first `melee` stand pressed against the
+ * army's front, `band` apart, lunging at it; the rest are the stream, `step`
+ * apart behind them (the core's column, so the rest step up as the front
+ * dies). It stands in the crowd while its slot is further back
  * than its spot; once the head has run far enough, it leaves the crowd and
  * runs in its slot, turning into its lane of the army-wide stream over
  * STREAM_TURN and running on into the army's front rows near it.
@@ -734,7 +756,9 @@ export function hordePlace(
   );
   const cz = HORDE_JITTER * g * (2 * r2 - 1) + wz + rag * L.gz;
   const spot = L.run + row * L.gz;
-  const slot = (L.n - 1 - k) * L.step;
+  const j = L.n - 1 - k;
+  const pressed = Math.min(j, L.melee) * L.band;
+  const slot = pressed + Math.max(0, j - L.melee) * L.step;
   const ahead = -L.headZ;
   const e = spot - slot;
   const t =
@@ -743,8 +767,20 @@ export function hordePlace(
       : Math.min(1, e / Math.max(1e-3, Math.min(STREAM_TURN, spot + ahead)));
   const lane =
     L.laneX + (((k * 0.6180339887) % 1) - 0.5) * Math.max(0, L.laneW - 2 * rad);
-  const crash = Math.min(1, Math.max(0, 1 - (ahead + slot) / STREAM_CRASH));
-  const back = e <= 0 ? spot + cz : slot + (1 - t) * cz + L.off * crash * t;
+  // the stream runs on into the melee's back (the army's front rows when there is none)
+  const crash = Math.min(
+    1,
+    Math.max(0, 1 - (ahead + slot - L.melee * L.band) / STREAM_CRASH),
+  );
+  // fighting: lunging at the army and back
+  const lunge =
+    j < L.melee
+      ? MELEE_LUNGE *
+        L.size *
+        (1 - Math.cos(6.2831853 * (L.clock * MELEE_HZ * (0.8 + 0.4 * r1) + r2)))
+      : 0;
+  const back =
+    e <= 0 ? spot + cz : slot + (1 - t) * cz + L.off * crash * t - lunge;
   out.x = cx + (lane - cx) * t;
   out.z = L.headZ - back;
   out.t = t;

@@ -16,7 +16,7 @@ import {
   Vector3,
   WebGLRenderer,
 } from "three";
-import type { RunState } from "../../core/sim";
+import { packMelee, type RunState } from "../../core/sim";
 import type { Scene } from "../scenes";
 import { cameraFor, fitCamera, LOOK, makeCamera, MAX_DPR } from "./view";
 import { sceneryFor, sceneryParam, type LookId } from "./scenery";
@@ -31,6 +31,7 @@ import { createBoss } from "./boss";
 import { createFpsReadout } from "./fps";
 import {
   clipGaps,
+  crowdHalfDepth,
   crowdLayout,
   drawnCentre,
   scaledWidth,
@@ -106,6 +107,12 @@ const STRIDE_HZ = 2.4;
 const HOP = 0.07;
 const LEAN = 0.18;
 const SWAY = 0.1;
+/** In a melee, soldiers within this far (world units) of the crowd's front lunge at the enemy this far, this many times a second. */
+const FRONT_ROWS = 0.6;
+const FIGHT_LUNGE = 0.06;
+const FIGHT_HZ = 1.6;
+/** How fast the front rows start and stop fighting (per second). */
+const FIGHT_RATE = 6;
 /** Seconds a new figure takes to scale in, and a lost one to fall and shrink away. */
 const GROW_S = 0.35;
 const DROP_S = 0.45;
@@ -149,7 +156,8 @@ function createCrowd(kind: FigureKind) {
     /**
      * Places the crowd for an army centred at track x `x` (world Z `cz`),
      * `share` spread out, at animation time `now` (s); `dt` eases layout changes.
-     * `running` (0..1) scales the run cycle: 0 stands still.
+     * `running` (0..1) scales the run cycle: 0 stands still. `fight`
+     * (0..1): the front rows lunge forward and back (a melee at the front).
      */
     update(
       army: number,
@@ -159,6 +167,7 @@ function createCrowd(kind: FigureKind) {
       now: number,
       dt: number,
       running = 1,
+      fight = 0,
     ) {
       if (army !== lastArmy) {
         lastArmy = army;
@@ -180,6 +189,8 @@ function createCrowd(kind: FigureKind) {
       // exactly the true width (and centre) when squeezed
       const sx = 1 + (stretch - 1) * share;
       const cx = worldX(drawnCentre(x0, scaledWidth(army, sx)));
+      // the front rows: within FRONT_ROWS of the crowd's front edge
+      const front = -crowdHalfDepth(army) * DIST_SCALE + FRONT_ROWS;
       let i = 0;
       for (let k = 0; k < max; k++) {
         const dying = !alive[k] && now - (diedAt[k] as number) < DROP_S;
@@ -194,14 +205,23 @@ function createCrowd(kind: FigureKind) {
             (tz - (cur[2 * k + 1] as number)) * ease;
         }
         const x = cx + (cur[2 * k] as number) * sx;
-        const z = cz + (cur[2 * k + 1] as number);
-        const stride = (now * STRIDE_HZ + phaseOf(k)) * Math.PI * 2;
+        const tz = cur[2 * k + 1] as number;
+        const ph = phaseOf(k);
+        // fighting at the front: a lunge at the enemy and back
+        const beat = (now * FIGHT_HZ * (0.8 + 0.4 * ph) + ph) * Math.PI * 2;
+        const lunge = tz < front ? fight * (1 - Math.cos(beat)) : 0;
+        const z = cz + tz - FIGHT_LUNGE * lunge;
+        const stride = (now * STRIDE_HZ + ph) * Math.PI * 2;
         if (alive[k]) {
           const g = Math.min(1, (now - (bornAt[k] as number)) / GROW_S);
           // ease out with a little overshoot, so a new figure pops in
           const s = 1 + 2.2 * (g - 1) ** 3 + 1.2 * (g - 1) ** 2;
           pos.set(x, Math.abs(Math.sin(stride)) * HOP * running, z);
-          rot.set(-LEAN * running, 0, Math.sin(stride) * SWAY * running);
+          rot.set(
+            -LEAN * running - 0.2 * lunge,
+            0,
+            Math.sin(stride) * SWAY * running,
+          );
           scl.setScalar(s);
         } else {
           // left behind as the crowd runs on: tips over backwards and shrinks
@@ -360,6 +380,8 @@ export function createView3d(canvas: HTMLCanvasElement): View3d | null {
   let pose = fit.pose;
   // the crowd's run cycle (1 running, 0 stopped at the boss), eased
   let running = 1;
+  // how far (0..1) the army's front rows are fighting a melee
+  let fightShare = 0;
   const bossRun = {} as RunState;
   const bossView: BossView = {
     dist: Infinity,
@@ -464,7 +486,12 @@ export function createView3d(canvas: HTMLCanvasElement): View3d | null {
       const halted = fight !== null && run.dist >= place.stop;
       running +=
         ((halted ? 0 : 1) - running) * (1 - Math.exp(-HALT_RATE * pdt));
-      army.update(run.army, run.x, 0, share, clock, pdt, running);
+      // a melee at the army's front: its front rows fight
+      let meleeNow = 0;
+      for (let i = run.nextHazard; i < run.front.length; i++)
+        if (packMelee(run, i) > 0) meleeNow = 1;
+      fightShare += (meleeNow - fightShare) * (1 - Math.exp(-FIGHT_RATE * pdt));
+      army.update(run.army, run.x, 0, share, clock, pdt, running, fightShare);
       renderer.render(scene, camera);
     },
     boss: () => bossView,

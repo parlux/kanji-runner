@@ -170,8 +170,13 @@ export type RunState = {
   damage: number[];
   /** Per hazard: a pack's enemies that have reached the army's front so far (fractional, a running total). */
   arrived: number[];
-  /** Per hazard: a pack's enemies at the army's front now, fighting it (fractional; see MELEE_RATE). */
-  melee: number[];
+  /**
+   * Per hazard: how far into a pack's column, counted from its front (the
+   * dead too), its enemies have reached the army's front (fractional). It
+   * dies from the front, so those still alive up to here fight there now
+   * (packMelee; see MELEE_RATE).
+   */
+  front: number[];
   /** Per hazard: soldiers its melee has cost so far (fractional; whole soldiers are lost as it rises). */
   meleeLoss: number[];
   /** Per hazard: whether its numbers are settled (a pack is sized for the army when it wakes: see wakePacks). */
@@ -242,7 +247,7 @@ export function createRunState(
     heads: hazardHeads(track, expected, horde),
     damage: track.hazards.map(() => 0),
     arrived: track.hazards.map(() => 0),
-    melee: track.hazards.map(() => 0),
+    front: track.hazards.map(() => 0),
     meleeLoss: track.hazards.map(() => 0),
     woke: track.hazards.map(() => false),
     // the head starts at the crowd's front (crowdFront)
@@ -408,12 +413,14 @@ export function packLength(s: RunState, i: number): number {
 
 /** Pack i's enemies left still in its stream (not yet at the army's front). */
 export function packStreamLeft(s: RunState, i: number): number {
-  return Math.max(0, packHeadsLeft(s, i) - (s.melee[i] ?? 0));
+  return Math.max(0, packHeadsLeft(s, i) - packMelee(s, i));
 }
 
 /** Pack i's enemies at the army's front now (never more than are left). */
 export function packMelee(s: RunState, i: number): number {
-  return Math.min(s.melee[i] ?? 0, packHeadsLeft(s, i));
+  const left = packHeadsLeft(s, i);
+  const killed = (s.heads[i] ?? 0) - left;
+  return Math.min(left, Math.max(0, (s.front[i] ?? 0) - killed));
 }
 
 /**
@@ -452,10 +459,12 @@ function arrive(s: RunState, i: number, n: number): RunState {
   const k = Math.min(n, packStreamLeft(s, i));
   if (k <= 0) return s;
   const arrived = [...s.arrived];
-  const melee = [...s.melee];
+  const front = [...s.front];
   arrived[i] = (arrived[i] ?? 0) + k;
-  melee[i] = packMelee(s, i) + k;
-  return { ...s, arrived, melee };
+  // the dead ahead of the stream's front count as passed
+  const killed = (s.heads[i] ?? 0) - packHeadsLeft(s, i);
+  front[i] = Math.max(front[i] ?? 0, killed) + k;
+  return { ...s, arrived, front };
 }
 
 /**
@@ -510,9 +519,7 @@ export function meleeStep(s: RunState, dt: number): RunState {
       };
     }
   }
-  if (next === s) return s;
-  const melee = next.melee.map((m, i) => Math.min(m, packHeadsLeft(next, i)));
-  return { ...next, melee };
+  return next;
 }
 
 /**

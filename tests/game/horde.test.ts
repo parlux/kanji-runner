@@ -26,6 +26,8 @@ import {
   HORDE_RAG,
   HORDE_WANDER,
   hordePlace,
+  MELEE_LUNGE,
+  meleeStep,
   hordeStride,
   type HordeLayout,
   STREAM_TURN,
@@ -57,6 +59,8 @@ function layout(n0: number, run = 0, clock = 0, n = n0): HordeLayout {
     step: (PACK_COLUMN_MAX * DIST_SCALE) / n0,
     off: crowdHalfDepth(200) * DIST_SCALE,
     clock,
+    melee: 0,
+    band: meleeStep(crowdWidth(200) * TRACK_W, 1),
   };
 }
 const places = (L: HordeLayout) =>
@@ -327,15 +331,54 @@ describe("drawing the horde", () => {
     const a = { ...horde([0.5], 0), packs: [{ pos: 0, x: 0.5 }] };
     h.update(a, 0);
     // 5 at the front, then 3 of them killed
-    h.update({ ...a, arrived: [5], melee: [5], dist: 0.01 }, 0.02);
+    h.update({ ...a, arrived: [5], front: [5], dist: 0.01 }, 0.02);
     expect(slot(0).state.x).toBe(200);
     h.update(
-      { ...a, damage: [0.6], arrived: [5], melee: [5], dist: 0.02 },
+      { ...a, damage: [0.6], arrived: [5], front: [5], dist: 0.02 },
       0.04,
     );
     const d = slot(0).death.array;
     for (let k = 197; k < 200; k++) expect(d[3 * k]).toBeCloseTo(0.02, 6);
     expect(slot(0).state.x).toBe(197);
+    // the 2 left at the front fight there
+    expect(h.meshes[0]?.userData.layout.melee).toBeCloseTo(2, 9);
+  });
+
+  it("a melee is a press of rows against the army's front, as wide as its lane, the stream right behind; fighters lunge, nobody jumps as it grows", () => {
+    // the head at the army, the crowd long emptied, 60 of 200 at the front
+    const base = { ...layout(200, 200), headZ: 0 };
+    const L = { ...base, melee: 60 };
+    const lo = L.laneX - L.laneW / 2;
+    const hi = L.laneX + L.laneW / 2;
+    const depth = L.melee * L.band;
+    for (let k = 0; k < 200; k++) {
+      const j = 199 - k;
+      const p = hordePlace(k, L);
+      if (j < 60) {
+        expect(p.t).toBe(1);
+        expect(p.x).toBeGreaterThanOrEqual(lo);
+        expect(p.x).toBeLessThanOrEqual(hi);
+        // pressed against the front rows (a lunge reaches a little into them)
+        expect(p.z).toBeLessThanOrEqual(-L.off + 2 * MELEE_LUNGE + 1e-9);
+        expect(p.z).toBeGreaterThanOrEqual(-L.off - depth - 1e-9);
+      } else expect(p.z).toBeLessThanOrEqual(-L.off - depth + 1e-9);
+    }
+    // a few rows: as many to a row as fit across the lane
+    expect(depth).toBeGreaterThan(2 * FIGURE_RADIUS * 3);
+    expect(depth).toBeLessThan(L.laneW);
+    // the fighters lunge with the clock; the stream doesn't
+    const later = { ...L, clock: 0.3 };
+    expect(hordePlace(199, later).z).not.toBeCloseTo(hordePlace(199, L).z, 3);
+    expect(hordePlace(0, later).z).toBeCloseTo(hordePlace(0, L).z, 9);
+    // the melee growing by one figure moves nobody far
+    const grown = { ...L, melee: 61 };
+    for (let k = 0; k < 200; k++) {
+      const a = hordePlace(k, L);
+      const b = hordePlace(k, grown);
+      expect(Math.hypot(a.x - b.x, a.z - b.z)).toBeLessThan(
+        2 * MELEE_LUNGE + L.step + 1e-6,
+      );
+    }
   });
 
   it("stands still while paused (the clock and distance stop); the clock alone makes the crowd mill", () => {

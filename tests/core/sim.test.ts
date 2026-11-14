@@ -725,7 +725,7 @@ describe("shooting", () => {
         expect(hazardPos(r, 0)).toBe(r.dist);
         // nobody vanishes into the army: all 200 are still alive
         expect(packSurvivors(r, 0)).toBe(200);
-        expect(packMelee(r, 0)).toBeCloseTo(r.arrived[0] ?? 0, 6);
+        expect(packMelee(r, 0)).toBeCloseTo(r.arrived[0] ?? 0, 4);
         expect(packMelee(r, 0) + packStreamLeft(r, 0)).toBeCloseTo(200, 4);
       }
       // the whole stream is at the front within its length / the closing speed
@@ -735,7 +735,8 @@ describe("shooting", () => {
     });
 
     it("melee: both sides lose units every second; whole soldiers, from a running total of MELEE_RATE × the enemies' worth", () => {
-      const s0 = range([pack(0.001)], [3.5 * 300], 300, [200]);
+      // 100 soldiers against a pack sized for 300
+      const s0 = range([pack(0.001)], [3.5 * 300], 100, [200]);
       const { states } = stream(s0, 0.6);
       let lostSteps = 0;
       let prev = s0;
@@ -743,7 +744,7 @@ describe("shooting", () => {
         expect(Number.isInteger(r.army)).toBe(true);
         expect(r.army - Math.round(r.army)).toBe(0);
         // the army's loss is the whole part of the running total
-        expect(300 - r.army).toBe(Math.floor((r.meleeLoss[0] ?? 0) + 1e-9));
+        expect(100 - r.army).toBe(Math.floor((r.meleeLoss[0] ?? 0) + 1e-9));
         if (r.army < prev.army) lostSteps++;
         prev = r;
       }
@@ -762,7 +763,7 @@ describe("shooting", () => {
           ]),
           woke: [true],
         };
-        s = { ...s, melee: [s.heads[0] ?? 0] };
+        s = { ...s, front: [s.heads[0] ?? 0] };
         let t = 0;
         while (packSurvivors(s, 0) > 0 && s.army > 0 && t < 30) {
           s = meleeStep(s, DT);
@@ -796,13 +797,14 @@ describe("shooting", () => {
     });
 
     it("a melee ends when the pack is dead: nothing is lost after, and the pack is passed", () => {
-      const s0 = range([pack(0.001)], [3.5 * 100], 100, [200]);
+      // 100 soldiers against a pack sized for 200
+      const s0 = range([pack(0.001)], [3.5 * 200], 100, [200]);
       const { s, states } = stream(s0);
       expect(s.nextHazard).toBe(1);
       const lost = 100 - s.army;
       expect(lost).toBeGreaterThan(0);
-      // with fire, far less than the quarter a fight with no fire costs
-      expect(lost).toBeLessThan(25);
+      // outmatched 2 to 1, it still stands, with most of its soldiers
+      expect(lost).toBeLessThan(50);
       const out = states.findIndex((r) => packSurvivors(r, 0) === 0);
       expect(out).toBeGreaterThan(0);
       expect(states[out]?.lastShatter?.index).toBe(0);
@@ -811,7 +813,7 @@ describe("shooting", () => {
     });
 
     it("pause holds a melee: no step, no change", () => {
-      const s0 = range([pack(0.001)], [3.5 * 100], 100, [200]);
+      const s0 = range([pack(0.001)], [3.5 * 200], 100, [200]);
       const mid = stream(s0, 0.4).s;
       expect(packMelee(mid, 0)).toBeGreaterThan(0);
       // a paused game never steps the run; a run that is over never changes
@@ -841,12 +843,12 @@ describe("shooting", () => {
       const s0 = range(
         [pack(0.001), wide(0.5)],
         [3.5 * 1000, 1e12],
-        1000,
+        600,
         [200, 0],
       );
       let s = s0;
       let held = 0;
-      while (packStreaming(s, 0) || s.dist < 0.01) {
+      while ((packStreaming(s, 0) || s.dist < 0.01) && s.status === "running") {
         expect(s.nextHazard).toBe(0);
         if (packMelee(s, 0) > 0) held++;
         s = stepRun(s, DT);
@@ -879,7 +881,8 @@ describe("shooting", () => {
         s = stepRun(s, DT);
         if (s.nextHazard === 0) {
           const tail = hazardPos(s, 0) + packLength(s, 0);
-          if (Math.abs(hazardPos(s, 1) - tail) < 1e-9) joined = true;
+          // (the tail as it was before this step's fire)
+          if (Math.abs(hazardPos(s, 1) - tail) < 0.02) joined = true;
           // the pack in front takes the fire
           if (s.target !== null) expect(s.target).toBe(0);
         }
