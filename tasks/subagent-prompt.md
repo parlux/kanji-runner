@@ -5,7 +5,7 @@ How the orchestrator hands a task in the active task list to a subagent. One tas
 ## Orchestrator rules
 
 - **Model:** run subagents on `sonnet`. Use `opus` for a task with high data or design risk (the todo marks it "highest risk", or it needs judgment calls such as data cleaning or balance tuning), or when a Sonnet attempt comes back weak.
-- Between tasks, verify the work yourself: clean tree and pushed, `npm test && npm run lint && npm run build` pass, look at a key screenshot. Put any issues into the next task's prompt.
+- Between tasks, verify the work yourself: clean tree and pushed, `npm run check` passes (plus `npm run test:slow` after a `core/` simulation or balance task), look at a key screenshot. Put any issues into the next task's prompt.
 - Contact the owner only for a blocking decision, or at the checkpoint (deployed and ready for the phone test). Then give a short report: what changed, what to check, rough edges.
 - Owner ideas that come up mid-task go to `docs/ideas/`, not into a running task.
 
@@ -35,7 +35,7 @@ You are implementing **Task <N>: <title>** in /Users/parlux/Projects/number-runn
 Dev server: `npx vite --port 8765` (`vite preview` 404s). Live runs die between slow CLI calls, so render crafted states offscreen at 390×844 via `playwright-cli eval` with dynamic `/src/...` imports. Check: <list>. Save screenshots to the session scratchpad and list their absolute paths.
 
 ## Rules
-- Thin slices; test each one; `npm test && npm run lint && npm run build` pass before every commit; commit and `git push` each slice. Messages like `... (Task <N>, slice M)`, ending with the Co-Authored-By line.
+- Thin slices; test each one; `npm run check:fast` passes before every commit (add `npm run test:slow` for `core/` simulation or balance changes); `npm run check` passes before ticking in the final slice; commit and `git push` each slice. Messages like `... (Task <N>, slice M)`, ending with the Co-Authored-By line.
 - Stay in scope. Tick only Task <N>'s acceptance criteria in the active task list, in the final slice.
 - No committed probes or scratch scripts. Never commit raw KANJIDIC2/KRADFILE downloads or `.data-cache`.
 - Finish with a clean tree, everything pushed<, and the deploy green if a checkpoint follows>.

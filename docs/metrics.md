@@ -47,6 +47,25 @@ Most of the gain is `isolate: false` (the modules, incl. 494 KB `kanji.json`, lo
 
 Slow-tier-only tests (statistical bounds that need the full sample): balance "50% accuracy wins less than 10%" and "80% accuracy wins 40-70%", reask "independent of where the first ask put the answer".
 
+## Task V2: agent loop and tool trial (2026-11-15)
+
+| Metric | Value |
+|---|---|
+| Edit hook (`scripts/hooks/post-edit.sh`: cached eslint + `vitest related --run`) | 3.1-3.8 s on a typical file (`labels.ts`, `drag.ts`, `render.ts`); 10.8 s on `core/sim.ts` (most tests depend on it); non-.ts files exit in 0.01 s |
+| `check:fast`, one-file change (`scripts/check-fast.sh`: related tests, typecheck and lint in parallel) | 18 s before; 5.3 s on `render.ts`, 14.8 s on `core/sim.ts` (worst case, bound by its related tests) |
+
+Tool trial (dev Mac, warm caches unless noted, lines = whole repo):
+
+| Tool | Time | Verdict |
+|---|---|---|
+| `tsc --noEmit` | 9.5 s cold, 2.9-3.1 s incremental (warm, also after a one-file change) | replaced |
+| `tsgo --noEmit` (`@typescript/native-preview` 7.0.0-dev.20260707.2) | 2.5 s no cache, 0.9-1.0 s incremental (3.2x faster than `tsc` incremental, 3.8x cold) | **keep**, pinned exact |
+| `eslint --cache .` | 1.3-1.8 s warm, 5.2 s cold | stays |
+| `oxlint .` | 0.56 s | **drop** |
+
+- `tsgo`: zero errors on the current code like `tsc`. A deliberate `string`-to-`number` assignment, an unused local and a `noUncheckedIndexedAccess` read gave the same three errors, same positions and codes, on every incremental run. It is a dev preview, so the version is pinned; `typescript` stays for typescript-eslint.
+- `oxlint`: also zero errors on the current code, but with its default rules it missed `no-explicit-any` that ESLint (typescript-eslint strict) reports, so the errors differ. In front of a warm ESLint cache it would save about 1 s. Dropped and uninstalled.
+
 ## After v1 (Task V11)
 
 | Metric | Value |

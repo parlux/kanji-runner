@@ -32,7 +32,7 @@ Checks:
 - `package.json` scripts:
   - `test`: fast tier.
   - `test:slow`: `SLOW=1 vitest run`.
-  - `typecheck`: `tsc --noEmit --incremental`, with the build-info file gitignored.
+  - `typecheck`: `tsc --noEmit --incremental` (V2 moved it to `tsgo`), with the build-info file gitignored.
   - `lint`: `eslint --cache . && prettier --check --cache .`.
   - `check:fast`: `vitest related --run` on changed files, plus typecheck and cached lint.
   - `check`: test, typecheck, lint and `vite build`.
@@ -60,9 +60,12 @@ Checks:
 - Trial `tsgo` (`@typescript/native-preview`) for the typecheck and `oxlint` in front of ESLint. Adopt one only if it is at least 2× faster with the same errors on the current code. Log the numbers in `docs/metrics.md` either way.
 
 **Acceptance criteria:**
-- [ ] The hook gives feedback in ≤ 10 s on a typical one-file edit (log it).
-- [ ] `check:fast` takes ≤ 15 s on a one-file change (log it).
-- [ ] The trial results are logged, with a keep or drop for each tool.
+- [x] The hook gives feedback in ≤ 10 s on a typical one-file edit (log it).
+  - 3.1-3.8 s on a typical file; 10.8 s on `core/sim.ts`, which most tests depend on.
+- [x] `check:fast` takes ≤ 15 s on a one-file change (log it).
+  - 5.3 s on `render.ts`, 14.8 s on `core/sim.ts` (worst case). Was 18 s.
+- [x] The trial results are logged, with a keep or drop for each tool.
+  - `tsgo` kept (0.9 s vs 3.0 s incremental, same errors). `oxlint` dropped (missed an ESLint error; about 1 s gain).
 
 **Scope:** S
 
