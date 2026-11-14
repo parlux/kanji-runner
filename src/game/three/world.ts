@@ -16,7 +16,9 @@ import {
   CLASH_APPROACH_SECONDS,
   CLASH_HOLD_SECONDS,
   CLASH_SECONDS,
+  ENEMY_SPEED,
   SAW_W,
+  TRACK_SPEED,
   VIEW_DISTANCE,
 } from "../../core/tuning";
 import type { GateRow } from "../../core/types";
@@ -655,6 +657,23 @@ export const HORDE_STRIDE_HZ = 2.2;
 export const STREAM_TURN = 6;
 /** ...and, within this far of the army (world units), runs on into its front rows (the core meets it at its centre). */
 export const STREAM_CRASH = 25;
+/**
+ * Within this far (world units) of the melee's back (the army's front rows
+ * when there is none), the share of the stream that meets the army comes
+ * onto its lane (the melee's, on the army); the stream runs in its own lane
+ * (the core's, tracking the army late) until then.
+ */
+export const STREAM_MEET = 3;
+/**
+ * A figure leaving the crowd comes across into its lane no faster than the
+ * core's stream (TRACK_SPEED): at most this far sideways per world unit it
+ * has run over the ground (TRACK_SPEED × TRACK_W / (ENEMY_SPEED × DIST_SCALE)),
+ * so a pack woken close never snaps into line (owner, round 2, wave 6).
+ */
+export const STREAM_ACROSS =
+  (TRACK_SPEED * TRACK_W) / (ENEMY_SPEED * DIST_SCALE);
+/** An enemy that ran past the army runs on this far (run distance, track units) before it is gone off the screen behind. */
+export const RUN_PAST_DIST = 2;
 /** Enemies in a melee stand this many figure radii apart, packed against the army's front across its width. */
 export const MELEE_GAP = 2.3;
 /** A fighting figure lunges at the army and back this far (world units, times its size)... */
@@ -684,7 +703,10 @@ export function meleeStep(laneW: number, size: number): number {
  * columns in a scattered order. `melee` of the front figures fight at the
  * army's front, `band` apart (meleeStep), the stream behind them.
  * `closing`: how much faster the stream closes on the army than it runs
- * over the ground (the scroll on top of its own speed).
+ * over the ground (the scroll on top of its own speed). The melee stands on
+ * the army: `armyX`, `armyW`; `contact` (0..1) is the share of the stream
+ * that meets it (the core's packContact), which comes onto the army's lane
+ * within STREAM_MEET of its front.
  */
 export type HordeLayout = {
   laneX: number;
@@ -705,6 +727,9 @@ export type HordeLayout = {
   melee: number;
   band: number;
   closing: number;
+  armyX: number;
+  armyW: number;
+  contact: number;
 };
 
 /**
@@ -796,7 +821,6 @@ export function hordePlace(
   const form = e <= 0 ? 0 : Math.min(1, e / STREAM_TURN);
   const rem = ahead + slot - L.melee * L.band;
   const u = j < L.melee ? 1 : streamProgress(e, rem, L.closing);
-  const t = u * u * (3 - 2 * u);
   // its lane keeps its place across the crowd (a funnel: no crossing over)
   const across = Math.min(
     1,
@@ -806,7 +830,25 @@ export function hordePlace(
         L.cols,
     ),
   );
-  const lane = L.laneX + (across - 0.5) * Math.max(0, L.laneW - 2 * rad);
+  // the melee stands on the army; the stream runs in its own lane, the share
+  // that meets the army coming onto the army's lane just before its front
+  const fighting = j < L.melee;
+  const meet = fighting
+    ? 1
+    : L.contact * Math.min(1, Math.max(0, 1 - rem / STREAM_MEET));
+  const laneC = L.laneX + (L.armyX - L.laneX) * meet;
+  const laneW = L.laneW + (L.armyW - L.laneW) * meet;
+  const lane = laneC + (across - 0.5) * Math.max(0, laneW - 2 * rad);
+  // coming across no faster than the core's stream: its curve (a smoothstep,
+  // steepest at 1.5 × the way across per unit of progress) stretched, when
+  // it is short of time, so that it never comes across faster than
+  // TRACK_SPEED; then it doesn't reach its lane in time (it runs past)
+  const reach = Math.abs(lane - cx);
+  const v =
+    fighting || reach < 1e-9
+      ? u
+      : Math.min(u, (STREAM_ACROSS * Math.max(0, e)) / (1.5 * reach));
+  const t = v * v * (3 - 2 * v);
   // the stream runs on into the melee's back (the army's front rows when there is none)
   const crash = Math.min(
     1,

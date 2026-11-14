@@ -90,44 +90,53 @@ export function createHazards(scene: Scene, fx: Fx) {
         }
       }
 
-      // the crowd's fire: onto its target, otherwise straight ahead (never past the next wall)
+      // the crowd's fire: straight ahead from each lane (never past the next
+      // wall); the lanes that face its target stop there
       const i = run.target;
       const target = i === null ? undefined : hazards[i];
-      if (fighting || run.gateTarget !== null) {
-        /* the squads' fight or the wall's opening takes the fire */
+      const wallZ = worldZ(Math.min(fireLimit(run), boss), run.dist);
+      const straight = (l: number): void =>
+        fx.stream(
+          laneX(l),
+          -0.4,
+          laneX(l),
+          -FIRE_RANGE * DIST_SCALE,
+          8,
+          1.2,
+          l * 0.37,
+          bullet,
+          clock,
+          0.65,
+          wallZ,
+        );
+      if (fighting || run.gateTarget !== null || run.status !== "running") {
+        /* the squads' fight or the wall's opening takes the fire; a dead army fires nothing */
       } else if (
         i !== null &&
         (target?.kind === "block" || target?.kind === "pack")
       ) {
         const cw = crowdWidth(run.army);
         const span = target.kind === "block" ? target : packSpan(run, i);
-        // aim at the middle of where the crowd and the target overlap
         const lo = Math.max(span.left, run.x - cw / 2);
         const hi = Math.min(span.right, run.x + cw / 2);
-        const tx = worldX((lo + hi) / 2);
         const tz = worldZ(hazardPos(run, i), run.dist);
-        for (let l = 0; l < lanes; l++)
-          fx.stream(laneX(l), -0.4, tx, tz, 6, 1.6, l * 0.37, bullet, clock);
+        // a crate takes all the fire (aimed at the overlap); a pack only the lanes that face it
+        const tx = worldX((lo + hi) / 2);
+        for (let l = 0; l < lanes; l++) {
+          const x = laneX(l);
+          if (target.kind === "block")
+            fx.stream(x, -0.4, tx, tz, 6, 1.6, l * 0.37, bullet, clock);
+          else if (
+            x >= worldX(span.left) - 0.3 &&
+            x <= worldX(span.right) + 0.3
+          )
+            fx.stream(x, -0.4, x, tz, 6, 1.6, l * 0.37, bullet, clock);
+          else straight(l);
+        }
         // hit flash at the impact point
         const f = 0.6 + 0.4 * Math.sin(run.dist * 80);
         fx.spark(tx, 0.5, tz, 0.5 * f, FX_COLOURS.flash);
-      } else {
-        const wallZ = worldZ(Math.min(fireLimit(run), boss), run.dist);
-        for (let l = 0; l < lanes; l++)
-          fx.stream(
-            laneX(l),
-            -0.4,
-            laneX(l),
-            -FIRE_RANGE * DIST_SCALE,
-            8,
-            1.2,
-            l * 0.37,
-            bullet,
-            clock,
-            0.65,
-            wallZ,
-          );
-      }
+      } else for (let l = 0; l < lanes; l++) straight(l);
 
       // a shattered crate or pack bursts
       const sh = run.lastShatter;

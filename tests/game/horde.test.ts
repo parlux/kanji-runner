@@ -15,6 +15,7 @@ import {
   HORDE_DEFAULTS,
   PACK_COLUMN_MAX,
   PACK_WAKE,
+  TRACK_SPEED,
 } from "../../src/core/tuning";
 import { createHorde, DIE_DIST } from "../../src/game/three/horde";
 import {
@@ -66,6 +67,9 @@ function layout(n0: number, run = 0, clock = 0, n = n0): HordeLayout {
     melee: 0,
     band: meleeStep(crowdWidth(200) * TRACK_W, 1),
     closing: 1,
+    armyX: -2,
+    armyW: crowdWidth(200) * TRACK_W,
+    contact: 1,
   };
 }
 const places = (L: HordeLayout) =>
@@ -217,6 +221,7 @@ describe("horde layout: the stream", () => {
     const dt = 1 / 60;
     const base = { ...layout(200), closing: C / G };
     let worst = 0;
+    let fastest = 0;
     const half: number[] = [];
     const startX: number[] = [];
     const leftAt: number[] = [];
@@ -230,6 +235,7 @@ describe("horde layout: the stream", () => {
         if (r && r.t > 0 && q.t > 0) {
           const dz = Math.abs(q.z - r.z);
           if (dz > 1e-6) worst = Math.max(worst, Math.abs(q.x - r.x) / dz);
+          fastest = Math.max(fastest, Math.abs(q.x - r.x) / dt);
         }
         const lane = laneOf(k, L);
         const from = startX[k] ?? q.x;
@@ -246,7 +252,12 @@ describe("horde layout: the stream", () => {
       });
       last = p;
     }
-    return { worst, half: half.filter((v) => v !== undefined) };
+    // fastest sideways, in track widths a second
+    return {
+      worst,
+      fastest: fastest / TRACK_W,
+      half: half.filter((v) => v !== undefined),
+    };
   };
   /** Figure k's lane in the stream: where it is once all the way across. */
   const laneOf = (k: number, L: HordeLayout) =>
@@ -270,8 +281,13 @@ describe("horde layout: the stream", () => {
     }
   });
 
-  it("a pack woken close (2 track units out, behind a wall) still curves in over its whole run, never faster sideways than forwards", () => {
-    expect(charge(20).worst).toBeLessThan(0.7);
+  it("a pack woken close (2 track units out, behind a wall) never comes across faster than the core's stream (TRACK_SPEED): no snapping into line", () => {
+    const close = charge(20);
+    console.log("charge 20", close.worst, close.fastest, charge(120).fastest);
+    expect(close.fastest).toBeLessThanOrEqual(TRACK_SPEED + 1e-6);
+    expect(charge(120).fastest).toBeLessThanOrEqual(TRACK_SPEED + 1e-6);
+    // it gets somewhere: not frozen in its crowd's place
+    expect(close.fastest).toBeGreaterThan(TRACK_SPEED / 2);
   });
 
   it("a waiting crowd is calmer: it wanders less far and about 3× slower than in H5b", () => {
@@ -380,7 +396,7 @@ describe("drawing the horde", () => {
   it("sizes its buffers once, at the cap, and keeps them across frames and runs", () => {
     const { h, slot } = setup();
     const before = slot(0).death.array;
-    expect(before.length).toBe(3 * HORDE_CAP);
+    expect(before.length).toBe(4 * HORDE_CAP);
     h.update(horde([2], 0, 20_000), 0);
     h.update({ ...horde([2], 30, 20_000), dist: 0.01 }, 0.1);
     h.update(horde([2], 0), 0);
@@ -399,7 +415,7 @@ describe("drawing the horde", () => {
     expect(death.updateRanges).toHaveLength(0);
     // 20,000 heads on 40 HP: 0.1 damage kills 50
     h.update({ ...a, dist: 0.02, damage: [0.1] }, 0.04);
-    expect(death.updateRanges).toEqual([{ start: 3 * 19_950, count: 3 * 50 }]);
+    expect(death.updateRanges).toEqual([{ start: 4 * 19_950, count: 4 * 50 }]);
     expect(slot(0).state.x).toBe(19_950);
     expect(Array.from(death.array).some(Number.isNaN)).toBe(false);
   });
@@ -428,10 +444,38 @@ describe("drawing the horde", () => {
       0.04,
     );
     const d = slot(0).death.array;
-    for (let k = 197; k < 200; k++) expect(d[3 * k]).toBeCloseTo(0.02, 6);
+    for (let k = 197; k < 200; k++) {
+      expect(d[4 * k]).toBeCloseTo(0.02, 6);
+      // killed, not run past
+      expect(d[4 * k + 3]).toBe(0);
+    }
     expect(slot(0).state.x).toBe(197);
     // the 2 left at the front fight there
     expect(h.meshes[0]?.userData.layout.melee).toBeCloseTo(2, 9);
+  });
+
+  it("enemies that miss the army run past it, beside it, and on off the screen; killed ones fall", () => {
+    const { h, slot } = setup();
+    const a = { ...horde([0.5], 0), packs: [{ pos: 0, x: 0.5 }] };
+    h.update(a, 0);
+    // 3 reach the army's line beside it and run past (counted dead, no kill), 2 more are shot
+    h.update({ ...a, damage: [1], missed: [3], front: [3], dist: 0.02 }, 0.04);
+    expect(slot(0).state.x).toBe(195);
+    const d = slot(0).death.array;
+    const ax = worldX(a.x);
+    const half = (crowdWidth(a.army) * TRACK_W) / 2;
+    const ran = [];
+    for (let k = 195; k < 200; k++) {
+      expect(d[4 * k]).toBeCloseTo(0.02, 6);
+      if (d[4 * k + 3] === 1) {
+        ran.push(k);
+        // beside the army, never through it
+        expect(Math.abs((d[4 * k + 1] ?? 0) - ax)).toBeGreaterThan(half);
+      }
+    }
+    expect(ran).toEqual([195, 196, 197]);
+    // they are drawn while they run off, then the slot lets them go
+    expect(slot(0).count).toBe(200);
   });
 
   it("a melee is a press of rows against the army's front, as wide as its lane, the stream right behind; fighters lunge, nobody jumps as it grows", () => {
