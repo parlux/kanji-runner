@@ -125,7 +125,7 @@ Checks:
 - Add the layer map to `AGENTS.md`, under 10 lines.
 
 **Acceptance criteria:**
-- [ ] 0 violations. A deliberate `core` → `game` import fails `check` (tried, not committed).
+- [x] 0 violations. A deliberate `core` → `game` import fails `check` (tried, not committed).
 
 **Scope:** S
 

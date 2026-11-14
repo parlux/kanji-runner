@@ -8,6 +8,12 @@
 - Stop at the checkpoint: report to the owner (what changed, what to check, rough edges). Contact them earlier only for a blocking decision.
 - The owner ticks checkpoints. Owner ideas go to `docs/ideas/`.
 
+## Layers (checked by `npm run deps`, part of `check`)
+- `core/` imports only `core/` and `data/`.
+- `storage/`, `sync/`, `wanikani/` never import `game/`.
+- Only `game/` imports `game/three/`; `main.ts` goes through `game/view3d.ts`.
+- No import cycles. Type-only imports count.
+
 ## Open vs done
 - Top level of `tasks/` and `docs/ideas/` = open. Finished = `done/` subfolder.
 - Specs: same split, `docs/specs/` = open, `docs/specs/done/` = finished (later specs extend earlier ones, so links into `done/` are normal).
