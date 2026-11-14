@@ -10,11 +10,11 @@ import {
 import {
   createRunState,
   plannedRows,
-  rowOpenings,
   setTarget,
   stepRun,
   type RunState,
 } from "../../src/core/sim";
+import { rowOpenings } from "../../src/core/walls";
 import { itemKey, recordRun } from "../../src/core/srs";
 import { buildTrack } from "../../src/core/track";
 import {

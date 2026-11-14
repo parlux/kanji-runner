@@ -8,7 +8,9 @@ import {
   PlaneGeometry,
   type Scene,
 } from "three";
-import { rowOpenings, wallSolids, type RunState } from "../../core/sim";
+import { rowOpenings } from "../../core/walls";
+import { wallSolids } from "../../core/gates";
+import type { RunState } from "../../core/sim";
 import {
   shapeDistance,
   TRACK_W,

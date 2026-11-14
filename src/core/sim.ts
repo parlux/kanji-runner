@@ -1,11 +1,5 @@
 import { clipLoss, crowdWidth } from "./crowd";
-import {
-  gateOpenings,
-  growOpening,
-  nearestOpening,
-  wallSolids,
-  type Opening,
-} from "./gates";
+import { gateOpenings, type Opening } from "./gates";
 import {
   expectedArmy,
   firepower,
@@ -26,20 +20,10 @@ import {
   wakePacks,
 } from "./horde";
 import type { ReaskConfig } from "./reask";
-import { placeReask } from "./reask-hook";
 import {
-  applyCorrect,
-  applyCorrectCharge,
-  applyWrong,
-  applyWrongCharge,
-} from "./scoring";
-import {
-  BASE_REWARD,
   BASE_SPEED,
   CRATE_REWARD_K,
   CROWD_DEPTH_MAX,
-  FIRE_RANGE,
-  GATE_GROW_PER_DAMAGE,
   MAX_SPEED_MUL,
   PACK_WAKE,
   STARTING_ARMY,
@@ -50,13 +34,12 @@ import {
   HORDE_DEFAULTS,
   type HordeTuning,
 } from "./tuning";
-import { hazardSpan, isCharge, type Hazard, type Track } from "./track";
+import { hazardSpan, type Hazard, type Track } from "./track";
 import type { GateRow } from "./types";
 import { clampOnTrack, fireLimit, type RunState } from "./state";
+import { resolveRow, rowOpenings, shootGate } from "./walls";
 
 export type { RunState } from "./state";
-
-export { gateOpenings, nearestOpening, wallSolids, type Opening };
 
 /**
  * The run's rows as built at the start. The boss is sized from these, so a
@@ -149,11 +132,6 @@ export function createRunState(
   };
 }
 
-/** Row q's wall openings as they are now. */
-export function rowOpenings(s: RunState, q: number): Opening[] {
-  return s.gates[q] ?? gateOpenings(s.rows[q]?.options.length ?? 2);
-}
-
 /** Squads stand in a wall's openings: one per answer, at each opening's centre. */
 export function squadCentres(openings: readonly Opening[]): number[] {
   return openings.map((o) => o.centre);
@@ -244,27 +222,6 @@ function threats(s: RunState): (Threat | null)[] {
 /** Recruits a crate pays out when it shatters. */
 export const crateReward = (hp: number): number =>
   Math.round(CRATE_REWARD_K * hp);
-
-/**
- * With nothing else to shoot, fire goes to the next wall once it is within
- * FIRE_RANGE: the opening nearest the crowd's centre grows (see growOpening).
- * Only where the crowd is matters, never which answer is right.
- */
-function shootGate(s: RunState, dt: number): RunState {
-  const q = s.next;
-  const ahead = (s.track.questions[q] ?? Infinity) - s.dist;
-  if (!s.rows[q] || ahead < 0 || ahead > FIRE_RANGE)
-    return { ...s, gateTarget: null };
-  const openings = rowOpenings(s, q);
-  const i = nearestOpening(openings, s.x);
-  const gates = [...s.gates];
-  gates[q] = growOpening(
-    openings,
-    i,
-    firepower(s.army) * dt * GATE_GROW_PER_DAMAGE,
-  );
-  return { ...s, gates, gateTarget: i };
-}
 
 /**
  * All fire goes to the nearest shootable threat ahead whose span overlaps
@@ -394,45 +351,4 @@ function passHazard(s: RunState, h: Hazard): RunState {
     lastClip: clip > 0 ? { loss: clip, dist: s.dist } : s.lastClip,
     status: army <= 0 ? "dead" : s.status,
   };
-}
-
-/**
- * Contact with a wall, or a charge (a wall with a squad in each opening):
- * the wall clips, the opening nearest the crowd's centre is the answer, and
- * a charge scores as a charge.
- */
-function resolveRow(s: RunState): RunState {
-  const row = s.rows[s.next];
-  if (!row) return { ...s, status: "finished" };
-  const openings = rowOpenings(s, s.next);
-  const charge = isCharge(s.track, s.next);
-  // clipping first, then the answer is scored on what is left
-  const clip = clipLoss(s.army, s.x, crowdWidth(s.army), wallSolids(openings));
-  const remaining = s.army - clip;
-  const choice = nearestOpening(openings, s.x);
-  const correct = choice === row.answerIndex;
-  const base = BASE_REWARD[row.type];
-  const scored = correct
-    ? (charge ? applyCorrectCharge : applyCorrect)(remaining, s.streak, base)
-    : (charge ? applyWrongCharge : applyWrong)(remaining);
-  // a crowd clipped to nothing stays dead, but the answer still counts
-  const army = remaining > 0 ? scored.army : 0;
-  const streak = scored.streak;
-  const nextIndex = s.next + 1;
-  const status =
-    army <= 0 ? "dead" : nextIndex >= s.rows.length ? "finished" : "running";
-  const resolved: RunState = {
-    ...s,
-    army,
-    streak,
-    bestStreak: Math.max(s.bestStreak, streak),
-    next: nextIndex,
-    results: [...s.results, correct],
-    lastClip: clip > 0 ? { loss: clip, dist: s.dist } : s.lastClip,
-    lastAnswer: { correct, choice, change: army - remaining, dist: s.dist },
-    status,
-  };
-  return status === "running"
-    ? placeReask(resolved, s.next, correct)
-    : resolved;
 }

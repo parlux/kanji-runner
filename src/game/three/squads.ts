@@ -1,5 +1,6 @@
 import { Euler, Matrix4, Quaternion, Vector3, type Scene } from "three";
-import { rowOpenings, viewOf, type RunState } from "../../core/sim";
+import { rowOpenings } from "../../core/walls";
+import { viewOf, type RunState } from "../../core/sim";
 import { makeCrowdMesh } from "./figures";
 import { FX_COLOURS, type Fx } from "./fx";
 import {

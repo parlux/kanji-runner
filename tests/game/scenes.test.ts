@@ -12,10 +12,10 @@ import { itemKey, defaultProgress } from "../../src/core/srs";
 import {
   createRunState,
   plannedRows,
-  rowOpenings,
   setTarget,
   type RunState,
 } from "../../src/core/sim";
+import { rowOpenings } from "../../src/core/walls";
 import { enemiesWon, packStreaming } from "../../src/core/horde";
 import {
   CHEER_SECONDS,

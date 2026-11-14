@@ -2,11 +2,11 @@ import { isCharge } from "../../core/track";
 import {
   crateReward,
   isShattered,
-  rowOpenings,
   viewOf,
   type ChargeView,
   type RunState,
 } from "../../core/sim";
+import { rowOpenings } from "../../core/walls";
 import { hazardPos, packSurvivors } from "../../core/horde";
 import {
   drawLabel,

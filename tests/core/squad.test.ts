@@ -10,16 +10,15 @@ import {
 import { clipLoss, crowdWidth } from "../../src/core/crowd";
 import {
   createRunState,
-  gateOpenings,
   setTarget,
   squadCentres,
   stepRun,
   viewOf,
-  wallSolids,
   type ChargeView,
   type RunState,
   type SquadView,
 } from "../../src/core/sim";
+import { gateOpenings, wallSolids } from "../../src/core/gates";
 import { buildTrack, isCharge } from "../../src/core/track";
 import { BASE_REWARD, ROWS_PER_RUN } from "../../src/core/tuning";
 import type { GateRow } from "../../src/core/types";

@@ -12,12 +12,12 @@ import { createRng } from "../../src/core/rng";
 import { kanaRun } from "./kana-run";
 import {
   createRunState,
-  rowOpenings,
   setTarget,
   stepRun,
   viewOf,
   type RunState,
 } from "../../src/core/sim";
+import { rowOpenings } from "../../src/core/walls";
 import { buildTrack, type Block } from "../../src/core/track";
 import type { GateRow } from "../../src/core/types";
 import {

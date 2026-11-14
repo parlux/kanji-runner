@@ -2,17 +2,19 @@ import { describe, expect, it } from "vitest";
 import {
   crateReward,
   createRunState,
-  gateOpenings,
   isShattered,
-  rowOpenings,
-  wallSolids,
-  nearestOpening,
   nudgeTarget,
   setTarget,
   stepRun,
-  type Opening,
   type RunState,
 } from "../../src/core/sim";
+import {
+  gateOpenings,
+  wallSolids,
+  nearestOpening,
+  type Opening,
+} from "../../src/core/gates";
+import { rowOpenings } from "../../src/core/walls";
 import {
   hazardPos,
   crowdFront,
