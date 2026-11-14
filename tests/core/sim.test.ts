@@ -17,6 +17,9 @@ import {
   rowOpenings,
   packMouth,
   packSpan,
+  packContact,
+  packFireShare,
+  streamSpan,
   packSurvivors,
   wallSolids,
   nearestOpening,
@@ -57,6 +60,8 @@ import {
   KILL_SECONDS,
   PACK_WIDTH,
   PACK_WAKE,
+  TRACK_DELAY,
+  TRACK_SPEED,
   ENEMY_SPEED,
   ROWS_PER_RUN,
   STARTING_ARMY,
@@ -665,7 +670,7 @@ describe("shooting", () => {
     expect(passed.packs[0]?.pos ?? 6).toBeLessThan(6);
   });
 
-  it("a pack's crowd stays where it is across the track (it doesn't follow the army); its stream is the army's width, on the army", () => {
+  it("a pack's crowd stays where it is across the track (it doesn't follow the army); its stream, the army's width, tracks the army no faster than TRACK_SPEED", () => {
     const s0 = {
       ...range([pack(5, 0.8)], [10 * ENEMY_HP]),
       horde: NARROW,
@@ -677,8 +682,12 @@ describe("shooting", () => {
     expect(s.packs[0]?.x).toBe(0.8);
     expect(packMouth(s, 0)).toEqual(packMouth(s0, 0));
     const w = crowdWidth(s.army);
-    expect(packSpan(s, 0).left).toBeCloseTo(s.x - w / 2, 12);
-    expect(packSpan(s, 0).right).toBeCloseTo(s.x + w / 2, 12);
+    const sp = packSpan(s, 0);
+    expect(sp).toEqual(streamSpan(s, 0));
+    expect(sp.right - sp.left).toBeCloseTo(w, 12);
+    const moved = 0.8 - (sp.left + sp.right) / 2;
+    expect(moved).toBeGreaterThan(0.05);
+    expect(moved).toBeLessThanOrEqual(TRACK_SPEED * 0.5 + 1e-9);
   });
 
   it("fire kills one enemy per ENEMY_HP; the pack thins from the front, never narrows", () => {
@@ -1269,7 +1278,7 @@ describe("shooting", () => {
     });
   });
 
-  it("a pack's span is its mouth while it waits, and the army's (as wide as the army, centred on it) from the moment it wakes, however far", () => {
+  it("a pack's span is its mouth while it waits, and its stream (streamSpan) from the moment it wakes, however far", () => {
     for (const [army, x, packX] of [
       [20, 0.1, 0.9],
       [200, 0.5, 0.2],
@@ -1286,10 +1295,12 @@ describe("shooting", () => {
         packs: [{ pos: ahead, x: packX }],
       });
       const w = crowdWidth(army);
-      for (const ahead of [PACK_WAKE - 0.1, 6, 2, 0]) {
+      const m = packMouth(s0, 0);
+      for (const ahead of [PACK_WAKE - 0.1, 6, 2]) {
         const col = packSpan(at(ahead), 0);
-        expect(col.left).toBeCloseTo(x - w / 2, 12);
-        expect(col.right).toBeCloseTo(x + w / 2, 12);
+        expect(col).toEqual(streamSpan(at(ahead), 0));
+        expect(col.left).toBeCloseTo((m.left + m.right) / 2 - w / 2, 12);
+        expect(col.right).toBeCloseTo((m.left + m.right) / 2 + w / 2, 12);
       }
       // too far to wake, or waiting behind a wall: its mouth
       expect(packSpan(at(PACK_WAKE + 0.5), 0)).toEqual(packMouth(s0, 0));
@@ -1299,7 +1310,7 @@ describe("shooting", () => {
       };
       expect(packSpan(walled, 0)).toEqual(packMouth(s0, 0));
     }
-    // a narrow pack far to the side still reaches the army
+    // a narrow pack far to the side, woken close, can't reach the army in time: it runs past
     const s = stepFor(
       {
         ...range([pack(1, 0.9)], [1e9], 20, [20]),
@@ -1307,9 +1318,170 @@ describe("shooting", () => {
         x: 0.1,
         targetX: 0.1,
       },
-      1,
+      2,
     );
-    expect(s.army).toBeLessThan(20);
+    expect(s.army).toBe(20);
+    expect(s.missed[0]).toBeGreaterThan(19.9);
+    expect(s.arrived[0]).toBe(0);
+  });
+
+  describe("straight-ahead fire, delayed tracking and dodging", () => {
+    /** An awake pack `ahead` of the army (heads 200), its stream `w` wide at `sx`; the army `army` at `x`. */
+    const awake = (
+      ahead: number,
+      sx: number,
+      x: number,
+      army = 60,
+      w = crowdWidth(army),
+      hp = 1e9,
+    ): RunState => {
+      const s = range([pack(ahead, sx)], [hp], army, [200]);
+      return {
+        ...s,
+        // each enemy worth next to nothing: the army stands
+        horde: { ...s.horde, killSeconds: 1e15 },
+        x,
+        targetX: x,
+        packs: [{ pos: ahead, x: sx, streamX: sx, aimX: sx, streamW: w }],
+      };
+    };
+
+    it("the stream follows the army late (TRACK_DELAY) and no faster than TRACK_SPEED, a quarter of the army's steering", () => {
+      expect(TRACK_SPEED).toBeLessThanOrEqual(STEER_MAX_SPEED / 4);
+      // the army is moved across at once; the stream sets off after it
+      let s: RunState = { ...awake(6, 0.5, 0.5), x: 0.8, targetX: 0.8 };
+      let prev = streamSpan(s, 0);
+      for (let n = 0; n < 2 / DT; n++) {
+        s = stepRun(s, DT);
+        const sp = streamSpan(s, 0);
+        const dx = (sp.left + sp.right) / 2 - (prev.left + prev.right) / 2;
+        expect(Math.abs(dx)).toBeLessThanOrEqual(TRACK_SPEED * DT + 1e-12);
+        prev = sp;
+        if (n + 1 === Math.round(TRACK_DELAY / DT))
+          // its aim has come 1 − 1/e of the way (a first-order lag)
+          expect(s.packs[0]?.aimX ?? 0).toBeCloseTo(
+            0.5 + 0.3 * (1 - Math.exp(-1)),
+            2,
+          );
+        if (n === 5) {
+          // it sets off at once, slowly
+          const c = (sp.left + sp.right) / 2;
+          expect(c).toBeGreaterThan(0.5);
+          expect(c).toBeLessThan(0.5 + 6 * TRACK_SPEED * DT + 1e-9);
+        }
+      }
+      // in the end it is back on the army
+      const sp = streamSpan(s, 0);
+      expect((sp.left + sp.right) / 2).toBeCloseTo(0.8, 2);
+    });
+
+    it("fire goes straight ahead: a pack takes the share of the army's width its stream faces, and nothing when they don't overlap", () => {
+      const w = crowdWidth(60);
+      // the stream far to the side: the fire misses it
+      const off = stepRun(awake(6, 0.8, 0.2), DT);
+      expect(packFireShare(off, 0)).toBe(0);
+      expect(off.target).toBe(null);
+      expect(off.damage[0]).toBe(0);
+      // half the army's width faces the stream: half the fire
+      for (const x of [0.5 - w / 2, 0.5, 0.5 + w / 4]) {
+        const s = stepRun(awake(6, 0.5, x), DT);
+        const share = packFireShare(s, 0);
+        expect(s.target).toBe(0);
+        expect(s.damage[0]).toBeCloseTo(firepower(60) * DT * share, 9);
+        const expected = 1 - Math.abs(x - 0.5) / w;
+        // (the stream has started after the army this step)
+        expect(share).toBeCloseTo(expected, 1);
+      }
+    });
+
+    it("fire hits the front first: the enemies fighting at the army's front (the whole fire, wherever the stream is)", () => {
+      // the melee at the front, the stream drifting off to the side
+      let s = awake(0.001, 0.5, 0.5, 60, crowdWidth(60), 1e6);
+      for (let n = 0; n < 20; n++) s = stepRun(s, DT);
+      expect(packMelee(s, 0)).toBeGreaterThan(5);
+      s = {
+        ...s,
+        packs: [
+          {
+            ...(s.packs[0] as NonNullable<RunState["packs"][0]>),
+            streamX: 0.9,
+            aimX: 0.9,
+          },
+        ],
+      };
+      expect(packFireShare(s, 0)).toBe(1);
+      const melee = packMelee(s, 0);
+      const stream = packStreamLeft(s, 0);
+      const next = stepRun(s, DT);
+      expect(packMelee(next, 0)).toBeLessThan(melee);
+      // the stream beside the army runs past; none of it is shot
+      expect(packStreamLeft(next, 0)).toBeLessThanOrEqual(stream);
+      expect(next.missed[0]).toBeGreaterThan(0);
+    });
+
+    it("a quick sidestep at full speed makes the stream miss: its enemies run past, no contact, no loss", () => {
+      // the stream on the army, its head 0.6 s out
+      const ahead = 0.6 * (BASE_SPEED + ENEMY_SPEED);
+      const s0 = awake(ahead, 0.3, 0.3);
+      let s: RunState = { ...s0, targetX: 0.8 };
+      // 0.3 s of enemies reach its line beside it before the stream comes across
+      for (let n = 0; n < 0.9 / DT; n++) s = stepRun(s, DT);
+      expect(packStreaming(s, 0)).toBe(true);
+      expect(s.arrived[0]).toBe(0);
+      expect(packMelee(s, 0)).toBe(0);
+      expect(s.missed[0]).toBeGreaterThan(20);
+      expect(s.army).toBe(60);
+      // a held line meets it: the melee
+      let held = s0;
+      for (let n = 0; n < 1 / DT; n++) held = stepRun(held, DT);
+      expect(held.missed[0]).toBeCloseTo(0, 9);
+      expect(held.arrived[0]).toBeGreaterThan(20);
+      expect(packMelee(held, 0)).toBeGreaterThan(0);
+    });
+
+    it("partial overlap: only the share of the stream that meets the army joins the melee; the rest runs past", () => {
+      const w = crowdWidth(60);
+      // the army a quarter of its width off the stream, both still
+      const s0 = awake(0.001, 0.5, 0.5 + w / 4);
+      const share = packContact(s0, 0);
+      expect(share).toBeCloseTo(0.75, 6);
+      const s = stepRun(s0, DT);
+      const all = (s.arrived[0] ?? 0) + (s.missed[0] ?? 0);
+      expect(all).toBeGreaterThan(0);
+      expect((s.arrived[0] ?? 0) / all).toBeCloseTo(packContact(s, 0), 3);
+    });
+
+    it("woken close, wider than the army: it narrows and comes across no faster than TRACK_SPEED; what can't line up in time runs past", () => {
+      const sp0 = { pos: 2, x: 0.5, streamX: 0.5, aimX: 0.5, streamW: 0.8 };
+      let s: RunState = {
+        ...range([pack(2)], [1e9], 60, [200]),
+        horde: { ...HORDE_DEFAULTS, killSeconds: 1e15 },
+        x: 0.2,
+        targetX: 0.2,
+        packs: [sp0],
+      };
+      let prev = streamSpan(s, 0);
+      for (let n = 0; n < 3 / DT && s.nextHazard === 0; n++) {
+        s = stepRun(s, DT);
+        const sp = streamSpan(s, 0);
+        const dc = (sp.left + sp.right - prev.left - prev.right) / 2;
+        const dw = sp.right - sp.left - (prev.right - prev.left);
+        expect(Math.abs(dc)).toBeLessThanOrEqual(TRACK_SPEED * DT + 1e-12);
+        expect(Math.abs(dw)).toBeLessThanOrEqual(2 * TRACK_SPEED * DT + 1e-12);
+        prev = sp;
+      }
+      expect(s.missed[0]).toBeGreaterThan(5);
+      expect(s.arrived[0]).toBeGreaterThan(10);
+    });
+
+    it("deterministic: the same steps give the same run", () => {
+      const go = (): RunState => {
+        let s: RunState = { ...awake(1.5, 0.4, 0.4), targetX: 0.7 };
+        for (let n = 0; n < 90; n++) s = stepRun(s, DT);
+        return s;
+      };
+      expect(go()).toEqual(go());
+    });
   });
 
   it("a pack shot to 0 costs nothing", () => {

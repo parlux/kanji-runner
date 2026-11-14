@@ -9,6 +9,7 @@ import {
   setTarget,
   speedMul,
   stepRun,
+  streamSpan,
   type RunState,
 } from "../../src/core/sim";
 import type { ReaskConfig } from "../../src/core/reask";
@@ -46,7 +47,7 @@ export type BotOptions = {
 
 /**
  * Shoots a crate when it can break it in time (else dodges), dodges saws
- * through the widest gap, stays on each enemy pack to shoot it, and goes
+ * through the widest gap, stays on each enemy pack's stream to shoot it, and goes
  * through the chosen opening at each wall (a charge is a wall with a squad in
  * each opening). Below skill 1, every beat (hazard or wall) gets its own aim
  * offset, kept inside the chosen opening at walls so it never changes the answer.
@@ -72,8 +73,11 @@ export function botRun(seed: number, opts: BotOptions): RunState {
     const rowAt = s.track.questions[s.next] ?? Infinity;
     let aim: number;
     if (h && hazardPos(s, s.nextHazard) < rowAt) {
-      if (h.kind === "pack") aim = s.packs[s.nextHazard]?.x ?? 0.5;
-      else if (h.kind === "block" && canBreak(s, s.nextHazard)) {
+      if (h.kind === "pack") {
+        // stay on its stream to shoot it (it tracks the army, late)
+        const sp = streamSpan(s, s.nextHazard);
+        aim = (sp.left + sp.right) / 2;
+      } else if (h.kind === "block" && canBreak(s, s.nextHazard)) {
         // overlap the crate fully so all fire reaches it
         const w = crowdWidth(s.army);
         const mid = (h.left + h.right) / 2;

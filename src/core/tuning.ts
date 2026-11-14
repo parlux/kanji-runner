@@ -252,6 +252,24 @@ export const PACK_FIRE_RANGE = PACK_WAKE;
  * numbers the pack was built with.
  */
 export const PACK_ADAPT = 1.0;
+/**
+ * Delayed, limited tracking (owner, gauntlet round 2: "they follow too fast
+ * when I move side to side, there should be a delay ... I should be able to
+ * miss if I move too fast to the side"). An awake pack's stream aims at
+ * where the army was: its aim follows the army's x with this lag (a
+ * first-order lag, seconds: the aim closes 63% of the gap in this time)...
+ */
+export const TRACK_DELAY = 0.4;
+/**
+ * ...and the stream moves toward its aim at most this fast (track widths per
+ * second; a quarter of STEER_MAX_SPEED, 1.2). An army that drifts slower
+ * than this stays met, a step or two behind; a full-speed sidestep of more
+ * than the army's width (0.06 to 0.3) outruns it, and the enemies that
+ * reach the army's line beside it run past (no contact). A stream woken
+ * wider than the army (its crowd's mouth) narrows to it at the same speed
+ * at each edge, so a pack woken close can't snap into line.
+ */
+export const TRACK_SPEED = 0.3;
 /** A pack that wakes behind another still charging catches up with that column's tail this much faster (track units per second). */
 export const PACK_MERGE_SPEED = 2.5;
 

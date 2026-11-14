@@ -50,6 +50,8 @@ import {
   REASK_MAX,
   PACK_COLUMN_MAX,
   STARTING_ARMY,
+  TRACK_DELAY,
+  TRACK_SPEED,
   STEER_EASE,
   SQUAD_DEFECT_GAIN,
   STEER_MAX_SPEED,
@@ -60,8 +62,20 @@ import {
 import { hazardSpan, isCharge, type Hazard, type Track } from "./track";
 import type { GateRow } from "./types";
 
-/** A moving enemy pack: its stream's head (track position) and its crowd's centre. */
-export type PackState = { pos: number; x: number };
+/**
+ * A moving enemy pack: its stream's head (track position) and its crowd's
+ * centre; once awake, its stream across the track (see TRACK_SPEED):
+ * `streamX` its centre, `aimX` where it is heading (the army's x, lagged by
+ * TRACK_DELAY), `streamW` its width where it meets the army's line. A pack
+ * without them (tests) is a stream as wide as the army at its mouth's centre.
+ */
+export type PackState = {
+  pos: number;
+  x: number;
+  streamX?: number;
+  aimX?: number;
+  streamW?: number;
+};
 
 /**
  * A pack's waiting crowd (track units): `cols` across its mouth `gx` apart
@@ -177,6 +191,8 @@ export type RunState = {
    * (packMelee; see MELEE_RATE).
    */
   front: number[];
+  /** Per hazard: a pack's enemies that reached the army's line beside it and ran past (fractional; gone, no contact). */
+  missed: number[];
   /** Per hazard: soldiers its melee has cost so far (fractional; whole soldiers are lost as it rises). */
   meleeLoss: number[];
   /** Per hazard: whether its numbers are settled (a pack is sized for the army when it wakes: see wakePacks). */
@@ -248,12 +264,23 @@ export function createRunState(
     damage: track.hazards.map(() => 0),
     arrived: track.hazards.map(() => 0),
     front: track.hazards.map(() => 0),
+    missed: track.hazards.map(() => 0),
     meleeLoss: track.hazards.map(() => 0),
     woke: track.hazards.map(() => false),
     // the head starts at the crowd's front (crowdFront)
-    packs: track.hazards.map((h) =>
-      h.kind === "pack" ? { pos: h.pos - CROWD_DEPTH_MAX / 2, x: h.x } : null,
-    ),
+    packs: track.hazards.map((h) => {
+      if (h.kind !== "pack") return null;
+      // its stream starts as its crowd: its mouth, where it stands
+      const w = Math.min(1, Math.max(0, horde.packWidth));
+      const c = clampOnTrack(h.x, w);
+      return {
+        pos: h.pos - CROWD_DEPTH_MAX / 2,
+        x: h.x,
+        streamX: c,
+        aimX: c,
+        streamW: w,
+      };
+    }),
     target: null,
     gates: rows.map((r) => gateOpenings(r.options.length)),
     gateTarget: null,
@@ -376,15 +403,57 @@ export function packMouth(s: RunState, i: number): Span {
   return { left: x - w / 2, right: x + w / 2 };
 }
 
-/**
- * Pack i's span where it can hit and be hit: its mouth while it waits; once
- * it wakes, its stream, as wide as the army and centred on it (it homes in,
- * so nothing that reaches the army can be dodged).
- */
-export function packSpan(s: RunState, i: number): Span {
-  if (!packAwake(s, i) && (s.arrived[i] ?? 0) <= 0) return packMouth(s, i);
+/** The army's span across the track. */
+export function armySpan(s: RunState): Span {
   const w = crowdWidth(s.army);
   return { left: s.x - w / 2, right: s.x + w / 2 };
+}
+
+const overlap = (a: Span, b: Span): number =>
+  Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left));
+
+/** Pack i's stream across the track: `streamW` wide at `streamX` (see PackState). */
+export function streamSpan(s: RunState, i: number): Span {
+  const p = s.packs[i];
+  const m = packMouth(s, i);
+  const x = p?.streamX ?? (m.left + m.right) / 2;
+  const w = p?.streamW ?? crowdWidth(s.army);
+  return { left: x - w / 2, right: x + w / 2 };
+}
+
+/**
+ * The share (0..1) of pack i's stream that meets the army where they reach
+ * its line: the overlap of the two spans over the stream's width. The rest
+ * runs past beside it (arrive).
+ */
+export function packContact(s: RunState, i: number): number {
+  const sp = streamSpan(s, i);
+  const w = sp.right - sp.left;
+  return w > 0 ? Math.min(1, overlap(sp, armySpan(s)) / w) : 0;
+}
+
+/**
+ * The share (0..1) of the army's fire that hits pack i: it fires straight
+ * ahead across its own width, so the share of its width that pack i's span
+ * covers (all of it while enemies fight at its front).
+ */
+export function packFireShare(s: RunState, i: number): number {
+  const a = armySpan(s);
+  const w = a.right - a.left;
+  return w > 0 ? Math.min(1, overlap(packSpan(s, i), a) / w) : 0;
+}
+
+/**
+ * Pack i's span where it can hit and be hit: its mouth while it waits; once
+ * it wakes, its stream (streamSpan: it tracks the army, late and no faster
+ * than TRACK_SPEED, so a quick sidestep can dodge it); while enemies fight
+ * at the army's front, the army's own span (they are on it).
+ */
+export function packSpan(s: RunState, i: number): Span {
+  if (!packAwake(s, i) && (s.arrived[i] ?? 0) <= 0 && (s.missed[i] ?? 0) <= 0)
+    return packMouth(s, i);
+  if (packMelee(s, i) > 0) return armySpan(s);
+  return streamSpan(s, i);
 }
 
 /** Where hazard i is now: packs move, everything else stays put. */
@@ -452,19 +521,31 @@ export function enemyWorth(s: RunState, i: number): number {
 }
 
 /**
- * n more of pack i's enemies reach the army's front from its stream: they
- * stop there and join the melee (never more than the stream has left).
+ * n more of pack i's enemies reach the army's line from its stream (never
+ * more than the stream has left): the share that meets the army
+ * (packContact) stops at its front and joins the melee; the rest run past
+ * beside it and are gone (`missed`, counted as dead without a kill, so the
+ * pack thins from its front as ever).
  */
 function arrive(s: RunState, i: number, n: number): RunState {
   const k = Math.min(n, packStreamLeft(s, i));
   if (k <= 0) return s;
+  const met = k * packContact(s, i);
+  const miss = k - met;
   const arrived = [...s.arrived];
   const front = [...s.front];
-  arrived[i] = (arrived[i] ?? 0) + k;
+  const missed = [...s.missed];
+  const damage = [...s.damage];
+  arrived[i] = (arrived[i] ?? 0) + met;
   // the dead ahead of the stream's front count as passed
   const killed = (s.heads[i] ?? 0) - packHeadsLeft(s, i);
   front[i] = Math.max(front[i] ?? 0, killed) + k;
-  return { ...s, arrived, front };
+  missed[i] = (missed[i] ?? 0) + miss;
+  const hp = s.hp[i] ?? 0;
+  const heads = s.heads[i] ?? 0;
+  if (miss > 0 && heads > 0)
+    damage[i] = Math.min(hp, (damage[i] ?? 0) + (miss * hp) / heads);
+  return { ...s, arrived, front, missed, damage };
 }
 
 /**
@@ -561,8 +642,10 @@ function wakePacks(s: RunState): RunState {
 function movePacks(s: RunState, dt: number): RunState {
   let next = s;
   for (let i = s.nextHazard; i < s.packs.length; i++) {
+    if (!next.packs[i] || !packAwake(s, i)) continue;
+    next = trackArmy(next, i, dt);
     const p = next.packs[i];
-    if (!p || !packAwake(s, i)) continue;
+    if (!p) continue;
     let pos = p.pos - ENEMY_SPEED * dt;
     const k = i - 1;
     const lead = next.packs[k];
@@ -578,11 +661,37 @@ function movePacks(s: RunState, dt: number): RunState {
       );
     const over = Math.max(0, s.dist - pos);
     const packs = [...next.packs];
-    packs[i] = { pos: Math.max(pos, s.dist), x: p.x };
+    packs[i] = { ...p, pos: Math.max(pos, s.dist) };
     next = { ...next, packs };
     if (over > 0) next = arrive(next, i, over * packDensity(next, i));
   }
   return next;
+}
+
+/**
+ * dt seconds of pack i's stream tracking the army: its aim follows the
+ * army's x with a first-order lag (TRACK_DELAY); the stream moves toward
+ * its aim no faster than TRACK_SPEED, and its width toward the army's no
+ * faster than TRACK_SPEED at each edge, kept on the track.
+ */
+function trackArmy(s: RunState, i: number, dt: number): RunState {
+  const p = s.packs[i];
+  if (!p) return s;
+  const sp = streamSpan(s, i);
+  const w = crowdWidth(s.army);
+  const x0 = (sp.left + sp.right) / 2;
+  const w0 = sp.right - sp.left;
+  const a0 = p.aimX ?? x0;
+  const aimX = a0 + (s.x - a0) * (1 - Math.exp(-dt / TRACK_DELAY));
+  const cap = TRACK_SPEED * dt;
+  const streamW = w0 + Math.max(-2 * cap, Math.min(2 * cap, w - w0));
+  const streamX = clampOnTrack(
+    x0 + Math.max(-cap, Math.min(cap, aimX - x0)),
+    streamW,
+  );
+  const packs = [...s.packs];
+  packs[i] = { ...p, streamX, aimX, streamW };
+  return { ...s, packs };
 }
 
 /** What can be shot now: intact blocks and packs with enemies left. */
@@ -635,7 +744,8 @@ function shootGate(s: RunState, dt: number): RunState {
 }
 
 /**
- * All fire goes to the nearest shootable threat ahead; damage is capped at its hp.
+ * All fire goes to the nearest shootable threat ahead whose span overlaps
+ * the army's (a pack takes only its share: packFireShare); damage is capped at its hp.
  * A block (supply crate) pays out once, on the step it shatters: it is never a target again.
  * With no threat to shoot, the next wall's opening takes the fire.
  */
@@ -650,7 +760,13 @@ function fire(s: RunState, w: number, dt: number): RunState {
   if (target === null) return shootGate({ ...s, target }, dt);
   const hp = s.hp[target] ?? 0;
   const damage = [...s.damage];
-  damage[target] = Math.min(hp, (damage[target] ?? 0) + firepower(s.army) * dt);
+  // straight ahead: a pack takes the share of the fire its span faces
+  const share =
+    s.track.hazards[target]?.kind === "pack" ? packFireShare(s, target) : 1;
+  damage[target] = Math.min(
+    hp,
+    (damage[target] ?? 0) + firepower(s.army) * dt * share,
+  );
   const shattered = damage[target] >= hp;
   const gain =
     shattered && s.track.hazards[target]?.kind === "block"

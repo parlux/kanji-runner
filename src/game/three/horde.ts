@@ -8,7 +8,6 @@ import {
   Vector4,
   type Scene,
 } from "three";
-import { crowdWidth } from "../../core/crowd";
 import {
   crowdFront,
   crowdOf,
@@ -19,6 +18,7 @@ import {
   packMouth,
   packSurvivors,
   speedMul,
+  streamSpan,
   type RunState,
 } from "../../core/sim";
 import { BASE_SPEED, ENEMY_SPEED, PACK_COLUMN_MAX } from "../../core/tuning";
@@ -370,8 +370,10 @@ export function createHorde(scene: Scene): Horde {
         const mouth = packMouth(run, i);
         const c = crowdOf(run, i);
         const L = s.lay;
-        L.laneX = worldX(run.x);
-        L.laneW = crowdWidth(run.army) * TRACK_W;
+        // the stream's lane: where the core's stream is (it tracks the army late)
+        const lane = streamSpan(run, i);
+        L.laneX = worldX((lane.left + lane.right) / 2);
+        L.laneW = (lane.right - lane.left) * TRACK_W;
         L.headZ = worldZ(pos, dist);
         L.off = crowdHalfDepth(run.army) * DIST_SCALE;
         L.left = worldX(mouth.left);
