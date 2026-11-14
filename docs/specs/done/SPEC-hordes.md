@@ -1,6 +1,6 @@
 # Spec: hordes (v1.10)
 
-Extends `docs/specs/done/SPEC-3d.md` and the shooting rules (S1/S2, `docs/ideas/done/shooting.md`). Everything there still holds unless this spec says otherwise. Idea and confirmed intent: `docs/ideas/hordes.md`.
+Extends `docs/specs/done/SPEC-3d.md` and the shooting rules (S1/S2, `docs/ideas/done/shooting.md`). Everything there still holds unless this spec says otherwise. Idea and confirmed intent: `docs/ideas/done/hordes.md`.
 
 ## Objective
 Enemy packs become hordes of many weak enemies that the army mows down, with spectacular kills. A pack is about as dangerous as it is today, and the Pixel 7 stays smooth.

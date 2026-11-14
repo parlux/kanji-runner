@@ -1,6 +1,6 @@
 # Spec: kanji meaning mode (v1.7)
 
-Extends `docs/specs/done/SPEC.md` (v1) through `docs/specs/done/SPEC-stories.md` (v1.5; v1.6 reveal was dropped). Everything there still holds unless this spec says otherwise. Intent: `docs/intent/kanji-meaning-mode.md`. Idea: `docs/ideas/kanji-meaning-mode.md`.
+Extends `docs/specs/done/SPEC.md` (v1) through `docs/specs/done/SPEC-stories.md` (v1.5; v1.6 reveal was dropped). Everything there still holds unless this spec says otherwise. Intent: `docs/intent/kanji-meaning-mode.md`. Idea: `docs/ideas/done/kanji-meaning-mode.md`.
 
 ## Objective
 A second way to play for someone who reads Chinese but no Japanese: kanji prompts, English meaning answers, nothing else. It has its own progress on the device and never touches the owner's.

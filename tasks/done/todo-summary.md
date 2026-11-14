@@ -1,6 +1,6 @@
 # Tasks: summary screen (v1.9)
 
-Spec: `docs/specs/SPEC-summary.md` (2026-11-13). Idea and mockup: `docs/ideas/summary-screen.md`. Started 2026-11-13 (owner go), in parallel with v1.8 scenery on main.
+Spec: `docs/specs/done/SPEC-summary.md` (2026-11-13). Idea and mockup: `docs/ideas/done/summary-screen.md`. Started 2026-11-13 (owner go), in parallel with v1.8 scenery on main.
 Every task: `npm test && npm run lint && npm run build` pass before it is checked off.
 
 ## Phase 15: Summary screen
@@ -37,6 +37,7 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 **Scope:** M
 
 ### Checkpoint E: v1.9 (owner, on their phone)
-- [ ] The level card makes it clear how close the next level is, after wins and losses.
-- [ ] Play again / Study / Home feel right; no accidental exits.
-- [ ] Nothing feels missing from the old screen (or note what to bring back).
+Owner accepted as-is for v1, 2026-11-15.
+- [x] The level card makes it clear how close the next level is, after wins and losses.
+- [x] Play again / Study / Home feel right; no accidental exits.
+- [x] Nothing feels missing from the old screen (or note what to bring back).

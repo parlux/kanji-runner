@@ -16,9 +16,10 @@ Checks:
 - Check each branch and worktree (`camera`, `pause-show-last-prompt-and-answer`, `summary-screen`, `worktree-kana-words`, the `worktree/*` ones, `.herdr/worktrees/…`) with `git branch --merged main` and `git worktree list`. Delete the merged ones, local and remote. List the unmerged ones for the owner; don't delete them.
 
 **Acceptance criteria:**
-- [ ] The top level of `tasks/` holds only `todo-v1.md` and `subagent-prompt.md`. The top level of `docs/specs/` holds only `SPEC-v1.md`.
-- [ ] No broken links to the moved files (`grep` for the old paths).
+- [x] The top level of `tasks/` holds only `todo-v1.md` and `subagent-prompt.md`. The top level of `docs/specs/` holds only `SPEC-v1.md`.
+- [x] No broken links to the moved files (`grep` for the old paths).
 - [ ] Only `main` and the reported unmerged branches remain.
+  - Local: done (merged branches and the `summary-screen` worktree removed). Unmerged, kept: `pause-show-last-prompt-and-answer` (origin has 023a8eb, not in main; local af494a0 is merged). Remote deletes of the merged `camera`, `ccr-*` (3), `summary-screen`, `worktree-kana-words`, `worktree/rapid-forest-ac1e` were blocked by the permission check: owner to run or approve.
 
 **Scope:** S
 

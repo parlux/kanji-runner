@@ -874,7 +874,7 @@ const SETTLE_MAX = 60 * 60;
  * next wall or hazard while pack i is still fighting at its front, the rest
  * of its stream joins the melee and it is fought out at once, as meleeStep
  * and fire would (the army's fire all on it), until the pack or the army is
- * dead. Rare in a real run (see the balance log in tasks/todo-hordes.md).
+ * dead. Rare in a real run (see the balance log in tasks/done/todo-hordes.md).
  */
 function settleMelee(s: RunState, i: number): RunState {
   let next = arrive(s, i, Infinity);

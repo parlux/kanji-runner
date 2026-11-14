@@ -1,6 +1,6 @@
 # Tasks: kanji meaning mode (v1.7)
 
-Spec: `docs/specs/SPEC-meaning-mode.md` (2026-11-13). Intent: `docs/intent/kanji-meaning-mode.md`. Idea: `docs/ideas/kanji-meaning-mode.md`. Started 2026-11-13.
+Spec: `docs/specs/done/SPEC-meaning-mode.md` (2026-11-13). Intent: `docs/intent/kanji-meaning-mode.md`. Idea: `docs/ideas/done/kanji-meaning-mode.md`. Started 2026-11-13.
 Every task: `npm test && npm run lint && npm run build` pass before it is checked off.
 
 ## Phase 13: Meaning mode
@@ -37,6 +37,7 @@ Every task: `npm test && npm run lint && npm run build` pass before it is checke
 **Scope:** M
 
 ### Checkpoint K: v1.7 (the owner and their wife, on her phone)
-- [ ] She can turn the mode on, pick a level and play without seeing any Japanese besides kanji.
-- [ ] The level feels right for her after a few runs (or note what to change).
-- [ ] The owner's progress on their phone is unaffected.
+Owner accepted as-is for v1, 2026-11-15.
+- [x] She can turn the mode on, pick a level and play without seeing any Japanese besides kanji.
+- [x] The level feels right for her after a few runs (or note what to change).
+- [x] The owner's progress on their phone is unaffected.

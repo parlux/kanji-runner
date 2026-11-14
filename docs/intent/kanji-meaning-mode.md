@@ -1,6 +1,6 @@
 # Intent: kanji meaning mode
 
-Status: confirmed by the owner, 2026-11-13, after an interview. Extends `docs/intent/kanji-runner.md`. Idea: `docs/ideas/kanji-meaning-mode.md`. Spec: `docs/specs/SPEC-meaning-mode.md`, tasks: `tasks/todo-meaning-mode.md`.
+Status: confirmed by the owner, 2026-11-13, after an interview. Extends `docs/intent/kanji-runner.md`. Idea: `docs/ideas/done/kanji-meaning-mode.md`. Spec: `docs/specs/done/SPEC-meaning-mode.md`, tasks: `tasks/done/todo-meaning-mode.md`.
 
 ## Statement of intent
 - **Outcome:** a "kanji meaning" mode: every gate is a kanji with English meanings as answers. No readings, kana or loanwords anywhere.

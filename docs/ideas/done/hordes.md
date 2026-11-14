@@ -1,6 +1,6 @@
 # Idea: enemy packs as hordes
 
-Status: owner idea, 2026-11-13, refined in an interview (confirmed below). Spec: `docs/specs/SPEC-hordes.md`, tasks: `tasks/todo-hordes.md`.
+Status: owner idea, 2026-11-13, refined in an interview (confirmed below). Spec: `docs/specs/done/SPEC-hordes.md`, tasks: `tasks/done/todo-hordes.md`.
 
 The owner: "I don't think the enemy squads need to be 1 to 1 power with my army. I think it would be more exciting if there were a lot of enemies that I get to mow down. Of course only if it doesn't degrade performance to the point of affecting gameplay."
 

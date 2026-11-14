@@ -1,6 +1,6 @@
 # Tasks: hordes (v1.10)
 
-Spec: `docs/specs/SPEC-hordes.md` (2026-11-13). Idea and confirmed intent: `docs/ideas/hordes.md`. Started 2026-11-13.
+Spec: `docs/specs/done/SPEC-hordes.md` (2026-11-13). Idea and confirmed intent: `docs/ideas/done/hordes.md`. Started 2026-11-13.
 Every task: `npm test && npm run lint && npm run build` pass before it is checked off.
 
 ## Plan
@@ -116,7 +116,7 @@ Owner change during H5b: default count back to **200** (K 3); and packs follow t
 **Verification:** tests (`npx vitest run --maxWorkers=2`), lint, build. **Dependencies:** H5. **Files:** `src/core/{tuning,sim}.ts`, `src/game/three/{horde,hazards,world}.ts`, `src/storage/horde.ts`, tests. **Scope:** M (use opus)
 
 ### Task H5c: Horde gauntlet (tuning run) with results saved to the owner's account
-**Description:** as `docs/ideas/horde-sandbox.md`: `?sandbox=horde` (also reachable from the dev gear) runs a gauntlet of numbered waves, no questions or walls, each wave with its own preset (army size, enemy count, kill time, pack width, figure size, `PACK_ADAPT`), from one data file. A big "Wave N" label before each wave; after each, a one-tap rating (Felt right / Too fast / Too slow / Too few / Too many). A per-wave log (preset, measured kill time, soldiers lost, enemies, fps, rating). At the end, results are saved to the owner's Supabase account (new `tuning_results` table with RLS like `progress`; SQL in `supabase/schema.sql`), with Share (Web Share API) and Copy as fallbacks. `scripts/gauntlet-results.ts` prints the latest runs on the laptop using a service-role key from `.env.local` (`SUPABASE_SERVICE_ROLE_KEY`, never committed; says clearly what is missing if absent).
+**Description:** as `docs/ideas/done/horde-sandbox.md`: `?sandbox=horde` (also reachable from the dev gear) runs a gauntlet of numbered waves, no questions or walls, each wave with its own preset (army size, enemy count, kill time, pack width, figure size, `PACK_ADAPT`), from one data file. A big "Wave N" label before each wave; after each, a one-tap rating (Felt right / Too fast / Too slow / Too few / Too many). A per-wave log (preset, measured kill time, soldiers lost, enemies, fps, rating). At the end, results are saved to the owner's Supabase account (new `tuning_results` table with RLS like `progress`; SQL in `supabase/schema.sql`), with Share (Web Share API) and Copy as fallbacks. `scripts/gauntlet-results.ts` prints the latest runs on the laptop using a service-role key from `.env.local` (`SUPABASE_SERVICE_ROLE_KEY`, never committed; says clearly what is missing if absent).
 **Acceptance criteria:**
 - [x] Tested: preset list valid; wave sequencing; kill time / loss measurement; results payload shape; save fails gracefully when logged out or offline (Share/Copy still work); the script's parsing.
   - `tests/game/gauntlet.test.ts` (presets valid, 8–10 waves, one change at a time from the defaults; `waveRun`: one waiting pack, no walls, not woken until the first step, adapting by the preset's `packAdapt`; sequencing: label holds the run, play, rating card, next, done; measurement: kill time ≈ the preset's at the expected army, slower is longer, lost ≥ 0 and = the army's drop for every wave, a pack that kills the army has no kill time, the wave ends `AFTER_SECONDS` after the pack is gone), `tests/game/gauntlet-results.test.ts` (payload keys, short device, Share/Copy text, survives jsonb), `tests/sync/sync.test.ts` "saveTuning" (one `tuning_results` row; logged out → login, offline → no client, network / missing table → offline, RLS refusal → login, no config → disabled, never throws; the progress status untouched), `tests/scripts/gauntlet-results.test.ts` (dotenv parsing, missing-config messages that never contain the key, count argument, the table, junk rows). 751 tests.
@@ -228,6 +228,7 @@ Notes: the snap came in the last half second before the wipe-out, not from the c
 **Verification:** as H2. **Dependencies:** H5g. **Files:** `src/game/three/{kills,hazards,horde,fx}.ts`, tests. **Scope:** M
 
 ### Checkpoint M: v1.10 (owner, on the Pixel 7)
-- [ ] Mowing down a pack looks spectacular.
-- [ ] Smooth with `?fps` while big packs die, in several looks.
-- [ ] Packs still feel fair: a light bite when misaligned.
+Owner accepted as-is for v1, 2026-11-15.
+- [x] Mowing down a pack looks spectacular.
+- [x] Smooth with `?fps` while big packs die, in several looks.
+- [x] Packs still feel fair: a light bite when misaligned.

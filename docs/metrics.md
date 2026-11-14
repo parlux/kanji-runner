@@ -14,7 +14,7 @@ Check and code-size numbers, measured on the dev Mac (4-core Intel i5-5257U, 201
 | Full check (`test && lint && build`; `build` runs tsc again) | ~130 s |
 | Source / tests | 16,153 / 12,829 lines |
 | Files over 600 lines | `game/render.ts` 1,818 · `three/world.ts` 1,015 · `core/sim.ts` 1,013 · `three/scenery.ts` 821 |
-| Active task list | `tasks/todo-hordes.md` 8,345 words |
+| Active task list | `tasks/done/todo-hordes.md` 8,345 words |
 | Bundle | `render` chunk 620 KB (incl. 494 KB `kanji.json`), `scene3d` 600 KB |
 
 Slowest test files: `core/balance` 67.5 s · `core/sim-reask` 31.5 s · `core/distractors` 28.4 s · `core/reask` 12.3 s · `game/horde` 6.2 s · `core/gates` 5.9 s · `core/squad` 4.8 s.
