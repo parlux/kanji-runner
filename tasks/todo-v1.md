@@ -18,8 +18,8 @@ Checks:
 **Acceptance criteria:**
 - [x] The top level of `tasks/` holds only `todo-v1.md` and `subagent-prompt.md`. The top level of `docs/specs/` holds only `SPEC-v1.md`.
 - [x] No broken links to the moved files (`grep` for the old paths).
-- [ ] Only `main` and the reported unmerged branches remain.
-  - Local: done (merged branches and the `summary-screen` worktree removed). Unmerged, kept: `pause-show-last-prompt-and-answer` (origin has 023a8eb, not in main; local af494a0 is merged). Remote deletes of the merged `camera`, `ccr-*` (3), `summary-screen`, `worktree-kana-words`, `worktree/rapid-forest-ac1e` were blocked by the permission check: owner to run or approve.
+- [x] Only `main` and the reported unmerged branches remain.
+  - Merged branches, local and remote, and the `summary-screen` worktree removed. `pause-show-last-prompt-and-answer` (unmerged) deleted at the owner's request, 2026-11-15. Only `main` is left.
 
 **Scope:** S
 
