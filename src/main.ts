@@ -36,6 +36,7 @@ import {
   syncCameraGear,
 } from "./game/camerasettings";
 import { hordePanelOpen, openHordePanel } from "./game/hordesettings";
+import { GAUNTLET_SEARCH } from "./game/sandbox/param";
 import {
   DEFAULT_HORDE_SETTINGS,
   hordeTuning,
@@ -170,6 +171,9 @@ const openHorde = (): void =>
       saveHorde(localStorage, horde);
     },
     onClose: () => {},
+    onGauntlet: () => {
+      window.location.search = GAUNTLET_SEARCH;
+    },
   });
 
 // tuned horde (dev tool): saved on this device, applied from the next run; null is the defaults

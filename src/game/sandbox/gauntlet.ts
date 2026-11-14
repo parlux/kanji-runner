@@ -29,7 +29,7 @@ export const INTRO_SECONDS = 2;
 /** Seconds the wave runs on after the pack is gone (its last deaths play out). */
 export const AFTER_SECONDS = 1;
 /** How far ahead (track units) the crowd's front stands while the label shows: in view, short of waking. */
-export const INTRO_AHEAD = 10;
+export const INTRO_AHEAD = 7;
 /** Where the pack stands when the run is built: far enough that it is not awake yet. */
 const PACK_POS = 100;
 /** The track's only question, never reached: keeps the boss and walls out of sight. */

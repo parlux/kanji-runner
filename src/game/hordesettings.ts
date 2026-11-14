@@ -74,6 +74,8 @@ export function openHordePanel(opts: {
   current: HordeSettings | null;
   onChange: (settings: HordeSettings | null) => void;
   onClose: () => void;
+  /** Adds a button that opens the horde gauntlet (`?sandbox=horde`). */
+  onGauntlet?: () => void;
 }): void {
   if (panelEl) return;
   installCss();
@@ -138,6 +140,16 @@ export function openHordePanel(opts: {
   };
   row.append(reset, close);
   box.append(row);
+  const { onGauntlet } = opts;
+  if (onGauntlet) {
+    const gauntlet = document.createElement("button");
+    gauntlet.textContent = "Play the gauntlet…";
+    gauntlet.onclick = onGauntlet;
+    const more = document.createElement("div");
+    more.className = "row";
+    more.append(gauntlet);
+    box.append(more);
+  }
   root.append(box);
   document.body.append(root);
   panelEl = root;

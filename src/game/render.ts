@@ -1326,14 +1326,16 @@ function renderHud(
   run: RunState,
   draw: Draw = text,
 ): void {
-  draw(
-    ctx,
-    `${Math.min(run.next + 1, run.rows.length)}/${run.rows.length}`,
-    40,
-    24,
-    16,
-    COLORS.dim,
-  );
+  // no questions (the horde gauntlet): no question count
+  if (run.rows.length > 0)
+    draw(
+      ctx,
+      `${Math.min(run.next + 1, run.rows.length)}/${run.rows.length}`,
+      40,
+      24,
+      16,
+      COLORS.dim,
+    );
   if (run.streak > 0) {
     // the streak, and what the next right answer pays
     const tier = streakTier(run.streak + 1);

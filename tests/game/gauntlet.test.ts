@@ -13,6 +13,7 @@ import {
   waveRun,
   type Gauntlet,
 } from "../../src/game/sandbox/gauntlet";
+import { sandboxParam } from "../../src/game/sandbox/param";
 import {
   GAUNTLET,
   presetErrors,
@@ -211,5 +212,14 @@ describe("measurement", () => {
     expect(g.measure.t - (g.measure.gone ?? 0)).toBeLessThan(
       AFTER_SECONDS + 2 * DT,
     );
+  });
+});
+
+describe("sandboxParam", () => {
+  it("is horde only for ?sandbox=horde", () => {
+    expect(sandboxParam("?sandbox=horde")).toBe("horde");
+    expect(sandboxParam("?fps&sandbox=horde")).toBe("horde");
+    expect(sandboxParam("")).toBeNull();
+    expect(sandboxParam("?sandbox=x")).toBeNull();
   });
 });
