@@ -179,6 +179,31 @@ describe("buildTrack", () => {
     expect(packs).toBeLessThan(all.length * 0.4);
   });
 
+  it("never puts a pack on the 1st or 2nd beat after a question; a pack gap has 3 beats, the pack last", () => {
+    const bad = failing((t) =>
+      t.questions.slice(0, -1).every((_, i) => {
+        const beats = between(t, i);
+        const at = beats.findIndex((h) => h.kind === "pack");
+        if (at < 0) return true;
+        return (
+          at === 2 &&
+          beats.length === 3 &&
+          beats.filter((h) => h.kind === "pack").length === 1
+        );
+      }),
+    );
+    expect(bad).toEqual([]);
+  });
+
+  it("holds about as many packs per run as before (~9 in 14 questions, was 8.98)", () => {
+    const packs = TRACKS.flatMap((t) => t.hazards).filter(
+      (h) => h.kind === "pack",
+    ).length;
+    const mean = packs / TRACKS.length;
+    expect(mean).toBeGreaterThan(8.98 * 0.9);
+    expect(mean).toBeLessThan(8.98 * 1.1);
+  });
+
   it("is identical for the same seed and differs between seeds", () => {
     expect(buildTrack(7, QUESTIONS)).toEqual(buildTrack(7, QUESTIONS));
     expect(buildTrack(7, QUESTIONS)).not.toEqual(buildTrack(8, QUESTIONS));

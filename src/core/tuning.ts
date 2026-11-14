@@ -123,8 +123,13 @@ export const BLOCK_HP_K = 1.0;
 export const CRATE_REWARD_K = 0.3;
 
 // Enemy packs (S2). Shootable groups that run at the army. See track.ts and sim.ts.
-/** Chance a hazard beat after question 2 is an enemy pack. */
-export const ENEMY_CHANCE = 0.3;
+/**
+ * Chance a gap after question 2 holds an enemy pack. Such a gap has PACK_BEAT
+ * beats and the last is the pack (never the 1st or 2nd beat after a gate).
+ * 0.75 keeps about 9 packs in a 14-question run, as the old 0.3 per beat did.
+ */
+export const PACK_GAP_CHANCE = 0.75;
+export const PACK_BEAT = 3;
 /** Pack strength = max(ENEMY_MIN, round(ENEMY_K × the expected army at that point)). */
 export const ENEMY_K = 0.6;
 export const ENEMY_MIN = 3;

@@ -4,11 +4,12 @@ import {
   BLOCK_MAX_W,
   BLOCK_MIN_W,
   CALM_DISTANCE,
-  ENEMY_CHANCE,
   ENEMY_X_MARGIN,
   HAZARD_SPACING,
   HAZARDS_MAX,
   HAZARDS_MIN,
+  PACK_GAP_CHANCE,
+  PACK_BEAT,
   SAW_CHANCE,
   SAW_MAX_AMP,
   SAW_MIN_AMP,
@@ -41,13 +42,15 @@ export function hazardSpan(h: Solid, dist: number): Span {
   return { left: c - SAW_W / 2, right: c + SAW_W / 2 };
 }
 
-function makeHazard(rng: Rng, pos: number, packs: boolean): Hazard {
-  if (packs && rng() < ENEMY_CHANCE)
-    return {
-      kind: "pack",
-      pos,
-      x: ENEMY_X_MARGIN + rng() * (1 - 2 * ENEMY_X_MARGIN),
-    };
+function makePack(rng: Rng, pos: number): Hazard {
+  return {
+    kind: "pack",
+    pos,
+    x: ENEMY_X_MARGIN + rng() * (1 - 2 * ENEMY_X_MARGIN),
+  };
+}
+
+function makeSolid(rng: Rng, pos: number): Hazard {
   if (rng() < SAW_CHANCE) {
     const amp = SAW_MIN_AMP + rng() * (SAW_MAX_AMP - SAW_MIN_AMP);
     // keep the whole sweep on the track
@@ -79,8 +82,10 @@ const TRACK_SALT = 0x9e3779b9;
 /**
  * Seeded beat layout: the first question VIEW_DISTANCE in (a full reading time),
  * then HAZARDS_MIN–HAZARDS_MAX hazards HAZARD_SPACING apart, then a calm stretch
- * right before each next question. Enemy packs only appear after the second
- * question. Questions SQUAD_QUESTIONS are squad charges when `squads` is on,
+ * right before each next question. After the second question each gap rolls
+ * once (PACK_GAP_CHANCE) for a pack: that gap has PACK_BEAT beats and the last
+ * is the pack, so a pack is never right behind a gate; the other beats are
+ * blocks and saws. Questions SQUAD_QUESTIONS are squad charges when `squads` is on,
  * laid out exactly like walls.
  */
 export function buildTrack(
@@ -98,10 +103,15 @@ export function buildTrack(
   for (let q = 0; q < questionCount; q++) {
     questions.push(pos);
     if (q === questionCount - 1) break;
-    const count = HAZARDS_MIN + randInt(rng, HAZARDS_MAX - HAZARDS_MIN + 1);
+    const pack = q >= 1 && rng() < PACK_GAP_CHANCE;
+    const count = pack
+      ? PACK_BEAT
+      : HAZARDS_MIN + randInt(rng, HAZARDS_MAX - HAZARDS_MIN + 1);
     for (let j = 0; j < count; j++) {
       pos += HAZARD_SPACING;
-      hazards.push(makeHazard(rng, pos, q >= 1));
+      hazards.push(
+        pack && j === count - 1 ? makePack(rng, pos) : makeSolid(rng, pos),
+      );
     }
     pos += CALM_DISTANCE;
   }

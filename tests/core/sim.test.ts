@@ -476,13 +476,13 @@ describe("hazards", () => {
     expect(results.filter((r) => r.hazardLoss > 0)).toEqual([]);
   }, 30_000); // 50 full runs at 60 Hz; slow under parallel load
 
-  it("a run to the last question takes about 60 seconds", () => {
+  it("a run to the last question takes about 60–75 seconds", () => {
     const times = Array.from(
       { length: 10 },
       (_, seed) => skilledRun(seed).time,
     );
     expect(Math.min(...times)).toBeGreaterThan(50);
-    expect(Math.max(...times)).toBeLessThan(70);
+    expect(Math.max(...times)).toBeLessThan(80); // a pack gap always has 3 beats (H5g): ~7% longer than 2–3
   }, 30_000);
 });
 
