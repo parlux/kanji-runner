@@ -160,7 +160,9 @@ function renderHazardText(
   const ahead = pos - run.dist;
   if (ahead < -WALL_BEHIND || ahead > shapeDistance()) return;
   if (hz.kind === "pack") {
-    if (i < run.nextHazard || isShattered(run, i)) return;
+    // no count over enemies cheering a win (the run is over)
+    if (i < run.nextHazard || isShattered(run, i) || run.status !== "running")
+      return;
     const n = packSurvivors(run, i);
     const x = run.packs[i]?.x ?? 0.5;
     const at = project(x, pos, FIGURE_TOP + 0.3);

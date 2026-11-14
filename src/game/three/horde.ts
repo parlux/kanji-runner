@@ -48,6 +48,7 @@ import {
   shapeDistance,
   CHEER_HOPS,
   CHEER_JUMP,
+  CHEER_WIDTH,
   RUN_PAST_DIST,
   STREAM_ACROSS,
   STREAM_CRASH,
@@ -176,6 +177,9 @@ const VERTEX_BODY = `
     swing = 0.4 * hop;
     sway = 0.25 * sin(6.2831853 * (hordeCheer * 1.3 + r1));
     yaw = 3.14159265 + 0.4 * sin(6.2831853 * (hordeCheer * 0.7 + r2));
+    // and the press spreads out across the track as they celebrate
+    float wide = max(1.0, ${f(CHEER_WIDTH)} / max(laneW, 0.1));
+    off.x = laneC + (off.x - laneC) * mix(1.0, wide, smoothstep(0.0, 0.8, hordeCheer));
   }
   if (k >= hordeState.x && death.w > 0.5) {
     // ran past the army: it runs on, past the camera and off

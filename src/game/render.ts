@@ -1280,7 +1280,8 @@ function renderArmyPopups(
   draw: Draw = text,
   clipY = armyY - radius * 0.6 - 24,
 ): void {
-  if (run.lastClip) {
+  // (frozen once the run is over: not shown while the enemies cheer)
+  if (run.lastClip && run.status === "running") {
     const t = (run.dist - run.lastClip.dist) / CLIP_POPUP_DIST;
     if (t < 1) {
       ctx.globalAlpha = 1 - t;
