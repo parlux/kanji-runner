@@ -187,8 +187,17 @@ Owner at M4, 2026-11-14 (gauntlet round 2): pace, movement, size, melee right. C
 **Verification:** tests (`npx vitest run --maxWorkers=2`), lint, build. **Dependencies:** H5d. **Files:** `src/core/{tuning,sim}.ts`, `src/game/three/{horde,hazards}.ts`, `src/game/sandbox/*`, end-of-run flow, tests. **Scope:** M (highest risk: balance; use opus)
 
 ### Checkpoint M5: gauntlet round 3 on the Pixel 7 (owner)
-- [ ] Aiming by steering feels right; sidestepping a stream is possible but not trivial.
-- [ ] The enemy celebration reads well; no glitch.
+- [x] Aiming by steering feels right; sidestepping a stream is possible but not trivial. (Owner, 2026-11-14: "Honestly, it all felt much better"; every answered question Right / Natural / Tense and fair.)
+- [ ] The enemy celebration reads well; no glitch. (Owner: "when you die some of them snap back to the back and spread across the road ... I can live with that if you can't reproduce and fix." Task H5f.)
+- Owner note, wave 4 (woken close): "All a little quick, but I don't see what else you could do when it starts so close." Real-run packs wake right behind a wall; moving packs further past walls (track change) is an open option for the owner.
+
+### Task H5f: Fix the celebration spread
+**Description:** reproduce gauntlet wave 7 (outmatched): right when the army dies, some enemies (the back rows / not-yet-streamed crowd) snap back and spread in a line across the road. Find the cause and fix it so the cheer starts from where every figure stands (no snapping).
+**Acceptance criteria:**
+- [ ] Reproduced and described; a test pins the fix (no figure jumps more than a small distance on the first cheer frame).
+- [ ] Browser: screenshots of the frame before and the first frames after the wipe-out.
+- [ ] Deploy green.
+**Verification:** tests (`npx vitest run --maxWorkers=2`), lint, build. **Dependencies:** H5e. **Files:** `src/game/three/{horde,hazards}.ts`, tests. **Scope:** XS
 
 ### Task H6: Spectacular kills
 **Description:** `kills.ts`: a pooled kill-effect ring. Each kill knocks the figure back or topples it with a spark burst in the enemy colour. Kills are found by comparing survivors between frames. The final burst of a pack is bigger than today's. Fewer pieces beyond about half the shape distance. Effects freeze when paused.
@@ -197,7 +206,7 @@ Owner at M4, 2026-11-14 (gauntlet round 2): pace, movement, size, melee right. C
 - [ ] Browser as in H4 at the owner's default count, plus a gate behind a dying pack (labels stay readable). Screenshots in the scratchpad.
 - [ ] Frame time logged against H4 and against today's pack scene (≤ 1.3× today's). On a miss: shrink the effects first, then `PACK_MAX`, and log what changed.
 - [ ] Deploy green.
-**Verification:** as H2. **Dependencies:** Checkpoint M5. **Files:** `src/game/three/{kills,hazards,horde,fx}.ts`, tests. **Scope:** M
+**Verification:** as H2. **Dependencies:** H5f. **Files:** `src/game/three/{kills,hazards,horde,fx}.ts`, tests. **Scope:** M
 
 ### Checkpoint M: v1.10 (owner, on the Pixel 7)
 - [ ] Mowing down a pack looks spectacular.
