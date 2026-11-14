@@ -84,6 +84,18 @@ Owner played the gauntlet: wave 3 (3.5 s kill) felt best. Strong armies killed t
 - **Gradual converging** (owner, waves 4–5: "the lateral movement is soooo fast ... they weirdly line up in the lane super fast"): enemies curve in towards the army over most of their run, with a capped sideways speed well below their forward speed; no snapping into the lane.
 - **Rating card questions** (owner: "give me specific questions"): Pace (too fast / right / too slow), Movement (too manic / right / too sluggish), Converging (snapped / natural / too slow), Size for my army (too small / right / too big), Melee, only if reached (unfair / tense and fair / no threat); plus an optional note.
 
+## Gauntlet round 2 findings (owner, 2026-11-14)
+Round 2 at 90 fps throughout. Pace, movement, converging and size "right" on waves 1, 3, 4, 5, 7; melee "tense and fair" (6, 7). Owner notes:
+- "I think another issue is the 'aimed firing'. It should just fire full width, aiming done by user, so you're attacking the whole enemy frontier (or missing)."
+- "They follow too fast when I move side to side, there should be a delay ... I should be able to miss if I move too fast to the side." / "I wouldn't be upset if it was possible to avoid enemies by moving quickly to the side so enemy walks off screen if they can't align back to me in time."
+- Wave 6 (woken close): converging "snapped". Wave 8 (enemy wins): "Glitch when enemy wins ... maybe celebrate?", "Borked".
+These rules replace the matching ones above (dodging comes back):
+- **Straight-ahead fire at packs:** the army fires straight ahead across its own width (its lanes), no auto-aim at a pack. Fire hits the pack's enemies whose lane positions overlap the army's width, front first; if nothing overlaps, it misses. Blocks/crates keep their span-overlap rule.
+- **Delayed, limited tracking:** a stream steers toward the army's x with a reaction delay (`TRACK_DELAY`, ~0.4 s) and a capped sideways speed (`TRACK_SPEED`, well below the army's steering speed). A quick sidestep makes the stream miss; enemies that don't overlap the army when they reach it run past and off the track behind (no contact, no melee). Melee happens only where the stream meets the army.
+- **Converging when woken close** must not snap: same capped sideways speed; if they can't align in time, they miss.
+- **Enemy wins:** when the army is wiped out by a melee, the enemies stop, jump and cheer for about 1.5 s, then the usual game over / end screen. No glitch.
+- Balance bands must hold with dodging back (the bots steer).
+
 ## Code layout
 - `src/core/tuning.ts`: `HORDE_K`, `PACK_MAX`, `HORDE_THREAT`.
 - `src/core/fire.ts`: `packCount`, and `hazardHp` unchanged in value.

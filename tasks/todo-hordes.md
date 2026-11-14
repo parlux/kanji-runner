@@ -167,6 +167,21 @@ Owner at M3, 2026-11-14 (gauntlet round 1): wave 3 (3.5 s) felt best; strong arm
 - [ ] Getting reached turns into a tense melee; fair when not outmatched.
 - [ ] Notes left on any wave that feels off.
 
+Owner at M4, 2026-11-14 (gauntlet round 2): pace, movement, size, melee right. Change: straight-ahead fire, delayed tracking with dodging, no snap when woken close, enemies celebrate a win (wave 8 glitched). Task H5e; Checkpoint M5 is round 3.
+
+### Task H5e: Straight-ahead fire, delayed tracking and dodging, enemy celebration
+**Description:** as the spec's "Gauntlet round 2 findings". Core: pack fire straight ahead across the army's width; stream tracking with `TRACK_DELAY` and `TRACK_SPEED`; enemies that miss run past; melee only where the stream meets the army. View: the stream's sideways motion follows the core's (no snap), misses run past and off; the win celebration. Fix the wave-8 glitch. Gauntlet round 3: baseline, a dodge test (sidestep), a side-to-side weave test, woken close, weak army melee, outmatched (celebration).
+**Acceptance criteria:**
+- [ ] Tested: fire hits only overlapping enemies, front first, and misses when none overlap; tracking delay and speed cap; a quick sidestep makes a stream miss with no contact; a held line gets the melee; woken-close packs never exceed the sideways cap; army wiped → celebration then the end screen, nothing else breaks; pause holds.
+- [ ] Balance bands hold with dodging (bots steer as now); before/after, loss per pack, melee and miss rates logged here.
+- [ ] Browser at 390×844: a stream missing after a sidestep, a weave, the celebration. Screenshots in the scratchpad.
+- [ ] Gauntlet round 3 presets in place (same card); deploy green.
+**Verification:** tests (`npx vitest run --maxWorkers=2`), lint, build. **Dependencies:** H5d. **Files:** `src/core/{tuning,sim}.ts`, `src/game/three/{horde,hazards}.ts`, `src/game/sandbox/*`, end-of-run flow, tests. **Scope:** M (highest risk: balance; use opus)
+
+### Checkpoint M5: gauntlet round 3 on the Pixel 7 (owner)
+- [ ] Aiming by steering feels right; sidestepping a stream is possible but not trivial.
+- [ ] The enemy celebration reads well; no glitch.
+
 ### Task H6: Spectacular kills
 **Description:** `kills.ts`: a pooled kill-effect ring. Each kill knocks the figure back or topples it with a spark burst in the enemy colour. Kills are found by comparing survivors between frames. The final burst of a pack is bigger than today's. Fewer pieces beyond about half the shape distance. Effects freeze when paused.
 **Acceptance criteria:**
@@ -174,7 +189,7 @@ Owner at M3, 2026-11-14 (gauntlet round 1): wave 3 (3.5 s) felt best; strong arm
 - [ ] Browser as in H4 at the owner's default count, plus a gate behind a dying pack (labels stay readable). Screenshots in the scratchpad.
 - [ ] Frame time logged against H4 and against today's pack scene (≤ 1.3× today's). On a miss: shrink the effects first, then `PACK_MAX`, and log what changed.
 - [ ] Deploy green.
-**Verification:** as H2. **Dependencies:** Checkpoint M4. **Files:** `src/game/three/{kills,hazards,horde,fx}.ts`, tests. **Scope:** M
+**Verification:** as H2. **Dependencies:** Checkpoint M5. **Files:** `src/game/three/{kills,hazards,horde,fx}.ts`, tests. **Scope:** M
 
 ### Checkpoint M: v1.10 (owner, on the Pixel 7)
 - [ ] Mowing down a pack looks spectacular.
