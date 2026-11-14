@@ -5,9 +5,6 @@ import { entryRow, poolRun } from "./run";
 import { REASK_GAP_MAX, REASK_GAP_MIN, REASK_MAX_BOX } from "./tuning";
 import type { GateRow, Progress } from "./types";
 
-/** Row `row` is a re-ask of row `of` (both 0-based row indexes). */
-export type ReaskLink = { row: number; of: number };
-
 /** Re-asks always have this many options, wherever they land. */
 export const REASK_OPTIONS = 3;
 

@@ -46,7 +46,7 @@ import { loadMeaningMode, saveMeaningMode } from "./storage/meaning";
 import { persistence } from "./game/mode";
 import { loginOpen, openLogin } from "./sync/login";
 import { createSyncFromEnv } from "./sync/sync";
-import type { View3d } from "./game/three/scene3d";
+import { loadScene3d, type View3d } from "./game/view3d";
 
 const canvas = document.querySelector<HTMLCanvasElement>("#game");
 if (!canvas) throw new Error("Missing #game canvas");
@@ -58,7 +58,7 @@ if (!ctx) throw new Error("Canvas 2D not supported");
 let view3d: View3d | null = null;
 let webgl: "pending" | "ok" | "failed" = "pending";
 const canvas3d = document.querySelector<HTMLCanvasElement>("#world");
-void import("./game/three/scene3d")
+void loadScene3d()
   .then(({ createView3d }) => {
     view3d = canvas3d ? createView3d(canvas3d) : null;
     if (!view3d || !canvas3d) {

@@ -59,7 +59,6 @@ import {
   worldX,
   worldZ,
 } from "./world";
-import type { KillSink } from "./kills";
 
 /**
  * The enemy packs, every figure animated on the GPU. Each pack in view gets
@@ -575,3 +574,11 @@ export function createHorde(scene: Scene, sink?: KillSink): Horde {
     },
   };
 }
+
+/** Where the GPU horde reports its deaths (see createHorde). */
+export type KillSink = {
+  /** A figure in slot `slot` was killed at world x and recorded z (world z with the army at run distance 0); `melee`: it fell fighting at the army's front. */
+  hit(slot: number, x: number, z: number, melee: boolean): void;
+  /** The pack in slot `slot` lost its last enemy. */
+  wiped(slot: number): void;
+};

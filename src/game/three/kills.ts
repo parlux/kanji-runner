@@ -12,7 +12,7 @@ import {
 } from "three";
 import type { RunState } from "../../core/sim";
 import { FX_COLOURS } from "./fx";
-import { HORDE_SLOTS } from "./horde";
+import { HORDE_SLOTS, type KillSink } from "./horde";
 import { crowdHalfDepth, DIST_SCALE, shapeDistance, worldZ } from "./world";
 
 /**
@@ -71,14 +71,6 @@ export function killPieces(kind: KillKind, count: number, z: number): number {
         : FINAL_PIECES;
   return -z > (shapeDistance() * DIST_SCALE) / 2 ? Math.ceil(base / 2) : base;
 }
-
-/** Where the GPU horde reports its deaths (see createHorde). */
-export type KillSink = {
-  /** A figure in slot `slot` was killed at world x and recorded z (world z with the army at run distance 0); `melee`: it fell fighting at the army's front. */
-  hit(slot: number, x: number, z: number, melee: boolean): void;
-  /** The pack in slot `slot` lost its last enemy. */
-  wiped(slot: number): void;
-};
 
 export type Kills = KillSink & {
   /** Draws the effects for the run as it is now (`clock`: the scene clock, still while paused). */

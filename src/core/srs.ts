@@ -1,6 +1,11 @@
-import type { ReaskLink } from "./reask";
 import { REASK_MAX_BOX } from "./tuning";
-import type { GateRow, GateType, ItemProgress, Progress } from "./types";
+import type {
+  GateRow,
+  GateType,
+  ItemProgress,
+  Progress,
+  ReaskLink,
+} from "./types";
 
 export const MAX_BOX = 5;
 /** An item counts as learned for unlocking at this box or higher. */

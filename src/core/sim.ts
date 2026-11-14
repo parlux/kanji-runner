@@ -22,7 +22,6 @@ import {
   REASK_OPTIONS,
   reaskRow,
   type ReaskConfig,
-  type ReaskLink,
 } from "./reask";
 import { createRng } from "./rng";
 import {
@@ -59,7 +58,7 @@ import {
   type HordeTuning,
 } from "./tuning";
 import { hazardSpan, isCharge, type Hazard, type Track } from "./track";
-import type { GateRow } from "./types";
+import type { GateRow, ReaskLink } from "./types";
 
 /**
  * A moving enemy pack: its stream's head (track position) and its crowd's

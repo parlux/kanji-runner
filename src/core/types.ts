@@ -67,3 +67,6 @@ export type Progress = {
   items: Record<string, ItemProgress>;
   stats: RunStats;
 };
+
+/** Row `row` is a re-ask of row `of` (both 0-based row indexes). */
+export type ReaskLink = { row: number; of: number };
