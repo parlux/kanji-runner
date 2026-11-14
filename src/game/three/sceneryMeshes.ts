@@ -45,7 +45,7 @@ import { FENCE_STEP } from "./lookCountry";
 import { WINDOW_H, WINDOW_W } from "./lookCity";
 
 /**
- * Meshes for the scenery looks in `scenery.ts`: every built look is made once,
+ * Meshes for the scenery looks in `looks.ts`: every built look is made once,
  * one instanced mesh per shape and layer, and shown by visibility. `update`
  * scrolls the props and drifts the backdrop by writing instance translations
  * in place (no allocation per frame). Plus the gradient sky dome.

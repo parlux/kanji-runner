@@ -105,3 +105,19 @@ Source lines (`find src -name '*.ts' | xargs cat | wc -l`, same method as the ba
 V5 itself: 61 unused exports and 15 unused types un-exported (used only in their own file or not at all); `packAdapt`, `handleAction`'s `horde` parameter, `setShapeDistance`, `packStrength`, `ENEMY_K`, `nextSpeed`, `speedLabel`, `trackDist` and two label constants removed with their tests. No unused files or dependencies were found. `npx knip` reports 0 issues and runs in `npm run check`; golden snapshot unchanged.
 
 Kept on purpose, no ignore entries: exports used only by tests but still tested on their own (e.g. `buildRun`, `drawnWidth`, `projectorFor`, `saveMeaning*`, `HAZE_FAR_Z`), since knip counts test imports as use.
+
+## Task V9: world.ts and scenery.ts split (2026-11-15)
+
+`three/world.ts` 989 -> 233 lines (+ `camera.ts` 153, `wallLayout.ts` 146, `hazardLayout.ts` 61, `hordeLayout.ts` 291, `bossLayout.ts` 114); `three/scenery.ts` 809 -> 164 (+ `looks.ts` 56, `lookCountry.ts` 109, `lookSpring.ts` 125, `lookStadium.ts` 151, `lookCity.ts` 170, `lookSky.ts` 111). Largest file in `src/game/three/` is now `horde.ts` at 583. `tests/game/world.test.ts` 817 -> 314 (+ `camera`, `wallLayout`, `hazardLayout`, `bossLayout` tests). Pure move, no test changed.
+
+Frame cost: CPU time inside each `requestAnimationFrame` callback (the whole update + draw), 600 frames over ~10 s of play (runs restarted on the end screen) per look, 390x844 headless Chrome 143, dev server. Medians in ms (p95 in brackets); the vsync-capped frame interval is a flat 16.7 ms and says nothing.
+
+| Look | Before | Same code again | After |
+|---|---|---|---|
+| stadium | 2.1 (3.5) | 2.2 (4.3) | 1.9 (4.4) |
+| sky | 1.5 (3.8) | 1.4 (3.4) | 2.0 (4.4) |
+| country | 1.8 (4.0) | 1.7 (3.9) | 1.9 (3.2) |
+| spring | 2.0 (3.8) | 2.4 (4.4) | 1.5 (3.9) |
+| city | 1.3 (3.8) | 1.9 (3.3) | 2.1 (4.0) |
+
+After sits inside the run-to-run spread of the unchanged code (medians 1.3-2.4 ms, p95 3.3-4.4 ms): unchanged. Screenshots (paused mid-run, five looks) match before and after; only the animated gate bar differs by timing.

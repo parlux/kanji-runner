@@ -106,7 +106,7 @@ float hordeRand(uint v) { return float(hordeHash(v)) / 4294967296.0; }
 `;
 const VERTEX_BODY = `
 {
-  // as hordePlace (world.ts)
+  // as hordePlace (hordeLayout.ts)
   // hordeLane: lane centre x, lane width, head z, the army's half depth
   // hordeCrowd: mouth's left edge, gx, gz, run (how far back of the head the crowd's front is)
   // hordeCount: n0, cols, stride, step
@@ -186,7 +186,7 @@ const VERTEX_BODY = `
     sway = 0.25 * sin(6.2831853 * (hordeCheer * 1.3 + r1));
     yaw = 3.14159265 + 0.4 * sin(6.2831853 * (hordeCheer * 0.7 + r2));
     // and the press spreads out across the track as they celebrate
-    // (as cheerX, world.ts: out from its lane's centre, from where it stands)
+    // (as cheerX, hordeLayout.ts: out from its lane's centre, from where it stands)
     float wide = max(1.0, ${f(CHEER_WIDTH)} / max(laneW, 0.1));
     float d = abs(off.x - laneC);
     float far = min(d * wide, max(d, ${f(CHEER_WIDTH / 2)}));

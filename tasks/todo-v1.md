@@ -159,8 +159,8 @@ Checks:
 - Split `tests/game/world.test.ts` to match.
 
 **Acceptance criteria:**
-- [ ] No file in `src/game/three/` is over 600 lines. Screenshots match.
-- [ ] Frame times are unchanged: a browser performance trace before and after (`browser-test` skill), with the numbers logged.
+- [x] No file in `src/game/three/` is over 600 lines. Screenshots match.
+- [x] Frame times are unchanged: a browser performance trace before and after (`browser-test` skill), with the numbers logged.
 
 **Scope:** M
 
