@@ -64,7 +64,8 @@ Every task: `npm run check` passes (plus `npm run test:slow` for `core/` tasks) 
 **Acceptance criteria:**
 - [x] Build label shows `v1.1.0 · <hash> · <time>`; CHANGELOG entry lists the changes.
   - `package.json` and lock 1.1.0; the label is built from package.json (`__APP_VERSION__`), no hardcoded label. CHANGELOG 1.1.0 entry (2026-11-15).
-- [ ] Deploy green (checkpoint follows).
+- [x] Deploy green (checkpoint follows).
+  - Deploy to GitHub Pages run 43688815233 (commit 3c2585e): success.
 **Verification:** `npm run check`. **Dependencies:** F3. **Files:** `package.json`, `package-lock.json`, `CHANGELOG.md`. **Scope:** XS
 
 ### Checkpoint F: straight fire on the phone (owner)
