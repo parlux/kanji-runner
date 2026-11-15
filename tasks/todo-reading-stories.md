@@ -13,13 +13,13 @@ Every task: `npm run check` passes before it is checked off. Test fixtures are s
 |---|---|---|
 | Some kanji stories have brackets in an odd form | Med | Fallback to WaniKani primary readings; R4 counts kanji with no bracket match in the owner's real library (scratchpad only). |
 | Bigger library and fetch | Low | Single-kanji vocabulary only; R4 measures pages and size. |
-| Longer pause card | Low | Owner judges at Checkpoint R (spec open question 1). |
+| Meaning-only kanji choice | Low | Owner judges at Checkpoint R (spec open question 1). |
 
 ### Task R1: Coverage and story choice (pure)
-**Description:** `coveredReadings(text)` in `src/core/mnemonic.ts`. `Story` in `src/core/study.ts` gains `primaryReadings` and `vocab`; the kanji card gets `readingStories: { reading, source: "kanji" | { word }, text } | { reading, none: true }`, one per main reading, replacing `mnemonics.reading`. A kanji with no story keeps today's card.
+**Description:** `coveredReadings(text)` in `src/core/mnemonic.ts`. `Story` in `src/core/study.ts` gains `primaryReadings` and `vocab`; the kanji card gets `readingStories: { reading, source: "kanji" | { word }, text } | { reading, none: true }`, one per presented reading, replacing `mnemonics.reading`. `studyCards` and `lastAnswer` work out the presented readings from the run's rows (spec "Which reading"). A kanji with no story keeps today's card.
 **Acceptance:** spec Testing Strategy "coveredReadings" and "Card" cases pass.
 **Verification:** `npm test -- mnemonic study`
-**Files:** `src/core/mnemonic.ts`, `src/core/study.ts`, `tests/core/mnemonic.test.ts`, `tests/core/study.test.ts`
+**Files:** `src/core/mnemonic.ts`, `src/core/study.ts`, `src/game/ui/panels.ts` (if the call needs the rows), `tests/core/mnemonic.test.ts`, `tests/core/study.test.ts`
 **Scope:** M
 
 ### Task R2: Library v2 and fetch
@@ -49,4 +49,4 @@ Every task: `npm run check` passes before it is checked off. Test fixtures are s
 ### Checkpoint R: v1.2.0 (owner, on the phone)
 - [ ] Pause on a 上 / 日 / 人 reading gate: the story under the shown reading is about that reading.
 - [ ] A reading with no story shows the "no story" line.
-- [ ] Card length on the pause screen is fine (spec open question 1).
+- [ ] Only the presented reading's story shows; meaning-only kanji show their own story (spec open question 1).

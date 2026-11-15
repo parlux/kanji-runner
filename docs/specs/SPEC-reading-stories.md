@@ -3,7 +3,7 @@
 Extends `docs/specs/done/SPEC-stories.md` and the specs it extends. Everything there still holds unless this spec says otherwise. Intent: `docs/intent/story-reading-mismatch.md`. Idea: `docs/ideas/story-reading-mismatch.md`.
 
 ## Objective
-A kanji card (study screen and pause screen, both modes) shows a reading story for **each main reading it lists** (first on'yomi, first kun'yomi; the readings runs rotate through). Each story is about that reading: the kanji's WaniKani story if it covers it, else a WaniKani vocabulary story for a word read that way, else a "no story" line. This fixes SPEC-stories' known rough edge ("a reading story about a reading Built-in doesn't show is shown unchanged").
+A kanji card (study screen and pause screen, both modes) shows the reading story for **the reading that was presented**: the reading the run's reading gate showed for that kanji. The story is about that reading: the kanji's WaniKani story if it covers it, else a WaniKani vocabulary story for a word read that way, else a "no story" line. This fixes SPEC-stories' known rough edge ("a reading story about a reading Built-in doesn't show is shown unchanged").
 
 ### User stories
 - As the player who just got 上 shown as うえ, I pause and read a story about うえ, labelled "from 上 (うえ)", not the "Joe" story about じょう.
@@ -24,11 +24,15 @@ A kanji card (study screen and pause screen, both modes) shows a reading story f
 - On'yomi only match vocabulary that is the bare kanji (`word` = the kanji); compounds are never searched.
 
 ### What the card shows
-- The single "Reading mnemonic" block becomes one block **per main reading**, in card order (on'yomi, then kun'yomi). Heading: `Reading mnemonic: じょう`; for a vocabulary story `Reading mnemonic: うえ (from 上)`, with the word in the kanji tag colour.
+- **Which reading:** the card shows a reading block only for the presented reading(s):
+  - Pause screen: the last gate. A reading gate → its correct answer (the shown reading). A meaning gate presents no reading → see the next rule.
+  - Study screen: every reading the run's reading gates showed for that kanji, in order of first sight (usually one; two if the run asked it with both).
+  - Kanji with no reading presented (only meaning gates): one block with the kanji's own story, headed with the reading it covers (its first covered main reading, else no reading in the heading). No "no story" line in this case.
+- Heading: `Reading mnemonic: じょう`; for a vocabulary story `Reading mnemonic: うえ (from 上)`, with the word in the kanji tag colour.
 - No story for that reading → the block shows `No story for this reading. This one just needs remembering.` in the muted text colour.
 - A kanji with **no story at all** in the library or taught cache (no token, not loaded, not a WaniKani kanji) → today's card, no "no story" lines (SPEC-stories' rule holds).
 - The meaning mnemonic, radicals row and everything else are unchanged.
-- The pause screen uses the same card, so it gets this for free.
+- The pause screen uses the same card renderer; `lastAnswer` passes the presented reading.
 - Taught-cache fallback (WaniKani mode, no library): the cached reading mnemonic is used with the same coverage rule; no vocabulary stories (the cache has none), so uncovered readings show the "no story" line.
 
 ### Library format and fetch
@@ -41,7 +45,7 @@ A kanji card (study screen and pause screen, both modes) shows a reading story f
 src/wanikani/stories.ts  → v2 library: primaryReadings, vocab; validation; storyLookup carries both
 src/wanikani/client.ts   → fetch adds vocabulary to types
 src/core/mnemonic.ts     → coveredReadings(text): string[] (pure)
-src/core/study.ts        → Story gains primaryReadings/vocab; kanji card gets readingStories: one per main reading
+src/core/study.ts        → Story gains primaryReadings/vocab; kanji card gets readingStories: one per presented reading; studyCards/lastAnswer take the presented readings from the run's rows
 src/game/ui/study.ts     → render one block per reading, vocabulary label, "no story" line
 ```
 Layers unchanged: `core/` gets plain types only; `wanikani/` still never imports `game/`.
@@ -61,6 +65,7 @@ export function coveredReadings(text: string): string[] { … }
 - **Synthetic fixtures only** (made-up story text and words), as SPEC-stories. The 上/日/人 examples are for the owner's manual check, not committed.
 - `coveredReadings`: one bracket, two readings in one story, `、`-split brackets, katakana in brackets, spaces, no bracket → empty, bracket not after `</reading>` ignored.
 - Library: vocabulary kept only in the single-kanji shape; hidden and mnemonic-less dropped; v1 record rejected; v2 round-trips.
+- Presented readings: from reading rows' answers, per kanji, in order; a meaning-only kanji gets the kanji-story block; pause on a reading gate shows only that reading.
 - Card: covered on'yomi → kanji story; uncovered kun → vocabulary story (okurigana preference, base match); no match → "no story"; no-bracket story falls back to primary readings; kanji with no stories → today's card unchanged; taught-cache fallback.
 - Client: request URL includes `vocabulary`.
 
@@ -70,13 +75,13 @@ export function coveredReadings(text: string): string[] { … }
 - Never: commit real WaniKani text, touch SRS or the save format.
 
 ## Success Criteria
-1. With the owner's token, 上 card shows a じょう block (the "Joe" story) and an うえ block labelled from 上.
-2. 日: にち block = kanji story; ひ block = vocabulary story from 日.
-3. 人: じん block = kanji story; ひと block = vocabulary story from 人.
+1. With the owner's token, 上 presented as じょう shows only the "Joe" story; presented as うえ, only the うえ story labelled from 上.
+2. 日: にち → kanji story; ひ → vocabulary story from 日.
+3. 人: じん → kanji story; ひと → vocabulary story from 人.
 4. A kun reading with no single-kanji vocabulary (or above level) shows the "no story" line.
 5. Without a token, every card is exactly as today.
 6. `npm run check` passes; version 1.2.0 in `package.json` and `CHANGELOG.md`.
 
 ## Open Questions
-1. Both readings' stories on every card, rather than only the run's shown reading. I chose this because the card already lists both readings, and it needs no run plumbing. On the pause screen the card gets about 3 lines longer.
+1. Kanji with no reading presented (meaning gates only): I chose to show the kanji's own story, labelled with its reading, rather than no reading story at all.
 2. Extra fetch: about 6 to 7 more pages on first load or a 7-day refresh. I'll measure the real count and library size at the checkpoint.
