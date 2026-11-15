@@ -128,39 +128,6 @@ export function hazardHeads(
 /** Where a shootable threat is now: its track position, its span across the track, and how far ahead it can be hit (FIRE_RANGE when absent). */
 export type Threat = { pos: number; span: Span; range?: number };
 
-/**
- * Index of the nearest threat at or after `from`, ahead of `dist` within
- * its range (FIRE_RANGE unless it says) and short of `limit` (the next question), whose span overlaps
- * the crowd's. Null entries can't be shot.
- */
-export function pickTarget(
-  threats: readonly (Threat | null)[],
-  from: number,
-  dist: number,
-  crowd: Span,
-  limit = Infinity,
-): number | null {
-  let best: number | null = null;
-  let bestPos = Infinity;
-  for (let i = from; i < threats.length; i++) {
-    const t = threats[i];
-    if (
-      !t ||
-      t.pos < dist ||
-      t.pos - dist > (t.range ?? FIRE_RANGE) ||
-      t.pos >= limit ||
-      t.pos >= bestPos
-    )
-      continue;
-    const { left, right } = t.span;
-    if (Math.min(crowd.right, right) - Math.max(crowd.left, left) > 0) {
-      best = i;
-      bestPos = t.pos;
-    }
-  }
-  return best;
-}
-
 /** A threat taking fire this step and its share (0..1) of the army's fire. */
 export type FireShare = { index: number; share: number };
 

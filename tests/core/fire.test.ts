@@ -5,7 +5,6 @@ import {
   hazardHeads,
   hazardHp,
   packCount,
-  pickTarget,
   splitFire,
   type Threat,
 } from "../../src/core/fire";
@@ -134,51 +133,6 @@ describe("hazardHeads", () => {
       packCount(5),
       packCount(11),
     ]);
-  });
-});
-
-describe("pickTarget", () => {
-  const t = (pos: number, left: number, right: number): Threat => ({
-    pos,
-    span: { left, right },
-  });
-
-  it("picks the nearest overlapping threat in range", () => {
-    expect(pickTarget([t(1, 0.5, 0.7), t(1.5, 0.3, 0.5)], 0, 0, crowd)).toBe(0);
-    expect(pickTarget([t(1.5, 0.5, 0.7), t(1, 0.3, 0.5)], 0, 0, crowd)).toBe(1);
-  });
-
-  it("skips threats that don't overlap the crowd", () => {
-    expect(pickTarget([t(1, 0, 0.4), t(1.5, 0.55, 0.9)], 0, 0, crowd)).toBe(1);
-  });
-
-  it("ignores threats beyond FIRE_RANGE and behind the crowd", () => {
-    expect(pickTarget([t(FIRE_RANGE + 0.01, 0, 1)], 0, 0, crowd)).toBe(null);
-    expect(pickTarget([t(FIRE_RANGE, 0, 1)], 0, 0, crowd)).toBe(0);
-    expect(pickTarget([t(0.9, 0, 1)], 0, 1, crowd)).toBe(null);
-  });
-
-  it("reaches a threat with its own range that far (a pack's stream), still nearest first", () => {
-    const far = { ...t(8, 0, 1), range: 12 };
-    expect(pickTarget([far], 0, 0, crowd)).toBe(0);
-    expect(pickTarget([{ ...far, pos: 12.01 }], 0, 0, crowd)).toBe(null);
-    expect(pickTarget([far], 0, 0, crowd, 7)).toBe(null);
-    expect(pickTarget([t(2, 0, 1), far], 0, 0, crowd)).toBe(0);
-  });
-
-  it("never targets null entries", () => {
-    expect(pickTarget([null, t(1.5, 0, 1)], 0, 0, crowd)).toBe(1);
-    expect(pickTarget([null], 0, 0, crowd)).toBe(null);
-  });
-
-  it("starts at `from`", () => {
-    expect(pickTarget([t(1, 0, 1), t(1.5, 0, 1)], 1, 0, crowd)).toBe(1);
-  });
-
-  it("skips threats at or past `limit` (the next question)", () => {
-    expect(pickTarget([t(1, 0, 1)], 0, 0, crowd, 1)).toBe(null);
-    expect(pickTarget([t(1, 0, 0.4), t(2, 0, 1)], 0, 0, crowd, 1.5)).toBe(null);
-    expect(pickTarget([t(1, 0, 1)], 0, 0, crowd, 1.01)).toBe(0);
   });
 });
 

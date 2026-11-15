@@ -202,3 +202,63 @@ describe("shooting", () => {
     expect(packLength(narrow, 0)).toBeLessThan(packLength(s, 0));
   });
 });
+
+describe("fire by lane", () => {
+  const cw = crowdWidth(20);
+  const L = 0.5 - cw / 2;
+  const R = 0.5 + cw / 2;
+  const block = (pos: number, left: number, right: number): Block => ({
+    kind: "block",
+    pos,
+    left,
+    right,
+  });
+  const per = firepower(20) * DT;
+
+  it("a crate in front of a pack takes the lanes it covers; the pack gets only the rest", () => {
+    const s0 = range([block(1.5, 0, 0.5), pack(5)], [1e9, 1e9], 20, [0, 100]);
+    expect(packSpan(s0, 1).left).toBeLessThanOrEqual(L);
+    expect(packSpan(s0, 1).right).toBeGreaterThanOrEqual(R);
+    const s = stepRun(s0, DT);
+    const share = (0.5 - L) / cw;
+    expect(s.damage[0]).toBeCloseTo(per * share, 9);
+    expect(s.damage[1]).toBeCloseTo(per * (1 - share), 9);
+    expect(s.targets.map((t) => t.index)).toEqual([0, 1]);
+    expect(s.targets.reduce((a, t) => a + t.share, 0)).toBeCloseTo(1, 9);
+  });
+
+  it("a crate covering the whole army blocks the pack entirely", () => {
+    const s0 = range([wide(1.5), pack(5)], [1e9, 1e9], 20, [0, 100]);
+    const s = stepFor(s0, 0.5);
+    expect(s.damage[0]).toBeCloseTo(firepower(20) * 0.5, 6);
+    expect(s.damage[1]).toBe(0);
+    expect(s.targets).toEqual([{ index: 0, share: 1 }]);
+    expect(s.target).toBe(0);
+  });
+
+  it("two crates side by side both take fire", () => {
+    const s0 = range([block(1.5, 0, 0.5), block(1.8, 0.5, 1)], [1e9, 1e9]);
+    const s = stepRun(s0, DT);
+    expect(s.damage[0]).toBeCloseTo(per / 2, 9);
+    expect(s.damage[1]).toBeCloseTo(per / 2, 9);
+    expect(s.targets).toHaveLength(2);
+  });
+
+  it("a crate pays out once; two shattering in one step both pay", () => {
+    const hp = 40;
+    const s0 = {
+      ...range([block(1.5, 0, 0.5), block(1.8, 0.5, 1)], [hp, hp]),
+      damage: [hp - 0.01, hp - 0.01],
+    };
+    const broke = stepRun(s0, DT);
+    expect(isShattered(broke, 0) && isShattered(broke, 1)).toBe(true);
+    expect(broke.army).toBe(20 + 2 * crateReward(hp));
+    expect(broke.lastCrate).toEqual({
+      gain: 2 * crateReward(hp),
+      dist: broke.dist,
+    });
+    const later = stepFor(broke, 0.5);
+    expect(later.army).toBe(broke.army);
+    expect(later.targets).toEqual([]);
+  });
+});

@@ -1,5 +1,5 @@
-import { firepower, pickTarget, type Threat } from "./fire";
-import { hazardPos, packFireShare, packSpan } from "./horde";
+import { firepower, splitFire, type Threat } from "./fire";
+import { hazardPos, packSpan } from "./horde";
 import { fireLimit, type RunState } from "./state";
 import { CRATE_REWARD_K, PACK_WAKE } from "./tuning";
 import { shootGate } from "./walls";
@@ -30,41 +30,49 @@ export const crateReward = (hp: number): number =>
   Math.round(CRATE_REWARD_K * hp);
 
 /**
- * All fire goes to the nearest shootable threat ahead whose span overlaps
- * the army's (a pack takes only its share: packFireShare); damage is capped at its hp.
- * A block (supply crate) pays out once, on the step it shatters: it is never a target again.
- * With no threat to shoot, the next wall's opening takes the fire.
+ * Fire by lane (splitFire): each part of the army's span fires at the
+ * nearest shootable threat ahead overlapping it, so a crate blocks what is
+ * behind it; each target takes firepower × dt × its share, capped at its hp.
+ * A block (supply crate) pays out once, on the step it shatters: it is never
+ * a target again (two shattering in one step both pay). The share with no
+ * threat ahead goes to the next wall's opening (shootGate).
  */
 export function fire(s: RunState, w: number, dt: number): RunState {
-  const target = pickTarget(
+  const { shares, free } = splitFire(
     threats(s),
     s.nextHazard,
     s.dist,
     { left: s.x - w / 2, right: s.x + w / 2 },
     fireLimit(s),
   );
-  if (target === null) return shootGate({ ...s, target }, dt);
-  const hp = s.hp[target] ?? 0;
   const damage = [...s.damage];
-  // straight ahead: a pack takes the share of the fire its span faces
-  const share =
-    s.track.hazards[target]?.kind === "pack" ? packFireShare(s, target) : 1;
-  damage[target] = Math.min(
-    hp,
-    (damage[target] ?? 0) + firepower(s.army) * dt * share,
-  );
-  const shattered = damage[target] >= hp;
-  const gain =
-    shattered && s.track.hazards[target]?.kind === "block"
-      ? crateReward(hp)
-      : 0;
+  let gain = 0;
+  let lastShatter = s.lastShatter;
+  let target: number | null = null;
+  let most = 0;
+  for (const { index, share } of shares) {
+    if (share > most) {
+      most = share;
+      target = index;
+    }
+    const hp = s.hp[index] ?? 0;
+    damage[index] = Math.min(
+      hp,
+      (damage[index] ?? 0) + firepower(s.army) * dt * share,
+    );
+    if (damage[index] < hp) continue;
+    lastShatter = { index, dist: s.dist };
+    if (s.track.hazards[index]?.kind === "block") gain += crateReward(hp);
+  }
+  // the wall takes the free share of this step's army (before any payout)
+  const g = shootGate(s, dt, free);
   return {
-    ...s,
-    army: s.army + gain,
+    ...g,
+    army: g.army + gain,
     damage,
+    targets: shares,
     target,
-    gateTarget: null,
-    lastShatter: shattered ? { index: target, dist: s.dist } : s.lastShatter,
+    lastShatter,
     lastCrate: gain > 0 ? { gain, dist: s.dist } : s.lastCrate,
   };
 }

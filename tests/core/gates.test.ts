@@ -18,6 +18,7 @@ import {
   type RunState,
 } from "../../src/core/sim";
 import { rowOpenings } from "../../src/core/walls";
+import { firepower } from "../../src/core/fire";
 import { buildTrack, type Block } from "../../src/core/track";
 import type { GateRow } from "../../src/core/types";
 import {
@@ -240,6 +241,30 @@ describe("gate growth in a run", () => {
     expect(after.target).toBe(0);
     expect(after.gateTarget).toBeNull();
     expect(rowOpenings(after, firstThree)).toEqual(gateOpenings(3));
+  });
+
+  it("the share with nothing ahead widens the wall, scaled by that share", () => {
+    const s = before(firstThree, 100, 1, 1.5);
+    const pos = (s.track.questions[firstThree] as number) - 0.5;
+    // a crate over the crowd's left half
+    const block: Block = { kind: "block", pos, left: 0, right: s.x };
+    const withBlock: RunState = {
+      ...s,
+      track: { ...s.track, hazards: [block] },
+      hp: [1000],
+      damage: [0],
+      packs: [null],
+    };
+    const grown = (r: RunState): number =>
+      width(at(rowOpenings(r, firstThree), 1)) - width(at(gateOpenings(3), 1));
+    const half = stepRun(withBlock, DT);
+    const all = stepRun(s, DT);
+    expect(half.target).toBe(0);
+    expect(half.gateTarget).toBe(1);
+    expect(half.gateShare).toBeCloseTo(0.5, 9);
+    expect(half.damage[0]).toBeCloseTo(firepower(100) * DT * 0.5, 9);
+    expect(all.gateShare).toBe(1);
+    expect(grown(half)).toBeCloseTo(grown(all) / 2, 9);
   });
 
   it("never depends on correctness, and never changes the streak or results", () => {

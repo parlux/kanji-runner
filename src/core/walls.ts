@@ -24,24 +24,25 @@ export function rowOpenings(s: RunState, q: number): Opening[] {
 }
 
 /**
- * With nothing else to shoot, fire goes to the next wall once it is within
- * FIRE_RANGE: the opening nearest the crowd's centre grows (see growOpening).
- * Only where the crowd is matters, never which answer is right.
+ * The share of fire with nothing else ahead (all of it by default) goes to
+ * the next wall once it is within FIRE_RANGE: the opening nearest the
+ * crowd's centre grows (see growOpening) by GATE_GROW_PER_DAMAGE × that
+ * share's damage. Only where the crowd is matters, never which answer is right.
  */
-export function shootGate(s: RunState, dt: number): RunState {
+export function shootGate(s: RunState, dt: number, share = 1): RunState {
   const q = s.next;
   const ahead = (s.track.questions[q] ?? Infinity) - s.dist;
-  if (!s.rows[q] || ahead < 0 || ahead > FIRE_RANGE)
-    return { ...s, gateTarget: null };
+  if (!s.rows[q] || ahead < 0 || ahead > FIRE_RANGE || !(share > 0))
+    return { ...s, gateTarget: null, gateShare: 0 };
   const openings = rowOpenings(s, q);
   const i = nearestOpening(openings, s.x);
   const gates = [...s.gates];
   gates[q] = growOpening(
     openings,
     i,
-    firepower(s.army) * dt * GATE_GROW_PER_DAMAGE,
+    firepower(s.army) * dt * share * GATE_GROW_PER_DAMAGE,
   );
-  return { ...s, gates, gateTarget: i };
+  return { ...s, gates, gateTarget: i, gateShare: share };
 }
 
 /**

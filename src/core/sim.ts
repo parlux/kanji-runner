@@ -103,9 +103,11 @@ export function createRunState(
         streamW: w,
       };
     }),
+    targets: [],
     target: null,
     gates: rows.map((r) => gateOpenings(r.options.length)),
     gateTarget: null,
+    gateShare: 0,
     lastShatter: null,
     lastCrate: null,
     lastClip: null,

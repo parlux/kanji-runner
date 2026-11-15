@@ -1,3 +1,4 @@
+import type { FireShare } from "./fire";
 import type { Opening } from "./gates";
 import type { ReaskConfig } from "./reask";
 import type { Track } from "./track";
@@ -74,12 +75,16 @@ export type RunState = {
   woke: boolean[];
   /** Per hazard: where its enemy pack is now (null for blocks and saws). */
   packs: (PackState | null)[];
-  /** Hazard being fired at this step, if any. */
+  /** Hazards fired at this step, by index, each with its share of the army's fire (fire by lane: see splitFire). */
+  targets: FireShare[];
+  /** The one of `targets` taking the most fire (the nearest on a tie), if any. */
   target: number | null;
   /** Per row: its wall's openings as they are now (shooting one grows it). */
   gates: Opening[][];
   /** Opening of the next row's wall being shot (grown) this step, if any. */
   gateTarget: number | null;
+  /** Share of the army's fire with no threat ahead this step (it goes to the next wall when in range). */
+  gateShare: number;
   /** Most recent shattered block and the distance it happened at, for feedback. */
   lastShatter: { index: number; dist: number } | null;
   /** Most recent crate payout (recruits from a shattered block) and the distance it happened at, for feedback. */

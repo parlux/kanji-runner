@@ -86,8 +86,8 @@ export function createHazards(scene: Scene, fx: Fx) {
           0.65,
           wallZ,
         );
-      if (fighting || run.gateTarget !== null || run.status !== "running") {
-        /* the squads' fight or the wall's opening takes the fire; a dead army fires nothing */
+      if (fighting || run.status !== "running") {
+        /* the squads' fight takes the fire; a dead army fires nothing */
       } else if (
         i !== null &&
         (target?.kind === "block" || target?.kind === "pack")
@@ -115,7 +115,9 @@ export function createHazards(scene: Scene, fx: Fx) {
           const f = 0.6 + 0.4 * Math.sin(run.dist * 80);
           fx.spark(tx, 0.5, tz, 0.5 * f, FX_COLOURS.flash);
         }
-      } else for (let l = 0; l < lanes; l++) straight(l);
+      } else if (run.gateTarget === null)
+        for (let l = 0; l < lanes; l++) straight(l);
+      // else the wall's opening takes the fire (squads.ts draws it)
 
       // a shattered crate bursts (a pack's final burst: kills.ts)
       const sh = run.lastShatter;
