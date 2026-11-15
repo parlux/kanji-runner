@@ -6,6 +6,7 @@ import {
   hazardHp,
   packCount,
   pickTarget,
+  splitFire,
   type Threat,
 } from "../../src/core/fire";
 import { kanaRun } from "./kana-run";
@@ -178,5 +179,93 @@ describe("pickTarget", () => {
     expect(pickTarget([t(1, 0, 1)], 0, 0, crowd, 1)).toBe(null);
     expect(pickTarget([t(1, 0, 0.4), t(2, 0, 1)], 0, 0, crowd, 1.5)).toBe(null);
     expect(pickTarget([t(1, 0, 1)], 0, 0, crowd, 1.01)).toBe(0);
+  });
+});
+
+describe("splitFire (fire by lane)", () => {
+  const t = (pos: number, left: number, right: number): Threat => ({
+    pos,
+    span: { left, right },
+  });
+  const pack = (pos: number, left: number, right: number): Threat => ({
+    ...t(pos, left, right),
+    range: 12,
+  });
+  const close = (got: {
+    shares: { index: number; share: number }[];
+    free: number;
+  }) => ({
+    shares: got.shares.map((x) => [x.index, Math.round(x.share * 1000) / 1000]),
+    free: Math.round(got.free * 1000) / 1000,
+  });
+
+  it("a crate in front of a pack takes the lanes it covers; the pack gets the rest", () => {
+    // crate over the left half of the crowd, pack across all of it behind
+    const got = splitFire([t(1, 0.3, 0.5), pack(5, 0, 1)], 0, 0, crowd);
+    expect(close(got)).toEqual({
+      shares: [
+        [0, 0.5],
+        [1, 0.5],
+      ],
+      free: 0,
+    });
+  });
+
+  it("a crate covering the whole army blocks the pack entirely", () => {
+    const got = splitFire([t(1, 0.3, 0.7), pack(5, 0, 1)], 0, 0, crowd);
+    expect(close(got)).toEqual({ shares: [[0, 1]], free: 0 });
+  });
+
+  it("a pack in front of a crate takes the lanes it covers", () => {
+    const got = splitFire([t(2, 0, 1), pack(1, 0.45, 0.55)], 0, 0, crowd);
+    expect(close(got)).toEqual({
+      shares: [
+        [0, 0.5],
+        [1, 0.5],
+      ],
+      free: 0,
+    });
+  });
+
+  it("two crates side by side both take fire; the gap between them is free", () => {
+    const got = splitFire([t(1, 0.3, 0.45), t(1.5, 0.55, 0.9)], 0, 0, crowd);
+    expect(close(got)).toEqual({
+      shares: [
+        [0, 0.25],
+        [1, 0.25],
+      ],
+      free: 0.5,
+    });
+  });
+
+  it("with nothing ahead all the fire is free", () => {
+    expect(splitFire([], 0, 0, crowd)).toEqual({ shares: [], free: 1 });
+    expect(close(splitFire([t(1, 0, 0.3)], 0, 0, crowd))).toEqual({
+      shares: [],
+      free: 1,
+    });
+  });
+
+  it("ties go to the lower index; shares always sum to 1 with free", () => {
+    const got = splitFire([t(1, 0, 1), t(1, 0, 1)], 0, 0, crowd);
+    expect(close(got)).toEqual({ shares: [[0, 1]], free: 0 });
+    const mix = splitFire(
+      [t(1, 0.42, 0.47), pack(3, 0.3, 0.52), t(2, 0.5, 0.58), null],
+      0,
+      0,
+      crowd,
+    );
+    const sum = mix.shares.reduce((a, x) => a + x.share, mix.free);
+    expect(sum).toBeCloseTo(1, 12);
+  });
+
+  it("keeps the range, `from` and `limit` rules", () => {
+    expect(splitFire([t(FIRE_RANGE + 0.01, 0, 1)], 0, 0, crowd).free).toBe(1);
+    expect(splitFire([t(0.9, 0, 1)], 0, 1, crowd).free).toBe(1);
+    expect(splitFire([pack(12, 0, 1)], 0, 0, crowd).shares).toHaveLength(1);
+    expect(splitFire([t(1, 0, 1), t(1.5, 0, 1)], 1, 0, crowd).shares).toEqual([
+      { index: 1, share: 1 },
+    ]);
+    expect(splitFire([t(1, 0, 1)], 0, 0, crowd, 1).free).toBe(1);
   });
 });

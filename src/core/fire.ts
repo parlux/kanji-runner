@@ -160,3 +160,71 @@ export function pickTarget(
   }
   return best;
 }
+
+/** A threat taking fire this step and its share (0..1) of the army's fire. */
+export type FireShare = { index: number; share: number };
+
+/**
+ * Fire by lane: the army fires straight ahead across its span `crowd`. Each
+ * part of the span hits the nearest threat that overlaps it (at or after
+ * `from`, ahead of `dist` within its range, short of `limit`; ties go to the
+ * lower index), so a nearer threat blocks what is behind it. A threat's
+ * share is the width it is nearest in over the crowd's width (listed by
+ * index, shares > 0 only); `free` is the share with nothing ahead (it goes
+ * to the next wall). Null entries can't be shot.
+ */
+export function splitFire(
+  threats: readonly (Threat | null)[],
+  from: number,
+  dist: number,
+  crowd: Span,
+  limit = Infinity,
+): { shares: FireShare[]; free: number } {
+  const width = crowd.right - crowd.left;
+  if (!(width > 0)) return { shares: [], free: 0 };
+  const live: number[] = [];
+  for (let i = from; i < threats.length; i++) {
+    const t = threats[i];
+    if (
+      !t ||
+      t.pos < dist ||
+      t.pos - dist > (t.range ?? FIRE_RANGE) ||
+      t.pos >= limit ||
+      Math.min(crowd.right, t.span.right) - Math.max(crowd.left, t.span.left) <=
+        0
+    )
+      continue;
+    live.push(i);
+  }
+  // cut the span at every live threat's edges; each piece goes to its nearest
+  const cuts = [crowd.left, crowd.right];
+  for (const i of live) {
+    const { left, right } = (threats[i] as Threat).span;
+    for (const c of [left, right])
+      if (c > crowd.left && c < crowd.right) cuts.push(c);
+  }
+  cuts.sort((a, b) => a - b);
+  const got = new Map<number, number>();
+  let free = 0;
+  for (let k = 0; k + 1 < cuts.length; k++) {
+    const a = cuts[k] as number;
+    const b = cuts[k + 1] as number;
+    if (b <= a) continue;
+    const mid = (a + b) / 2;
+    let best: number | null = null;
+    let bestPos = Infinity;
+    for (const i of live) {
+      const t = threats[i] as Threat;
+      if (t.pos < bestPos && t.span.left <= mid && mid <= t.span.right) {
+        best = i;
+        bestPos = t.pos;
+      }
+    }
+    if (best === null) free += b - a;
+    else got.set(best, (got.get(best) ?? 0) + (b - a));
+  }
+  const shares = [...got]
+    .sort(([a], [b]) => a - b)
+    .map(([index, w]) => ({ index, share: w / width }));
+  return { shares, free: free / width };
+}
