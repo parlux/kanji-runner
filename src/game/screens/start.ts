@@ -64,7 +64,7 @@ export function renderStart(
     ),
     COLORS.dim,
   );
-  text(ctx, `build ${__BUILD__}`, w / 2, h - 11, 10, COLORS.dim);
+  text(ctx, __BUILD__, w / 2, h - 11, 10, COLORS.dim);
 }
 
 const ON_FILL = "#2f6b48";

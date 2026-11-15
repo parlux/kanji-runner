@@ -1,7 +1,8 @@
 import { execSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 import { defineConfig } from "vitest/config";
 
-/** Short commit hash plus UTC build time, shown on the pause screen. */
+/** Version, short commit hash and UTC build time, shown on the pause screen. */
 function buildLabel(): string {
   let hash = "dev";
   try {
@@ -10,7 +11,10 @@ function buildLabel(): string {
     // no git: keep "dev"
   }
   const time = new Date().toISOString().slice(0, 16).replace("T", " ");
-  return `${hash} · ${time} UTC`;
+  const { version } = JSON.parse(readFileSync("package.json", "utf8")) as {
+    version: string;
+  };
+  return `v${version} · ${hash} · ${time} UTC`;
 }
 
 export default defineConfig(({ command }) => ({
