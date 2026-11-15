@@ -15,7 +15,7 @@ Pick the flow for an owner request. The owner does not want to decide this thems
 |---|---|---|
 | `doc` | Only docs, comments, copy in `docs/`, `AGENTS.md`, `CHANGELOG.md`, `tasks/` | Edit, commit, push. |
 | `fix` | **All** of the fix checks below hold | Fix directly (see Fix flow). |
-| `sdd` | Any fix check fails, or you are unsure | `interview-me` → intent in `docs/intent/` → `spec-driven-development` → `planning-and-task-breakdown` → `tasks/todo-*.md` → orchestrate to the first checkpoint (AGENTS.md). |
+| `sdd` | Any fix check fails, or you are unsure | `interview-me` → intent in `docs/intent/` → `spec-driven-development` → `planning-and-task-breakdown` → `tasks/todo-*.md` → spec page (`docs/review-pages.md`), owner approves → orchestrate to the first checkpoint (AGENTS.md). |
 | `idea` | "Maybe", "someday", "what if", not a request to act now | Write it to `docs/ideas/`, done. |
 
 A prefix from the owner (`doc:`, `fix:`, `feat:`/`sdd:`, `idea:`) overrides classification. `feat:` means `sdd`.

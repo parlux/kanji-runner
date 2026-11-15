@@ -7,3 +7,4 @@ One row per owner request, written by the `triage` skill (`.claude/skills/triage
 | 2026-11-15 | Village keeps coming up as 'ri' | fix | One gloss override for 里, clear outcome | |
 | 2026-11-15 | 厘 shows 'rin' (follow-up) | fix | One gloss override for 厘 | |
 | 2026-11-15 | Trial HTML review page for SPEC-straight-fire (claude.ai link) | doc | Review view of an existing spec, no code | |
+| 2026-11-15 | Make spec and checkpoint review pages part of the flow | doc | Docs, AGENTS.md and triage flow line only | |
