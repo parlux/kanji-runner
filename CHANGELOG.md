@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.2.0 (2026-11-15)
+
+Reading stories match the reading.
+
+- The study and pause cards show the reading story for the reading the run showed, not always the kanji's one.
+- When the kanji's WaniKani story doesn't cover that reading, the story comes from a WaniKani vocabulary word read that way, labelled "from <word>".
+- No story for a reading: "No story for this reading. This one just needs remembering."
+- A kanji only asked for its meaning shows every reading's story.
+- Stories now fetch WaniKani vocabulary too; the saved story library is refetched once in the new format.
+
 ## 1.1.1 (2026-11-15)
 
 - Tapping Study on the end screen opens it on phones (it closed at once: the tap also hit its Back button).

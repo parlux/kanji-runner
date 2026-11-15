@@ -45,7 +45,10 @@ Every task: `npm run check` passes before it is checked off. Test fixtures are s
 
 ### Task R4: Measure, changelog, version
 **Description:** With the owner's token (scratchpad only, nothing committed): count fetch pages and library size before/after, and kanji whose story has no bracket match; check 上, 日, 人 match spec success criteria 1–3. Bump to 1.2.0, add `## 1.2.0 (date)` to `CHANGELOG.md`. Grep repo and `dist/` for a real story phrase and the token prefix.
-**Acceptance:** numbers logged in this file; version and changelog done; grep clean.
+**Acceptance:**
+- [x] Version 1.2.0 and `## 1.2.0 (2026-11-15)` in `CHANGELOG.md`.
+- [x] Grep of `src/`, `tests/`, `dist/` for real story phrases: clean.
+- [ ] Real-token measurement (pages, library size, kanji with no bracket match): not possible here (the token lives on the owner's phone); 上 / 日 / 人 are checked by the owner at Checkpoint R instead.
 **Verification:** `npm run check`; deploy green.
 **Dependencies:** R3
 **Files:** `package.json`, `CHANGELOG.md`, this file
