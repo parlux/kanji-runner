@@ -1,10 +1,5 @@
 # Changelog
 
-## Unreleased
-
-- 里 shows "hometown" instead of "ri" (gloss override).
-- 厘 shows "tiny bit" instead of "rin".
-
 ## 1.1.0 (2026-11-15)
 
 Straight fire. The pause screen shows `v1.1.0 · <hash> · <time>`.
@@ -14,6 +9,8 @@ Straight fire. The pause screen shows `v1.1.0 · <hash> · <time>`.
 - One firing range (12) for crates, packs and walls.
 - Crates retuned (1.3x HP, same reward) and gate growth retuned (0.8x) so they feel as hard as before.
 - The balance bot judges a crate by the lanes it covers.
+- 里 shows "hometown" instead of "ri" (gloss override).
+- 厘 shows "tiny bit" instead of "rin".
 
 ## 1.0.0 (2026-11-15)
 

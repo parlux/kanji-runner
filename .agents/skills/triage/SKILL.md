@@ -47,7 +47,7 @@ Triage: <route> — <reason in ≤15 words>. Say "sdd" / "just fix it" to overri
 - If one detail is ambiguous, ask 1–2 questions first (not a full interview).
 - If a subagent is running a round, don't commit in the shared tree: queue the fix or use a worktree.
 - Implement with `incremental-implementation`; `npm run check` passes; commit, push.
-- Add a line to `CHANGELOG.md` under an `Unreleased` section (create it at the top if missing).
+- Bump the patch version in the same commit: `npm version patch --no-git-tag-version`, and add a `## <version> (<date>)` section at the top of `CHANGELOG.md` with one line for the fix. No `Unreleased` section. During an open round, bump anyway. The deploy fails without a bump (`scripts/check-version.sh`).
 - **Escalate, don't expand:** if the fix grows past the checks (more files, a systemic cause, e.g. the data pipeline picks wrong readings for many kanji), stop and report the pattern. Propose `sdd` for the wider job; finish only the original narrow fix if it still stands alone.
 
 ## Log

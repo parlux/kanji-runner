@@ -1,6 +1,7 @@
 # AGENTS.md
 
 - Always push after implementing a change.
+- Every fix and feat ships under a new version: fix = patch, round = minor (its final task bumps `package.json` and adds `## <version> (<date>)` to `CHANGELOG.md`). The deploy runs `scripts/check-version.sh`: once no `tasks/todo-*.md` is open, code changed since tag `v<version>` fails it. The deploy job pushes the tag.
 - Every owner request to build, change, fix, audit or document something: load the `triage` skill first. It picks the flow (doc, fix, full SDD, idea).
 
 ## Workflow: "implement the next round"

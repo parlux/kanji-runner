@@ -9,3 +9,4 @@ One row per owner request, written by the `triage` skill (`.claude/skills/triage
 | 2026-11-15 | Trial HTML review page for SPEC-straight-fire (claude.ai link) | doc | Review view of an existing spec, no code | |
 | 2026-11-15 | Make spec and checkpoint review pages part of the flow | doc | Docs, AGENTS.md and triage flow line only | |
 | 2026-11-15 | WaniKani reading story covers only one reading | idea | Owner asked for a backlog entry only | |
+| 2026-11-15 | Every fix and feat bumps the version (CI guard) | fix | One script, deploy step, rule lines; no game code | |
