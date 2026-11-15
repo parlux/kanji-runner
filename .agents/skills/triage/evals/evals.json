@@ -5,67 +5,114 @@
       "id": 1,
       "prompt": "village keeps coming up as 'ri', fix that",
       "expected_output": "Route fix. Single data correction with a clear outcome; mentions escalating if the cause is systemic.",
-      "files": []
+      "files": [],
+      "assertions": [
+        "Routes to fix (direct fix, no interview/spec)",
+        "Mentions it would stop/escalate if the cause is systemic across many kanji",
+        "Does not modify any repo file"
+      ]
     },
     {
       "id": 2,
       "prompt": "audit our kanji readings against wanikani so the core readings line up",
       "expected_output": "Route sdd. Many data items and a judgment call per mismatch; waits for owner go before interviewing.",
-      "files": []
+      "files": [],
+      "assertions": [
+        "Routes to SDD (interview-me, spec, tasks)",
+        "Waits for owner go before starting the interview",
+        "Does not start implementing"
+      ]
     },
     {
       "id": 3,
       "prompt": "make the run feel faster",
       "expected_output": "Route sdd. Outcome unclear and a feel judgment.",
-      "files": []
+      "files": [],
+      "assertions": [
+        "Routes to SDD",
+        "Does not start implementing a speed change"
+      ]
     },
     {
       "id": 4,
-      "prompt": "typo in AGENTS.md: 'orchestator' should be 'orchestrator'",
-      "expected_output": "Route doc. Edits, commits, pushes without asking.",
-      "files": []
+      "prompt": "add a line to AGENTS.md saying the dev server runs with `npx vite --port 8765`",
+      "expected_output": "Route doc. Edits AGENTS.md, commits, pushes without asking.",
+      "files": [],
+      "assertions": [
+        "Routes to doc",
+        "Proceeds without asking the owner for permission"
+      ]
     },
     {
       "id": 5,
       "prompt": "add a daily challenge mode",
       "expected_output": "Route sdd. New feature with new concepts.",
-      "files": []
+      "files": [],
+      "assertions": [
+        "Routes to SDD",
+        "Does not start implementing"
+      ]
     },
     {
       "id": 6,
       "prompt": "the pause button doesn't respond on the summary screen",
       "expected_output": "Route fix only after the cause is found and is local; otherwise investigates first and re-triages. Must not start SDD by default, must not skip investigation.",
-      "files": []
+      "files": [],
+      "assertions": [
+        "Plans to investigate/reproduce the cause before choosing a fix",
+        "Does not start the SDD interview by default"
+      ]
     },
     {
       "id": 7,
       "prompt": "boss is too easy, tune it",
       "expected_output": "Route sdd. Balance tuning is a judgment call.",
-      "files": []
+      "files": [],
+      "assertions": [
+        "Routes to SDD (balance tuning is a judgment call)",
+        "Does not change balance values directly"
+      ]
     },
     {
       "id": 8,
       "prompt": "maybe someday we could have multiplayer races?",
       "expected_output": "Route idea. Writes it to docs/ideas/, nothing else.",
-      "files": []
+      "files": [],
+      "assertions": [
+        "Files it as an idea in docs/ideas/",
+        "Does not start an interview, spec or implementation"
+      ]
     },
     {
       "id": 9,
       "prompt": "fix: change the spaced repetition intervals to 1, 3, 7 days",
       "expected_output": "Honours the fix: prefix as an override, but flags that it touches core spaced repetition and offers sdd. Logs the triage.",
-      "files": []
+      "files": [],
+      "assertions": [
+        "Acknowledges the fix: prefix",
+        "Flags that it touches core spaced repetition and offers SDD instead"
+      ]
     },
     {
       "id": 10,
       "prompt": "fix the 'ri' reading on village and also add a settings toggle for romaji",
       "expected_output": "Triages separately: village reading is fix, romaji toggle is sdd (new setting).",
-      "files": []
+      "files": [],
+      "assertions": [
+        "Treats the two requests separately",
+        "Routes the village reading to fix",
+        "Routes the romaji toggle to SDD"
+      ]
     },
     {
       "id": 11,
       "prompt": "the camera is a bit too high, lower it",
       "expected_output": "Route sdd (or asks): look-and-feel judgment that needs a phone check and a numeric target. Must not silently fix.",
-      "files": []
+      "files": [],
+      "assertions": [
+        "Routes to SDD or asks for a numeric target before changing anything",
+        "Does not silently change camera values"
+      ]
     }
   ]
 }
