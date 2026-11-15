@@ -51,9 +51,12 @@ Every task: `npm run check` passes (plus `npm run test:slow` for `core/` tasks) 
 ### Task F3: Straight tracers
 **Description:** as the spec's "Drawing": each lane's tracer straight ahead, stopping at what that lane hits, fading at 12 or stopping at the wall. No aimed streams; crate hit flash where its lanes hit. 2D the same rule.
 **Acceptance criteria:**
-- [ ] Tested: lane end points for a crate in front of a pack, a crate to one side, and nothing ahead.
-- [ ] Browser at 390×844: crate in front of a pack (partial and full cover), crate alone, wall only; Countryside and Race day. Screenshots in the scratchpad.
-- [ ] Frame time and draw calls unchanged (logged).
+- [x] Tested: lane end points for a crate in front of a pack, a crate to one side, and nothing ahead.
+  - `laneHits(threats, from, dist, xs, limit)` (fire.ts, pure): per lane x the nearest threat whose span holds x (same filter and tie rule as `splitFire`), else null. `hazards.ts` draws every lane straight from its x to that hit, or on to range end (fading) clipped at the next wall or the boss; the crate's hit flash is one spark at the mean x of its lanes. The squads' separate wall stream is gone (the lanes that hit nothing already end at the wall), so no double drawing. `scene3d.ts` clears `targets` on the boss copy too. Tests: fire.test.ts "laneHits" (crate in front of a pack, full cover, crate to one side, nothing ahead, agrees with `splitFire`).
+- [x] Browser at 390×844: crate in front of a pack (partial and full cover), crate alone, wall only; Countryside and Race day. Screenshots in the scratchpad.
+  - Crafted states (army 100, 4 lanes) rendered at 390×844: `/private/tmp/claude-501/-Users-parlux-Projects-number-runner/cb6c1d62-6a62-4355-856e-bd452d799f45/scratchpad/f3-{partial,full,crate,wall}-{country,stadium}.png` (partial: crate over the left lanes, the rest reach the pack; full: crate over the whole crowd; crate: 0.2 wide, the outer lanes fly on; wall: no hazards, tracers stop at the wall). 2D: `render.ts` draws no run without the 3D view (a run is never entered), so there are no 2D tracers to change.
+- [x] Frame time and draw calls unchanged (logged).
+  - Render CPU time per frame (mean of 35, headless Chrome), before the task was not measured with the same harness; after: 1.0–1.5 ms across the 8 scenes (wall only 1.3). Draw calls: same instanced tracer and spark meshes, same caps (120 and 80), no new meshes or materials; at most 5 lanes × 6 tracers + 1 spark per crate.
 **Verification:** `npm run check` plus browser. **Dependencies:** F2. **Files:** `src/game/three/hazards.ts`, `src/game/render.ts` (2D), tests. **Scope:** S
 
 ### Task F4: Version 1.1.0
