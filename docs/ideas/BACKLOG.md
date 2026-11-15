@@ -2,7 +2,9 @@
 
 Open ideas in priority order; the top one is next. The owner orders it. New ideas go at the bottom unless the owner places them.
 
-1. [Reading story doesn't match the reading shown](story-reading-mismatch.md): learning; stories can mislead today.
-2. [Enemy packs can't run through crates](packs-blocked-by-crates.md): game; follows straight fire.
-3. [Fold the round skills into one project flow](skill-audit.md): process.
-4. [Install as an app on the phone](install-as-app.md): platform; home-screen icon, full screen, maybe offline.
+1. [Enemy packs can't run through crates](packs-blocked-by-crates.md): game; follows straight fire.
+2. [Fold the round skills into one project flow](skill-audit.md): process.
+3. [Install as an app on the phone](install-as-app.md): platform; home-screen icon, full screen, maybe offline.
+
+## In progress
+- [Reading story doesn't match the reading shown](story-reading-mismatch.md): intent `docs/intent/story-reading-mismatch.md`, spec `docs/specs/SPEC-reading-stories.md`.
