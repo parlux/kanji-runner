@@ -16,7 +16,7 @@ Pick the flow for an owner request. The owner does not want to decide this thems
 | `doc` | Only docs, comments, copy in `docs/`, `AGENTS.md`, `CHANGELOG.md`, `tasks/` | Edit, commit, push. |
 | `fix` | **All** of the fix checks below hold | Fix directly (see Fix flow). |
 | `sdd` | Any fix check fails, or you are unsure | `interview-me` → intent in `docs/intent/` → `spec-driven-development` → `planning-and-task-breakdown` → `tasks/todo-*.md` → spec page (`docs/review-pages.md`), owner approves → orchestrate to the first checkpoint (AGENTS.md). |
-| `idea` | "Maybe", "someday", "what if", not a request to act now | Write it to `docs/ideas/`, done. |
+| `idea` | "Maybe", "someday", "what if", not a request to act now | Write `docs/ideas/<slug>.md`; append `N. [Title](<slug>.md): <area>; <one-line why>.` to `docs/ideas/BACKLOG.md` (bottom unless the owner places it); commit, push. Name the position in the reply so the owner can reorder. |
 
 A prefix from the owner (`doc:`, `fix:`, `feat:`/`sdd:`, `idea:`) overrides classification. `feat:` means `sdd`.
 
@@ -48,7 +48,7 @@ Triage: <route> — <reason in ≤15 words>. Say "sdd" / "just fix it" to overri
 - If a subagent is running a round, don't commit in the shared tree: queue the fix or use a worktree.
 - Implement with `incremental-implementation`; `npm run check` passes; commit, push.
 - Bump the patch version in the same commit: `npm version patch --no-git-tag-version`, and add a `## <version> (<date>)` section at the top of `CHANGELOG.md` with one line for the fix. No `Unreleased` section. During an open round, bump anyway. The deploy fails without a bump (`scripts/check-version.sh`).
-- **Escalate, don't expand:** if the fix grows past the checks (more files, a systemic cause, e.g. the data pipeline picks wrong readings for many kanji), stop and report the pattern. Propose `sdd` for the wider job; finish only the original narrow fix if it still stands alone.
+- **Escalate, don't expand:** if the fix grows past the checks (more files, a systemic cause, e.g. the data pipeline picks wrong readings for many kanji), stop and report the pattern. Propose `sdd` for the wider job; finish only the original narrow fix if it still stands alone. If the owner defers the wider job, file it via the `idea` route.
 
 ## Log
 
