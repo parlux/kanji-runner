@@ -1,6 +1,6 @@
 # Tasks: reading stories match the reading (v1.2.0)
 
-Spec: `docs/specs/SPEC-reading-stories.md` (2026-11-15). Intent: `docs/intent/story-reading-mismatch.md`. Idea: `docs/ideas/story-reading-mismatch.md`. Waiting for owner approval of the spec.
+Spec: `docs/specs/SPEC-reading-stories.md` (2026-11-15). Intent: `docs/intent/story-reading-mismatch.md`. Idea: `docs/ideas/story-reading-mismatch.md`. Approved and started 2026-11-15.
 Review: https://claude.ai/artifact/Q9WkSgJuHgNFZ3Nfrw2rD7
 Every task: `npm run check` passes before it is checked off. Test fixtures are synthetic: never commit real WaniKani content.
 
