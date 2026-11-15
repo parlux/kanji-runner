@@ -17,3 +17,4 @@ One row per owner request, written by the `triage` skill (`.claude/skills/triage
 | 2026-11-15 | Study button does nothing when tapped | fix | Touch click hit the overlay Back button; one-line fix | |
 | 2026-11-15 | On'yomi stories from compound vocabulary | idea | Owner asked for a backlog placeholder | |
 | 2026-11-15 | Compound words as gates | idea | Owner asked for a backlog placeholder | |
+| 2026-11-15 | Re-order the backlog by Claude's priority | doc | Backlog order only | |
