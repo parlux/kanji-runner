@@ -10,7 +10,7 @@ export function isShattered(s: RunState, i: number): boolean {
 }
 
 /** What can be shot now: intact blocks and packs with enemies left. */
-function threats(s: RunState): (Threat | null)[] {
+export function threats(s: RunState): (Threat | null)[] {
   return s.track.hazards.map((h, i) => {
     if ((s.hp[i] ?? 0) <= 0 || isShattered(s, i)) return null;
     if (h.kind === "block")

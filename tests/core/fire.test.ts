@@ -4,6 +4,7 @@ import {
   firepower,
   hazardHeads,
   hazardHp,
+  laneHits,
   packCount,
   splitFire,
   type Threat,
@@ -218,5 +219,37 @@ describe("splitFire (fire by lane)", () => {
       { index: 1, share: 1 },
     ]);
     expect(splitFire([t(1, 0, 1)], 0, 0, crowd, 1).free).toBe(1);
+  });
+});
+
+describe("laneHits (straight tracer ends)", () => {
+  const t = (pos: number, left: number, right: number): Threat => ({
+    pos,
+    span: { left, right },
+  });
+  const xs = [0.3, 0.4, 0.5, 0.6, 0.7];
+  const ends = (th: (Threat | null)[], limit?: number) =>
+    laneHits(th, 0, 0, xs, limit).map((h) => (h ? h.index : null));
+
+  it("a crate in front of a pack: its lanes stop at the crate, the rest at the pack", () => {
+    expect(ends([t(2, 0.25, 0.45), t(8, 0.2, 0.8)])).toEqual([0, 0, 1, 1, 1]);
+  });
+  it("a crate covering every lane takes them all", () => {
+    expect(ends([t(2, 0.1, 0.9), t(8, 0.2, 0.8)])).toEqual([0, 0, 0, 0, 0]);
+  });
+  it("a crate to one side leaves the other lanes flying on", () => {
+    expect(ends([t(3, 0.1, 0.35)])).toEqual([0, null, null, null, null]);
+  });
+  it("nothing ahead: no lane hits anything", () => {
+    expect(ends([])).toEqual([null, null, null, null, null]);
+    // out of range, behind, or past the wall
+    expect(ends([t(20, 0, 1), t(-1, 0, 1)])).toEqual(Array(5).fill(null));
+    expect(ends([t(5, 0, 1)], 4)).toEqual(Array(5).fill(null));
+  });
+  it("agrees with splitFire on who is nearest", () => {
+    const th = [t(2, 0.25, 0.45), t(8, 0.2, 0.8)];
+    const hit = new Set(laneHits(th, 0, 0, xs).map((h) => h?.index));
+    const got = splitFire(th, 0, 0, { left: 0.25, right: 0.75 });
+    expect(got.shares.map((x) => x.index).every((i) => hit.has(i))).toBe(true);
   });
 });

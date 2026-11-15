@@ -195,3 +195,35 @@ export function splitFire(
     .map(([index, w]) => ({ index, share: w / width }));
   return { shares, free: free / width };
 }
+
+/**
+ * Where each straight tracer ends: for every lane x, the nearest threat whose
+ * span holds x (same filter and tie rule as splitFire), else null (it flies
+ * on to the range end or the wall). Entries are the threat's index and track
+ * position.
+ */
+export function laneHits(
+  threats: readonly (Threat | null)[],
+  from: number,
+  dist: number,
+  xs: readonly number[],
+  limit = Infinity,
+): ({ index: number; pos: number } | null)[] {
+  return xs.map((x) => {
+    let best: { index: number; pos: number } | null = null;
+    for (let i = from; i < threats.length; i++) {
+      const t = threats[i];
+      if (
+        !t ||
+        t.pos < dist ||
+        t.pos - dist > FIRE_RANGE ||
+        t.pos >= limit ||
+        x < t.span.left ||
+        x > t.span.right
+      )
+        continue;
+      if (!best || t.pos < best.pos) best = { index: i, pos: t.pos };
+    }
+    return best;
+  });
+}
