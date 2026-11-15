@@ -4,6 +4,7 @@
 
 - 里 shows "hometown" instead of "ri" (gloss override).
 - 厘 shows "tiny bit" instead of "rin".
+- Tapping Study on the end screen opens it on phones (it closed at once: the tap also hit its Back button).
 
 ## 1.1.0 (2026-11-15)
 
