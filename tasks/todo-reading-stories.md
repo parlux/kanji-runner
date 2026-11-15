@@ -26,7 +26,9 @@ Every task: `npm run check` passes before it is checked off. Test fixtures are s
 
 ### Task R2: Library v2 and fetch
 **Description:** `buildLibrary` keeps `primaryReadings` per kanji and single-kanji vocabulary (shape rule in the spec), `version: 2`; `parseLibrary` validates v2 and rejects v1; `storyLookup` passes both on. `client.ts` fetches `types=kanji,radical,vocabulary`. Taught-cache fallback (`storiesWithFallback`) keeps working with no vocab.
-**Acceptance:** spec Testing Strategy "Library" and "Client" cases pass; existing stories and client tests updated, not deleted.
+**Acceptance:**
+- [x] spec Testing Strategy "Library" and "Client" cases pass; existing stories and client tests updated, not deleted.
+- [x] `npm run check` passes.
 **Verification:** `npm test -- stories client storystore`
 **Dependencies:** R1
 **Files:** `src/wanikani/stories.ts`, `src/wanikani/client.ts`, `src/core/study.ts`, `tests/wanikani/stories.test.ts`, `tests/wanikani/client.test.ts`
