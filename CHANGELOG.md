@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- 里 shows "village" instead of "ri" (gloss override).
+
 ## 1.0.0 (2026-11-15)
 
 First tagged release. The pause screen shows `v1.0.0 · <hash> · <time>`.
