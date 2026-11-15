@@ -44,6 +44,7 @@ const CSS = `
 .kr-study .mn-kanji { color: #ff8ad0; font-weight: 600; }
 .kr-study .mn-reading { color: #c4a0ff; font-weight: 600; }
 .kr-study .mn-vocabulary { color: #ffc46b; font-weight: 600; }
+.kr-study .mn-none { color: #9aa3b5; }
 .kr-study .mn-ja { color: #5fd38d; }
 .kr-study .mn-em { font-style: italic; font-weight: 600; color: #fff; }
 .kr-study .empty { color: #9aa3b5; padding: 8px 0; }
@@ -141,16 +142,13 @@ export function cardEl(c: StudyCard): HTMLElement {
     if (c.mnemonics?.meaning)
       block(["Meaning mnemonic"], mnemonicNodes(c.mnemonics.meaning));
     for (const r of c.readingStories ?? []) {
-      const head: (Node | string)[] = [
-        `Reading mnemonic${r.reading ? `: ${r.reading}` : ""}`,
-      ];
+      const head: (Node | string)[] = [`Reading mnemonic: ${r.reading}`];
       if ("none" in r) {
         const note = el(
           "p",
-          "",
+          "mn-none",
           "No story for this reading. This one just needs remembering.",
         );
-        note.style.color = "var(--muted, #888)";
         info.append(el("div", "mn", el("h3", "", ...head), note));
         continue;
       }

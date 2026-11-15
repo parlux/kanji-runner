@@ -36,7 +36,8 @@ Every task: `npm run check` passes before it is checked off. Test fixtures are s
 
 ### Task R3: Render the reading blocks
 **Description:** Owner change (2026-11-15): a kanji with no presented reading gets one block per main reading (spec "Which reading"); update the R1 logic in `src/core/study.ts` and its tests. `src/game/ui/study.ts`: one block per entry in `readingStories`, heading `Reading mnemonic: <reading>` plus ` (from <word>)` for vocabulary, "no story" line in muted text. Pause screen gets it through `cardEl`.
-**Acceptance:** browser check at 390×844 with a mocked fetch and synthetic data: a card with a kanji story, a vocabulary story and a "no story" block; pause card the same; no-token card unchanged. Screenshots in the scratchpad only.
+**Acceptance:**
+- [x] browser check at 390×844 with a mocked fetch and synthetic data: a card with a kanji story, a vocabulary story and a "no story" block; pause card the same; no-token card unchanged. Screenshots in the scratchpad only.
 **Verification:** `npm run check`; browser check.
 **Dependencies:** R2
 **Files:** `src/game/ui/study.ts`, `src/core/study.ts`, `tests/core/study.test.ts`
