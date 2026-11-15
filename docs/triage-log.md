@@ -12,3 +12,4 @@ One row per owner request, written by the `triage` skill (`.claude/skills/triage
 | 2026-11-15 | Every fix and feat bumps the version (CI guard) | fix | One script, deploy step, rule lines; no game code | |
 | 2026-11-15 | Triage idea route must add the backlog entry | doc | Skill text only | |
 | 2026-11-15 | Install the webpage as an app on the phone | idea | Owner asked for a backlog entry only | |
+| 2026-11-15 | Implement next task: no task list, top backlog idea = story-reading mismatch | sdd | Open design questions; touches reading choice in core | |
