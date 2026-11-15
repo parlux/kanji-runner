@@ -15,3 +15,5 @@ One row per owner request, written by the `triage` skill (`.claude/skills/triage
 | 2026-11-15 | Implement next task: no task list, top backlog idea = story-reading mismatch | sdd | Open design questions; touches reading choice in core | |
 | 2026-11-15 | SDD skill: no stop after spec; continue to tasks + spec page | doc | Skill text only | |
 | 2026-11-15 | Study button does nothing when tapped | fix | Touch click hit the overlay Back button; one-line fix | |
+| 2026-11-15 | On'yomi stories from compound vocabulary | idea | Owner asked for a backlog placeholder | |
+| 2026-11-15 | Compound words as gates | idea | Owner asked for a backlog placeholder | |
