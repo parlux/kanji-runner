@@ -44,7 +44,7 @@ describe("story store", () => {
     expect(parseRecord({ ...rec, fetchedAt: "x" })).toBeNull();
     expect(parseRecord({ ...rec, tokenTail: 1 })).toBeNull();
     expect(
-      parseRecord({ ...rec, library: { version: 2, kanji: {} } }),
+      parseRecord({ ...rec, library: { version: 1, kanji: {} } }),
     ).toBeNull();
   });
 });

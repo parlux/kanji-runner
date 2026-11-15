@@ -89,6 +89,18 @@
               "meaning": "x",
               "primary": true
             }
+          ],
+          "readings": [
+            {
+              "reading": "きゅう",
+              "primary": true,
+              "type": "onyomi"
+            },
+            {
+              "reading": "く",
+              "primary": false,
+              "type": "onyomi"
+            }
           ]
         }
       },
@@ -106,6 +118,13 @@
             {
               "meaning": "x",
               "primary": true
+            }
+          ],
+          "readings": [
+            {
+              "reading": "めい",
+              "primary": true,
+              "type": "onyomi"
             }
           ]
         }
@@ -151,6 +170,18 @@
               "meaning": "x",
               "primary": true
             }
+          ],
+          "readings": [
+            {
+              "reading": "こう",
+              "primary": false,
+              "type": "onyomi"
+            },
+            {
+              "reading": "くち",
+              "primary": true,
+              "type": "onyomi"
+            }
           ]
         }
       },
@@ -173,12 +204,170 @@
         }
       },
       {
-        "id": 50,
+        "id": 62,
         "object": "vocabulary",
         "data": {
           "characters": "休む",
           "level": 1,
-          "meaning_mnemonic": "v"
+          "hidden_at": null,
+          "reading_mnemonic": "Fake vocab story B",
+          "meaning_mnemonic": "m",
+          "readings": [
+            {
+              "reading": "やすむ",
+              "primary": true,
+              "accepted_answer": true
+            }
+          ]
+        }
+      },
+      {
+        "id": 61,
+        "object": "vocabulary",
+        "data": {
+          "characters": "休",
+          "level": 1,
+          "hidden_at": null,
+          "reading_mnemonic": "Fake vocab story A",
+          "meaning_mnemonic": "m",
+          "readings": [
+            {
+              "reading": "きゅう",
+              "primary": true,
+              "accepted_answer": true
+            },
+            {
+              "reading": "やす",
+              "primary": false,
+              "accepted_answer": true
+            }
+          ]
+        }
+      },
+      {
+        "id": 63,
+        "object": "vocabulary",
+        "data": {
+          "characters": "休日",
+          "level": 1,
+          "hidden_at": null,
+          "reading_mnemonic": "compound",
+          "meaning_mnemonic": "m",
+          "readings": [
+            {
+              "reading": "きゅうじつ",
+              "primary": true,
+              "accepted_answer": true
+            }
+          ]
+        }
+      },
+      {
+        "id": 64,
+        "object": "vocabulary",
+        "data": {
+          "characters": "休み",
+          "level": 1,
+          "hidden_at": null,
+          "reading_mnemonic": null,
+          "meaning_mnemonic": "m",
+          "readings": [
+            {
+              "reading": "やすみ",
+              "primary": true,
+              "accepted_answer": true
+            }
+          ]
+        }
+      },
+      {
+        "id": 65,
+        "object": "vocabulary",
+        "data": {
+          "characters": "口げ",
+          "level": 1,
+          "hidden_at": "2026-01-01T00:00:00Z",
+          "reading_mnemonic": "hidden",
+          "meaning_mnemonic": "m",
+          "readings": [
+            {
+              "reading": "くちげ",
+              "primary": true,
+              "accepted_answer": true
+            }
+          ]
+        }
+      },
+      {
+        "id": 66,
+        "object": "vocabulary",
+        "data": {
+          "characters": "ア休",
+          "level": 1,
+          "hidden_at": null,
+          "reading_mnemonic": "katakana start",
+          "meaning_mnemonic": "m",
+          "readings": [
+            {
+              "reading": "あ",
+              "primary": true,
+              "accepted_answer": true
+            }
+          ]
+        }
+      },
+      {
+        "id": 67,
+        "object": "vocabulary",
+        "data": {
+          "characters": "十",
+          "level": 1,
+          "hidden_at": null,
+          "reading_mnemonic": "orphan kanji vocab",
+          "meaning_mnemonic": "m",
+          "readings": [
+            {
+              "reading": "じゅう",
+              "primary": true,
+              "accepted_answer": true
+            }
+          ]
+        }
+      },
+      {
+        "id": 68,
+        "object": "vocabulary",
+        "data": {
+          "characters": "休ん",
+          "level": 1,
+          "hidden_at": null,
+          "reading_mnemonic": "bad kana",
+          "meaning_mnemonic": "m",
+          "readings": [
+            {
+              "reading": "ABC",
+              "primary": true,
+              "accepted_answer": true
+            }
+          ]
+        }
+      },
+      {
+        "id": 69,
+        "object": "vocabulary",
+        "data": {
+          "characters": "明るい",
+          "level": 1,
+          "hidden_at": null,
+          "reading_mnemonic": "Fake vocab story C",
+          "meaning_mnemonic": "m",
+          "readings": [
+            {
+              "reading": "あかるい",
+              "primary": true,
+              "accepted_answer": true
+            }
+          ]
         }
       }
     ]

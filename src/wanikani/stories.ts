@@ -6,11 +6,15 @@ type StoryKanji = {
   meaning?: string;
   reading?: string;
   radicals: StoryRadical[];
+  /** WaniKani's `primary: true` readings, hiragana. */
+  primaryReadings: string[];
+  /** Single-kanji vocabulary with a reading story, in WaniKani id order. */
+  vocab: { word: string; readings: string[]; story: string }[];
 };
 
 /** The story library: every kanji WaniKani has, by character. JSON-serialisable. */
 export type StoryLibrary = {
-  version: 1;
+  version: 2;
   kanji: Record<string, StoryKanji>;
 };
 
@@ -45,6 +49,18 @@ function primaryName(d: Obj): string | undefined {
   return str((ms.find((m) => m.primary === true) ?? ms[0])?.meaning);
 }
 
+const HIRAGANA = /^\p{Script=Hiragana}+$/u;
+/** One kanji followed by zero or more hiragana, e.g. 上 or 上げる. */
+const SINGLE_KANJI_WORD = /^\p{Script=Han}\p{Script=Hiragana}*$/u;
+
+function readingsOf(d: Obj, primaryOnly: boolean): string[] {
+  return arr(d.readings)
+    .filter(isObj)
+    .filter((r) => !primaryOnly || r.primary === true)
+    .map((r) => str(r.reading))
+    .filter((r): r is string => r !== undefined && HIRAGANA.test(r));
+}
+
 function svgUrl(d: Obj): string | null {
   for (const i of arr(d.character_images).filter(isObj)) {
     if (i.content_type === "image/svg+xml" && str(i.url))
@@ -55,8 +71,9 @@ function svgUrl(d: Obj): string | null {
 
 /**
  * Trim every `/subjects` page (kanji and radicals mixed) to the story library.
- * Hidden subjects are dropped, and so is a kanji with no mnemonics and no
- * radicals. Malformed input gives an error result.
+ * Hidden subjects are dropped, and so is a kanji with no mnemonics, no
+ * radicals and no vocabulary. Only single-kanji vocabulary with a reading
+ * mnemonic is kept (see SPEC-reading-stories). Malformed input gives an error result.
  */
 export function buildLibrary(subjectPages: unknown): Result<StoryLibrary> {
   if (!Array.isArray(subjectPages)) return fail("subjects: unexpected shape");
@@ -81,6 +98,23 @@ export function buildLibrary(subjectPages: unknown): Result<StoryLibrary> {
     radicals.set(id, { char, name, image: char ? null : svgUrl(d) });
   }
 
+  const vocabByKanji = new Map<string, StoryKanji["vocab"]>();
+  const vocabSubjects = subjects
+    .filter((s) => s.object === "vocabulary")
+    .sort((a, b) => a.id - b.id);
+  for (const { d } of vocabSubjects) {
+    const word = str(d.characters);
+    const story = str(d.reading_mnemonic);
+    if (hidden(d) || !word || !story || !SINGLE_KANJI_WORD.test(word)) continue;
+    const readings = readingsOf(d, false);
+    if (readings.length === 0) continue;
+    const key = [...word][0] as string;
+    vocabByKanji.set(key, [
+      ...(vocabByKanji.get(key) ?? []),
+      { word, readings, story },
+    ]);
+  }
+
   const kanji: Record<string, StoryKanji> = {};
   for (const { object, d } of subjects) {
     if (object !== "kanji" || hidden(d)) continue;
@@ -91,21 +125,26 @@ export function buildLibrary(subjectPages: unknown): Result<StoryLibrary> {
       .filter((r): r is StoryRadical => r !== undefined);
     const meaning = str(d.meaning_mnemonic);
     const reading = str(d.reading_mnemonic);
-    if (!meaning && !reading && rs.length === 0) continue;
+    const vocab = vocabByKanji.get(char) ?? [];
+    if (!meaning && !reading && rs.length === 0 && vocab.length === 0) continue;
     kanji[char] = {
       ...(meaning ? { meaning } : {}),
       ...(reading ? { reading } : {}),
       radicals: rs.map((r) => ({ ...r })),
+      primaryReadings: readingsOf(d, true),
+      vocab: vocab.map((v) => ({ ...v })),
     };
   }
-  return { ok: true, value: { version: 1, kanji } };
+  return { ok: true, value: { version: 2, kanji } };
 }
 
 /** Validate a library read back from storage; wrong version or shape → error. */
 export function parseLibrary(raw: unknown): Result<StoryLibrary> {
-  if (!isObj(raw) || raw.version !== 1 || !isObj(raw.kanji)) {
+  if (!isObj(raw) || raw.version !== 2 || !isObj(raw.kanji)) {
     return fail("library: wrong version or shape");
   }
+  const strArr = (v: unknown) =>
+    Array.isArray(v) && v.every((x) => typeof x === "string");
   const optStr = (v: unknown) => v === undefined || typeof v === "string";
   for (const [char, k] of Object.entries(raw.kanji)) {
     if (
@@ -113,6 +152,15 @@ export function parseLibrary(raw: unknown): Result<StoryLibrary> {
       !isObj(k) ||
       !optStr(k.meaning) ||
       !optStr(k.reading) ||
+      !strArr(k.primaryReadings) ||
+      !Array.isArray(k.vocab) ||
+      !k.vocab.every(
+        (v) =>
+          isObj(v) &&
+          typeof v.word === "string" &&
+          typeof v.story === "string" &&
+          strArr(v.readings),
+      ) ||
       !Array.isArray(k.radicals) ||
       !k.radicals.every(
         (r) =>

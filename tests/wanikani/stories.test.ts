@@ -12,8 +12,10 @@ if (!built.ok) throw new Error(built.error);
 const lib = built.value;
 
 describe("buildLibrary", () => {
-  it("keeps kanji with stories or radicals; hidden, empty and vocabulary are out", () => {
-    expect(Object.keys(lib.kanji).sort()).toEqual(["休", "明", "口"].sort());
+  it("keeps kanji with stories, radicals or vocabulary; hidden and empty are out", () => {
+    expect(Object.keys(lib.kanji).sort()).toEqual(
+      ["休", "明", "口", "十"].sort(),
+    );
   });
 
   it("resolves radicals in WaniKani's order, dropping hidden radicals", () => {
@@ -33,9 +35,43 @@ describe("buildLibrary", () => {
   it("keeps a kanji with radicals only, or stories only", () => {
     expect(lib.kanji["明"]).toEqual({
       radicals: [{ char: "龘龘", name: "zorb", image: null }],
+      primaryReadings: ["めい"],
+      vocab: [
+        { word: "明るい", readings: ["あかるい"], story: "Fake vocab story C" },
+      ],
     });
-    expect(lib.kanji["口"]).toEqual({ meaning: "Only meaning", radicals: [] });
+    expect(lib.kanji["口"]).toEqual({
+      meaning: "Only meaning",
+      radicals: [],
+      primaryReadings: ["くち"],
+      vocab: [],
+    });
     expect(lib.kanji["休"]?.reading).toBe("Fake reading story");
+  });
+
+  it("keeps primary readings only, hiragana only", () => {
+    expect(lib.kanji["休"]?.primaryReadings).toEqual(["きゅう"]);
+  });
+
+  it("keeps only single-kanji vocabulary with a story, in id order", () => {
+    expect(lib.kanji["休"]?.vocab).toEqual([
+      { word: "休", readings: ["きゅう", "やす"], story: "Fake vocab story A" },
+      { word: "休む", readings: ["やすむ"], story: "Fake vocab story B" },
+    ]);
+  });
+
+  it("keeps a kanji that has only vocabulary", () => {
+    expect(lib.kanji["十"]).toEqual({
+      radicals: [],
+      primaryReadings: [],
+      vocab: [
+        { word: "十", readings: ["じゅう"], story: "orphan kanji vocab" },
+      ],
+    });
+  });
+
+  it("is version 2", () => {
+    expect(lib.version).toBe(2);
   });
 
   it("round-trips through JSON and parseLibrary", () => {
@@ -80,15 +116,27 @@ describe("parseLibrary", () => {
     for (const bad of [
       null,
       [],
-      { version: 2, kanji: {} },
-      { version: 1 },
-      { version: 1, kanji: { 休: { radicals: "x" } } },
-      { version: 1, kanji: { 休: { meaning: 3, radicals: [] } } },
+      { version: 1, kanji: {} },
+      { version: 2 },
+      { version: 2, kanji: { 休: { radicals: [], vocab: [] } } },
+      { version: 2, kanji: { 休: { radicals: [], primaryReadings: [] } } },
       {
-        version: 1,
+        version: 2,
+        kanji: {
+          休: {
+            radicals: [],
+            primaryReadings: [],
+            vocab: [{ word: "休", readings: [1], story: "s" }],
+          },
+        },
+      },
+      { version: 2, kanji: { 休: { radicals: "x" } } },
+      { version: 2, kanji: { 休: { meaning: 3, radicals: [] } } },
+      {
+        version: 2,
         kanji: { 休: { radicals: [{ char: 1, name: "a", image: null }] } },
       },
-      { version: 1, kanji: { 休: { radicals: [{ char: null, name: "a" }] } } },
+      { version: 2, kanji: { 休: { radicals: [{ char: null, name: "a" }] } } },
     ]) {
       expect(parseLibrary(bad).ok).toBe(false);
     }
@@ -98,5 +146,11 @@ describe("parseLibrary", () => {
 describe("storyLookup", () => {
   it("maps characters to stories", () => {
     expect(storyLookup(lib).get("口")?.meaning).toBe("Only meaning");
+  });
+
+  it("passes primary readings and vocabulary on", () => {
+    const s = storyLookup(lib).get("休");
+    expect(s?.primaryReadings).toEqual(["きゅう"]);
+    expect(s?.vocab?.map((v) => v.word)).toEqual(["休", "休む"]);
   });
 });

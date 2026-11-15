@@ -128,7 +128,7 @@ export function createWkClient(deps: WkClientDeps): WkClient {
     if (!level.ok) throw new Stop("offline");
     const levels = Array.from({ length: level.value }, (_, i) => i + 1);
     const subjects = await pages(
-      `${WK_BASE}subjects?types=kanji,radical&levels=${levels.join(",")}`,
+      `${WK_BASE}subjects?types=kanji,radical,vocabulary&levels=${levels.join(",")}`,
       token,
     );
     const lib = buildLibrary(subjects);

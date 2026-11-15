@@ -261,11 +261,11 @@ describe("fetchStories", () => {
     const r = await client.fetchStories();
     if (r.status !== "ok") throw new Error(r.status);
     expect(Object.keys(r.library.kanji).sort()).toEqual(
-      ["口", "明", "休"].sort(),
+      ["口", "明", "休", "十"].sort(),
     );
     expect(f.calls.map((c) => c.url)).toEqual([
       `${WK_BASE}user`,
-      `${WK_BASE}subjects?types=kanji,radical&levels=1,2,3`,
+      `${WK_BASE}subjects?types=kanji,radical,vocabulary&levels=1,2,3`,
       `${WK_BASE}subjects?page_after_id=9`,
     ]);
     for (const c of f.calls) {
