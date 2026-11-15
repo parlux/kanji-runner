@@ -7,6 +7,7 @@ import { missedItems } from "../../core/run";
 import { WORDS } from "../../core/words";
 import {
   lastAnswer,
+  presentedReadings,
   runKanji,
   storiesWithFallback,
   studyCards,
@@ -153,6 +154,7 @@ export function createPanels(d: PanelDeps): Panels {
         stories(),
         runKanji(run.rows, run.results),
         WORDS,
+        presentedReadings(run.rows, run.results),
       );
       // its Play again is the end screen's: a new run straight away
       openStudy(cards, () => d.act("confirm"));

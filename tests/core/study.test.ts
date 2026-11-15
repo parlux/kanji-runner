@@ -4,8 +4,10 @@ import { KANJI } from "../../src/core/kanji";
 import { buildRun, missedItems } from "../../src/core/run";
 import { defaultProgress, recordRun } from "../../src/core/srs";
 import {
+  type Story,
   canStudy,
   lastAnswer,
+  presentedReadings,
   runKanji,
   storiesWithFallback,
   studyCards,
@@ -110,7 +112,10 @@ describe("studyCards", () => {
     expect(cards).toHaveLength(plain.length);
     cards.forEach((c, i) => {
       if (c.kind === "kanji" && c.char === c0) {
-        expect(c.mnemonics).toEqual({ meaning: "m", reading: "r" });
+        expect(c.mnemonics).toEqual({ meaning: "m" });
+        expect(c.readingStories).toEqual([
+          { reading: "", source: "kanji", text: "r" },
+        ]);
         expect(c.radicals).toEqual([rad]);
       } else expect(c).toEqual(plain[i]);
     });
@@ -324,5 +329,185 @@ describe("word cards", () => {
     });
     const b = lastAnswer(wrows, [true], 0, KANJI, KANA, undefined, words);
     expect(b?.card).toMatchObject({ kind: "word", missed: false });
+  });
+});
+
+describe("reading stories", () => {
+  const k = (over: Partial<KanjiItem> = {}): KanjiItem => ({
+    ...(KANJI[0] as KanjiItem),
+    char: "X",
+    on: "じょう",
+    kun: { base: "あ", okurigana: "げる" },
+    ...over,
+  });
+  const kanji = k();
+  const row = (type: GateRow["type"], answer: string): GateRow => ({
+    type,
+    prompt: "X",
+    options: [answer],
+    answerIndex: 0,
+    answer,
+  });
+  const card = (
+    story: Story | undefined,
+    presented: string[],
+    item: KanjiItem = kanji,
+  ) => {
+    const c = studyCards(
+      [{ type: "reading", prompt: "X", answers: [] } as never],
+      [item],
+      KANA,
+      story ? new Map([["X", story]]) : undefined,
+      [],
+      [],
+      new Map([["X", presented]]),
+    )[0];
+    return c?.kind === "kanji" ? c : undefined;
+  };
+  const kstory = "<reading>Joe</reading> (じょう) story";
+  const vocab = [
+    { word: "X", readings: ["うえ", "あげる"], story: "v-bare" },
+    { word: "Xげる", readings: ["あげる"], story: "v-okuri" },
+  ];
+
+  it("presentedReadings: per kanji, in order, reading gates only", () => {
+    const rs = [
+      row("reading", "じょう"),
+      row("meaning", "up"),
+      row("reading", "あ(げる)"),
+      row("reading", "じょう"),
+      row("reading", "later"),
+    ];
+    expect(presentedReadings(rs, [true, true, true, true]).get("X")).toEqual([
+      "じょう",
+      "あ(げる)",
+    ]);
+    expect(presentedReadings(rs, [true, true]).size).toBe(1);
+    expect(presentedReadings(rs, [true, true]).get("X")).toEqual(["じょう"]);
+  });
+
+  it("covered on'yomi shows the kanji story", () => {
+    expect(card({ reading: kstory }, ["じょう"])?.readingStories).toEqual([
+      { reading: "じょう", source: "kanji", text: kstory },
+    ]);
+  });
+
+  it("uncovered kun takes the vocabulary story, preferring the okurigana word", () => {
+    const c = card({ reading: kstory, vocab }, ["あ(げる)"]);
+    expect(c?.readingStories).toEqual([
+      { reading: "あ(げる)", source: { word: "Xげる" }, text: "v-okuri" },
+    ]);
+  });
+
+  it("matches vocabulary by base and falls back to any match", () => {
+    const only = [vocab[0] as (typeof vocab)[number]];
+    expect(
+      card({ reading: kstory, vocab: only }, ["あ(げる)"])?.readingStories,
+    ).toEqual([{ reading: "あ(げる)", source: { word: "X" }, text: "v-bare" }]);
+  });
+
+  it("on'yomi only match the bare kanji vocabulary", () => {
+    const v = [{ word: "Xげる", readings: ["じょう"], story: "x" }];
+    expect(
+      card({ reading: "no bracket", primaryReadings: [], vocab: v }, ["じょう"])
+        ?.readingStories,
+    ).toEqual([{ reading: "じょう", none: true }]);
+  });
+
+  it("a covered base counts: あ covers あ(げる)", () => {
+    const s = "<reading>A</reading> (あ) story";
+    expect(card({ reading: s }, ["あ(げる)"])?.readingStories).toEqual([
+      { reading: "あ(げる)", source: "kanji", text: s },
+    ]);
+  });
+
+  it("no match gives the none block", () => {
+    expect(card({ reading: kstory }, ["あ(げる)"])?.readingStories).toEqual([
+      { reading: "あ(げる)", none: true },
+    ]);
+  });
+
+  it("a story with no bracket falls back to primary readings", () => {
+    expect(
+      card({ reading: "plain", primaryReadings: ["じょう"] }, ["じょう"])
+        ?.readingStories,
+    ).toEqual([{ reading: "じょう", source: "kanji", text: "plain" }]);
+    expect(
+      card({ reading: "plain", primaryReadings: ["じょう"] }, ["あ(げる)"])
+        ?.readingStories,
+    ).toEqual([{ reading: "あ(げる)", none: true }]);
+  });
+
+  it("two presented readings give two blocks in order", () => {
+    const c = card({ reading: kstory, vocab }, ["あ(げる)", "じょう"]);
+    expect(c?.readingStories?.map((r) => r.reading)).toEqual([
+      "あ(げる)",
+      "じょう",
+    ]);
+  });
+
+  it("a meaning-only kanji gets its own story headed by a covered main reading", () => {
+    expect(card({ reading: kstory }, [])?.readingStories).toEqual([
+      { reading: "じょう", source: "kanji", text: kstory },
+    ]);
+    expect(card({ reading: "plain" }, [])?.readingStories).toEqual([
+      { reading: "", source: "kanji", text: "plain" },
+    ]);
+  });
+
+  it("no story at all keeps today's card", () => {
+    expect(card(undefined, ["じょう"])).toEqual(
+      studyCards(
+        [{ type: "reading", prompt: "X", answers: [] } as never],
+        [kanji],
+        KANA,
+      )[0],
+    );
+    expect(card({}, ["じょう"])?.readingStories).toBeUndefined();
+  });
+
+  it("taught-cache fallback: covered reading shows, uncovered shows none", () => {
+    const m = storiesWithFallback(
+      undefined,
+      new Map([["X", { reading: kstory }]]),
+    );
+    const c = studyCards(
+      [],
+      [kanji],
+      KANA,
+      m,
+      ["X"],
+      [],
+      new Map([["X", ["あ(げる)"]]]),
+    )[0];
+    expect(c?.kind === "kanji" && c.readingStories).toEqual([
+      { reading: "あ(げる)", none: true },
+    ]);
+  });
+
+  it("lastAnswer: pause on a reading gate shows only that reading; meaning gate shows the own story", () => {
+    const stories = new Map([["X", { reading: kstory, vocab }]]);
+    const a = lastAnswer(
+      [row("reading", "あ(げる)")],
+      [true],
+      0,
+      [kanji],
+      KANA,
+      stories,
+    );
+    expect(a?.card?.kind === "kanji" && a.card.readingStories).toEqual([
+      { reading: "あ(げる)", source: { word: "Xげる" }, text: "v-okuri" },
+    ]);
+    const b = lastAnswer(
+      [row("meaning", "up")],
+      [true],
+      0,
+      [kanji],
+      KANA,
+      stories,
+    );
+    expect(b?.card?.kind === "kanji" && b.card.readingStories).toEqual([
+      { reading: "じょう", source: "kanji", text: kstory },
+    ]);
   });
 });

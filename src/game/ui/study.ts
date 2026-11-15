@@ -132,16 +132,31 @@ export function cardEl(c: StudyCard): HTMLElement {
     el("div", "big", c.char),
     info,
   );
-  if (c.kind === "kanji" && c.mnemonics) {
-    const notes = [
-      ["Meaning mnemonic", c.mnemonics.meaning],
-      ["Reading mnemonic", c.mnemonics.reading],
-    ] as const;
-    for (const [title, text] of notes) {
-      if (!text) continue;
-      const body = el("p");
-      body.append(...mnemonicNodes(text));
-      info.append(el("div", "mn", el("h3", "", title), body));
+  if (c.kind === "kanji") {
+    const block = (head: (Node | string)[], body: Node[]) => {
+      const p = el("p");
+      p.append(...body);
+      info.append(el("div", "mn", el("h3", "", ...head), p));
+    };
+    if (c.mnemonics?.meaning)
+      block(["Meaning mnemonic"], mnemonicNodes(c.mnemonics.meaning));
+    for (const r of c.readingStories ?? []) {
+      const head: (Node | string)[] = [
+        `Reading mnemonic${r.reading ? `: ${r.reading}` : ""}`,
+      ];
+      if ("none" in r) {
+        const note = el(
+          "p",
+          "",
+          "No story for this reading. This one just needs remembering.",
+        );
+        note.style.color = "var(--muted, #888)";
+        info.append(el("div", "mn", el("h3", "", ...head), note));
+        continue;
+      }
+      if (r.source !== "kanji")
+        head.push(" (from ", el("span", "mn-kanji", r.source.word), ")");
+      block(head, mnemonicNodes(r.text));
     }
   }
   return card;
