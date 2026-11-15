@@ -62,7 +62,8 @@ Every task: `npm run check` passes (plus `npm run test:slow` for `core/` tasks) 
 ### Task F4: Version 1.1.0
 **Description:** `package.json` 1.1.0, CHANGELOG 1.1.0 entry, pause screen shows `v1.1.0`.
 **Acceptance criteria:**
-- [ ] Build label shows `v1.1.0 · <hash> · <time>`; CHANGELOG entry lists the changes.
+- [x] Build label shows `v1.1.0 · <hash> · <time>`; CHANGELOG entry lists the changes.
+  - `package.json` and lock 1.1.0; the label is built from package.json (`__APP_VERSION__`), no hardcoded label. CHANGELOG 1.1.0 entry (2026-11-15).
 - [ ] Deploy green (checkpoint follows).
 **Verification:** `npm run check`. **Dependencies:** F3. **Files:** `package.json`, `package-lock.json`, `CHANGELOG.md`. **Scope:** XS
 
