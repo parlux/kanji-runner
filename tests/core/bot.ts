@@ -1,6 +1,6 @@
 import { bossSize, bossWon } from "../../src/core/boss";
 import { crowdWidth } from "../../src/core/crowd";
-import { firepower } from "../../src/core/fire";
+import { firepower, splitFire } from "../../src/core/fire";
 import { createRng } from "../../src/core/rng";
 import {
   createRunState,
@@ -9,6 +9,7 @@ import {
   stepRun,
   type RunState,
 } from "../../src/core/sim";
+import { clampOnTrack } from "../../src/core/state";
 import { rowOpenings } from "../../src/core/walls";
 import { hazardPos, streamSpan } from "../../src/core/horde";
 import type { ReaskConfig } from "../../src/core/reask";
@@ -22,14 +23,39 @@ const CRATE_MARGIN = 1.25;
 /** With s = 0, aim misses by up to this much (track widths) on every beat. */
 const AIM_SPREAD = 0.3;
 
-/** Can the army break crate i before reaching it, if it lines up now? */
-function canBreak(s: RunState, i: number): boolean {
+/**
+ * Where the bot lines up on crate i: centred on it (kept on the track), off
+ * by this beat's aim offset (as the steering will be).
+ */
+export function crateAim(s: RunState, i: number, offset: number): number {
+  const h = s.track.hazards[i];
+  if (h?.kind !== "block") return s.x;
+  const w = crowdWidth(s.army);
+  return clampOnTrack((h.left + h.right) / 2 + offset, w);
+}
+
+/**
+ * Can the army break crate i before reaching it, lined up at `aim`? Only the
+ * share of fire the crate would get there counts: the lanes it covers, as
+ * splitFire (the crate is the nearest threat, so nothing blocks it).
+ */
+export function canBreak(s: RunState, i: number, aim: number): boolean {
+  const h = s.track.hazards[i];
   const left = (s.hp[i] ?? 0) - (s.damage[i] ?? 0);
-  if (left <= 0) return true;
+  if (h?.kind !== "block" || left <= 0) return true;
   const ahead = hazardPos(s, i) - s.dist;
   const secs =
     Math.min(ahead, FIRE_RANGE) / (BASE_SPEED * speedMul(s.dist, s.track));
-  return firepower(s.army) * secs >= CRATE_MARGIN * left;
+  const w = crowdWidth(s.army);
+  const crate = { pos: h.pos, span: { left: h.left, right: h.right } };
+  const { shares } = splitFire(
+    [crate],
+    0,
+    h.pos - Math.min(ahead, FIRE_RANGE),
+    { left: aim - w / 2, right: aim + w / 2 },
+  );
+  const share = shares[0]?.share ?? 0;
+  return firepower(s.army) * share * secs >= CRATE_MARGIN * left;
 }
 
 const DT = 1 / 60;
@@ -45,8 +71,8 @@ export type BotOptions = {
 };
 
 /**
- * Shoots a crate when it can break it in time (else dodges), dodges saws
- * through the widest gap, stays on each enemy pack's stream to shoot it, and goes
+ * Shoots a crate when it can break it in time with the lanes it covers
+ * where it lines up (else dodges), dodges saws through the widest gap, stays on each enemy pack's stream to shoot it, and goes
  * through the chosen opening at each wall (a charge is a wall with a squad in
  * each opening). Below skill 1, every beat (hazard or wall) gets its own aim
  * offset, kept inside the chosen opening at walls so it never changes the answer.
@@ -75,17 +101,18 @@ export function botRun(seed: number, opts: BotOptions): RunState {
       if (h.kind === "pack") {
         // stay on its stream to shoot it (it tracks the army, late)
         const sp = streamSpan(s, s.nextHazard);
-        aim = (sp.left + sp.right) / 2;
-      } else if (h.kind === "block" && canBreak(s, s.nextHazard)) {
-        // overlap the crate fully so all fire reaches it
-        const w = crowdWidth(s.army);
-        const mid = (h.left + h.right) / 2;
-        aim = Math.min(h.right - w / 2, Math.max(h.left + w / 2, mid));
+        aim = (sp.left + sp.right) / 2 + offset;
+      } else if (
+        h.kind === "block" &&
+        canBreak(s, s.nextHazard, crateAim(s, s.nextHazard, offset))
+      ) {
+        // line up on it (sloppily below skill 1): it breaks with the lanes covered
+        aim = crateAim(s, s.nextHazard, offset);
       } else {
         const { left, right } = hazardSpan(h, h.pos);
         aim = left > 1 - right ? left / 2 : (1 + right) / 2;
+        aim += offset;
       }
-      aim += offset;
     } else {
       const row = s.rows[s.next];
       const n = row?.options.length ?? 2;
