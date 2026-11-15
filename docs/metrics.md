@@ -84,11 +84,30 @@ Expected was about -1,500; the gauntlet's tests and the results script were larg
 - Left for V4 (done): the `?2d` check in `main.ts`.
 - The `tuning_results` table was never live (the schema block said so); nothing to drop if it was never run. If the owner did run it, it can be dropped.
 
-## After v1 (Task V11)
+## After v1 (Task V11, 2026-11-15)
 
-| Metric | Value |
-|---|---|
-| (filled in by V11) | |
+Same methods as the baseline, main after V10 plus the version bump, dev Mac. Caches were removed (`node_modules/.cache`, `.eslintcache`) before the cold runs.
+
+| Metric | Baseline | Target | After | Met? |
+|---|---|---|---|---|
+| `npm test` (fast tier) | 98 s | <= 20 s | 11.4-15.1 s (10 runs), 719 pass + 3 slow-only skipped | met |
+| `npm run test:slow` | 98 s | n/a | 58.9 s, 722 of 722 | n/a |
+| `npm run check` (full: test, typecheck, lint, knip, deps, build) | ~130 s | <= 40 s | 36.4 s cold, 25.7 s warm | met |
+| `check:fast`, one-file change | ~130 s | <= 15 s | 6.3 s on `render.ts`; 20.2 s on `core/sim.ts` | gap, see below |
+| Flaky runs | 1 of 2 | 0 of 10 | 0 of 10 `npm test` runs failed | met |
+| `tsc --noEmit` | 14 s | <= 7 s | 10.9 s cold; replaced by `tsgo`: 1.0 s incremental (2.5 s cold in V2) | met via `tsgo` (plain `tsc` is not the typecheck any more) |
+| `eslint` cached | 8 s | <= 2 s | 1.5 s cached, 6.9 s no cache | met |
+| `vite build` | 7.5 s | n/a | 4.9 s | n/a |
+| Source lines (`src/**/*.ts`) | 16,153 | ~13k | 13,804 | gap, see below |
+| Tests lines | 12,829 | n/a | 11,294 (722 tests) | n/a |
+| Files over 600 lines | 4 | 0 | 0 (largest `three/horde.ts` 585) | met |
+| knip issues / layer violations | not checked | 0, in CI | 0 / 0, both in `npm run check` and so in the deploy workflow | met |
+| Words a subagent reads first (`AGENTS.md` 204 + `tasks/todo-v1.md` 1,716 + `tasks/subagent-prompt.md` 502) | ~12k | <= 4k | ~2.4k | met |
+| Release | untagged, 0.0.0 | v1.0.0 | `package.json` 1.0.0, label `v1.0.0 · <hash> · <time>`; tag comes with the owner's checkpoint | met (tag pending) |
+
+Gaps:
+- `check:fast` on `core/sim.ts`: 20.2 s (was 14.8 s before the V8 split; machine load varies). Almost every test depends on `core/sim.ts` (directly or through the bot and balance helpers), so `vitest related` runs most of the suite. The V8 split did not change that, because the importers still reach the sim through its public module. A change to any other file is 5-6 s. Left as is: it only affects edits to the sim's core.
+- Source 13,804 vs ~13k: the target was a rough estimate. V3-V5 removed about 2,550 lines; the V7-V10 splits added about 200 lines of imports and module headers. No dead code remains (knip 0).
 
 ## Task V4: 2D renderer removed (2026-11-15)
 
