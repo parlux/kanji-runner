@@ -1,4 +1,4 @@
-import type { LastAnswer } from "../core/study";
+import type { LastAnswer } from "../../core/study";
 import { cardEl, installStudyCss } from "./study";
 
 const CSS = `

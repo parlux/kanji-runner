@@ -1,5 +1,5 @@
-import { mnemonicNodes } from "../core/mnemonic";
-import type { StoryRadical, StudyCard } from "../core/study";
+import { mnemonicNodes } from "../../core/mnemonic";
+import type { StoryRadical, StudyCard } from "../../core/study";
 
 const CSS = `
 .kr-study { position: fixed; inset: 0; display: flex; flex-direction: column;

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { maskToken } from "../../src/game/wanikani";
+import { maskToken } from "../../../src/game/ui/wanikani";
 
 describe("maskToken", () => {
   it("shows only the last 4 characters", () => {

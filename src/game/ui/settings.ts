@@ -1,5 +1,5 @@
-import type { SpeedPreset } from "../core/tuning";
-import type { SyncStatus } from "../sync/sync";
+import type { SpeedPreset } from "../../core/tuning";
+import type { SyncStatus } from "../../sync/sync";
 
 /** What the settings panel shows; read again every frame while it is open. */
 type SettingsView = {
