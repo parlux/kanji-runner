@@ -1,103 +1,382 @@
-<title><!-- Name, 2–4 words, e.g. "Straight Fire Spec" or "Checkpoint F" --></title>
-<meta name="claude:viewport-fit-sides" content="cover">
+<title>
+  <!-- Name, 2–4 words, e.g. "Straight Fire Spec" or "Checkpoint F" -->
+</title>
+<meta name="claude:viewport-fit-sides" content="cover" />
 <!-- Review page template. See docs/review-pages.md. Keep the tokens and components; fill in the sections, delete the ones that don't apply. -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+/>
 <style>
-/* Layout: one reading column; summary first, then diagram, rules as short cards, numbers as tables, progress last. */
-:root {
-  --bg: #f5f7fa; --surface: #ffffff; --ink: #18202b; --muted: #5b6676; --line: #d9dee6;
-  --accent: #d97a06; --accent-soft: #fdf0dc;
-  --crate: #9a6a3a; --pack: #c8343a; --wall: #5a6b82; --army: #2f6fd6; --track: #e8ecf2;
-  --ok: #2e8a4e; --ok-soft: #e3f3e8; --todo: #8a94a3;
-  --f-display: "Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
-  --f-body: "Inter", system-ui, -apple-system, sans-serif;
-  --f-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
-}
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-  --bg: #11161d; --surface: #19212b; --ink: #e6ebf1; --muted: #9aa5b4; --line: #2c3744;
-  --accent: #f3a33a; --accent-soft: #3a2a14;
-  --crate: #c08a55; --pack: #ef5b5f; --wall: #8a9bb3; --army: #6a9cf0; --track: #1f2833;
-  --ok: #5cc27e; --ok-soft: #173123; --todo: #6c7787; color-scheme: dark; } }
-:root[data-theme="dark"] {
-  --bg: #11161d; --surface: #19212b; --ink: #e6ebf1; --muted: #9aa5b4; --line: #2c3744;
-  --accent: #f3a33a; --accent-soft: #3a2a14;
-  --crate: #c08a55; --pack: #ef5b5f; --wall: #8a9bb3; --army: #6a9cf0; --track: #1f2833;
-  --ok: #5cc27e; --ok-soft: #173123; --todo: #6c7787; color-scheme: dark; }
+  /* Layout: one reading column; summary first, then diagram, rules as short cards, numbers as tables, progress last. */
+  :root {
+    --bg: #f5f7fa;
+    --surface: #ffffff;
+    --ink: #18202b;
+    --muted: #5b6676;
+    --line: #d9dee6;
+    --accent: #d97a06;
+    --accent-soft: #fdf0dc;
+    --crate: #9a6a3a;
+    --pack: #c8343a;
+    --wall: #5a6b82;
+    --army: #2f6fd6;
+    --track: #e8ecf2;
+    --ok: #2e8a4e;
+    --ok-soft: #e3f3e8;
+    --todo: #8a94a3;
+    --f-display: "Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+    --f-body: "Inter", system-ui, -apple-system, sans-serif;
+    --f-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #11161d;
+      --surface: #19212b;
+      --ink: #e6ebf1;
+      --muted: #9aa5b4;
+      --line: #2c3744;
+      --accent: #f3a33a;
+      --accent-soft: #3a2a14;
+      --crate: #c08a55;
+      --pack: #ef5b5f;
+      --wall: #8a9bb3;
+      --army: #6a9cf0;
+      --track: #1f2833;
+      --ok: #5cc27e;
+      --ok-soft: #173123;
+      --todo: #6c7787;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #11161d;
+    --surface: #19212b;
+    --ink: #e6ebf1;
+    --muted: #9aa5b4;
+    --line: #2c3744;
+    --accent: #f3a33a;
+    --accent-soft: #3a2a14;
+    --crate: #c08a55;
+    --pack: #ef5b5f;
+    --wall: #8a9bb3;
+    --army: #6a9cf0;
+    --track: #1f2833;
+    --ok: #5cc27e;
+    --ok-soft: #173123;
+    --todo: #6c7787;
+    color-scheme: dark;
+  }
 
-body { background: var(--bg); color: var(--ink); font: 15px/1.6 var(--f-body); }
-.wrap { max-width: 760px; margin: 0 auto; padding-block: 32px 64px;
-  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
-  display: grid; gap: 40px; }
-h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; line-height: 1.15; }
-h1 { font-size: 2.3rem; }
-h2 { font-size: 1.4rem; }
-h3 { font-size: 1.02rem; }
-p { margin: 0; }
-code { font: 0.86em var(--f-mono); background: var(--track); padding: 1px 5px; border-radius: 4px; }
-section { display: grid; gap: 14px; min-width: 0; }
-.eyebrow { font: 500 0.72rem var(--f-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font: 15px/1.6 var(--f-body);
+  }
+  .wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding-block: 32px 64px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    display: grid;
+    gap: 40px;
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--f-display);
+    text-wrap: balance;
+    margin: 0;
+    line-height: 1.15;
+  }
+  h1 {
+    font-size: 2.3rem;
+  }
+  h2 {
+    font-size: 1.4rem;
+  }
+  h3 {
+    font-size: 1.02rem;
+  }
+  p {
+    margin: 0;
+  }
+  code {
+    font: 0.86em var(--f-mono);
+    background: var(--track);
+    padding: 1px 5px;
+    border-radius: 4px;
+  }
+  section {
+    display: grid;
+    gap: 14px;
+    min-width: 0;
+  }
+  .eyebrow {
+    font: 500 0.72rem var(--f-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
 
-header { display: grid; gap: 12px; }
-.meta { display: flex; flex-wrap: wrap; gap: 6px 16px; color: var(--muted); font-size: 0.85rem; }
-.pill { display: inline-flex; align-items: center; gap: 6px; font: 500 0.75rem var(--f-mono); padding: 2px 9px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); }
-.pill.ok { background: var(--ok-soft); color: var(--ok); }
-.lead { font-size: 1.12rem; max-width: 62ch; }
-.note { font-size: 0.85rem; color: var(--muted); border-left: 2px solid var(--line); padding-left: 10px; }
+  header {
+    display: grid;
+    gap: 12px;
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font: 500 0.75rem var(--f-mono);
+    padding: 2px 9px;
+    border-radius: 999px;
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+  .pill.ok {
+    background: var(--ok-soft);
+    color: var(--ok);
+  }
+  .lead {
+    font-size: 1.12rem;
+    max-width: 62ch;
+  }
+  .note {
+    font-size: 0.85rem;
+    color: var(--muted);
+    border-left: 2px solid var(--line);
+    padding-left: 10px;
+  }
 
-.stories { display: grid; gap: 8px; padding: 0; margin: 0; list-style: none; }
-.stories li { display: grid; grid-template-columns: 22px 1fr; gap: 8px; }
-.stories li::before { content: "▸"; color: var(--accent); font-weight: 700; }
-.steps { display: grid; gap: 10px; padding-left: 22px; margin: 0; }
-.steps li::marker { font: 600 0.9rem var(--f-mono); color: var(--accent); }
-.steps .look { display: block; color: var(--muted); font-size: 0.9rem; }
+  .stories {
+    display: grid;
+    gap: 8px;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+  .stories li {
+    display: grid;
+    grid-template-columns: 22px 1fr;
+    gap: 8px;
+  }
+  .stories li::before {
+    content: "▸";
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .steps {
+    display: grid;
+    gap: 10px;
+    padding-left: 22px;
+    margin: 0;
+  }
+  .steps li::marker {
+    font: 600 0.9rem var(--f-mono);
+    color: var(--accent);
+  }
+  .steps .look {
+    display: block;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
 
-.diagram { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; overflow-x: auto; }
-.diagram svg { display: block; width: 100%; min-width: 520px; height: auto; }
-.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 0.8rem; color: var(--muted); margin-top: 10px; }
-.legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; background: var(--c); }
+  .diagram {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 16px;
+    overflow-x: auto;
+  }
+  .diagram svg {
+    display: block;
+    width: 100%;
+    min-width: 520px;
+    height: auto;
+  }
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-top: 10px;
+  }
+  .legend span::before {
+    content: "";
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    margin-right: 6px;
+    vertical-align: -1px;
+    background: var(--c);
+  }
 
-.rules { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
-.rule { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: grid; gap: 8px; align-content: start; min-width: 0; }
-.rule ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
-.tag { font: 500 0.68rem var(--f-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+  .rules {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 12px;
+  }
+  .rule {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 16px;
+    display: grid;
+    gap: 8px;
+    align-content: start;
+    min-width: 0;
+  }
+  .rule ul {
+    margin: 0;
+    padding-left: 18px;
+    display: grid;
+    gap: 4px;
+  }
+  .tag {
+    font: 500 0.68rem var(--f-mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
 
-.tablebox { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
-table { border-collapse: collapse; width: 100%; font-size: 0.88rem; font-variant-numeric: tabular-nums; }
-th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
-th { font: 500 0.72rem var(--f-mono); letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); }
-tr:last-child td { border-bottom: 0; }
-td.num { font-family: var(--f-mono); white-space: nowrap; }
-.warn { color: var(--accent); font-weight: 600; }
-.good { color: var(--ok); font-weight: 600; }
+  .tablebox {
+    overflow-x: auto;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 0.88rem;
+    font-variant-numeric: tabular-nums;
+  }
+  th,
+  td {
+    text-align: left;
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+  }
+  th {
+    font: 500 0.72rem var(--f-mono);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  tr:last-child td {
+    border-bottom: 0;
+  }
+  td.num {
+    font-family: var(--f-mono);
+    white-space: nowrap;
+  }
+  .warn {
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .good {
+    color: var(--ok);
+    font-weight: 600;
+  }
 
-.shots { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
-.shots figure { margin: 0; display: grid; gap: 6px; }
-.shots img { border-radius: 8px; border: 1px solid var(--line); }
-.shots figcaption { font-size: 0.8rem; color: var(--muted); }
+  .shots {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+  }
+  .shots figure {
+    margin: 0;
+    display: grid;
+    gap: 6px;
+  }
+  .shots img {
+    border-radius: 8px;
+    border: 1px solid var(--line);
+  }
+  .shots figcaption {
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
 
-.tasks { display: grid; gap: 8px; padding: 0; margin: 0; list-style: none; }
-.tasks li { display: grid; grid-template-columns: 80px 1fr; gap: 12px; align-items: baseline; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; }
-.state { font: 500 0.72rem var(--f-mono); text-transform: uppercase; letter-spacing: 0.05em; color: var(--todo); }
-.state.done { color: var(--ok); }
-.tasks li.owner { background: var(--accent-soft); border-color: transparent; }
-.tasks li.owner .state { color: var(--accent); }
-.out { color: var(--muted); }
-footer { font-size: 0.8rem; color: var(--muted); }
-@media (max-width: 480px) { h1 { font-size: 1.9rem; } .tasks li { grid-template-columns: 1fr; gap: 2px; } }
+  .tasks {
+    display: grid;
+    gap: 8px;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+  .tasks li {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 12px;
+    align-items: baseline;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 10px 14px;
+  }
+  .state {
+    font: 500 0.72rem var(--f-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--todo);
+  }
+  .state.done {
+    color: var(--ok);
+  }
+  .tasks li.owner {
+    background: var(--accent-soft);
+    border-color: transparent;
+  }
+  .tasks li.owner .state {
+    color: var(--accent);
+  }
+  .out {
+    color: var(--muted);
+  }
+  footer {
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+  @media (max-width: 480px) {
+    h1 {
+      font-size: 1.9rem;
+    }
+    .tasks li {
+      grid-template-columns: 1fr;
+      gap: 2px;
+    }
+  }
 </style>
 
 <div class="wrap">
   <header>
-    <div class="eyebrow">Spec · Number Runner</div> <!-- or "Checkpoint · Number Runner" -->
+    <div class="eyebrow">Spec · Number Runner</div>
+    <!-- or "Checkpoint · Number Runner" -->
     <h1>NAME</h1>
     <div class="meta">
-      <span class="pill">vX.Y.Z · in progress</span> <!-- .pill.ok for "deployed" -->
+      <span class="pill">vX.Y.Z · in progress</span>
+      <!-- .pill.ok for "deployed" -->
       <span>Spec dated YYYY-MM-DD</span>
       <span>N of M tasks done</span>
     </div>
     <p class="lead">One paragraph, plain words: what changes for the player.</p>
-    <p class="note">This page is the readable version. The source agents work from is <code>docs/specs/SPEC-x.md</code>; if the two ever disagree, the md wins.</p>
+    <p class="note">
+      This page is the readable version. The source agents work from is
+      <code>docs/specs/SPEC-x.md</code>; if the two ever disagree, the md wins.
+    </p>
   </header>
 
   <!-- Checkpoint pages: "Play this" first -->
@@ -124,7 +403,11 @@ footer { font-size: 0.8rem; color: var(--muted); }
     <h2>Diagram title</h2>
     <div class="diagram">
       <!-- Inline SVG; every fill/stroke from tokens (var(--army), var(--crate), …); role="img" + aria-label. -->
-      <svg viewBox="0 0 560 360" role="img" aria-label="Describe the diagram"></svg>
+      <svg
+        viewBox="0 0 560 360"
+        role="img"
+        aria-label="Describe the diagram"
+      ></svg>
       <div class="legend">
         <span style="--c: var(--army)">army</span>
       </div>
@@ -135,9 +418,12 @@ footer { font-size: 0.8rem; color: var(--muted); }
     <h2>The rules</h2>
     <div class="rules">
       <div class="rule">
-        <div class="tag">Game rule</div> <!-- Game rule · Looks · Release · Data -->
+        <div class="tag">Game rule</div>
+        <!-- Game rule · Looks · Release · Data -->
         <h3>Rule name</h3>
-        <ul><li>Point.</li></ul>
+        <ul>
+          <li>Point.</li>
+        </ul>
       </div>
     </div>
   </section>
@@ -147,9 +433,20 @@ footer { font-size: 0.8rem; color: var(--muted); }
     <p>Where they come from (task, seeds, bot).</p>
     <div class="tablebox">
       <table>
-        <thead><tr><th>Measure</th><th>Before → after</th><th>Within band?</th></tr></thead>
+        <thead>
+          <tr>
+            <th>Measure</th>
+            <th>Before → after</th>
+            <th>Within band?</th>
+          </tr>
+        </thead>
         <tbody>
-          <tr><td>Measure</td><td class="num">0 → 0</td><td class="good">yes</td></tr> <!-- .warn for a miss -->
+          <tr>
+            <td>Measure</td>
+            <td class="num">0 → 0</td>
+            <td class="good">yes</td>
+          </tr>
+          <!-- .warn for a miss -->
         </tbody>
       </table>
     </div>
@@ -159,17 +456,32 @@ footer { font-size: 0.8rem; color: var(--muted); }
   <section>
     <h2>Screenshots</h2>
     <div class="shots">
-      <figure><img alt="" src="data:image/jpeg;base64,"><figcaption>Before · scene</figcaption></figure>
-      <figure><img alt="" src="data:image/jpeg;base64,"><figcaption>After · scene</figcaption></figure>
+      <figure>
+        <img alt="" src="data:image/jpeg;base64," />
+        <figcaption>Before · scene</figcaption>
+      </figure>
+      <figure>
+        <img alt="" src="data:image/jpeg;base64," />
+        <figcaption>After · scene</figcaption>
+      </figure>
     </div>
   </section>
 
   <section>
-    <h2>Progress</h2> <!-- Checkpoint pages: "What changed", one line per task with commit hashes -->
+    <h2>Progress</h2>
+    <!-- Checkpoint pages: "What changed", one line per task with commit hashes -->
     <ul class="tasks">
-      <li><span class="state done">Done</span><span><b>X1 · Task.</b> One line.</span></li>
-      <li><span class="state">Next</span><span><b>X2 · Task.</b> One line.</span></li>
-      <li class="owner"><span class="state">You</span><span><b>Checkpoint X:</b> what you check.</span></li>
+      <li>
+        <span class="state done">Done</span
+        ><span><b>X1 · Task.</b> One line.</span>
+      </li>
+      <li>
+        <span class="state">Next</span><span><b>X2 · Task.</b> One line.</span>
+      </li>
+      <li class="owner">
+        <span class="state">You</span
+        ><span><b>Checkpoint X:</b> what you check.</span>
+      </li>
     </ul>
   </section>
 
@@ -180,5 +492,8 @@ footer { font-size: 0.8rem; color: var(--muted); }
     <p class="out">List.</p>
   </section>
 
-  <footer>Made from <code>docs/specs/SPEC-x.md</code> and <code>tasks/todo-x.md</code> at commit HASH, YYYY-MM-DD.</footer>
+  <footer>
+    Made from <code>docs/specs/SPEC-x.md</code> and
+    <code>tasks/todo-x.md</code> at commit HASH, YYYY-MM-DD.
+  </footer>
 </div>
