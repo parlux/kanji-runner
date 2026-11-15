@@ -184,8 +184,8 @@ Checks:
 - `package.json` version `1.0.0`. The pause screen's build label shows `v1.0.0 · <hash> · <time>`.
 
 **Acceptance criteria:**
-- [ ] Every target in the spec is met, or the gap is explained in `docs/metrics.md`.
-- [ ] The deploy is green.
+- [x] Every target in the spec is met, or the gap is explained in `docs/metrics.md`.
+- [x] The deploy is green.
 
 **Scope:** S
 

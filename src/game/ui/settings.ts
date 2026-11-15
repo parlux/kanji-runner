@@ -158,7 +158,7 @@ function build(o: SettingsOptions, v: SettingsView): HTMLElement {
         "edrdg.org",
       ),
       el("br"),
-      `build ${o.build}`,
+      o.build,
     ),
   );
   return body;
