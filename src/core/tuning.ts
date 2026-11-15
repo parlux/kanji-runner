@@ -155,9 +155,10 @@ export const ENEMY_HP = 1;
 export const PACK_WAKE = 4 * VIEW_DISTANCE;
 /**
  * How far ahead (track units) the army can hit anything: crates, packs and
- * the next wall's openings alike (never past an unanswered wall).
+ * the next wall's openings alike (never past an unanswered wall). The same
+ * as PACK_WAKE (tested), so a pack can be shot from the moment it wakes.
  */
-export const FIRE_RANGE = PACK_WAKE;
+export const FIRE_RANGE = 4 * VIEW_DISTANCE;
 /** Pack start centres are drawn from [ENEMY_X_MARGIN, 1 − ENEMY_X_MARGIN]. */
 export const ENEMY_X_MARGIN = 0.2;
 /**
