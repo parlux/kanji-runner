@@ -102,7 +102,7 @@ Same methods as the baseline, main after V10 plus the version bump, dev Mac. Cac
 | Tests lines | 12,829 | n/a | 11,294 (722 tests) | n/a |
 | Files over 600 lines | 4 | 0 | 0 (largest `three/horde.ts` 585) | met |
 | knip issues / layer violations | not checked | 0, in CI | 0 / 0, both in `npm run check` and so in the deploy workflow | met |
-| Words a subagent reads first (`AGENTS.md` 204 + `tasks/todo-v1.md` 1,716 + `tasks/subagent-prompt.md` 502) | ~12k | <= 4k | ~2.4k | met |
+| Words a subagent reads first (`AGENTS.md` 204 + `tasks/done/todo-v1.md` 1,716 + `tasks/subagent-prompt.md` 502) | ~12k | <= 4k | ~2.4k | met |
 | Release | untagged, 0.0.0 | v1.0.0 | `package.json` 1.0.0, label `v1.0.0 · <hash> · <time>`; tag comes with the owner's checkpoint | met (tag pending) |
 
 Gaps:

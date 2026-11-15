@@ -1,6 +1,6 @@
 # Tasks: v1 clean-up and release (v1.0.0)
 
-Spec: `docs/specs/SPEC-v1.md` (2026-11-15, owner decisions). Baseline: `docs/metrics.md`. Started 2026-11-15 (owner go).
+Spec: `docs/specs/done/SPEC-v1.md` (2026-11-15, owner decisions). Baseline: `docs/metrics.md`. Started 2026-11-15 (owner go).
 **No behaviour change:** the golden snapshot and balance numbers stay unchanged in every task.
 Checks:
 - Until V1 lands, use `npm test && npm run lint && npm run build`.
@@ -190,8 +190,10 @@ Checks:
 **Scope:** S
 
 ### Checkpoint V1: v1.0.0 (owner, on the Pixel 7)
-- [ ] A run, the boss and the end screen play and look as before the clean-up.
-- [ ] Meaning mode, WaniKani and saved progress still work.
-- [ ] The pause screen shows v1.0.0.
+- [x] A run, the boss and the end screen play and look as before the clean-up.
+- [x] Meaning mode, WaniKani and saved progress still work.
+- [x] The pause screen shows v1.0.0.
+
+Owner approved on the Pixel 7, 2026-11-15.
 
 When the owner ticks it, tag `v1.0.0` on that commit and push the tag. Then move this list and `SPEC-v1.md` to `done/`.

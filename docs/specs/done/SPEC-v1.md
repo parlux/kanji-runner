@@ -1,6 +1,6 @@
 # SPEC: v1 clean-up and release
 
-Owner decisions, 2026-11-15. Tasks: `tasks/todo-v1.md`. Baseline: `docs/metrics.md`.
+Owner decisions, 2026-11-15. Tasks: `tasks/done/todo-v1.md`. Baseline: `docs/metrics.md`.
 
 ## Goal
 Make what exists today v1.0.0 with less code and much faster checks, so later rounds are quicker. **The game plays exactly as it does today.**
