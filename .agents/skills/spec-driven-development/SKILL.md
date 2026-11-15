@@ -167,6 +167,8 @@ REFRAMED SUCCESS CRITERIA:
 
 This lets you loop, retry, and problem-solve toward a clear goal rather than guessing what "faster" means.
 
+**This project (number-runner):** don't stop here. Go straight on to the task list (`planning-and-task-breakdown`) and the spec page (`docs/review-pages.md`), then ask the owner to approve on the page. The triage flow overrides the stop below.
+
 **Stop after writing the spec (CRITICAL).** Once the spec is saved:
 
 1. Summarize it and list any Open Questions.
