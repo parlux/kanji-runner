@@ -27,7 +27,7 @@ A kanji card (study screen and pause screen, both modes) shows the reading story
 - **Which reading:** the card shows a reading block only for the presented reading(s):
   - Pause screen: the last gate. A reading gate → its correct answer (the shown reading). A meaning gate presents no reading → see the next rule.
   - Study screen: every reading the run's reading gates showed for that kanji, in order of first sight (usually one; two if the run asked it with both).
-  - Kanji with no reading presented (only meaning gates): one block with the kanji's own story, headed with the reading it covers (its first covered main reading, else no reading in the heading). No "no story" line in this case.
+  - Kanji with no reading presented (only meaning gates, or a pause on a meaning gate): one block **per main reading** (on'yomi, then kun'yomi), each chosen like a presented reading (kanji story, vocabulary story or "no story"). The card introduces the kanji, so you can read every reading's story and try to recall it when a reading is presented later (owner, 2026-11-15).
 - Heading: `Reading mnemonic: じょう`; for a vocabulary story `Reading mnemonic: うえ (from 上)`, with the word in the kanji tag colour.
 - No story for that reading → the block shows `No story for this reading. This one just needs remembering.` in the muted text colour.
 - A kanji with **no story at all** in the library or taught cache (no token, not loaded, not a WaniKani kanji) → today's card, no "no story" lines (SPEC-stories' rule holds).
@@ -65,7 +65,7 @@ export function coveredReadings(text: string): string[] { … }
 - **Synthetic fixtures only** (made-up story text and words), as SPEC-stories. The 上/日/人 examples are for the owner's manual check, not committed.
 - `coveredReadings`: one bracket, two readings in one story, `、`-split brackets, katakana in brackets, spaces, no bracket → empty, bracket not after `</reading>` ignored.
 - Library: vocabulary kept only in the single-kanji shape; hidden and mnemonic-less dropped; v1 record rejected; v2 round-trips.
-- Presented readings: from reading rows' answers, per kanji, in order; a meaning-only kanji gets the kanji-story block; pause on a reading gate shows only that reading.
+- Presented readings: from reading rows' answers, per kanji, in order; a meaning-only kanji gets one block per main reading; pause on a reading gate shows only that reading.
 - Card: covered on'yomi → kanji story; uncovered kun → vocabulary story (okurigana preference, base match); no match → "no story"; no-bracket story falls back to primary readings; kanji with no stories → today's card unchanged; taught-cache fallback.
 - Client: request URL includes `vocabulary`.
 
@@ -83,5 +83,5 @@ export function coveredReadings(text: string): string[] { … }
 6. `npm run check` passes; version 1.2.0 in `package.json` and `CHANGELOG.md`.
 
 ## Open Questions
-1. Kanji with no reading presented (meaning gates only): I chose to show the kanji's own story, labelled with its reading, rather than no reading story at all.
+1. (Resolved by the owner, 2026-11-15) Meaning-only kanji show every main reading's story.
 2. Extra fetch: about 6 to 7 more pages on first load or a 7-day refresh. I'll measure the real count and library size at the checkpoint.

@@ -13,7 +13,7 @@ Every task: `npm run check` passes before it is checked off. Test fixtures are s
 |---|---|---|
 | Some kanji stories have brackets in an odd form | Med | Fallback to WaniKani primary readings; R4 counts kanji with no bracket match in the owner's real library (scratchpad only). |
 | Bigger library and fetch | Low | Single-kanji vocabulary only; R4 measures pages and size. |
-| Meaning-only kanji choice | Low | Owner judges at Checkpoint R (spec open question 1). |
+| Card length for meaning-only kanji (two stories) | Low | Owner judges at Checkpoint R. |
 
 ### Task R1: Coverage and story choice (pure)
 **Description:** `coveredReadings(text)` in `src/core/mnemonic.ts`. `Story` in `src/core/study.ts` gains `primaryReadings` and `vocab`; the kanji card gets `readingStories: { reading, source: "kanji" | { word }, text } | { reading, none: true }`, one per presented reading, replacing `mnemonics.reading`. `studyCards` and `lastAnswer` work out the presented readings from the run's rows (spec "Which reading"). A kanji with no story keeps today's card.
@@ -35,11 +35,11 @@ Every task: `npm run check` passes before it is checked off. Test fixtures are s
 **Scope:** M
 
 ### Task R3: Render the reading blocks
-**Description:** `src/game/ui/study.ts`: one block per entry in `readingStories`, heading `Reading mnemonic: <reading>` plus ` (from <word>)` for vocabulary, "no story" line in muted text. Pause screen gets it through `cardEl`.
+**Description:** Owner change (2026-11-15): a kanji with no presented reading gets one block per main reading (spec "Which reading"); update the R1 logic in `src/core/study.ts` and its tests. `src/game/ui/study.ts`: one block per entry in `readingStories`, heading `Reading mnemonic: <reading>` plus ` (from <word>)` for vocabulary, "no story" line in muted text. Pause screen gets it through `cardEl`.
 **Acceptance:** browser check at 390×844 with a mocked fetch and synthetic data: a card with a kanji story, a vocabulary story and a "no story" block; pause card the same; no-token card unchanged. Screenshots in the scratchpad only.
 **Verification:** `npm run check`; browser check.
 **Dependencies:** R2
-**Files:** `src/game/ui/study.ts`
+**Files:** `src/game/ui/study.ts`, `src/core/study.ts`, `tests/core/study.test.ts`
 **Scope:** S
 
 ### Task R4: Measure, changelog, version
@@ -53,4 +53,4 @@ Every task: `npm run check` passes before it is checked off. Test fixtures are s
 ### Checkpoint R: v1.2.0 (owner, on the phone)
 - [ ] Pause on a 上 / 日 / 人 reading gate: the story under the shown reading is about that reading.
 - [ ] A reading with no story shows the "no story" line.
-- [ ] Only the presented reading's story shows; meaning-only kanji show their own story (spec open question 1).
+- [ ] Only the presented reading's story shows; meaning-only kanji show every reading's story; card length is fine.
