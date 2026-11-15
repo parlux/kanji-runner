@@ -3,6 +3,7 @@
 ## Unreleased
 
 - 里 shows "hometown" instead of "ri" (gloss override).
+- 厘 shows "tiny bit" instead of "rin".
 
 ## 1.0.0 (2026-11-15)
 

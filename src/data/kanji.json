@@ -1777,7 +1777,7 @@
   {"char":"坊","level":61,"grade":8,"freq":1832,"glosses":["boy","priest's residence","priest"],"on":"ぼう","kun":null,"readings":["ぼう","ぼっ"],"components":["土","方"]},
   {"char":"峡","level":61,"grade":8,"freq":1833,"glosses":["gorge","ravine"],"on":"きょう","kun":{"base":"はざま","okurigana":""},"readings":["きょう","こう","はざま"],"components":["山","人","大","二","丷","亠"]},
   {"char":"俸","level":61,"grade":8,"freq":1834,"glosses":["stipend","salary"],"on":"ほう","kun":null,"readings":["ほう"],"components":["｜","一","⺅","人","大","二"]},
-  {"char":"厘","level":61,"grade":8,"freq":1835,"glosses":["rin","1/10 sen","1/10 bu"],"on":"りん","kun":null,"readings":["りん"],"components":["里","厂"]},
+  {"char":"厘","level":61,"grade":8,"freq":1835,"glosses":["tiny bit","rin","1/10 sen","1/10 bu"],"on":"りん","kun":null,"readings":["りん"],"components":["里","厂"]},
   {"char":"峰","level":61,"grade":8,"freq":1836,"glosses":["summit","peak"],"on":"ほう","kun":{"base":"みね","okurigana":""},"readings":["ほう","みね","ね"],"components":["｜","一","山","夂"]},
   {"char":"醸","level":61,"grade":8,"freq":1838,"glosses":["brew","cause"],"on":"じょう","kun":{"base":"かも","okurigana":"す"},"readings":["じょう","かもす"],"components":["衣","酉","ハ","亠"]},
   {"char":"弔","level":61,"grade":8,"freq":1840,"glosses":["condolences","mourning","funeral"],"on":"ちょう","kun":{"base":"とむら","okurigana":"う"},"readings":["ちょう","とむらう","とぶらう"],"components":["｜","弓"]},
