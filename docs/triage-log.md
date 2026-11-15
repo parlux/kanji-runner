@@ -4,3 +4,4 @@ One row per owner request, written by the `triage` skill (`.claude/skills/triage
 
 | Date | Request | Route | Reason | Override |
 |---|---|---|---|---|
+| 2026-11-15 | Trial HTML review page for SPEC-straight-fire (claude.ai link) | doc | Review view of an existing spec, no code | |
