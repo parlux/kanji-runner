@@ -38,6 +38,13 @@ Every task: `npm run check` passes (plus `npm run test:slow` for `core/` tasks) 
   - 200 seeds, `botBossRun` mean final army (win), pre-round → after F2: 100% 1601.51 → 1592.51 (1.00 → 1.00); 80% 321.87 → 319.03 (0.570 → 0.570); 50% 22.36 → 21.65 (0.080 → 0.075); 100% at skill 0.5 1219.53 → 1116.24 (−8.5%) (1.00 → **0.94**, after F1 0.925). **Not met:** skill-0.5 win rate is 0.06 down. All 12 losses are deaths on an unbroken crate the half-steered crowd lines up on (it covers only part of it, so it takes part of the fire). No mix of the three knobs fixes it: `BLOCK_HP_K` 0.8–1.3 with growth 0.0008–0.002 gives 0.93–0.95, and only 0.95 at growth 0.002, where gate widening is +25%. Left for the owner (a bot or crate-clip change is outside F2).
 **Verification:** `npm run check && npm run test:slow`. **Dependencies:** F1. **Files:** `src/core/{tuning,fire,shooting,walls}.ts`, tests. **Scope:** S (highest risk: balance; use opus)
 
+### Task F2b: Bot judges crates by lanes
+**Description:** owner, 2026-11-15, after F2 (skill 0.5 win rate 1.00 → 0.94, every loss an unbroken crate): the balance bot decides to shoot or dodge a crate by the fire share it will actually get (the lanes it covers, as `splitFire`), not by any overlap. It shoots when it can break the crate before reaching it, dodges otherwise. Skill noise still applies to steering, so skill 0.5 stays a sloppy player. Game rules unchanged.
+**Acceptance criteria:**
+- [ ] Tested: the bot dodges a crate it can't break with the lanes it would cover and lines up on one it can.
+- [ ] Balance bands vs the pre-round baseline logged (spec's list), F2's crate/gate measures re-logged; skill 0.5 within band or the reason explained.
+**Verification:** `npm run check && npm run test:slow`. **Dependencies:** F2. **Files:** the bot (tests/ or src/core), tests. **Scope:** S (use opus)
+
 ### Task F3: Straight tracers
 **Description:** as the spec's "Drawing": each lane's tracer straight ahead, stopping at what that lane hits, fading at 12 or stopping at the wall. No aimed streams; crate hit flash where its lanes hit. 2D the same rule.
 **Acceptance criteria:**
