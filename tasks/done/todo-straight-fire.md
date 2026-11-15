@@ -1,6 +1,6 @@
 # Tasks: straight fire (v1.1.0)
 
-Spec: `docs/specs/SPEC-straight-fire.md` (2026-11-15). Idea and confirmed intent: `docs/ideas/straight-fire.md`. Started 2026-11-15.
+Spec: `docs/specs/done/SPEC-straight-fire.md` (2026-11-15). Idea and confirmed intent: `docs/ideas/done/straight-fire.md`. Started 2026-11-15.
 Review: https://claude.ai/artifact/EFKCvzghsaCHogg8jPnY4L · Checkpoint F: https://claude.ai/artifact/2S9TcvU7EPUZBBVhzDJLbM
 Every task: `npm run check` passes (plus `npm run test:slow` for `core/` tasks) before it is checked off.
 
@@ -69,4 +69,5 @@ Every task: `npm run check` passes (plus `npm run test:slow` for `core/` tasks) 
 **Verification:** `npm run check`. **Dependencies:** F3. **Files:** `package.json`, `package-lock.json`, `CHANGELOG.md`. **Scope:** XS
 
 ### Checkpoint F: straight fire on the phone (owner)
-- [ ] Owner: no hits through crates; tracers straight; crates and gates feel as hard as before; build label v1.1.0.
+Approved by the owner, 2026-11-15.
+- [x] Owner: no hits through crates; tracers straight; crates and gates feel as hard as before; build label v1.1.0.

@@ -1,6 +1,6 @@
 # Straight fire, crates block
 
-Status: confirmed by owner, 2026-11-15 (interview). Input for `docs/specs/SPEC-straight-fire.md`.
+Status: confirmed by owner, 2026-11-15 (interview). Input for `docs/specs/done/SPEC-straight-fire.md`.
 
 ## Problem
 Firing at enemy packs feels good, but the army shoots through crates, and the different firing ranges (2.8 for crates and walls, 12 for packs) feel weird. Fire at a crate is aimed at it at an angle instead of going straight ahead.

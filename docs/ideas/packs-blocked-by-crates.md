@@ -10,4 +10,4 @@ Enemy packs (squads) shouldn't run through crates. Today a charging pack's colum
 - Does a crate then shield the army from the lanes behind it (cover)? `docs/ideas/done/crates.md` turned down "blocks as cover from packs" as too much to read at a glance.
 - Balance: crates that hold packs back change how often packs arrive.
 
-Related: `docs/ideas/straight-fire.md` (crates block the army's fire).
+Related: `docs/ideas/done/straight-fire.md` (crates block the army's fire).

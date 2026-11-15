@@ -1,6 +1,6 @@
 # Spec: straight fire (v1.1.0)
 
-Extends `docs/specs/done/SPEC-v1.md`, the shooting rules (`docs/ideas/done/shooting.md`, `docs/ideas/done/crates.md`) and `docs/specs/done/SPEC-hordes.md`. Everything there still holds unless this spec says otherwise. Idea and confirmed intent: `docs/ideas/straight-fire.md`.
+Extends `docs/specs/done/SPEC-v1.md`, the shooting rules (`docs/ideas/done/shooting.md`, `docs/ideas/done/crates.md`) and `docs/specs/done/SPEC-hordes.md`. Everything there still holds unless this spec says otherwise. Idea and confirmed intent: `docs/ideas/done/straight-fire.md`.
 
 ## Objective
 The army's fire goes straight ahead, lane by lane, with one range. Crates block what's behind them. The game feels as hard as today.
