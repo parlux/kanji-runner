@@ -25,14 +25,14 @@ export type Story = Mnemonics & {
 };
 
 /** A vocabulary entry that can tell one kanji's reading: the word, its accepted readings, its story. */
-export type StoryVocab = {
+type StoryVocab = {
   word: string;
   readings: readonly string[];
   story: string;
 };
 
 /** The story for one presented reading; `reading` is "" when a meaning-only kanji covers no main reading. */
-export type ReadingStory =
+type ReadingStory =
   | { reading: string; source: "kanji" | { word: string }; text: string }
   | { reading: string; none: true };
 

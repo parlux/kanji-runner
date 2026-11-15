@@ -17,7 +17,9 @@ Every task: `npm run check` passes before it is checked off. Test fixtures are s
 
 ### Task R1: Coverage and story choice (pure)
 **Description:** `coveredReadings(text)` in `src/core/mnemonic.ts`. `Story` in `src/core/study.ts` gains `primaryReadings` and `vocab`; the kanji card gets `readingStories: { reading, source: "kanji" | { word }, text } | { reading, none: true }`, one per presented reading, replacing `mnemonics.reading`. `studyCards` and `lastAnswer` work out the presented readings from the run's rows (spec "Which reading"). A kanji with no story keeps today's card.
-**Acceptance:** spec Testing Strategy "coveredReadings" and "Card" cases pass.
+**Acceptance:**
+- [x] spec Testing Strategy "coveredReadings", "Presented readings" and "Card" cases pass.
+- [x] `npm run check` passes.
 **Verification:** `npm test -- mnemonic study`
 **Files:** `src/core/mnemonic.ts`, `src/core/study.ts`, `src/game/ui/panels.ts` (if the call needs the rows), `tests/core/mnemonic.test.ts`, `tests/core/study.test.ts`
 **Scope:** M
