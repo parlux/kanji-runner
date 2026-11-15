@@ -1,0 +1,71 @@
+{
+  "skill_name": "triage",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "village keeps coming up as 'ri', fix that",
+      "expected_output": "Route fix. Single data correction with a clear outcome; mentions escalating if the cause is systemic.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "audit our kanji readings against wanikani so the core readings line up",
+      "expected_output": "Route sdd. Many data items and a judgment call per mismatch; waits for owner go before interviewing.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "make the run feel faster",
+      "expected_output": "Route sdd. Outcome unclear and a feel judgment.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "typo in AGENTS.md: 'orchestator' should be 'orchestrator'",
+      "expected_output": "Route doc. Edits, commits, pushes without asking.",
+      "files": []
+    },
+    {
+      "id": 5,
+      "prompt": "add a daily challenge mode",
+      "expected_output": "Route sdd. New feature with new concepts.",
+      "files": []
+    },
+    {
+      "id": 6,
+      "prompt": "the pause button doesn't respond on the summary screen",
+      "expected_output": "Route fix only after the cause is found and is local; otherwise investigates first and re-triages. Must not start SDD by default, must not skip investigation.",
+      "files": []
+    },
+    {
+      "id": 7,
+      "prompt": "boss is too easy, tune it",
+      "expected_output": "Route sdd. Balance tuning is a judgment call.",
+      "files": []
+    },
+    {
+      "id": 8,
+      "prompt": "maybe someday we could have multiplayer races?",
+      "expected_output": "Route idea. Writes it to docs/ideas/, nothing else.",
+      "files": []
+    },
+    {
+      "id": 9,
+      "prompt": "fix: change the spaced repetition intervals to 1, 3, 7 days",
+      "expected_output": "Honours the fix: prefix as an override, but flags that it touches core spaced repetition and offers sdd. Logs the triage.",
+      "files": []
+    },
+    {
+      "id": 10,
+      "prompt": "fix the 'ri' reading on village and also add a settings toggle for romaji",
+      "expected_output": "Triages separately: village reading is fix, romaji toggle is sdd (new setting).",
+      "files": []
+    },
+    {
+      "id": 11,
+      "prompt": "the camera is a bit too high, lower it",
+      "expected_output": "Route sdd (or asks): look-and-feel judgment that needs a phone check and a numeric target. Must not silently fix.",
+      "files": []
+    }
+  ]
+}

@@ -1,6 +1,7 @@
 # AGENTS.md
 
 - Always push after implementing a change.
+- Every owner request to build, change, fix, audit or document something: load the `triage` skill first. It picks the flow (doc, fix, full SDD, idea).
 
 ## Workflow: "implement the next round"
 - Active task list: the `todo-*.md` at the top level of `tasks/` (it names its spec and any baseline).
