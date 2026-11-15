@@ -1,7 +1,9 @@
 import { Color, Euler, Matrix4, Quaternion, Vector3, type Scene } from "three";
 import { crowdWidth } from "../../core/crowd";
-import { hazardPos, packSpan } from "../../core/horde";
+import { laneHits } from "../../core/fire";
+import { hazardPos } from "../../core/horde";
 import type { RunState } from "../../core/sim";
+import { threats } from "../../core/shooting";
 import { fireLimit } from "../../core/state";
 import { FIRE_RANGE } from "../../core/tuning";
 import { makeCrowdMesh } from "./figures";
@@ -19,7 +21,14 @@ import {
   SHATTER_DIST,
   spanWorld,
 } from "./hazardLayout";
-import { CROWD_DEPTH, DIST_SCALE, TRACK_W, worldX, worldZ } from "./world";
+import {
+  CROWD_DEPTH,
+  DIST_SCALE,
+  TRACK_W,
+  trackX,
+  worldX,
+  worldZ,
+} from "./world";
 
 /**
  * Enemy packs and their kill effects, the crowd's fire at what it targets,
@@ -67,57 +76,58 @@ export function createHazards(scene: Scene, fx: Fx) {
       const { hazards } = run.track;
       horde.update(run, clock, cheer);
       kills.update(run, clock);
-      // the crowd's fire: straight ahead from each lane (never past the next
-      // wall); the lanes that face its target stop there
-      const i = run.target;
-      const target = i === null ? undefined : hazards[i];
-      const wallZ = worldZ(Math.min(fireLimit(run), boss), run.dist);
-      const straight = (l: number): void =>
-        fx.stream(
-          laneX(l),
-          -0.4,
-          laneX(l),
-          -FIRE_RANGE * DIST_SCALE,
-          8,
-          1.2,
-          l * 0.37,
-          bullet,
-          clock,
-          0.65,
-          wallZ,
+      // the crowd's fire: every lane straight ahead; it stops at the first
+      // crate or pack over its x (laneHits), else flies on to the range end,
+      // never past the next wall (or the boss), which also takes the free share
+      const limit = Math.min(fireLimit(run), boss);
+      const wallZ = worldZ(limit, run.dist);
+      if (!fighting && run.status === "running") {
+        const xs = Array.from({ length: lanes }, (_, l) => trackX(laneX(l)));
+        const hits = laneHits(
+          threats(run),
+          run.nextHazard,
+          run.dist,
+          xs,
+          limit,
         );
-      if (fighting || run.status !== "running") {
-        /* the squads' fight takes the fire; a dead army fires nothing */
-      } else if (
-        i !== null &&
-        (target?.kind === "block" || target?.kind === "pack")
-      ) {
-        const cw = crowdWidth(run.army);
-        const span = target.kind === "block" ? target : packSpan(run, i);
-        const lo = Math.max(span.left, run.x - cw / 2);
-        const hi = Math.min(span.right, run.x + cw / 2);
-        const tz = worldZ(hazardPos(run, i), run.dist);
-        // a crate takes all the fire (aimed at the overlap); a pack only the lanes that face it
-        const tx = worldX((lo + hi) / 2);
+        const flash = new Map<number, { sum: number; n: number }>();
         for (let l = 0; l < lanes; l++) {
+          const hit = hits[l] ?? null;
           const x = laneX(l);
-          if (target.kind === "block")
-            fx.stream(x, -0.4, tx, tz, 6, 1.6, l * 0.37, bullet, clock);
-          else if (
-            x >= worldX(span.left) - 0.3 &&
-            x <= worldX(span.right) + 0.3
-          )
-            fx.stream(x, -0.4, x, tz, 6, 1.6, l * 0.37, bullet, clock);
-          else straight(l);
+          if (!hit) {
+            fx.stream(
+              x,
+              -0.4,
+              x,
+              -FIRE_RANGE * DIST_SCALE,
+              8,
+              1.2,
+              l * 0.37,
+              bullet,
+              clock,
+              0.65,
+              wallZ,
+            );
+            continue;
+          }
+          const tz = worldZ(hit.pos, run.dist);
+          fx.stream(x, -0.4, x, tz, 6, 1.6, l * 0.37, bullet, clock);
+          // a crate's hit flash sits where its lanes hit it (a pack's: kills.ts)
+          if (hazards[hit.index]?.kind === "block") {
+            const f = flash.get(hit.index) ?? { sum: 0, n: 0 };
+            flash.set(hit.index, { sum: f.sum + x, n: f.n + 1 });
+          }
         }
-        // hit flash at the impact point (a pack's hits flash where its rows die: kills.ts)
-        if (target.kind === "block") {
-          const f = 0.6 + 0.4 * Math.sin(run.dist * 80);
-          fx.spark(tx, 0.5, tz, 0.5 * f, FX_COLOURS.flash);
-        }
-      } else if (run.gateTarget === null)
-        for (let l = 0; l < lanes; l++) straight(l);
-      // else the wall's opening takes the fire (squads.ts draws it)
+        const f = 0.6 + 0.4 * Math.sin(run.dist * 80);
+        for (const [i, { sum, n }] of flash)
+          fx.spark(
+            sum / n,
+            0.5,
+            worldZ(hazardPos(run, i), run.dist),
+            0.5 * f,
+            FX_COLOURS.flash,
+          );
+      }
 
       // a shattered crate bursts (a pack's final burst: kills.ts)
       const sh = run.lastShatter;

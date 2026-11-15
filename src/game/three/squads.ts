@@ -1,5 +1,4 @@
 import { Euler, Matrix4, Quaternion, Vector3, type Scene } from "three";
-import { rowOpenings } from "../../core/walls";
 import { viewOf, type RunState } from "../../core/sim";
 import { makeCrowdMesh } from "./figures";
 import { FX_COLOURS, type Fx } from "./fx";
@@ -115,29 +114,6 @@ export function createSquads(scene: Scene, fx: Fx) {
             }
           }
         }
-      }
-
-      // the opening being shot: straight ahead from each lane, stopping at the
-      // wall's face (the opening's edges glow in walls.ts)
-      const gate =
-        run.gateTarget === null || fighting
-          ? undefined
-          : rowOpenings(run, run.next)[run.gateTarget];
-      const wallPos = run.track.questions[run.next];
-      if (gate && wallPos !== undefined) {
-        const wz = worldZ(wallPos, run.dist);
-        for (let l = 0; l < lanes; l++)
-          fx.stream(
-            laneX(l),
-            -0.4,
-            laneX(l),
-            wz,
-            6,
-            1.6,
-            l * 0.37,
-            bullet,
-            clock,
-          );
       }
 
       enemies.count = ne;

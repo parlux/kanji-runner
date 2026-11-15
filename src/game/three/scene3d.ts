@@ -428,6 +428,7 @@ export function createView3d(canvas: HTMLCanvasElement): View3d | null {
         run.dist = bossArmyDist(s.run.dist, s.run.track, pace, s.t);
         run.army = fight?.army ?? 0;
         run.target = null;
+        run.targets = [];
         run.gateTarget = null;
       }
       runDist = run.dist;
