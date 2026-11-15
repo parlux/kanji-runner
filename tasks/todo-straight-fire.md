@@ -34,15 +34,18 @@ Every task: `npm run check` passes (plus `npm run test:slow` for `core/` tasks) 
 - [x] 80% bot, 200 seeds, before → after logged: mean shatter distance ahead (±25%), share of crates shattered (±5 points), mean gate widening per row (±20%).
   - Chosen: `BLOCK_HP_K` 1.0 → **1.3**, `GATE_GROW_PER_DAMAGE` 0.001 → **0.0008** (not the spec's 4.0 and 0.00025: the bot lines up on a crate only once the hazard before it is passed, about 3 apart, so the longer range adds little fire time; 4.0 left 15.6% shattered, 1.5 left 48%; 0.00025 halved gate widening).
   - Pre-round (54c9789) / after F1 / after F2: shatter distance ahead 1.975 / 1.842 / 2.437 (+23%); crates shattered 60.2% / 59.8% / 58.3% (−1.9 points); gate widening per row (widest opening − default, rows reached) 0.0844 / 0.0839 / 0.0804 (−5%).
-- [ ] Balance bands hold and are logged (spec's list).
+- [x] Balance bands hold and are logged (spec's list). **Met after F2b** (bot change only; see F2b for the numbers: skill 0.5 win rate back to 1.00).
   - 200 seeds, `botBossRun` mean final army (win), pre-round → after F2: 100% 1601.51 → 1592.51 (1.00 → 1.00); 80% 321.87 → 319.03 (0.570 → 0.570); 50% 22.36 → 21.65 (0.080 → 0.075); 100% at skill 0.5 1219.53 → 1116.24 (−8.5%) (1.00 → **0.94**, after F1 0.925). **Not met:** skill-0.5 win rate is 0.06 down. All 12 losses are deaths on an unbroken crate the half-steered crowd lines up on (it covers only part of it, so it takes part of the fire). No mix of the three knobs fixes it: `BLOCK_HP_K` 0.8–1.3 with growth 0.0008–0.002 gives 0.93–0.95, and only 0.95 at growth 0.002, where gate widening is +25%. Left for the owner (a bot or crate-clip change is outside F2).
 **Verification:** `npm run check && npm run test:slow`. **Dependencies:** F1. **Files:** `src/core/{tuning,fire,shooting,walls}.ts`, tests. **Scope:** S (highest risk: balance; use opus)
 
 ### Task F2b: Bot judges crates by lanes
 **Description:** owner, 2026-11-15, after F2 (skill 0.5 win rate 1.00 → 0.94, every loss an unbroken crate): the balance bot decides to shoot or dodge a crate by the fire share it will actually get (the lanes it covers, as `splitFire`), not by any overlap. It shoots when it can break the crate before reaching it, dodges otherwise. Skill noise still applies to steering, so skill 0.5 stays a sloppy player. Game rules unchanged.
 **Acceptance criteria:**
-- [ ] Tested: the bot dodges a crate it can't break with the lanes it would cover and lines up on one it can.
-- [ ] Balance bands vs the pre-round baseline logged (spec's list), F2's crate/gate measures re-logged; skill 0.5 within band or the reason explained.
+- [x] Tested: the bot dodges a crate it can't break with the lanes it would cover and lines up on one it can.
+  - `tests/core/bot.ts`: `crateAim` = crate centre + this beat's aim offset (kept on the track; the old aim clamped inside the crate, which put a crowd wider than the crate off-centre); `canBreak(s, i, aim)` = firepower × `splitFire` share at that aim × seconds to the crate (≤ `FIRE_RANGE`) ≥ 1.25 × hp left. Skill noise still moves the aim, and the bot judges where it will actually be. Tests: bot.test.ts (lines up on a wide crate; dodges a crate a fifth of its width; a 0.7-width crate is shot dead on, dodged a quarter-width off).
+- [x] Balance bands vs the pre-round baseline logged (spec's list), F2's crate/gate measures re-logged; skill 0.5 within band or the reason explained.
+  - 200 seeds, `botBossRun` mean final army (win), pre-round (54c9789) → after F2 → after F2b: 100% 1601.51 → 1592.51 → 1592.76 (−0.5%) (1.00 → 1.00 → 1.00); 80% 321.87 → 319.03 → 318.31 (−1.1%) (0.570 → 0.570 → 0.565); 50% 22.36 → 21.65 → 21.07 (−5.8%) (0.080 → 0.075 → 0.075); 100% at skill 0.5 1219.53 → 1116.24 → 1189.59 (−2.5%) (1.00 → 0.94 → **1.00**). All within ±10% / ±0.05.
+  - 80% bot crate/gate measures, pre-round / after F2 / after F2b: shatter distance ahead 1.975 / 2.437 / 2.459 (+24.5%, inside ±25% but at its edge); crates shattered 60.2% / 58.3% / 57.7% (−2.5 points); gate widening per row 0.0844 / 0.0804 / 0.0804 (−5%).
 **Verification:** `npm run check && npm run test:slow`. **Dependencies:** F2. **Files:** the bot (tests/ or src/core), tests. **Scope:** S (use opus)
 
 ### Task F3: Straight tracers
