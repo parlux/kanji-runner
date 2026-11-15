@@ -19,8 +19,10 @@ Every task: `npm run check` passes (plus `npm run test:slow` for `core/` tasks) 
 ### Task F1: Fire by lane, crates block
 **Description:** as the spec's "Fire by lane": nearest threat per part of the army span takes that part's share; unblocked share goes to the wall; run state lists the step's targets with shares. Ranges unchanged in this task (crates 2.8, packs 12). Keep 3D, 2D and the bot working (3D may still draw the old way until F3).
 **Acceptance criteria:**
-- [ ] Tested: a crate in front of a pack takes the lanes it covers and the pack gets only the rest; a crate covering the whole army blocks the pack entirely; two crates side by side both take fire; the free share widens the wall; a crate pays out once; two shattering in a step both pay.
-- [ ] Balance bands logged before and after (spec's list).
+- [x] Tested: a crate in front of a pack takes the lanes it covers and the pack gets only the rest; a crate covering the whole army blocks the pack entirely; two crates side by side both take fire; the free share widens the wall; a crate pays out once; two shattering in a step both pay.
+  - `splitFire` (fire.ts) cuts the army span at every live threat's edges and gives each piece to the nearest threat over it (ties to the lower index); the rest is `free`. Run state: `targets` (index + share, by index), `target` (the largest share, nearest on a tie), `gateShare` (the free share the wall took). `pickTarget` is gone. Tests: fire.test.ts "splitFire", shooting.test.ts "fire by lane", gates.test.ts (half the crowd behind a crate: the wall grows by half).
+- [x] Balance bands logged before and after (spec's list).
+  - 200 seeds, `botBossRun` mean final army and win rate, before → after: 100% 1601.51 → 1601.76 (1.00 → 1.00); 80% 321.87 → 321.75 (0.570 → 0.565); 50% 22.36 → 22.30 (0.080 → 0.075); 100% at skill 0.5 1219.53 → 1117.11 (1.00 → 0.925). The skill-0.5 drop: a crate now takes only the lanes it covers (it used to take all the fire on any overlap), so a half-steered army shatters fewer crates before reaching them (100 seeds at 100%: 99.8% → 88.3% shattered) and clips more. Left for F2's retune (longer range gives more time).
 **Verification:** `npm run check && npm run test:slow`. **Dependencies:** none. **Files:** `src/core/{fire,shooting,walls,state,horde}.ts`, consumers of `target`, tests. **Scope:** M (highest risk: rule change across core; use opus)
 
 ### Task F2: One range, retune crates and gates
