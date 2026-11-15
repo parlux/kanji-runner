@@ -1,13 +1,13 @@
 # Spec: reading stories match the reading (v1.2.0)
 
-Extends `docs/specs/done/SPEC-stories.md` and the specs it extends. Everything there still holds unless this spec says otherwise. Intent: `docs/intent/story-reading-mismatch.md`. Idea: `docs/ideas/story-reading-mismatch.md`.
+Extends `docs/specs/done/SPEC-stories.md` and the specs it extends. Everything there still holds unless this spec says otherwise. Intent: `docs/intent/story-reading-mismatch.md`. Idea: `docs/ideas/done/story-reading-mismatch.md`.
 
 ## Objective
 A kanji card (study screen and pause screen, both modes) shows the reading story for **the reading that was presented**: the reading the run's reading gate showed for that kanji. The story is about that reading: the kanji's WaniKani story if it covers it, else a WaniKani vocabulary story for a word read that way, else a "no story" line. This fixes SPEC-stories' known rough edge ("a reading story about a reading Built-in doesn't show is shown unchanged").
 
 ### User stories
-- As the player who just got 上 shown as うえ, I pause and read a story about うえ, labelled "from 上 (うえ)", not the "Joe" story about じょう.
-- As the player shown 上 as じょう, I still read the "Joe" story.
+- As the player who just got 上 shown as うえ, I pause and read a story about うえ, labelled "from 上 (うえ)", not the kanji story about じょう.
+- As the player shown 上 as じょう, I still read the kanji story about じょう.
 - As the player shown a reading with no WaniKani story, I see "No story for this reading. This one just needs remembering." and don't go looking for a link that isn't there.
 
 ## Rules
@@ -75,7 +75,7 @@ export function coveredReadings(text: string): string[] { … }
 - Never: commit real WaniKani text, touch SRS or the save format.
 
 ## Success Criteria
-1. With the owner's token, 上 presented as じょう shows only the "Joe" story; presented as うえ, only the うえ story labelled from 上.
+1. With the owner's token, 上 presented as じょう shows only the kanji story; presented as うえ, only the うえ story labelled from 上.
 2. 日: にち → kanji story; ひ → vocabulary story from 日.
 3. 人: じん → kanji story; ひと → vocabulary story from 人.
 4. A kun reading with no single-kanji vocabulary (or above level) shows the "no story" line.

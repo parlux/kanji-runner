@@ -6,5 +6,3 @@ Open ideas in priority order; the top one is next. The owner orders it. New idea
 2. [Fold the round skills into one project flow](skill-audit.md): process.
 3. [Install as an app on the phone](install-as-app.md): platform; home-screen icon, full screen, maybe offline.
 
-## In progress
-- [Reading story doesn't match the reading shown](story-reading-mismatch.md): intent `docs/intent/story-reading-mismatch.md`, spec `docs/specs/SPEC-reading-stories.md`.
