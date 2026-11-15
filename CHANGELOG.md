@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- 里 shows "village" instead of "ri" (gloss override).
+- 里 shows "hometown" instead of "ri" (gloss override).
 
 ## 1.0.0 (2026-11-15)
 

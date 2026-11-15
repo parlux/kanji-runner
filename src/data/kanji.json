@@ -121,7 +121,7 @@
   {"char":"通","level":5,"grade":2,"freq":80,"glosses":["traffic","pass through","avenue","commute"],"on":"つう","kun":{"base":"とお","okurigana":"る"},"readings":["つう","つ","とおる","とおり","どおり","とおす","とおし","どおし","かよう"],"components":["⻌","用","マ"]},
   {"char":"外","level":6,"grade":2,"freq":81,"glosses":["outside"],"on":"がい","kun":{"base":"そと","okurigana":""},"readings":["がい","げ","そと","ほか","はずす","はずれる","と"],"components":["卜","夕"]},
   {"char":"言","level":6,"grade":2,"freq":83,"glosses":["say","word"],"on":"げん","kun":{"base":"い","okurigana":"う"},"readings":["げん","ごん","いう","こと"],"components":[]},
-  {"char":"里","level":6,"grade":2,"freq":1096,"glosses":["village","ri","parent's home","league"],"on":"り","kun":{"base":"さと","okurigana":""},"readings":["り","さと"],"components":[]},
+  {"char":"里","level":6,"grade":2,"freq":1096,"glosses":["hometown","ri","village","parent's home","league"],"on":"り","kun":{"base":"さと","okurigana":""},"readings":["り","さと"],"components":[]},
   {"char":"理","level":6,"grade":2,"freq":86,"glosses":["logic","arrangement","reason","justice","truth"],"on":"り","kun":{"base":"ことわり","okurigana":""},"readings":["り","ことわり"],"components":["王","里"]},
   {"char":"体","level":6,"grade":2,"freq":88,"glosses":["body","substance","object","reality"],"on":"たい","kun":{"base":"からだ","okurigana":""},"readings":["たい","てい","からだ","かたち"],"components":["木","一","⺅"]},
   {"char":"当","level":6,"grade":2,"freq":91,"glosses":["hit","right","appropriate","himself"],"on":"とう","kun":{"base":"あ","okurigana":"たる"},"readings":["とう","あたる","あたり","あてる","あて","まさに","まさにべし"],"components":["ヨ","⺌"]},
