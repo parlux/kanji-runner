@@ -71,5 +71,8 @@ export function bindDrag(
     }
   });
   el.addEventListener("pointercancel", (e) => drag.cancel(e.pointerId));
+  // no click after a touch: a tap that opens a panel would otherwise click
+  // whatever the panel put under the finger (Study's own Back button)
+  el.addEventListener("touchend", (e) => e.preventDefault());
   return drag.take;
 }

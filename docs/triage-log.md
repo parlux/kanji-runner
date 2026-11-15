@@ -14,3 +14,4 @@ One row per owner request, written by the `triage` skill (`.claude/skills/triage
 | 2026-11-15 | Install the webpage as an app on the phone | idea | Owner asked for a backlog entry only | |
 | 2026-11-15 | Implement next task: no task list, top backlog idea = story-reading mismatch | sdd | Open design questions; touches reading choice in core | |
 | 2026-11-15 | SDD skill: no stop after spec; continue to tasks + spec page | doc | Skill text only | |
+| 2026-11-15 | Study button does nothing when tapped | fix | Touch click hit the overlay Back button; one-line fix | |
