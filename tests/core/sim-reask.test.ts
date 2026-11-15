@@ -148,7 +148,7 @@ describe("re-asks in the sim", () => {
       for (const l of links)
         expect(links.some((m) => m.of === l.row)).toBe(false);
     }
-  });
+  }, 30_000); // full runs per seed; near 5 s under parallel load
 
   it("never changes the track, hit points or boss inputs", () => {
     for (const seed of SEEDS.slice(0, 30)) {

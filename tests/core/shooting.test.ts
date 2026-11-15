@@ -9,11 +9,15 @@ import {
   packSurvivors,
 } from "../../src/core/horde";
 import { crowdWidth } from "../../src/core/crowd";
-import { firepower } from "../../src/core/fire";
-import { type Block, type Saw } from "../../src/core/track";
+import { expectedArmy, firepower, hazardHp } from "../../src/core/fire";
+import { buildTrack, type Block, type Saw } from "../../src/core/track";
+import { kanaRun } from "./kana-run";
 import {
+  BLOCK_HP_K,
   CRATE_REWARD_K,
   ENEMY_HP,
+  FIRE_RANGE,
+  ROWS_PER_RUN,
   PACK_WAKE,
   TRACK_SPEED,
   ENEMY_SPEED,
@@ -81,13 +85,15 @@ describe("shooting", () => {
     expect(intact.status).toBe("dead");
   });
 
-  it("a shattered crate adds round(CRATE_REWARD_K × hp) exactly once", () => {
+  it("a shattered crate adds crateReward(hp) exactly once", () => {
     const hp = 40;
     const s0 = { ...range([wide(0.5)], [hp]), damage: [hp - 0.01] };
     const broke = stepRun(s0, DT);
     expect(isShattered(broke, 0)).toBe(true);
     expect(broke.army).toBe(20 + crateReward(hp));
-    expect(crateReward(hp)).toBe(Math.round(CRATE_REWARD_K * hp));
+    expect(crateReward(hp)).toBe(
+      Math.round(CRATE_REWARD_K * Math.round(hp / BLOCK_HP_K)),
+    );
     expect(broke.lastCrate).toEqual({
       gain: crateReward(hp),
       dist: broke.dist,
@@ -96,6 +102,51 @@ describe("shooting", () => {
     const passed = stepFor(broke, 1);
     expect(passed.nextHazard).toBe(1);
     expect(passed.army).toBe(broke.army);
+  });
+
+  it("a crate pays as many soldiers as before the retune for the same expected army: round(0.3 × it)", () => {
+    // before: hp = 1.0 × e and the reward round(0.3 × hp)
+    for (let e = 1; e <= 2000; e++)
+      expect(crateReward(BLOCK_HP_K * e)).toBe(Math.round(0.3 * e));
+    for (let seed = 1; seed <= 20; seed++) {
+      const rows = kanaRun(seed);
+      const track = buildTrack(seed, ROWS_PER_RUN, true);
+      const expected = expectedArmy(rows, track.charges);
+      const hp = hazardHp(track, expected);
+      track.hazards.forEach((h, i) => {
+        if (h.kind !== "block") return;
+        const q = track.questions.filter((p) => p < h.pos).length;
+        const e = expected[Math.min(q, expected.length - 1)] as number;
+        expect(crateReward(hp[i] as number)).toBe(Math.round(0.3 * e));
+      });
+    }
+  });
+
+  it("crates and walls are hit from FIRE_RANGE (12) ahead, never past the next wall", () => {
+    expect(FIRE_RANGE).toBe(PACK_WAKE);
+    expect(FIRE_RANGE).toBe(12);
+    const near = stepRun(range([wide(FIRE_RANGE - 0.1)], [1e9]), DT);
+    expect(near.target).toBe(0);
+    expect(near.damage[0]).toBeGreaterThan(0);
+    const far = stepRun(range([wide(FIRE_RANGE + 0.1)], [1e9]), DT);
+    expect(far.target).toBeNull();
+    expect(far.damage[0]).toBe(0);
+    // the wall: its opening grows from 12 ahead, not before
+    const wallAt = (ahead: number): RunState => {
+      const s = range([], []);
+      return { ...s, track: { ...s.track, questions: [ahead, 100] } };
+    };
+    expect(stepRun(wallAt(FIRE_RANGE - 0.1), DT).gateTarget).not.toBeNull();
+    expect(stepRun(wallAt(FIRE_RANGE + 0.1), DT).gateTarget).toBeNull();
+    // a crate past the next wall takes nothing; the wall takes the fire
+    const s0 = range([wide(8)], [1e9]);
+    const walled = stepRun(
+      { ...s0, track: { ...s0.track, questions: [5, 100] } },
+      DT,
+    );
+    expect(walled.target).toBeNull();
+    expect(walled.damage[0]).toBe(0);
+    expect(walled.gateShare).toBe(1);
   });
 
   it("an unbroken crate adds nothing and clips as before", () => {

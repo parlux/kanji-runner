@@ -67,13 +67,15 @@ export const GATE_OPENING_3 = 0.26;
 
 // Gate growth (S7). See gates.ts and sim.ts.
 /**
- * Track widths an opening widens per point of damage. The wall is in range
- * for FIRE_RANGE / speed ≈ 1.75 s (1.35 s at the end of the run), so a full
- * army (100, 100 damage/s) widens by 0.13–0.17 (reaching the cap at 3
- * answers), while 20 soldiers manage about 0.03 and the starting 5 under 0.01.
- * A max-width crowd (0.30) clears a 3-answer opening after 40 damage.
+ * Track widths an opening widens per point of damage, from the fire with
+ * nothing else ahead. The wall is in range for FIRE_RANGE / speed ≈ 7.5 s
+ * (5.8 s at the end of the run), less the time crates and packs in front of
+ * it take the fire: alone, 5 soldiers widen it by about 0.03 and 20 by about
+ * 0.12, while a full army reaches the cap. A max-width crowd (0.30) clears a
+ * 3-answer opening after 50 damage. Tuned (v1.1.0) so the 80% bot widens each
+ * wall about as much as with the old 2.8 range and 0.001.
  */
-export const GATE_GROW_PER_DAMAGE = 0.001;
+export const GATE_GROW_PER_DAMAGE = 0.0008;
 /** Widest an opening can grow. At 2 answers the other is left at 0.22, which clips a max-width crowd. */
 export const GATE_MAX_W = 0.5;
 /**
@@ -115,11 +117,19 @@ export const SAW_CHANCE = 1 / 3;
 // Shooting (S1). The army auto-fires at the nearest shootable threat ahead.
 /** Damage per second per soldier. */
 export const FIRE_PER_SOLDIER = 1;
-/** How far ahead (track units) the army can hit a threat. */
-export const FIRE_RANGE = 2.8;
-/** Block hit points = BLOCK_HP_K × the expected army at that point of the run. */
-export const BLOCK_HP_K = 1.0;
-/** Supply crates (S3): a shattered block adds round(CRATE_REWARD_K × its hit points) soldiers. */
+/**
+ * Block hit points = BLOCK_HP_K × the expected army at that point of the run.
+ * 1.3 (was 1.0 with the old 2.8 range): the army only lines up on a crate
+ * once the hazard before it is passed (about 3 apart), so the longer range
+ * adds little fire time; 1.3 keeps the 80% bot shattering about as many
+ * crates, about as far ahead, as before.
+ */
+export const BLOCK_HP_K = 1.3;
+/**
+ * Supply crates (S3): a shattered block adds round(CRATE_REWARD_K × the
+ * expected army it was sized for) soldiers, i.e. its hit points ÷ BLOCK_HP_K,
+ * so retuning BLOCK_HP_K never changes the reward.
+ */
 export const CRATE_REWARD_K = 0.3;
 
 // Enemy packs (S2). Shootable groups that run at the army. See track.ts and sim.ts.
@@ -139,10 +149,15 @@ export const ENEMY_HP = 1;
  * A pack starts running at the army this far ahead (track units): where the 3D
  * view starts drawing it (its default shape distance, 4 × VIEW_DISTANCE).
  *
- * Also how far ahead the army fires at an awake pack (never past an unanswered
- * wall; nothing beyond one wakes). Other threats stay within FIRE_RANGE.
+ * Also the army's fire range (FIRE_RANGE). Nothing beyond an unanswered wall
+ * wakes.
  */
 export const PACK_WAKE = 4 * VIEW_DISTANCE;
+/**
+ * How far ahead (track units) the army can hit anything: crates, packs and
+ * the next wall's openings alike (never past an unanswered wall).
+ */
+export const FIRE_RANGE = PACK_WAKE;
 /** Pack start centres are drawn from [ENEMY_X_MARGIN, 1 − ENEMY_X_MARGIN]. */
 export const ENEMY_X_MARGIN = 0.2;
 /**

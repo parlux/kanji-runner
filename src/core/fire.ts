@@ -125,8 +125,8 @@ export function hazardHeads(
   );
 }
 
-/** Where a shootable threat is now: its track position, its span across the track, and how far ahead it can be hit (FIRE_RANGE when absent). */
-export type Threat = { pos: number; span: Span; range?: number };
+/** Where a shootable threat is now: its track position and its span across the track. */
+export type Threat = { pos: number; span: Span };
 
 /** A threat taking fire this step and its share (0..1) of the army's fire. */
 export type FireShare = { index: number; share: number };
@@ -134,7 +134,7 @@ export type FireShare = { index: number; share: number };
 /**
  * Fire by lane: the army fires straight ahead across its span `crowd`. Each
  * part of the span hits the nearest threat that overlaps it (at or after
- * `from`, ahead of `dist` within its range, short of `limit`; ties go to the
+ * `from`, ahead of `dist` within FIRE_RANGE, short of `limit`; ties go to the
  * lower index), so a nearer threat blocks what is behind it. A threat's
  * share is the width it is nearest in over the crowd's width (listed by
  * index, shares > 0 only); `free` is the share with nothing ahead (it goes
@@ -155,7 +155,7 @@ export function splitFire(
     if (
       !t ||
       t.pos < dist ||
-      t.pos - dist > (t.range ?? FIRE_RANGE) ||
+      t.pos - dist > FIRE_RANGE ||
       t.pos >= limit ||
       Math.min(crowd.right, t.span.right) - Math.max(crowd.left, t.span.left) <=
         0

@@ -315,13 +315,13 @@ describe("gate growth in a run", () => {
     expect(after.lastClip?.loss ?? 0).toBeGreaterThan(0);
   });
 
-  it("a small army barely grows its opening", () => {
+  it("a small army barely grows its opening (5 soldiers over the whole FIRE_RANGE)", () => {
     const s = before(firstThree, 5, 1, FIRE_RANGE);
     // the last step before contact
     let r = s;
     for (let n = stepRun(r, DT); n.next === firstThree; n = stepRun(n, DT))
       r = n;
-    expect(width(at(rowOpenings(r, firstThree), 1))).toBeLessThan(0.26 + 0.01);
+    expect(width(at(rowOpenings(r, firstThree), 1))).toBeLessThan(0.26 + 0.04);
   });
 
   it("squads stand at the openings as they are now", () => {

@@ -141,10 +141,7 @@ describe("splitFire (fire by lane)", () => {
     pos,
     span: { left, right },
   });
-  const pack = (pos: number, left: number, right: number): Threat => ({
-    ...t(pos, left, right),
-    range: 12,
-  });
+  const pack = t;
   const close = (got: {
     shares: { index: number; share: number }[];
     free: number;

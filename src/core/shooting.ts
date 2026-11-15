@@ -1,7 +1,7 @@
 import { firepower, splitFire, type Threat } from "./fire";
 import { hazardPos, packSpan } from "./horde";
 import { fireLimit, type RunState } from "./state";
-import { CRATE_REWARD_K, PACK_WAKE } from "./tuning";
+import { BLOCK_HP_K, CRATE_REWARD_K } from "./tuning";
 import { shootGate } from "./walls";
 
 export function isShattered(s: RunState, i: number): boolean {
@@ -16,18 +16,18 @@ function threats(s: RunState): (Threat | null)[] {
     if (h.kind === "block")
       return { pos: h.pos, span: { left: h.left, right: h.right } };
     if (h.kind === "pack")
-      return {
-        pos: hazardPos(s, i),
-        span: packSpan(s, i),
-        range: PACK_WAKE,
-      };
+      return { pos: hazardPos(s, i), span: packSpan(s, i) };
     return null;
   });
 }
 
-/** Recruits a crate pays out when it shatters. */
+/**
+ * Recruits a crate pays out when it shatters: CRATE_REWARD_K × the expected
+ * army it was sized for (hp ÷ BLOCK_HP_K, a whole number of soldiers, so it is
+ * rounded back exactly), whatever BLOCK_HP_K is.
+ */
 export const crateReward = (hp: number): number =>
-  Math.round(CRATE_REWARD_K * hp);
+  Math.round(CRATE_REWARD_K * Math.round(hp / BLOCK_HP_K));
 
 /**
  * Fire by lane (splitFire): each part of the army's span fires at the

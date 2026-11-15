@@ -335,7 +335,7 @@ describe("shooting", () => {
     });
 
     it("the stream starts the moment the pack wakes: its head leaves the crowd's front and can be shot from there", () => {
-      // a pack 7 ahead (well beyond FIRE_RANGE), behind a wall at 0.3
+      // a pack 7 ahead, behind a wall at 0.3
       const s0 = range([pack(7)], [1e9], 100, [500]);
       const walled = { ...s0, track: { ...s0.track, questions: [0.3, 100] } };
       const waiting = stepFor(walled, 0.1);
@@ -347,12 +347,12 @@ describe("shooting", () => {
       // woken: the head moves at once and takes the fire, 7 − 0.3 ahead
       const woke = stepRun(s, DT);
       expect(woke.packs[0]?.pos ?? 7).toBeLessThan(s.packs[0]?.pos ?? 7);
-      expect(hazardPos(woke, 0) - woke.dist).toBeGreaterThan(FIRE_RANGE);
+      expect(hazardPos(woke, 0) - woke.dist).toBeGreaterThan(6);
       expect(woke.target).toBe(0);
       expect(woke.damage[0]).toBeGreaterThan(0);
     });
 
-    it("fire reaches an awake pack up to PACK_WAKE, never past an unanswered wall; nearer threats still go first", () => {
+    it("fire reaches an awake pack up to FIRE_RANGE (= PACK_WAKE), never past an unanswered wall; nearer threats still go first", () => {
       const far = range([pack(PACK_WAKE + 0.5)], [1e9], 100);
       expect(stepRun(far, DT).target).toBeNull();
       const near = range([pack(PACK_WAKE - 0.5)], [1e9], 100);
@@ -364,9 +364,9 @@ describe("shooting", () => {
       expect(stepRun(walled, DT).target).toBeNull();
       const crate = range([wide(1.9), pack(8)], [1e9, 1e9], 100);
       expect(stepRun(crate, DT).target).toBe(0);
-      // a crate beyond FIRE_RANGE is still out of reach: the pack takes the fire
-      const later = range([wide(FIRE_RANGE + 0.5), pack(8)], [1e9, 1e9], 100);
-      expect(stepRun(later, DT).target).toBe(1);
+      // a crate beyond FIRE_RANGE is out of reach, like a pack
+      const later = range([wide(FIRE_RANGE + 0.5)], [1e9], 100);
+      expect(stepRun(later, DT).target).toBeNull();
     });
 
     it("in a real run, the army can fire at each lone pack from waking until its whole stream is at its front for at least 1.7 s (2.2 s at the start's speed)", () => {
