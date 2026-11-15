@@ -1,7 +1,7 @@
 # Tasks: straight fire (v1.1.0)
 
 Spec: `docs/specs/SPEC-straight-fire.md` (2026-11-15). Idea and confirmed intent: `docs/ideas/straight-fire.md`. Started 2026-11-15.
-Review: https://claude.ai/artifact/EFKCvzghsaCHogg8jPnY4L
+Review: https://claude.ai/artifact/EFKCvzghsaCHogg8jPnY4L · Checkpoint F: https://claude.ai/artifact/2S9TcvU7EPUZBBVhzDJLbM
 Every task: `npm run check` passes (plus `npm run test:slow` for `core/` tasks) before it is checked off.
 
 ## Plan
