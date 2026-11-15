@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { mainReadings, showReading } from "../../src/core/distractors";
 import { KANA } from "../../src/core/kana";
 import { KANJI } from "../../src/core/kanji";
 import { buildRun, missedItems } from "../../src/core/run";
@@ -113,9 +114,8 @@ describe("studyCards", () => {
     cards.forEach((c, i) => {
       if (c.kind === "kanji" && c.char === c0) {
         expect(c.mnemonics).toEqual({ meaning: "m" });
-        expect(c.readingStories).toEqual([
-          { reading: "", source: "kanji", text: "r" },
-        ]);
+        expect(c.readingStories?.length).toBeGreaterThan(0);
+        expect(c.readingStories?.every((r) => r.reading !== "")).toBe(true);
         expect(c.radicals).toEqual([rad]);
       } else expect(c).toEqual(plain[i]);
     });
@@ -446,13 +446,16 @@ describe("reading stories", () => {
     ]);
   });
 
-  it("a meaning-only kanji gets its own story headed by a covered main reading", () => {
-    expect(card({ reading: kstory }, [])?.readingStories).toEqual([
-      { reading: "じょう", source: "kanji", text: kstory },
-    ]);
-    expect(card({ reading: "plain" }, [])?.readingStories).toEqual([
-      { reading: "", source: "kanji", text: "plain" },
-    ]);
+  it("a meaning-only kanji gets one block per main reading", () => {
+    const c = card({ reading: kstory, vocab }, []);
+    expect(c?.readingStories?.map((r) => r.reading)).toEqual(
+      mainReadings(kanji).map(showReading),
+    );
+    expect(c?.readingStories?.[0]).toEqual({
+      reading: "じょう",
+      source: "kanji",
+      text: kstory,
+    });
   });
 
   it("no story at all keeps today's card", () => {
@@ -506,8 +509,8 @@ describe("reading stories", () => {
       KANA,
       stories,
     );
-    expect(b?.card?.kind === "kanji" && b.card.readingStories).toEqual([
-      { reading: "じょう", source: "kanji", text: kstory },
-    ]);
+    expect(
+      b?.card?.kind === "kanji" && b.card.readingStories?.map((r) => r.reading),
+    ).toEqual(mainReadings(kanji).map(showReading));
   });
 });

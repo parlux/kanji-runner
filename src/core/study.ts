@@ -31,7 +31,7 @@ type StoryVocab = {
   story: string;
 };
 
-/** The story for one presented reading; `reading` is "" when a meaning-only kanji covers no main reading. */
+/** The story for one shown reading. */
 type ReadingStory =
   | { reading: string; source: "kanji" | { word: string }; text: string }
   | { reading: string; none: true };
@@ -145,19 +145,12 @@ function readingStories(
   presented: readonly string[],
 ): ReadingStory[] | undefined {
   if (!st || !(st.meaning || st.reading || st.vocab?.length)) return undefined;
-  if (presented.length > 0)
-    return presented.map((label) => readingStory(k, st, label));
-  if (!st.reading) return undefined;
-  // no reading presented: the kanji's own story, headed with its first covered main reading
-  const covered = coveredReadings(st.reading);
-  const set = covered.length > 0 ? covered : (st.primaryReadings ?? []);
-  const head = mainReadings(k)
-    .map(showReading)
-    .find(
-      (l) =>
-        set.includes(plainReading(l)) || set.includes(l.split("(")[0] ?? l),
-    );
-  return [{ reading: head ?? "", source: "kanji", text: st.reading }];
+  // no reading presented (meaning gate): one block per main reading
+  const labels =
+    presented.length > 0 ? presented : mainReadings(k).map(showReading);
+  return labels.length > 0
+    ? labels.map((label) => readingStory(k, st, label))
+    : undefined;
 }
 
 function kanjiCard(
