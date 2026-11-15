@@ -7,7 +7,7 @@
 - Active task list: the `todo-*.md` at the top level of `tasks/` (it names its spec and any baseline).
 - You are the orchestrator. Start at the first unchecked task and run tasks one at a time, each in a fresh background subagent, until the next checkpoint. Follow `tasks/subagent-prompt.md` (model choice, prompt template, verify between tasks).
 - Stop at the checkpoint: report to the owner as a checkpoint page (`docs/review-pages.md`): what to play, what changed, rough edges. Contact them earlier only for a blocking decision.
-- The owner ticks checkpoints. Owner ideas go to `docs/ideas/`.
+- The owner ticks checkpoints. Owner ideas go to `docs/ideas/`, listed in `docs/ideas/BACKLOG.md` (ordered; new ones at the bottom unless the owner places them). With no active task list, the next round starts from the top of the backlog. When an idea's round starts, move it to "In progress"; when it's archived to `done/`, drop it from the backlog.
 
 ## Layers (checked by `npm run deps`, part of `check`)
 - `core/` imports only `core/` and `data/`.
