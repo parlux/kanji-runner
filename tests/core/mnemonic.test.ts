@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseMnemonic } from "../../src/core/mnemonic";
+import { coveredReadings, parseMnemonic } from "../../src/core/mnemonic";
 
 const seg = (text: string, tag: string | null = null) => ({ text, tag });
 
@@ -62,5 +62,38 @@ describe("parseMnemonic", () => {
     expect(parseMnemonic("stray </em> close, 1 < 2 and <")).toEqual([
       seg("stray  close, 1 < 2 and <"),
     ]);
+  });
+});
+
+describe("coveredReadings", () => {
+  it("reads one bracket after a reading tag", () => {
+    expect(coveredReadings("a <reading>Foo</reading> (ふう) b")).toEqual([
+      "ふう",
+    ]);
+  });
+  it("collects two readings from two brackets", () => {
+    expect(
+      coveredReadings(
+        "<reading>A</reading> (あ) and <reading>B</reading> (び)",
+      ),
+    ).toEqual(["あ", "び"]);
+  });
+  it("splits one bracket on 、 , and /", () => {
+    expect(coveredReadings("<reading>A</reading> (あ、い, う/え)")).toEqual([
+      "あ",
+      "い",
+      "う",
+      "え",
+    ]);
+  });
+  it("converts katakana and allows spaces", () => {
+    expect(coveredReadings("<reading>A</reading>   (ジョウ)")).toEqual([
+      "じょう",
+    ]);
+  });
+  it("is empty with no bracket, and ignores brackets not after the tag", () => {
+    expect(coveredReadings("<reading>A</reading> alone")).toEqual([]);
+    expect(coveredReadings("plain (あ) text")).toEqual([]);
+    expect(coveredReadings("<kanji>A</kanji> (あ)")).toEqual([]);
   });
 });
