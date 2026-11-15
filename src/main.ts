@@ -2,37 +2,19 @@ import { bindDrag, bindKeys, type Action } from "./game/input";
 import { startLoop } from "./game/loop";
 import { render } from "./game/render";
 import type { TrackView } from "./game/hud";
-import type { KanjiItem, Progress } from "./core/types";
+import type { Progress } from "./core/types";
 import {
   adoptProgress,
   afterStep,
   createSession,
   handleAction,
-  studyOffered,
   updateScene,
   type Scene,
 } from "./game/scenes";
 import { endTap, modeTap, settingsTap, startTap, syncTap } from "./game/start";
 import { SPEED_PRESETS } from "./core/tuning";
 import { removeLegacyKeys } from "./storage/legacy";
-import { loadSpeed, saveSpeed } from "./storage/speed";
-import { openSettings, settingsOpen, syncSettings } from "./game/ui/settings";
-import { openTokenForm, tokenFormOpen } from "./game/ui/wanikani";
-import { createWkState } from "./game/wkstate";
-import { createStoryStore } from "./wanikani/storystore";
-import { createWkClient } from "./wanikani/client";
-import { openStudy, studyOpen } from "./game/ui/study";
-import { syncPauseCard } from "./game/ui/pausecard";
-import { KANA } from "./core/kana";
-import { KANJI } from "./core/kanji";
-import { missedItems } from "./core/run";
-import { WORDS } from "./core/words";
-import {
-  lastAnswer,
-  runKanji,
-  storiesWithFallback,
-  studyCards,
-} from "./core/study";
+import { createPanels } from "./game/ui/panels";
 import {
   loadMeaningSessionLog,
   loadSessionLog,
@@ -45,47 +27,10 @@ import {
 } from "./storage/storage";
 import { loadMeaningMode, saveMeaningMode } from "./storage/meaning";
 import { persistence } from "./game/mode";
-import { loginOpen, openLogin } from "./sync/login";
 import { createSyncFromEnv } from "./sync/sync";
-import { loadScene3d, type View3d } from "./game/view3d";
+import { createStage } from "./game/stage";
 
-const canvas = document.querySelector<HTMLCanvasElement>("#game");
-if (!canvas) throw new Error("Missing #game canvas");
-const ctx = canvas.getContext("2d");
-if (!ctx) throw new Error("Canvas 2D not supported");
-
-// The run is drawn in 3D on a WebGL canvas behind #game. Without WebGL the start
-// screen says so and Play does nothing; the menus stay on #game.
-let view3d: View3d | null = null;
-let webgl: "pending" | "ok" | "failed" = "pending";
-const canvas3d = document.querySelector<HTMLCanvasElement>("#world");
-void loadScene3d()
-  .then(({ createView3d }) => {
-    view3d = canvas3d ? createView3d(canvas3d) : null;
-    if (!view3d || !canvas3d) {
-      webgl = "failed";
-      return;
-    }
-    webgl = "ok";
-    canvas3d.style.display = "block";
-    resize();
-  })
-  .catch(() => {
-    view3d = null;
-    webgl = "failed";
-  });
-
-function resize(): void {
-  if (!canvas || !ctx) return;
-  const dpr = window.devicePixelRatio || 1;
-  canvas.width = Math.round(window.innerWidth * dpr);
-  canvas.height = Math.round(window.innerHeight * dpr);
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  view3d?.resize(window.innerWidth, window.innerHeight);
-}
-
-window.addEventListener("resize", resize);
-resize();
+const stage = createStage();
 
 // drop the old tuned camera, gear and horde values saved on this device
 removeLegacyKeys(localStorage);
@@ -116,106 +61,26 @@ const adopt = (p: Progress): void => {
 };
 if (syncs()) void sync.pull().then(adopt);
 
-// speed preset: this device only, changed in settings
-let speed = loadSpeed(localStorage);
-
-// WaniKani: token, cache and mode live on this device only
-const wk = createWkState({
-  store: localStorage,
-  storyStore: createStoryStore(),
-  now: Date.now,
-  makeClient: () =>
-    createWkClient({
-      fetch: (input, init) => fetch(input, init),
-      store: localStorage,
-      now: Date.now,
-    }),
-});
-const overlayOpen = (): boolean =>
-  studyOpen() || tokenFormOpen() || loginOpen() || settingsOpen();
 // WaniKani (the token, for stories) is off in meaning mode;
 // runs always use the Built-in list
 const wkOn = (): boolean => !session.meaning;
-const showTokenForm = (error?: string): void =>
-  openTokenForm({
-    saved: wk.token(),
-    ...(error ? { error } : {}),
-    onSave: (token) => void wk.save(token),
-    onRemove: wk.remove,
-  });
-if (wkOn()) void wk.refresh();
 
-// the study screen (end screen only) lists what the last run missed, then its other kanji
-const kanjiList = (): readonly KanjiItem[] => session.wk?.kanji ?? KANJI;
-const studyAvailable = (): boolean =>
-  scene.kind === "end" && studyOffered(scene.run, scene.boss, session);
-// a paused run shows its last answered gate with that item's study card
-const pauseCard = (): void => {
-  // meaning mode: no card (it shows readings), the plain "Paused" instead
-  if (scene.kind !== "run" || !scene.paused || session.meaning)
-    return syncPauseCard(null, "", () => {});
-  const { run } = scene;
-  const last = lastAnswer(
-    run.rows,
-    run.results,
-    run.lastAnswer?.choice ?? -1,
-    kanjiList(),
-    KANA,
-    storiesWithFallback(wk.stories(), session.wk ? wk.mnemonics() : undefined),
-    WORDS,
-  );
-  syncPauseCard(last, `${scene.seed}:${run.results.length}`, () =>
-    act("pause"),
-  );
-};
-
-// offline retries; log in opens the form; synced offers sign out
-const syncAction = (): void => {
-  if (sync.status() === "offline") void sync.pull().then(adopt);
-  else openLogin(sync, adopt);
-};
-const showSettings = (): void =>
-  openSettings({
-    view: () => ({
-      speed,
-      wkLabel: wk.view().label,
-      hasToken: wk.token() !== null,
-      sync: !session.meaning ? sync.status() : null,
-    }),
-    onSpeed: (s) => {
-      speed = s;
-      saveSpeed(localStorage, speed);
-    },
-    onToken: () => showTokenForm(),
-    onSync: syncAction,
-    build: __BUILD__,
-  });
-
-const study = (): void => {
-  if (scene.kind !== "end" || !studyAvailable()) return;
-  const { run } = scene;
-  const missed = missedItems(
-    run.rows,
-    run.results,
-    run.track.charges,
-    kanjiList(),
-  );
-  const cards = studyCards(
-    missed,
-    kanjiList(),
-    KANA,
-    storiesWithFallback(wk.stories(), session.wk ? wk.mnemonics() : undefined),
-    runKanji(run.rows, run.results),
-    WORDS,
-  );
-  // its Play again is the end screen's: a new run straight away
-  openStudy(cards, () => act("confirm"));
-};
+// the DOM panels: settings, WaniKani token, study, login, pause card
+const panels = createPanels({
+  scene: () => scene,
+  session: () => session,
+  sync,
+  adopt,
+  act: (a) => act(a),
+  store: localStorage,
+});
+if (wkOn()) void panels.wk.refresh();
 
 const act = (action: Action): void => {
-  if (overlayOpen()) return;
-  if (webgl !== "ok" && scene.kind === "start" && action === "confirm") return;
-  if (action === "study") return study();
+  if (panels.anyOpen()) return;
+  if (stage.webgl() !== "ok" && scene.kind === "start" && action === "confirm")
+    return;
+  if (action === "study") return panels.openStudy();
   const next = handleAction(scene, action, newSeed, session);
   // placement changes progress: save it right away, under this mode's key
   const keys = persistence(session);
@@ -228,21 +93,21 @@ const steerAxis = bindKeys(act);
 // a tap pauses or resumes a run, does nothing during the boss clash, hits the end
 // screen's buttons (Play again, Study, Home; elsewhere nothing), and on the start
 // screen hits the placement controls or else starts a run
-const takeDrag = bindDrag(canvas, (x, y) => {
-  if (overlayOpen()) return;
+const takeDrag = bindDrag(stage.canvas, (x, y) => {
+  if (panels.anyOpen()) return;
   if (scene.kind === "run") return act("pause");
   if (scene.kind === "boss") return;
   if (scene.kind === "end") {
     const w = window.innerWidth;
     const h = window.innerHeight;
-    const action = endTap(studyAvailable(), w, h, x, y);
+    const action = endTap(panels.studyAvailable(), w, h, x, y);
     if (action) act(action);
     return;
   }
   const w = window.innerWidth;
   const h = window.innerHeight;
   const picking = scene.pick !== undefined;
-  if (!picking && settingsTap(w, h, x, y)) return showSettings();
+  if (!picking && settingsTap(w, h, x, y)) return panels.openSettings();
   const mode = !picking ? modeTap(w, h, x, y) : null;
   if (mode && (mode === "meaning") !== session.meaning) {
     // switch modes: load the other save; nothing carries over
@@ -254,7 +119,7 @@ const takeDrag = bindDrag(canvas, (x, y) => {
     return;
   }
   if (!picking && !session.meaning && syncTap(sync.status(), w, h, x, y))
-    return syncAction();
+    return panels.openSync();
   const action = startTap(scene.pick !== undefined, w, h, x, y, !session.wk);
   if (action) act(action);
 });
@@ -264,17 +129,22 @@ startLoop(
   (dt) => {
     // back on the start screen: refresh WaniKani (the client throttles)
     if (scene.kind === "start" && lastKind !== "start" && wkOn())
-      void wk.refresh();
+      void panels.wk.refresh();
     lastKind = scene.kind;
     // an invalid token reopens the form, once, from the start screen
-    if (scene.kind === "start" && !overlayOpen() && wkOn() && wk.takeInvalid())
-      showTokenForm("WaniKani token invalid");
+    if (
+      scene.kind === "start" &&
+      !panels.anyOpen() &&
+      wkOn() &&
+      panels.wk.takeInvalid()
+    )
+      panels.openToken("WaniKani token invalid");
     const next = updateScene(
       scene,
       dt,
       steerAxis(),
       takeDrag(),
-      SPEED_PRESETS[speed],
+      SPEED_PRESETS[panels.speed()],
     );
 
     const settled = afterStep(session, scene, next, Date.now());
@@ -290,9 +160,10 @@ startLoop(
   },
   () => {
     // 3D draws the run and the boss clash; #game then draws only the overlay
+    const view3d = stage.view3d();
     let track: TrackView | undefined;
     if (view3d && (scene.kind === "run" || scene.kind === "boss")) {
-      view3d.render(scene, SPEED_PRESETS[speed]);
+      view3d.render(scene, SPEED_PRESETS[panels.speed()]);
       track = {
         project: view3d.project,
         haze: view3d.haze,
@@ -300,7 +171,7 @@ startLoop(
       };
     }
     render(
-      ctx,
+      stage.ctx,
       window.innerWidth,
       window.innerHeight,
       scene,
@@ -308,9 +179,8 @@ startLoop(
       sync.status(),
       track,
       otherLevel,
-      webgl !== "failed",
+      stage.webgl() !== "failed",
     );
-    pauseCard();
-    syncSettings();
+    panels.sync();
   },
 );

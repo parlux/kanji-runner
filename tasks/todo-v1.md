@@ -170,8 +170,8 @@ Checks:
 - `main.ts` keeps boot, the loop, input and the scene changes.
 
 **Acceptance criteria:**
-- [ ] `main.ts` ≤ 200 lines.
-- [ ] Every panel opens and closes as before, checked in the browser at 390×844.
+- [x] `main.ts` ≤ 200 lines.
+- [x] Every panel opens and closes as before, checked in the browser at 390×844.
 
 **Scope:** M
 
