@@ -1,5 +1,5 @@
 import { itemKey, READING_UNLOCK_BOX, weight } from "./srs";
-import { isWordEligible } from "./words";
+import { isKanjiWord, isWordEligible } from "./words";
 import { WK_DUE_BOOST } from "./tuning";
 import type { KanaItem, KanjiItem, Progress, WordItem } from "./types";
 
@@ -7,16 +7,19 @@ import type { KanaItem, KanjiItem, Progress, WordItem } from "./types";
 export const kanaLevel = (k: KanaItem): number =>
   k.script === "hiragana" ? 0 : 1;
 
-/** One askable item: a kana, a kanji as a meaning or a reading gate, or a loanword. */
+/** One askable item: a kana, a kanji as a meaning or a reading gate, or a word (its meaning, or a kanji word's reading). */
 export type Entry =
   | { key: string; type: "kana"; item: KanaItem }
   | { key: string; type: "word"; item: WordItem }
+  | { key: string; type: "wordreading"; item: WordItem }
   | { key: string; type: "meaning" | "reading"; item: KanjiItem };
 
 /**
  * Every unlocked item, in progression order: kana, then kanji by level. A
  * kanji's reading follows its meaning, once the meaning box is ≥ 3. Then the
- * eligible `words` (Built-in only), in list order.
+ * eligible `words` (Built-in only): the current level's first, then the lower
+ * levels from the lowest up, each in list order (loanwords, then kanji words).
+ * A kanji word's reading follows its meaning, at meaning box ≥ 3 as for kanji.
  */
 export function unlockedPool(
   progress: Progress,
@@ -36,9 +39,22 @@ export function unlockedPool(
     if ((progress.items[key]?.box ?? 0) >= READING_UNLOCK_BOX)
       out.push({ key: itemKey(k.char, "reading"), type: "reading", item: k });
   }
-  for (const w of words)
-    if (isWordEligible(w, progress))
-      out.push({ key: itemKey(w.word, "word"), type: "word", item: w });
+  const eligible = words.filter((w) => isWordEligible(w, progress));
+  const byLevel = (a: WordItem, b: WordItem) => a.level - b.level;
+  const ordered = [
+    ...eligible.filter((w) => w.level === level),
+    ...eligible.filter((w) => w.level < level).sort(byLevel),
+  ];
+  for (const w of ordered) {
+    const key = itemKey(w.word, "word");
+    out.push({ key, type: "word", item: w });
+    if (isKanjiWord(w) && (progress.items[key]?.box ?? 0) >= READING_UNLOCK_BOX)
+      out.push({
+        key: itemKey(w.word, "wordreading"),
+        type: "wordreading",
+        item: w,
+      });
+  }
   return out;
 }
 
@@ -176,7 +192,7 @@ export function wanikaniPool(
 ): Pool {
   const record = (e: Entry) => progress.items[e.key];
   const extras = (e: Entry) =>
-    e.type === "kana" || e.type === "word"
+    e.type === "kana" || e.type === "word" || e.type === "wordreading"
       ? undefined
       : list.extras.get(e.item.char);
   const box = (e: Entry): number => {

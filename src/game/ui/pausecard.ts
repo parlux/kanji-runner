@@ -25,6 +25,7 @@ const ASKED: Record<LastAnswer["type"], string> = {
   meaning: "Kanji → meaning",
   reading: "Kanji → reading",
   word: "Word → meaning",
+  wordreading: "Word → reading",
 };
 
 let shown: { el: HTMLElement; key: string } | null = null;

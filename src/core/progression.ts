@@ -155,7 +155,7 @@ export function applyUnlock(
  * lower undoes an over-placement: the unlocked level becomes N + 1, and
  * placement marks above N that were never answered (seen 0) are removed.
  * Answered items always keep their record. Words of those levels are marked
- * the same way (`words`); they never affect unlocking (`levelKeys`).
+ * the same way (`words`; a kanji word's reading too); they never affect unlocking (`levelKeys`).
  */
 export function place(
   progress: Progress,
@@ -184,7 +184,10 @@ export function place(
   };
   for (let l = 0; l <= top; l++)
     for (const key of levelKeys(l, kana, kanji)) mark(key, l);
-  for (const w of words) mark(itemKey(w.word, "word"), w.level);
+  for (const w of words) {
+    mark(itemKey(w.word, "word"), w.level);
+    if (w.kind !== "loanword") mark(itemKey(w.word, "wordreading"), w.level);
+  }
   return {
     ...progress,
     unlockedLevel: n + 1,

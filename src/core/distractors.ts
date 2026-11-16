@@ -1,4 +1,5 @@
 import confusables from "../data/confusables.json";
+import { kanjiNeeded } from "./words";
 import { randInt, shuffle, type Rng } from "./rng";
 import type { GateRow, KanaItem, KanjiItem, WordItem } from "./types";
 
@@ -204,6 +205,40 @@ export function wordRow(
     item.glosses[0] as string,
     pick(rng, candidates, count - 1),
   );
+}
+
+/**
+ * Kanji word → its reading in kana. Distractors are readings of other kanji
+ * words in `pool`, never equal to the answer, within ±1 kana of its length
+ * (wider only if short); words sharing a kanji with the prompt come first (一人
+ * meets いちにち), then the rest of `pool`, then `rest` (all kanji words) to pad.
+ */
+export function wordReadingRow(
+  rng: Rng,
+  item: WordItem,
+  pool: readonly WordItem[],
+  rest: readonly WordItem[],
+  count: number,
+): GateRow {
+  const answer = item.reading as string;
+  const mine = new Set(kanjiNeeded(item.word));
+  const all: Candidate[] = [];
+  const add = (list: readonly WordItem[], rankOf: (w: WordItem) => number) => {
+    for (const w of list) {
+      if (w.word === item.word || !w.reading || w.reading === answer) continue;
+      all.push({ label: w.reading, key: w.reading, rank: rankOf(w) });
+    }
+  };
+  add(pool, (w) => (kanjiNeeded(w.word).some((c) => mine.has(c)) ? 0 : 1));
+  add(rest, () => 2);
+  let picked: string[] = [];
+  for (let tol = 1; picked.length < count - 1 && tol <= 10; tol++) {
+    const near = all.filter(
+      (c) => Math.abs(c.key.length - answer.length) <= tol,
+    );
+    picked = pick(rng, near, count - 1);
+  }
+  return row(rng, "wordreading", item.word, answer, picked);
 }
 
 /** A reading as shown on a gate: kun'yomi okurigana in brackets, あ(げる). */

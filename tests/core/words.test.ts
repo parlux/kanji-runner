@@ -71,7 +71,7 @@ describe("kanaNeeded", () => {
 
   it("every word's kana are in kana.json", () => {
     const kana = new Set(KANA.map((k) => k.char));
-    for (const w of WORDS)
+    for (const w of WORDS.filter((x) => x.kind === "loanword"))
       for (const c of kanaNeeded(w.word)) expect(kana.has(c)).toBe(true);
   });
 });
@@ -104,7 +104,12 @@ describe("level assignment", () => {
 });
 
 describe("isWordEligible", () => {
-  const coffee: WordItem = { word: "コーヒー", glosses: ["coffee"], level: 3 };
+  const coffee: WordItem = {
+    word: "コーヒー",
+    kind: "loanword",
+    glosses: ["coffee"],
+    level: 3,
+  };
   const at = (box: number) => ({
     box,
     seen: 1,
@@ -133,7 +138,12 @@ describe("isWordEligible", () => {
   });
 
   it("checks small kana as full size", () => {
-    const tissue: WordItem = { word: "ティッシュ", glosses: ["t"], level: 2 };
+    const tissue: WordItem = {
+      word: "ティッシュ",
+      kind: "loanword",
+      glosses: ["t"],
+      level: 2,
+    };
     const learned = { テ: 2, イ: 2, シ: 2, ツ: 2 };
     expect(isWordEligible(tissue, progress(2, learned))).toBe(false);
     expect(isWordEligible(tissue, progress(2, { ...learned, ユ: 2 }))).toBe(

@@ -22,7 +22,11 @@ import {
 import { createRng } from "../../src/core/rng";
 import { buildPoolRun, buildRun, select } from "../../src/core/run";
 import { defaultProgress, itemKey, MAX_BOX } from "../../src/core/srs";
-import { MAX_NEW_PER_RUN, ROWS_PER_RUN } from "../../src/core/tuning";
+import {
+  MAX_NEW_PER_RUN,
+  MAX_NEW_WORDS_PER_RUN,
+  ROWS_PER_RUN,
+} from "../../src/core/tuning";
 import type { GateRow, KanjiItem, Progress } from "../../src/core/types";
 import type { WkList } from "../../src/wanikani/parse";
 import { syntheticList } from "./wk-fixture";
@@ -316,7 +320,7 @@ describe("WaniKani pool", () => {
     let otherN = 0;
     for (const seed of forSeeds(1000, 100))
       for (const e of select(createRng(seed), pool))
-        if (e.type !== "kana" && e.type !== "word") {
+        if (e.type === "meaning" || e.type === "reading") {
           if (due.has(e.item.char)) dueN++;
           else otherN++;
         }
@@ -366,7 +370,7 @@ describe("words in the Built-in pool", () => {
     );
   });
 
-  it("introduces at most 1 new word per run, inside the cap of 4", () => {
+  it("introduces at most 2 new words per run, inside the cap of 4", () => {
     // every kanji known, no word known: only new words are left to introduce
     const p = at(6);
     for (const k of KANJI)
@@ -379,7 +383,7 @@ describe("words in the Built-in pool", () => {
       const run = select(createRng(seed), pool);
       const fresh = run.filter((e) => !pool.known(e));
       expect(fresh.filter((e) => e.type === "word").length).toBeLessThanOrEqual(
-        1,
+        MAX_NEW_WORDS_PER_RUN,
       );
       expect(fresh.length).toBeLessThanOrEqual(MAX_NEW_PER_RUN);
     }

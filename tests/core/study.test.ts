@@ -262,9 +262,9 @@ describe("lastAnswer", () => {
 
 describe("word cards", () => {
   const words: WordItem[] = [
-    { word: "コーヒー", glosses: ["coffee"], level: 2 },
-    { word: "ジャズ", glosses: ["jazz"], level: 2 },
-    { word: "ホッチキス", glosses: ["stapler"], level: 2 },
+    { word: "コーヒー", kind: "loanword", glosses: ["coffee"], level: 2 },
+    { word: "ジャズ", kind: "loanword", glosses: ["jazz"], level: 2 },
+    { word: "ホッチキス", kind: "loanword", glosses: ["stapler"], level: 2 },
   ];
   const wrows: GateRow[] = words.map((w) => ({
     type: "word",

@@ -1,4 +1,4 @@
-export type GateType = "kana" | "meaning" | "reading" | "word";
+export type GateType = "kana" | "meaning" | "reading" | "word" | "wordreading";
 
 export type KanaItem = {
   char: string;
@@ -35,10 +35,16 @@ export type KanjiItem = {
   components: string[];
 };
 
-/** A katakana loanword from `src/data/loanwords.json`; its level is assigned at load (see words.ts). */
+/**
+ * A word: a katakana loanword from `src/data/loanwords.json` (level assigned at
+ * load, see words.ts) or a kanji word from `src/data/words.json`.
+ */
 export type WordItem = {
   word: string;
-  /** Hand-written English glosses; the first is shown on gates. */
+  /** Kanji words only: the reading in kana, as the `wordreading` gate answers it. */
+  reading?: string;
+  kind: "loanword" | "single" | "okurigana" | "compound";
+  /** English glosses (loanwords hand-written, kanji words from JMdict); the first is shown on gates. */
   glosses: string[];
   /** Kanji level (2+) the word joins. */
   level: number;

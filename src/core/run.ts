@@ -4,6 +4,7 @@ import {
   meaningRow,
   readingRow,
   shownReading,
+  wordReadingRow,
   wordRow,
   type Reading,
   showReading,
@@ -73,7 +74,11 @@ export function select(rng: Rng, sel: Selection): Entry[] {
   for (const e of sel.entries) {
     if (fresh.length >= MAX_NEW_PER_RUN) break;
     if (sel.known(e)) continue;
-    if (e.type === "word" && newWords++ >= MAX_NEW_WORDS_PER_RUN) continue;
+    if (
+      (e.type === "word" || e.type === "wordreading") &&
+      newWords++ >= MAX_NEW_WORDS_PER_RUN
+    )
+      continue;
     fresh.push(e);
   }
   // Warm-ups come from the current level's known items once it has enough,
@@ -130,6 +135,8 @@ export function entryRow(
   if (e.type === "kana") return kanaRow(rng, e.item, pool.kana, count);
   if (e.type === "word")
     return wordRow(rng, e.item, pool.words, pool.allWords, count);
+  if (e.type === "wordreading")
+    return wordReadingRow(rng, e.item, pool.words, pool.allWords, count);
   const similar = pool.similar(e.item.char);
   if (e.type === "meaning")
     return meaningRow(rng, e.item, pool.kanji, count, similar);

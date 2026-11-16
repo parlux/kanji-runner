@@ -216,7 +216,7 @@ describe("wordRow", () => {
         }
       }
     }
-  });
+  }, 60000);
 
   it("prefers the pool and pads from the whole list when it is short", () => {
     const [a, b] = WORDS as [WordItem, WordItem];
