@@ -19,3 +19,4 @@ One row per owner request, written by the `triage` skill (`.claude/skills/triage
 | 2026-11-15 | Compound words as gates | idea | Owner asked for a backlog placeholder | |
 | 2026-11-15 | Re-order the backlog by Claude's priority | doc | Backlog order only | |
 | 2026-11-17 | Align standard progression with WaniKani order, readings, compounds | idea | Owner asked to refine an idea; copying WK order is out of bounds | |
+| 2026-11-17 | Fold compound unlocks into compound-word-gates; grade blend as new idea; drop wk-shaped-progression | doc | Idea and backlog edits only | |
