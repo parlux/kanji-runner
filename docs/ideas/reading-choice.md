@@ -10,4 +10,4 @@ Use open data only (KANJIDIC2, JMdict). WaniKani's own reading choices are propr
 ## Open questions
 - Should the taught reading become kun'yomi when that's the more common one (e.g. 山 やま vs サン)? Gates, distractors and stories would follow.
 - What happens to progress on a reading that stops being taught?
-- Does this shrink the "no story for this reading" gaps that [On'yomi stories from compound vocabulary](onyomi-compound-stories.md) targets? Do this one first and see.
+- Does this shrink the "no story for this reading" gaps that [On'yomi stories from compound vocabulary](onyomi-compound-stories.md) targets (in progress)? Check once that round lands.
