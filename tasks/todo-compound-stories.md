@@ -18,8 +18,8 @@ Every task: `npm run check` passes before it is checked off. Test fixtures are s
 ### Task C1: Pick and store compounds (library v3)
 **Description:** `buildLibrary` in `src/wanikani/stories.ts` picks one compound per kanji on'yomi that the kanji story and single-kanji vocabulary don't cover (spec "Which compound"), stores `compounds: [{ reading, word, wordReading, story }]`, `version: 3`. `parseLibrary` validates v3 and rejects v2. `Story` in `src/core/study.ts` gains `compounds`; `storyLookup` passes them on.
 **Acceptance:**
-- [ ] spec Testing Strategy "Pick" and "Library" cases pass; existing stories tests updated, not deleted.
-- [ ] `npm run check` passes.
+- [x] spec Testing Strategy "Pick" and "Library" cases pass; existing stories tests updated, not deleted.
+- [x] `npm run check` passes.
 **Verification:** `npm test -- stories storystore`
 **Files:** `src/wanikani/stories.ts`, `src/core/study.ts`, `tests/wanikani/stories.test.ts`
 **Scope:** M

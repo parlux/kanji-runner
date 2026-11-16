@@ -1,4 +1,5 @@
-import type { Story, StoryRadical } from "../core/study";
+import { storyReadings, toHiragana } from "../core/mnemonic";
+import type { Story, StoryCompound, StoryRadical } from "../core/study";
 import type { Result } from "./parse";
 
 /** One kanji's story entry: mnemonics and radicals in WaniKani's order. */
@@ -10,11 +11,13 @@ type StoryKanji = {
   primaryReadings: string[];
   /** Single-kanji vocabulary with a reading story, in WaniKani id order. */
   vocab: { word: string; readings: string[]; story: string }[];
+  /** One compound story per on'yomi the kanji story and bare-kanji vocabulary miss. */
+  compounds: StoryCompound[];
 };
 
 /** The story library: every kanji WaniKani has, by character. JSON-serialisable. */
 export type StoryLibrary = {
-  version: 2;
+  version: 3;
   kanji: Record<string, StoryKanji>;
 };
 
@@ -49,16 +52,47 @@ function primaryName(d: Obj): string | undefined {
   return str((ms.find((m) => m.primary === true) ?? ms[0])?.meaning);
 }
 
+const HAN = /^\p{Script=Han}$/u;
 const HIRAGANA = /^\p{Script=Hiragana}+$/u;
 /** One kanji followed by zero or more hiragana, e.g. 上 or 上げる. */
 const SINGLE_KANJI_WORD = /^\p{Script=Han}\p{Script=Hiragana}*$/u;
 
-function readingsOf(d: Obj, primaryOnly: boolean): string[] {
+function readingsOf(d: Obj, primaryOnly: boolean, type?: string): string[] {
   return arr(d.readings)
     .filter(isObj)
     .filter((r) => !primaryOnly || r.primary === true)
+    .filter((r) => type === undefined || r.type === type)
     .map((r) => str(r.reading))
     .filter((r): r is string => r !== undefined && HIRAGANA.test(r));
+}
+
+/** A multi-kanji vocabulary word that could lend a story to an on'yomi. */
+type Candidate = { word: string; readings: string[]; story: string };
+
+/** Does the word reading use the on'yomi where the kanji sits (first: prefix, last: suffix, else inside)? */
+function usesOnyomi(word: string, char: string, wr: string, on: string) {
+  const chars = [...word];
+  const i = chars.indexOf(char);
+  if (i === 0) return wr.startsWith(on);
+  if (i === chars.length - 1) return wr.endsWith(on);
+  return wr.includes(on);
+}
+
+/** The first candidate (already in level, id order) whose story mentions the on'yomi or word reading and whose reading fits. */
+function pickCompound(
+  char: string,
+  on: string,
+  words: readonly Candidate[],
+): StoryCompound | undefined {
+  for (const w of words) {
+    const story = toHiragana(w.story);
+    for (const wr of w.readings) {
+      if (!usesOnyomi(w.word, char, wr, on)) continue;
+      if (!story.includes(on) && !story.includes(wr)) continue;
+      return { reading: on, word: w.word, wordReading: wr, story: w.story };
+    }
+  }
+  return undefined;
 }
 
 function svgUrl(d: Obj): string | null {
@@ -99,9 +133,28 @@ export function buildLibrary(subjectPages: unknown): Result<StoryLibrary> {
   }
 
   const vocabByKanji = new Map<string, StoryKanji["vocab"]>();
+  const compoundsByKanji = new Map<string, Candidate[]>();
   const vocabSubjects = subjects
     .filter((s) => s.object === "vocabulary")
     .sort((a, b) => a.id - b.id);
+  const byLevel = [...vocabSubjects].sort(
+    (a, b) =>
+      (int(a.d.level) ?? Infinity) - (int(b.d.level) ?? Infinity) ||
+      a.id - b.id,
+  );
+  for (const { d } of byLevel) {
+    const word = str(d.characters);
+    const story = str(d.reading_mnemonic);
+    if (hidden(d) || !word || !story || SINGLE_KANJI_WORD.test(word)) continue;
+    const readings = readingsOf(d, false);
+    if (readings.length === 0) continue;
+    for (const c of new Set([...word].filter((x) => HAN.test(x)))) {
+      compoundsByKanji.set(c, [
+        ...(compoundsByKanji.get(c) ?? []),
+        { word, readings, story },
+      ]);
+    }
+  }
   for (const { d } of vocabSubjects) {
     const word = str(d.characters);
     const story = str(d.reading_mnemonic);
@@ -127,20 +180,30 @@ export function buildLibrary(subjectPages: unknown): Result<StoryLibrary> {
     const reading = str(d.reading_mnemonic);
     const vocab = vocabByKanji.get(char) ?? [];
     if (!meaning && !reading && rs.length === 0 && vocab.length === 0) continue;
+    const primaryReadings = readingsOf(d, true);
+    const covered = new Set([
+      ...storyReadings(reading, primaryReadings),
+      ...vocab.filter((v) => v.word === char).flatMap((v) => v.readings),
+    ]);
+    const compounds = [...new Set(readingsOf(d, false, "onyomi"))]
+      .filter((on) => !covered.has(on))
+      .map((on) => pickCompound(char, on, compoundsByKanji.get(char) ?? []))
+      .filter((c): c is StoryCompound => c !== undefined);
     kanji[char] = {
       ...(meaning ? { meaning } : {}),
       ...(reading ? { reading } : {}),
       radicals: rs.map((r) => ({ ...r })),
-      primaryReadings: readingsOf(d, true),
+      primaryReadings,
       vocab: vocab.map((v) => ({ ...v })),
+      compounds,
     };
   }
-  return { ok: true, value: { version: 2, kanji } };
+  return { ok: true, value: { version: 3, kanji } };
 }
 
 /** Validate a library read back from storage; wrong version or shape → error. */
 export function parseLibrary(raw: unknown): Result<StoryLibrary> {
-  if (!isObj(raw) || raw.version !== 2 || !isObj(raw.kanji)) {
+  if (!isObj(raw) || raw.version !== 3 || !isObj(raw.kanji)) {
     return fail("library: wrong version or shape");
   }
   const strArr = (v: unknown) =>
@@ -160,6 +223,15 @@ export function parseLibrary(raw: unknown): Result<StoryLibrary> {
           typeof v.word === "string" &&
           typeof v.story === "string" &&
           strArr(v.readings),
+      ) ||
+      !Array.isArray(k.compounds) ||
+      !k.compounds.every(
+        (c) =>
+          isObj(c) &&
+          typeof c.reading === "string" &&
+          typeof c.word === "string" &&
+          typeof c.wordReading === "string" &&
+          typeof c.story === "string",
       ) ||
       !Array.isArray(k.radicals) ||
       !k.radicals.every(
