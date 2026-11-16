@@ -29,4 +29,15 @@ describe("golden reading set", () => {
         expect(k?.readings, `${g.char} ${r}`).toContain(r);
     }
   });
+
+  it("teaches an acceptable on'yomi and kun'yomi for every entry", () => {
+    for (const g of entries) {
+      const k = kanji.get(g.char);
+      const kun = k?.kun
+        ? [k.kun.base, k.kun.okurigana].filter(Boolean).join(".")
+        : null;
+      if (g.on.length) expect(g.on, `${g.char} on`).toContain(k?.on);
+      if (g.kun.length) expect(g.kun, `${g.char} kun`).toContain(kun);
+    }
+  });
 });
