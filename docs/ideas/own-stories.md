@@ -1,6 +1,6 @@
 # Our own stories, no WaniKani needed
 
-Status: owner idea, 2026-11-17. Needs an interview.
+Status: owner idea, 2026-11-17. Needs an interview. Round 4 of the [useful Japanese epic](useful-japanese.md).
 
 ## Idea
 Create our own stories so the game no longer needs WaniKani at all.

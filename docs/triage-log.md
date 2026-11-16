@@ -27,3 +27,4 @@ One row per owner request, written by the `triage` skill (`.claude/skills/triage
 | 2026-11-17 | Re-prioritise whole backlog (keep in-progress) | doc | Backlog order only | |
 | 2026-11-17 | Make repo private, keep free hosting; add and re-prioritise | idea | Owner idea for the backlog | |
 | 2026-11-17 | Start next round: backlog #1, teach the most useful reading first | sdd | Data pipeline change across all kanji; progress/save impact; open questions | |
+| 2026-11-17 | Write up drop-WaniKani goal and useful-words epic; fold two ideas; reorder backlog | idea | Goal and backlog docs only | |

@@ -2,14 +2,18 @@
 
 Open ideas in priority order; the top one is next. The owner orders it. New ideas go at the bottom unless the owner places them.
 
+## Goal: useful Japanese, then drop WaniKani by 2027-03-14
+Epic: [Useful Japanese, then drop WaniKani](useful-japanese.md). Its rounds come first; other ideas slot between them only when the owner wants a break.
+
 ## Next
-1. [Compound words as gates](compound-word-gates.md): game; test vocabulary like 家具, unlocked once its kanji are learned. The on'yomi stories round stores only one chosen compound per reading, so this needs its own vocabulary list.
-2. [Show overall progress](overall-progress.md): game; how many levels there are and where we're up to. Small, and shows the payoff of the content rounds.
-3. [Sound effects](sound-effects.md): game; cheap boost to feel, and sets up the audio plumbing.
-4. [Private repo, page still hosted](private-repo.md): platform; free hosting. Before install-as-app, so the installed URL doesn't change.
-5. [Install as an app on the phone](install-as-app.md): platform; home-screen icon, full screen, maybe offline.
-6. [Simple, common kanji first](simple-kanji-first.md): progression; blend frequency, strokes and grade instead of strict school grade, like WaniKani. Reorders every level, so it comes after the content work.
-7. [Our own stories, no WaniKani needed](own-stories.md): stories; remove the need for WaniKani. Largest job; do it once readings and level order have settled.
-8. [Soundtrack](soundtrack.md): game; builds on the sound effects' audio plumbing.
-9. [Enemy packs can't run through crates](packs-blocked-by-crates.md): game; follows straight fire.
-10. [Fold the round skills into one project flow](skill-audit.md): process.
+1. [Word gates](useful-japanese.md#rounds): epic round 1; test words (single kanji, kanji plus kana, compounds) from JMdict with today's kanji order. Biggest gain in feel.
+2. [Useful-words order](useful-japanese.md#rounds): epic round 2; levels chosen by usefulness for travel and conversation, then manga, for the cost in new kanji; coverage measured. Replaces grade order.
+3. [Trial without WaniKani](useful-japanese.md#rounds): epic round 3; no code, a few weeks using only the app.
+4. [Our own stories, no WaniKani needed](own-stories.md): epic round 4; stays ahead of the owner's level, grows after WaniKani is dropped.
+5. [Show overall progress](overall-progress.md): game; levels, and coverage and JLPT share once round 2 has the numbers.
+6. [Sound effects](sound-effects.md): game; cheap boost to feel, and sets up the audio plumbing.
+7. [Private repo, page still hosted](private-repo.md): platform; free hosting. Before install-as-app, so the installed URL doesn't change.
+8. [Install as an app on the phone](install-as-app.md): platform; home-screen icon, full screen, maybe offline.
+9. [Soundtrack](soundtrack.md): game; builds on the sound effects' audio plumbing.
+10. [Enemy packs can't run through crates](packs-blocked-by-crates.md): game; follows straight fire.
+11. [Fold the round skills into one project flow](skill-audit.md): process.
