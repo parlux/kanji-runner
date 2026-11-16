@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
   byFrequency,
+  byUsage,
   KANJI_WORDS_PER_LEVEL,
   parseUsage,
+  usageRank,
+  usageRanks,
   WORD_PICKER,
   wordCandidates,
   wordReport,
@@ -305,6 +308,21 @@ describe("wordCandidates: kind, level, frequency facts", () => {
       [null, ["spec1"]],
     ]);
   });
+
+  it("keeps the entry's other kanji spellings, common or not", () => {
+    const { candidates } = wordCandidates(
+      jmdict(
+        entry(
+          [{ keb: "出かける" }, { keb: "出掛ける", pri: [] }],
+          [{ reb: "でかける" }],
+        ),
+      ),
+      KANJI,
+    );
+    expect(candidates.map((c) => [c.word, c.spellings])).toEqual([
+      ["出かける", ["出掛ける"]],
+    ]);
+  });
 });
 
 /** A made-up candidate. */
@@ -322,6 +340,7 @@ const cand = (
   level,
   nf,
   pri,
+  spellings: [],
 });
 const names = (cs: Candidate[]) => cs.map((c) => c.word);
 
@@ -437,6 +456,95 @@ describe("byFrequency", () => {
     const run = (pick: WordPicker) => names(pick(candidates, 2));
     expect(run(byFrequency)).toEqual(["人人", "一人"]);
     expect(run(alphabetical)).toEqual(["一人", "人人"]);
+  });
+});
+
+const usage = (...forms: string[]) => new Map(forms.map((f, i) => [f, i]));
+const withReading = (c: Candidate, reading: string) => ({ ...c, reading });
+
+describe("usageRank", () => {
+  const rank = (c: Candidate, list: Map<string, number>, words = [c.word]) =>
+    usageRank(c, list, new Set(words));
+
+  it("takes the best rank of the word or its entry's other spellings", () => {
+    const c = { ...cand("出かける", "okurigana"), spellings: ["出掛ける"] };
+    expect(rank(c, usage("の", "出掛ける", "出かける"))).toBe(1);
+    expect(rank(c, usage("の"))).toBeNull();
+  });
+
+  it("looks up an all-katakana reading, never a hiragana one", () => {
+    const hk = withReading(cand("香港", "compound"), "ホンコン");
+    expect(rank(hk, usage("の", "ホンコン"))).toBe(1);
+    // そう is "so" in the list, not 添う.
+    const sou = withReading(cand("添う", "okurigana"), "そう");
+    expect(rank(sou, usage("そう"))).toBeNull();
+  });
+
+  it("ranks お/ご + stem by the stem, unless the stem is a candidate", () => {
+    const okane = cand("お金", "compound");
+    expect(rank(okane, usage("の", "金"))).toBe(1);
+    const otenki = cand("お天気", "compound");
+    expect(rank(otenki, usage("天気"), ["お天気", "天気"])).toBeNull();
+    expect(rank(otenki, usage("天気"))).toBe(0);
+  });
+});
+
+describe("byUsage", () => {
+  it("orders by usage rank within each level, then by level", () => {
+    const cs = [
+      cand("c", "compound", 3, 1),
+      cand("a", "compound", 2, 1),
+      cand("b", "compound", 2, 40),
+    ];
+    expect(names(byUsage(usage("c", "b", "a"))(cs, 30))).toEqual([
+      "b",
+      "a",
+      "c",
+    ]);
+  });
+
+  it("ranks an unlisted word at the median rank of listed words with its nf", () => {
+    const cs = [
+      cand("l1", "compound", 2, 5),
+      cand("l2", "compound", 2, 5),
+      cand("l3", "compound", 2, 5),
+      cand("x", "compound", 2, 9),
+      cand("u", "compound", 2, 5),
+      cand("n", "compound", 2, null),
+    ];
+    const list = usage("l1", "x", "l2", "l3");
+    const ranks = usageRanks(cs, list);
+    expect(cs.map((c) => ranks.get(c))).toEqual([0, 2, 3, 1, 2, Infinity]);
+    // u ties l2 at rank 2 (nf, then spelling, break it); n has no nf: last.
+    expect(names(byUsage(list)(cs, 30))).toEqual([
+      "l1",
+      "x",
+      "l2",
+      "u",
+      "l3",
+      "n",
+    ]);
+  });
+
+  it("puts words with no rank after the rest, ordered by nf", () => {
+    const cs = [
+      cand("p", "compound", 2, null),
+      cand("q", "compound", 2, null, ["ichi1", "news1"]),
+      cand("r", "compound", 2, 3),
+    ];
+    expect(names(byUsage(usage("r"))(cs, 30))).toEqual(["r", "q", "p"]);
+  });
+
+  it("keeps the kind shares and the number cap", () => {
+    const cs = [
+      ...["十一", "十二", "十三", "十四"].map((w) => cand(w, "compound")),
+      ...Array.from({ length: 4 }, (_, i) => cand(`s${i}`, "single")),
+    ];
+    const out = byUsage(usage("十一", "十二", "十三", "十四", "s0", "s1"))(
+      cs,
+      4,
+    );
+    expect(names(out)).toEqual(["十一", "十二", "十三", "s0"]);
   });
 });
 

@@ -40,6 +40,8 @@ export type Candidate = {
   nf: number | null;
   /** The spelling's priority tags other than nf (news1, ichi1, …). */
   pri: string[];
+  /** The entry's other kanji spellings, common or not (出掛ける for 出かける). */
+  spellings: string[];
 };
 
 /** A (spelling, reading) option of one entry, before filtering. */
@@ -51,6 +53,8 @@ type Draft = {
   pos: string[];
   misc: string[];
   glosses: string[];
+  /** Every kanji spelling of the entry. */
+  kebs: string[];
 };
 
 const COMMON = /^(news1|ichi1|spec1|spec2|gai1)$/;
@@ -146,10 +150,10 @@ export type RemovedBy = keyof typeof FILTERS | "duplicateSpelling";
 
 /** The entry's drafts: one per common spelling, with its reading. */
 function drafts(entry: string): Draft[] {
-  const kebs = [...entry.matchAll(/<k_ele>([\s\S]*?)<\/k_ele>/g)]
+  const all = [...entry.matchAll(/<k_ele>([\s\S]*?)<\/k_ele>/g)]
     .map((m) => m[1] ?? "")
-    .map((k) => ({ keb: tags(k, "keb")[0] ?? "", pri: tags(k, "ke_pri") }))
-    .filter((k) => isCommon(k.pri));
+    .map((k) => ({ keb: tags(k, "keb")[0] ?? "", pri: tags(k, "ke_pri") }));
+  const kebs = all.filter((k) => isCommon(k.pri));
   const rebs = [...entry.matchAll(/<r_ele>([\s\S]*?)<\/r_ele>/g)]
     .map((m) => m[1] ?? "")
     .filter((r) => !r.includes("<re_nokanji"))
@@ -167,7 +171,13 @@ function drafts(entry: string): Draft[] {
   return kebs.map(({ keb, pri }) => {
     const apply = rebs.filter((r) => !r.restr.length || r.restr.includes(keb));
     const reb = (apply.find((r) => r.common) ?? apply[0])?.reb ?? "";
-    return { word: keb, reading: reb, pri, ...first };
+    return {
+      word: keb,
+      reading: reb,
+      pri,
+      ...first,
+      kebs: all.map((k) => k.keb),
+    };
   });
 }
 
@@ -202,6 +212,7 @@ function toCandidate(d: Draft, ctx: Ctx): Candidate {
     level,
     nf: nfOf(d.pri),
     pri: d.pri.filter((p) => !/^nf\d\d$/.test(p)),
+    spellings: d.kebs.filter((k) => k !== d.word),
   };
 }
 
@@ -289,18 +300,22 @@ const isNumberWord = (word: string) =>
   /^[〇一二三四五六七八九十百千万]+月?$/u.test(word);
 
 /**
- * Today's picker: per level, rank by frequency (`byRank`), fill each kind's
- * share (about 25% single, 25% okurigana, 50% compound) from its best-ranked
- * candidates, then any shortfall from the best-ranked of the rest. At most
+ * Per level, rank with `compare`, fill each kind's share (about 25% single,
+ * 25% okurigana, 50% compound) from its best-ranked candidates, then any
+ * shortfall from the best-ranked of the rest. At most
  * `MAX_NUMBER_WORDS_PER_LEVEL` number words (the best-ranked); the skipped
  * ones don't fill shortfalls.
  */
-export const byFrequency: WordPicker = (candidates, perLevel) => {
+function pickPerLevel(
+  candidates: Candidate[],
+  perLevel: number,
+  compare: (a: Candidate, b: Candidate) => number,
+): Candidate[] {
   const levels = [...new Set(candidates.map((c) => c.level))].sort(
     (a, b) => a - b,
   );
   return levels.flatMap((level) => {
-    const ranked = candidates.filter((c) => c.level === level).sort(byRank);
+    const ranked = candidates.filter((c) => c.level === level).sort(compare);
     const single = Math.floor(perLevel * MIX.single);
     const okurigana = Math.floor(perLevel * MIX.okurigana);
     const share: Record<WordKind, number> = {
@@ -315,7 +330,87 @@ export const byFrequency: WordPicker = (candidates, perLevel) => {
     for (const c of usable) if (chosen.size < perLevel) chosen.add(c);
     return usable.filter((c) => chosen.has(c));
   });
-};
+}
+
+/** Newspaper-frequency picker (W2): `pickPerLevel` ranked by JMdict `nf`. */
+export const byFrequency: WordPicker = (candidates, perLevel) =>
+  pickPerLevel(candidates, perLevel, byRank);
+
+const ALL_KATAKANA = /^[\u30a1-\u30fa\u30fc]+$/;
+
+/**
+ * A candidate's rank in the usage list, or null when it isn't listed:
+ * 1. the best rank of any of its entry's kanji spellings (the list holds
+ *    UniDic lemmas, so 出かける is listed as 出掛ける);
+ * 2. else, by reading when the reading is all katakana (香港 ホンコン): the
+ *    lemmas put native words in kanji, so a hiragana form in the list is
+ *    another word (そう "so" is not 添う, とる is not 撮る);
+ * 3. else, for お/ご plus a stem, the stem's rank: UniDic splits the prefix
+ *    off (お金 is 御 + 金), so the stem's count holds these uses. Only when
+ *    the stem is not a candidate itself (`words`), so お天気 doesn't take
+ *    天気's rank and the plain word is taught instead of a doublet.
+ */
+export function usageRank(
+  c: Candidate,
+  usage: UsageRanks,
+  words: Set<string>,
+): number | null {
+  const best = (forms: string[]) => {
+    const ranks = forms.flatMap((w) => usage.get(w) ?? []);
+    return ranks.length ? Math.min(...ranks) : null;
+  };
+  return (
+    best([c.word, ...c.spellings]) ??
+    (ALL_KATAKANA.test(c.reading) ? best([c.reading]) : null) ??
+    (/^[おご]./.test(c.word) && !words.has(c.word.slice(1))
+      ? best([c.word.slice(1)])
+      : null)
+  );
+}
+
+/**
+ * Usage ranks for every candidate. A candidate the list lacks (mostly
+ * compounds UniDic splits into short units: お金 is 御 + 金, 三月 is 三 + 月)
+ * gets the median rank of the listed candidates with the same `nf`; with no
+ * `nf`, Infinity (after every listed word).
+ */
+export function usageRanks(
+  candidates: Candidate[],
+  usage: UsageRanks,
+): Map<Candidate, number> {
+  const words = new Set(candidates.map((c) => c.word));
+  const listed = new Map(
+    candidates.map((c) => [c, usageRank(c, usage, words)]),
+  );
+  const byNf = new Map<number, number[]>();
+  for (const [c, r] of listed)
+    if (r !== null && c.nf !== null)
+      byNf.set(c.nf, [...(byNf.get(c.nf) ?? []), r]);
+  const median = (rs: number[] = []) =>
+    rs.sort((a, b) => a - b)[Math.floor(rs.length / 2)] ?? Infinity;
+  return new Map(
+    candidates.map((c) => [
+      c,
+      listed.get(c) ?? (c.nf === null ? Infinity : median(byNf.get(c.nf))),
+    ]),
+  );
+}
+
+/**
+ * Everyday-usage picker (SPEC-word-gates `byUsage`): `pickPerLevel` ranked by
+ * `usageRanks`, ties (and words with no rank) by `nf` as `byFrequency`.
+ */
+export const byUsage =
+  (usage: UsageRanks): WordPicker =>
+  (candidates, perLevel) => {
+    const rank = usageRanks(candidates, usage);
+    const at = (c: Candidate) => rank.get(c) ?? Infinity;
+    return pickPerLevel(
+      candidates,
+      perLevel,
+      (a, b) => (at(a) === at(b) ? 0 : at(a) - at(b)) || byRank(a, b),
+    );
+  };
 
 /** The one picker the build uses; point it at another `WordPicker` to swap. */
 export const WORD_PICKER: WordPicker = (candidates, perLevel) =>
