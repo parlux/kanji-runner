@@ -29,8 +29,8 @@ describe("kanji words data (SPEC-word-gates)", () => {
     expectPresent("お金", "おかね");
   });
 
-  // byFrequency ranks by JMdict nf bands. 今日 (nf02) loses level 5's
-  // nf01/02 ties on spelling; 入る はいる (nf25) ranks ~40th of level 2's
+  // byFrequency ranks by JMdict nf bands. Level 5 has 32 nf01 compounds
+  // ahead of 今日 (nf02); 入る はいる (nf25) ranks 41st of level 2's
   // okurigana. A picker change is the owner's call; each flips when fixed.
   it.fails("has 今日 きょう", () => expectPresent("今日", "きょう"));
   it.fails("has 入る はいる", () => expectPresent("入る", "はいる"));
