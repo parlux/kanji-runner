@@ -1,6 +1,7 @@
 # Tasks: on'yomi stories from compound vocabulary (v1.3.0)
 
 Spec: `docs/specs/SPEC-compound-stories.md` (2026-11-17). Intent: `docs/intent/onyomi-compound-stories.md`. Idea: `docs/ideas/onyomi-compound-stories.md`. Started 2026-11-17.
+Review: https://claude.ai/artifact/DgzLWE284WZFqUPgQrZwqB
 Every task: `npm run check` passes before it is checked off. Test fixtures are synthetic: never commit real WaniKani content.
 
 ## Plan
