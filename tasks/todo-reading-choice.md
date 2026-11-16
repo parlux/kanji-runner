@@ -39,18 +39,30 @@ Every task: `npm run check` passes before it is checked off. Never commit `.data
 **Files:** `scripts/build-data.ts`, `scripts/reading-overrides.json`, `src/data/kanji.json` (+ any regenerated `src/data/` file), `tests/data/kanji.test.ts`, `README.md`, this file
 **Scope:** M
 
-### Task R3: Changelog, version
+### Task R3: Golden reading set (highest risk: opus, web research)
+**Description:** Owner request (2026-11-17): a curated, researched set of expected readings so this and later data changes are measured against it. `tests/data/reading-golden.json`: one entry per kanji, `{ "char", "on": [acceptable on'yomi], "kun": [acceptable kun entries], "note": "<evidence: top everyday words, source>" }`. "Correct" = the reading a learner meets most in everyday vocabulary (on'yomi: across common words; kun'yomi: the most frequent word where the kanji stands alone with kana). Two readings go in the list only when they're genuinely about equally common. Covers: every kanji in the R2 change list (135), every level 2–10 kanji whose pick was a tie or a count of 1, and the hard multi-reading kanji of levels 2–10 (生, 下, 間, 日, 上, 家, 人, 行, 出, 中…). Researched from open sources and general knowledge of Japanese (word-frequency lists, dictionaries); nothing copied from WaniKani. A test checks every golden entry against `src/data/kanji.json`; each mismatch is fixed with an override in `scripts/reading-overrides.json` (why cites the evidence) or, if the golden entry was wrong, a corrected entry.
+**Acceptance:**
+- [ ] Golden set covers the groups above; every entry has a note.
+- [ ] Golden test passes; overrides added with reasons; data rebuilt and committed.
+- [ ] Numbers logged below: golden size, agreement before overrides, overrides added.
+- [ ] `npm run check` passes.
+**Verification:** `npm test -- golden kanji`
+**Dependencies:** R2
+**Files:** `tests/data/reading-golden.json`, a golden test in `tests/data/`, `scripts/reading-overrides.json`, `src/data/kanji.json`, this file
+**Scope:** M
+
+### Task R4: Changelog, version
 **Description:** Bump to 1.4.0, add `## 1.4.0 (date)` to `CHANGELOG.md` (one line: readings picked by how many common words use them).
 **Acceptance:**
 - [ ] Version 1.4.0 in `package.json` and `CHANGELOG.md`.
 - [ ] Deploy green.
 **Verification:** `npm run check`; deploy green.
-**Dependencies:** R2
+**Dependencies:** R3
 **Files:** `package.json`, `CHANGELOG.md`, this file
 **Scope:** S
 
 ### Checkpoint R: v1.4.0 (owner, on the phone + change list)
-- [ ] The change list (checkpoint page) reads right against your WaniKani sense; flagged misses noted for overrides.
+- [ ] The change list (checkpoint page, with the golden-set result) reads right against your WaniKani sense; flagged misses noted for overrides.
 - [ ] A run with 明 (level 5) shows あか(るい) on its reading gate; labels readable.
 - [ ] Existing progress intact; stories still show (or "no story") for the new readings.
 
