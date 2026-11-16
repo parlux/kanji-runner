@@ -22,3 +22,4 @@ One row per owner request, written by the `triage` skill (`.claude/skills/triage
 | 2026-11-17 | Fold compound unlocks into compound-word-gates; grade blend as new idea; drop wk-shaped-progression | doc | Idea and backlog edits only | |
 | 2026-11-17 | Add reading-choice idea; re-prioritise backlog | idea | Owner asked for an idea entry and backlog order | |
 | 2026-11-17 | On'yomi stories already in progress: move to In progress in backlog | doc | Backlog edit only | |
+| 2026-11-17 | Own stories (drop WaniKani), sound effects, soundtrack, overall progress | idea | Four owner ideas for the backlog | |

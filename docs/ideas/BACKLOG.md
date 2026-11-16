@@ -12,3 +12,7 @@ Open ideas in priority order; the top one is next. The owner orders it. New idea
 4. [Install as an app on the phone](install-as-app.md): platform; home-screen icon, full screen, maybe offline.
 5. [Simple, common kanji first](simple-kanji-first.md): progression; blend frequency, strokes and grade instead of strict school grade, like WaniKani. Reorders every level, so it comes after the content work.
 6. [Fold the round skills into one project flow](skill-audit.md): process.
+7. [Our own stories, no WaniKani needed](own-stories.md): stories; remove the need for WaniKani.
+8. [Sound effects](sound-effects.md): game.
+9. [Soundtrack](soundtrack.md): game.
+10. [Show overall progress](overall-progress.md): game; how many levels there are and where we're up to.
