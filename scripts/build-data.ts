@@ -23,6 +23,7 @@ import { cleanGloss, isShort, pickGlosses } from "./glosses";
 import {
   KANJI_WORDS_PER_LEVEL,
   parseUsage,
+  usageRank,
   WORD_PICKER,
   wordCandidates,
   wordReport,
@@ -334,8 +335,12 @@ async function main(): Promise<void> {
 
   const { candidates, removed } = wordCandidates(jmdict, kanji);
   const usage = parseUsage((await cached("usage", refresh)).toString("utf8"));
-  console.log(`usage list: ${usage.size} word forms`);
-  const words = WORD_PICKER(candidates, KANJI_WORDS_PER_LEVEL);
+  const listed = new Set(candidates.map((c) => c.word));
+  const ranked = candidates.filter((c) => usageRank(c, usage, listed) !== null);
+  console.log(
+    `usage list: ${usage.size} word forms; ranks ${ranked.length} of ${candidates.length} candidates`,
+  );
+  const words = WORD_PICKER(usage)(candidates, KANJI_WORDS_PER_LEVEL);
   writeJsonLines(
     "src/data/words.json",
     words.map(({ word, reading, glosses, kind, level }) => ({

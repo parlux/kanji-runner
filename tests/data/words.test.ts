@@ -29,11 +29,9 @@ describe("kanji words data (SPEC-word-gates)", () => {
     expectPresent("お金", "おかね");
   });
 
-  // byFrequency ranks by JMdict nf bands. Level 5 has 32 nf01 compounds
-  // ahead of 今日 (nf02); 入る はいる (nf25) ranks 41st of level 2's
-  // okurigana. A picker change is the owner's call; each flips when fixed.
-  it.fails("has 今日 きょう", () => expectPresent("今日", "きょう"));
-  it.fails("has 入る はいる", () => expectPresent("入る", "はいる"));
+  // Newspaper ranking (byFrequency, W2) missed these; byUsage picks them.
+  it("has 今日 きょう", () => expectPresent("今日", "きょう"));
+  it("has 入る はいる", () => expectPresent("入る", "はいる"));
 
   it("leaves out usually-kana words and fragments", () => {
     for (const w of ["出来る", "その上"]) expect(find(w), w).toBeUndefined();

@@ -10,8 +10,10 @@ npm run lint
 npm run build
 ```
 
-`npm run data:build` regenerates `src/data/kanji.json` from the sources below. The generated JSON is committed, so the app needs no network at runtime.
+`npm run data:build` regenerates `src/data/` (kanji, words) from the sources below. The generated JSON is committed, so the app needs no network at runtime.
 
 ## Attribution
 
 Kanji data comes from the [KANJIDIC2](https://www.edrdg.org/wiki/index.php/KANJIDIC_Project), [KRADFILE](https://www.edrdg.org/krad/kradinf.html) and [JMdict](https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project) files (JMdict picks which readings to teach and supplies the kanji words and their glosses), the property of the [Electronic Dictionary Research and Development Group](https://www.edrdg.org/) (EDRDG), used in conformance with the group's [licence](https://www.edrdg.org/edrdg/licence.html): [Creative Commons Attribution-ShareAlike 4.0](https://creativecommons.org/licenses/by-sa/4.0/). The generated data in `src/data/` is derived from them and shared under the same licence.
+
+Which kanji words each level teaches is ranked by everyday usage from the [TUBELEX](https://github.com/naist-nlp/tubelex) Japanese word frequency list (YouTube subtitles, UniDic 3.1.0 lemmas; Adam Nohejl et al., NAIST), Copyright (c) 2022-4 Adam Nohejl, used under its [BSD 3-Clause licence](https://github.com/naist-nlp/tubelex/blob/main/LICENSE). Only the ranking is used; no list data ships in the app. Rebuilding the data needs the `xz` command to unpack it.

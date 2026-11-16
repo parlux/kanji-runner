@@ -456,7 +456,7 @@ describe("byFrequency", () => {
       cand("b", "compound", 3, 1),
       ...Array.from({ length: 4 }, (_, i) => cand(`a${i}`, "compound", 2, i)),
     ];
-    const out = WORD_PICKER(cs, 3);
+    const out = WORD_PICKER(new Map())(cs, 3);
     expect(out.map((c) => c.level)).toEqual([2, 2, 2, 3]);
   });
 

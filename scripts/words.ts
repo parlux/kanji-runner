@@ -6,15 +6,17 @@
  * 1. `wordCandidates(jmdictXml, kanji)` → every usable word (`Candidate`),
  *    after the named filters in `FILTERS`, plus how many entries each removed.
  *    No ranking happens here beyond keeping one entry per spelling.
- * 2. `WORD_PICKER(candidates, KANJI_WORDS_PER_LEVEL)` → the words to teach, in
- *    teaching order (level, then rank within the level).
+ * 2. `WORD_PICKER(usage)(candidates, KANJI_WORDS_PER_LEVEL)` → the words to
+ *    teach, in teaching order (level, then rank within the level). `usage` is
+ *    the everyday frequency list (`parseUsage`).
  *
  * `wordReport(removed, chosen)` renders the report for `.data-cache/`.
  *
  * Adding a picker: write a function of type `WordPicker` (it sees only the
  * candidates and the per-level count; `nf` and `pri` are its frequency
- * facts), return the chosen candidates in teaching order, and point
- * `WORD_PICKER` at it. Nothing else needs editing; rebuild the data.
+ * facts, and a picker that needs the usage list takes it as `byUsage` does),
+ * return the chosen candidates in teaching order, and point `WORD_PICKER` at
+ * it. Nothing else needs editing; rebuild the data.
  */
 import { cleanGloss, pickGlosses } from "./glosses";
 
@@ -109,7 +111,7 @@ const MAX_GLOSS = 20;
  * sense's other glosses that fits becomes the primary (帰国 "return to one's
  * country" → "returning home").
  */
-export function fitGlosses(meanings: string[]): string[] {
+function fitGlosses(meanings: string[]): string[] {
   const glosses = pickGlosses(meanings);
   const fit = glosses.find((g) => g.length <= MAX_GLOSS);
   return fit ? [fit, ...glosses.filter((g) => g !== fit)] : glosses;
@@ -426,9 +428,11 @@ export const byUsage =
     );
   };
 
-/** The one picker the build uses; point it at another `WordPicker` to swap. */
-export const WORD_PICKER: WordPicker = (candidates, perLevel) =>
-  byFrequency(candidates, perLevel);
+/**
+ * The one picker the build uses, given the usage list; point it at another
+ * `WordPicker` to swap (`() => byFrequency` for the W2 newspaper order).
+ */
+export const WORD_PICKER = (usage: UsageRanks): WordPicker => byUsage(usage);
 
 const LISTED_LEVELS = { from: 2, to: 10 };
 
