@@ -23,3 +23,5 @@ One row per owner request, written by the `triage` skill (`.claude/skills/triage
 | 2026-11-17 | Add reading-choice idea; re-prioritise backlog | idea | Owner asked for an idea entry and backlog order | |
 | 2026-11-17 | On'yomi stories already in progress: move to In progress in backlog | doc | Backlog edit only | |
 | 2026-11-17 | Start backlog #1: on'yomi stories from compound vocabulary | sdd | New data (compound vocab), storage change, reverses a spec rule | |
+| 2026-11-17 | Own stories (drop WaniKani), sound effects, soundtrack, overall progress | idea | Four owner ideas for the backlog | |
+| 2026-11-17 | Re-prioritise whole backlog (keep in-progress) | doc | Backlog order only | |
