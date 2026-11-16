@@ -42,10 +42,10 @@ Every task: `npm run check` passes before it is checked off. Never commit `.data
 ### Task R3: Golden reading set (highest risk: opus, web research)
 **Description:** Owner request (2026-11-17): a curated, researched set of expected readings so this and later data changes are measured against it. `tests/data/reading-golden.json`: one entry per kanji, `{ "char", "on": [acceptable on'yomi], "kun": [acceptable kun entries], "note": "<evidence: top everyday words, source>" }`. "Correct" = the reading a learner meets most in everyday vocabulary (on'yomi: across common words; kun'yomi: the most frequent word where the kanji stands alone with kana). Two readings go in the list only when they're genuinely about equally common. Covers: every kanji in the R2 change list (135), every level 2–10 kanji whose pick was a tie or a count of 1, and the hard multi-reading kanji of levels 2–10 (生, 下, 間, 日, 上, 家, 人, 行, 出, 中…). Researched from open sources and general knowledge of Japanese (word-frequency lists, dictionaries); nothing copied from WaniKani. A test checks every golden entry against `src/data/kanji.json`; each mismatch is fixed with an override in `scripts/reading-overrides.json` (why cites the evidence) or, if the golden entry was wrong, a corrected entry.
 **Acceptance:**
-- [ ] Golden set covers the groups above; every entry has a note.
-- [ ] Golden test passes; overrides added with reasons; data rebuilt and committed.
-- [ ] Numbers logged below: golden size, agreement before overrides, overrides added.
-- [ ] `npm run check` passes.
+- [x] Golden set covers the groups above; every entry has a note.
+- [x] Golden test passes; overrides added with reasons; data rebuilt and committed.
+- [x] Numbers logged below: golden size, agreement before overrides, overrides added.
+- [x] `npm run check` passes.
 **Verification:** `npm test -- golden kanji`
 **Dependencies:** R2
 **Files:** `tests/data/reading-golden.json`, a golden test in `tests/data/`, `scripts/reading-overrides.json`, `src/data/kanji.json`, this file
@@ -90,3 +90,10 @@ From Task R2's build (full report: `.data-cache/reading-report.txt`, 135 rows):
   ```
 - Longest new gate labels: 7 characters (あたた(かい), まぬが(れる), わきま(える), そそのか(す), い(まわしい)); the longest label overall was already 8. At GATE_MIN_W (70 px) they draw at 13–23 px, い(まわしい) smallest (13 px on one line).
 - Screenshot (crafted 3-answer reading walls, 60–160 px tall, narrowed openings at GATE_MIN_W, drawn with the game's `drawLabel`): `/private/tmp/claude-501/-Users-parlux-Projects-number-runner/a6a4a232-bb83-492b-845a-8f572a909944/scratchpad/r2-gate-labels-390x844.png`.
+
+From Task R3 (golden set, `tests/data/reading-golden.json`):
+- **Size: 373 kanji**: all 270 of levels 2–10 (covers the 197 with a tie or a count ≤ 1 and the hard multi-reading ones) + the 103 changed kanji of levels 11+ (all 135 R2 changes covered).
+- **Evidence:** NINJAL BCCWJ short-unit-word frequency list (corpus token counts per lemma and reading, aligned with the same rules as `scripts/readings.ts`), read with judgment where UniDic lemmas merge spellings (帰る→返る, 治る→直る, 暖かい→温かい, 載る→乗る, 私 わたし→わたくし) or count kana-only use (すぐ, ください, いる). Empty list = no everyday reading to expect (e.g. 気 kun, 天 kun, 点 kun).
+- **Agreement before overrides:** on'yomi 368/369 (one miss: 鋳); kun'yomi 289/318 (29 misses). Expectations: 369 entries with an on list, 318 with a kun list.
+- **30 overrides added** (`scripts/reading-overrides.json`, each with its BCCWJ counts): on 鋳 イ→ちゅう; kun 三 み→みっ(つ), 生 なま→い(きる), 入 い(る)→はい(る), 空 から→そら, 早 はや→はや(い), 分 わ(ける)→わ(かる), 間 ま→あいだ, 高 たか→たか(い), 当 あ(て)→あ(たる), 考 かんが(え)→かんが(える), 直 す(ぐ)→なお(す), 切 き(り)→き(る), 食 く(う)→た(べる), 光 ひか(る)→ひかり, 細 こま(か)→こま(かい), 羽 わ→はね, 安 やす→やす(い), 重 おも→おも(い), 落 お(ち)→お(ちる), 治 おさ(める)→なお(る), 果 は(て)→は(たす), 省 かえり(みる)→はぶ(く), 焼 や(き)→や(く), 居 お(る)→い(る), 違 ちが(い)→ちが(う), 汚 よご(す)→よご(れる), 控 ひか(え)→ひか(える), 揺 ゆ(る)→ゆ(れる), 恥 はじ→は(ずかしい).
+- After the rebuild: 28 kanji changed on'yomi and 97 changed kun'yomi against the first-listed readings.
