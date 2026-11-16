@@ -1,5 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { wordCandidates, type WordKanji } from "../../scripts/words";
+import {
+  byFrequency,
+  KANJI_WORDS_PER_LEVEL,
+  WORD_PICKER,
+  wordCandidates,
+  wordReport,
+  type Candidate,
+  type WordKanji,
+  type WordPicker,
+} from "../../scripts/words";
 
 type K = { keb: string; pri?: string[] };
 type R = { reb: string; pri?: string[]; restr?: string[]; nokanji?: boolean };
@@ -271,5 +280,146 @@ describe("wordCandidates: kind, level, frequency facts", () => {
       [2, ["ichi1", "news1"]],
       [null, ["spec1"]],
     ]);
+  });
+});
+
+/** A made-up candidate. */
+const cand = (
+  word: string,
+  kind: Candidate["kind"],
+  level = 2,
+  nf: number | null = null,
+  pri: string[] = ["ichi1"],
+): Candidate => ({
+  word,
+  reading: "よみ",
+  glosses: [`${word} gloss`],
+  kind,
+  level,
+  nf,
+  pri,
+});
+const names = (cs: Candidate[]) => cs.map((c) => c.word);
+
+describe("byFrequency", () => {
+  it("orders by level, then nf (null last), tag count, spelling", () => {
+    const cs = [
+      cand("d", "compound", 3, 1),
+      cand("c", "compound", 2, null, ["ichi1", "news1"]),
+      cand("b", "compound", 2, null),
+      cand("a", "compound", 2, null),
+      cand("e", "compound", 2, 40),
+      cand("f", "compound", 2, 7),
+    ];
+    expect(names(byFrequency(cs, 30))).toEqual(["f", "e", "c", "a", "b", "d"]);
+  });
+
+  it("fills each kind's share from its best-ranked candidates", () => {
+    const cs = [
+      ...Array.from({ length: 5 }, (_, i) => cand(`s${i}`, "single", 2, i + 1)),
+      ...Array.from({ length: 5 }, (_, i) =>
+        cand(`o${i}`, "okurigana", 2, i + 10),
+      ),
+      ...Array.from({ length: 8 }, (_, i) =>
+        cand(`c${i}`, "compound", 2, i + 20),
+      ),
+    ];
+    // 8 per level: 2 single, 2 okurigana, 4 compound, despite singles ranking best.
+    expect(names(byFrequency(cs, 8))).toEqual([
+      "s0",
+      "s1",
+      "o0",
+      "o1",
+      "c0",
+      "c1",
+      "c2",
+      "c3",
+    ]);
+  });
+
+  it("fills a kind's shortfall from the best-ranked of the rest", () => {
+    const cs = [
+      cand("s0", "single", 2, 30),
+      ...Array.from({ length: 4 }, (_, i) =>
+        cand(`o${i}`, "okurigana", 2, i + 10),
+      ),
+      ...Array.from({ length: 6 }, (_, i) =>
+        cand(`c${i}`, "compound", 2, i + 1),
+      ),
+    ];
+    // Share 2/2/4; one single short → next best is c4 (nf 5).
+    expect(names(byFrequency(cs, 8))).toEqual([
+      "c0",
+      "c1",
+      "c2",
+      "c3",
+      "c4",
+      "o0",
+      "o1",
+      "s0",
+    ]);
+  });
+
+  it("takes every candidate of a level with fewer than perLevel", () => {
+    const cs = [cand("a", "single"), cand("b", "compound", 3)];
+    expect(names(byFrequency(cs, KANJI_WORDS_PER_LEVEL))).toEqual(["a", "b"]);
+  });
+
+  it("WORD_PICKER (whichever it is) keeps teaching order and the cap", () => {
+    const cs = [
+      cand("b", "compound", 3, 1),
+      ...Array.from({ length: 4 }, (_, i) => cand(`a${i}`, "compound", 2, i)),
+    ];
+    const out = WORD_PICKER(cs, 3);
+    expect(out.map((c) => c.level)).toEqual([2, 2, 2, 3]);
+  });
+
+  it("another picker of the same type swaps in", () => {
+    const alphabetical: WordPicker = (cs, perLevel) =>
+      [...cs]
+        .sort((a, b) => a.level - b.level || (a.word < b.word ? -1 : 1))
+        .filter(
+          (c, _, all) =>
+            all.filter((o) => o.level === c.level).indexOf(c) < perLevel,
+        );
+    const { candidates } = wordCandidates(
+      jmdict(
+        entry([{ keb: "人人", pri: ["ichi1", "nf01"] }], [{ reb: "じんじん" }]),
+        entry([{ keb: "一人" }], [{ reb: "ひとり" }]),
+        entry([{ keb: "入る" }], [{ reb: "いる" }]),
+      ),
+      KANJI,
+    );
+    const run = (pick: WordPicker) => names(pick(candidates, 2));
+    expect(run(byFrequency)).toEqual(["人人", "一人"]);
+    expect(run(alphabetical)).toEqual(["一人", "人人"]);
+  });
+});
+
+describe("wordReport", () => {
+  it("summarises removals, kind mix and the listed levels", () => {
+    const chosen = [
+      cand("一人", "compound", 2),
+      cand("人", "single", 2),
+      cand("今日", "compound", 11),
+    ];
+    const removed = {
+      characters: 3,
+      startsWithKanji: 0,
+      notUsuallyKana: 1,
+      usualSense: 0,
+      fitsGate: 0,
+      usableGloss: 0,
+      notRepeatOfKanji: 2,
+      duplicateSpelling: 0,
+    };
+    const report = wordReport(removed, chosen);
+    expect(report.split("\n")[0]).toBe("words: 3 over 2 levels");
+    expect(report).toContain("characters 3\n");
+    expect(report).toContain("notRepeatOfKanji 2\n");
+    expect(report).toContain("L2  single 1  okurigana 0  compound 1  (2)");
+    expect(report).toContain("L11  single 0  okurigana 0  compound 1  (1)");
+    expect(report).toContain("# Level 2\n一人 よみ 一人 gloss compound\n");
+    expect(report).not.toContain("# Level 11");
   });
 });

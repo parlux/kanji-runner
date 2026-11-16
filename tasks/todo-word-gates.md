@@ -19,9 +19,9 @@ Every task: `npm run check` passes before it is checked off. Never commit `.data
 ### Task W1: Word candidates and picker module (highest risk: opus)
 **Description:** New `scripts/words.ts`, pure functions per the spec: candidates from JMdict XML (spelling/reading choice, every filter as a named predicate, kind, level, nf facts), the `WordPicker` type, `byFrequency`, the `WORD_PICKER` constant and report rows. Not yet called by the build.
 **Acceptance:**
-- [ ] Spec Testing Strategy synthetic cases pass in `tests/data/words-build.test.ts` (filters, `re_restr`, kind, level, repeat-of-kanji rule, `byFrequency` order/mix/shortfall, a test-only second picker swaps in).
-- [ ] `src/data/` unchanged.
-- [ ] `npm run check` passes.
+- [x] Spec Testing Strategy synthetic cases pass in `tests/data/words-build.test.ts` (filters, `re_restr`, kind, level, repeat-of-kanji rule, `byFrequency` order/mix/shortfall, a test-only second picker swaps in).
+- [x] `src/data/` unchanged.
+- [x] `npm run check` passes.
 **Verification:** `npm test -- words-build`
 **Files:** `scripts/words.ts`, `tests/data/words-build.test.ts`
 **Scope:** M

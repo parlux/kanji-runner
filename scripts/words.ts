@@ -240,3 +240,92 @@ export function wordCandidates(
   }
   return { candidates: [...bySpelling.values()], removed };
 }
+
+/**
+ * Chooses the words to teach from all candidates: `perLevel` per level (all
+ * of a level's candidates when it has fewer), in teaching order (level, then
+ * rank within the level).
+ */
+export type WordPicker = (
+  candidates: Candidate[],
+  perLevel: number,
+) => Candidate[];
+
+/** Kanji words per level (SPEC-word-gates). */
+export const KANJI_WORDS_PER_LEVEL = 30;
+
+/** Share of each kind a level aims at; compounds take the rest. */
+const MIX: Record<Exclude<WordKind, "compound">, number> = {
+  single: 0.25,
+  okurigana: 0.25,
+};
+
+/**
+ * Today's picker: per level, rank by frequency (`byRank`), fill each kind's
+ * share (about 25% single, 25% okurigana, 50% compound) from its best-ranked
+ * candidates, then any shortfall from the best-ranked of the rest.
+ */
+export const byFrequency: WordPicker = (candidates, perLevel) => {
+  const levels = [...new Set(candidates.map((c) => c.level))].sort(
+    (a, b) => a - b,
+  );
+  return levels.flatMap((level) => {
+    const ranked = candidates.filter((c) => c.level === level).sort(byRank);
+    const single = Math.floor(perLevel * MIX.single);
+    const okurigana = Math.floor(perLevel * MIX.okurigana);
+    const share: Record<WordKind, number> = {
+      single,
+      okurigana,
+      compound: perLevel - single - okurigana,
+    };
+    const chosen = new Set<Candidate>();
+    for (const c of ranked) if (share[c.kind]-- > 0) chosen.add(c);
+    for (const c of ranked) if (chosen.size < perLevel) chosen.add(c);
+    return ranked.filter((c) => chosen.has(c));
+  });
+};
+
+/** The one picker the build uses; point it at another `WordPicker` to swap. */
+export const WORD_PICKER: WordPicker = (candidates, perLevel) =>
+  byFrequency(candidates, perLevel);
+
+const LISTED_LEVELS = { from: 2, to: 10 };
+
+/**
+ * The word report: total, removals per filter, kind mix per level, and the
+ * chosen words of levels 2–10 (`word reading gloss kind`). The first line is
+ * the one-line summary the build prints.
+ */
+export function wordReport(
+  removed: Record<RemovedBy, number>,
+  chosen: Candidate[],
+): string {
+  const levels = [...new Set(chosen.map((c) => c.level))].sort((a, b) => a - b);
+  const at = (level: number) => chosen.filter((c) => c.level === level);
+  const kinds: WordKind[] = ["single", "okurigana", "compound"];
+  return [
+    `words: ${chosen.length} over ${levels.length} levels`,
+    "",
+    "# Removed per filter",
+    ...Object.entries(removed).map(([name, n]) => `${name} ${n}`),
+    "",
+    "# Kind mix per level",
+    ...levels.map((l) => {
+      const ws = at(l);
+      const mix = kinds.map(
+        (k) => `${k} ${ws.filter((c) => c.kind === k).length}`,
+      );
+      return `L${l}  ${mix.join("  ")}  (${ws.length})`;
+    }),
+    ...levels
+      .filter((l) => l >= LISTED_LEVELS.from && l <= LISTED_LEVELS.to)
+      .flatMap((l) => [
+        "",
+        `# Level ${l}`,
+        ...at(l).map(
+          (c) => `${c.word} ${c.reading} ${c.glosses[0] ?? ""} ${c.kind}`,
+        ),
+      ]),
+    "",
+  ].join("\n");
+}
