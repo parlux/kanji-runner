@@ -27,9 +27,9 @@ Every task: `npm run check` passes before it is checked off. Test fixtures are s
 ### Task C2: Card uses the compound
 **Description:** `readingStory` in `src/core/study.ts` adds step 3 (on'yomi only): the stored compound for the reading; source becomes `{ word, wordReading }`. `src/game/ui/study.ts` labels it `(from <word> <wordReading>)`, word in the kanji tag colour; single-kanji labels unchanged.
 **Acceptance:**
-- [ ] spec Testing Strategy "Card" cases pass.
-- [ ] browser check at 390×844 with synthetic data: a compound block, a single-kanji block, a "no story" block; pause card the same; no-token card unchanged. Screenshots in the scratchpad only.
-- [ ] `npm run check` passes.
+- [x] spec Testing Strategy "Card" cases pass.
+- [x] browser check at 390×844 with synthetic data: a compound block, a single-kanji block, a "no story" block; pause card the same; no-token card unchanged. Screenshots in the scratchpad only.
+- [x] `npm run check` passes.
 **Verification:** `npm test -- study`; browser check.
 **Dependencies:** C1
 **Files:** `src/core/study.ts`, `src/game/ui/study.ts`, `tests/core/study.test.ts`
