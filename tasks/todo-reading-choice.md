@@ -19,9 +19,9 @@ Every task: `npm run check` passes before it is checked off. Never commit `.data
 ### Task R1: Counting module (highest risk: opus)
 **Description:** New `scripts/readings.ts` with pure functions per the spec: parse common words from JMdict XML, align spelling/reading pairs to kanji readings (rendaku, sokuon, `々`, "every alignment agrees"), count entries per on'yomi and per kun entry, pick with ties/zero rule and overrides (unknown override throws), and build report rows. Not yet called by the build.
 **Acceptance:**
-- [ ] spec Testing Strategy synthetic cases (common filter, alignment, kun entry attribution, pick) pass in `tests/data/readings.test.ts`.
-- [ ] `src/data/` unchanged.
-- [ ] `npm run check` passes (knip: export only what tests and R2 use).
+- [x] spec Testing Strategy synthetic cases (common filter, alignment, kun entry attribution, pick) pass in `tests/data/readings.test.ts`.
+- [x] `src/data/` unchanged.
+- [x] `npm run check` passes (knip: export only what tests and R2 use).
 **Verification:** `npm test -- readings`
 **Files:** `scripts/readings.ts`, `tests/data/readings.test.ts`
 **Scope:** M

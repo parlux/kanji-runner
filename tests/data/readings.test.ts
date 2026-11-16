@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   commonWords,
   countReadings,
+  pickReadings,
+  reportRow,
   type CommonWord,
   type KanjiReadings,
 } from "../../scripts/readings";
@@ -204,5 +206,82 @@ describe("kun entry attribution", () => {
     const c = count([["手", "て"]], [["手さき", "てさき"]], [["明", "あか"]]);
     expect(c.get("手")?.kun).toEqual([2, 0, 0, 0]);
     expect(c.get("明")?.kun).toEqual([0, 0, 0, 0, 1]);
+  });
+});
+
+describe("pickReadings", () => {
+  const mei = KANJI[0] as KanjiReadings;
+  const counts = (on: number[], kun: number[]) => ({ on, kun });
+
+  it("picks the reading with the most entries", () => {
+    expect(pickReadings(mei, counts([3, 5], [1, 4, 0, 0, 0]))).toEqual({
+      on: "ミョウ",
+      kun: "あか.るい",
+    });
+  });
+
+  it("breaks ties by KANJIDIC2 order", () => {
+    expect(pickReadings(mei, counts([2, 2], [0, 3, 0, 3, 0]))).toEqual({
+      on: "メイ",
+      kun: "あか.るい",
+    });
+  });
+
+  it("falls back to the first listed when all are zero", () => {
+    expect(pickReadings(mei, counts([0, 0], [0, 0, 0, 0, 0]))).toEqual({
+      on: "メイ",
+      kun: "あ.かり",
+    });
+    expect(pickReadings(mei, undefined)).toEqual({
+      on: "メイ",
+      kun: "あ.かり",
+    });
+    expect(
+      pickReadings({ char: "校", on: ["コウ"], kun: [] }, undefined),
+    ).toEqual({
+      on: "コウ",
+      kun: null,
+    });
+  });
+
+  it("lets an override win over the count", () => {
+    const c = counts([9, 0], [0, 0, 0, 9, 0]);
+    expect(pickReadings(mei, c, { kun: "あか.るい", why: "WaniKani" })).toEqual(
+      {
+        on: "メイ",
+        kun: "あか.るい",
+      },
+    );
+    expect(pickReadings(mei, c, { on: "みょう", why: "test" }).on).toBe(
+      "ミョウ",
+    );
+  });
+
+  it("throws on an override reading the kanji doesn't have", () => {
+    expect(() =>
+      pickReadings(mei, undefined, { kun: "あき.らか", why: "x" }),
+    ).toThrow(/明.*あき\.らか/);
+    expect(() =>
+      pickReadings(mei, undefined, { on: "ミン", why: "x" }),
+    ).toThrow();
+  });
+});
+
+describe("reportRow", () => {
+  const mei = KANJI[0] as KanjiReadings;
+
+  it("lists changed readings with the top three candidates", () => {
+    const c = { on: [5, 1], kun: [2, 9, 0, 4, 0] };
+    expect(reportRow(mei, 3, c)).toBe(
+      "明 L3  kun あ.かり → あか.るい (あか.るい 9, あ.ける 4, あ.かり 2)",
+    );
+  });
+
+  it("marks overrides and skips unchanged kanji", () => {
+    const c = { on: [5, 1], kun: [9, 0, 0, 0, 0] };
+    expect(reportRow(mei, 3, c)).toBeNull();
+    expect(reportRow(mei, 3, c, { on: "ミョウ", why: "test" })).toBe(
+      "明 L3  on メイ → ミョウ (メイ 5, ミョウ 1)  [override: test]",
+    );
   });
 });

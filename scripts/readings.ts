@@ -8,6 +8,10 @@
  * - `countReadings(words, kanji)` → per kanji char, how many common entries
  *   use each of its KANJIDIC2 on'yomi and kun entries (`ReadingCounts`,
  *   parallel to `on` and `kun`).
+ * - `pickReadings(kanji, counts, override?)` → `{ on, kun }`: the raw
+ *   KANJIDIC2 on'yomi and kun entry to teach (null when it has none).
+ * - `reportRow(kanji, level, counts, override?)` → a report line when the
+ *   pick differs from the first-listed readings, else null.
  */
 
 /** A common JMdict entry: every (kanji spelling, reading) pair it allows. */
@@ -249,4 +253,80 @@ export function countReadings(
     }
   }
   return counts;
+}
+
+/** An entry of `reading-overrides.json`. */
+export type Override = { on?: string; kun?: string; why: string };
+
+/** Index of the reading with the most counts; ties and all-zero → first. */
+function most(counts: number[]): number {
+  let best = 0;
+  counts.forEach((n, i) => {
+    if (n > (counts[best] ?? 0)) best = i;
+  });
+  return best;
+}
+
+/** Index of `want` in `list`, exactly or ignoring dashes and kana script. */
+function find(k: KanjiReadings, list: string[], want: string): number {
+  const exact = list.indexOf(want);
+  const i =
+    exact >= 0 ? exact : list.findIndex((r) => strip(r) === strip(want));
+  if (i < 0) throw new Error(`reading override ${k.char}: no reading ${want}`);
+  return i;
+}
+
+/**
+ * The readings to teach: the on'yomi and kun entry with the most common
+ * entries (ties and all-zero → KANJIDIC2 order). An override wins; one naming
+ * a reading the kanji doesn't have throws.
+ */
+export function pickReadings(
+  k: KanjiReadings,
+  counts: ReadingCounts | undefined,
+  override?: Override,
+): { on: string | null; kun: string | null } {
+  const on = override?.on ? find(k, k.on, override.on) : most(counts?.on ?? []);
+  const kun = override?.kun
+    ? find(k, k.kun, override.kun)
+    : most(counts?.kun ?? []);
+  return { on: k.on[on] ?? null, kun: k.kun[kun] ?? null };
+}
+
+/** `old → new (top three candidates with counts)` for one reading kind. */
+function change(
+  kind: string,
+  list: string[],
+  counts: number[],
+  picked: string | null,
+): string {
+  const old = list[0] ?? null;
+  if (picked === old) return "";
+  const top = list
+    .map((r, i) => ({ r, n: counts[i] ?? 0 }))
+    .sort((a, b) => b.n - a.n)
+    .slice(0, 3)
+    .map((c) => `${c.r} ${c.n}`);
+  return `${kind} ${old} → ${picked} (${top.join(", ")})`;
+}
+
+/**
+ * One report line for a kanji whose taught on or kun changed from the first
+ * listed: kanji, level, old → new with the top three candidates, and the
+ * override reason if any. Null when nothing changed.
+ */
+export function reportRow(
+  k: KanjiReadings,
+  level: number,
+  counts: ReadingCounts | undefined,
+  override?: Override,
+): string | null {
+  const pick = pickReadings(k, counts, override);
+  const parts = [
+    change("on", k.on, counts?.on ?? [], pick.on),
+    change("kun", k.kun, counts?.kun ?? [], pick.kun),
+  ].filter(Boolean);
+  if (!parts.length) return null;
+  const why = override ? `  [override: ${override.why}]` : "";
+  return `${k.char} L${level}  ${parts.join("; ")}${why}`;
 }
