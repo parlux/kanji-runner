@@ -82,19 +82,23 @@ type Filter = (d: Draft, ctx: Ctx) => boolean;
 /** Kanji characters of a spelling (`々` counts here, not for level). */
 const kanjiCount = (word: string) => [...word].filter((c) => !isKana(c)).length;
 
-/** True when the word only repeats its kanji's taught reading (人 ひと). */
+/**
+ * True when the word is one kanji alone read as the kanji is taught (人 ひと,
+ * 山 やま). Kanji-plus-kana words never repeat: 入る はいる is kept.
+ */
 function repeatsKanji(d: Draft, ctx: Ctx): boolean {
-  const [first = "", ...rest] = [...d.word];
-  const k = ctx.kanji.get(first);
-  if (!k || !rest.every((c) => HIRAGANA.test(c))) return false;
-  const tail = rest.join("");
-  if (!tail) return d.reading === k.on || d.reading === k.kun?.base;
-  return (
-    !!k.kun &&
-    tail === k.kun.okurigana &&
-    d.reading === k.kun.base + k.kun.okurigana
-  );
+  const chars = [...d.word];
+  const k = chars.length === 1 ? ctx.kanji.get(chars[0] ?? "") : undefined;
+  return !!k && (d.reading === k.on || d.reading === k.kun?.base);
 }
+
+const nfOf = (pri: string[]) => {
+  const nf = pri.find((p) => /^nf\d\d$/.test(p));
+  return nf ? Number(nf.slice(2)) : null;
+};
+
+/** Longest primary gloss a gate shows (SPEC-word-gates, amended after W1). */
+const MAX_GLOSS = 20;
 
 /**
  * The filters, in order; each keeps a draft when it returns true. An entry is
@@ -128,10 +132,14 @@ const FILTERS = {
   /** Fits a gate: spelling ≤ 6 characters, reading ≤ 7 kana. */
   fitsGate: (d) =>
     [...d.word].length <= MAX_WORD && [...d.reading].length <= MAX_READING,
-  /** The first sense has a usable gloss. */
-  usableGloss: (d) => d.glosses.some((g) => cleanGloss(g)),
-  /** Not one kanji read as the kanji itself is taught (人 ひと). */
+  /** The first sense has a usable gloss; its primary is ≤ 20 characters. */
+  usableGloss: (d) =>
+    d.glosses.some((g) => cleanGloss(g)) &&
+    (pickGlosses(d.glosses)[0] ?? "").length <= MAX_GLOSS,
+  /** Not one kanji alone read as the kanji itself is taught (人 ひと). */
   notRepeatOfKanji: (d, ctx) => !repeatsKanji(d, ctx),
+  /** A one-kanji word needs an nf rank (drops 子 ね "the Rat"). */
+  frequentSingle: (d) => [...d.word].length > 1 || nfOf(d.pri) !== null,
 } satisfies Record<string, Filter>;
 
 export type RemovedBy = keyof typeof FILTERS | "duplicateSpelling";
@@ -169,11 +177,6 @@ function kindOf(word: string): WordKind {
     return "compound";
   return [...word].length === 1 ? "single" : "okurigana";
 }
-
-const nfOf = (pri: string[]) => {
-  const nf = pri.find((p) => /^nf\d\d$/.test(p));
-  return nf ? Number(nf.slice(2)) : null;
-};
 
 /**
  * Frequency order: `nf` (null after 48), then more priority tags first, then
@@ -260,10 +263,19 @@ const MIX: Record<Exclude<WordKind, "compound">, number> = {
   okurigana: 0.25,
 };
 
+/** Most number words (十一, 三十, 十二月) a level teaches. */
+export const MAX_NUMBER_WORDS_PER_LEVEL = 3;
+
+/** Only numeral kanji, optionally ending in 月. */
+const isNumberWord = (word: string) =>
+  /^[〇一二三四五六七八九十百千万]+月?$/u.test(word);
+
 /**
  * Today's picker: per level, rank by frequency (`byRank`), fill each kind's
  * share (about 25% single, 25% okurigana, 50% compound) from its best-ranked
- * candidates, then any shortfall from the best-ranked of the rest.
+ * candidates, then any shortfall from the best-ranked of the rest. At most
+ * `MAX_NUMBER_WORDS_PER_LEVEL` number words (the best-ranked); the skipped
+ * ones don't fill shortfalls.
  */
 export const byFrequency: WordPicker = (candidates, perLevel) => {
   const levels = [...new Set(candidates.map((c) => c.level))].sort(
@@ -278,10 +290,12 @@ export const byFrequency: WordPicker = (candidates, perLevel) => {
       okurigana,
       compound: perLevel - single - okurigana,
     };
+    let numbers = MAX_NUMBER_WORDS_PER_LEVEL;
+    const usable = ranked.filter((c) => !isNumberWord(c.word) || numbers-- > 0);
     const chosen = new Set<Candidate>();
-    for (const c of ranked) if (share[c.kind]-- > 0) chosen.add(c);
-    for (const c of ranked) if (chosen.size < perLevel) chosen.add(c);
-    return ranked.filter((c) => chosen.has(c));
+    for (const c of usable) if (share[c.kind]-- > 0) chosen.add(c);
+    for (const c of usable) if (chosen.size < perLevel) chosen.add(c);
+    return usable.filter((c) => chosen.has(c));
   });
 };
 

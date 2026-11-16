@@ -213,20 +213,43 @@ describe("wordCandidates: filters", () => {
     ]);
   });
 
-  it("notRepeatOfKanji: drops one kanji read as taught, keeps the rest", () => {
+  it("notRepeatOfKanji: drops one kanji alone read as taught, keeps the rest", () => {
     const rep = (keb: string, reb: string) =>
-      words(entry([{ keb }], [{ reb }]));
+      words(entry([{ keb, pri: ["ichi1", "nf01"] }], [{ reb }]));
     expect(rep("人", "ひと")).toEqual([]); // kun base
     expect(rep("人", "じん")).toEqual([]); // on
-    expect(rep("入る", "はいる")).toEqual([]); // kun with its okurigana
     expect(rep("人", "にん")).toEqual(["人 にん"]); // reading not taught
-    expect(rep("入る", "いる")).toEqual(["入る いる"]);
+    expect(rep("入る", "はいる")).toEqual(["入る はいる"]); // kanji + kana kept
+    expect(rep("一つ", "ひとつ")).toEqual(["一つ ひとつ"]);
     expect(rep("一人", "ひとり")).toEqual(["一人 ひとり"]); // two kanji
-    expect(rep("一つ", "ひとつ")).toEqual([]);
     expect(rep("一", "ひとつ")).toEqual(["一 ひとつ"]); // okurigana not written
     expect(removedBy(entry([{ keb: "人" }], [{ reb: "ひと" }]))).toEqual({
       notRepeatOfKanji: 1,
     });
+  });
+
+  it("frequentSingle: a one-kanji word needs an nf rank", () => {
+    expect(words(entry([{ keb: "人" }], [{ reb: "にん" }]))).toEqual([]);
+    expect(removedBy(entry([{ keb: "人" }], [{ reb: "にん" }]))).toEqual({
+      frequentSingle: 1,
+    });
+    expect(
+      words(entry([{ keb: "人", pri: ["ichi1", "nf20"] }], [{ reb: "にん" }])),
+    ).toEqual(["人 にん"]);
+    expect(words(entry([{ keb: "一人" }], [{ reb: "ひとり" }]))).toEqual([
+      "一人 ひとり",
+    ]);
+  });
+
+  it("usableGloss: drops a primary gloss over 20 characters", () => {
+    const gloss = (g: string) =>
+      words(entry([{ keb: "一人" }], [{ reb: "ひとり" }], { glosses: [g] }));
+    expect(gloss("a".repeat(20))).toEqual(["一人 ひとり"]);
+    const long = entry([{ keb: "一人" }], [{ reb: "ひとり" }], {
+      glosses: ["a".repeat(21)],
+    });
+    expect(words(long)).toEqual([]);
+    expect(removedBy(long)).toEqual({ usableGloss: 1 });
   });
 });
 
@@ -234,7 +257,7 @@ describe("wordCandidates: kind, level, frequency facts", () => {
   it("kind: single, okurigana, compound", () => {
     const { candidates } = wordCandidates(
       jmdict(
-        entry([{ keb: "人" }], [{ reb: "にん" }]),
+        entry([{ keb: "人", pri: ["ichi1", "nf01"] }], [{ reb: "にん" }]),
         entry([{ keb: "出る" }], [{ reb: "でる" }], { glosses: ["go out"] }),
         entry([{ keb: "お金" }], [{ reb: "おかね" }]),
         entry([{ keb: "今日" }], [{ reb: "きょう" }]),
@@ -360,6 +383,26 @@ describe("byFrequency", () => {
     ]);
   });
 
+  it("takes at most 3 number words per level; skipped ones don't fill", () => {
+    const cs = [
+      ...["十一", "十二", "三十", "十二月", "百万"].map((w, i) =>
+        cand(w, "compound", 2, i + 1),
+      ),
+      cand("一人", "compound", 2, 10),
+      cand("月", "single", 2, 9),
+      cand("一月", "compound", 3, 1),
+    ];
+    // 月 alone isn't a number word; 十二月 and 百万 are skipped, not refilled.
+    expect(names(byFrequency(cs, 30))).toEqual([
+      "十一",
+      "十二",
+      "三十",
+      "月",
+      "一人",
+      "一月",
+    ]);
+  });
+
   it("takes every candidate of a level with fewer than perLevel", () => {
     const cs = [cand("a", "single"), cand("b", "compound", 3)];
     expect(names(byFrequency(cs, KANJI_WORDS_PER_LEVEL))).toEqual(["a", "b"]);
@@ -411,6 +454,7 @@ describe("wordReport", () => {
       fitsGate: 0,
       usableGloss: 0,
       notRepeatOfKanji: 2,
+      frequentSingle: 0,
       duplicateSpelling: 0,
     };
     const report = wordReport(removed, chosen);
