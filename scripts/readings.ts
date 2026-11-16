@@ -5,6 +5,9 @@
  *
  * - `commonWords(jmdictXml)` → one `CommonWord` per common entry, holding its
  *   (spelling, reading) pairs.
+ * - `countReadings(words, kanji)` → per kanji char, how many common entries
+ *   use each of its KANJIDIC2 on'yomi and kun entries (`ReadingCounts`,
+ *   parallel to `on` and `kun`).
  */
 
 /** A common JMdict entry: every (kanji spelling, reading) pair it allows. */
@@ -53,4 +56,197 @@ export function commonWords(xml: string): CommonWord[] {
     if (pairs.length) out.push({ pairs });
   }
   return out;
+}
+
+/** A kanji's KANJIDIC2 readings, raw: on `メイ`, kun `あか.るい`, `-あ.げる-`. */
+export type KanjiReadings = { char: string; on: string[]; kun: string[] };
+
+/** Common-entry counts, parallel to `KanjiReadings.on` and `.kun`. */
+export type ReadingCounts = { on: number[]; kun: number[] };
+
+/** Katakana to hiragana; other characters pass through. */
+const hira = (s: string) =>
+  s.replace(/[\u30a1-\u30f6]/g, (c) =>
+    String.fromCharCode(c.charCodeAt(0) - 0x60),
+  );
+const strip = (r: string) => hira(r.replace(/^-|-$/g, ""));
+const isKana = (c: string) => /^[\u3041-\u3096\u30a1-\u30fa\u30fc]$/.test(c);
+
+const VOICED: Record<string, string[]> = {};
+for (const [plain, voiced] of [
+  ["かきくけこさしすせそたちつてと", "がぎぐげござじずぜぞだぢづでど"],
+  ["はひふへほ", "ばびぶべぼ"],
+  ["はひふへほ", "ぱぴぷぺぽ"],
+] as const)
+  [...plain].forEach((c, i) => (VOICED[c] ??= []).push(voiced[i] ?? ""));
+
+/** One way a kanji can be read: its id (`on:めい`, `kun:あか`) and surface forms. */
+type Option = {
+  id: string;
+  /** Forms anywhere in a word: the reading, and its sokuon form. */
+  forms: string[];
+  /** Rendaku forms, not allowed word-initially. */
+  voiced: string[];
+};
+
+type Indexed = {
+  options: Option[];
+  on: string[];
+  kun: { base: string; okurigana: string }[];
+};
+
+/**
+ * Options for a kanji. A sound-changed form that is itself one of the kanji's
+ * readings is left out, so the plain reading isn't made ambiguous.
+ */
+function index(k: KanjiReadings): Indexed {
+  const on = k.on.map(strip);
+  const kun = k.kun.map((r) => {
+    const [base = "", okurigana = ""] = strip(r).split(".");
+    return { base, okurigana };
+  });
+  const plain = new Set([...on, ...kun.map((r) => r.base)]);
+  const option = (kind: string, r: string): Option => {
+    const sokuon =
+      kind === "on" && /[くつちき]$/.test(r) && r.length > 1
+        ? [r.slice(0, -1) + "っ"]
+        : [];
+    const voiced = (VOICED[r[0] ?? ""] ?? []).map((v) => v + r.slice(1));
+    const extra = (xs: string[]) => xs.filter((x) => !plain.has(x));
+    return {
+      id: `${kind}:${r}`,
+      forms: [r, ...extra(sokuon)],
+      voiced: extra([
+        ...voiced,
+        ...voiced.flatMap((v) =>
+          sokuon.length ? [v.slice(0, -1) + "っ"] : [],
+        ),
+      ]),
+    };
+  };
+  const ids = new Map<string, Option>();
+  for (const r of on) ids.set(`on:${r}`, option("on", r));
+  for (const r of kun) ids.set(`kun:${r.base}`, option("kun", r.base));
+  return { options: [...ids.values()], on, kun };
+}
+
+/** Cap on alignments per pair; real words have a handful. */
+const MAX_ALIGNMENTS = 64;
+
+/**
+ * Every way `chars` (kanji, kana, 々) reads as `reading`: per alignment, the
+ * option id each position used ("" for kana).
+ */
+function alignments(
+  chars: string[],
+  reading: string,
+  idx: Map<string, Indexed>,
+): string[][] {
+  const out: string[][] = [];
+  const path: string[] = [];
+  const walk = (i: number, j: number): void => {
+    if (out.length >= MAX_ALIGNMENTS) return;
+    if (i === chars.length) {
+      if (j === reading.length) out.push([...path]);
+      return;
+    }
+    const c = chars[i] ?? "";
+    if (isKana(c)) {
+      if (reading[j] !== c) return;
+      path.push("");
+      walk(i + 1, j + 1);
+      path.pop();
+      return;
+    }
+    const k = idx.get(c === "々" ? (chars[i - 1] ?? "") : c);
+    for (const o of k?.options ?? []) {
+      const forms = i === 0 ? o.forms : [...o.forms, ...o.voiced];
+      for (const f of forms) {
+        if (!reading.startsWith(f, j)) continue;
+        path.push(o.id);
+        walk(i + 1, j + f.length);
+        path.pop();
+      }
+    }
+  };
+  walk(0, 0);
+  return out;
+}
+
+/**
+ * Readings one pair gives its kanji, as `<char>|on|<i>` / `<char>|kun|<i>`:
+ * a position counts only when every alignment agrees on its reading. A kun
+ * match goes to the entry with that base whose okurigana the spelling writes
+ * next, the longest such; an entry without okurigana matches anything.
+ */
+function pairCredits(
+  spelling: string,
+  reading: string,
+  idx: Map<string, Indexed>,
+): string[] {
+  const chars = [...hira(spelling)];
+  for (let i = 0; i < chars.length; i++) {
+    const c = chars[i] ?? "";
+    if (
+      c === "々"
+        ? i === 0 || isKana(chars[i - 1] ?? "")
+        : !isKana(c) && !idx.has(c)
+    )
+      return [];
+  }
+  const all = alignments(chars, hira(reading), idx);
+  if (!all.length) return [];
+  const credits: string[] = [];
+  chars.forEach((c, i) => {
+    const id = all[0]?.[i] ?? "";
+    if (!id || all.some((a) => a[i] !== id)) return;
+    const char = c === "々" ? (chars[i - 1] ?? "") : c;
+    const k = idx.get(char);
+    if (!k) return;
+    const [kind, r] = id.split(":") as [string, string];
+    if (kind === "on") {
+      credits.push(`${char}|on|${k.on.indexOf(r)}`);
+      return;
+    }
+    let next = i + 1;
+    while (next < chars.length && isKana(chars[next] ?? "")) next++;
+    const after = chars.slice(i + 1, next).join("");
+    let best = -1;
+    k.kun.forEach((e, n) => {
+      if (e.base !== r || !after.startsWith(e.okurigana)) return;
+      const len = k.kun[best]?.okurigana.length ?? -1;
+      if (e.okurigana.length > len) best = n;
+    });
+    if (best >= 0) credits.push(`${char}|kun|${best}`);
+  });
+  return credits;
+}
+
+/**
+ * For each kanji, how many common entries use each on'yomi and kun entry.
+ * An entry counts at most once per reading, however many pairs match.
+ */
+export function countReadings(
+  words: CommonWord[],
+  kanji: KanjiReadings[],
+): Map<string, ReadingCounts> {
+  const idx = new Map(kanji.map((k) => [k.char, index(k)]));
+  const counts = new Map(
+    kanji.map((k) => [
+      k.char,
+      { on: k.on.map(() => 0), kun: k.kun.map(() => 0) },
+    ]),
+  );
+  for (const w of words) {
+    const credits = new Set(
+      w.pairs.flatMap(([s, r]) => pairCredits(s, r, idx)),
+    );
+    for (const key of credits) {
+      const [char = "", kind, n] = key.split("|");
+      const c = counts.get(char);
+      const list = kind === "on" ? c?.on : c?.kun;
+      if (list) list[Number(n)] = (list[Number(n)] ?? 0) + 1;
+    }
+  }
+  return counts;
 }
