@@ -86,7 +86,7 @@ export function mnemonicNodes(input: string, doc: Document = document): Node[] {
 const BRACKET = /<\/reading>\s*[(（]([^)）]*)[)）]/gi;
 
 /** Katakana to hiragana, leaving everything else alone. */
-const toHiragana = (s: string): string =>
+export const toHiragana = (s: string): string =>
   s.replace(/[ァ-ヶ]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0x60));
 
 /** The readings a kanji reading story is about, from its `</reading> (かな)` brackets. */
@@ -98,4 +98,13 @@ export function coveredReadings(text: string): string[] {
       if (/^[ぁ-ゖー]+$/.test(r)) out.add(r);
     }
   return [...out];
+}
+
+/** The readings a kanji story stands for: its bracketed readings, else the primary ones. */
+export function storyReadings(
+  text: string | undefined,
+  primary: readonly string[] = [],
+): readonly string[] {
+  const covered = text ? coveredReadings(text) : [];
+  return covered.length > 0 ? covered : primary;
 }

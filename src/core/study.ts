@@ -1,5 +1,5 @@
 import { plainReading, showReading, mainReadings } from "./distractors";
-import { coveredReadings } from "./mnemonic";
+import { storyReadings } from "./mnemonic";
 import type { Missed } from "./run";
 import type { GateRow, KanaItem, KanjiItem, WordItem } from "./types";
 
@@ -22,6 +22,18 @@ export type Story = Mnemonics & {
   primaryReadings?: readonly string[];
   /** Single-kanji vocabulary with reading stories, in WaniKani id order (library only). */
   vocab?: readonly StoryVocab[];
+  /** One compound story per on'yomi the kanji story and bare-kanji vocabulary miss (library only). */
+  compounds?: readonly StoryCompound[];
+};
+
+/** A compound word whose reading story stands in for one of the kanji's on'yomi. */
+export type StoryCompound = {
+  /** The kanji's on'yomi, hiragana. */
+  reading: string;
+  word: string;
+  /** The word's reading that uses the on'yomi, hiragana. */
+  wordReading: string;
+  story: string;
 };
 
 /** A vocabulary entry that can tell one kanji's reading: the word, its accepted readings, its story. */
@@ -123,8 +135,7 @@ function readingStory(k: KanjiItem, st: Story, label: string): ReadingStory {
   const plain = plainReading(label);
   const base = label.split("(")[0] ?? label;
   const text = st.reading;
-  const covered = text ? coveredReadings(text) : [];
-  const set = covered.length > 0 ? covered : (st.primaryReadings ?? []);
+  const set = storyReadings(text, st.primaryReadings);
   if (text && (set.includes(plain) || set.includes(base)))
     return { reading: label, source: "kanji", text };
   const hits = (st.vocab ?? []).filter((v) => v.readings.includes(plain));
