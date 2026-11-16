@@ -29,3 +29,4 @@ One row per owner request, written by the `triage` skill (`.claude/skills/triage
 | 2026-11-17 | Start next round: backlog #1, teach the most useful reading first | sdd | Data pipeline change across all kanji; progress/save impact; open questions | |
 | 2026-11-17 | Write up drop-WaniKani goal and useful-words epic; fold two ideas; reorder backlog | idea | Goal and backlog docs only | |
 | 2026-11-17 | Move overall progress up; make #5 the assess-against-WaniKani checkpoint | doc | Backlog order only | |
+| 2026-11-17 | Start next round: Word gates (epic round 1) | sdd | New data source (JMdict), save/unlock logic, many items; epic says each round needs an interview | |
