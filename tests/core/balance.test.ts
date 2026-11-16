@@ -51,6 +51,31 @@ describe("balance bot with words in the pool (perfect steering)", () => {
   }, 60_000);
 });
 
+describe("balance bot with word readings in the pool (perfect steering)", () => {
+  // as above, with the words themselves at box 3: their reading gates are asked
+  const progress = { ...defaultProgress(), unlockedLevel: 8 };
+  const known = { box: 2, seen: 1, correct: 1, wrong: 0, lastSeen: 1 };
+  for (const k of KANA) progress.items[itemKey(k.char, "kana")] = known;
+  for (const k of KANJI)
+    if (k.level <= 8) progress.items[itemKey(k.char, "meaning")] = known;
+  for (const w of WORDS)
+    if (w.level <= 8)
+      progress.items[itemKey(w.word, "word")] = { ...known, box: 3 };
+  const build = (seed: number) => ({
+    rows: buildRun(seed, progress, KANA, KANJI, WORDS),
+  });
+
+  it("100% accuracy never dies before the last question", () => {
+    const runs = SEEDS.slice(0, 60).map((seed) =>
+      botRun(seed, { build, wrong: () => false }),
+    );
+    expect(runs.filter(diedEarly)).toEqual([]);
+    expect(runs.some((r) => r.rows.some((x) => x.type === "wordreading"))).toBe(
+      true,
+    );
+  }, 60_000);
+});
+
 describe("balance bot in WaniKani mode, re-asks on (perfect steering)", () => {
   const wk = { build: (seed: number) => wkRun(seed) };
 

@@ -53,10 +53,10 @@ Every task: `npm run check` passes before it is checked off. Never commit `.data
 ### Task W3: Words in runs (core)
 **Description:** `WordItem` reading/kind; load both lists; pool order (current level's words first, then lower levels from the lowest up); `kanjiNeeded`, eligibility by learned kanji meaning; `wordreading` gate type and entries (after meaning box 3); `MAX_NEW_WORDS_PER_RUN` 2 counting both types; placement marks both keys; `wordReadingRow` distractors; summary entries. No game visuals beyond what's needed to keep it running (a `wordreading` gate must render with the default look).
 **Acceptance:**
-- [ ] Spec Testing Strategy "Core" tests pass.
-- [ ] `npm run test:slow` passes; bot figures logged below.
-- [ ] Loanwords behave as before (existing tests unchanged or only extended).
-- [ ] `npm run check` passes.
+- [x] Spec Testing Strategy "Core" tests pass.
+- [x] `npm run test:slow` passes; bot figures logged below.
+- [x] Loanwords behave as before (existing tests unchanged or only extended).
+- [x] `npm run check` passes.
 **Verification:** `npm run check && npm run test:slow`
 **Dependencies:** W2b
 **Files:** `src/core/{types,words,pool,run,distractors,progression,study,tuning}.ts`, tests in `tests/core/`, this file
@@ -105,4 +105,4 @@ W1 dry run on real JMdict (before the amendments): removals characters 526, star
 
 **W3 slice 0 (homograph singles):** 2,112 words, same set; 8 single-kanji words lost their usage rank (下 もと, 石 こく, 空 から, 何 なに, 面 つら, 眼 め, 罰 ばち, 畳 たたみ) and moved within their level, plus 著作 swapped places. Singles still 38 in total (the shortfall fill keeps them). Level 2 singles: none; level 3 singles: 下 もと (still chosen, now by nf-median rank). Kind mix unchanged.
 
-(W3 fills in below.)
+**W3 (2026-11-17):** core only; `check` and `test:slow` pass. Bot figures (200 seeds, perfect steering, all kana and kanji of levels 2-8 learned at box 2, unlocked level 8; accuracy 100% / 80% / 50%): kanji only (no words) win 100% / 56% / 7%, died early 0 / 68 / 165 of 200; words in the pool (new words, box 2) win 100% / 57% / 7.5%, died early 0 / 71 / 165, 14.3% of rows are words; words known at box 3 (their readings join) win 100% / 56% / 7%, died early 0 / 72 / 168, 38.6% word rows and 14.3% wordreading rows. Within the existing bands (80% boss win 40-70%, 50% under 10%); no retune. The boss tests' kana bot is unaffected. Existing tests changed only by: `kind: "loanword"` on hand-built WordItems, loanword-only filters where a test meant the 5-per-level list, new-word cap 1 → 2, a longer timeout for the wordRow sweep (word list is 2,112 longer; `wordRow` now caches normalized glosses). Golden runs unchanged (no words in them).

@@ -171,6 +171,17 @@ export function meaningRow(
   );
 }
 
+/** A word's glosses, normalized once (the word list is long). */
+const wordGlossCache = new WeakMap<WordItem, string[]>();
+const wordGlosses = (w: WordItem): string[] => {
+  let g = wordGlossCache.get(w);
+  if (!g) {
+    g = w.glosses.map(normGloss);
+    wordGlossCache.set(w, g);
+  }
+  return g;
+};
+
 /**
  * Word → first gloss. Distractors are first glosses of other words in `pool`,
  * never one sharing any gloss with the prompt; if fewer than needed, `rest`
@@ -183,15 +194,15 @@ export function wordRow(
   rest: readonly WordItem[],
   count: number,
 ): GateRow {
-  const own = new Set(item.glosses.map(normGloss));
+  const own = new Set(wordGlosses(item));
   const candidates: Candidate[] = [];
   const add = (list: readonly WordItem[], rank: number): void => {
     for (const w of list) {
-      if (w.word === item.word || w.glosses.some((g) => own.has(normGloss(g))))
-        continue;
+      const g = wordGlosses(w);
+      if (w.word === item.word || g.some((x) => own.has(x))) continue;
       candidates.push({
         label: w.glosses[0] as string,
-        key: normGloss(w.glosses[0] as string),
+        key: g[0] as string,
         rank,
       });
     }
