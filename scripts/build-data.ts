@@ -17,6 +17,12 @@ import {
   type Override,
 } from "./readings";
 import { cleanGloss, isShort, pickGlosses } from "./glosses";
+import {
+  KANJI_WORDS_PER_LEVEL,
+  WORD_PICKER,
+  wordCandidates,
+  wordReport,
+} from "./words";
 
 const CACHE = ".data-cache";
 /** Kanji levels 2+ hold 30 kanji each (SPEC: Progression and levels). */
@@ -312,6 +318,24 @@ async function main(): Promise<void> {
   );
   console.log(
     `${summary}; reading report written to ${CACHE}/reading-report.txt`,
+  );
+
+  const { candidates, removed } = wordCandidates(jmdict, kanji);
+  const words = WORD_PICKER(candidates, KANJI_WORDS_PER_LEVEL);
+  writeJsonLines(
+    "src/data/words.json",
+    words.map(({ word, reading, glosses, kind, level }) => ({
+      word,
+      reading,
+      glosses,
+      kind,
+      level,
+    })),
+  );
+  const wordText = wordReport(removed, words);
+  writeFileSync(`${CACHE}/word-report.txt`, wordText);
+  console.log(
+    `${wordText.split("\n")[0]}; word report written to ${CACHE}/word-report.txt`,
   );
 }
 

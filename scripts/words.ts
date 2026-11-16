@@ -264,7 +264,7 @@ const MIX: Record<Exclude<WordKind, "compound">, number> = {
 };
 
 /** Most number words (十一, 三十, 十二月) a level teaches. */
-export const MAX_NUMBER_WORDS_PER_LEVEL = 3;
+const MAX_NUMBER_WORDS_PER_LEVEL = 3;
 
 /** Only numeral kanji, optionally ending in 月. */
 const isNumberWord = (word: string) =>

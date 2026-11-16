@@ -7,3 +7,4 @@ skills-lock.json
 *.md
 src/data/kanji.json
 src/data/confusables.json
+src/data/words.json
