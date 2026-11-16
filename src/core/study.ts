@@ -1,6 +1,7 @@
 import { plainReading, showReading, mainReadings } from "./distractors";
 import { storyReadings } from "./mnemonic";
 import type { Missed } from "./run";
+import { kanjiNeeded } from "./words";
 import type { GateRow, KanaItem, KanjiItem, WordItem } from "./types";
 
 /** WaniKani's mnemonics (raw text). */
@@ -83,11 +84,13 @@ export type StudyCard =
     }
   | {
       kind: "word";
-      /** The katakana word. */
+      /** The word: katakana, or a kanji word. */
       char: string;
+      /** Kanji words: the reading in kana. */
+      reading?: string;
       /** English glosses, first is the one shown on gates. */
       meanings: string[];
-      /** Each character with its romaji or note, in order. */
+      /** Loanwords: each character with its romaji or note, in order. Kanji words: each kanji with its first gloss and main readings. */
       breakdown: WordPart[];
       missed: boolean;
     };
@@ -120,19 +123,47 @@ export function wordBreakdown(
   });
 }
 
+/** Each kanji of a kanji word with its first gloss and main readings: 人 "person; じん, ひと". */
+function kanjiBreakdown(word: string, kanji: readonly KanjiItem[]): WordPart[] {
+  return kanjiNeeded(word).flatMap((char) => {
+    const k = kanji.find((x) => x.char === char);
+    return k
+      ? [
+          {
+            char,
+            note: [
+              k.glosses[0] ?? "",
+              mainReadings(k).map(showReading).join(", "),
+            ]
+              .filter(Boolean)
+              .join("; "),
+          },
+        ]
+      : [];
+  });
+}
+
 function wordCard(
   w: WordItem,
   missed: boolean,
   kana: readonly KanaItem[],
+  kanji: readonly KanjiItem[],
 ): StudyCard {
   return {
     kind: "word",
     char: w.word,
+    ...(w.reading ? { reading: w.reading } : {}),
     meanings: w.glosses,
-    breakdown: wordBreakdown(w.word, kana),
+    breakdown: w.reading
+      ? kanjiBreakdown(w.word, kanji)
+      : wordBreakdown(w.word, kana),
     missed,
   };
 }
+
+/** Word meaning and reading gates share one study card per word. */
+const isWordType = (t: GateRow["type"]): boolean =>
+  t === "word" || t === "wordreading";
 
 /** The story for one shown reading label (あ(げる), じょう): the kanji's own, else a vocabulary one, else (on'yomi) a compound's, else none. */
 function readingStory(k: KanjiItem, st: Story, label: string): ReadingStory {
@@ -240,7 +271,7 @@ export function studyCards(
   const done = new Set<string>();
   const out: StudyCard[] = [];
   for (const m of missed) {
-    const key = `${m.type === "kana" || m.type === "word" ? m.type : "kanji"}:${m.prompt}`;
+    const key = `${m.type === "kana" ? "kana" : isWordType(m.type) ? "word" : "kanji"}:${m.prompt}`;
     if (done.has(key)) continue;
     done.add(key);
     if (m.type === "kana") {
@@ -253,9 +284,9 @@ export function studyCards(
           script: k.script,
           missed: true,
         });
-    } else if (m.type === "word") {
+    } else if (isWordType(m.type)) {
       const w = words.find((x) => x.word === m.prompt);
-      if (w) out.push(wordCard(w, true, kana));
+      if (w) out.push(wordCard(w, true, kana, kanji));
     } else {
       const k = kanji.find((x) => x.char === m.prompt);
       if (k) out.push(kanjiCard(k, true, stories, presented.get(k.char)));
@@ -279,7 +310,8 @@ export function runKanji(
   const out = new Set<string>();
   results.forEach((_, i) => {
     const row = rows[i];
-    if (row && row.type !== "kana" && row.type !== "word") out.add(row.prompt);
+    if (row && row.type !== "kana" && !isWordType(row.type))
+      out.add(row.prompt);
   });
   return [...out];
 }
@@ -353,9 +385,9 @@ export function lastAnswer(
         script: k.script,
         missed: true,
       };
-  } else if (row.type === "word") {
+  } else if (isWordType(row.type)) {
     const w = words.find((x) => x.word === row.prompt);
-    if (w) card = wordCard(w, !correct, kana);
+    if (w) card = wordCard(w, !correct, kana, kanji);
   } else {
     const k = kanji.find((x) => x.char === row.prompt);
     if (k)

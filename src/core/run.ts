@@ -189,6 +189,8 @@ export type Missed = {
   answers: string[];
   /** A wrong squad charge rather than a wall gate. */
   charge: boolean;
+  /** Kanji words (meaning or reading gate): the word's reading and first gloss, for the summary. */
+  word?: { reading: string; meaning: string };
 };
 
 /**
@@ -200,6 +202,7 @@ export function missedItems(
   results: readonly boolean[],
   charges: readonly number[],
   kanji: readonly KanjiItem[],
+  words: readonly WordItem[] = [],
 ): Missed[] {
   const out: Missed[] = [];
   results.forEach((ok, i) => {
@@ -208,12 +211,19 @@ export function missedItems(
     const k =
       row.type === "reading" ? kanji.find((x) => x.char === row.prompt) : null;
     const all = k ? mainReadings(k).map(showReading) : [];
+    const w =
+      row.type === "word" || row.type === "wordreading"
+        ? words.find((x) => x.word === row.prompt && x.reading)
+        : undefined;
     out.push({
       q: i + 1,
       type: row.type,
       prompt: row.prompt,
       answers: all.length > 0 ? all : [row.answer],
       charge: charges.includes(i),
+      ...(w?.reading
+        ? { word: { reading: w.reading, meaning: w.glosses[0] ?? "" } }
+        : {}),
     });
   });
   return out;

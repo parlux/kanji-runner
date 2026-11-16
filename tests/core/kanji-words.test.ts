@@ -9,6 +9,7 @@ import { buildRun, missedItems, select } from "../../src/core/run";
 import { defaultProgress, itemKey } from "../../src/core/srs";
 import { MAX_NEW_PER_RUN, MAX_NEW_WORDS_PER_RUN } from "../../src/core/tuning";
 import type { Progress, WordItem } from "../../src/core/types";
+import { lastAnswer, runKanji, studyCards } from "../../src/core/study";
 import { isWordEligible, kanjiNeeded, WORDS } from "../../src/core/words";
 import { forSeeds } from "../sweep";
 
@@ -235,26 +236,48 @@ describe("wordReadingRow", () => {
   });
 });
 
-describe("summary", () => {
-  it("lists a missed wordreading gate with the reading as the answer", () => {
-    const rows = [
-      {
-        type: "wordreading" as const,
-        prompt: "一人",
-        options: ["ひとり", "いちにん"],
-        answerIndex: 0,
-        answer: "ひとり",
-      },
-    ];
-    const m = missedItems(rows, [false], [], KANJI);
-    expect(m).toEqual([
-      {
-        q: 1,
-        type: "wordreading",
-        prompt: "一人",
-        answers: ["ひとり"],
-        charge: false,
-      },
+describe("summary and study cards", () => {
+  const w = kw("一人");
+  const rows = (["word", "wordreading"] as const).map((type) => ({
+    type,
+    prompt: "一人",
+    options: ["a", "b"],
+    answerIndex: 0,
+    answer: type === "word" ? "one person" : "ひとり",
+  }));
+
+  it("lists a missed kanji word with its reading and meaning", () => {
+    const m = missedItems(rows, [false, false], [], KANJI, WORDS);
+    expect(m.map((x) => [x.type, x.answers, x.word])).toEqual([
+      ["word", ["one person"], { reading: "ひとり", meaning: "one person" }],
+      ["wordreading", ["ひとり"], { reading: "ひとり", meaning: "one person" }],
     ]);
+  });
+
+  it("makes one card per word missed on both gates, with kanji parts", () => {
+    const missed = missedItems(rows, [false, false], [], KANJI, WORDS);
+    const cards = studyCards(missed, KANJI, KANA, undefined, [], WORDS);
+    expect(cards).toHaveLength(1);
+    const c = cards[0];
+    expect(c).toMatchObject({
+      kind: "word",
+      char: "一人",
+      reading: "ひとり",
+      meanings: w.glosses,
+      missed: true,
+    });
+    if (c?.kind !== "word") throw new Error("word card");
+    expect(c.breakdown.map((p) => p.char)).toEqual(["一", "人"]);
+    expect(c.breakdown[1]?.note).toContain("person");
+  });
+
+  it("keeps words out of runKanji and gives the pause card a word card", () => {
+    expect(runKanji(rows, [true, true])).toEqual([]);
+    const a = lastAnswer(rows, [true, false], 1, KANJI, KANA, undefined, WORDS);
+    expect(a?.card).toMatchObject({
+      kind: "word",
+      reading: "ひとり",
+      missed: true,
+    });
   });
 });
