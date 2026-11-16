@@ -1,6 +1,6 @@
 # Tasks: teach the most useful reading first (v1.4.0)
 
-Spec: `docs/specs/SPEC-reading-choice.md` (2026-11-17). Intent: `docs/intent/reading-choice.md`. Idea: `docs/ideas/reading-choice.md`. Started 2026-11-17.
+Spec: `docs/specs/done/SPEC-reading-choice.md` (2026-11-17). Intent: `docs/intent/reading-choice.md`. Idea: `docs/ideas/done/reading-choice.md`. Started and closed 2026-11-17 (owner ticked Checkpoint R).
 Review: owner skipped the spec page (2026-11-17). · Checkpoint R: https://claude.ai/artifact/5PFoqtM9soRs4TjkALPE94
 Every task: `npm run check` passes before it is checked off. Never commit `.data-cache` or raw EDRDG downloads.
 
@@ -62,9 +62,9 @@ Every task: `npm run check` passes before it is checked off. Never commit `.data
 **Scope:** S
 
 ### Checkpoint R: v1.4.0 (owner, on the phone + change list)
-- [ ] The change list (checkpoint page, with the golden-set result) reads right against your WaniKani sense; flagged misses noted for overrides.
-- [ ] A run with 明 (level 5) shows あか(るい) on its reading gate; labels readable.
-- [ ] Existing progress intact; stories still show (or "no story") for the new readings.
+- [x] The change list (checkpoint page, with the golden-set result) reads right against your WaniKani sense; flagged misses noted for overrides.
+- [x] A run with 明 (level 5) shows あか(るい) on its reading gate; labels readable.
+- [x] Existing progress intact; stories still show (or "no story") for the new readings.
 
 ## Numbers
 From Task R2's build (full report: `.data-cache/reading-report.txt`, 135 rows):

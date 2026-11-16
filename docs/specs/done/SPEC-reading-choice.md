@@ -1,6 +1,6 @@
 # Spec: teach the most useful reading first (v1.4.0)
 
-Extends `docs/specs/done/SPEC.md` and the specs after it. Everything there still holds unless this spec says otherwise. Intent: `docs/intent/reading-choice.md`. Idea: `docs/ideas/reading-choice.md`.
+Extends `docs/specs/done/SPEC.md` and the specs after it. Everything there still holds unless this spec says otherwise. Intent: `docs/intent/reading-choice.md`. Idea: `docs/ideas/done/reading-choice.md`.
 
 ## Objective
 Each kanji's taught readings (`on` and `kun` in `src/data/kanji.json`, shown on reading gates via `mainReadings`) become the on'yomi and the kun'yomi used by the most common JMdict words, instead of the first ones KANJIDIC2 lists. Today 明 teaches あ(かり) and 図 teaches え; they should teach あか(るい) and はか(る) if the counts agree.

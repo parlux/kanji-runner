@@ -1,6 +1,6 @@
 # Intent: teach the most useful reading first
 
-Status: confirmed by the owner, 2026-11-17, after an interview. Idea: `docs/ideas/reading-choice.md`. Spec: `docs/specs/SPEC-reading-choice.md`.
+Status: confirmed by the owner, 2026-11-17, after an interview. Idea: `docs/ideas/done/reading-choice.md`. Spec: `docs/specs/done/SPEC-reading-choice.md`.
 
 ## Statement of intent
 - **Outcome:** each kanji teaches its most-used on'yomi and its most-used kun'yomi, counted from common JMdict words, instead of whichever KANJIDIC2 lists first. Data build only, plus a small overrides file for odd cases.

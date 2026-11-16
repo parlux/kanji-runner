@@ -1,6 +1,6 @@
 # Teach the most useful reading first
 
-Status: in progress (interviewed 2026-11-17). Intent: `docs/intent/reading-choice.md`.
+Status: done in v1.4.0 (2026-11-17, owner ticked Checkpoint R). Intent: `docs/intent/reading-choice.md`.
 
 ## Idea
 Like WaniKani, teach each kanji's reading that shows up in the most vocabulary. Today the taught on'yomi is simply the first one KANJIDIC2 lists (`scripts/build-data.ts`), which can be a rare one. Instead, count the common JMdict words that use each reading and teach the winner. This changes only the data build, with overrides for odd cases.

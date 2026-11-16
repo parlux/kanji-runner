@@ -2,9 +2,6 @@
 
 Open ideas in priority order; the top one is next. The owner orders it. New ideas go at the bottom unless the owner places them.
 
-## In progress
-- [Teach the most useful reading first](reading-choice.md): data; spec `docs/specs/SPEC-reading-choice.md`, tasks `tasks/todo-reading-choice.md`.
-
 ## Next
 1. [Compound words as gates](compound-word-gates.md): game; test vocabulary like 家具, unlocked once its kanji are learned. The on'yomi stories round stores only one chosen compound per reading, so this needs its own vocabulary list.
 2. [Show overall progress](overall-progress.md): game; how many levels there are and where we're up to. Small, and shows the payoff of the content rounds.
