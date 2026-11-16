@@ -36,6 +36,8 @@ In Built-in mode, each kanji level brings about 30 JMdict words built from learn
 - Interface: `type WordPicker = (candidates: Candidate[], perLevel: number) => Candidate[]`. Returns the chosen words in teaching order (level, then rank within the level). Build-data calls exactly one picker, named in one constant (`WORD_PICKER` in `scripts/words.ts`); swapping the ordering means writing another function with this type and changing that constant.
 - **Today's picker, `byFrequency`:** per level, rank candidates by `nf` (null ranks after 48; ties by number of priority tags, more first; then by spelling for determinism). Take `KANJI_WORDS_PER_LEVEL = 30` per level, aiming at a mix of about 25% `single`, 25% `okurigana`, 50% `compound`: fill each kind's share from its best-ranked candidates, then fill any shortfall from the best-ranked of the rest. Levels with fewer candidates take all of them.
 - **Number cap (in `byFrequency`):** at most `MAX_NUMBER_WORDS_PER_LEVEL = 3` number words per level; a number word is made only of the numeral kanji 〇一二三四五六七八九十百千万, optionally ending in 月 (十一, 三十, 十二月). Skipped number words don't fill shortfalls. (Added after W1, owner 2026-11-17: JMdict's nf bands tie ~24 numbers and months at nf01 on level 2, crowding out 一人 and 大人.)
+- **Everyday-frequency picker, `byUsage` (added after W2, owner 2026-11-17; becomes `WORD_PICKER`):** W2 showed JMdict's `nf` bands measure newspaper frequency, so level 2 got 大手, 年金, 中立 while 見る, 入る, 今日, 行く were never picked. `byUsage` ranks by an open, licence-checked everyday-language frequency list (spoken or subtitle-based), looked up by spelling (and by reading where the list holds kana forms); words not in the list rank after those that are, then by `nf` as today. Same 30 per level, kind mix and number cap. The source is cached in `.data-cache/` and added to `SOURCES` like JMdict (never committed); its licence is credited in README. `byFrequency` stays as a second picker.
+- **Gloss fallback (amended after W2):** before the 20-character cap drops a word, try the shorter glosses of its first sense (帰国 "return to one's country" → a shorter one if any).
 - Output: `src/data/words.json`, one line per word: `{ "word", "reading", "glosses", "kind", "level" }`, in teaching order. Deterministic: two builds give identical JSON.
 - **Report** `.data-cache/word-report.txt`: removals per filter; per level 2–10 the chosen words (`word reading gloss kind`); the kind mix per level for all levels; total count. Build prints a one-line summary.
 - Credit: README already credits JMdict; add "words and glosses" to that credit.
@@ -93,7 +95,7 @@ README.md                   → JMdict credit covers words
 
 ## Boundaries
 - Always: `npm run check` before commit; push after each task; re-run `npm run data:build` and commit regenerated `src/data/`.
-- Ask first: a different per-level count; letting words count toward the unlock; any data source besides JMdict.
+- Ask first: a different per-level count; letting words count toward the unlock; any data source besides JMdict and the one everyday-frequency list W2b picks.
 - Never: hand-curated word lists or override files for words (filters only); copy anything from WaniKani; commit `.data-cache` or raw EDRDG downloads; change kanji gates, level order or the save format.
 
 ## Success Criteria

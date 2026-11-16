@@ -38,6 +38,18 @@ Every task: `npm run check` passes before it is checked off. Never commit `.data
 **Files:** `scripts/build-data.ts`, `src/data/words.json`, `tests/data/words.test.ts`, `README.md`, this file
 **Scope:** M
 
+### Task W2b: Everyday-frequency picker (highest risk: opus, web research)
+**Description:** Owner chose (2026-11-17) to bring a better frequency source forward after W2 showed newspaper ranking misses basic words (見る, 入る, 今日, 行く, 来る, 食べる). Research and choose an open, licence-checked everyday-language Japanese frequency list (spoken or subtitle-based; must allow use in a build and attribution; nothing from WaniKani). Add it to `SOURCES` (cached, never committed), write `byUsage` per the spec, make it `WORD_PICKER`, add the gloss fallback, rebuild `words.json`. Flip the `it.fails` tests for 今日 and 入る to plain tests. Log in "Numbers": source + licence, how many candidates it ranks, levels 2–3 lists, and which of 見る 出る 入る 今日 行く 来る 食べる 電車 are now picked at which level.
+**Acceptance:**
+- [ ] Source chosen with licence noted in the spec's README credit; build deterministic from the cache.
+- [ ] 今日 きょう and 入る はいる real-data tests pass as plain tests; most of the basic words above are picked.
+- [ ] Numbers logged.
+- [ ] `npm run check` passes.
+**Verification:** `npm run data:build` twice + `git diff --exit-code src/data`; `npm test -- words`
+**Dependencies:** W2
+**Files:** `scripts/words.ts`, `scripts/build-data.ts`, `src/data/words.json`, `tests/data/words*.test.ts`, `README.md`, this file
+**Scope:** M
+
 ### Task W3: Words in runs (core)
 **Description:** `WordItem` reading/kind; load both lists; pool order (current level's words first, then lower levels from the lowest up); `kanjiNeeded`, eligibility by learned kanji meaning; `wordreading` gate type and entries (after meaning box 3); `MAX_NEW_WORDS_PER_RUN` 2 counting both types; placement marks both keys; `wordReadingRow` distractors; summary entries. No game visuals beyond what's needed to keep it running (a `wordreading` gate must render with the default look).
 **Acceptance:**
@@ -46,7 +58,7 @@ Every task: `npm run check` passes before it is checked off. Never commit `.data
 - [ ] Loanwords behave as before (existing tests unchanged or only extended).
 - [ ] `npm run check` passes.
 **Verification:** `npm run check && npm run test:slow`
-**Dependencies:** W2
+**Dependencies:** W2b
 **Files:** `src/core/{types,words,pool,run,distractors,progression,study,tuning}.ts`, tests in `tests/core/`, this file
 **Scope:** M
 
