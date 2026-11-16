@@ -54,8 +54,8 @@ Every task: `npm run check` passes before it is checked off. Never commit `.data
 ### Task R4: Changelog, version
 **Description:** Bump to 1.4.0, add `## 1.4.0 (date)` to `CHANGELOG.md` (one line: readings picked by how many common words use them).
 **Acceptance:**
-- [ ] Version 1.4.0 in `package.json` and `CHANGELOG.md`.
-- [ ] Deploy green.
+- [x] Version 1.4.0 in `package.json` and `CHANGELOG.md`.
+- [x] Deploy green.
 **Verification:** `npm run check`; deploy green.
 **Dependencies:** R3
 **Files:** `package.json`, `CHANGELOG.md`, this file

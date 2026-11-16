@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.4.0 (2026-11-17)
+
+Reading gates teach the readings people actually use.
+
+- Each kanji's gate teaches its most-used on'yomi and kun'yomi, counted from common JMdict words; kun'yomi are counted from words where the kanji stands alone.
+- Overrides are checked against a researched golden set of 373 kanji.
+- Examples: 明 あか(るい), 生 い(きる), 木 もく.
+
 ## 1.3.0 (2026-11-17)
 
 On'yomi stories from compound words.
