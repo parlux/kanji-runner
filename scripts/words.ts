@@ -105,6 +105,17 @@ const nfOf = (pri: string[]) => {
 const MAX_GLOSS = 20;
 
 /**
+ * `pickGlosses`, but when its primary is over `MAX_GLOSS` the first of the
+ * sense's other glosses that fits becomes the primary (帰国 "return to one's
+ * country" → "returning home").
+ */
+export function fitGlosses(meanings: string[]): string[] {
+  const glosses = pickGlosses(meanings);
+  const fit = glosses.find((g) => g.length <= MAX_GLOSS);
+  return fit ? [fit, ...glosses.filter((g) => g !== fit)] : glosses;
+}
+
+/**
  * The filters, in order; each keeps a draft when it returns true. An entry is
  * counted against the first filter that leaves it no spelling.
  */
@@ -136,10 +147,13 @@ const FILTERS = {
   /** Fits a gate: spelling ≤ 6 characters, reading ≤ 7 kana. */
   fitsGate: (d) =>
     [...d.word].length <= MAX_WORD && [...d.reading].length <= MAX_READING,
-  /** The first sense has a usable gloss; its primary is ≤ 20 characters. */
+  /**
+   * The first sense has a usable gloss; its primary (`fitGlosses`) is ≤ 20
+   * characters.
+   */
   usableGloss: (d) =>
     d.glosses.some((g) => cleanGloss(g)) &&
-    (pickGlosses(d.glosses)[0] ?? "").length <= MAX_GLOSS,
+    (fitGlosses(d.glosses)[0] ?? "").length <= MAX_GLOSS,
   /** Not one kanji alone read as the kanji itself is taught (人 ひと). */
   notRepeatOfKanji: (d, ctx) => !repeatsKanji(d, ctx),
   /** A one-kanji word needs an nf rank (drops 子 ね "the Rat"). */
@@ -207,7 +221,7 @@ function toCandidate(d: Draft, ctx: Ctx): Candidate {
   return {
     word: d.word,
     reading: d.reading,
-    glosses: pickGlosses(d.glosses),
+    glosses: fitGlosses(d.glosses),
     kind: kindOf(d.word),
     level,
     nf: nfOf(d.pri),

@@ -255,6 +255,29 @@ describe("wordCandidates: filters", () => {
     expect(words(long)).toEqual([]);
     expect(removedBy(long)).toEqual({ usableGloss: 1 });
   });
+
+  it("usableGloss: falls back to the first shorter gloss of the sense", () => {
+    const glossesOf = (gs: string[]) =>
+      wordCandidates(
+        jmdict(entry([{ keb: "一人" }], [{ reb: "ひとり" }], { glosses: gs })),
+        KANJI,
+      ).candidates.map((c) => c.glosses);
+    expect(
+      glossesOf([
+        "return to one's country",
+        "returning to one's home country",
+        "going back to one's homeland",
+        "coming home",
+      ]),
+    ).toEqual([
+      [
+        "coming home",
+        "return to one's country",
+        "returning to one's home country",
+        "going back to one's homeland",
+      ],
+    ]);
+  });
 });
 
 describe("wordCandidates: kind, level, frequency facts", () => {
