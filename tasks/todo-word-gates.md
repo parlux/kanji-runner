@@ -1,7 +1,7 @@
 # Tasks: word gates (v1.5.0)
 
 Spec: `docs/specs/SPEC-word-gates.md` (2026-11-17). Intent: `docs/intent/word-gates.md`. Epic: `docs/ideas/useful-japanese.md` (round 1).
-Review: https://claude.ai/artifact/GJA3yUyi9Eu4Di6xcP1sKr
+Review: https://claude.ai/artifact/GJA3yUyi9Eu4Di6xcP1sKr · Checkpoint W: https://claude.ai/artifact/UfYR2b4LZbCNqBqHSRRsZN
 Every task: `npm run check` passes before it is checked off. Never commit `.data-cache` or raw EDRDG downloads.
 
 ## Plan
