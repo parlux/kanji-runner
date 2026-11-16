@@ -2,13 +2,20 @@
 /**
  * Dev-only data build: `npm run data:build`.
  *
- * Downloads KANJIDIC2 and KRADFILE (EDRDG, CC BY-SA 4.0) into the gitignored
+ * Downloads KANJIDIC2, KRADFILE and JMdict (EDRDG, CC BY-SA 4.0) into the gitignored
  * `.data-cache/` (pass `--refresh` to download again) and writes compact JSON
  * into `src/data/`. Output depends only on the cached files, so running it
  * twice gives identical JSON.
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { gunzipSync } from "node:zlib";
+import {
+  commonWords,
+  countReadings,
+  pickReadings,
+  reportRow,
+  type Override,
+} from "./readings";
 
 const CACHE = ".data-cache";
 /** Kanji levels 2+ hold 30 kanji each (SPEC: Progression and levels). */
@@ -16,6 +23,7 @@ const LEVEL_SIZE = 30;
 const SOURCES = {
   kanjidic: "http://www.edrdg.org/kanjidic/kanjidic2.xml.gz",
   kradfile: "http://ftp.edrdg.org/pub/Nihongo/kradfile.gz",
+  jmdict: "http://ftp.edrdg.org/pub/Nihongo/JMdict_e.gz",
 };
 
 type Kun = { base: string; okurigana: string };
@@ -278,21 +286,32 @@ async function main(): Promise<void> {
     components,
     readJson<OrderOverride[]>("scripts/order-overrides.json"),
   );
+  const readingOverrides = readJson<Record<string, Override>>(
+    "scripts/reading-overrides.json",
+  );
+  for (const c of Object.keys(readingOverrides))
+    if (!components.has(c))
+      throw new Error(`reading override ${c}: not a Jōyō kanji`);
+  const jmdict = (await cached("jmdict", refresh)).toString("utf8");
+  const counts = countReadings(commonWords(jmdict), raw);
   const pos = new Map(order.map((c, i) => [c, i]));
   const sorted = [...raw].sort(
     (a, b) => (pos.get(a.char) ?? 0) - (pos.get(b.char) ?? 0),
   );
-  const kanji = sorted.map((k, i) => ({
-    char: k.char,
-    level: 2 + Math.floor(i / LEVEL_SIZE),
-    grade: k.grade,
-    freq: k.freq,
-    glosses: pickGlosses(k.meanings, glossOverrides[k.char]),
-    on: k.on[0] ? toHiragana(k.on[0].replace(/^-|-$/g, "")) : null,
-    kun: k.kun[0] ? splitKun(k.kun[0]) : null,
-    readings: allReadings(k),
-    components: components.get(k.char) ?? [],
-  }));
+  const kanji = sorted.map((k, i) => {
+    const pick = pickReadings(k, counts.get(k.char), readingOverrides[k.char]);
+    return {
+      char: k.char,
+      level: 2 + Math.floor(i / LEVEL_SIZE),
+      grade: k.grade,
+      freq: k.freq,
+      glosses: pickGlosses(k.meanings, glossOverrides[k.char]),
+      on: pick.on ? toHiragana(pick.on.replace(/^-|-$/g, "")) : null,
+      kun: pick.kun ? splitKun(pick.kun) : null,
+      readings: allReadings(k),
+      components: components.get(k.char) ?? [],
+    };
+  });
   writeJsonLines("src/data/kanji.json", kanji);
   writeConfusables(kanji);
 
@@ -300,6 +319,28 @@ async function main(): Promise<void> {
   writeFileSync(`${CACHE}/gloss-report.txt`, report);
   console.log(report);
   console.log(`gloss report written to ${CACHE}/gloss-report.txt`);
+
+  // `sorted` and `kanji` share the progression order.
+  const rows = sorted.flatMap((k, i) => {
+    const level = kanji[i]?.level ?? 0;
+    const row = reportRow(
+      k,
+      level,
+      counts.get(k.char),
+      readingOverrides[k.char],
+    );
+    return row ? [row] : [];
+  });
+  const onChanged = rows.filter((r) => / on /.test(r)).length;
+  const kunChanged = rows.filter((r) => /(  |; )kun /.test(r)).length;
+  const summary = `${onChanged} kanji changed on'yomi, ${kunChanged} changed kun'yomi`;
+  writeFileSync(
+    `${CACHE}/reading-report.txt`,
+    [`# ${summary}`, ...rows, ""].join("\n"),
+  );
+  console.log(
+    `${summary}; reading report written to ${CACHE}/reading-report.txt`,
+  );
 }
 
 /** Hand-curated kana look-alikes, within one script (SPEC: Distractors). */
