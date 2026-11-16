@@ -364,6 +364,7 @@ const cand = (
   nf,
   pri,
   spellings: [],
+  homograph: false,
 });
 const names = (cs: Candidate[]) => cs.map((c) => c.word);
 
@@ -493,6 +494,31 @@ describe("usageRank", () => {
     const c = { ...cand("出かける", "okurigana"), spellings: ["出掛ける"] };
     expect(rank(c, usage("の", "出掛ける", "出かける"))).toBe(1);
     expect(rank(c, usage("の"))).toBeNull();
+  });
+
+  it("ranks a homograph single as unlisted (下 した and 下 もと)", () => {
+    const { candidates } = wordCandidates(
+      jmdict(
+        entry([{ keb: "下", pri: ["ichi1", "nf05"] }], [{ reb: "もと" }]),
+        // Dropped by a filter (reading as taught), but still counted.
+        entry([{ keb: "下", pri: ["ichi1", "nf05"] }], [{ reb: "した" }]),
+        entry([{ keb: "大", pri: ["ichi1", "nf05"] }], [{ reb: "だい" }]),
+      ),
+      [
+        {
+          char: "下",
+          level: 3,
+          on: "か",
+          kun: { base: "した", okurigana: "" },
+        },
+        ...KANJI,
+      ],
+    );
+    const shita = candidates.find((c) => c.word === "下");
+    expect(shita?.homograph).toBe(true);
+    if (shita) expect(rank(shita, usage("下"))).toBeNull();
+    const lone = cand("大", "single");
+    expect(rank(lone, usage("大"))).toBe(0);
   });
 
   it("looks up an all-katakana reading, never a hiragana one", () => {

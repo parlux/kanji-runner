@@ -44,6 +44,8 @@ export type Candidate = {
   pri: string[];
   /** The entry's other kanji spellings, common or not (出掛ける for 出かける). */
   spellings: string[];
+  /** Another common JMdict entry also writes this spelling (下 した, 下 もと). */
+  homograph: boolean;
 };
 
 /** A (spelling, reading) option of one entry, before filtering. */
@@ -216,7 +218,7 @@ function byRank(a: Candidate, b: Candidate): number {
   );
 }
 
-function toCandidate(d: Draft, ctx: Ctx): Candidate {
+function toCandidate(d: Draft, ctx: Ctx, homograph: boolean): Candidate {
   const level = Math.max(
     ...[...d.word].map((c) => ctx.kanji.get(c)?.level ?? 0),
   );
@@ -229,6 +231,7 @@ function toCandidate(d: Draft, ctx: Ctx): Candidate {
     nf: nfOf(d.pri),
     pri: d.pri.filter((p) => !/^nf\d\d$/.test(p)),
     spellings: d.kebs.filter((k) => k !== d.word),
+    homograph,
   };
 }
 
@@ -247,7 +250,14 @@ export function wordCandidates(
     [...Object.keys(FILTERS), "duplicateSpelling"].map((k) => [k, 0]),
   ) as Record<RemovedBy, number>;
   const bySpelling = new Map<string, Candidate>();
-  for (const entry of xml.split("<entry>")) {
+  const entries = xml.split("<entry>");
+  // Common entries per spelling, counted before any filter (下 した counts).
+  const entriesOf = new Map<string, number>();
+  for (const entry of entries)
+    if (entry.includes("<ke_pri>"))
+      for (const d of drafts(entry))
+        entriesOf.set(d.word, (entriesOf.get(d.word) ?? 0) + 1);
+  for (const entry of entries) {
     if (!entry.includes("<ke_pri>")) continue;
     let left = drafts(entry);
     if (!left.length) continue;
@@ -263,7 +273,7 @@ export function wordCandidates(
     }
     const pick = left[0];
     if (!pick) continue;
-    const c = toCandidate(pick, ctx);
+    const c = toCandidate(pick, ctx, (entriesOf.get(pick.word) ?? 0) > 1);
     const other = bySpelling.get(c.word);
     if (other) removed.duplicateSpelling++;
     if (!other || byRank(c, other) < 0) bySpelling.set(c.word, c);
@@ -375,6 +385,9 @@ export function usageRank(
     const ranks = forms.flatMap((w) => usage.get(w) ?? []);
     return ranks.length ? Math.min(...ranks) : null;
   };
+  // A single kanji with another common entry (下 した, 下 もと) can't be told
+  // apart in the list (it has no readings): rank it as unlisted.
+  if (c.kind === "single" && c.homograph) return null;
   return (
     best([c.word, ...c.spellings]) ??
     (ALL_KATAKANA.test(c.reading) ? best([c.reading]) : null) ??
