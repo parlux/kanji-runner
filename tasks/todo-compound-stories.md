@@ -38,8 +38,8 @@ Every task: `npm run check` passes before it is checked off. Test fixtures are s
 ### Task C3: Changelog, version
 **Description:** Bump to 1.3.0, add `## 1.3.0 (date)` to `CHANGELOG.md`. Grep `src/`, `tests/`, `dist/` for real story phrases and the token prefix.
 **Acceptance:**
-- [ ] Version 1.3.0 and `## 1.3.0 (<date>)` in `CHANGELOG.md`.
-- [ ] Grep clean.
+- [x] Version 1.3.0 and `## 1.3.0 (2026-11-17)` in `CHANGELOG.md`.
+- [x] Grep clean.
 **Verification:** `npm run check`; deploy green.
 **Dependencies:** C2
 **Files:** `package.json`, `CHANGELOG.md`, this file

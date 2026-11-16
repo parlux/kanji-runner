@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.3.0 (2026-11-17)
+
+On'yomi stories from compound words.
+
+- An on'yomi with no WaniKani kanji story and no single-kanji word story (like 家 か) borrows the reading story of a compound word that uses it, labelled "from <word> <reading>".
+- The compound is the lowest-level WaniKani word with that reading whose story actually mentions it; filler stories are skipped, and "no story" stays when nothing fits.
+- Kun'yomi are unchanged. The saved story library is refetched once in the new format.
+
 ## 1.2.0 (2026-11-15)
 
 Reading stories match the reading.
