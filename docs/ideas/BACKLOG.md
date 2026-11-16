@@ -8,3 +8,4 @@ Open ideas in priority order; the top one is next. The owner orders it. New idea
 4. [Fold the round skills into one project flow](skill-audit.md): process.
 5. [Compound words as gates](compound-word-gates.md): game; test vocabulary like 家具, not just single kanji.
 
+6. [WaniKani-shaped progression from open data](wk-shaped-progression.md): progression; WaniKani's principles (reading choice, compounds after kanji) without its proprietary order.
