@@ -1,7 +1,7 @@
 # Tasks: teach the most useful reading first (v1.4.0)
 
 Spec: `docs/specs/SPEC-reading-choice.md` (2026-11-17). Intent: `docs/intent/reading-choice.md`. Idea: `docs/ideas/reading-choice.md`. Started 2026-11-17.
-Review: owner skipped the spec page (2026-11-17).
+Review: owner skipped the spec page (2026-11-17). · Checkpoint R: https://claude.ai/artifact/5PFoqtM9soRs4TjkALPE94
 Every task: `npm run check` passes before it is checked off. Never commit `.data-cache` or raw EDRDG downloads.
 
 ## Plan
