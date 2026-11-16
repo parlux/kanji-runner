@@ -73,4 +73,21 @@ describe("kanji data", () => {
     const rest = kanji.find((k) => k.char === "休");
     expect(rest?.components).toEqual(["\u2e85", "木"]);
   });
+
+  it("teaches the most common readings (SPEC-reading-choice)", () => {
+    const get = (c: string) => kanji.find((k) => k.char === c);
+    expect(get("明")?.kun).toEqual({ base: "あか", okurigana: "るい" });
+    expect(get("気")?.on).toBe("き");
+    expect(get("上")?.kun).toEqual({ base: "うえ", okurigana: "" });
+    expect(get("家")?.kun).toEqual({ base: "いえ", okurigana: "" });
+    expect(get("日")?.on).toBe("にち");
+    expect(get("日")?.kun).toEqual({ base: "ひ", okurigana: "" });
+    expect(get("上")?.on).toBe("じょう");
+  });
+
+  it("keeps an on and a kun for every kanji that had one before the pick", () => {
+    // Counts from the first-listed data (v1.3.0): 2130 with an on'yomi, 1777 with a kun'yomi.
+    expect(kanji.filter((k) => k.on).length).toBe(2130);
+    expect(kanji.filter((k) => k.kun).length).toBe(1777);
+  });
 });

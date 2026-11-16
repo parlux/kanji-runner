@@ -332,7 +332,7 @@ async function main(): Promise<void> {
     return row ? [row] : [];
   });
   const onChanged = rows.filter((r) => / on /.test(r)).length;
-  const kunChanged = rows.filter((r) => /(  |; )kun /.test(r)).length;
+  const kunChanged = rows.filter((r) => /( {2}|; )kun /.test(r)).length;
   const summary = `${onChanged} kanji changed on'yomi, ${kunChanged} changed kun'yomi`;
   writeFileSync(
     `${CACHE}/reading-report.txt`,

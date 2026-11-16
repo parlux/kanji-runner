@@ -29,11 +29,11 @@ Every task: `npm run check` passes before it is checked off. Never commit `.data
 ### Task R2: Wire into the build, regenerate data
 **Description:** Add JMdict to `SOURCES`; `build-data.ts` uses `scripts/readings.ts` for `on`/`kun`; create `scripts/reading-overrides.json` as `{}`; write `.data-cache/reading-report.txt` and print the summary. Run `npm run data:build`, commit the regenerated `src/data/`. Add the real-data spot checks to `tests/data/kanji.test.ts`. Credit JMdict in `README.md`. Check the longest new gate label fits `GATE_MIN_W` (browser check at 390×844 on a crafted reading gate). Log in this file under "Numbers": changed on'yomi / kun'yomi counts, the 明 and 図 rows, and 10 sample changed rows.
 **Acceptance:**
-- [ ] spec Testing Strategy "Real data" checks pass; two builds give identical JSON.
-- [ ] Report written; numbers logged below.
-- [ ] Longest new label readable at 390×844 (screenshot in the scratchpad).
-- [ ] README credits JMdict.
-- [ ] `npm run check` passes.
+- [x] spec Testing Strategy "Real data" checks pass; two builds give identical JSON.
+- [x] Report written; numbers logged below.
+- [x] Longest new label readable at 390×844 (screenshot in the scratchpad).
+- [x] README credits JMdict.
+- [x] `npm run check` passes.
 **Verification:** `npm run data:build` twice + `git diff --exit-code src/data`; `npm test -- kanji readings`; browser check.
 **Dependencies:** R1
 **Files:** `scripts/build-data.ts`, `scripts/reading-overrides.json`, `src/data/kanji.json` (+ any regenerated `src/data/` file), `tests/data/kanji.test.ts`, `README.md`, this file
@@ -55,4 +55,26 @@ Every task: `npm run check` passes before it is checked off. Never commit `.data
 - [ ] Existing progress intact; stories still show (or "no story") for the new readings.
 
 ## Numbers
-(filled in by Task R2)
+From Task R2's build (full report: `.data-cache/reading-report.txt`, 135 rows):
+- **29 kanji changed on'yomi, 106 changed kun'yomi** (kun counted from standalone words only).
+- Spec rows. Counts are common JMdict entries; on'yomi from every word, kun'yomi from standalone spellings.
+  - 明: on メイ 42 (unchanged); kun あ.かり → あか.るい by override (standalone tie: あ.かり, あか.るい, あき.らか, あ.ける, あ.くる, あ.かす all 1).
+  - 図: on ズ 17 (unchanged); kun え → はか.る (はか.る 1, え 0).
+  - 上: on ジョウ 74 (unchanged); kun うえ, first listed (うえ, かみ, あ.げる, あ.がる, … all 1, tie → KANJIDIC2 order). Not in the report.
+  - 家: on カ 59 (unchanged); kun いえ 2, うち 1 (unchanged). Not in the report.
+  - 気: on キ 124, ケ 12 (unchanged); kun いき → き (き 9, いき 0).
+- 10 sample rows:
+  ```
+  大 L2  kun おお- → おお.きい (おお.きい 1, おお- 0, -おお.いに 0)
+  木 L2  on ボク → モク (モク 13, ボク 2)
+  生 L2  kun い.きる → なま (なま 3, う.まれ 2, い.きる 1)
+  間 L5  kun あいだ → ま (ま 2, あいだ 1, あい 0)
+  少 L7  kun すく.ない → すこ.し (すこ.し 3, すく.ない 1)
+  主 L11  kun ぬし → おも (おも 2, ぬし 1, あるじ 1)
+  世 L11  on セイ → セ (セ 24, セイ 10, ソウ 0)
+  省 L20  on セイ → ショウ (ショウ 21, セイ 5)
+  便 L21  on ベン → ビン (ビン 13, ベン 9)
+  怒 L46  kun いか.る → おこ.る (おこ.る 1, いか.る 0)
+  ```
+- Longest new gate labels: 7 characters (あたた(かい), まぬが(れる), わきま(える), そそのか(す), い(まわしい)); the longest label overall was already 8. At GATE_MIN_W (70 px) they draw at 13–23 px, い(まわしい) smallest (13 px on one line).
+- Screenshot (crafted 3-answer reading walls, 60–160 px tall, narrowed openings at GATE_MIN_W, drawn with the game's `drawLabel`): `/private/tmp/claude-501/-Users-parlux-Projects-number-runner/a6a4a232-bb83-492b-845a-8f572a909944/scratchpad/r2-gate-labels-390x844.png`.
