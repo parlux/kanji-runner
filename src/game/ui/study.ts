@@ -19,7 +19,8 @@ const CSS = `
 .kr-study .crumb { display: flex; flex-direction: column; align-items: center;
   min-width: 44px; padding: 2px 6px; background: #111; border: 1px solid #5a6478; }
 .kr-study .crumb .ch { font-size: 22px; line-height: 1.2; }
-.kr-study .crumb .rm { font-size: 12px; color: #5fd38d; white-space: nowrap; }
+.kr-study .crumb .rm { font-size: 12px; color: #5fd38d; text-align: center; }
+.kr-study .wordreading { font-size: 20px; color: #46e0d6; }
 .kr-study .info { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 6px;
   overflow-wrap: anywhere; }
 .kr-study .meaning { font-size: 18px; font-weight: 600; }
@@ -107,6 +108,7 @@ export function cardEl(c: StudyCard): HTMLElement {
   if (c.kind === "kana") {
     info.append(el("div", "meaning", c.romaji), el("div", "row", c.script));
   } else if (c.kind === "word") {
+    if (c.reading) info.append(el("div", "wordreading", c.reading));
     info.append(el("div", "meaning", c.meanings.join(", ")));
     const crumbs = el("div", "crumbs");
     crumbs.append(

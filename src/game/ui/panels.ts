@@ -146,6 +146,7 @@ export function createPanels(d: PanelDeps): Panels {
         run.results,
         run.track.charges,
         kanjiList(),
+        WORDS,
       );
       const cards = studyCards(
         missed,

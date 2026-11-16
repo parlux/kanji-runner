@@ -1,6 +1,7 @@
 import { gateReached, type RunState } from "../../core/sim";
 import { SESSION_LINE_MAX_LINES } from "../../core/tuning";
 import { KANJI } from "../../core/kanji";
+import { WORDS } from "../../core/words";
 import { missedItems } from "../../core/run";
 import {
   sessionTokens,
@@ -84,6 +85,7 @@ export function renderEnd(
     run.results,
     run.track.charges,
     session.wk?.kanji ?? KANJI,
+    WORDS,
   );
   const line = (maxLines: number) =>
     session.log ? layoutSessionLine(ctx, inner, session.log, maxLines) : null;
@@ -223,7 +225,10 @@ function renderMissedRow(
     right -= tagW + 10;
   }
   const answerX = Math.max(promptX + 44, promptX + promptW + 14);
-  const answer = m.answers.join(" · ");
+  // a kanji word shows its reading and meaning, whichever gate it was missed on
+  const answer = m.word
+    ? `${m.word.reading} · ${m.word.meaning}`
+    : m.answers.join(" · ");
   put(
     ctx,
     answer,
