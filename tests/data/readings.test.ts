@@ -151,9 +151,25 @@ describe("countReadings", () => {
   });
 
   it("reads 々 as the previous kanji, sound changes included", () => {
-    const c = count([["人々", "ひとびと"]]);
-    expect(c.get("人")?.kun).toEqual([1, 0, 0]);
-    expect(c.get("人")?.on).toEqual([0, 0]);
+    const c = count([["日々", "にちにち"]], [["人々", "じんじん"]]);
+    expect(c.get("日")?.on).toEqual([1, 0]);
+    expect(c.get("人")?.on).toEqual([1, 0]);
+    const k: KanjiReadings[] = [{ char: "時", on: ["ジ"], kun: ["とき"] }];
+    // 時々 ときどき: rendaku on the repeat; but kun only counts standalone.
+    const t = countReadings(
+      words([["時々", "じじ"]], [["時々", "ときどき"]]),
+      k,
+    );
+    expect(t.get("時")).toEqual({ on: [1], kun: [0] });
+  });
+
+  it("counts an on'yomi and a kun base spelled the same for both", () => {
+    const k: KanjiReadings[] = [
+      { char: "気", on: ["キ", "ケ"], kun: ["き"] },
+      { char: "分", on: ["ブン"], kun: [] },
+    ];
+    const c = countReadings(words([["気分", "きぶん"]], [["気", "き"]]), k);
+    expect(c.get("気")).toEqual({ on: [2, 0], kun: [1] });
   });
 
   it("matches katakana in a spelling as hiragana", () => {
@@ -189,6 +205,23 @@ describe("countReadings", () => {
 });
 
 describe("kun entry attribution", () => {
+  it("counts kun'yomi only from standalone spellings", () => {
+    const c = count(
+      [["上", "うえ"]],
+      [["上げる", "あげる"]],
+      [["手上げる", "てあげる"]],
+      [["上手", "うわて"]],
+    );
+    expect(c.get("上")?.kun).toEqual([1, 0, 0, 0, 1, 0, 0, 0]);
+    expect(c.get("手")?.kun).toEqual([0, 0, 0, 0]);
+  });
+
+  it("never counts an entry with a - marker", () => {
+    const k: KanjiReadings[] = [{ char: "日", on: [], kun: ["-か", "ひ"] }];
+    const c = countReadings(words([["日", "か"]], [["日", "ひ"]]), k);
+    expect(c.get("日")?.kun).toEqual([0, 1]);
+  });
+
   it("tells あか.るい from あ.かり by the okurigana written", () => {
     const c = count([["明るい", "あかるい"]], [["明かり", "あかり"]]);
     expect(c.get("明")?.kun).toEqual([1, 1, 0, 0, 0]);

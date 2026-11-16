@@ -7,7 +7,8 @@
  *   (spelling, reading) pairs.
  * - `countReadings(words, kanji)` → per kanji char, how many common entries
  *   use each of its KANJIDIC2 on'yomi and kun entries (`ReadingCounts`,
- *   parallel to `on` and `kun`).
+ *   parallel to `on` and `kun`). On'yomi count from every word, kun'yomi
+ *   only from standalone ones (上げる, not 引き上げる); `-` entries never.
  * - `pickReadings(kanji, counts, override?)` → `{ on, kun }`: the raw
  *   KANJIDIC2 on'yomi and kun entry to teach (null when it has none).
  * - `reportRow(kanji, level, counts, override?)` → a report line when the
@@ -84,54 +85,59 @@ for (const [plain, voiced] of [
 ] as const)
   [...plain].forEach((c, i) => (VOICED[c] ??= []).push(voiced[i] ?? ""));
 
-/** One way a kanji can be read: its id (`on:めい`, `kun:あか`) and surface forms. */
-type Option = {
+/** A surface form a kanji can take, and the readings it stands for. */
+type Form = {
+  text: string;
+  /** Option ids it counts for (`on:き`, `kun:き`); an on'yomi and a kun base
+   * spelled the same share one form, so they don't make a word ambiguous. */
   id: string;
-  /** Forms anywhere in a word: the reading, and its sokuon form. */
-  forms: string[];
-  /** Rendaku forms, not allowed word-initially. */
-  voiced: string[];
 };
 
 type Indexed = {
-  options: Option[];
+  /** Forms anywhere in a word: the readings and their sokuon forms. */
+  forms: Form[];
+  /** Rendaku forms, not allowed word-initially. */
+  voiced: Form[];
   on: string[];
-  kun: { base: string; okurigana: string }[];
+  kun: { base: string; okurigana: string; marked: boolean }[];
 };
 
 /**
- * Options for a kanji. A sound-changed form that is itself one of the kanji's
+ * Forms for a kanji. A sound-changed form that is itself one of the kanji's
  * readings is left out, so the plain reading isn't made ambiguous.
  */
 function index(k: KanjiReadings): Indexed {
   const on = k.on.map(strip);
   const kun = k.kun.map((r) => {
     const [base = "", okurigana = ""] = strip(r).split(".");
-    return { base, okurigana };
+    return { base, okurigana, marked: /^-|-$/.test(r) };
   });
   const plain = new Set([...on, ...kun.map((r) => r.base)]);
-  const option = (kind: string, r: string): Option => {
+  const forms = new Map<string, Set<string>>();
+  const voiced = new Map<string, Set<string>>();
+  const add = (to: Map<string, Set<string>>, text: string, id: string) => {
+    if (text !== id.slice(id.indexOf(":") + 1) && plain.has(text)) return;
+    const ids = to.get(text) ?? new Set<string>();
+    to.set(text, ids.add(id));
+  };
+  const option = (kind: string, r: string) => {
+    const id = `${kind}:${r}`;
     const sokuon =
       kind === "on" && /[くつちき]$/.test(r) && r.length > 1
         ? [r.slice(0, -1) + "っ"]
         : [];
-    const voiced = (VOICED[r[0] ?? ""] ?? []).map((v) => v + r.slice(1));
-    const extra = (xs: string[]) => xs.filter((x) => !plain.has(x));
-    return {
-      id: `${kind}:${r}`,
-      forms: [r, ...extra(sokuon)],
-      voiced: extra([
-        ...voiced,
-        ...voiced.flatMap((v) =>
-          sokuon.length ? [v.slice(0, -1) + "っ"] : [],
-        ),
-      ]),
-    };
+    add(forms, r, id);
+    for (const s of sokuon) add(forms, s, id);
+    for (const v of VOICED[r[0] ?? ""] ?? []) {
+      add(voiced, v + r.slice(1), id);
+      if (sokuon.length) add(voiced, v + r.slice(1, -1) + "っ", id);
+    }
   };
-  const ids = new Map<string, Option>();
-  for (const r of on) ids.set(`on:${r}`, option("on", r));
-  for (const r of kun) ids.set(`kun:${r.base}`, option("kun", r.base));
-  return { options: [...ids.values()], on, kun };
+  for (const r of new Set(on)) option("on", r);
+  for (const r of new Set(kun.map((e) => e.base))) option("kun", r);
+  const list = (m: Map<string, Set<string>>) =>
+    [...m].map(([text, ids]) => ({ text, id: [...ids].sort().join(",") }));
+  return { forms: list(forms), voiced: list(voiced), on, kun };
 }
 
 /** Cap on alignments per pair; real words have a handful. */
@@ -163,14 +169,13 @@ function alignments(
       return;
     }
     const k = idx.get(c === "々" ? (chars[i - 1] ?? "") : c);
-    for (const o of k?.options ?? []) {
-      const forms = i === 0 ? o.forms : [...o.forms, ...o.voiced];
-      for (const f of forms) {
-        if (!reading.startsWith(f, j)) continue;
-        path.push(o.id);
-        walk(i + 1, j + f.length);
-        path.pop();
-      }
+    const forms =
+      i === 0 ? k?.forms : [...(k?.forms ?? []), ...(k?.voiced ?? [])];
+    for (const f of forms ?? []) {
+      if (!reading.startsWith(f.text, j)) continue;
+      path.push(f.id);
+      walk(i + 1, j + f.text.length);
+      path.pop();
     }
   };
   walk(0, 0);
@@ -179,9 +184,11 @@ function alignments(
 
 /**
  * Readings one pair gives its kanji, as `<char>|on|<i>` / `<char>|kun|<i>`:
- * a position counts only when every alignment agrees on its reading. A kun
- * match goes to the entry with that base whose okurigana the spelling writes
+ * a position counts only when every alignment agrees on its reading. Kun
+ * matches count only in standalone spellings (上, 上げる; not 引き上げる) and
+ * go to the unmarked entry with that base whose okurigana the spelling writes
  * next, the longest such; an entry without okurigana matches anything.
+ * Entries marked with `-` never count.
  */
 function pairCredits(
   spelling: string,
@@ -201,27 +208,30 @@ function pairCredits(
   const all = alignments(chars, hira(reading), idx);
   if (!all.length) return [];
   const credits: string[] = [];
+  // Kun'yomi count only from standalone words: the kanji, then kana only.
+  const standalone = chars.slice(1).every(isKana);
   chars.forEach((c, i) => {
     const id = all[0]?.[i] ?? "";
     if (!id || all.some((a) => a[i] !== id)) return;
     const char = c === "々" ? (chars[i - 1] ?? "") : c;
     const k = idx.get(char);
     if (!k) return;
-    const [kind, r] = id.split(":") as [string, string];
-    if (kind === "on") {
-      credits.push(`${char}|on|${k.on.indexOf(r)}`);
-      return;
+    for (const option of id.split(",")) {
+      const [kind, r] = option.split(":") as [string, string];
+      if (kind === "on") {
+        credits.push(`${char}|on|${k.on.indexOf(r)}`);
+        continue;
+      }
+      if (!standalone) continue;
+      const after = chars.slice(1).join("");
+      let best = -1;
+      k.kun.forEach((e, n) => {
+        if (e.marked || e.base !== r || !after.startsWith(e.okurigana)) return;
+        const len = k.kun[best]?.okurigana.length ?? -1;
+        if (e.okurigana.length > len) best = n;
+      });
+      if (best >= 0) credits.push(`${char}|kun|${best}`);
     }
-    let next = i + 1;
-    while (next < chars.length && isKana(chars[next] ?? "")) next++;
-    const after = chars.slice(i + 1, next).join("");
-    let best = -1;
-    k.kun.forEach((e, n) => {
-      if (e.base !== r || !after.startsWith(e.okurigana)) return;
-      const len = k.kun[best]?.okurigana.length ?? -1;
-      if (e.okurigana.length > len) best = n;
-    });
-    if (best >= 0) credits.push(`${char}|kun|${best}`);
   });
   return credits;
 }
