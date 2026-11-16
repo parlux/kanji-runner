@@ -27,7 +27,7 @@ Every task: `npm run check` passes before it is checked off. Never commit `.data
 **Scope:** M
 
 ### Task W2: Wire into the build, generate `words.json`
-**Description:** `build-data.ts` calls `scripts/words.ts` with the kanji it just built; writes `src/data/words.json` and `.data-cache/word-report.txt`, prints the summary. Real-data tests in `tests/data/words.test.ts`. README credit. Log below under "Numbers": total words, removals per filter, kind mix for levels 2–6, and levels 2–3's word lists.
+**Description:** First, apply the spec amendments from W1's real-data findings in `scripts/words.ts` (+ synthetic tests): repeat rule narrowed to a lone kanji, singles need nf, primary gloss ≤ 20 chars, number cap 3 per level. Then `build-data.ts` calls `scripts/words.ts` with the kanji it just built; writes `src/data/words.json` and `.data-cache/word-report.txt`, prints the summary. Real-data tests in `tests/data/words.test.ts`. README credit. Log below under "Numbers": total words, removals per filter (W1 dry run vs now), kind mix for levels 2–6, and levels 2–3's word lists.
 **Acceptance:**
 - [ ] Spec Testing Strategy "Real data" checks pass; two builds give identical JSON.
 - [ ] Report written; numbers logged below.
@@ -39,7 +39,7 @@ Every task: `npm run check` passes before it is checked off. Never commit `.data
 **Scope:** M
 
 ### Task W3: Words in runs (core)
-**Description:** `WordItem` reading/kind; load both lists; `kanjiNeeded`, eligibility by learned kanji meaning; `wordreading` gate type and entries (after meaning box 3); `MAX_NEW_WORDS_PER_RUN` 2 counting both types; placement marks both keys; `wordReadingRow` distractors; summary entries. No game visuals beyond what's needed to keep it running (a `wordreading` gate must render with the default look).
+**Description:** `WordItem` reading/kind; load both lists; pool order (current level's words first, then lower levels from the lowest up); `kanjiNeeded`, eligibility by learned kanji meaning; `wordreading` gate type and entries (after meaning box 3); `MAX_NEW_WORDS_PER_RUN` 2 counting both types; placement marks both keys; `wordReadingRow` distractors; summary entries. No game visuals beyond what's needed to keep it running (a `wordreading` gate must render with the default look).
 **Acceptance:**
 - [ ] Spec Testing Strategy "Core" tests pass.
 - [ ] `npm run test:slow` passes; bot figures logged below.
@@ -69,4 +69,6 @@ Every task: `npm run check` passes before it is checked off. Never commit `.data
 - [ ] The words feel useful, not odd. If not, say what's off: the fix is a filter or a new picker, not a list.
 
 ## Numbers
-(filled by W2 and W3)
+W1 dry run on real JMdict (before the amendments): removals characters 526, startsWithKanji 143, notUsuallyKana 419, usualSense 76, fitsGate 362, usableGloss 7, notRepeatOfKanji 1472, duplicateSpelling 42; 14,636 candidates, 2,103 chosen; levels 2–68 at 30 each. Problems found: numbers/months tied at nf01 crowd out 一人/大人; 入る came out as いる; singles scarce and odd (子 ね). Owner approved fixes (2026-11-17), now in the spec.
+
+(W2 and W3 fill in below.)

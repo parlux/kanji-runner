@@ -24,8 +24,9 @@ In Built-in mode, each kanji level brings about 30 JMdict words built from learn
   - Not usually written in kana: the first sense has no `&uk;` (drops 出来る, 何方).
   - First sense's part of speech is not only a prefix, suffix or counter (`&pref;`, `&suf;`, `&ctr;`), and not tagged archaic, obsolete, rare or obscure (`&arch;`, `&obs;`, `&rare;`, `&obsc;`).
   - Fits a gate: spelling ≤ 6 characters; reading ≤ 7 kana.
-  - Usable gloss: the first sense's glosses run through the existing `cleanGloss`/`pickGlosses`; empty → dropped.
-  - **Not a repeat of its kanji:** dropped when the word is one kanji (plus that kanji's own okurigana) and its reading equals one of the kanji's main readings as taught (`on`, `kun.base`, or `kun.base + kun.okurigana` with matching okurigana). 人 ひと (kanji teaches ひと) is dropped; 人 as a word with a reading the kanji doesn't teach is kept.
+  - Usable gloss: the first sense's glosses run through the existing `cleanGloss`/`pickGlosses`; empty, or a primary gloss over 20 characters → dropped (amended after W1: glosses weren't capped).
+  - **Not a repeat of its kanji:** dropped when the word is one kanji alone (no kana) and its reading equals one of the kanji's main readings as taught (`on` or `kun.base`): 人 ひと, 山 やま. Kanji-plus-kana words are always kept, even when they match the kanji's kun'yomi (入る はいる, 大きい, 一つ): the whole verb or adjective is what's learned. (Amended after W1, owner 2026-11-17: the wider rule dropped 入る はいる and nearly every single.)
+  - **Singles must be frequent:** a one-kanji word (kind `single`) needs an `nf` rank; drops rarities like 子 ね "the Rat". (Added after W1, owner 2026-11-17.)
   - One entry per spelling: when two candidates share a spelling, keep the better-ranked one.
 - **Kind** (stored): `single` (one kanji, no kana), `okurigana` (one kanji plus hiragana), `compound` (two or more kanji, any kana; or any katakana: アメリカ人).
 - **Level:** the highest `level` of its kanji (`々` adds none).
@@ -34,6 +35,7 @@ In Built-in mode, each kanji level brings about 30 JMdict words built from learn
 ### Data build: picker (swappable)
 - Interface: `type WordPicker = (candidates: Candidate[], perLevel: number) => Candidate[]`. Returns the chosen words in teaching order (level, then rank within the level). Build-data calls exactly one picker, named in one constant (`WORD_PICKER` in `scripts/words.ts`); swapping the ordering means writing another function with this type and changing that constant.
 - **Today's picker, `byFrequency`:** per level, rank candidates by `nf` (null ranks after 48; ties by number of priority tags, more first; then by spelling for determinism). Take `KANJI_WORDS_PER_LEVEL = 30` per level, aiming at a mix of about 25% `single`, 25% `okurigana`, 50% `compound`: fill each kind's share from its best-ranked candidates, then fill any shortfall from the best-ranked of the rest. Levels with fewer candidates take all of them.
+- **Number cap (in `byFrequency`):** at most `MAX_NUMBER_WORDS_PER_LEVEL = 3` number words per level; a number word is made only of the numeral kanji 〇一二三四五六七八九十百千万, optionally ending in 月 (十一, 三十, 十二月). Skipped number words don't fill shortfalls. (Added after W1, owner 2026-11-17: JMdict's nf bands tie ~24 numbers and months at nf01 on level 2, crowding out 一人 and 大人.)
 - Output: `src/data/words.json`, one line per word: `{ "word", "reading", "glosses", "kind", "level" }`, in teaching order. Deterministic: two builds give identical JSON.
 - **Report** `.data-cache/word-report.txt`: removals per filter; per level 2–10 the chosen words (`word reading gloss kind`); the kind mix per level for all levels; total count. Build prints a one-line summary.
 - Credit: README already credits JMdict; add "words and glosses" to that credit.
@@ -47,7 +49,7 @@ In Built-in mode, each kanji level brings about 30 JMdict words built from learn
 - A word's reading entry joins the pool once its meaning box is ≥ `READING_UNLOCK_BOX` (3), like kanji.
 
 ### Pool and runs (Built-in mode)
-- `unlockedPool` adds eligible words after the kanji: loanwords, then kanji words, in list order; each kanji word's reading entry follows its meaning entry.
+- `unlockedPool` adds eligible words after the kanji: words of the current level (`unlockedLevel`) first, then the lower levels from the lowest up; within a level, loanwords then kanji words, in list order. Each kanji word's reading entry follows its meaning entry. So new words come from the current level first and the backlog of earlier levels fills in behind (owner, 2026-11-17).
 - **New words:** `MAX_NEW_WORDS_PER_RUN` 1 → **2**, still inside `MAX_NEW_PER_RUN` (4). Both `word` and `wordreading` count as words.
 - Level unlock unchanged: `levelKeys` stays kana or kanji meaning only.
 - **Placement:** placing up to level N marks both keys of every kanji word of levels ≤ N at box 4 (same rule as loanwords; unanswered marks above N removed on re-placement).
@@ -84,9 +86,9 @@ README.md                   → JMdict credit covers words
 `npm run data:build`, `npm run check`, `npm run check:fast`, `npm run test:slow`.
 
 ## Testing Strategy
-- **Synthetic JMdict fixtures** for `scripts/words.ts`: each filter keeps/drops the right entry; `re_restr`; kind; level; the repeat-of-its-kanji rule (人 ひと dropped, 一人 kept); `byFrequency` order, mix and shortfall fill; a second picker with the same type swaps in (test-only).
+- **Synthetic JMdict fixtures** for `scripts/words.ts`: each filter keeps/drops the right entry; `re_restr`; kind; level; the repeat-of-its-kanji rule (人 ひと dropped, 一人 and 入る はいる kept); singles need nf; gloss cap; number cap; `byFrequency` order, mix and shortfall fill; a second picker with the same type swaps in (test-only).
 - **Real data** (`tests/data/words.test.ts`): 一人 ひとり, 今日 きょう, 大人 おとな, 入る はいる, お金 おかね are present at the level of their last kanji with those readings; no 出来る, その上; every word's kanji are in `kanji.json`; label limits hold; levels 2–10 have 30 words each (or all candidates); `words.json` is deterministic.
-- **Core:** eligibility (unlearned kanji blocks, learned unlocks); reading entry after meaning box 3; new-word cap 2; placement marks both keys; `wordReadingRow` length band, no answer duplicate, shared-kanji preference; summary and study card for a kanji word.
+- **Core:** pool order (current level's words before lower levels' words); eligibility (unlearned kanji blocks, learned unlocks); reading entry after meaning box 3; new-word cap 2; placement marks both keys; `wordReadingRow` length band, no answer duplicate, shared-kanji preference; summary and study card for a kanji word.
 - **Balance:** `npm run test:slow` passes; bot win rate stays in its existing band with words in the pool.
 
 ## Boundaries
