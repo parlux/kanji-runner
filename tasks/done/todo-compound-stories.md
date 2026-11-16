@@ -1,6 +1,6 @@
 # Tasks: on'yomi stories from compound vocabulary (v1.3.0)
 
-Spec: `docs/specs/SPEC-compound-stories.md` (2026-11-17). Intent: `docs/intent/onyomi-compound-stories.md`. Idea: `docs/ideas/onyomi-compound-stories.md`. Started 2026-11-17.
+Spec: `docs/specs/done/SPEC-compound-stories.md` (2026-11-17). Intent: `docs/intent/onyomi-compound-stories.md`. Idea: `docs/ideas/done/onyomi-compound-stories.md`. Started and closed 2026-11-17 (owner ticked Checkpoint C).
 Review: https://claude.ai/artifact/DgzLWE284WZFqUPgQrZwqB · Checkpoint C: https://claude.ai/artifact/6ooEfv8qqwAZsD5VHkqqUg
 Every task: `npm run check` passes before it is checked off. Test fixtures are synthetic: never commit real WaniKani content.
 
@@ -46,6 +46,6 @@ Every task: `npm run check` passes before it is checked off. Test fixtures are s
 **Scope:** S
 
 ### Checkpoint C: v1.3.0 (owner, on the phone)
-- [ ] Pause on 家 shown as か: a compound story labelled `(from <word> <reading>)` that is about か.
-- [ ] じょう / にち / うえ stories unchanged.
-- [ ] Borrowed stories read as helpful, not filler; "no story" still appears where nothing fits.
+- [x] Pause on 家 shown as か: a compound story labelled `(from <word> <reading>)` that is about か.
+- [x] じょう / にち / うえ stories unchanged.
+- [x] Borrowed stories read as helpful, not filler; "no story" still appears where nothing fits.

@@ -1,6 +1,6 @@
 # Intent: on'yomi stories from compound vocabulary
 
-Status: confirmed by the owner, 2026-11-17, after an interview. Idea: `docs/ideas/onyomi-compound-stories.md`. Spec: `docs/specs/SPEC-compound-stories.md`.
+Status: confirmed by the owner, 2026-11-17, after an interview. Idea: `docs/ideas/done/onyomi-compound-stories.md`. Spec: `docs/specs/done/SPEC-compound-stories.md`.
 
 ## Statement of intent
 - **Outcome:** when a presented on'yomi has neither a kanji story nor a single-kanji vocabulary story, the card borrows the reading story of a WaniKani compound word with that reading.

@@ -1,6 +1,6 @@
 # Spec: on'yomi stories from compound vocabulary (v1.3.0)
 
-Extends `docs/specs/done/SPEC-reading-stories.md` and the specs it extends. Everything there still holds unless this spec says otherwise. Intent: `docs/intent/onyomi-compound-stories.md`. Idea: `docs/ideas/onyomi-compound-stories.md`.
+Extends `docs/specs/done/SPEC-reading-stories.md` and the specs it extends. Everything there still holds unless this spec says otherwise. Intent: `docs/intent/onyomi-compound-stories.md`. Idea: `docs/ideas/done/onyomi-compound-stories.md`.
 
 ## Objective
 A presented on'yomi that today shows "No story for this reading" (e.g. 家 か: WaniKani teaches 家 as いえ/うち) gets a reading story borrowed from a WaniKani compound word that uses it (家具 かぐ). This replaces SPEC-reading-stories' rule "On'yomi only match vocabulary that is the bare kanji; compounds are never searched" with a last-resort compound step.
