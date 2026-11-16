@@ -17,17 +17,17 @@ In Built-in mode, each kanji level brings about 30 JMdict words built from learn
 ## Rules
 
 ### Data build: candidates (`scripts/words.ts`, pure)
-- Source: JMdict (already cached for readings). A **candidate** is a JMdict entry with a common kanji spelling (same `ke_pri` set as `SPEC-reading-choice`) that passes every filter below. Its spelling is the first common `keb` that passes; its reading is the first common `reb` that applies to it (`re_restr`), else the first that applies; `re_nokanji` skipped.
+- Source: JMdict (already cached for readings). A **candidate** is a JMdict entry with a common kanji spelling (same `ke_pri` set as `SPEC-reading-choice`) that passes every filter below. Its spelling is the first common `keb` that passes; its reading is the first common `reb` that applies to it (`re_restr`), else the first that applies, kept as written (アメリカ人 アメリカじん); `re_nokanji` skipped.
 - **Filters** (each one a named, tested predicate; the report counts how many each removes):
-  - Characters: only our Jōyō kanji (every kanji in `kanji.json`), hiragana and `々`. No katakana, no other kanji.
-  - At least one kanji. Spelling starts with a kanji, or with お/ご followed by a kanji (お金, ご飯). Drops fragments like その上, と言うもの.
+  - Characters: only our Jōyō kanji (every kanji in `kanji.json`), hiragana, katakana (with `ー` and small kana) and `々`. No other kanji. The reading is all kana.
+  - At least one kanji. Spelling starts with a kanji, with katakana (アメリカ人, ローマ字), or with お/ご followed by a kanji (お金, ご飯). Drops fragments like その上, と言うもの.
   - Not usually written in kana: the first sense has no `&uk;` (drops 出来る, 何方).
   - First sense's part of speech is not only a prefix, suffix or counter (`&pref;`, `&suf;`, `&ctr;`), and not tagged archaic, obsolete, rare or obscure (`&arch;`, `&obs;`, `&rare;`, `&obsc;`).
   - Fits a gate: spelling ≤ 6 characters; reading ≤ 7 kana.
   - Usable gloss: the first sense's glosses run through the existing `cleanGloss`/`pickGlosses`; empty → dropped.
   - **Not a repeat of its kanji:** dropped when the word is one kanji (plus that kanji's own okurigana) and its reading equals one of the kanji's main readings as taught (`on`, `kun.base`, or `kun.base + kun.okurigana` with matching okurigana). 人 ひと (kanji teaches ひと) is dropped; 人 as a word with a reading the kanji doesn't teach is kept.
   - One entry per spelling: when two candidates share a spelling, keep the better-ranked one.
-- **Kind** (stored): `single` (one kanji, no kana), `okurigana` (kanji plus hiragana), `compound` (two or more kanji, any kana).
+- **Kind** (stored): `single` (one kanji, no kana), `okurigana` (one kanji plus hiragana), `compound` (two or more kanji, any kana; or any katakana: アメリカ人).
 - **Level:** the highest `level` of its kanji (`々` adds none).
 - **Frequency facts** kept on the candidate for pickers: the `nfXX` number (1–48, lower is more frequent) or null, and the priority tags.
 
