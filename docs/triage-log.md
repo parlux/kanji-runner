@@ -18,11 +18,8 @@ One row per owner request, written by the `triage` skill (`.claude/skills/triage
 | 2026-11-15 | On'yomi stories from compound vocabulary | idea | Owner asked for a backlog placeholder | |
 | 2026-11-15 | Compound words as gates | idea | Owner asked for a backlog placeholder | |
 | 2026-11-15 | Re-order the backlog by Claude's priority | doc | Backlog order only | |
-<<<<<<< HEAD
 | 2026-11-17 | Align standard progression with WaniKani order, readings, compounds | idea | Owner asked to refine an idea; copying WK order is out of bounds | |
 | 2026-11-17 | Fold compound unlocks into compound-word-gates; grade blend as new idea; drop wk-shaped-progression | doc | Idea and backlog edits only | |
 | 2026-11-17 | Add reading-choice idea; re-prioritise backlog | idea | Owner asked for an idea entry and backlog order | |
 | 2026-11-17 | On'yomi stories already in progress: move to In progress in backlog | doc | Backlog edit only | |
-=======
 | 2026-11-17 | Start backlog #1: on'yomi stories from compound vocabulary | sdd | New data (compound vocab), storage change, reverses a spec rule | |
->>>>>>> 57eeeac (Spec + intent: on'yomi stories from compound vocabulary (v1.3.0))
