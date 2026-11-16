@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createRunState } from "../../src/core/sim";
 import { buildTrack } from "../../src/core/track";
 import { ROWS_PER_RUN, VIEW_DISTANCE } from "../../src/core/tuning";
-import { mixHex } from "../../src/game/labels";
+import { isWordGate, mixHex, WORD_TINT } from "../../src/game/labels";
 import { renderTrackText } from "../../src/game/three/overlay";
 import { HAZE_COLOUR, SHAPE_DISTANCE } from "../../src/game/three/world";
 import { hazeFor } from "../../src/game/three/camera";
@@ -85,5 +85,24 @@ describe("track text haze", () => {
         mixHex("#9aa3b5", hex, amount),
       ]).toContain(x.fill);
     }
+  });
+
+  it("tints the prompt of word gates only", () => {
+    const promptFill = (type: "kana" | "word" | "wordreading"): string => {
+      const rows = run.rows.map((r) => ({ ...r, type }));
+      const r = { ...createRunState(rows, run.track), dist: wall - 0.5 };
+      const { ctx, draws } = recorder();
+      renderTrackText(
+        ctx,
+        r,
+        projectorFor(fit, w, h, r.dist),
+        hazeFor(fit.pose, r.dist),
+      );
+      return draws.find((d) => d.s === rows[0]?.prompt)?.fill as string;
+    };
+    expect(promptFill("kana")).toBe("#f2f2f2");
+    expect(promptFill("word")).toBe(WORD_TINT);
+    expect(promptFill("wordreading")).toBe(WORD_TINT);
+    expect(["kana", "meaning", "reading"].some(isWordGate)).toBe(false);
   });
 });

@@ -10,6 +10,13 @@ export const TEXT_COLORS = {
   outline: "#4a3220",
 };
 
+/** The one tint for word gates (`word` and `wordreading`): prompt text and gate frame, in every view. */
+export const WORD_TINT = "#46e0d6";
+
+/** Whether a gate type is a word gate and gets WORD_TINT. */
+export const isWordGate = (type: string): boolean =>
+  type === "word" || type === "wordreading";
+
 /** Maps a colour (#rrggbb) to what is drawn, e.g. mixed toward a haze colour. */
 export type Tint = (colour: string) => string;
 

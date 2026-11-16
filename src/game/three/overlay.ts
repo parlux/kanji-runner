@@ -6,11 +6,13 @@ import { hazardPos, packSurvivors } from "../../core/horde";
 import {
   drawLabel,
   fitSize,
+  isWordGate,
   mixHex,
   outlinedText,
   PROMPT_MARGIN,
   TEXT_COLORS,
   type Tint,
+  WORD_TINT,
 } from "../labels";
 import { BOSS_TOP, type BossView } from "./bossLayout";
 import { CRATE_H } from "./hazardLayout";
@@ -260,7 +262,15 @@ function renderWall(
     lft && rgt && rgt.x > lft.x
       ? fitSize(ctx, row.prompt, size, rgt.x - lft.x - PROMPT_MARGIN)
       : size;
-  outlinedText(ctx, row.prompt, top.x, y, fitted, undefined, tint);
+  outlinedText(
+    ctx,
+    row.prompt,
+    top.x,
+    y,
+    fitted,
+    isWordGate(row.type) ? WORD_TINT : undefined,
+    tint,
+  );
 }
 
 /** The boss's HP is this many times its projected height (with a floor); its bar this wide and tall. */

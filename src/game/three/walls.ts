@@ -12,6 +12,7 @@ import { rowOpenings } from "../../core/walls";
 import { wallSolids } from "../../core/gates";
 import type { RunState } from "../../core/sim";
 import { shapeDistance, TRACK_W, worldX, worldZ } from "./world";
+import { isWordGate, WORD_TINT } from "../labels";
 import { WALL_BEHIND, WALL_H, WALL_T } from "./wallLayout";
 
 /**
@@ -25,6 +26,8 @@ import { WALL_BEHIND, WALL_H, WALL_T } from "./wallLayout";
 const MAX_WALLS = 6;
 const WALL_COLOUR = 0x8c7fd0;
 const TRIM_COLOUR = 0x6a5bb8;
+/** Word gates' frame: the same tint as their prompt. */
+const WORD_COLOUR = new Color(WORD_TINT);
 const TRIM_H = 0.12;
 const PANE = { neutral: 0x6aa6ff, good: 0x4fd07f, bad: 0xff5a5a } as const;
 const PANE_OPACITY = 0.45;
@@ -40,7 +43,7 @@ export function createWalls(scene: Scene) {
   );
   const trims = new InstancedMesh(
     box,
-    new MeshLambertMaterial({ color: TRIM_COLOUR }),
+    new MeshLambertMaterial({ color: 0xffffff }),
     MAX_WALLS * 4,
   );
   const panes = new InstancedMesh(
@@ -55,6 +58,7 @@ export function createWalls(scene: Scene) {
   const glowMat = new MeshBasicMaterial({ color: GLOW_COLOUR });
   const glowBase = new Color(GLOW_COLOUR);
   const white = new Color(0xffffff);
+  const trimBase = new Color(TRIM_COLOUR);
   const glows = new InstancedMesh(box, glowMat, 2);
   for (const mesh of [pieces, trims, panes, glows]) {
     mesh.count = 0;
@@ -83,6 +87,7 @@ export function createWalls(scene: Scene) {
         rows++;
         const z = worldZ(questions[i] as number, run.dist) - WALL_T / 2;
         const openings = rowOpenings(run, i);
+        const word = isWordGate(run.rows[i]?.type ?? "");
         for (const s of wallSolids(openings)) {
           const width = (s.right - s.left) * TRACK_W;
           if (width <= 0) continue;
@@ -94,7 +99,8 @@ export function createWalls(scene: Scene) {
             WALL_H,
             z,
           );
-          trims.setMatrixAt(nt++, m);
+          trims.setMatrixAt(nt, m);
+          trims.setColorAt(nt++, word ? WORD_COLOUR : trimBase);
         }
         const answered = i === run.next - 1 ? run.lastAnswer : null;
         openings.forEach((o, j) => {
@@ -110,7 +116,9 @@ export function createWalls(scene: Scene) {
               ? answered.correct
                 ? PANE.good
                 : PANE.bad
-              : PANE.neutral,
+              : word
+                ? WORD_COLOUR.getHex()
+                : PANE.neutral,
           );
           panes.setColorAt(nw++, c);
           // the opening being shot glows at both edges as they are pushed apart
@@ -137,6 +145,7 @@ export function createWalls(scene: Scene) {
       );
       for (const mesh of [pieces, trims, panes, glows])
         mesh.instanceMatrix.needsUpdate = true;
+      if (trims.instanceColor) trims.instanceColor.needsUpdate = true;
       if (panes.instanceColor) panes.instanceColor.needsUpdate = true;
     },
   };
