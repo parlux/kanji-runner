@@ -24,15 +24,18 @@ For each (spelling, reading) pair of a common word:
 - `々` repeats the previous kanji's readings (with the same sound changes).
 - A pair with a character that isn't one of our Jōyō kanji, kana or `々` is skipped.
 - A kanji's reading in a pair counts only when **every** alignment of that pair gives it the same reading. Otherwise that kanji gets nothing from the pair (other kanji in the word still can).
+- An on'yomi and a kun base spelled the same (気 キ / き) are the same consumed kana, not an ambiguity: the match counts for both (amended after Task R1: 気 lost き).
 - An entry counts **at most once** per kanji reading, however many of its pairs match.
 
 ### Which kun'yomi entry a match counts for
+Kun'yomi are counted **only from standalone words**: spellings that are the kanji alone, optionally followed by kana (上, 上げる, 明るい; not 引き上げる or 夜明け). Kun entries with a `-` prefix/suffix marker are never picked (count 0). On'yomi still count from every common word. (Owner decision 2026-11-17, after Task R1's probe: plain counts picked 上 あ(げる), 明 あ(け), 家 や, because verbs in many compounds won; standalone counting gave 上 うえ, 家 いえ, 大 おお(きい), 来 く(る), 図 はか(る), about 104 kun changes.)
+
 KANJIDIC2 lists kun'yomi as entries like `あか.るい`, `あ.かり`. A kun match counts for the entry whose base the kanji consumed **and** whose okurigana the spelling writes straight after the kanji (`明るい` → `あか.るい`). Among several such entries, the longest okurigana wins. An entry without okurigana matches whatever follows.
 
 ### Pick
 - Taught on'yomi = the on'yomi with the most common entries; ties go to KANJIDIC2 order. All zero → first listed, as today.
 - Taught kun'yomi = the kun entry with the most common entries; same tie and zero rules.
-- **Overrides:** `scripts/reading-overrides.json`, `{ "<kanji>": { "on"?: "<on'yomi>", "kun"?: "<kun entry, e.g. あか.るい>", "why": "<reason>" } }`. An override wins over the count. The build fails if an override names a reading the kanji doesn't have in KANJIDIC2. Starts as `{}`; misses from the owner's review are added here.
+- **Overrides:** `scripts/reading-overrides.json`, `{ "<kanji>": { "on"?: "<on'yomi>", "kun"?: "<kun entry, e.g. あか.るい>", "why": "<reason>" } }`. An override wins over the count. The build fails if an override names a reading the kanji doesn't have in KANJIDIC2. Starts with 明 → `あか.るい` (standalone counts tie, so KANJIDIC2 order would keep あ(かり)); misses from the owner's review are added here. Overrides for kanji not in the list fail the build.
 - `readings` (every reading, used to keep distractors honest) is unchanged.
 - The pick lives in its own module, `scripts/readings.ts`: pure functions (parse common words, align, count, pick) that `build-data.ts` calls.
 
@@ -65,7 +68,7 @@ As the existing build script: small pure exported functions, regex XML parsing, 
 - Alignment: plain on + on; kun with okurigana; rendaku; sokuon; `々`; non-Jōyō character skips the pair; ambiguous alignment gives nothing to the ambiguous kanji only; entry counted once per reading.
 - Kun entry attribution: `あか.るい` vs `あ.かり`; longest okurigana wins; entry without okurigana.
 - Pick: most counts wins; tie → KANJIDIC2 order; all zero → first listed; override wins; unknown override reading throws.
-- Real data (`tests/data/kanji.test.ts`): 明 kun `あか.るい`; 日 `にち`/`ひ` and 上 `じょう`/`うえ` unchanged; every kanji that had an on/kun still has one; `kanji.json` is deterministic.
+- Real data (`tests/data/kanji.test.ts`): 明 kun `あか.るい` (override); 気 on `き`; 上 kun `うえ`, 家 kun `いえ`; 日 `にち`/`ひ` and 上 `じょう` unchanged; every kanji that had an on/kun still has one; `kanji.json` is deterministic.
 
 ## Boundaries
 - Always: `npm run check` before commit; push after each task; re-run `npm run data:build` and commit the regenerated `src/data/`.
@@ -73,7 +76,7 @@ As the existing build script: small pure exported functions, regex XML parsing, 
 - Never: commit `.data-cache` or raw EDRDG downloads; copy WaniKani readings; touch SRS, the save format or level order.
 
 ## Success Criteria
-1. 明 teaches あか(るい); 日, 上, 間 keep their readings.
+1. 明 teaches あか(るい) (override); 上 うえ, 家 いえ, 日 にち/ひ, 気 き.
 2. The report lists every changed kanji with counts; the owner's review of it at Checkpoint R finds no more than a handful of misses, and each is fixed by an override.
 3. On the phone, reading gates show the new readings, labels readable, and existing progress is intact.
 4. `npm run check` passes; version 1.4.0 in `package.json` and `CHANGELOG.md`; README credits JMdict.
