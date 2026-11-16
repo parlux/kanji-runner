@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.5.0 (2026-11-17)
+
+Kanji words join the runs.
+
+- Kanji words (JMdict, ranked by TUBELEX subtitle frequency) come as meaning and reading gates.
+- Word gates get their own tint on the prompt and the gate frame.
+- A level's own words come first; at most 2 new words per run.
+- The summary and study card show a kanji word's reading, meaning and kanji.
+
 ## 1.4.0 (2026-11-17)
 
 Reading gates teach the readings people actually use.

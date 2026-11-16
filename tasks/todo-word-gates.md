@@ -65,10 +65,10 @@ Every task: `npm run check` passes before it is checked off. Never commit `.data
 ### Task W4: Word gates on screen, ship 1.5.0
 **Description:** Tint for `word`/`wordreading` gates (prompt and frame) in 2D and 3D; label fit for 6-char prompts and 7-kana options; answer reveal; summary; kanji-word study card. Bump to 1.5.0, `## 1.5.0 (date)` in `CHANGELOG.md`. Screenshots at 390×844, 2D and `?3d`: a word gate, a wordreading gate, a kanji gate next to them, the study card.
 **Acceptance:**
-- [ ] Tint visible on word gates only, in 2D and 3D; labels readable at `GATE_MIN_W` (screenshots in the scratchpad).
-- [ ] Study card and summary show reading and meaning for kanji words.
-- [ ] Version 1.5.0 in `package.json` and `CHANGELOG.md`; deploy green.
-- [ ] `npm run check` passes.
+- [x] Tint visible on word gates only, in 2D and 3D; labels readable at `GATE_MIN_W` (screenshots in the scratchpad).
+- [x] Study card and summary show reading and meaning for kanji words.
+- [x] Version 1.5.0 in `package.json` and `CHANGELOG.md`; deploy green.
+- [x] `npm run check` passes.
 **Verification:** `npm run check`; browser checks; deploy green.
 **Dependencies:** W3
 **Files:** `src/game/…`, `src/core/study.ts`, `package.json`, `CHANGELOG.md`, this file
