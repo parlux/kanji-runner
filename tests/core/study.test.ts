@@ -414,6 +414,54 @@ describe("reading stories", () => {
     ).toEqual([{ reading: "じょう", none: true }]);
   });
 
+  describe("compounds", () => {
+    const compounds = [
+      {
+        reading: "じょう",
+        word: "XY",
+        wordReading: "じょうず",
+        story: "c-jou",
+      },
+      { reading: "あげる", word: "XZ", wordReading: "あげる", story: "c-kun" },
+    ];
+    const none = "no bracket";
+    it("uncovered on'yomi takes the compound with its wordReading", () => {
+      expect(
+        card({ reading: none, primaryReadings: [], compounds }, ["じょう"])
+          ?.readingStories,
+      ).toEqual([
+        {
+          reading: "じょう",
+          source: { word: "XY", wordReading: "じょうず" },
+          text: "c-jou",
+        },
+      ]);
+    });
+    it("kanji story and bare-kanji vocabulary win over a compound", () => {
+      expect(
+        card({ reading: kstory, compounds }, ["じょう"])?.readingStories,
+      ).toEqual([{ reading: "じょう", source: "kanji", text: kstory }]);
+      const v = [{ word: "X", readings: ["じょう"], story: "v-bare" }];
+      expect(
+        card({ reading: none, primaryReadings: [], vocab: v, compounds }, [
+          "じょう",
+        ])?.readingStories,
+      ).toEqual([{ reading: "じょう", source: { word: "X" }, text: "v-bare" }]);
+    });
+    it("kun'yomi never use compounds", () => {
+      expect(
+        card({ reading: none, primaryReadings: [], compounds }, ["あ(げる)"])
+          ?.readingStories,
+      ).toEqual([{ reading: "あ(げる)", none: true }]);
+    });
+    it("no compounds gives none", () => {
+      expect(
+        card({ reading: none, primaryReadings: [] }, ["じょう"])
+          ?.readingStories,
+      ).toEqual([{ reading: "じょう", none: true }]);
+    });
+  });
+
   it("a covered base counts: あ covers あ(げる)", () => {
     const s = "<reading>A</reading> (あ) story";
     expect(card({ reading: s }, ["あ(げる)"])?.readingStories).toEqual([

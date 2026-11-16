@@ -45,7 +45,11 @@ type StoryVocab = {
 
 /** The story for one shown reading. */
 type ReadingStory =
-  | { reading: string; source: "kanji" | { word: string }; text: string }
+  | {
+      reading: string;
+      source: "kanji" | { word: string; wordReading?: string };
+      text: string;
+    }
   | { reading: string; none: true };
 
 /** One study card: what to learn about an item missed in a run. */
@@ -130,7 +134,7 @@ function wordCard(
   };
 }
 
-/** The story for one shown reading label (あ(げる), じょう): the kanji's own, else a vocabulary one, else none. */
+/** The story for one shown reading label (あ(げる), じょう): the kanji's own, else a vocabulary one, else (on'yomi) a compound's, else none. */
 function readingStory(k: KanjiItem, st: Story, label: string): ReadingStory {
   const plain = plainReading(label);
   const base = label.split("(")[0] ?? label;
@@ -144,8 +148,15 @@ function readingStory(k: KanjiItem, st: Story, label: string): ReadingStory {
   const hit = isOn
     ? hits.find((v) => v.word === k.char)
     : (hits.find((v) => v.word === k.char + okuri) ?? hits[0]);
-  return hit
-    ? { reading: label, source: { word: hit.word }, text: hit.story }
+  if (hit)
+    return { reading: label, source: { word: hit.word }, text: hit.story };
+  const c = isOn ? st.compounds?.find((x) => x.reading === label) : undefined;
+  return c
+    ? {
+        reading: label,
+        source: { word: c.word, wordReading: c.wordReading },
+        text: c.story,
+      }
     : { reading: label, none: true };
 }
 

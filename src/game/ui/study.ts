@@ -152,8 +152,11 @@ export function cardEl(c: StudyCard): HTMLElement {
         info.append(el("div", "mn", el("h3", "", ...head), note));
         continue;
       }
-      if (r.source !== "kanji")
-        head.push(" (from ", el("span", "mn-kanji", r.source.word), ")");
+      if (r.source !== "kanji") {
+        head.push(" (from ", el("span", "mn-kanji", r.source.word));
+        if (r.source.wordReading) head.push(` ${r.source.wordReading}`);
+        head.push(")");
+      }
       block(head, mnemonicNodes(r.text));
     }
   }
