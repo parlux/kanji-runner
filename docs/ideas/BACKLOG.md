@@ -3,7 +3,7 @@
 Open ideas in priority order; the top one is next. The owner orders it. New ideas go at the bottom unless the owner places them.
 
 ## In progress
-- [On'yomi stories from compound vocabulary](onyomi-compound-stories.md): stories; fills "no story" on'yomi like 家 か.
+- [On'yomi stories from compound vocabulary](onyomi-compound-stories.md): stories; fills "no story" on'yomi like 家 か. Intent `docs/intent/onyomi-compound-stories.md`, spec `docs/specs/SPEC-compound-stories.md`.
 
 ## Next
 1. [Teach the most useful reading first](reading-choice.md): data; every level teaches a better reading, data build only.
