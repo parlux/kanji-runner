@@ -2,11 +2,14 @@
 /**
  * Dev-only data build: `npm run data:build`.
  *
- * Downloads KANJIDIC2, KRADFILE and JMdict (EDRDG, CC BY-SA 4.0) into the gitignored
+ * Downloads KANJIDIC2, KRADFILE and JMdict (EDRDG, CC BY-SA 4.0) and the
+ * TUBELEX Japanese word frequencies (BSD-3-Clause; unpacked with the `xz`
+ * command) into the gitignored
  * `.data-cache/` (pass `--refresh` to download again) and writes compact JSON
  * into `src/data/`. Output depends only on the cached files, so running it
  * twice gives identical JSON.
  */
+import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { gunzipSync } from "node:zlib";
 import {
@@ -19,6 +22,7 @@ import {
 import { cleanGloss, isShort, pickGlosses } from "./glosses";
 import {
   KANJI_WORDS_PER_LEVEL,
+  parseUsage,
   WORD_PICKER,
   wordCandidates,
   wordReport,
@@ -31,6 +35,12 @@ const SOURCES = {
   kanjidic: "http://www.edrdg.org/kanjidic/kanjidic2.xml.gz",
   kradfile: "http://ftp.edrdg.org/pub/Nihongo/kradfile.gz",
   jmdict: "http://ftp.edrdg.org/pub/Nihongo/JMdict_e.gz",
+  /**
+   * Everyday word frequency (SPEC-word-gates `byUsage`): TUBELEX, YouTube
+   * subtitles, UniDic 3.1.0 lemmas. Pinned to a commit so builds repeat.
+   */
+  usage:
+    "https://raw.githubusercontent.com/naist-nlp/tubelex/7cb5fb36add76b83a266d1967536e1a1d3faa513/frequencies/tubelex-ja-310-lemma-pos.tsv.xz",
 };
 
 type Kun = { base: string; okurigana: string };
@@ -60,6 +70,8 @@ async function cached(
     mkdirSync(CACHE, { recursive: true });
     writeFileSync(file, Buffer.from(await res.arrayBuffer()));
   }
+  if (file.endsWith(".xz"))
+    return execFileSync("xz", ["-dc", file], { maxBuffer: 1 << 30 });
   return gunzipSync(readFileSync(file));
 }
 
@@ -321,6 +333,8 @@ async function main(): Promise<void> {
   );
 
   const { candidates, removed } = wordCandidates(jmdict, kanji);
+  const usage = parseUsage((await cached("usage", refresh)).toString("utf8"));
+  console.log(`usage list: ${usage.size} word forms`);
   const words = WORD_PICKER(candidates, KANJI_WORDS_PER_LEVEL);
   writeJsonLines(
     "src/data/words.json",

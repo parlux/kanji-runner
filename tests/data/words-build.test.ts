@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   byFrequency,
   KANJI_WORDS_PER_LEVEL,
+  parseUsage,
   WORD_PICKER,
   wordCandidates,
   wordReport,
@@ -436,6 +437,25 @@ describe("byFrequency", () => {
     const run = (pick: WordPicker) => names(pick(candidates, 2));
     expect(run(byFrequency)).toEqual(["人人", "一人"]);
     expect(run(alphabetical)).toEqual(["一人", "人人"]);
+  });
+});
+
+describe("parseUsage", () => {
+  it("ranks forms by row order, skipping the header and [TOTAL]", () => {
+    const tsv = [
+      "word\tcount\tvideos",
+      "の\t90\t9",
+      "見る\t50\t8",
+      "見る\t5\t1",
+      "今日\t40\t7",
+      "[TOTAL]\t185\t9",
+      "",
+    ].join("\n");
+    expect([...parseUsage(tsv)]).toEqual([
+      ["の", 0],
+      ["見る", 1],
+      ["今日", 2],
+    ]);
   });
 });
 

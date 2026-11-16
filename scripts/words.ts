@@ -245,6 +245,24 @@ export function wordCandidates(
 }
 
 /**
+ * Everyday-usage rank of each word form (0 = most used), from a TUBELEX
+ * frequency list: a header row, then `word<TAB>count<TAB>…` rows sorted by
+ * count, ending with a `[TOTAL]` row. A form listed twice keeps its first
+ * (higher) rank.
+ */
+export type UsageRanks = Map<string, number>;
+
+export function parseUsage(tsv: string): UsageRanks {
+  const ranks: UsageRanks = new Map();
+  for (const line of tsv.split("\n").slice(1)) {
+    const word = line.split("\t", 1)[0] ?? "";
+    if (word && word !== "[TOTAL]" && !ranks.has(word))
+      ranks.set(word, ranks.size);
+  }
+  return ranks;
+}
+
+/**
  * Chooses the words to teach from all candidates: `perLevel` per level (all
  * of a level's candidates when it has fewer), in teaching order (level, then
  * rank within the level).
