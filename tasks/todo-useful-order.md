@@ -70,9 +70,9 @@ Every task: `npm run check` passes before it is checked off. Never commit `.data
 ### Task U5: Progress carry-over (schema 2)
 **Description:** Schema version 2 with the `MIGRATIONS[1]` from the spec (items kept, `unlockedLevel` recomputed by `applyUnlock` from 0), for both the main and Meaning stores. Change the `version` literal to 2 in types, `srs.ts`, `merge.ts` and storage. Sync goes through `migrate`; check that remote v1 + local v2 merges correctly. Add tests per the spec's Storage list, including a fixture of "levels 2–12 learned in today's order" landing on the first level under 80% in the new order (log that level).
 **Acceptance:**
-- [ ] Storage tests pass; no item is lost in migration.
-- [ ] Sync tests pass with v1 and v2 saves mixed.
-- [ ] `npm run check` passes.
+- [x] Storage tests pass; no item is lost in migration.
+- [x] Sync tests pass with v1 and v2 saves mixed.
+- [x] `npm run check` passes.
 **Verification:** `npm test -- storage sync`; `npm run check`
 **Dependencies:** U4
 **Files:** `src/storage/storage.ts`, `src/storage/meaning.ts`, `src/core/{types,srs,merge}.ts`, `src/sync/sync.ts` if needed, `tests/storage/*`, `tests/sync/*`, this file
@@ -210,3 +210,6 @@ Order summary: 522 kanji from theme words, 1,558 from other words (79 of them bu
 **Kanji 2 words:** 本当, 先生, 何時, 二人, 名前, 会う, お店, 食事, 方向, 売る, 出発, 一時, 休み, 地下, 今週, 先週, 二つ, お母さん, 夕食, 夕方, 今月, お父さん, 右手, 手前, 火事, 先月, 入場, 車内, 発車, 前方.
 
 Rough edges: 下 もと (value 0.30, no longer a theme word) and 行 ぎょう (0.40) still close Kanji 1, as fillers of the single-kanji quota (about 25%): Kanji 1 has only three single candidates. Fixing that means changing the kind mix, which the spec keeps, so it's left for the owner. `npm run check` and `npm run test:slow` pass (balance bands untouched; run golden snapshot and the "level 2 starts with 一" check follow the new order).
+
+### U5 migration fixture (2026-11-17)
+Kana levels learned plus levels 2-12 (330 kanji, v1.5.0 order) at box 5, saved as v1 at level 13. `migrate` lands on level 6 (Kanji 5): 21/30 learned, 24 needed. Learned per new level: Kanji 1 (L2) 29/30, Kanji 2 (L3) 30/30, Kanji 3 (L4) 26/30, Kanji 4 (L5) 25/30, Kanji 5 (L6) 21/30, Kanji 6 (L7) 13/30. Fixture chars: `tests/storage/fixtures/old-order.ts`.

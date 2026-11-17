@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { KANA } from "../../src/core/kana";
 import { KANJI } from "../../src/core/kanji";
 import { levelProgress, meaningProgress } from "../../src/core/progression";
-import { defaultProgress, itemKey, LEARNED_BOX } from "../../src/core/srs";
+import { itemKey, LEARNED_BOX } from "../../src/core/srs";
 import type { ItemProgress, Progress } from "../../src/core/types";
 import {
   loadMeaningProgress,
