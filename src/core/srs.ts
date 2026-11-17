@@ -18,7 +18,7 @@ export const itemKey = (char: string, type: GateType): string =>
 
 export function defaultProgress(): Progress {
   return {
-    version: 1,
+    version: 2,
     unlockedLevel: 0,
     items: {},
     stats: { runs: 0, wins: 0, losses: 0 },

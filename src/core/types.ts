@@ -66,7 +66,7 @@ type RunStats = { runs: number; wins: number; losses: number };
 
 /** Everything persisted: the one contract for storage, run building and sync. */
 export type Progress = {
-  version: 1;
+  version: 2;
   /** 0 hiragana, 1 katakana, 2+ kanji levels. */
   unlockedLevel: number;
   /** Only items that have a record; a missing key is a new item. */

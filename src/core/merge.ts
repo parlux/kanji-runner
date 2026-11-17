@@ -19,7 +19,7 @@ function mergeItem(a: ItemProgress, b: ItemProgress): ItemProgress {
 /**
  * Merge local and remote progress. Pure; returns a new object.
  * Items: union of keys, per-key `mergeItem`. `unlockedLevel` and each stats
- * counter take the max. `version` is fixed at 1 (the only version).
+ * counter take the max. `version` is fixed at 2 (the current version).
  */
 export function mergeProgress(a: Progress, b: Progress): Progress {
   const items: Record<string, ItemProgress> = {};
@@ -34,7 +34,7 @@ export function mergeProgress(a: Progress, b: Progress): Progress {
     else if (only) items[key] = { ...only };
   }
   return {
-    version: 1,
+    version: 2,
     unlockedLevel: Math.max(a.unlockedLevel, b.unlockedLevel),
     items,
     stats: {

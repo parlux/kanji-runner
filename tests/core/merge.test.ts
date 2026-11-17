@@ -22,7 +22,7 @@ function randomProgress(rng: Rng): Progress {
   const items: Record<string, ItemProgress> = {};
   for (const k of KEYS) if (rng() < 0.6) items[k] = randomItem(rng);
   return {
-    version: 1,
+    version: 2,
     unlockedLevel: randInt(rng, 4),
     items,
     stats: {
