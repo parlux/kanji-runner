@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.6.0 (2026-11-17)
+
+Kanji levels reordered by usefulness for travel.
+
+- Levels now start with the kanji you meet most on a trip (menus, stations, shops, signs) instead of school grade order.
+- Your progress carries over: every kanji and word you learned is kept, and you land on the level that fits what you know.
+- New coverage report tool (`npm run data:coverage`) shows how much of travel texts and children's stories each level unlocks.
+- New data credits: Tatoeba sentences (CC BY 2.0 FR) and Aozora Bunko stories (public domain, dev check only), see the README.
+
 ## 1.5.0 (2026-11-17)
 
 Kanji words join the runs.
