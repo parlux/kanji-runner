@@ -69,15 +69,15 @@ export type Why =
   | { kind: "leftover" };
 
 /** Cost of a kanji: `1 + strokes / STROKES_PER_UNIT` (amended in U4). */
-export const STROKES_PER_UNIT = 20;
+const STROKES_PER_UNIT = 20;
 const kanjiCost = (k: RawKanji) => 1 + k.strokes / STROKES_PER_UNIT;
 /** A building block costs this share of its kanji cost (amended in U4). */
-export const BLOCK_COST = 0.25;
+const BLOCK_COST = 0.25;
 /**
  * Weight of the lookahead: the value shares a word's kanji also bring to the
  * other words that need them (amended in U4).
  */
-export const LOOKAHEAD = 1;
+const LOOKAHEAD = 1;
 
 /**
  * The greedy order (SPEC-useful-order: Kanji order, amended in U4). A word's

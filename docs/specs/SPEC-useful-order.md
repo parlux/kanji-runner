@@ -38,18 +38,22 @@ Built-in kanji levels are ordered by usefulness for a trip to Japan, not by scho
   - `theme` is 1 if the word is in any theme, else 0.
   - `spoken` and `easy` are log-scaled ranks in [0, 1]: `1 − log(rank)/log(listSize)`, or 0 if the word is unlisted.
   - Starting weights: `W_THEME = 3`, `W_SPOKEN = 1`, `W_EASY = 0.5`. These are named constants, tuned in U4 against the coverage report.
+  - **(amended in U4)** Weights: `W_THEME = 10`, `W_SPOKEN = 1`, `W_EASY = 0.5`. The high theme weight makes a kanji's lookahead gain (below) come mostly from the theme words it unlocks, not from the thousands of rare general words.
+  - **(amended in U4)** A one-kanji word has `easy = 0`: its substring count is its kanji's count in every compound (行 in 行く, 銀行), not the word's.
+  - **(amended in U4)** When a theme word's spelling is both a racer and a candidate, it matches the racer: a lone kanji in a theme means the kanji read as taught (下 した), not the homograph (下 もと "under the guidance of").
 
 ### Kanji order (`scripts/order.ts`, pure; replaces `orderKanji`'s grade sort)
-- **Cost of a kanji:** `1 + strokes / 10`, so a 14-stroke 駅 costs 2.4 and 一 costs 1.1.
-- **Cost of a word:** the sum, over the kanji it needs that aren't placed yet, of their cost, **plus the cost of their unplaced building blocks** (KRADFILE elements that are themselves Jōyō kanji, recursively, as the component pass does today).
+- **Cost of a kanji:** `1 + strokes / 10`, so a 14-stroke 駅 costs 2.4 and 一 costs 1.1. **(amended in U4)** `1 + strokes / STROKES_PER_UNIT` with `STROKES_PER_UNIT = 20`: 駅 1.7, 一 1.05.
+- **Cost of a word:** the sum, over the kanji it needs that aren't placed yet, of their cost, **plus the cost of their unplaced building blocks** (KRADFILE elements that are themselves Jōyō kanji, recursively, as the component pass does today). **(amended in U4)** Building blocks count `BLOCK_COST = 0.25` of their cost: they are taught anyway and serve many kanji.
+- **Lookahead (amended in U4):** each live word spreads its value over its own unplaced kanji in proportion to their cost (blocks get no share). A kanji's `gain` is the sum of the shares it holds. A word's score is `(value + LOOKAHEAD · others) / cost`, where `others` is the gain of its unplaced kanji minus its own shares: what placing them does for every other word that needs them. `LOOKAHEAD = 1`. This rewards 出, 時, 口 that sit in many useful words over 甘 that serves one.
 - **Greedy order:**
-  1. Repeatedly take the candidate word with the highest `value / cost` among words with cost > 0. Ties go by value, then spelling.
+  1. Repeatedly take the candidate word with the highest `value / cost` among words with cost > 0. Ties go by value, then spelling. **(amended in U4)** The highest score (above) instead of `value / cost`; scores within float noise (1e-9 relative) tie.
   2. Append its unplaced kanji to the order, building blocks first (by the old order's rank).
   3. Words whose kanji are now all placed cost nothing and drop out of the race.
   4. When no candidate with value > 0 remains, the leftover kanji follow in today's order (grade, then frequency, with the component pass).
 - `scripts/order-overrides.json` still applies afterwards (empty today).
 - Levels stay 30 kanji each from level 2 (`LEVEL_SIZE`).
-- **Ordering words (amended after U2):** the greedy also races lone-kanji words dropped *only* by `notRepeatOfKanji` (駅 えき, 水 みず, 人 ひと). Their kanji gate teaches them, so they never enter `words.json`, but they carry their value into the order. Themes may list them (written without seeing the coverage texts).
+- **Ordering words (amended after U2):** the greedy also races lone-kanji words dropped *only* by `notRepeatOfKanji` (駅 えき, 水 みず, 人 ひと). Their kanji gate teaches them, so they never enter `words.json`, but they carry their value into the order. Themes may list them (written without seeing the coverage texts). **(amended in U4)** Racers also skip `frequentSingle` (人, 金, 下 した have no nf; racers are never shown, and their value comes from themes and the usage list), and race even when a candidate has the same spelling (下 した beside 下 もと).
 - Candidates are built once, before levels exist. A word's `level` is the highest level of its kanji in the new order, and is set after ordering.
 - **"Why here" report:** `.data-cache/order-report.txt` lists, per level 2–21, each kanji and why it came: the word that pulled it in (with that word's value), "building block of X", or "leftover". The build prints a one-line summary: how many kanji came from theme words, from other words, and as leftovers.
 - Old order function kept as `byGrade` for the coverage comparison and tests.
