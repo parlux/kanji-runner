@@ -68,17 +68,31 @@ export type Why =
   | { kind: "block"; of: string; word: RaceWord }
   | { kind: "leftover" };
 
-/** Cost of a kanji in tenths: `1 + strokes / 10` is `(10 + strokes) / 10`. */
-const costTenths = (k: RawKanji) => 10 + k.strokes;
+/** Cost of a kanji: `1 + strokes / STROKES_PER_UNIT` (amended in U4). */
+export const STROKES_PER_UNIT = 20;
+const kanjiCost = (k: RawKanji) => 1 + k.strokes / STROKES_PER_UNIT;
+/** A building block costs this share of its kanji cost (amended in U4). */
+export const BLOCK_COST = 0.25;
+/**
+ * Weight of the lookahead: the value shares a word's kanji also bring to the
+ * other words that need them (amended in U4).
+ */
+export const LOOKAHEAD = 1;
 
 /**
- * The greedy order (SPEC-useful-order: Kanji order). A word's cost is the
- * cost of its unplaced kanji and their unplaced building blocks (KRADFILE
- * elements that are Jōyō kanji, recursively). Repeatedly the word with the
- * highest value / cost (ties: value, then spelling) places its unplaced
- * kanji, building blocks first, each group by `byGrade` rank. Words left
- * with cost 0 drop out. When no word with value > 0 is left, the remaining
- * kanji follow in `byGrade` order. Overrides apply last.
+ * The greedy order (SPEC-useful-order: Kanji order, amended in U4). A word's
+ * cost is the cost of its unplaced kanji plus `BLOCK_COST` times that of
+ * their unplaced building blocks (KRADFILE elements that are Jōyō kanji,
+ * recursively). Each live word shares its value over its own unplaced kanji
+ * in proportion to their cost (blocks get no share); a kanji's `gain` is the
+ * sum of the shares it holds. A word's score is
+ * `(value + LOOKAHEAD · others) / cost`, where `others` is the gain of its
+ * unplaced kanji minus its own shares: what placing them also does for the
+ * other words that need them. Repeatedly the best-scoring word (ties within
+ * float noise: value, then spelling) places its unplaced kanji, building
+ * blocks first, each group by `byGrade` rank. Words with nothing left to
+ * place drop out. When no word with value > 0 is left, the remaining kanji
+ * follow in `byGrade` order. Overrides apply last.
  */
 export function usefulOrder(
   raw: RawKanji[],
@@ -88,7 +102,7 @@ export function usefulOrder(
 ): { order: string[]; why: Map<string, Why> } {
   const tail = byGrade(raw, components, []);
   const rank = new Map(tail.map((c, i) => [c, i]));
-  const cost = new Map(raw.map((k) => [k.char, costTenths(k)]));
+  const cost = new Map(raw.map((k) => [k.char, kanjiCost(k)]));
   const byRank = (a: string, b: string) =>
     (rank.get(a) ?? 0) - (rank.get(b) ?? 0);
   const partsOf = (c: string) =>
@@ -108,7 +122,13 @@ export function usefulOrder(
     return out;
   };
 
-  type Racer = { word: RaceWord; kanji: string[]; cost: number };
+  type Racer = {
+    word: RaceWord;
+    need: Map<string, number>;
+    kanji: string[];
+    cost: number;
+    left: number;
+  };
   const racers: Racer[] = [];
   const byKanji = new Map<string, Racer[]>();
   for (const w of words) {
@@ -116,11 +136,13 @@ export function usefulOrder(
     const kanji = [...new Set([...w.word].filter((c) => rank.has(c)))].sort(
       byRank,
     );
-    const need = new Set(kanji.flatMap((c) => [...closure(c)]));
+    const need = new Map<string, number>();
+    for (const c of kanji.flatMap((c) => [...closure(c)]))
+      need.set(c, (cost.get(c) ?? 0) * (kanji.includes(c) ? 1 : BLOCK_COST));
     if (!need.size) continue;
-    const r: Racer = { word: w, kanji, cost: 0 };
-    for (const c of need) {
-      r.cost += cost.get(c) ?? 0;
+    const r: Racer = { word: w, need, kanji, cost: 0, left: need.size };
+    for (const [c, n] of need) {
+      r.cost += n;
       const list = byKanji.get(c);
       if (list) list.push(r);
       else byKanji.set(c, [r]);
@@ -130,6 +152,19 @@ export function usefulOrder(
 
   const order: string[] = [];
   const why = new Map<string, Why>();
+  // gain(k): the shares of every live word's value its unplaced kanji hold.
+  const gain = new Map<string, number>();
+  const share = (r: Racer, sign: number) => {
+    if (r.left <= 0) return;
+    for (const c of r.kanji)
+      if (!why.has(c))
+        gain.set(
+          c,
+          (gain.get(c) ?? 0) +
+            (sign * r.word.value * (cost.get(c) ?? 0)) / r.cost,
+        );
+  };
+  for (const r of racers) share(r, 1);
   const place = (c: string, root: string, w: RaceWord): void => {
     if (why.has(c)) return;
     why.set(c, { kind: "leftover" }); // marks it as in progress
@@ -141,21 +176,42 @@ export function usefulOrder(
         : { kind: "block", of: root, word: w },
     );
     order.push(c);
-    for (const r of byKanji.get(c) ?? []) r.cost -= cost.get(c) ?? 0;
+    for (const r of byKanji.get(c) ?? []) {
+      share(r, -1);
+      r.cost -= r.need.get(c) ?? 0;
+      r.left--;
+      share(r, 1);
+    }
   };
-  const better = (a: Racer, b: Racer): boolean => {
-    const ra = a.word.value / a.cost;
-    const rb = b.word.value / b.cost;
-    if (ra !== rb) return ra > rb;
-    if (a.word.value !== b.word.value) return a.word.value > b.word.value;
-    return a.word.word < b.word.word;
+  const score = (r: Racer): number => {
+    let others = 0;
+    for (const c of r.kanji)
+      if (!why.has(c))
+        others +=
+          (gain.get(c) ?? 0) - (r.word.value * (cost.get(c) ?? 0)) / r.cost;
+    return (r.word.value + LOOKAHEAD * others) / r.cost;
   };
 
   let live = racers;
   for (;;) {
-    live = live.filter((r) => r.cost > 0);
+    live = live.filter((r) => r.left > 0);
     let best: Racer | undefined;
-    for (const r of live) if (!best || better(r, best)) best = r;
+    let bestScore = -Infinity;
+    for (const r of live) {
+      const s = score(r);
+      // Scores within float noise tie (words sharing their unplaced kanji).
+      const tol = 1e-9 * Math.abs(bestScore);
+      if (
+        !best ||
+        s > bestScore + tol ||
+        (s >= bestScore - tol &&
+          (r.word.value > best.word.value ||
+            (r.word.value === best.word.value && r.word.word < best.word.word)))
+      ) {
+        best = r;
+        bestScore = s;
+      }
+    }
     if (!best) break;
     for (const c of best.kanji) place(c, c, best.word);
   }

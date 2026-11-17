@@ -45,12 +45,22 @@ const order = (words: RaceWord[], overrides = []) =>
 
 describe("usefulOrder", () => {
   it("costs a word with its unplaced building blocks, recursively", () => {
-    // 時 alone costs 時 2.0 + 日 1.4 + 寺 1.6 + 寸 1.3 = 6.3; 駅 costs 2.4.
-    // 時 value 6.2 (ratio 0.98) loses to 駅 value 2.4 (ratio 1.0).
-    expect(order([w("時", 6.2), w("駅", 2.4)]).order.slice(0, 1)).toEqual([
+    // Kanji cost 1 + strokes/20; blocks count a quarter. 時 alone costs
+    // 時 1.5 + (日 1.2 + 寺 1.3 + 寸 1.15)/4 = 2.4125; 駅 costs 1.7.
+    // 時 value 2.3 (ratio 0.95) loses to 駅 value 1.7 (ratio 1.0).
+    expect(order([w("時", 2.3), w("駅", 1.7)]).order.slice(0, 1)).toEqual([
       "駅",
     ]);
-    expect(order([w("時", 6.4), w("駅", 2.4)]).order[0]).toBe("日");
+    expect(order([w("時", 2.5), w("駅", 1.7)]).order[0]).toBe("日");
+  });
+
+  it("looks ahead: a kanji also counts the words it helps unlock", () => {
+    // 番 1/1.6 = 0.63 beats 駅 alone 0.9/1.7 = 0.53, but 駅一 (cost 2.75)
+    // gives 駅 a share 0.5·1.7/2.75: (0.9 + 0.31)/1.7 = 0.71.
+    expect(order([w("番", 1), w("駅", 0.9)]).order[0]).toBe("番");
+    expect(order([w("番", 1), w("駅", 0.9), w("駅一", 0.5)]).order[0]).toBe(
+      "駅",
+    );
   });
 
   it("places building blocks first, by byGrade rank", () => {
@@ -61,7 +71,7 @@ describe("usefulOrder", () => {
   });
 
   it("lowers a word's cost once its kanji are placed, and drops free words", () => {
-    // After 日 (ratio 1/1.4), 日間 costs only 間 (2.2): 0.7/2.2 > 0.1/2.4.
+    // After 日, 日間 costs only 間 (1.6): 0.7/1.6 > 0.1/1.7.
     const { order: o, why } = order([
       w("日", 1),
       w("日間", 0.7),
@@ -74,8 +84,10 @@ describe("usefulOrder", () => {
 
   it("breaks ties by value, then spelling", () => {
     // Same ratio: higher value first; same value: spelling.
-    // 一 costs 1.1, 番 2.2: same ratio, 番 has the higher value.
-    expect(order([w("一", 0.5), w("番", 1)]).order[0]).toBe("番");
+    // 一 costs 1.05, 番 1.6: same ratio (within float noise), 番 has the
+    // higher value.
+    expect(order([w("一", 0.525), w("番", 0.8)]).order[0]).toBe("番");
+    expect(order([w("一", 0.53), w("番", 0.8)]).order[0]).toBe("一");
     const tie = [w("寸", 1), w("干", 1)];
     expect(order(tie).order[0]).toBe("寸");
     expect(order([...tie].reverse()).order).toEqual(order(tie).order);
