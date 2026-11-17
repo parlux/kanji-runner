@@ -81,9 +81,9 @@ Every task: `npm run check` passes before it is checked off. Never commit `.data
 ### Task U6: Ship 1.6.0
 **Description:** Add Tatoeba (CC BY 2.0 FR) and Aozora Bunko (public domain) credits to the README. Bump to 1.6.0 and add `## 1.6.0 (date)` in `CHANGELOG.md`. Wait for the deploy to go green. Take a screenshot at 390×844 of the start screen on migrated old-order progress (the fixture from U5) and of a Kanji 1 run with a gate.
 **Acceptance:**
-- [ ] Credits in README; version and changelog done; deploy green.
-- [ ] Screenshots in the scratchpad.
-- [ ] `npm run check` passes.
+- [x] Credits in README; version and changelog done; deploy green.
+- [x] Screenshots in the scratchpad.
+- [x] `npm run check` passes.
 **Verification:** `npm run check`; deploy green.
 **Dependencies:** U5
 **Files:** `README.md`, `package.json`, `CHANGELOG.md`, this file
