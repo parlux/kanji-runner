@@ -1,8 +1,8 @@
 /// <reference types="node" />
 /**
  * Dev-only data sources shared by `build-data.ts` and `coverage.ts`: the
- * pinned download list, the `.data-cache/` download cache (gzip, xz and zip
- * files are unpacked on read), and the KANJIDIC2 and KRADFILE parsers.
+ * pinned download list, the `.data-cache/` download cache (gzip, xz, bzip2
+ * and zip files are unpacked on read), and the KANJIDIC2 and KRADFILE parsers.
  */
 import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -29,6 +29,14 @@ export const SOURCES = {
   chumon: "https://www.aozora.gr.jp/cards/000081/files/43754_ruby_17594.zip",
   gauche: "https://www.aozora.gr.jp/cards/000081/files/470_ruby_3987.zip",
   kumonoito: "https://www.aozora.gr.jp/cards/000879/files/92_ruby_164.zip",
+  /**
+   * Easy-text frequency (SPEC-useful-order): Tatoeba's Japanese sentences
+   * (CC BY 2.0 FR). A live weekly export that can't be pinned by URL: the
+   * cached file is the pin, so `--refresh` may change the counts. Unpacked
+   * with the `bzip2` command.
+   */
+  tatoeba:
+    "https://downloads.tatoeba.org/exports/per_language/jpn/jpn_sentences.tsv.bz2",
 };
 
 /** The Aozora Bunko stories in `SOURCES`, Shift_JIS text with ruby. */
@@ -67,6 +75,8 @@ export async function cached(
   }
   if (file.endsWith(".xz"))
     return execFileSync("xz", ["-dc", file], { maxBuffer: 1 << 30 });
+  if (file.endsWith(".bz2"))
+    return execFileSync("bzip2", ["-dc", file], { maxBuffer: 1 << 30 });
   if (file.endsWith(".zip"))
     return execFileSync("unzip", ["-p", file, "*.txt"], { maxBuffer: 1 << 30 });
   return gunzipSync(readFileSync(file));

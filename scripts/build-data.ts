@@ -4,8 +4,8 @@
  *
  * Downloads KANJIDIC2, KRADFILE and JMdict (EDRDG, CC BY-SA 4.0) and the
  * TUBELEX Japanese word frequencies (BSD-3-Clause; unpacked with the `xz`
- * command) into the gitignored
- * `.data-cache/` (pass `--refresh` to download again) and writes compact JSON
+ * command), and Tatoeba's Japanese sentences (CC BY 2.0 FR) for word value,
+ * into the gitignored `.data-cache/` (pass `--refresh` to download again) and writes compact JSON
  * into `src/data/`. Output depends only on the cached files, so running it
  * twice gives identical JSON.
  */
@@ -23,11 +23,22 @@ import {
   KANJI_WORDS_PER_LEVEL,
   parseUsage,
   usageRank,
+  usageRanks,
   WORD_PICKER,
   wordCandidates,
   wordReport,
+  type Candidate,
+  type UsageRanks,
 } from "./words";
 import { CACHE, cached, jouyouKanji, type RawKanji } from "./sources";
+import {
+  easyCounts,
+  matchThemes,
+  parseTatoeba,
+  usefulness,
+  usefulReport,
+  type Themes,
+} from "./useful";
 
 /** Kanji levels 2+ hold 30 kanji each (SPEC: Progression and levels). */
 const LEVEL_SIZE = 30;
@@ -143,6 +154,7 @@ async function main(): Promise<void> {
   console.log(
     `usage list: ${usage.size} word forms; ranks ${ranked.length} of ${candidates.length} candidates`,
   );
+  await reportUsefulness(candidates, usage, refresh);
   const words = WORD_PICKER(usage)(candidates, KANJI_WORDS_PER_LEVEL);
   writeJsonLines(
     "src/data/words.json",
@@ -158,6 +170,39 @@ async function main(): Promise<void> {
   writeFileSync(`${CACHE}/word-report.txt`, wordText);
   console.log(
     `${wordText.split("\n")[0]}; word report written to ${CACHE}/word-report.txt`,
+  );
+}
+
+/**
+ * Word value (SPEC-useful-order), not yet used by the order: matches the
+ * themes to candidates and writes `useful-report.txt`.
+ */
+async function reportUsefulness(
+  candidates: Candidate[],
+  usage: UsageRanks,
+  refresh: boolean,
+): Promise<void> {
+  const start = performance.now();
+  const sentences = parseTatoeba(
+    (await cached("tatoeba", refresh)).toString("utf8"),
+  );
+  const matches = matchThemes(
+    readJson<Themes>("scripts/themes.json"),
+    candidates,
+  );
+  const themed = new Set(matches.flatMap((m) => m.candidate ?? []));
+  const useful = usefulness(
+    candidates,
+    themed,
+    usageRanks(candidates, usage),
+    usage.size,
+    easyCounts(sentences, candidates),
+  );
+  const text = usefulReport(matches, useful);
+  writeFileSync(`${CACHE}/useful-report.txt`, text);
+  const secs = ((performance.now() - start) / 1000).toFixed(1);
+  console.log(
+    `${text.split("\n")[0]}; ${sentences.length} Tatoeba sentences, ${secs} s; useful report written to ${CACHE}/useful-report.txt`,
   );
 }
 
