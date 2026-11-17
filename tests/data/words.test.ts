@@ -29,12 +29,25 @@ describe("kanji words data (SPEC-word-gates)", () => {
     expectPresent("お金", "おかね");
   });
 
-  // Newspaper ranking (byFrequency, W2) missed these; byUsage picks them.
+  // Newspaper ranking (byFrequency, W2) missed 今日; byUsefulness picks it
+  // and the travel words of the themes.
   it("has 今日 きょう", () => expectPresent("今日", "きょう"));
-  it("has 入る はいる", () => expectPresent("入る", "はいる"));
+  it("has the travel words 入り口 and 毎日", () => {
+    expectPresent("入り口", "いりぐち");
+    expectPresent("毎日", "まいにち");
+  });
 
   it("leaves out usually-kana words and fragments", () => {
     for (const w of ["出来る", "その上"]) expect(find(w), w).toBeUndefined();
+  });
+
+  it("leaves out lone kanji read as taught (they only race for the order)", () => {
+    const taught = new Map(kanjiData.map((k) => [k.char, k]));
+    for (const { word, reading } of words) {
+      const k = taught.get(word);
+      if (k) expect([k.on, k.kun?.base], word).not.toContain(reading);
+    }
+    expect(find("駅"), "駅").toBeUndefined();
   });
 
   it("uses only kanji from kanji.json, kana and 々", () => {

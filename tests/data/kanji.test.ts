@@ -4,6 +4,7 @@ import type { KanjiItem } from "../../src/core/types";
 
 const kanji = data as KanjiItem[];
 const KATAKANA = /[゠-ヿ]/;
+const level = new Map(kanji.map((k) => [k.char, k.level]));
 
 describe("kanji data", () => {
   it("holds the 2136 Jōyō kanji once each", () => {
@@ -64,9 +65,23 @@ describe("kanji data", () => {
     }
   });
 
-  it("starts with simple grade 1 kanji", () => {
-    const first = kanji.slice(0, 30).map((k) => k.char);
-    for (const c of "一二三人口山日大木") expect(first).toContain(c);
+  // SPEC-useful-order: travel kanji by Kanji 5 (levels 2–6). Fails with the
+  // starting weights (U3): every theme word weighs about the same, so the
+  // cheapest come first and 駅 (with 馬), 出 and 時 (with 寺, 寸) wait until
+  // levels 10–19. Tuned in U4.
+  it.fails("teaches 駅, 円, 出, 入, 口, 何, 時 by Kanji 5", () => {
+    for (const c of "駅円出入口何時")
+      expect(level.get(c), c).toBeLessThanOrEqual(6);
+  });
+
+  it("teaches 干, 乙, 弓, 矛 in Kanji 1–3 only as a building block", () => {
+    const early = kanji.filter((k) => k.level <= 4);
+    for (const c of "干乙弓矛")
+      if ((level.get(c) ?? 99) <= 4)
+        expect(
+          early.some((k) => k.components.includes(c)),
+          c,
+        ).toBe(true);
   });
 
   it("reads KRADFILE's stand-in elements as radicals", () => {

@@ -4,11 +4,14 @@
  * `build-data.ts`. Two separate steps:
  *
  * 1. `wordCandidates(jmdictXml, kanji)` → every usable word (`Candidate`),
- *    after the named filters in `FILTERS`, plus how many entries each removed.
- *    No ranking happens here beyond keeping one entry per spelling.
- * 2. `WORD_PICKER(usage)(candidates, KANJI_WORDS_PER_LEVEL)` → the words to
- *    teach, in teaching order (level, then rank within the level). `usage` is
- *    the everyday frequency list (`parseUsage`).
+ *    after the named filters in `FILTERS`, plus how many entries each removed,
+ *    and the lone-kanji `racers` for the order. No ranking happens here beyond
+ *    keeping one entry per spelling. Candidates are built before levels
+ *    exist; `setLevels` gives them their level once the order is known.
+ * 2. `WORD_PICKER(usage, value)(candidates, KANJI_WORDS_PER_LEVEL)` → the
+ *    words to teach, in teaching order (level, then rank within the level).
+ *    `usage` is the everyday frequency list (`parseUsage`), `value` each
+ *    candidate's usefulness (`scripts/useful.ts`).
  *
  * `wordReport(removed, chosen)` renders the report for `.data-cache/`.
  *
@@ -23,7 +26,8 @@ import { cleanGloss, pickGlosses } from "./glosses";
 /** What the word build needs of a kanji (a `kanji.json` row). */
 export type WordKanji = {
   char: string;
-  level: number;
+  /** Unknown (0) while candidates are built for the order. */
+  level?: number;
   on: string | null;
   kun: { base: string; okurigana: string } | null;
 };
@@ -36,7 +40,7 @@ export type Candidate = {
   reading: string;
   glosses: string[];
   kind: WordKind;
-  /** Highest level of its kanji. */
+  /** Highest level of its kanji (0 until `setLevels`). */
   level: number;
   /** JMdict `nfXX` of the spelling (1–48, lower is more frequent), or null. */
   nf: number | null;
@@ -244,12 +248,21 @@ function toCandidate(d: Draft, ctx: Ctx, homograph: boolean): Candidate {
 export function wordCandidates(
   xml: string,
   kanji: WordKanji[],
-): { candidates: Candidate[]; removed: Record<RemovedBy, number> } {
+): {
+  candidates: Candidate[];
+  removed: Record<RemovedBy, number>;
+  racers: Candidate[];
+} {
   const ctx: Ctx = { kanji: new Map(kanji.map((k) => [k.char, k])) };
   const removed = Object.fromEntries(
     [...Object.keys(FILTERS), "duplicateSpelling"].map((k) => [k, 0]),
   ) as Record<RemovedBy, number>;
   const bySpelling = new Map<string, Candidate>();
+  const racers = new Map<string, Candidate>();
+  const filters = Object.entries(FILTERS) as [keyof typeof FILTERS, Filter][];
+  const after = filters.slice(
+    filters.findIndex(([name]) => name === "notRepeatOfKanji") + 1,
+  );
   const entries = xml.split("<entry>");
   // Common entries per spelling, counted before any filter (下 した counts).
   const entriesOf = new Map<string, number>();
@@ -261,13 +274,23 @@ export function wordCandidates(
     if (!entry.includes("<ke_pri>")) continue;
     let left = drafts(entry);
     if (!left.length) continue;
-    for (const [name, keep] of Object.entries(FILTERS) as [
-      keyof typeof FILTERS,
-      Filter,
-    ][]) {
+    for (const [name, keep] of filters) {
+      const before = left;
       left = left.filter((d) => keep(d, ctx));
       if (!left.length) {
         removed[name]++;
+        if (name === "notRepeatOfKanji") {
+          const racer = before.find((d) => after.every(([, k]) => k(d, ctx)));
+          if (racer) {
+            const c = toCandidate(
+              racer,
+              ctx,
+              (entriesOf.get(racer.word) ?? 0) > 1,
+            );
+            const other = racers.get(c.word);
+            if (!other || byRank(c, other) < 0) racers.set(c.word, c);
+          }
+        }
         break;
       }
     }
@@ -278,7 +301,20 @@ export function wordCandidates(
     if (other) removed.duplicateSpelling++;
     if (!other || byRank(c, other) < 0) bySpelling.set(c.word, c);
   }
-  return { candidates: [...bySpelling.values()], removed };
+  return {
+    candidates: [...bySpelling.values()],
+    removed,
+    racers: [...racers.values()].filter((c) => !bySpelling.has(c.word)),
+  };
+}
+
+/** Sets each candidate's level: the highest level of its kanji. */
+export function setLevels(
+  candidates: Candidate[],
+  levelOf: Map<string, number>,
+): void {
+  for (const c of candidates)
+    c.level = Math.max(...[...c.word].map((ch) => levelOf.get(ch) ?? 0));
 }
 
 /**
@@ -431,21 +467,45 @@ export function usageRanks(
  */
 export const byUsage =
   (usage: UsageRanks): WordPicker =>
+  (candidates, perLevel) =>
+    pickPerLevel(candidates, perLevel, usageOrder(candidates, usage));
+
+/** `byUsage`'s comparison over these candidates. */
+function usageOrder(
+  candidates: Candidate[],
+  usage: UsageRanks,
+): (a: Candidate, b: Candidate) => number {
+  const rank = usageRanks(candidates, usage);
+  const at = (c: Candidate) => rank.get(c) ?? Infinity;
+  return (a, b) => (at(a) === at(b) ? 0 : at(a) - at(b)) || byRank(a, b);
+}
+
+/**
+ * Usefulness picker (SPEC-useful-order `byUsefulness`): `pickPerLevel`
+ * ranked by `value`, highest first (a candidate without one counts 0), ties
+ * by `byUsage`'s comparison.
+ */
+export const byUsefulness =
+  (usage: UsageRanks, value: Map<Candidate, number>): WordPicker =>
   (candidates, perLevel) => {
-    const rank = usageRanks(candidates, usage);
-    const at = (c: Candidate) => rank.get(c) ?? Infinity;
+    const tie = usageOrder(candidates, usage);
+    const at = (c: Candidate) => value.get(c) ?? 0;
     return pickPerLevel(
       candidates,
       perLevel,
-      (a, b) => (at(a) === at(b) ? 0 : at(a) - at(b)) || byRank(a, b),
+      (a, b) => at(b) - at(a) || tie(a, b),
     );
   };
 
 /**
- * The one picker the build uses, given the usage list; point it at another
- * `WordPicker` to swap (`() => byFrequency` for the W2 newspaper order).
+ * The one picker the build uses, given the usage list and each candidate's
+ * value; point it at another `WordPicker` to swap (`() => byUsage(usage)`
+ * for the word-gates order, `() => byFrequency` for the W2 newspaper order).
  */
-export const WORD_PICKER = (usage: UsageRanks): WordPicker => byUsage(usage);
+export const WORD_PICKER = (
+  usage: UsageRanks,
+  value: Map<Candidate, number>,
+): WordPicker => byUsefulness(usage, value);
 
 const LISTED_LEVELS = { from: 2, to: 10 };
 

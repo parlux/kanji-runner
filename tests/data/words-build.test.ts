@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest";
 import {
   byFrequency,
   byUsage,
+  byUsefulness,
   KANJI_WORDS_PER_LEVEL,
   parseUsage,
+  setLevels,
   usageRank,
   usageRanks,
   WORD_PICKER,
@@ -232,6 +234,22 @@ describe("wordCandidates: filters", () => {
     });
   });
 
+  it("racers: lone kanji dropped only by notRepeatOfKanji race for the order", () => {
+    const { candidates, racers } = wordCandidates(
+      jmdict(
+        entry([{ keb: "人", pri: ["ichi1", "nf01"] }], [{ reb: "ひと" }]),
+        entry([{ keb: "金" }], [{ reb: "かね" }]), // no nf: frequentSingle too
+        entry([{ keb: "今" }], [{ reb: "いま" }], { misc: ["&uk;"] }),
+        entry([{ keb: "一人" }], [{ reb: "ひとり" }]),
+      ),
+      KANJI,
+    );
+    expect(names(candidates)).toEqual(["一人"]);
+    expect(racers.map((c) => [c.word, c.reading, c.kind])).toEqual([
+      ["人", "ひと", "single"],
+    ]);
+  });
+
   it("frequentSingle: a one-kanji word needs an nf rank", () => {
     expect(words(entry([{ keb: "人" }], [{ reb: "にん" }]))).toEqual([]);
     expect(removedBy(entry([{ keb: "人" }], [{ reb: "にん" }]))).toEqual({
@@ -313,6 +331,26 @@ describe("wordCandidates: kind, level, frequency facts", () => {
       KANJI,
     );
     expect(candidates.map((c) => c.level)).toEqual([5, 2, 3]);
+  });
+
+  it("level is 0 without kanji levels; setLevels sets it from the order", () => {
+    const { candidates } = wordCandidates(
+      jmdict(
+        entry([{ keb: "今日" }], [{ reb: "きょう" }]),
+        entry([{ keb: "人々" }], [{ reb: "ひとびと" }]),
+      ),
+      KANJI.map((k) => ({ char: k.char, on: k.on, kun: k.kun })),
+    );
+    expect(candidates.map((c) => c.level)).toEqual([0, 0]);
+    setLevels(
+      candidates,
+      new Map([
+        ["今", 3],
+        ["日", 2],
+        ["人", 4],
+      ]),
+    );
+    expect(candidates.map((c) => c.level)).toEqual([3, 4]);
   });
 
   it("keeps nf and the other priority tags of the spelling", () => {
@@ -457,7 +495,7 @@ describe("byFrequency", () => {
       cand("b", "compound", 3, 1),
       ...Array.from({ length: 4 }, (_, i) => cand(`a${i}`, "compound", 2, i)),
     ];
-    const out = WORD_PICKER(new Map())(cs, 3);
+    const out = WORD_PICKER(new Map(), new Map())(cs, 3);
     expect(out.map((c) => c.level)).toEqual([2, 2, 2, 3]);
   });
 
@@ -594,6 +632,44 @@ describe("byUsage", () => {
       4,
     );
     expect(names(out)).toEqual(["十一", "十二", "十三", "s0"]);
+  });
+});
+
+describe("byUsefulness", () => {
+  it("orders by value within each level, ties by byUsage", () => {
+    const cs = [
+      cand("c", "compound", 3),
+      cand("a", "compound", 2),
+      cand("b", "compound", 2),
+      cand("d", "compound", 2),
+    ];
+    const [c, a, b, d] = cs as [Candidate, Candidate, Candidate, Candidate];
+    const value = new Map([
+      [a, 1],
+      [b, 2],
+      [c, 5],
+      [d, 1],
+    ]);
+    expect(names(byUsefulness(usage("d", "a"), value)(cs, 30))).toEqual([
+      "b",
+      "d",
+      "a",
+      "c",
+    ]);
+  });
+
+  it("keeps the kind shares and the number cap", () => {
+    const cs = [
+      ...["十一", "十二", "十三", "十四"].map((w) => cand(w, "compound")),
+      ...Array.from({ length: 4 }, (_, i) => cand(`s${i}`, "single")),
+    ];
+    const value = new Map(cs.map((c, i) => [c, 10 - i]));
+    expect(names(byUsefulness(new Map(), value)(cs, 4))).toEqual([
+      "十一",
+      "十二",
+      "十三",
+      "s0",
+    ]);
   });
 });
 

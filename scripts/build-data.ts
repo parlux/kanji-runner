@@ -10,7 +10,7 @@
  * twice gives identical JSON.
  */
 import { readFileSync, writeFileSync } from "node:fs";
-import { byGrade, type OrderOverride } from "./order";
+import { orderReport, usefulOrder, type OrderOverride } from "./order";
 import {
   commonWords,
   countReadings,
@@ -22,6 +22,7 @@ import { cleanGloss, isShort, pickGlosses } from "./glosses";
 import {
   KANJI_WORDS_PER_LEVEL,
   parseUsage,
+  setLevels,
   usageRank,
   usageRanks,
   WORD_PICKER,
@@ -38,6 +39,7 @@ import {
   usefulness,
   usefulReport,
   type Themes,
+  type Usefulness,
 } from "./useful";
 
 /** Kanji levels 2+ hold 30 kanji each (SPEC: Progression and levels). */
@@ -86,11 +88,6 @@ async function main(): Promise<void> {
   const glossOverrides = readJson<Record<string, string>>(
     "scripts/gloss-overrides.json",
   );
-  const order = byGrade(
-    raw,
-    components,
-    readJson<OrderOverride[]>("scripts/order-overrides.json"),
-  );
   const readingOverrides = readJson<Record<string, Override>>(
     "scripts/reading-overrides.json",
   );
@@ -99,24 +96,67 @@ async function main(): Promise<void> {
       throw new Error(`reading override ${c}: not a Jōyō kanji`);
   const jmdict = (await cached("jmdict", refresh)).toString("utf8");
   const counts = countReadings(commonWords(jmdict), raw);
+  // Taught readings don't depend on the order; candidates need them first.
+  const taught = new Map(
+    raw.map((k) => {
+      const pick = pickReadings(
+        k,
+        counts.get(k.char),
+        readingOverrides[k.char],
+      );
+      return [
+        k.char,
+        {
+          char: k.char,
+          on: pick.on ? toHiragana(pick.on.replace(/^-|-$/g, "")) : null,
+          kun: pick.kun ? splitKun(pick.kun) : null,
+        },
+      ];
+    }),
+  );
+  const { candidates, removed, racers } = wordCandidates(jmdict, [
+    ...taught.values(),
+  ]);
+  const usage = parseUsage((await cached("usage", refresh)).toString("utf8"));
+  const listed = new Set(candidates.map((c) => c.word));
+  const ranked = candidates.filter((c) => usageRank(c, usage, listed) !== null);
+  console.log(
+    `usage list: ${usage.size} word forms; ranks ${ranked.length} of ${candidates.length} candidates; ${racers.length} lone-kanji racers`,
+  );
+  const useful = await usefulnessOf(candidates, racers, usage, refresh);
+
+  const orderStart = performance.now();
+  const { order, why } = usefulOrder(
+    raw,
+    components,
+    [...candidates, ...racers].map((c) => {
+      const u = useful.get(c);
+      return { word: c.word, value: u?.value ?? 0, theme: !!u?.theme };
+    }),
+    readJson<OrderOverride[]>("scripts/order-overrides.json"),
+  );
+  const levelAt = (i: number) => 2 + Math.floor(i / LEVEL_SIZE);
+  const orderText = orderReport(order, why, levelAt);
+  writeFileSync(`${CACHE}/order-report.txt`, orderText);
+  const orderSecs = ((performance.now() - orderStart) / 1000).toFixed(1);
+  console.log(
+    `${orderText.split("\n")[0]}; ${orderSecs} s; order report written to ${CACHE}/order-report.txt`,
+  );
   const pos = new Map(order.map((c, i) => [c, i]));
   const sorted = [...raw].sort(
     (a, b) => (pos.get(a.char) ?? 0) - (pos.get(b.char) ?? 0),
   );
-  const kanji = sorted.map((k, i) => {
-    const pick = pickReadings(k, counts.get(k.char), readingOverrides[k.char]);
-    return {
-      char: k.char,
-      level: 2 + Math.floor(i / LEVEL_SIZE),
-      grade: k.grade,
-      freq: k.freq,
-      glosses: pickGlosses(k.meanings, glossOverrides[k.char]),
-      on: pick.on ? toHiragana(pick.on.replace(/^-|-$/g, "")) : null,
-      kun: pick.kun ? splitKun(pick.kun) : null,
-      readings: allReadings(k),
-      components: components.get(k.char) ?? [],
-    };
-  });
+  const kanji = sorted.map((k, i) => ({
+    char: k.char,
+    level: levelAt(i),
+    grade: k.grade,
+    freq: k.freq,
+    glosses: pickGlosses(k.meanings, glossOverrides[k.char]),
+    on: taught.get(k.char)?.on ?? null,
+    kun: taught.get(k.char)?.kun ?? null,
+    readings: allReadings(k),
+    components: components.get(k.char) ?? [],
+  }));
   writeJsonLines("src/data/kanji.json", kanji);
   writeConfusables(kanji);
 
@@ -147,15 +187,9 @@ async function main(): Promise<void> {
     `${summary}; reading report written to ${CACHE}/reading-report.txt`,
   );
 
-  const { candidates, removed } = wordCandidates(jmdict, kanji);
-  const usage = parseUsage((await cached("usage", refresh)).toString("utf8"));
-  const listed = new Set(candidates.map((c) => c.word));
-  const ranked = candidates.filter((c) => usageRank(c, usage, listed) !== null);
-  console.log(
-    `usage list: ${usage.size} word forms; ranks ${ranked.length} of ${candidates.length} candidates`,
-  );
-  await reportUsefulness(candidates, usage, refresh);
-  const words = WORD_PICKER(usage)(candidates, KANJI_WORDS_PER_LEVEL);
+  setLevels(candidates, new Map(kanji.map((k) => [k.char, k.level])));
+  const value = new Map(candidates.map((c) => [c, useful.get(c)?.value ?? 0]));
+  const words = WORD_PICKER(usage, value)(candidates, KANJI_WORDS_PER_LEVEL);
   writeJsonLines(
     "src/data/words.json",
     words.map(({ word, reading, glosses, kind, level }) => ({
@@ -174,29 +208,32 @@ async function main(): Promise<void> {
 }
 
 /**
- * Word value (SPEC-useful-order), not yet used by the order: matches the
- * themes to candidates and writes `useful-report.txt`.
+ * Word value (SPEC-useful-order) of the candidates and the lone-kanji racers:
+ * matches the themes to both and writes `useful-report.txt`. Candidates keep
+ * their own spoken ranks (the お/ご rule looks only at candidates); racers'
+ * ranks are taken over both.
  */
-async function reportUsefulness(
+async function usefulnessOf(
   candidates: Candidate[],
+  racers: Candidate[],
   usage: UsageRanks,
   refresh: boolean,
-): Promise<void> {
+): Promise<Map<Candidate, Usefulness>> {
   const start = performance.now();
   const sentences = parseTatoeba(
     (await cached("tatoeba", refresh)).toString("utf8"),
   );
-  const matches = matchThemes(
-    readJson<Themes>("scripts/themes.json"),
-    candidates,
-  );
+  const all = [...candidates, ...racers];
+  const matches = matchThemes(readJson<Themes>("scripts/themes.json"), all);
   const themed = new Set(matches.flatMap((m) => m.candidate ?? []));
+  const spoken = usageRanks(all, usage);
+  for (const [c, r] of usageRanks(candidates, usage)) spoken.set(c, r);
   const useful = usefulness(
-    candidates,
+    all,
     themed,
-    usageRanks(candidates, usage),
+    spoken,
     usage.size,
-    easyCounts(sentences, candidates),
+    easyCounts(sentences, all),
   );
   const text = usefulReport(matches, useful);
   writeFileSync(`${CACHE}/useful-report.txt`, text);
@@ -204,6 +241,7 @@ async function reportUsefulness(
   console.log(
     `${text.split("\n")[0]}; ${sentences.length} Tatoeba sentences, ${secs} s; useful report written to ${CACHE}/useful-report.txt`,
   );
+  return useful;
 }
 
 /** Hand-curated kana look-alikes, within one script (SPEC: Distractors). */
