@@ -335,6 +335,35 @@ describe("sync", () => {
     expect(b).toEqual(a);
     expect(upserts).toHaveLength(1);
   });
+
+  it("a remote v1 save is migrated before merging with local v2", async () => {
+    // old-order level 13 is recomputed from the items; local level 1 wins
+    const v1 = { ...remote, version: 1, unlockedLevel: 13 };
+    const { sync, store } = setup({ select: ok({ data: v1 }) });
+    const p = await sync.pull();
+    expect(p.version).toBe(2);
+    expect(p.unlockedLevel).toBe(local.unlockedLevel);
+    expect(p.items["kanji:日"]).toEqual(remote.items["kanji:日"]);
+    expect(loadProgress(store)).toEqual(p);
+  });
+
+  it("a local v1 save and a remote v2 save merge at v2", async () => {
+    const fake = fakeClient({ select: ok({ data: remote }) });
+    const store = fakeStore({
+      ...local,
+      version: 1,
+      unlockedLevel: 13,
+    } as never);
+    const sync = createSync({
+      client: fake.factory,
+      store,
+      isOnline: () => true,
+    });
+    const p = await sync.pull();
+    expect(p.version).toBe(2);
+    expect(p.unlockedLevel).toBe(2);
+    expect(Object.keys(p.items)).toHaveLength(3);
+  });
 });
 
 describe("sync disabled (env vars missing)", () => {
