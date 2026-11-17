@@ -23,7 +23,7 @@ From the owner's WaniKani levels 1–7 (approximate counts, scratchpad only, not
 - **Old kanji return in new words** (今 in 今日 and 今月), so they stay active instead of only showing up as reviews.
 
 ## Rounds
-1. **Word gates.** Test words of all three kinds, keeping the current kanji order. A word unlocks once all its kanji are learned, in Built-in mode too. Words and readings come from JMdict, not WaniKani.
+1. **Word gates.** Done in v1.5.0 (2026-11-17): spec `docs/specs/done/SPEC-word-gates.md`; words ranked by TUBELEX (YouTube subtitles), which round 2 can build on. Test words of all three kinds, keeping the current kanji order. A word unlocks once all its kanji are learned, in Built-in mode too. Words and readings come from JMdict, not WaniKani.
    - Gates test the word's own reading, not one pieced together from its kanji: many useful words are irregular (一人 ひとり, 二人 ふたり, 今日 きょう, 大人 おとな).
    - The on'yomi stories round stores only one chosen compound per reading, so this needs its own word list.
    - Kana-only conversation words (すみません, ありがとう) could join the loanword gates.

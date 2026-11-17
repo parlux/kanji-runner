@@ -5,9 +5,6 @@ Open ideas in priority order; the top one is next. The owner orders it. New idea
 ## Goal: useful Japanese, then drop WaniKani by 2027-03-14
 Epic: [Useful Japanese, then drop WaniKani](useful-japanese.md). Its rounds come first; other ideas slot between them only when the owner wants a break.
 
-## In progress
-- [Word gates](useful-japanese.md#rounds): epic round 1; spec `docs/specs/SPEC-word-gates.md`, tasks `tasks/todo-word-gates.md`.
-
 ## Next
 1. [Useful-words order](useful-japanese.md#rounds): epic round 2; levels chosen by usefulness for travel and conversation, then manga, for the cost in new kanji; coverage measured. Replaces grade order.
 2. [Show overall progress](overall-progress.md): epic round 3; levels, plus coverage and JLPT share from round 2, as the yardstick for the assessment.

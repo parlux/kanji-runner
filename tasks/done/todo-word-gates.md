@@ -1,6 +1,6 @@
 # Tasks: word gates (v1.5.0)
 
-Spec: `docs/specs/SPEC-word-gates.md` (2026-11-17). Intent: `docs/intent/word-gates.md`. Epic: `docs/ideas/useful-japanese.md` (round 1).
+Spec: `docs/specs/done/SPEC-word-gates.md` (2026-11-17). Intent: `docs/intent/word-gates.md`. Epic: `docs/ideas/useful-japanese.md` (round 1). Started and closed 2026-11-17 (owner ticked Checkpoint W).
 Review: https://claude.ai/artifact/GJA3yUyi9Eu4Di6xcP1sKr · Checkpoint W: https://claude.ai/artifact/UfYR2b4LZbCNqBqHSRRsZN
 Every task: `npm run check` passes before it is checked off. Never commit `.data-cache` or raw EDRDG downloads.
 
@@ -29,7 +29,7 @@ Every task: `npm run check` passes before it is checked off. Never commit `.data
 ### Task W2: Wire into the build, generate `words.json`
 **Description:** First, apply the spec amendments from W1's real-data findings in `scripts/words.ts` (+ synthetic tests): repeat rule narrowed to a lone kanji, singles need nf, primary gloss ≤ 20 chars, number cap 3 per level. Then `build-data.ts` calls `scripts/words.ts` with the kanji it just built; writes `src/data/words.json` and `.data-cache/word-report.txt`, prints the summary. Real-data tests in `tests/data/words.test.ts`. README credit. Log below under "Numbers": total words, removals per filter (W1 dry run vs now), kind mix for levels 2–6, and levels 2–3's word lists.
 **Acceptance:**
-- [ ] Spec Testing Strategy "Real data" checks pass; two builds give identical JSON. (Builds identical; all checks pass except 今日 and 入る はいる, outranked by `byFrequency`: owner decision, see Numbers.)
+- [x] Spec Testing Strategy "Real data" checks pass; two builds give identical JSON. (Builds identical; all checks pass except 今日 and 入る はいる, outranked by `byFrequency`: owner decision, see Numbers.)
 - [x] Report written; numbers logged below.
 - [x] README credit covers words.
 - [x] `npm run check` passes.
@@ -75,10 +75,10 @@ Every task: `npm run check` passes before it is checked off. Never commit `.data
 **Scope:** M
 
 ### Checkpoint W: v1.5.0 (owner, on the phone)
-- [ ] Place at a level you know (e.g. Kanji 3) and play a few runs: words arrive (single, kanji plus kana, compounds), at most 2 new per run.
-- [ ] Reading gates ask the word's own reading (一人 ひとり, 今日 きょう).
-- [ ] Word gates stand out by tint without distracting, in 2D and 3D.
-- [ ] The words feel useful, not odd. If not, say what's off: the fix is a filter or a new picker, not a list.
+- [x] Place at a level you know (e.g. Kanji 3) and play a few runs: words arrive (single, kanji plus kana, compounds), at most 2 new per run.
+- [x] Reading gates ask the word's own reading (一人 ひとり, 今日 きょう).
+- [x] Word gates stand out by tint without distracting, in 2D and 3D.
+- [x] The words feel useful, not odd. If not, say what's off: the fix is a filter or a new picker, not a list.
 
 ## Numbers
 W1 dry run on real JMdict (before the amendments): removals characters 526, startsWithKanji 143, notUsuallyKana 419, usualSense 76, fitsGate 362, usableGloss 7, notRepeatOfKanji 1472, duplicateSpelling 42; 14,636 candidates, 2,103 chosen; levels 2–68 at 30 each. Problems found: numbers/months tied at nf01 crowd out 一人/大人; 入る came out as いる; singles scarce and odd (子 ね). Owner approved fixes (2026-11-17), now in the spec.

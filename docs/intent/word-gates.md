@@ -1,6 +1,6 @@
 # Intent: word gates
 
-Status: confirmed by the owner, 2026-11-17, after an interview. Epic: `docs/ideas/useful-japanese.md` (round 1). Spec: `docs/specs/SPEC-word-gates.md`.
+Status: confirmed by the owner, 2026-11-17, after an interview. Epic: `docs/ideas/useful-japanese.md` (round 1). Spec: `docs/specs/done/SPEC-word-gates.md`.
 
 ## Statement of intent
 - **Outcome:** in Built-in mode each kanji level brings about 30 real words from JMdict, of three kinds: a kanji on its own (人 as ひと), kanji plus kana (入る) and compounds (今日). Each word has a meaning gate and a reading gate. The reading gate tests the word's own reading, irregular ones included (一人 ひとり, 今日 きょう).
