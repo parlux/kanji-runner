@@ -17,7 +17,8 @@
     "check": "npm test && npm run typecheck && npm run lint && npm run knip && npm run deps && npm run build",
     "knip": "knip",
     "deps": "depcruise src --config .dependency-cruiser.cjs",
-    "data:build": "tsx scripts/build-data.ts"
+    "data:build": "tsx scripts/build-data.ts",
+    "data:coverage": "tsx scripts/coverage.ts"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",

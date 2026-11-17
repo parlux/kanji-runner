@@ -1,8 +1,8 @@
 /// <reference types="node" />
 /**
  * Dev-only data sources shared by `build-data.ts` and `coverage.ts`: the
- * pinned download list, the `.data-cache/` download cache, and the KANJIDIC2
- * and KRADFILE parsers.
+ * pinned download list, the `.data-cache/` download cache (gzip, xz and zip
+ * files are unpacked on read), and the KANJIDIC2 and KRADFILE parsers.
  */
 import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -19,7 +19,26 @@ export const SOURCES = {
    */
   usage:
     "https://raw.githubusercontent.com/naist-nlp/tubelex/7cb5fb36add76b83a266d1967536e1a1d3faa513/frequencies/tubelex-ja-310-lemma-pos.tsv.xz",
+  /**
+   * Easy reader for the coverage check (SPEC-useful-order): Aozora Bunko
+   * children's stories, public domain, 新字新仮名. Each zip name carries its
+   * file revision, so the text is pinned. Unpacked with the `unzip` command.
+   */
+  gongitsune: "https://www.aozora.gr.jp/cards/000121/files/628_ruby_649.zip",
+  tebukuro: "https://www.aozora.gr.jp/cards/000121/files/637_ruby_4095.zip",
+  chumon: "https://www.aozora.gr.jp/cards/000081/files/43754_ruby_17594.zip",
+  gauche: "https://www.aozora.gr.jp/cards/000081/files/470_ruby_3987.zip",
+  kumonoito: "https://www.aozora.gr.jp/cards/000879/files/92_ruby_164.zip",
 };
+
+/** The Aozora Bunko stories in `SOURCES`, Shift_JIS text with ruby. */
+export const STORIES = [
+  "gongitsune",
+  "tebukuro",
+  "chumon",
+  "gauche",
+  "kumonoito",
+] as const;
 
 export type RawKanji = {
   char: string;
@@ -48,6 +67,8 @@ export async function cached(
   }
   if (file.endsWith(".xz"))
     return execFileSync("xz", ["-dc", file], { maxBuffer: 1 << 30 });
+  if (file.endsWith(".zip"))
+    return execFileSync("unzip", ["-p", file, "*.txt"], { maxBuffer: 1 << 30 });
   return gunzipSync(readFileSync(file));
 }
 
