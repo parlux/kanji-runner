@@ -59,6 +59,14 @@ describe("wordValue", () => {
 });
 
 describe("matchThemes", () => {
+  it("lets the later of two same-spelled words win (racers come last)", () => {
+    const moto = cand("下");
+    const shita = cand("下");
+    expect(matchThemes({ places: ["下"] }, [moto, shita])[0]?.candidate).toBe(
+      shita,
+    );
+  });
+
   it("matches by spelling, else by another kanji spelling", () => {
     const eki = cand("駅");
     const dekakeru = cand("出かける", ["出掛ける"]);
@@ -142,6 +150,18 @@ describe("usefulness", () => {
     expect(u.get(spoken)).toMatchObject({ spoken: 1, value: W_SPOKEN });
     expect(u.get(easy)).toMatchObject({ easy: 1, value: W_EASY });
     expect(u.get(none)?.value).toBe(0);
+  });
+
+  it("gives a one-kanji word no easy score", () => {
+    const mizu = cand("水");
+    const u = usefulness(
+      [mizu],
+      new Set(),
+      new Map(),
+      10,
+      new Map([[mizu, 7]]),
+    );
+    expect(u.get(mizu)).toMatchObject({ easy: 0, value: 0 });
   });
 
   it("takes 0-based usage ranks", () => {

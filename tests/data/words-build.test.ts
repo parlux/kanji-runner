@@ -234,19 +234,23 @@ describe("wordCandidates: filters", () => {
     });
   });
 
-  it("racers: lone kanji dropped only by notRepeatOfKanji race for the order", () => {
+  it("racers: lone kanji dropped only by notRepeatOfKanji race for the order, even beside a same-spelled candidate", () => {
     const { candidates, racers } = wordCandidates(
       jmdict(
         entry([{ keb: "人", pri: ["ichi1", "nf01"] }], [{ reb: "ひと" }]),
-        entry([{ keb: "金" }], [{ reb: "かね" }]), // no nf: frequentSingle too
+        entry([{ keb: "金" }], [{ reb: "かね" }]), // no nf: races anyway
+        entry([{ keb: "上" }], [{ reb: "うえ" }]),
+        entry([{ keb: "上", pri: ["news1", "nf07"] }], [{ reb: "かみ" }]),
         entry([{ keb: "今" }], [{ reb: "いま" }], { misc: ["&uk;"] }),
         entry([{ keb: "一人" }], [{ reb: "ひとり" }]),
       ),
       KANJI,
     );
-    expect(names(candidates)).toEqual(["一人"]);
+    expect(names(candidates)).toEqual(["上", "一人"]);
     expect(racers.map((c) => [c.word, c.reading, c.kind])).toEqual([
       ["人", "ひと", "single"],
+      ["金", "かね", "single"],
+      ["上", "うえ", "single"],
     ]);
   });
 

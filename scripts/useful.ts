@@ -5,8 +5,12 @@
  */
 import type { Candidate } from "./words";
 
-/** Weights of the three parts of `value` (tuned in U4). */
-export const W_THEME = 3;
+/**
+ * Weights of the three parts of `value` (tuned in U4). The theme weight is
+ * high so that, in the order's lookahead, a kanji's gain comes mostly from
+ * the theme words it unlocks rather than from the many rare general words.
+ */
+export const W_THEME = 10;
 export const W_SPOKEN = 1;
 export const W_EASY = 0.5;
 
@@ -48,7 +52,10 @@ export type ThemeMatch = {
 
 /**
  * Matches each theme word to a candidate: by spelling, else by another kanji
- * spelling of a candidate's entry (`Candidate.spellings`).
+ * spelling of a candidate's entry (`Candidate.spellings`). When two share a
+ * spelling, the later one wins: the build lists the lone-kanji racers last,
+ * so a lone kanji in a theme is the kanji read as taught (下 した), not a
+ * homograph candidate (下 もと "under the guidance of").
  */
 export function matchThemes(
   themes: Themes,
@@ -166,7 +173,10 @@ export function usefulness(
       const parts = {
         theme: themed.has(c),
         spoken: logScore(r + 1, usageSize),
-        easy: logScore(ranks.get(c) ?? null, size),
+        // A one-kanji word's substring count is its kanji's count in every
+        // compound (行 in 行く, 銀行), not the word's: no easy score.
+        easy:
+          [...c.word].length === 1 ? 0 : logScore(ranks.get(c) ?? null, size),
       };
       return [c, { ...parts, value: wordValue(parts) }];
     }),

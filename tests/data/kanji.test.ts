@@ -65,13 +65,16 @@ describe("kanji data", () => {
     }
   });
 
-  // SPEC-useful-order: travel kanji by Kanji 5 (levels 2–6). Fails with the
-  // starting weights (U3): every theme word weighs about the same, so the
-  // cheapest come first and 駅 (with 馬), 出 and 時 (with 寺, 寸) wait until
-  // levels 10–19. Tuned in U4.
-  it.fails("teaches 駅, 円, 出, 入, 口, 何, 時 by Kanji 5", () => {
-    for (const c of "駅円出入口何時")
+  // SPEC-useful-order: travel kanji by Kanji 5 (levels 2–6).
+  it("teaches 円, 出, 入, 口, 何, 時 by Kanji 5", () => {
+    for (const c of "円出入口何時")
       expect(level.get(c), c).toBeLessThanOrEqual(6);
+  });
+
+  // 駅 still waits until Kanji 10 after the U4 tuning: few theme words use
+  // it, and 馬 comes with it (shortfall logged in the task list).
+  it.fails("teaches 駅 by Kanji 5", () => {
+    expect(level.get("駅")).toBeLessThanOrEqual(6);
   });
 
   it("teaches 干, 乙, 弓, 矛 in Kanji 1–3 only as a building block", () => {

@@ -280,7 +280,9 @@ export function wordCandidates(
       if (!left.length) {
         removed[name]++;
         if (name === "notRepeatOfKanji") {
-          const racer = before.find((d) => after.every(([, k]) => k(d, ctx)));
+          const racer = before.find((d) =>
+            after.every(([n, k]) => n === "frequentSingle" || k(d, ctx)),
+          );
           if (racer) {
             const c = toCandidate(
               racer,
@@ -304,7 +306,10 @@ export function wordCandidates(
   return {
     candidates: [...bySpelling.values()],
     removed,
-    racers: [...racers.values()].filter((c) => !bySpelling.has(c.word)),
+    // Racers keep their spelling even when a candidate has it (下 した beside
+    // 下 もと), and skip `frequentSingle`: they are never shown, and their
+    // value comes from the themes and the usage list, not from nf.
+    racers: [...racers.values()],
   };
 }
 

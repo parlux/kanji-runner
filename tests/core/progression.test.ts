@@ -39,7 +39,7 @@ describe("levels", () => {
     expect(levelKeys(1, KANA, KANJI)).toContain("ア:kana");
     expect(levelKeys(0, KANA, KANJI)).not.toContain("ア:kana");
     expect(levelKeys(2, KANA, KANJI)).toHaveLength(30);
-    expect(levelKeys(2, KANA, KANJI)[0]).toBe("一:meaning");
+    expect(levelKeys(2, KANA, KANJI)).toContain("一:meaning");
     expect(maxLevel(KANJI)).toBe(73);
   });
 
