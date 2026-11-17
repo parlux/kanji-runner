@@ -1,7 +1,7 @@
 # Tasks: useful-words order (v1.6.0)
 
 Spec: `docs/specs/SPEC-useful-order.md` (2026-11-17). Intent: `docs/intent/useful-words-order.md`. Epic: `docs/ideas/useful-japanese.md` (round 2). Started 2026-11-17.
-Review: https://claude.ai/artifact/TZ4TSiMPUqozQZkecva4yF
+Review: https://claude.ai/artifact/TZ4TSiMPUqozQZkecva4yF · Checkpoint U: https://claude.ai/artifact/KZDbNTEdhyxEsoGY7k6N2C
 Every task: `npm run check` passes before it is checked off. Never commit `.data-cache`, raw EDRDG, Tatoeba or Aozora downloads, or anything derived from WaniKani.
 
 ## Plan
