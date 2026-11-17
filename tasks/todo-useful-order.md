@@ -21,11 +21,11 @@ Every task: `npm run check` passes before it is checked off. Never commit `.data
 ### Task U1: Coverage report and travel texts, baseline (highest risk: opus)
 **Description:** Write `scripts/coverage/menu.txt`, `signs.txt`, `phrasebook.txt` per the spec: natural Japanese as written in Japan, our own text. Add 3–5 Aozora Bunko children's stories as a cached source (pinned URLs, ruby stripped). Write `scripts/coverage.ts` (`npm run data:coverage`, optional `--wk <file>`), with `byGrade` as today's order (move `orderKanji` into `scripts/order.ts` unchanged, named `byGrade`). The data output is unchanged. Log the baseline table (today's order, Kanji 1/3/5/10/20, both measures, per text) under "Numbers", and say whether the spec's pass bands look reachable.
 **Acceptance:**
-- [ ] Texts meet the spec's sizes; stories cached, not committed.
-- [ ] Coverage unit tests pass (`tests/data/coverage.test.ts`).
-- [ ] `src/data/` unchanged after `npm run data:build`.
-- [ ] Baseline logged.
-- [ ] `npm run check` passes.
+- [x] Texts meet the spec's sizes; stories cached, not committed.
+- [x] Coverage unit tests pass (`tests/data/coverage.test.ts`).
+- [x] `src/data/` unchanged after `npm run data:build`.
+- [x] Baseline logged.
+- [x] `npm run check` passes.
 **Verification:** `npm run data:coverage`; `npm run data:build && git diff --exit-code src/data`; `npm test -- coverage`
 **Files:** `scripts/coverage/*.txt`, `scripts/coverage.ts`, `scripts/order.ts`, `scripts/build-data.ts`, `package.json`, `tests/data/coverage.test.ts`, this file
 **Scope:** M
@@ -96,3 +96,16 @@ Every task: `npm run check` passes before it is checked off. Never commit `.data
 
 ## Numbers
 (Logged by each task.)
+
+### U1 baseline (2026-11-17, today's order = `byGrade`; `new` equals it until U3)
+Texts: menu 80 lines (269 kanji tokens), signs 123 (357), phrasebook 117 (273); stories = 5 Aozora texts (ごん狐, 手袋を買いに, 注文の多い料理店, セロ弾きのゴーシュ, 蜘蛛の糸), 1,152 sentences. Cells: kanji coverage % / readable lines %.
+
+| text | Kanji 1 | Kanji 3 | Kanji 5 | Kanji 10 | Kanji 20 |
+|---|---|---|---|---|---|
+| menu | 9 / 1 | 33 / 15 | 42 / 19 | 57 / 26 | 70 / 38 |
+| signs | 11 / 3 | 21 / 5 | 36 / 9 | 54 / 19 | 78 / 46 |
+| phrasebook | 18 / 5 | 26 / 10 | 42 / 17 | 63 / 39 | 86 / 71 |
+| stories | 20 / 3 | 30 / 5 | 43 / 10 | 58 / 19 | 72 / 33 |
+| travel avg (coverage) | 13 | 27 | 40 | 58 | 78 |
+
+**Pass bands look reachable.** Travel needs about 55 at Kanji 5 and 73 at Kanji 10 (+15). The ceiling, the texts' own most frequent kanji first (pooled travel tokens), is 71 at 150 kanji and 91 at 300, so +15 is about half the headroom: reachable but not trivial. Easy reader floor at Kanji 10 is 53 (today 58). Caveats: each travel text has only about 270–360 kanji tokens, so one token is about 0.3 points; 7 menu tokens are non-Jōyō (醤, 噌, 餃, 姜, 鮭) and stay unknown under every order.
