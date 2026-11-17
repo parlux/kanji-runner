@@ -125,5 +125,5 @@ Pass bands are checked in U4. If U1's baseline shows a band can't be met, or is 
 - Owner checkpoint: levels 1–4's kanji and words look useful at a skim; the start screen shows a sensible level.
 
 ## Open Questions
-- **WaniKani column:** it needs the owner's WaniKani kanji per level once. The orchestrator asks at the checkpoint for a read-only API token or a pasted list, used in the scratchpad only. The report works without it.
+- **WaniKani column:** approved by the owner (2026-11-17). The orchestrator builds the kanji-per-level file once from the owner's `WANIKANI_TOKEN` in `.env.local` (read-only) into the scratchpad; subagents never read the token. The report works without it.
 - If the greedy pulls rare building blocks early (寸 for 時, 尺 for 駅), that's the agreed cost of keeping stories working. The order report makes it visible.
