@@ -49,6 +49,7 @@ Built-in kanji levels are ordered by usefulness for a trip to Japan, not by scho
   4. When no candidate with value > 0 remains, the leftover kanji follow in today's order (grade, then frequency, with the component pass).
 - `scripts/order-overrides.json` still applies afterwards (empty today).
 - Levels stay 30 kanji each from level 2 (`LEVEL_SIZE`).
+- **Ordering words (amended after U2):** the greedy also races lone-kanji words dropped *only* by `notRepeatOfKanji` (駅 えき, 水 みず, 人 ひと). Their kanji gate teaches them, so they never enter `words.json`, but they carry their value into the order. Themes may list them (written without seeing the coverage texts).
 - Candidates are built once, before levels exist. A word's `level` is the highest level of its kanji in the new order, and is set after ordering.
 - **"Why here" report:** `.data-cache/order-report.txt` lists, per level 2–21, each kanji and why it came: the word that pulled it in (with that word's value), "building block of X", or "leftover". The build prints a one-line summary: how many kanji came from theme words, from other words, and as leftovers.
 - Old order function kept as `byGrade` for the coverage comparison and tests.
