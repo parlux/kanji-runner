@@ -1,1 +1,713 @@
-{}
+{
+  "一": {
+    "name": "one"
+  },
+  "口": {
+    "name": "mouth"
+  },
+  "ノ": {
+    "name": "slash"
+  },
+  "｜": {
+    "name": "pole"
+  },
+  "日": {
+    "name": "sun"
+  },
+  "ハ": {
+    "name": "eight"
+  },
+  "二": {
+    "name": "two"
+  },
+  "木": {
+    "name": "tree"
+  },
+  "土": {
+    "name": "soil"
+  },
+  "亠": {
+    "name": "lid"
+  },
+  "丷": {
+    "name": "horns"
+  },
+  "目": {
+    "name": "eye"
+  },
+  "十": {
+    "name": "ten"
+  },
+  "小": {
+    "name": "little"
+  },
+  "𠂉": {
+    "name": "hat"
+  },
+  "⺡": {
+    "name": "water drops"
+  },
+  "田": {
+    "name": "rice field"
+  },
+  "⺅": {
+    "name": "leaning person"
+  },
+  "丶": {
+    "name": "dot"
+  },
+  "月": {
+    "name": "moon"
+  },
+  "大": {
+    "name": "large"
+  },
+  "又": {
+    "name": "pretzel"
+  },
+  "⺘": {
+    "name": "reaching hand"
+  },
+  "儿": {
+    "name": "legs"
+  },
+  "幺": {
+    "name": "loop"
+  },
+  "⺾": {
+    "name": "grass"
+  },
+  "貝": {
+    "name": "shellfish"
+  },
+  "厶": {
+    "name": "elbow"
+  },
+  "宀": {
+    "name": "roof"
+  },
+  "冂": {
+    "name": "frame"
+  },
+  "王": {
+    "name": "king"
+  },
+  "𠆢": {
+    "name": "umbrella"
+  },
+  "勹": {
+    "name": "wrap"
+  },
+  "言": {
+    "name": "speech"
+  },
+  "糸": {
+    "name": "thread"
+  },
+  "冖": {
+    "name": "blanket"
+  },
+  "心": {
+    "name": "heart"
+  },
+  "立": {
+    "name": "stand"
+  },
+  "人": {
+    "name": "person"
+  },
+  "亅": {
+    "name": "crowbar"
+  },
+  "尸": {
+    "name": "flag"
+  },
+  "⻌": {
+    "name": "road"
+  },
+  "匕": {
+    "name": "spoon"
+  },
+  "厂": {
+    "name": "cliff"
+  },
+  "女": {
+    "name": "woman"
+  },
+  "戈": {
+    "name": "spear"
+  },
+  "寸": {
+    "name": "thumb"
+  },
+  "夂": {
+    "name": "slow walker"
+  },
+  "⺣": {
+    "name": "hot coals"
+  },
+  "攵": {
+    "name": "baton"
+  },
+  "⺉": {
+    "name": "dagger"
+  },
+  "ヨ": {
+    "name": "rake"
+  },
+  "禾": {
+    "name": "grain"
+  },
+  "止": {
+    "name": "stop"
+  },
+  "隹": {
+    "name": "sparrow"
+  },
+  "广": {
+    "name": "shed"
+  },
+  "⺌": {
+    "name": "sparkle"
+  },
+  "廾": {
+    "name": "two hands"
+  },
+  "巾": {
+    "name": "towel"
+  },
+  "山": {
+    "name": "mountain"
+  },
+  "力": {
+    "name": "muscle"
+  },
+  "冫": {
+    "name": "ice"
+  },
+  "衣": {
+    "name": "garment"
+  },
+  "几": {
+    "name": "table"
+  },
+  "卜": {
+    "name": "wand"
+  },
+  "刀": {
+    "name": "sword"
+  },
+  "⻖": {
+    "name": "hill"
+  },
+  "金": {
+    "name": "gold"
+  },
+  "⺖": {
+    "name": "heartbeat"
+  },
+  "彳": {
+    "name": "footsteps"
+  },
+  "米": {
+    "name": "rice"
+  },
+  "斤": {
+    "name": "axe"
+  },
+  "卩": {
+    "name": "stamp"
+  },
+  "白": {
+    "name": "white"
+  },
+  "士": {
+    "name": "gentleman"
+  },
+  "爪": {
+    "name": "claw"
+  },
+  "凵": {
+    "name": "bucket"
+  },
+  "羊": {
+    "name": "sheep"
+  },
+  "水": {
+    "name": "water"
+  },
+  "艮": {
+    "name": "mule"
+  },
+  "頁": {
+    "name": "big head"
+  },
+  "車": {
+    "name": "car"
+  },
+  "竹": {
+    "name": "bamboo"
+  },
+  "子": {
+    "name": "child"
+  },
+  "乙": {
+    "name": "zigzag"
+  },
+  "⺲": {
+    "name": "net"
+  },
+  "囗": {
+    "name": "cage"
+  },
+  "矢": {
+    "name": "dart"
+  },
+  "夕": {
+    "name": "evening"
+  },
+  "方": {
+    "name": "compass"
+  },
+  "工": {
+    "name": "workbench"
+  },
+  "示": {
+    "name": "altar"
+  },
+  "干": {
+    "name": "drying rack"
+  },
+  "里": {
+    "name": "farm"
+  },
+  "欠": {
+    "name": "yawn"
+  },
+  "已": {
+    "name": "snake"
+  },
+  "火": {
+    "name": "fire"
+  },
+  "皿": {
+    "name": "dish"
+  },
+  "殳": {
+    "name": "club"
+  },
+  "石": {
+    "name": "stone"
+  },
+  "酉": {
+    "name": "jug"
+  },
+  "⽧": {
+    "name": "sickbed"
+  },
+  "⺹": {
+    "name": "elder"
+  },
+  "弓": {
+    "name": "bow"
+  },
+  "九": {
+    "name": "nine"
+  },
+  "虫": {
+    "name": "insect"
+  },
+  "匚": {
+    "name": "drawer"
+  },
+  "音": {
+    "name": "chime"
+  },
+  "彡": {
+    "name": "whiskers"
+  },
+  "牛": {
+    "name": "cow"
+  },
+  "疋": {
+    "name": "boot"
+  },
+  "門": {
+    "name": "gate"
+  },
+  "雨": {
+    "name": "rain"
+  },
+  "⺨": {
+    "name": "wild dog"
+  },
+  "戸": {
+    "name": "door"
+  },
+  "豕": {
+    "name": "pig"
+  },
+  "辛": {
+    "name": "chili"
+  },
+  "⻏": {
+    "name": "village"
+  },
+  "手": {
+    "name": "hand"
+  },
+  "臣": {
+    "name": "servant"
+  },
+  "マ": {
+    "name": "knot"
+  },
+  "穴": {
+    "name": "hole"
+  },
+  "⺭": {
+    "name": "offering box"
+  },
+  "足": {
+    "name": "foot"
+  },
+  "耳": {
+    "name": "ear"
+  },
+  "甘": {
+    "name": "candy"
+  },
+  "自": {
+    "name": "nose"
+  },
+  "馬": {
+    "name": "horse"
+  },
+  "豆": {
+    "name": "beans"
+  },
+  "用": {
+    "name": "fence"
+  },
+  "毋": {
+    "name": "no sign"
+  },
+  "食": {
+    "name": "food"
+  },
+  "西": {
+    "name": "west"
+  },
+  "比": {
+    "name": "two spoons"
+  },
+  "勿": {
+    "name": "broom"
+  },
+  "母": {
+    "name": "mother"
+  },
+  "⻂": {
+    "name": "cloak"
+  },
+  "井": {
+    "name": "well"
+  },
+  "爿": {
+    "name": "bed"
+  },
+  "廴": {
+    "name": "long stride"
+  },
+  "歹": {
+    "name": "bones"
+  },
+  "弋": {
+    "name": "stake"
+  },
+  "舟": {
+    "name": "boat"
+  },
+  "犬": {
+    "name": "dog"
+  },
+  "虍": {
+    "name": "tiger"
+  },
+  "癶": {
+    "name": "tent"
+  },
+  "見": {
+    "name": "binoculars"
+  },
+  "至": {
+    "name": "finish line"
+  },
+  "聿": {
+    "name": "brush"
+  },
+  "氏": {
+    "name": "clan"
+  },
+  "亡": {
+    "name": "tombstone"
+  },
+  "文": {
+    "name": "tattoo"
+  },
+  "川": {
+    "name": "river"
+  },
+  "⽱": {
+    "name": "paw print"
+  },
+  "父": {
+    "name": "father"
+  },
+  "生": {
+    "name": "sprout"
+  },
+  "皮": {
+    "name": "pelt"
+  },
+  "辰": {
+    "name": "hoe"
+  },
+  "冊": {
+    "name": "scroll"
+  },
+  "谷": {
+    "name": "valley"
+  },
+  "舌": {
+    "name": "tongue"
+  },
+  "走": {
+    "name": "runner"
+  },
+  "青": {
+    "name": "blue"
+  },
+  "牙": {
+    "name": "tusk"
+  },
+  "ユ": {
+    "name": "staple"
+  },
+  "非": {
+    "name": "fishbone"
+  },
+  "隶": {
+    "name": "mop"
+  },
+  "行": {
+    "name": "crossroads"
+  },
+  "支": {
+    "name": "branch"
+  },
+  "羽": {
+    "name": "feathers"
+  },
+  "釆": {
+    "name": "sieve"
+  },
+  "元": {
+    "name": "starting block"
+  },
+  "乃": {
+    "name": "ribbon"
+  },
+  "韋": {
+    "name": "tanned hide"
+  },
+  "啇": {
+    "name": "stalk"
+  },
+  "玄": {
+    "name": "dark thread"
+  },
+  "品": {
+    "name": "goods"
+  },
+  "麻": {
+    "name": "hemp"
+  },
+  "鬼": {
+    "name": "ghost"
+  },
+  "也": {
+    "name": "scorpion"
+  },
+  "斗": {
+    "name": "ladle"
+  },
+  "耒": {
+    "name": "pitchfork"
+  },
+  "舛": {
+    "name": "dance steps"
+  },
+  "矛": {
+    "name": "harpoon"
+  },
+  "鳥": {
+    "name": "bird"
+  },
+  "而": {
+    "name": "beard"
+  },
+  "赤": {
+    "name": "red"
+  },
+  "尢": {
+    "name": "crutch"
+  },
+  "免": {
+    "name": "excuse note"
+  },
+  "巴": {
+    "name": "swirl"
+  },
+  "長": {
+    "name": "long"
+  },
+  "身": {
+    "name": "torso"
+  },
+  "屮": {
+    "name": "tuning fork"
+  },
+  "巛": {
+    "name": "winding river"
+  },
+  "及": {
+    "name": "long arm"
+  },
+  "斉": {
+    "name": "neat rows"
+  },
+  "尤": {
+    "name": "broken crutch"
+  },
+  "魚": {
+    "name": "fish"
+  },
+  "臼": {
+    "name": "mortar"
+  },
+  "骨": {
+    "name": "skeleton"
+  },
+  "屯": {
+    "name": "hitching post"
+  },
+  "岡": {
+    "name": "ridge"
+  },
+  "豸": {
+    "name": "leopard"
+  },
+  "气": {
+    "name": "steam"
+  },
+  "首": {
+    "name": "neck"
+  },
+  "五": {
+    "name": "five"
+  },
+  "入": {
+    "name": "entrance"
+  },
+  "革": {
+    "name": "leather"
+  },
+  "角": {
+    "name": "antler"
+  },
+  "色": {
+    "name": "paint palette"
+  },
+  "彑": {
+    "name": "pig snout"
+  },
+  "鬲": {
+    "name": "cauldron"
+  },
+  "毛": {
+    "name": "fur"
+  },
+  "瓜": {
+    "name": "melon"
+  },
+  "巨": {
+    "name": "giant"
+  },
+  "黒": {
+    "name": "black"
+  },
+  "缶": {
+    "name": "tin can"
+  },
+  "鹿": {
+    "name": "deer"
+  },
+  "風": {
+    "name": "wind"
+  },
+  "黄": {
+    "name": "yellow"
+  },
+  "世": {
+    "name": "family photo"
+  },
+  "肉": {
+    "name": "meat"
+  },
+  "無": {
+    "name": "empty basket"
+  },
+  "髟": {
+    "name": "long hair"
+  },
+  "片": {
+    "name": "splinter"
+  },
+  "歯": {
+    "name": "tooth"
+  },
+  "血": {
+    "name": "blood"
+  },
+  "高": {
+    "name": "tall"
+  },
+  "瓦": {
+    "name": "tile"
+  },
+  "亀": {
+    "name": "tortoise"
+  },
+  "竜": {
+    "name": "dragon"
+  },
+  "奄": {
+    "name": "canopy"
+  },
+  "麦": {
+    "name": "barley"
+  },
+  "面": {
+    "name": "mask"
+  },
+  "久": {
+    "name": "hourglass"
+  },
+  "鬯": {
+    "name": "herb pot"
+  },
+  "爻": {
+    "name": "lattice"
+  }
+}

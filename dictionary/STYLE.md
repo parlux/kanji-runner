@@ -43,12 +43,13 @@ Plus `parts.json` (part names) and `sounds.json` (sound keywords). Work from the
 
 - 1–3 sentences, 80–450 characters of plain text.
 - Ties the meaning (or the meaning story's scene) to the reading's sound.
-- When `onSound` has a keyword, use it: the same sound always calls up the same image across all kanji. Without one, pick an English sound-alike and say how it sounds.
+- When `onSound` has a keyword, use it: the same sound always calls up the same image across all kanji. Only the keyword's matching syllable is the sound (the `sounds.json` note says how much counts); make that clear, don't make the reader say the whole word. Without a keyword, pick an English sound-alike and say how it sounds.
+- Sounds that come in sets (しょう / しょ / しょく, よう / よ / よく): make the length or final consonant obvious in the scene, so the reader can't mix up the set.
 - Spell the reading in `<reading>` kana, exactly the hiragana from the input: `<reading>きゅう</reading>`. For `kun`, the base (`<reading>やす</reading>`) or base plus okurigana (`<reading>やすむ</reading>`); the story may use the okurigana word (`<ja>休む</ja>`). Every `<reading>` tag must hold that story's reading, nothing else.
 
 ## Building on earlier levels
 
-- A part that is an earlier kanji is called by that kanji's name (its `parts.json` name, which is normally the kanji's first gloss).
+- A part that is an earlier kanji is called by its `parts.json` name. That is normally the kanji's first gloss, but some parts have a more drawable name (日 is the part "sun" though the kanji means "day"). Always use the part name in `<part>`, and still land on this kanji's own gloss in `<kanji>`.
 - Reuse an image from an earlier story where it comes naturally; a recurring character is fine. Don't force it.
 
 ## Language
@@ -59,9 +60,9 @@ Plus `parts.json` (part names) and `sounds.json` (sound keywords). Work from the
 
 ## Example (made up, not a real entry)
 
-休, glosses `rest`, parts `person` + `tree`, on `きゅう`, kun `やす(む)`, sound keyword for きゅう: `cue` (a pool cue).
+休, glosses `rest`, parts `leaning person` + `tree`, on `きゅう`, kun `やす(む)`, sound keyword for きゅう: `cue` (a pool cue).
 
-- meaning: `A tired <part>person</part> hugs a <part>tree</part> like a giant pillow and starts snoring. The tree doesn't mind: it was planning a day off too. Both of them <kanji>rest</kanji> until the moon comes up.`
+- meaning: `A tired <part>leaning person</part> hugs a <part>tree</part> like a giant pillow and starts snoring. The tree doesn't mind: it was planning a day off too. Both of them <kanji>rest</kanji> until the moon comes up.`
 - on: `The resting person uses a pool <em>cue</em> to scratch their back without getting up: <reading>きゅう</reading>. Even rest needs the right tool.`
 - kun: `A friend shakes the sleeper: "Get up!" A sleepy voice answers "<reading>やす</reading>… ya, sue me, I'm on a break." <ja>休む</ja> means to take that break.`
 
