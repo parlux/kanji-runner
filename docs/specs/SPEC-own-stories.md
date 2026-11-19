@@ -94,7 +94,7 @@ tests/data/stories.test.ts   → validator over committed dictionary + fixtures
 - Never: commit or bundle anything from WaniKani (text, names list, similarity reports, judge files); let the writer read `.data-cache/stories/wk-library.json`, `overlap-*` or the judge's WaniKani excerpts; change gates, levels, the save format or the WaniKani path's behaviour for kanji without our story.
 
 ## Success criteria
-- Every kanji in our levels (Kanji 1–72) has a committed entry that passes `stories:check` and a judge `pass`; every part has a name; no unresolved overlap suspect.
+- **Early levels only** (owner, 2026-11-20): Kanji 1–10 first, then up to 3 levels past the owner's level; later levels are written as the owner nears them, so a renamed part or keyword ripples into few stories. Every committed entry passes `stories:check` and has a judge `pass`; every part has a name; no unresolved overlap suspect.
 - First checkpoint: Kanji 1–10 done, deployed; the owner reviews a handful and plays with our stories on the phone.
 - Main chunk grows ≤ 10 KB; a level's stories load in under 300 ms on the phone after the first study open.
 - The flag round trip works: flag on the phone → `npm run stories:flags` lists it.

@@ -7,7 +7,7 @@ Every task: `npm run check` passes before it is checked off. Never commit `.data
 - **Pipeline first.** D1 builds the format, validator, prep, WaniKani fetch and overlap check, so every story after it is checked the same way.
 - **Shared vocabulary next.** D2 names the parts and the on'yomi sound keywords once, so every story uses the same names and images.
 - **Pilot, then the card.** D3 writes Kanji 1–2 through the full writer/judge loop and tunes `STYLE.md` on what fails; D4 shows them on the card; D5 adds the flag.
-- **Then scale.** D6 writes Kanji 3–10 and deploys: Checkpoint D. After it, D7 writes the rest and D8 ships 1.7.0.
+- **Then early levels only.** D6 writes Kanji 3–10 and deploys: Checkpoint D. After it, D7 fixes flags and writes a few levels past the owner's; D8 ships 1.7.0. Later levels are written as the owner nears them (owner, 2026-11-20: a renamed part or keyword ripples into every story that uses it, so keep few stories ahead until the names have settled).
 
 ### Content tasks (D2, D3, D6, D7): run by the orchestrator
 Not one implementer subagent: the orchestrator runs the loop per batch (2 levels):
@@ -86,10 +86,10 @@ Not one implementer subagent: the orchestrator runs the loop per batch (2 levels
 - [ ] Owner reads a handful of Kanji 1–3 stories on the checkpoint page and plays a few runs on the phone with Study; flags anything weak.
 - [ ] Owner ticks, or sends `STYLE.md` changes before D7 scales up.
 
-### Task D7: Kanji 11–72 (content, orchestrator)
-**Description:** Owner's flags first (rewrite, resolve), then the loop on game levels 12–73 in parallel batches.
+### Task D7: Flags, and a few levels ahead (content, orchestrator)
+**Description:** Owner's flags first (rewrite, resolve; a renamed part or keyword means rewriting every story using it), then the loop on the next levels up to 3 past the owner's level.
 **Acceptance:**
-- [ ] Every kanji level has a file; all pass check and judge; no unresolved suspect.
+- [ ] Levels through the owner's level + 3 have files; all pass check and judge; no unresolved suspect.
 - [ ] Flags from Checkpoint D resolved.
 - [ ] Counts logged below.
 
