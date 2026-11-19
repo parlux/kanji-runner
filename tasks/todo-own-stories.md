@@ -31,11 +31,11 @@ Not one implementer subagent: the orchestrator runs the loop per batch (2 levels
 ### Task D1: Dictionary format, validator and WaniKani comparison tools (opus)
 **Description:** Create `dictionary/` (`README.md`, `STYLE.md` per the spec's style guide, empty `parts.json`/`sounds.json`, `stories/`), and `scripts/stories/`: `prep.ts`, `check.ts`, `wk.ts`, `overlap.ts`, with `npm run stories:*` scripts. `check` runs over committed files inside `npm test` (empty dictionary passes; parts coverage is checked only once `parts.json` is non-empty).
 **Acceptance:**
-- [ ] `stories:prep -- 2-3` writes input files with every field the spec lists.
-- [ ] Validator tests: each rule fails on a broken fixture and passes a good one.
-- [ ] `stories:wk` writes `.data-cache/stories/wk-library.json` (owner's token from `.env.local`); nothing under `dictionary/` or `src/` reads it.
-- [ ] Overlap tests: copied text scores high, unrelated low, shared glosses/readings/part names ignored.
-- [ ] `npm run check` passes (knip and deps included).
+- [x] `stories:prep -- 2-3` writes input files with every field the spec lists.
+- [x] Validator tests: each rule fails on a broken fixture and passes a good one.
+- [x] `stories:wk` writes `.data-cache/stories/wk-library.json` (owner's token from `.env.local`); nothing under `dictionary/` or `src/` reads it.
+- [x] Overlap tests: copied text scores high, unrelated low, shared glosses/readings/part names ignored.
+- [x] `npm run check` passes (knip and deps included).
 **Verification:** `npm test -- stories`; `npm run stories:prep -- 2-3`; `npm run stories:wk && ls .data-cache/stories`
 **Files:** `dictionary/*`, `scripts/stories/*.ts`, `package.json`, `tests/data/stories.test.ts`, this file
 

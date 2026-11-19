@@ -21,7 +21,8 @@
     "data:coverage": "tsx scripts/coverage.ts",
     "stories:prep": "tsx scripts/stories/prep.ts",
     "stories:check": "tsx scripts/stories/check.ts",
-    "stories:wk": "tsx scripts/stories/wk.ts"
+    "stories:wk": "tsx scripts/stories/wk.ts",
+    "stories:overlap": "tsx scripts/stories/overlap.ts"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
