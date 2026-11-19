@@ -4,7 +4,10 @@ import { KANA } from "../../src/core/kana";
 import { KANJI } from "../../src/core/kanji";
 import { buildRun, missedItems } from "../../src/core/run";
 import { defaultProgress, recordRun } from "../../src/core/srs";
+import type { Missed } from "../../src/core/run";
 import {
+  type Dictionary,
+  type StudyCard,
   type Story,
   canStudy,
   lastAnswer,
@@ -560,5 +563,164 @@ describe("reading stories", () => {
     expect(
       b?.card?.kind === "kanji" && b.card.readingStories?.map((r) => r.reading),
     ).toEqual(mainReadings(kanji).map(showReading));
+  });
+});
+
+describe("studyCards with our dictionary", () => {
+  const ori = KANJI.find((k) => k.char === "折") as KanjiItem;
+  const dict: Dictionary = {
+    parts: new Map([
+      ["斤", "axe"],
+      ["⺘", "reaching hand"],
+    ]),
+    entries: new Map([
+      [
+        "折",
+        {
+          meaning: "<part>axe</part> m",
+          on: "<reading>せつ</reading> o",
+          kun: "<reading>おり</reading> k",
+        },
+      ],
+    ]),
+  };
+  const miss = (type: "meaning" | "reading", prompt = "折"): Missed => ({
+    q: 1,
+    type,
+    prompt,
+    answers: [],
+    charge: false,
+  });
+  const card = (c: StudyCard | undefined) =>
+    c?.kind === "kanji" ? c : (undefined as never);
+
+  it("ours beats the library; parts carry names; headings flag own", () => {
+    const lib = new Map([["折", { meaning: "wk", radicals: [] }]]);
+    const c = card(
+      studyCards(
+        [miss("meaning")],
+        KANJI,
+        KANA,
+        lib,
+        [],
+        [],
+        undefined,
+        dict,
+      )[0],
+    );
+    expect(c.own).toBe(true);
+    expect(c.mnemonics).toEqual({ meaning: "<part>axe</part> m" });
+    expect(c.radicals).toBeUndefined();
+    expect(c.parts).toEqual([
+      { char: "斤", name: "axe" },
+      { char: "⺘", name: "reaching hand" },
+    ]);
+  });
+
+  it("reading blocks follow the presented labels", () => {
+    const rs = (labels: string[]) =>
+      card(
+        studyCards(
+          [miss("reading")],
+          KANJI,
+          KANA,
+          undefined,
+          [],
+          [],
+          new Map([["折", labels]]),
+          dict,
+        )[0],
+      ).readingStories;
+    expect(rs(["せつ"])).toEqual([
+      { reading: "せつ", source: "kanji", text: "<reading>せつ</reading> o" },
+    ]);
+    expect(rs(["おり"])?.[0]).toMatchObject({
+      text: "<reading>おり</reading> k",
+    });
+    expect(rs(["せつ", "おり"])).toHaveLength(2);
+    // a non-main reading gets the "no story" line
+    expect(rs(["しゃく"])).toEqual([{ reading: "しゃく", none: true }]);
+    // no reading presented (meaning gate): one block per main reading
+    expect(
+      card(
+        studyCards(
+          [miss("meaning")],
+          KANJI,
+          KANA,
+          undefined,
+          [],
+          [],
+          undefined,
+          dict,
+        )[0],
+      ).readingStories?.map((r) => r.reading),
+    ).toEqual(mainReadings(ori).map(showReading));
+  });
+
+  it("a kanji with no components has no parts row", () => {
+    const one = KANJI.find((k) => k.components.length === 0) as KanjiItem;
+    const d: Dictionary = {
+      parts: new Map(),
+      entries: new Map([[one.char, { meaning: "m" }]]),
+    };
+    const c = card(
+      studyCards(
+        [miss("meaning", one.char)],
+        KANJI,
+        KANA,
+        undefined,
+        [],
+        [],
+        undefined,
+        d,
+      )[0],
+    );
+    expect(c.own).toBe(true);
+    expect(c.parts).toBeUndefined();
+  });
+
+  it("no entry: today's card, or the library's", () => {
+    const empty: Dictionary = { parts: new Map(), entries: new Map() };
+    const today = studyCards([miss("meaning")], KANJI, KANA);
+    expect(
+      studyCards(
+        [miss("meaning")],
+        KANJI,
+        KANA,
+        undefined,
+        [],
+        [],
+        undefined,
+        empty,
+      ),
+    ).toEqual(today);
+    const lib = new Map([["折", { meaning: "wk" }]]);
+    const c = card(
+      studyCards(
+        [miss("meaning")],
+        KANJI,
+        KANA,
+        lib,
+        [],
+        [],
+        undefined,
+        empty,
+      )[0],
+    );
+    expect(c.own).toBeUndefined();
+    expect(c.mnemonics).toEqual({ meaning: "wk" });
+  });
+
+  it("the pause card uses ours too", () => {
+    const rows: GateRow[] = [
+      {
+        type: "reading",
+        prompt: "折",
+        options: ["せつ", "x"],
+        answer: "せつ",
+      } as GateRow,
+    ];
+    const la = lastAnswer(rows, [true], 0, KANJI, KANA, undefined, [], dict);
+    expect(la?.card?.kind === "kanji" && la.card.own).toBe(true);
   });
 });

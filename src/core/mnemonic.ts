@@ -1,6 +1,7 @@
-/** The inline tags WaniKani mnemonics use; every other tag is dropped. */
+/** The inline tags WaniKani mnemonics and our own stories use; every other tag is dropped. */
 const MNEMONIC_TAGS = [
   "radical",
+  "part",
   "kanji",
   "reading",
   "vocabulary",

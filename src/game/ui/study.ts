@@ -41,7 +41,7 @@ const CSS = `
 .kr-study .mn h3 { margin: 0 0 2px; font-size: 12px; font-weight: 600;
   color: #9aa3b5; text-transform: uppercase; letter-spacing: 0.04em; }
 .kr-study .mn p { margin: 0; white-space: pre-line; }
-.kr-study .mn-radical { color: #6cc4ff; font-weight: 600; }
+.kr-study .mn-radical, .kr-study .mn-part { color: #6cc4ff; font-weight: 600; }
 .kr-study .mn-kanji { color: #ff8ad0; font-weight: 600; }
 .kr-study .mn-reading { color: #c4a0ff; font-weight: 600; }
 .kr-study .mn-vocabulary { color: #ffc46b; font-weight: 600; }
@@ -121,7 +121,22 @@ export function cardEl(c: StudyCard): HTMLElement {
     info.append(el("div", "meaning", c.meanings.join(", ")));
     if (c.on) info.append(line("on", c.on));
     if (c.kun) info.append(line("kun", c.kun));
-    if (c.radicals?.length) {
+    if (c.own) {
+      if (c.parts?.length) {
+        const chips = el("div", "radicals");
+        chips.append(
+          ...c.parts.map((p) =>
+            el(
+              "span",
+              "rad",
+              el("span", "glyph", p.char),
+              ...(p.name ? [el("span", "rname", p.name)] : []),
+            ),
+          ),
+        );
+        info.append(el("div", "row", "parts"), chips);
+      }
+    } else if (c.radicals?.length) {
       info.append(el("div", "row", "radicals"), radicalsEl(c.radicals));
     } else if (c.components.length > 0) {
       const parts = el("div", "parts");
@@ -141,10 +156,11 @@ export function cardEl(c: StudyCard): HTMLElement {
       p.append(...body);
       info.append(el("div", "mn", el("h3", "", ...head), p));
     };
+    const noun = c.own ? "story" : "mnemonic";
     if (c.mnemonics?.meaning)
-      block(["Meaning mnemonic"], mnemonicNodes(c.mnemonics.meaning));
+      block([`Meaning ${noun}`], mnemonicNodes(c.mnemonics.meaning));
     for (const r of c.readingStories ?? []) {
-      const head: (Node | string)[] = [`Reading mnemonic: ${r.reading}`];
+      const head: (Node | string)[] = [`Reading ${noun}: ${r.reading}`];
       if ("none" in r) {
         const note = el(
           "p",

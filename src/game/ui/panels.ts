@@ -23,6 +23,7 @@ import { createStoryStore } from "../../wanikani/storystore";
 import { syncPauseCard } from "./pausecard";
 import { openSettings, settingsOpen, syncSettings } from "./settings";
 import { openStudy, studyOpen } from "./study";
+import { dictionary, dictionaryReady, loadDictionary } from "../dictionary";
 import { openTokenForm, tokenFormOpen } from "./wanikani";
 
 export type PanelDeps = {
@@ -75,6 +76,15 @@ export function createPanels(d: PanelDeps): Panels {
       wk.stories(),
       d.session().wk ? wk.mnemonics() : undefined,
     );
+  // our level files for these kanji (by the built-in level, whatever the mode)
+  const levelsOf = (chars: Iterable<string>): number[] => {
+    const out = new Set<number>();
+    for (const c of chars) {
+      const k = KANJI.find((x) => x.char === c);
+      if (k) out.add(k.level);
+    }
+    return [...out];
+  };
   const studyAvailable = (): boolean => {
     const scene = d.scene();
     return (
@@ -100,6 +110,12 @@ export function createPanels(d: PanelDeps): Panels {
     if (scene.kind !== "run" || !scene.paused || d.session().meaning)
       return syncPauseCard(null, "", () => {});
     const { run } = scene;
+    // wait for our stories rather than flash the other card first
+    const levels = levelsOf(run.rows.map((r) => r.prompt));
+    if (!dictionaryReady(levels)) {
+      void loadDictionary(levels);
+      return syncPauseCard(null, "", () => {});
+    }
     const last = lastAnswer(
       run.rows,
       run.results,
@@ -108,6 +124,7 @@ export function createPanels(d: PanelDeps): Panels {
       KANA,
       stories(),
       WORDS,
+      dictionary,
     );
     syncPauseCard(last, `${scene.seed}:${run.results.length}`, () =>
       d.act("pause"),
@@ -148,17 +165,24 @@ export function createPanels(d: PanelDeps): Panels {
         kanjiList(),
         WORDS,
       );
-      const cards = studyCards(
-        missed,
-        kanjiList(),
-        KANA,
-        stories(),
-        runKanji(run.rows, run.results),
-        WORDS,
-        presentedReadings(run.rows, run.results),
-      );
-      // its Play again is the end screen's: a new run straight away
-      openStudy(cards, () => d.act("confirm"));
+      const seen = runKanji(run.rows, run.results);
+      // open once our stories are in (a local chunk, so near-instant): no flash of the other card
+      void loadDictionary(
+        levelsOf([...missed.map((m) => m.prompt), ...seen]),
+      ).then(() => {
+        const cards = studyCards(
+          missed,
+          kanjiList(),
+          KANA,
+          stories(),
+          seen,
+          WORDS,
+          presentedReadings(run.rows, run.results),
+          dictionary,
+        );
+        // its Play again is the end screen's: a new run straight away
+        openStudy(cards, () => d.act("confirm"));
+      });
     },
     studyAvailable,
     sync: () => {

@@ -44,6 +44,20 @@ type StoryVocab = {
   story: string;
 };
 
+type KanjiCard = Extract<StudyCard, { kind: "kanji" }>;
+
+/** Our own story for one kanji (`dictionary/stories/`): meaning, and one per main reading. */
+export type DictEntry = { meaning: string; on?: string; kun?: string };
+
+/** Our own dictionary: part names by component glyph, and story entries by kanji. */
+export type Dictionary = {
+  parts: ReadonlyMap<string, string>;
+  entries: ReadonlyMap<string, DictEntry>;
+};
+
+/** A component of a kanji with our name for it. */
+export type CardPart = { char: string; name: string };
+
 /** The story for one shown reading. */
 type ReadingStory =
   | {
@@ -72,6 +86,10 @@ export type StudyCard =
       readingStories?: ReadingStory[];
       /** WaniKani's radicals in order, when a story lookup has the kanji. */
       radicals?: StoryRadical[];
+      /** Set when the stories are ours (`dictionary/`): headings say "story". */
+      own?: true;
+      /** With `own`: each component and its name (none for a kanji without components). */
+      parts?: CardPart[];
       /** Answered wrongly in the run; false for a kanji only answered right. */
       missed: boolean;
     }
@@ -206,12 +224,62 @@ function readingStories(
     : undefined;
 }
 
+/** The reading blocks from our entry: `on` for the on'yomi label, `kun` for the kun'yomi label, else none. */
+function ownReadingStories(
+  k: KanjiItem,
+  e: DictEntry,
+  presented: readonly string[],
+): ReadingStory[] | undefined {
+  const mains = mainReadings(k).map(showReading);
+  const labels = presented.length > 0 ? presented : mains;
+  if (labels.length === 0) return undefined;
+  return labels.map((label): ReadingStory => {
+    const text =
+      label === mains[0] && k.on
+        ? e.on
+        : label === mains[mains.length - 1] && k.kun
+          ? e.kun
+          : undefined;
+    return text
+      ? { reading: label, source: "kanji", text }
+      : { reading: label, none: true };
+  });
+}
+
+/** The card for a kanji with an entry in our dictionary. */
+function ownCard(
+  k: KanjiItem,
+  missed: boolean,
+  d: Dictionary,
+  e: DictEntry,
+  presented: readonly string[],
+): KanjiCard {
+  const rs = ownReadingStories(k, e, presented);
+  return {
+    ...kanjiCard(k, missed),
+    mnemonics: { meaning: e.meaning },
+    ...(rs ? { readingStories: rs } : {}),
+    own: true,
+    ...(k.components.length > 0
+      ? {
+          parts: k.components.map((char) => ({
+            char,
+            name: d.parts.get(char) ?? "",
+          })),
+        }
+      : {}),
+  };
+}
+
 function kanjiCard(
   k: KanjiItem,
   missed: boolean,
   stories?: ReadonlyMap<string, Story>,
   presented: readonly string[] = [],
-): StudyCard {
+  dict?: Dictionary,
+): KanjiCard {
+  const own = dict?.entries.get(k.char);
+  if (dict && own) return ownCard(k, missed, dict, own, presented);
   const st = stories?.get(k.char);
   const rs = readingStories(k, st, presented);
   return {
@@ -257,7 +325,7 @@ export function presentedReadings(
  * other kanji in `seen` (the run's kanji, in order), marked not missed. An item
  * missed on several gates (e.g. meaning and reading) gets one card. Items not
  * found in the given lists are skipped. `presented` (from `presentedReadings`) picks each kanji's reading blocks. `stories` (mnemonics and radicals, either
- * mode) are attached by character; a kanji missing from it gets today's card.
+ * mode) are attached by character; a kanji missing from it gets today's card. `dict` (our own stories) wins over `stories`.
  */
 export function studyCards(
   missed: readonly Missed[],
@@ -267,6 +335,7 @@ export function studyCards(
   seen: readonly string[] = [],
   words: readonly WordItem[] = [],
   presented: ReadonlyMap<string, readonly string[]> = new Map(),
+  dict?: Dictionary,
 ): StudyCard[] {
   const done = new Set<string>();
   const out: StudyCard[] = [];
@@ -289,7 +358,7 @@ export function studyCards(
       if (w) out.push(wordCard(w, true, kana, kanji));
     } else {
       const k = kanji.find((x) => x.char === m.prompt);
-      if (k) out.push(kanjiCard(k, true, stories, presented.get(k.char)));
+      if (k) out.push(kanjiCard(k, true, stories, presented.get(k.char), dict));
     }
   }
   for (const char of seen) {
@@ -297,7 +366,7 @@ export function studyCards(
     if (done.has(key)) continue;
     done.add(key);
     const k = kanji.find((x) => x.char === char);
-    if (k) out.push(kanjiCard(k, false, stories, presented.get(k.char)));
+    if (k) out.push(kanjiCard(k, false, stories, presented.get(k.char), dict));
   }
   return out;
 }
@@ -369,6 +438,7 @@ export function lastAnswer(
   kana: readonly KanaItem[],
   stories?: ReadonlyMap<string, Story>,
   words: readonly WordItem[] = [],
+  dict?: Dictionary,
 ): LastAnswer | null {
   const i = results.length - 1;
   const row = rows[i];
@@ -396,6 +466,7 @@ export function lastAnswer(
         !correct,
         stories,
         row.type === "reading" ? [row.answer] : [],
+        dict,
       );
   }
   return {
