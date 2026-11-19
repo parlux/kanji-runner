@@ -1,6 +1,6 @@
 # Intent: useful-words order
 
-Status: confirmed by the owner, 2026-11-17, after an interview. Epic: `docs/ideas/useful-japanese.md` (round 2).
+Status: confirmed by the owner, 2026-11-17, after an interview. Epic: `docs/ideas/useful-japanese.md` (round 2). Spec: `docs/specs/done/SPEC-useful-order.md`.
 
 ## Statement of intent
 - **Outcome:** Built-in levels are reordered by usefulness. Each level picks the words that do most for travel and conversation (highest weight), then spoken frequency, then manga and easy stories, for the cost of the new kanji they need. A kanji's building blocks still come before it. Pace stays as today: 30 kanji and about 30 words per level.

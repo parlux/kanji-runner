@@ -27,7 +27,7 @@ From the owner's WaniKani levels 1–7 (approximate counts, scratchpad only, not
    - Gates test the word's own reading, not one pieced together from its kanji: many useful words are irregular (一人 ひとり, 二人 ふたり, 今日 きょう, 大人 おとな).
    - The on'yomi stories round stores only one chosen compound per reading, so this needs its own word list.
    - Kana-only conversation words (すみません, ありがとう) could join the loanword gates.
-2. **Useful-words order.** Choose levels by usefulness for the cost in new kanji:
+2. **Useful-words order.** Done in v1.6.0/1.6.1 (2026-11-20): spec `docs/specs/done/SPEC-useful-order.md`, tasks `tasks/done/todo-useful-order.md`. Travel-text kanji coverage at Kanji 5/10: 52/73% (today's order 40/58, WaniKani 38/60); `npm run data:coverage`. Choose levels by usefulness for the cost in new kanji:
    - **Usefulness:** hand-written travel and conversation themes (highest weight), spoken frequency (subtitle corpus), and manga and easy-story frequency (lower weight).
    - **Cost:** the new kanji a word needs, weighted by how complex they are.
    - **Each level:** pick the most useful words for the cost, within a budget of new kanji. A kanji's building blocks still come before it, so stories keep working.

@@ -1,6 +1,6 @@
 # Tasks: useful-words order (v1.6.0)
 
-Spec: `docs/specs/SPEC-useful-order.md` (2026-11-17). Intent: `docs/intent/useful-words-order.md`. Epic: `docs/ideas/useful-japanese.md` (round 2). Started 2026-11-17.
+Spec: `docs/specs/done/SPEC-useful-order.md` (2026-11-17). Intent: `docs/intent/useful-words-order.md`. Epic: `docs/ideas/useful-japanese.md` (round 2). Started 2026-11-17, closed 2026-11-20 (owner ticked Checkpoint U).
 Review: https://claude.ai/artifact/TZ4TSiMPUqozQZkecva4yF · Checkpoint U: https://claude.ai/artifact/KZDbNTEdhyxEsoGY7k6N2C
 Every task: `npm run check` passes before it is checked off. Never commit `.data-cache`, raw EDRDG, Tatoeba or Aozora downloads, or anything derived from WaniKani.
 
@@ -90,11 +90,13 @@ Every task: `npm run check` passes before it is checked off. Never commit `.data
 **Scope:** S
 
 ### Checkpoint U: v1.6.0 (owner, on the phone)
-- [ ] Open the app: your learned kanji are still there, and the start screen puts you on a sensible level.
-- [ ] Skim Kanji 1–4 (study cards or a few runs): kanji and words look useful for a trip, with no odd characters except building blocks.
-- [ ] Coverage table on the checkpoint page: new order beats today's on menu, signs and phrasebook. If you want the WaniKani column, give a read-only token or kanji list (scratchpad only).
+- [x] Open the app: your learned kanji are still there, and the start screen puts you on a sensible level.
+- [x] Skim Kanji 1–4 (study cards or a few runs): kanji and words look useful for a trip, with no odd characters except building blocks.
+- [x] Coverage table on the checkpoint page: new order beats today's on menu, signs and phrasebook. If you want the WaniKani column, give a read-only token or kanji list (scratchpad only).
 
 ## Numbers
+**Checkpoint U (owner, 2026-11-20):** ticked. Accepted travel +12 at Kanji 5 (target +15). Dropped the single-kanji quota in `byUsefulness` (v1.6.1, 483d815): 38 → 1 single words.
+
 (Logged by each task.)
 
 ### U1 baseline (2026-11-17, today's order = `byGrade`; `new` equals it until U3)
