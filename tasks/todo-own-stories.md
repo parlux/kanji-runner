@@ -79,7 +79,7 @@ Not one implementer subagent: the orchestrator runs the loop per batch (2 levels
 ### Task D6: Deploy (orchestrator)
 **Description:** Deploy and check the live build shows our stories for Kanji 5–6.
 **Acceptance:**
-- [ ] Deploy green; live study card shows our story.
+- [x] Deploy green; live study card shows our story. (81662af: the live bundle loads `kanji-05`, `kanji-06` and `parts` chunks and has the Flag button.)
 
 ### Checkpoint D: owner
 - [ ] Owner runs `supabase/story-flags.sql` once.
