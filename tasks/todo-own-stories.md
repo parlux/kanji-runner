@@ -58,11 +58,13 @@ Not one implementer subagent: the orchestrator runs the loop per batch (2 levels
 ### Task D4: Our stories on the study and pause cards (sonnet)
 **Description:** `src/game/dictionary.ts` lazy loader; `src/core/study.ts` uses our entry first (spec "Card"); `part` tag; parts row with names; "story" headings. Both modes. WaniKani path unchanged for kanji without our entry.
 **Acceptance:**
-- [ ] `studyCards` tests: ours beats the library; parts with names; reading blocks by presented label; non-main reading → none line; no entry → today's card or WaniKani's.
-- [ ] Main chunk grows ≤ 10 KB (`npm run build` sizes before/after logged); level files are separate chunks.
-- [ ] Screenshot at 390×844: Kanji 1 card, meaning mode card, pause card.
-- [ ] `npm run check` passes.
+- [x] `studyCards` tests: ours beats the library; parts with names; reading blocks by presented label; non-main reading → none line; no entry → today's card or WaniKani's.
+- [x] Main chunk grows ≤ 10 KB (`npm run build` sizes before/after logged); level files are separate chunks.
+- [x] Screenshot at 390×844: Kanji 5 card (折, 合), meaning-gate card (both reading blocks), pause card (checked offscreen; owner sees it live at Checkpoint D).
+- [x] `npm run check` passes.
 **Files:** `src/game/dictionary.ts`, `src/core/study.ts`, `src/core/mnemonic.ts`, `src/game/ui/study.ts`, `src/game/ui/panels.ts`, tests
+
+**Log (D4):** main chunk 908.91 kB (238.93 gz) before, 910.84 kB (239.64 gz) after: +1.93 kB. Separate chunks: `parts` 4.80 kB, `kanji-05` 15.35 kB, `kanji-06` 15.21 kB. Loading: study awaits the (local) chunk before opening, the pause card waits to render until it settles, so the WaniKani card never flashes first; a failed load falls back to today's card. Core holds `Dictionary`/`DictEntry` and conversion; `src/game/dictionary.ts` loads and `panels.ts` passes it in. Tests: 5 new `studyCards`/`lastAnswer` cases (42 in file).
 
 ### Task D5: Flag a story (sonnet)
 **Description:** Flag button, inline note, local queue, push to `story_flags`, `supabase/story-flags.sql`, `npm run stories:flags` (spec "Flag").

@@ -56,7 +56,7 @@ export type Dictionary = {
 };
 
 /** A component of a kanji with our name for it. */
-export type CardPart = { char: string; name: string };
+type CardPart = { char: string; name: string };
 
 /** The story for one shown reading. */
 type ReadingStory =
