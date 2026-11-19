@@ -359,6 +359,13 @@ const MIX: Record<Exclude<WordKind, "compound">, number> = {
   okurigana: 0.25,
 };
 
+/**
+ * `byUsefulness`'s mix (owner, 2026-11-20): no single-kanji quota. Singles
+ * compete with compounds for the compound share, so a weak single (行 ぎょう,
+ * 下 もと) no longer fills a slot just because it is a single.
+ */
+const USEFUL_MIX: typeof MIX = { single: 0, okurigana: MIX.okurigana };
+
 /** Most number words (十一, 三十, 十二月) a level teaches. */
 const MAX_NUMBER_WORDS_PER_LEVEL = 3;
 
@@ -377,14 +384,15 @@ function pickPerLevel(
   candidates: Candidate[],
   perLevel: number,
   compare: (a: Candidate, b: Candidate) => number,
+  mix: typeof MIX = MIX,
 ): Candidate[] {
   const levels = [...new Set(candidates.map((c) => c.level))].sort(
     (a, b) => a - b,
   );
   return levels.flatMap((level) => {
     const ranked = candidates.filter((c) => c.level === level).sort(compare);
-    const single = Math.floor(perLevel * MIX.single);
-    const okurigana = Math.floor(perLevel * MIX.okurigana);
+    const single = Math.floor(perLevel * mix.single);
+    const okurigana = Math.floor(perLevel * mix.okurigana);
     const share: Record<WordKind, number> = {
       single,
       okurigana,
@@ -393,7 +401,10 @@ function pickPerLevel(
     let numbers = MAX_NUMBER_WORDS_PER_LEVEL;
     const usable = ranked.filter((c) => !isNumberWord(c.word) || numbers-- > 0);
     const chosen = new Set<Candidate>();
-    for (const c of usable) if (share[c.kind]-- > 0) chosen.add(c);
+    // With no single share, singles count against the compound share.
+    const shareOf = (k: WordKind): WordKind =>
+      k === "single" && mix.single === 0 ? "compound" : k;
+    for (const c of usable) if (share[shareOf(c.kind)]-- > 0) chosen.add(c);
     for (const c of usable) if (chosen.size < perLevel) chosen.add(c);
     return usable.filter((c) => chosen.has(c));
   });
@@ -499,6 +510,7 @@ export const byUsefulness =
       candidates,
       perLevel,
       (a, b) => at(b) - at(a) || tie(a, b),
+      USEFUL_MIX,
     );
   };
 

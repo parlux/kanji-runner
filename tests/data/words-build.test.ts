@@ -662,17 +662,45 @@ describe("byUsefulness", () => {
     ]);
   });
 
-  it("keeps the kind shares and the number cap", () => {
+  it("keeps the number cap; singles compete with compounds, no single quota", () => {
     const cs = [
       ...["十一", "十二", "十三", "十四"].map((w) => cand(w, "compound")),
-      ...Array.from({ length: 4 }, (_, i) => cand(`s${i}`, "single")),
+      ...["c0", "c1", "c2"].map((w) => cand(w, "compound")),
+      cand("s0", "single"),
+      cand("o0", "okurigana"),
+      cand("o1", "okurigana"),
     ];
-    const value = new Map(cs.map((c, i) => [c, 10 - i]));
-    expect(names(byUsefulness(new Map(), value)(cs, 4))).toEqual([
+    const pick = (single: number) =>
+      names(
+        byUsefulness(
+          new Map(),
+          new Map<Candidate, number>(
+            cs.map((c, i) => [c, c.word === "s0" ? single : 20 - i]),
+          ),
+        )(cs, 8),
+      );
+    // 8 per level: okurigana 2, compound 6 (singles count as compounds);
+    // numbers capped at 3. A weak single loses its slot to compounds…
+    expect(pick(1)).toEqual([
       "十一",
       "十二",
       "十三",
+      "c0",
+      "c1",
+      "c2",
+      "o0",
+      "o1",
+    ]);
+    // …and a strong one wins it.
+    expect(pick(30)).toEqual([
       "s0",
+      "十一",
+      "十二",
+      "十三",
+      "c0",
+      "c1",
+      "o0",
+      "o1",
     ]);
   });
 });

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.1 (2026-11-20)
+
+- Word lists no longer reserve a quarter of each level for one-kanji words, which brought in odd readings (行 ぎょう, 下 もと). One-kanji words now compete with compounds on usefulness.
+
 ## 1.6.0 (2026-11-17)
 
 Kanji levels reordered by usefulness for travel.

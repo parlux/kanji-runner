@@ -60,7 +60,7 @@ Built-in kanji levels are ordered by usefulness for a trip to Japan, not by scho
 - Performance: the full data build takes no more than 60 s longer than today.
 
 ### Words per level
-- New `WordPicker` `byUsefulness`, which becomes `WORD_PICKER`. It ranks candidates within a level by `value` (ties by today's `byUsage` comparison). It keeps the 30 per level, the kind mix (about 25/25/50) and the number cap of 3. `byUsage` and `byFrequency` stay.
+- New `WordPicker` `byUsefulness`, which becomes `WORD_PICKER`. It ranks candidates within a level by `value` (ties by today's `byUsage` comparison). It keeps the 30 per level, the okurigana share (about 25%) and the number cap of 3. **No single-kanji quota (owner, 2026-11-20, v1.6.1):** singles compete with compounds for the remaining share by value; 37 of 38 singles drop out (most were odd readings like 行 ぎょう, 下 もと, 古 いにしえ; 何 なに and 話 はなし go too). `byUsage` and `byFrequency` stay.
 - Loanwords (`loanwords.json`, hand-written levels): unchanged.
 
 ### Progress carry-over (`src/storage`)
@@ -97,7 +97,7 @@ README.md                  → Tatoeba and Aozora credits
   - The greedy picks the best value/cost, places building blocks first, drops free words, and is deterministic on ties.
   - The leftover tail follows `byGrade`.
   - Overrides still apply.
-  - `byUsefulness` keeps the mix and the number cap.
+  - `byUsefulness` keeps the okurigana share and the number cap; singles compete with compounds (no single quota).
 - **Coverage (`tests/data/coverage.test.ts`):** kanji coverage and readable lines on tiny fixtures; ruby stripping; WaniKani cumulation by kanji count.
 - **Real data (`tests/data/kanji.test.ts`, `words.test.ts`, updated):**
   - Every kanji's building blocks come before it.
