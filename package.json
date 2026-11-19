@@ -18,7 +18,8 @@
     "knip": "knip",
     "deps": "depcruise src --config .dependency-cruiser.cjs",
     "data:build": "tsx scripts/build-data.ts",
-    "data:coverage": "tsx scripts/coverage.ts"
+    "data:coverage": "tsx scripts/coverage.ts",
+    "stories:check": "tsx scripts/stories/check.ts"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
