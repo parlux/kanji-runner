@@ -15,3 +15,4 @@ Epic: [Useful Japanese, then drop WaniKani](useful-japanese.md). Its rounds come
 7. [Soundtrack](soundtrack.md): game; builds on the sound effects' audio plumbing.
 8. [Enemy packs can't run through crates](packs-blocked-by-crates.md): game; follows straight fire.
 9. [Fold the round skills into one project flow](skill-audit.md): process.
+10. [Remove WaniKani from the game](remove-wanikani.md): epic; after own stories, so the shared game has no WaniKani token, fetch or mode.

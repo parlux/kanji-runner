@@ -34,3 +34,4 @@ One row per owner request, written by the `triage` skill (`.claude/skills/triage
 | 2026-11-20 | Drop the one-kanji word quota (行 ぎょう, 下 もと in Kanji 1) | fix | Owner decided at Checkpoint U; one picker rule | |
 | 2026-11-20 | Start next round: Show overall progress (epic round 3) | sdd | New UI concept, coverage/JLPT yardstick choices; idea needs an interview | |
 | 2026-11-20 | Swap backlog: own stories before overall progress | doc | Stories are the only blocker to dropping WaniKani; backlog order only | |
+| 2026-11-20 | Remove all WaniKani code from the game (separate from own stories) | idea | Owner split it out of the own-stories round | |
