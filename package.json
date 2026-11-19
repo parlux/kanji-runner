@@ -20,7 +20,8 @@
     "data:build": "tsx scripts/build-data.ts",
     "data:coverage": "tsx scripts/coverage.ts",
     "stories:prep": "tsx scripts/stories/prep.ts",
-    "stories:check": "tsx scripts/stories/check.ts"
+    "stories:check": "tsx scripts/stories/check.ts",
+    "stories:wk": "tsx scripts/stories/wk.ts"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
