@@ -83,7 +83,7 @@ Not one implementer subagent: the orchestrator runs the loop per batch (2 levels
 - [x] Deploy green; live study card shows our story. (81662af: the live bundle loads `kanji-05`, `kanji-06` and `parts` chunks and has the Flag button.)
 
 ### Checkpoint D: owner
-- [ ] Owner runs `supabase/story-flags.sql` once.
+- [x] Owner runs `supabase/story-flags.sql` once. (2026-11-20; `stories:flags` reads the table: no flags yet.)
 - [ ] Owner reads a handful of Kanji 5–6 stories on the checkpoint page and plays a few runs on the phone with Study; flags anything weak.
 - [ ] Owner ticks, or sends `STYLE.md` changes before D7 scales up.
 
