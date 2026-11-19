@@ -1,6 +1,6 @@
 # Our own stories, no WaniKani needed
 
-Status: owner idea, 2026-11-17. Needs an interview. Round 3 of the [useful Japanese epic](useful-japanese.md).
+Status: in progress, 2026-11-20. Intent `docs/intent/own-stories.md`, spec `docs/specs/SPEC-own-stories.md`, tasks `tasks/todo-own-stories.md`. Round 3 of the [useful Japanese epic](useful-japanese.md).
 
 ## Idea
 Create our own stories so the game no longer needs WaniKani at all.

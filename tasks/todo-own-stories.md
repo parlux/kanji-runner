@@ -1,0 +1,105 @@
+# Tasks: our own stories (v1.7.0)
+
+Spec: `docs/specs/SPEC-own-stories.md` (2026-11-20). Intent: `docs/intent/own-stories.md`. Epic: `docs/ideas/useful-japanese.md` (round 3). Started 2026-11-20. The owner approved going straight to the first checkpoint (no spec sign-off).
+Every task: `npm run check` passes before it is checked off. Never commit `.data-cache` or anything from WaniKani (text, names, overlap reports, judge files).
+
+## Plan
+- **Pipeline first.** D1 builds the format, validator, prep, WaniKani fetch and overlap check, so every story after it is checked the same way.
+- **Shared vocabulary next.** D2 names the parts and the on'yomi sound keywords once, so every story uses the same names and images.
+- **Pilot, then the card.** D3 writes Kanji 1–2 through the full writer/judge loop and tunes `STYLE.md` on what fails; D4 shows them on the card; D5 adds the flag.
+- **Then scale.** D6 writes Kanji 3–10 and deploys: Checkpoint D. After it, D7 writes the rest and D8 ships 1.7.0.
+
+### Content tasks (D2, D3, D6, D7): run by the orchestrator
+Not one implementer subagent: the orchestrator runs the loop per batch (2 levels):
+1. `npm run stories:prep -- <levels>`.
+2. Writer subagent, **opus**: reads `dictionary/STYLE.md`, `parts.json`, `sounds.json`, the prep files; writes the level files. Told it must not read `.data-cache/stories/wk-library.json`, `overlap-*` or `judge-*`.
+3. `npm run stories:check -- <levels>` until clean; `npm run stories:overlap -- <levels>`.
+4. Judge subagent, **sonnet**: reads `STYLE.md`, prep files, our entries, the overlap report and `wk-library.json`; writes `judge-NN.json`.
+5. Fails go back to a writer with the judge's reasons only (no WaniKani text); re-judge; max 3 rounds, then fix by hand.
+6. Commit the level files, log counts below, push. Independent batches may run in parallel; commits stay serial.
+
+### Risks
+| Risk | Impact | Mitigation |
+|---|---|---|
+| Stories too close to WaniKani (the writer model has read WaniKani) | High | Side-by-side judge on another model, similarity pre-pass, writer never sees WaniKani text; `close` fails rewritten from the reason only. |
+| Stories wrong (part not in the kanji, wrong reading) | High | Validator checks readings and part names mechanically; judge checks sense; owner review and flags. |
+| Weak, samey stories across 2,100 kanji | Med | Pilot (D3) tunes `STYLE.md` before scaling; sound keywords and part names give consistent building blocks. |
+| Bundle bloat (2,100 × ~800 chars) | Med | Lazy chunk per level; main chunk cap +10 KB. |
+| KRADFILE parts that aren't visible in the glyph | Med | Missing-part is a warning, listed; writer may skip an invisible part; judge checks. |
+| Subagent cost and time for 70 levels | Med | 2 levels per batch, parallel batches after the pilot. |
+
+### Task D1: Dictionary format, validator and WaniKani comparison tools (opus)
+**Description:** Create `dictionary/` (`README.md`, `STYLE.md` per the spec's style guide, empty `parts.json`/`sounds.json`, `stories/`), and `scripts/stories/`: `prep.ts`, `check.ts`, `wk.ts`, `overlap.ts`, with `npm run stories:*` scripts. `check` runs over committed files inside `npm test` (empty dictionary passes; parts coverage is checked only once `parts.json` is non-empty).
+**Acceptance:**
+- [ ] `stories:prep -- 2-3` writes input files with every field the spec lists.
+- [ ] Validator tests: each rule fails on a broken fixture and passes a good one.
+- [ ] `stories:wk` writes `.data-cache/stories/wk-library.json` (owner's token from `.env.local`); nothing under `dictionary/` or `src/` reads it.
+- [ ] Overlap tests: copied text scores high, unrelated low, shared glosses/readings/part names ignored.
+- [ ] `npm run check` passes (knip and deps included).
+**Verification:** `npm test -- stories`; `npm run stories:prep -- 2-3`; `npm run stories:wk && ls .data-cache/stories`
+**Files:** `dictionary/*`, `scripts/stories/*.ts`, `package.json`, `tests/data/stories.test.ts`, this file
+
+### Task D2: Part names and sound keywords (content, orchestrator)
+**Description:** Writer names every component in `src/data/kanji.json` (from KANJIDIC2/Kangxi meanings or our own choice) and writes `sounds.json` for every main on'yomi in our levels that occurs on 3+ kanji. Judge checks: fits the shape, unique, short, not a WaniKani invented name or recurring reading character. Overlap with plain WaniKani names is listed, not failed.
+**Acceptance:**
+- [ ] `parts.json` covers every component; names unique; `stories:check` passes.
+- [ ] `sounds.json` covers every on'yomi on 3+ kanji; judge pass on all.
+- [ ] Counts logged below.
+**Files:** `dictionary/parts.json`, `dictionary/sounds.json`, this file
+
+### Task D3: Pilot, Kanji 1–2 (content, orchestrator)
+**Description:** Run the loop on game levels 2–3. Read every entry and the judge's fails; tighten `STYLE.md` where fails cluster (re-run the pilot if the guide changed much). Log counts.
+**Acceptance:**
+- [ ] `dictionary/stories/kanji-01.json`, `kanji-02.json` committed; all pass check and judge.
+- [ ] `STYLE.md` updated from the pilot; changes listed below.
+- [ ] Counts logged below.
+**Files:** `dictionary/stories/*`, `dictionary/STYLE.md`, this file
+
+### Task D4: Our stories on the study and pause cards (sonnet)
+**Description:** `src/game/dictionary.ts` lazy loader; `src/core/study.ts` uses our entry first (spec "Card"); `part` tag; parts row with names; "story" headings. Both modes. WaniKani path unchanged for kanji without our entry.
+**Acceptance:**
+- [ ] `studyCards` tests: ours beats the library; parts with names; reading blocks by presented label; non-main reading → none line; no entry → today's card or WaniKani's.
+- [ ] Main chunk grows ≤ 10 KB (`npm run build` sizes before/after logged); level files are separate chunks.
+- [ ] Screenshot at 390×844: Kanji 1 card, meaning mode card, pause card.
+- [ ] `npm run check` passes.
+**Files:** `src/game/dictionary.ts`, `src/core/study.ts`, `src/core/mnemonic.ts`, `src/game/ui/study.ts`, `src/game/ui/panels.ts`, tests
+
+### Task D5: Flag a story (sonnet)
+**Description:** Flag button, inline note, local queue, push to `story_flags`, `supabase/story-flags.sql`, `npm run stories:flags` (spec "Flag").
+**Acceptance:**
+- [ ] Queue tests: save/load, bad JSON ignored, push removes sent, failure keeps; never throws.
+- [ ] Signed out: Flag → Flagged, queued; nothing thrown.
+- [ ] `stories:flags` prints an empty list (or a "table missing, run supabase/story-flags.sql" hint) without crashing.
+- [ ] Screenshot of the flag form at 390×844.
+- [ ] `npm run check` passes.
+**Files:** `src/storage/flags.ts`, `src/sync/flags.ts`, `src/game/ui/study.ts`, `supabase/story-flags.sql`, `scripts/stories/flags.ts`, `package.json`, tests
+
+### Task D6: Kanji 3–10, deploy (content, orchestrator)
+**Description:** Run the loop on game levels 4–11 (4 batches). Deploy and check the live build shows our stories.
+**Acceptance:**
+- [ ] `kanji-03.json` … `kanji-10.json` committed, all pass check and judge.
+- [ ] Counts logged below.
+- [ ] Deploy green; live study card shows our story.
+
+### Checkpoint D: owner
+- [ ] Owner runs `supabase/story-flags.sql` once.
+- [ ] Owner reads a handful of Kanji 1–3 stories on the checkpoint page and plays a few runs on the phone with Study; flags anything weak.
+- [ ] Owner ticks, or sends `STYLE.md` changes before D7 scales up.
+
+### Task D7: Kanji 11–72 (content, orchestrator)
+**Description:** Owner's flags first (rewrite, resolve), then the loop on game levels 12–73 in parallel batches.
+**Acceptance:**
+- [ ] Every kanji level has a file; all pass check and judge; no unresolved suspect.
+- [ ] Flags from Checkpoint D resolved.
+- [ ] Counts logged below.
+
+### Task D8: Ship 1.7.0
+**Description:** Credits/README note on the dictionary, `package.json` 1.7.0, `## 1.7.0 (<date>)` in `CHANGELOG.md`, deploy.
+**Acceptance:**
+- [ ] Version and changelog; deploy green.
+
+### Checkpoint D2: owner
+- [ ] Owner plays on with our stories only; ticks to close the round.
+
+## Numbers
+(batch counts: entries, first-pass fails by reason, suspects, rounds, final pass)
