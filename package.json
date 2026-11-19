@@ -19,6 +19,7 @@
     "deps": "depcruise src --config .dependency-cruiser.cjs",
     "data:build": "tsx scripts/build-data.ts",
     "data:coverage": "tsx scripts/coverage.ts",
+    "stories:prep": "tsx scripts/stories/prep.ts",
     "stories:check": "tsx scripts/stories/check.ts"
   },
   "devDependencies": {

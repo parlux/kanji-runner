@@ -11,6 +11,11 @@ import {
   parseLevels,
   storyFile,
 } from "../../scripts/stories/levels";
+import {
+  levelInput,
+  partsInput,
+  soundsInput,
+} from "../../scripts/stories/prep";
 
 describe("committed dictionary (SPEC-own-stories)", () => {
   it("passes the validator", () => {
@@ -244,5 +249,55 @@ describe("validator rules", () => {
     const e = errorsOf(d).join("\n");
     expect(e).toMatch(/"キュウ": key must be hiragana/);
     expect(e).toMatch(/もく: needs a "keyword"/);
+  });
+});
+
+describe("prep inputs", () => {
+  const words = [
+    { word: "円", reading: "えん", glosses: ["yen"], level: 3 },
+    { word: "休む", reading: "やすむ", glosses: ["to rest"], level: 2 },
+  ];
+  const parts = { 木: { name: "tree" } };
+  const sounds = { きゅう: { keyword: "cue" } };
+
+  it("gives the writer every field per kanji", () => {
+    const input = levelInput(2, FIX, words, parts, sounds);
+    expect(input).toMatchObject({
+      level: "Kanji 1",
+      gameLevel: 2,
+      output: "dictionary/stories/kanji-01.json",
+    });
+    expect(input.kanji[1]).toEqual({
+      char: "休",
+      glosses: ["rest"],
+      on: "きゅう",
+      kun: "やす(む)",
+      readings: [],
+      components: [
+        { part: "亻", name: null },
+        { part: "木", name: "tree" },
+      ],
+      onSound: "cue",
+      words: [{ word: "休む", reading: "やすむ", gloss: "to rest" }],
+      earlier: [{ char: "木", gloss: "tree", level: "Kanji 1" }],
+    });
+  });
+
+  it("lists parts and sounds with their users", () => {
+    const p = partsInput(FIX, parts, new Map([["木", "tree"]]));
+    expect(p[1]).toEqual({
+      part: "木",
+      name: "tree",
+      uses: 1,
+      examples: [{ char: "休", gloss: "rest" }],
+      kanji: { gloss: "tree", level: "Kanji 1" },
+      kanjidic: "tree",
+    });
+    expect(soundsInput(FIX, sounds)[1]).toEqual({
+      sound: "きゅう",
+      keyword: "cue",
+      count: 1,
+      examples: [{ char: "休", gloss: "rest" }],
+    });
   });
 });
