@@ -90,11 +90,11 @@ tests/data/stories.test.ts   → validator over committed dictionary + fixtures
 
 ## Boundaries
 - Always: `npm run check` before commit; push after each slice; the writer works only from `STYLE.md`, `parts.json`, `sounds.json` and the prep input; every committed entry has a judge pass; log batch counts in the task list.
-- Ask first: changing the dictionary file format after Kanji 1–10 are written.
+- Ask first: changing the dictionary file format after the first checkpoint.
 - Never: commit or bundle anything from WaniKani (text, names list, similarity reports, judge files); let the writer read `.data-cache/stories/wk-library.json`, `overlap-*` or the judge's WaniKani excerpts; change gates, levels, the save format or the WaniKani path's behaviour for kanji without our story.
 
 ## Success criteria
-- **Early levels only** (owner, 2026-11-20): Kanji 1–10 first, then up to 3 levels past the owner's level; later levels are written as the owner nears them, so a renamed part or keyword ripples into few stories. Every committed entry passes `stories:check` and has a judge `pass`; every part has a name; no unresolved overlap suspect.
-- First checkpoint: Kanji 1–10 done, deployed; the owner reviews a handful and plays with our stories on the phone.
+- **Early levels only** (owner, 2026-11-20): the owner's current levels first (Kanji 5–6), then pairs of levels about one ahead of the owner; Kanji 1–4 later; later levels are written as the owner nears them, so a renamed part or keyword ripples into few stories. Every committed entry passes `stories:check` and has a judge `pass`; every part has a name; no unresolved overlap suspect.
+- First checkpoint: Kanji 5–6 done, deployed; the owner reviews a handful and plays with our stories on the phone.
 - Main chunk grows ≤ 10 KB; a level's stories load in under 300 ms on the phone after the first study open.
 - The flag round trip works: flag on the phone → `npm run stories:flags` lists it.

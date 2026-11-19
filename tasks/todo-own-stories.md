@@ -6,10 +6,10 @@ Every task: `npm run check` passes before it is checked off. Never commit `.data
 ## Plan
 - **Pipeline first.** D1 builds the format, validator, prep, WaniKani fetch and overlap check, so every story after it is checked the same way.
 - **Shared vocabulary next.** D2 names the parts and the on'yomi sound keywords once, so every story uses the same names and images.
-- **Pilot, then the card.** D3 writes Kanji 1–2 through the full writer/judge loop and tunes `STYLE.md` on what fails; D4 shows them on the card; D5 adds the flag.
-- **Then early levels only.** D6 writes Kanji 3–10 and deploys: Checkpoint D. After it, D7 fixes flags and writes a few levels past the owner's; D8 ships 1.7.0. Later levels are written as the owner nears them (owner, 2026-11-20: a renamed part or keyword ripples into every story that uses it, so keep few stories ahead until the names have settled).
+- **Pilot, then the card.** D3 writes Kanji 5–6 (the owner is on Kanji 5 and doesn't need Kanji 1–4) through the full writer/judge loop and tunes `STYLE.md` on what fails; D4 shows them on the card; D5 adds the flag.
+- **Then the owner's levels only.** D6 deploys: Checkpoint D, on Kanji 5–6. After it, D7 fixes flags and writes the next levels in pairs, about one level ahead of the owner; D8 ships 1.7.0. Kanji 1–4 are left for later (owner, 2026-11-20). Later levels are written as the owner nears them (owner, 2026-11-20: a renamed part or keyword ripples into every story that uses it, so keep few stories ahead until the names have settled).
 
-### Content tasks (D2, D3, D6, D7): run by the orchestrator
+### Content tasks (D2, D3, D7): run by the orchestrator
 Not one implementer subagent: the orchestrator runs the loop per batch (2 levels):
 1. `npm run stories:prep -- <levels>`.
 2. Writer subagent, **opus**: reads `dictionary/STYLE.md`, `parts.json`, `sounds.json`, the prep files; writes the level files. Told it must not read `.data-cache/stories/wk-library.json`, `overlap-*` or `judge-*`.
@@ -47,10 +47,10 @@ Not one implementer subagent: the orchestrator runs the loop per batch (2 levels
 - [x] Counts logged below.
 **Files:** `dictionary/parts.json`, `dictionary/sounds.json`, this file
 
-### Task D3: Pilot, Kanji 1–2 (content, orchestrator)
-**Description:** Run the loop on game levels 2–3. Read every entry and the judge's fails; tighten `STYLE.md` where fails cluster (re-run the pilot if the guide changed much). Log counts.
+### Task D3: Pilot, Kanji 5–6 (content, orchestrator)
+**Description:** Run the loop on game levels 6–7. Read every entry and the judge's fails; tighten `STYLE.md` where fails cluster (re-run the pilot if the guide changed much). Log counts.
 **Acceptance:**
-- [ ] `dictionary/stories/kanji-01.json`, `kanji-02.json` committed; all pass check and judge.
+- [ ] `dictionary/stories/kanji-05.json`, `kanji-06.json` committed; all pass check and judge.
 - [ ] `STYLE.md` updated from the pilot; changes listed below.
 - [ ] Counts logged below.
 **Files:** `dictionary/stories/*`, `dictionary/STYLE.md`, this file
@@ -74,22 +74,20 @@ Not one implementer subagent: the orchestrator runs the loop per batch (2 levels
 - [ ] `npm run check` passes.
 **Files:** `src/storage/flags.ts`, `src/sync/flags.ts`, `src/game/ui/study.ts`, `supabase/story-flags.sql`, `scripts/stories/flags.ts`, `package.json`, tests
 
-### Task D6: Kanji 3–10, deploy (content, orchestrator)
-**Description:** Run the loop on game levels 4–11 (4 batches). Deploy and check the live build shows our stories.
+### Task D6: Deploy (orchestrator)
+**Description:** Deploy and check the live build shows our stories for Kanji 5–6.
 **Acceptance:**
-- [ ] `kanji-03.json` … `kanji-10.json` committed, all pass check and judge.
-- [ ] Counts logged below.
 - [ ] Deploy green; live study card shows our story.
 
 ### Checkpoint D: owner
 - [ ] Owner runs `supabase/story-flags.sql` once.
-- [ ] Owner reads a handful of Kanji 1–3 stories on the checkpoint page and plays a few runs on the phone with Study; flags anything weak.
+- [ ] Owner reads a handful of Kanji 5–6 stories on the checkpoint page and plays a few runs on the phone with Study; flags anything weak.
 - [ ] Owner ticks, or sends `STYLE.md` changes before D7 scales up.
 
 ### Task D7: Flags, and a few levels ahead (content, orchestrator)
-**Description:** Owner's flags first (rewrite, resolve; a renamed part or keyword means rewriting every story using it), then the loop on the next levels up to 3 past the owner's level.
+**Description:** Owner's flags first (rewrite, resolve; a renamed part or keyword means rewriting every story using it), then the loop on the next levels in pairs, about one level ahead of the owner.
 **Acceptance:**
-- [ ] Levels through the owner's level + 3 have files; all pass check and judge; no unresolved suspect.
+- [ ] Levels through the owner's level + 1 have files; all pass check and judge; no unresolved suspect.
 - [ ] Flags from Checkpoint D resolved.
 - [ ] Counts logged below.
 
