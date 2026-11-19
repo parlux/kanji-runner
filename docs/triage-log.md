@@ -32,3 +32,4 @@ One row per owner request, written by the `triage` skill (`.claude/skills/triage
 | 2026-11-17 | Start next round: Word gates (epic round 1) | sdd | New data source (JMdict), save/unlock logic, many items; epic says each round needs an interview | |
 | 2026-11-17 | Start next round: Useful-words order (epic round 2) | sdd | Reorders all kanji levels; new data sources, weighting judgment, save/progress impact | |
 | 2026-11-20 | Drop the one-kanji word quota (行 ぎょう, 下 もと in Kanji 1) | fix | Owner decided at Checkpoint U; one picker rule | |
+| 2026-11-20 | Start next round: Show overall progress (epic round 3) | sdd | New UI concept, coverage/JLPT yardstick choices; idea needs an interview | |
