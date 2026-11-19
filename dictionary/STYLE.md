@@ -34,7 +34,8 @@ Plus `parts.json` (part names) and `sounds.json` (sound keywords). Work from the
 ## Meaning story
 
 - 1–4 sentences, 120–600 characters of plain text (tags don't count).
-- Names every part, using its `parts.json` name exactly (case aside), each wrapped in `<part>`: `<part>tree</part>`. Don't pluralise or reword inside the tag ("two `<part>tree</part>` trunks", not `<part>trees</part>`). If a part really can't be seen in the glyph, leave it out; the checker lists it as a warning for the judge.
+- Names every part, using its `parts.json` name exactly (case aside), each wrapped in `<part>`: `<part>tree</part>`. Don't pluralise or reword inside the tag ("two `<part>tree</part>` trunks", not `<part>trees</part>`). If a part really can't be seen in the glyph, leave it out; the checker lists it as a warning for the judge. Never rationalise an invisible part into the scene (no "lid" in 円 or 味).
+- The input's components come from a flat decomposition, so a list can hold a part and its own sub-parts (味: mouth, tree, pole, eight, two). Name either the whole or the pieces, never both: one tree, not tree + pole + eight.
 - Lands on the meaning: the first gloss, in `<kanji>`, ideally near the end. Other glosses may appear as plain text.
 - Concrete, visual, a little absurd. One scene the reader can picture, with the parts doing something. Prefer action and a twist over a description.
 - No puns that need the reader to know WaniKani or any other course.
@@ -45,6 +46,9 @@ Plus `parts.json` (part names) and `sounds.json` (sound keywords). Work from the
 - Ties the meaning (or the meaning story's scene) to the reading's sound.
 - When `onSound` has a keyword, use it: the same sound always calls up the same image across all kanji. Only the keyword's matching syllable is the sound (the `sounds.json` note says how much counts); make that clear, don't make the reader say the whole word. Without a keyword, pick an English sound-alike and say how it sounds.
 - Sounds that come in sets (しょう / しょ / しょく, よう / よ / よく): make the length or final consonant obvious in the scene, so the reader can't mix up the set.
+- Never borrow a long-vowel keyword for a short sound, in `on` or `kun` stories: "toe" is とう, so it can't stand for short と (おっと, おとこ); "dough" is どう, not ど. Find a sound-alike with the short vowel.
+- The story must produce every syllable of the reading, and a sound-alike keeps its real ending ("oats" gives おつ only if the s stays as つ; don't drop letters that are part of the reading).
+- A picture, not a caption: "it sounds like the English word X" with no scene, or a hook that only restates the meaning, is weak.
 - Spell the reading in `<reading>` kana, exactly the hiragana from the input: `<reading>きゅう</reading>`. For `kun`, the base (`<reading>やす</reading>`) or base plus okurigana (`<reading>やすむ</reading>`); the story may use the okurigana word (`<ja>休む</ja>`). Every `<reading>` tag must hold that story's reading, nothing else.
 
 ## Building on earlier levels
@@ -74,4 +78,5 @@ Pass, or fail with one reason:
 
 - `wrong`: a part that isn't in the kanji, a wrong meaning, a reading story that doesn't make the sound.
 - `weak`: no picture, confusing, too long to remember, a sound-alike that doesn't sound alike, breaks a rule above.
+- Parts: every named part is visible in the glyph; no part named together with its own sub-parts.
 - `close`: too near WaniKani's story for this kanji (same scene, same twist or same phrasing), or uses one of WaniKani's invented radical names or recurring reading characters.
