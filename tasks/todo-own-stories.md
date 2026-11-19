@@ -50,9 +50,9 @@ Not one implementer subagent: the orchestrator runs the loop per batch (2 levels
 ### Task D3: Pilot, Kanji 5–6 (content, orchestrator)
 **Description:** Run the loop on game levels 6–7. Read every entry and the judge's fails; tighten `STYLE.md` where fails cluster (re-run the pilot if the guide changed much). Log counts.
 **Acceptance:**
-- [ ] `dictionary/stories/kanji-05.json`, `kanji-06.json` committed; all pass check and judge.
-- [ ] `STYLE.md` updated from the pilot; changes listed below.
-- [ ] Counts logged below.
+- [x] `dictionary/stories/kanji-05.json`, `kanji-06.json` committed; all pass check and judge.
+- [x] `STYLE.md` updated from the pilot; changes listed below.
+- [x] Counts logged below.
 **Files:** `dictionary/stories/*`, `dictionary/STYLE.md`, this file
 
 ### Task D4: Our stories on the study and pause cards (sonnet)
@@ -109,3 +109,12 @@ Not one implementer subagent: the orchestrator runs the loop per batch (2 levels
 | Sounds | 186 → 179 | 3 / 12 / 2 | 3 weak (2 fixed by hand, きょう dropped) | 179 pass, 7 dropped |
 - 123 part names equal a WaniKani radical name: plain shape meanings (mouth, tree, sun), judged fine; 3 distinctive matches renamed.
 - STYLE.md: part names vs kanji glosses (日 part "sun", kanji "day"); only the keyword's matching syllable counts; sound sets (しょう/しょ/しょく) make length or final consonant obvious; example uses ⺅ "leaning person".
+
+### D3: pilot, Kanji 5–6 (2026-11-20)
+| Level | Fields | Overlap suspects (≥ 0.2) | 1st pass fails (wrong / weak / close) | Rounds | Final |
+|---|---|---|---|---|---|
+| Kanji 5 | 89 | 0 | 3 / 8 / 1 | 1 | 89 pass |
+| Kanji 6 | 90 | 0 | 1 / 5 / 3 | 1 | 90 pass |
+- The 4 `close` fails scored 0.08–0.14 on overlap: the score is a hint; the side-by-side judge is the gate.
+- STYLE.md: reading minimum 80 → 60 (owner); no invisible parts; never a part plus its own sub-parts (flat KRADFILE lists); no long-vowel keyword for a short sound; every syllable produced; picture, not caption.
+- Rough edge: component lists are flat (味 lists mouth, tree, pole, eight, two), so the checker warns where the writer names only visible parts (着, 円, 味, 薬). A real fix is part data with structure: its own job.
