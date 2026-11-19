@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { mergeProgress } from "../core/merge";
 import type { Progress } from "../core/types";
+import { pushFlags } from "./flags";
 import {
   loadProgress,
   migrate,
@@ -28,6 +29,8 @@ export type Sync = {
   pull(): Promise<Progress>;
   /** Fetch remote, merge with local, save locally and upsert. Resolves to local progress. */
   push(): Promise<Progress>;
+  /** Sends queued story flags when signed in; they wait otherwise. Never throws. */
+  pushFlags(): Promise<void>;
   /** Email/password sign-in; on success pulls straight away. */
   signIn(email: string, password: string): Promise<SignInResult>;
   /** Drops the session on this device. Local progress is kept. */
@@ -145,12 +148,26 @@ export function createSync(options: SyncOptions): Sync {
             updated_at: new Date().toISOString(),
           });
           if (error) throw new SyncFailure(classify(error, status));
+          await pushFlags(client, store);
         }
         setStatus("synced");
         return merged;
       } catch (e) {
         setStatus(e instanceof SyncFailure ? e.status : "offline");
         return loadProgress(store);
+      }
+    });
+
+  /** Flags go out only with a session; no status change, no throw. */
+  const flushFlags = () =>
+    serial(async (): Promise<void> => {
+      if (!factory || !isOnline()) return;
+      try {
+        const client = await getClient();
+        await userId(client);
+        await pushFlags(client, store);
+      } catch {
+        // signed out or offline: the flags wait in the queue
       }
     });
 
@@ -198,6 +215,7 @@ export function createSync(options: SyncOptions): Sync {
     },
     pull: () => sync(false),
     push: () => sync(true),
+    pushFlags: flushFlags,
     signIn,
     signOut,
   };
