@@ -69,11 +69,11 @@ Not one implementer subagent: the orchestrator runs the loop per batch (2 levels
 ### Task D5: Flag a story (sonnet)
 **Description:** Flag button, inline note, local queue, push to `story_flags`, `supabase/story-flags.sql`, `npm run stories:flags` (spec "Flag").
 **Acceptance:**
-- [ ] Queue tests: save/load, bad JSON ignored, push removes sent, failure keeps; never throws.
-- [ ] Signed out: Flag → Flagged, queued; nothing thrown.
-- [ ] `stories:flags` prints an empty list (or a "table missing, run supabase/story-flags.sql" hint) without crashing.
-- [ ] Screenshot of the flag form at 390×844.
-- [ ] `npm run check` passes.
+- [x] Queue tests: save/load, bad JSON ignored, push removes sent, failure keeps; never throws.
+- [x] Signed out: Flag → Flagged, queued; nothing thrown.
+- [x] `stories:flags` prints an empty list (or a "table missing, run supabase/story-flags.sql" hint) without crashing.
+- [x] Screenshot of the flag form at 390×844.
+- [x] `npm run check` passes.
 **Files:** `src/storage/flags.ts`, `src/sync/flags.ts`, `src/game/ui/study.ts`, `supabase/story-flags.sql`, `scripts/stories/flags.ts`, `package.json`, tests
 
 ### Task D6: Deploy (orchestrator)
