@@ -12,6 +12,8 @@ import {
   storiesWithFallback,
   studyCards,
 } from "../../core/study";
+import { addFlag } from "../../storage/flags";
+import { levelName } from "../../core/progression";
 import { loadSpeed, saveSpeed } from "../../storage/speed";
 import { loginOpen, openLogin } from "../../sync/login";
 import type { Sync } from "../../sync/sync";
@@ -85,6 +87,18 @@ export function createPanels(d: PanelDeps): Panels {
     }
     return [...out];
   };
+  // a flag waits in the local queue, then goes to Supabase when signed in
+  const onFlag = (kanji: string, note: string): void => {
+    const k = KANJI.find((x) => x.char === kanji);
+    addFlag(store, {
+      kanji,
+      level: k ? levelName(k.level) : "",
+      note,
+      at: Date.now(),
+      build: __BUILD__,
+    });
+    void d.sync.pushFlags();
+  };
   const studyAvailable = (): boolean => {
     const scene = d.scene();
     return (
@@ -126,8 +140,11 @@ export function createPanels(d: PanelDeps): Panels {
       WORDS,
       dictionary,
     );
-    syncPauseCard(last, `${scene.seed}:${run.results.length}`, () =>
-      d.act("pause"),
+    syncPauseCard(
+      last,
+      `${scene.seed}:${run.results.length}`,
+      () => d.act("pause"),
+      onFlag,
     );
   };
 
@@ -181,7 +198,7 @@ export function createPanels(d: PanelDeps): Panels {
           dictionary,
         );
         // its Play again is the end screen's: a new run straight away
-        openStudy(cards, () => d.act("confirm"));
+        openStudy(cards, () => d.act("confirm"), onFlag);
       });
     },
     studyAvailable,

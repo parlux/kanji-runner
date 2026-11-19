@@ -1,5 +1,9 @@
 import { mnemonicNodes } from "../../core/mnemonic";
 import type { StoryRadical, StudyCard } from "../../core/study";
+import { NOTE_MAX } from "../../storage/flags";
+
+/** Called when the player sends a flag for a kanji's story (with the optional note). */
+export type FlagFn = (kanji: string, note: string) => void;
 
 const CSS = `
 .kr-study { position: fixed; inset: 0; display: flex; flex-direction: column;
@@ -53,6 +57,13 @@ const CSS = `
 .kr-study button { flex: 1; font: inherit; padding: 12px; color: #f2f2f2;
   background: #111; border: 1px solid #8892a8; cursor: pointer; }
 .kr-study button.primary { background: #2f6b48; }
+.kr-study .flag { align-self: flex-start; display: flex; flex-direction: column; gap: 6px;
+  width: 100%; margin-top: 4px; }
+.kr-study .flag button { flex: none; padding: 6px 12px; font-size: 14px; }
+.kr-study .flag button:disabled { color: #9aa3b5; cursor: default; }
+.kr-study .flag input { box-sizing: border-box; width: 100%; padding: 8px; font: inherit;
+  font-size: 16px; color: #f2f2f2; background: #111; border: 1px solid #8892a8; }
+.kr-study .flag .acts { display: flex; gap: 8px; }
 `;
 
 let open: HTMLElement | null = null;
@@ -101,8 +112,50 @@ function radicalsEl(rs: readonly StoryRadical[]): HTMLElement {
   return el("div", "radicals", ...rs.map(radicalChip));
 }
 
-/** One study card; shared with the pause screen. */
-export function cardEl(c: StudyCard): HTMLElement {
+/** The Flag button: a tap opens a note field with Send and Cancel; Send reads "Flagged". */
+function flagEl(kanji: string, onFlag: FlagFn): HTMLElement {
+  const box = el("div", "flag");
+  // typing and taps here must not reach the game or resume the pause card
+  for (const type of ["keydown", "keyup", "click"])
+    box.addEventListener(type, (e) => e.stopPropagation());
+  const button = (label: string, onclick: () => void) => {
+    const b = el("button", "", label);
+    b.type = "button";
+    b.onclick = onclick;
+    return b;
+  };
+  const flagged = () => {
+    const b = button("Flagged", () => {});
+    b.disabled = true;
+    box.replaceChildren(b);
+  };
+  const idle = () => box.replaceChildren(button("Flag", form));
+  const form = () => {
+    const note = el("input");
+    note.type = "text";
+    note.maxLength = NOTE_MAX;
+    note.placeholder = "What's wrong? (optional)";
+    note.setAttribute("aria-label", "Note about this story");
+    const send = () => {
+      onFlag(kanji, note.value);
+      flagged();
+    };
+    note.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") send();
+      else if (e.key === "Escape") idle();
+    });
+    box.replaceChildren(
+      note,
+      el("div", "acts", button("Send", send), button("Cancel", idle)),
+    );
+    note.focus();
+  };
+  idle();
+  return box;
+}
+
+/** One study card; shared with the pause screen. Our stories get a Flag button when `onFlag` is given. */
+export function cardEl(c: StudyCard, onFlag?: FlagFn): HTMLElement {
   const info = el("div", "info");
   if (c.missed) info.append(el("span", "tag", "missed"));
   if (c.kind === "kana") {
@@ -177,6 +230,7 @@ export function cardEl(c: StudyCard): HTMLElement {
       }
       block(head, mnemonicNodes(r.text));
     }
+    if (c.own && onFlag) info.append(flagEl(c.char, onFlag));
   }
   return card;
 }
@@ -187,7 +241,11 @@ export function cardEl(c: StudyCard): HTMLElement {
  * "Play again" closes it and calls `onPlay`; Escape or "Back" just closes it.
  * Does nothing if already open.
  */
-export function openStudy(cards: readonly StudyCard[], onPlay: () => void) {
+export function openStudy(
+  cards: readonly StudyCard[],
+  onPlay: () => void,
+  onFlag?: FlagFn,
+) {
   if (open) return;
   installStudyCss();
   const overlay = el("div", "kr-study");
@@ -208,7 +266,7 @@ export function openStudy(cards: readonly StudyCard[], onPlay: () => void) {
 
   const list = el("div", "cards");
   if (cards.length === 0) list.append(el("div", "empty", "Nothing to study."));
-  else list.append(...cards.map(cardEl));
+  else list.append(...cards.map((c) => cardEl(c, onFlag)));
   const back = el("button", "", "Back");
   back.type = "button";
   back.onclick = close;

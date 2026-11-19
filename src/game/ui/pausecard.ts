@@ -1,5 +1,5 @@
 import type { LastAnswer } from "../../core/study";
-import { cardEl, installStudyCss } from "./study";
+import { cardEl, installStudyCss, type FlagFn } from "./study";
 
 const CSS = `
 .kr-pause { position: fixed; inset: 0; display: flex; flex-direction: column;
@@ -37,7 +37,11 @@ function span(className: string, text: string): HTMLElement {
   return s;
 }
 
-function panel(last: LastAnswer, onTap: () => void): HTMLElement {
+function panel(
+  last: LastAnswer,
+  onTap: () => void,
+  onFlag?: FlagFn,
+): HTMLElement {
   const root = document.createElement("div");
   root.className = "kr-study kr-pause";
   // .kr-study supplies the card styles; undo its full-screen look
@@ -59,7 +63,7 @@ function panel(last: LastAnswer, onTap: () => void): HTMLElement {
   if (!last.correct) verdict.append(span("ok", `→ ${last.answer}`));
   const scroll = document.createElement("div");
   scroll.className = "scroll";
-  if (last.card) scroll.append(cardEl(last.card));
+  if (last.card) scroll.append(cardEl(last.card, onFlag));
   const hint = document.createElement("div");
   hint.className = "hint";
   hint.textContent = "Tap or P to resume";
@@ -77,6 +81,7 @@ export function syncPauseCard(
   last: LastAnswer | null,
   key: string,
   onTap: () => void,
+  onFlag?: FlagFn,
 ): void {
   if (!last) {
     shown?.el.remove();
@@ -92,7 +97,7 @@ export function syncPauseCard(
     style.textContent = CSS;
     document.head.append(style);
   }
-  const el = panel(last, onTap);
+  const el = panel(last, onTap, onFlag);
   document.body.append(el);
   shown = { el, key };
 }
