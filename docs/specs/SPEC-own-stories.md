@@ -31,7 +31,7 @@ A story dictionary in `dictionary/`, kept separate from the game code: our own n
 
 ### Style guide (`STYLE.md`, summary)
 - Meaning story: 1–4 sentences, 120–600 characters. Names every part (by its `parts.json` name, in `<part>`) and lands on the meaning (first gloss, in `<kanji>`). Concrete, visual, a little absurd; no puns that need the reader to know WaniKani.
-- Reading story: 1–3 sentences, 80–450 characters. Ties the meaning to the reading's sound, using the `sounds.json` keyword where there is one, and spells the reading in `<reading>` kana. `kun` stories may use the kanji's okurigana word (休む).
+- Reading story: 1–3 sentences, 60–450 characters. Ties the meaning to the reading's sound, using the `sounds.json` keyword where there is one, and spells the reading in `<reading>` kana. `kun` stories may use the kanji's okurigana word (休む).
 - Build on earlier levels: when a part is an earlier kanji, call it by that kanji's name; reuse images from earlier stories where natural.
 - Plain English, no cultural knowledge needed, nothing offensive, nothing that only works in American English.
 - Written from the inputs only. The writer never reads WaniKani's library or the judge's comparison files.

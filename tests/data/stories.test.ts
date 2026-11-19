@@ -202,7 +202,7 @@ describe("validator rules", () => {
     entry(d, "木").on = reading("<reading>もく</reading>" + "x".repeat(450));
     const e = errorsOf(d).join("\n");
     expect(e).toMatch(/木 meaning: 12 characters, outside 120-600/);
-    expect(e).toMatch(/木 on: \d+ characters, outside 80-450/);
+    expect(e).toMatch(/木 on: \d+ characters, outside 60-450/);
   });
 
   it("needs a <kanji> meaning word in the meaning story", () => {

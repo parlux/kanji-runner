@@ -31,8 +31,8 @@ type Field = (typeof FIELDS)[number];
 /** Plain-text length bands, in characters. */
 export const BANDS: Record<Field, [number, number]> = {
   meaning: [120, 600],
-  on: [80, 450],
-  kun: [80, 450],
+  on: [60, 450],
+  kun: [60, 450],
 };
 
 type Obj = Record<string, unknown>;

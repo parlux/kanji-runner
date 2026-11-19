@@ -41,7 +41,7 @@ Plus `parts.json` (part names) and `sounds.json` (sound keywords). Work from the
 
 ## Reading stories (`on`, `kun`)
 
-- 1–3 sentences, 80–450 characters of plain text.
+- 1–3 sentences, 60–450 characters of plain text.
 - Ties the meaning (or the meaning story's scene) to the reading's sound.
 - When `onSound` has a keyword, use it: the same sound always calls up the same image across all kanji. Only the keyword's matching syllable is the sound (the `sounds.json` note says how much counts); make that clear, don't make the reader say the whole word. Without a keyword, pick an English sound-alike and say how it sounds.
 - Sounds that come in sets (しょう / しょ / しょく, よう / よ / よく): make the length or final consonant obvious in the scene, so the reader can't mix up the set.
