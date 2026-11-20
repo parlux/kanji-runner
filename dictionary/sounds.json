@@ -12,8 +12,8 @@
     "note": "A knight's shield: the \"shee\" at its start."
   },
   "かん": {
-    "keyword": "candle",
-    "note": "A lit candle: its first part, \"kan\"."
+    "keyword": "carnation",
+    "note": "A pink carnation: its first part, \"kahn\" (the r silent)."
   },
   "き": {
     "keyword": "key",
@@ -28,8 +28,8 @@
     "note": "A stubbed toe: \"toe\" is the held \"toh\"."
   },
   "か": {
-    "keyword": "cabbage",
-    "note": "A round cabbage: its short first syllable \"ka\"."
+    "keyword": "carp",
+    "note": "A big orange carp: \"kah\", drop the p."
   },
   "せい": {
     "keyword": "sail",
@@ -68,8 +68,8 @@
     "note": "A garden hose: a held \"hoh\". One syllable = long vowel."
   },
   "ふ": {
-    "keyword": "fuzz",
-    "note": "A ball of fuzz: \"fuh\", a short soft \"fu\"."
+    "keyword": "futon",
+    "note": "A rolled-up futon: its first syllable \"fu\", a short \"oo\", said the Japanese way."
   },
   "よう": {
     "keyword": "yo-yo",
@@ -80,8 +80,8 @@
     "note": "A giant shoe: \"shoe\" is the held \"shoo\"."
   },
   "はん": {
-    "keyword": "hanger",
-    "note": "A coat hanger: its first part, \"han\"."
+    "keyword": "honey",
+    "note": "A pot of honey: its first part, \"hahn\", the u of cup, an open \"ah\"."
   },
   "ぼう": {
     "keyword": "boulder",
@@ -125,19 +125,19 @@
   },
   "ゆう": {
     "keyword": "unicorn",
-    "note": "A unicorn: its first part, a held \"yoo\". Yucca is the short ゆ."
+    "note": "A unicorn: its first part, a held \"yoo\". Eucalyptus is the short ゆ."
   },
   "かく": {
-    "keyword": "cactus",
-    "note": "A prickly cactus: its first part, \"kak\"."
+    "keyword": "carcass",
+    "note": "A picked-clean carcass: its first part, \"kahk\" (the r silent), close to \"kaku\"."
   },
   "せき": {
     "keyword": "sector",
     "note": "A pie-chart sector: \"sek-tor\", its first part is \"seki\"."
   },
   "たん": {
-    "keyword": "tank",
-    "note": "A big tank: \"tan\", drop the k."
+    "keyword": "tunnel",
+    "note": "A dark tunnel: its first part, \"tahn\", the u of cup, an open \"ah\"."
   },
   "ちゅう": {
     "keyword": "chewing gum",
@@ -164,12 +164,12 @@
     "note": "A haystack: \"hay\" is \"hei\"."
   },
   "しゃ": {
-    "keyword": "shark",
-    "note": "A shark: its first part, \"sha\"."
+    "keyword": "shuttlecock",
+    "note": "A feathered shuttlecock: its short first syllable \"sha\", the u of cup, an open \"ah\". Shark is しゃく."
   },
   "さん": {
-    "keyword": "sandal",
-    "note": "A flip-flop sandal: its first part, \"san\"."
+    "keyword": "sundae",
+    "note": "An ice cream sundae: its first part, \"sahn\", the u of cup, an open \"ah\"."
   },
   "すい": {
     "keyword": "sweet",
@@ -196,8 +196,8 @@
     "note": "A pot of ink: \"in\", drop the k."
   },
   "ご": {
-    "keyword": "gorilla",
-    "note": "A gorilla: its short first syllable \"go\". Goat is the long ごう."
+    "keyword": "goggles",
+    "note": "Swimming goggles: its short first syllable \"go\". Goat is the long ごう."
   },
   "じゅう": {
     "keyword": "jewel",
@@ -232,8 +232,8 @@
     "note": "A turning gear wheel: \"gee\", hard g."
   },
   "じゅん": {
-    "keyword": "jungle",
-    "note": "A thick jungle: its first part, \"jun\"."
+    "keyword": "juniper",
+    "note": "A juniper bush: its first part, \"joon\", said short."
   },
   "じん": {
     "keyword": "ginger",
@@ -272,32 +272,32 @@
     "note": "A hedge maze: \"may\", drop the z."
   },
   "さ": {
-    "keyword": "saddle",
-    "note": "A horse's saddle: its short first syllable \"sa\"."
+    "keyword": "sardine",
+    "note": "A tin of sardines: its short first syllable \"sah\", the r silent."
   },
   "と": {
     "keyword": "totem pole",
     "note": "A tall totem pole: its first syllable \"to\". Toe is the long とう."
   },
   "はく": {
-    "keyword": "hacksaw",
-    "note": "A hacksaw: its first part, \"hak\"."
+    "keyword": "huckleberry",
+    "note": "A huckleberry: its first part, \"hahk\", the u of cup, an open \"ah\", close to \"haku\"."
   },
   "ふく": {
     "keyword": "hook",
     "note": "A big hook: \"hook\" is \"huk\", close to \"fuku\"."
   },
   "かつ": {
-    "keyword": "cat",
-    "note": "A cat: \"kat\", close to \"katsu\"."
+    "keyword": "katsu",
+    "note": "A crumbed katsu cutlet: \"katsu\", said the Japanese way, is exactly かつ."
   },
   "さく": {
-    "keyword": "saxophone",
-    "note": "A saxophone: its first part, \"sak\"."
+    "keyword": "succulent",
+    "note": "A fat succulent plant: its first part, \"sahk\", the u of cup, an open \"ah\", close to \"saku\"."
   },
   "がん": {
-    "keyword": "gangplank",
-    "note": "A pirate gangplank: its first part, \"gan(g)\"."
+    "keyword": "gunk",
+    "note": "A blob of gunk: \"gahn\", the u of cup, an open \"ah\", drop the k."
   },
   "てん": {
     "keyword": "tenor",
@@ -312,12 +312,12 @@
     "note": "A crested cockatoo: its first part, \"kok\"."
   },
   "だん": {
-    "keyword": "dandelion",
-    "note": "A dandelion puff: its first part, \"dan\"."
+    "keyword": "dungeon",
+    "note": "A dripping dungeon: its first part, \"dahn\", the u of cup, an open \"ah\"."
   },
   "さつ": {
-    "keyword": "satellite",
-    "note": "A satellite in orbit: its first part, \"sat\"."
+    "keyword": "satsuma",
+    "note": "A satsuma orange: its first part, \"sats\", said the Japanese way \"sah-tsu\"."
   },
   "じょ": {
     "keyword": "jogger",
@@ -332,16 +332,16 @@
     "note": "A hotdog: its short first syllable \"ho\". Hose is the long ほう."
   },
   "しゅく": {
-    "keyword": "shuck",
-    "note": "Corn shucks (husks): \"shuck\" is \"shuk\". Shackle is しゃく."
+    "keyword": "sugar cube",
+    "note": "A sugar cube: the 'shu' of sugar plus the 'ku' of cube → しゅく."
   },
   "へん": {
     "keyword": "hen",
     "note": "A clucking hen: \"hen\" is \"hen\"."
   },
   "じゅ": {
-    "keyword": "juggler",
-    "note": "A juggler: its short first syllable \"ju\"."
+    "keyword": "jury",
+    "note": "A jury in its box: its first syllable \"ju\", a short \"oo\"."
   },
   "たく": {
     "keyword": "taco",
@@ -352,8 +352,8 @@
     "note": "A bulb of garlic: its first syllable \"ga\"."
   },
   "ふん": {
-    "keyword": "funnel",
-    "note": "A kitchen funnel: its first part, \"fun\"."
+    "keyword": "typhoon",
+    "note": "A whirling typhoon: its end, \"foon\", said short."
   },
   "ちん": {
     "keyword": "chin",
@@ -372,8 +372,8 @@
     "note": "A zodiac wheel of signs: its first part, a held \"zoh\"."
   },
   "らん": {
-    "keyword": "ranch",
-    "note": "A cattle ranch: \"ran\", drop the ch."
+    "keyword": "lunch",
+    "note": "A lunchbox: 'lun', said the Japanese way 'lahn' → らん."
   },
   "ぼ": {
     "keyword": "bonsai",
@@ -384,16 +384,16 @@
     "note": "A goat: a held \"goh\", drop the t."
   },
   "やく": {
-    "keyword": "yapping puppy",
-    "note": "A yapping puppy: \"yap\", close to \"yaku\"."
+    "keyword": "yucca",
+    "note": "A spiky yucca plant: \"yuk\", the u of cup, an open \"ah\", close to \"yaku\"."
   },
   "とく": {
     "keyword": "tick-tock",
     "note": "A clock's tick-tock: the \"tock\" is \"tok\"."
   },
   "てき": {
-    "keyword": "tea kettle",
-    "note": "A whistling tea kettle: \"tea-ket\" run together, \"teki\"."
+    "keyword": "text message",
+    "note": "A text message: its first part, \"tek\", close to \"teki\"."
   },
   "もう": {
     "keyword": "mower",
@@ -404,8 +404,8 @@
     "note": "A tiny wren: \"wren\" is \"ren\"."
   },
   "だ": {
-    "keyword": "dachshund",
-    "note": "A long dachshund: its short first syllable \"da\"."
+    "keyword": "duck",
+    "note": "A duck: \"dah\", the u of cup, an open \"ah\", drop the k."
   },
   "び": {
     "keyword": "beetle",
@@ -416,12 +416,12 @@
     "note": "A garden gnome: a held \"noh\", drop the m."
   },
   "ゆ": {
-    "keyword": "yucca",
-    "note": "A spiky yucca plant: its short first syllable \"yu\". Unicorn is the long ゆう."
+    "keyword": "yuzu",
+    "note": "A yuzu fruit: just its first short 'yu' → ゆ."
   },
   "しゃく": {
-    "keyword": "shackle",
-    "note": "An iron shackle: its first part, \"shak\"."
+    "keyword": "shark",
+    "note": "A shark: \"shahk\", the r silent, close to \"shaku\". Shuttlecock is the short しゃ."
   },
   "ぼく": {
     "keyword": "boxer",
@@ -432,8 +432,8 @@
     "note": "A pair of dice: \"dai\", drop the s."
   },
   "う": {
-    "keyword": "wolf",
-    "note": "A howling wolf: its first part, a short \"woo\"."
+    "keyword": "udon",
+    "note": "A bowl of udon noodles: its first sound, a short \"oo\" with no w."
   },
   "ど": {
     "keyword": "dolphin",
@@ -460,8 +460,8 @@
     "note": "A clanking robot: its short first syllable \"ro\". Rose is the long ろう."
   },
   "ばん": {
-    "keyword": "banjo",
-    "note": "A banjo: its first part, \"ban\"."
+    "keyword": "bun",
+    "note": "A sticky bun: \"bun\", said \"bahn\", the u of cup, an open \"ah\"."
   },
   "く": {
     "keyword": "cuckoo",
@@ -492,16 +492,16 @@
     "note": "A pot of yogurt: its short first syllable \"yo\"."
   },
   "は": {
-    "keyword": "hammock",
-    "note": "A hammock: its short first syllable \"ha\"."
+    "keyword": "hut",
+    "note": "A little hut: \"hah\", the u of cup, an open \"ah\", drop the t."
   },
   "そん": {
     "keyword": "sombrero",
     "note": "A wide sombrero: its first part, \"som\", close to \"son\"."
   },
   "ぶん": {
-    "keyword": "bun",
-    "note": "A sticky bun: \"bun\" is \"bun\"."
+    "keyword": "baboon",
+    "note": "A baboon: its end, \"boon\", said short."
   },
   "らい": {
     "keyword": "lion",
@@ -516,8 +516,8 @@
     "note": "A trio of singers: drop the t, \"rio\", said fast \"ryo\". Leotard is the long りょう."
   },
   "あん": {
-    "keyword": "anchor",
-    "note": "A ship's anchor: its first part, \"an(g)\"."
+    "keyword": "uncle",
+    "note": "A smiling uncle: its first part, \"ahn(g)\", the u of cup, an open \"ah\"."
   },
   "み": {
     "keyword": "meerkat",
@@ -548,12 +548,12 @@
     "note": "A big ON switch: \"on\" is \"on\"."
   },
   "えき": {
-    "keyword": "excavator",
-    "note": "An excavator digging: its first part, \"ek\"."
+    "keyword": "echidna",
+    "note": "A spiky echidna: its first part, \"eh-ki\", said the Japanese way."
   },
   "まん": {
-    "keyword": "mango",
-    "note": "A ripe mango: its first part, \"man\"."
+    "keyword": "monkey",
+    "note": "A cheeky monkey: its first part, \"mahn(g)\", the u of cup, an open \"ah\" (not the o of monster)."
   },
   "ぐ": {
     "keyword": "goodie bag",
@@ -576,8 +576,8 @@
     "note": "A sneaky ninja: its first part, \"nin\"."
   },
   "ばつ": {
-    "keyword": "bat",
-    "note": "A flapping bat: \"bat\", close to \"batsu\"."
+    "keyword": "button",
+    "note": "A big button: its first part, \"baht\", the u of cup, an open \"ah\", close to \"batsu\"."
   },
   "あい": {
     "keyword": "ivy",
@@ -592,24 +592,24 @@
     "note": "An old ruin: \"roo-in\" said fast, \"rui\"."
   },
   "ばく": {
-    "keyword": "backpack",
-    "note": "A stuffed backpack: its first part, \"bak\"."
+    "keyword": "buckle",
+    "note": "A belt buckle: its first part, \"bahk\", the u of cup, an open \"ah\", close to \"baku\"."
   },
   "ろく": {
     "keyword": "rocket",
     "note": "A rocket: its first part, \"rok\"."
   },
   "くつ": {
-    "keyword": "cutlass",
-    "note": "A pirate's cutlass: its first part, \"kut\"."
+    "keyword": "coot",
+    "note": "A black coot on a pond: \"koot\", the t as tsu, said short."
   },
   "ま": {
-    "keyword": "mammoth",
-    "note": "A woolly mammoth: its short first syllable \"ma\"."
+    "keyword": "mug",
+    "note": "A big mug: \"mah\", the u of cup, an open \"ah\", drop the g."
   },
   "くん": {
-    "keyword": "kung fu",
-    "note": "A kung fu kick: its first part, \"kun(g)\"."
+    "keyword": "cocoon",
+    "note": "A silk cocoon: its end, \"koon\", said short."
   },
   "もく": {
     "keyword": "moccasin",
@@ -628,20 +628,20 @@
     "note": "A monster: its first part, \"mon\"."
   },
   "や": {
-    "keyword": "yam",
-    "note": "A big yam: \"ya\", drop the m."
+    "keyword": "yarn",
+    "note": "A ball of yarn: \"yah\", drop the rn."
   },
   "なん": {
-    "keyword": "nanny",
-    "note": "A nanny with a pram: its first part, \"nan\"."
+    "keyword": "naan",
+    "note": "A puffy naan bread: \"naan\" is \"nahn\"."
   },
   "びん": {
     "keyword": "bin",
     "note": "A rubbish bin: \"bin\" is \"bin\"."
   },
   "らく": {
-    "keyword": "raccoon",
-    "note": "A raccoon: its first part, \"rak\"."
+    "keyword": "rucksack",
+    "note": "A heavy rucksack: its first part, \"rahk\", the u of cup, an open \"ah\", close to \"raku\"."
   },
   "きゃく": {
     "keyword": "kayak",
@@ -652,20 +652,20 @@
     "note": "A flying superhero: its first part, the held \"soo\"."
   },
   "ば": {
-    "keyword": "baboon",
-    "note": "A baboon: its short first syllable \"ba\"."
+    "keyword": "barbecue",
+    "note": "A smoking barbecue: its short first syllable \"bah\", the r silent."
   },
   "きつ": {
     "keyword": "kitten",
     "note": "A kitten: its first part, \"kit\"."
   },
   "た": {
-    "keyword": "tadpole",
-    "note": "A tadpole: its short first syllable \"ta\"."
+    "keyword": "tub",
+    "note": "A tub: \"tah\", the u of cup, an open \"ah\", drop the b."
   },
   "じゃく": {
-    "keyword": "jackal",
-    "note": "A jackal: its first part, \"jak\"."
+    "keyword": "jacuzzi",
+    "note": "A bubbling jacuzzi: its first part, \"jah-koo\", said fast."
   },
   "しゅん": {
     "keyword": "cushion",
@@ -684,8 +684,8 @@
     "note": "A donkey: its first part, \"don(g)\"."
   },
   "ぐん": {
-    "keyword": "gunk",
-    "note": "A blob of gunk: \"gun\", drop the k."
+    "keyword": "goon",
+    "note": "A goon in a suit, said short and clipped: 'goon' → ぐん. Not the long ぐう."
   },
   "つい": {
     "keyword": "tweezers",
@@ -712,7 +712,7 @@
     "note": "A blob of goo: \"goo\" is the held \"goo\"."
   },
   "ら": {
-    "keyword": "lasso",
-    "note": "A lasso: its first syllable \"la\"."
+    "keyword": "llama",
+    "note": "A llama: its first syllable \"lah\", a true \"ah\"."
   }
 }

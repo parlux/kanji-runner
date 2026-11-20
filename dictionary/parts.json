@@ -5,7 +5,7 @@
   },
   "口": {
     "name": "mouth",
-    "note": "A small square box, like an open mouth seen from the front."
+    "note": "A small empty box sitting beside other parts, like an open mouth."
   },
   "ノ": {
     "name": "slash",
@@ -61,15 +61,15 @@
   },
   "⺡": {
     "name": "water drops",
-    "note": "Three short strokes stacked down the left side, like drops of water."
+    "note": "Three short strokes stacked down the left side, like drops of water. Also: tadpoles, splashes."
   },
   "田": {
     "name": "rice field",
     "note": "A box split into four squares, the paddies of a rice field."
   },
   "⺅": {
-    "name": "leaning person",
-    "note": "A slanted stroke leaning against a post, a person leaning."
+    "name": "coat hook",
+    "note": "An upright post with a short arm slanting off its top, like a coat hook."
   },
   "丶": {
     "name": "dot",
@@ -164,8 +164,8 @@
     "note": "A box-topped flag with a long pole sweeping down to the left."
   },
   "⻌": {
-    "name": "road",
-    "note": "A dot, a zigzag, then a long sweep along the bottom: a winding road."
+    "name": "ramp",
+    "note": "A dot, a zigzag down, then a long sweep along the bottom, like a ramp."
   },
   "匕": {
     "name": "spoon",
@@ -273,7 +273,7 @@
   },
   "⺖": {
     "name": "heartbeat",
-    "note": "A tall line with a blip on each side, like a heartbeat spike."
+    "note": "A tall line with a short blip on each side, like a heartbeat spike. Also: antenna, trident."
   },
   "彳": {
     "name": "peg post",
@@ -345,7 +345,7 @@
   },
   "囗": {
     "name": "cage",
-    "note": "A big closed square that other parts sit inside, a cage."
+    "note": "A big box wrapping the whole kanji, something trapped inside: a cage."
   },
   "矢": {
     "name": "dart",
@@ -693,8 +693,8 @@
     "note": "A tall bent stroke looping back on itself, a ribbon."
   },
   "韋": {
-    "name": "totem pole",
-    "note": "Bars and a box stacked on one tall post, like a totem pole."
+    "name": "pagoda",
+    "note": "Boxes and bars stacked up one post, tier on tier, like a pagoda."
   },
   "啇": {
     "name": "hanging lantern",
@@ -725,8 +725,8 @@
     "note": "Two dots on a cross with a long handle, a ladle."
   },
   "耒": {
-    "name": "pitchfork",
-    "note": "Three bars on a tree trunk, the tines of a pitchfork."
+    "name": "TV aerial",
+    "note": "Three crossbars stacked on a mast with two legs splayed below, like a TV aerial."
   },
   "舛": {
     "name": "dance steps",
@@ -769,8 +769,8 @@
     "note": "A box with bars and a sweep through it, a torso."
   },
   "屮": {
-    "name": "tuning fork",
-    "note": "Three prongs rising from a base, a tuning fork."
+    "name": "pitchfork",
+    "note": "A post with two side prongs curving up beside it, like a pitchfork."
   },
   "巛": {
     "name": "winding river",
