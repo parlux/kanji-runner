@@ -132,9 +132,9 @@ Not one implementer subagent: the orchestrator runs the loop per batch (2 levels
 ### Task H2: Rewrite Kanji 5–6 reading stories (content, orchestrator)
 **Description:** Writer (**opus**) rewrites every `on` and `kun` field in `kanji-05.json` and `kanji-06.json` to the new form from `STYLE.md`, `sounds.json` and the current stories (same scene and keyword, explainer and kana dropped, kun tail only when the meaning differs). `stories:check` (flag removed), `stories:overlap`; judge (**sonnet**) checks highlights and tails; max 3 rounds. Commit, push, deploy. No re-seed: the owner reviews the stories in the game with the Flag button (owner, 2026-11-21). Log counts below.
 **Acceptance:**
-- [ ] Every on/kun field in Kanji 5–6 rewritten; `--allow-reading` removed; all pass check and judge.
+- [x] Every on/kun field in Kanji 5–6 rewritten; `--allow-reading` removed; all pass check and judge.
 - [ ] Deploy green; one Kanji 5 card checked live (highlight shown, no explainer).
-- [ ] Counts logged below.
+- [x] Counts logged below.
 **Files:** `dictionary/stories/kanji-05.json`, `dictionary/stories/kanji-06.json`, `scripts/stories/check.ts`, this file
 
 ### Checkpoint D: owner (moved to the review page, 2026-11-20)
@@ -210,3 +210,12 @@ Not one implementer subagent: the orchestrator runs the loop per batch (2 levels
 - STYLE.md: vowel rule (あ "ah", no flat a; う no w; strut u counts as あ for this owner); example now uses coat hook.
 - Flagged, unchanged: がく gaggle, きゃく kayak (flat a, owner ✓); おん on switch (accent).
 - Rough edge: `tests/core/kanji-words.test.ts` "wordreading rows" times out at 5 s under full `npm run check` load; passes alone.
+
+### H2: sound highlight rewrite (2026-11-21)
+| Level | Fields | Overlap suspects | Judge 1st pass (weak / wrong) | Fixed | Final |
+|---|---|---|---|---|---|
+| Kanji 5 | 59 | 0 | 4 / 0 | 4 by hand (着 力 cuckoo for く, 安 sue, 主 mole) | 59 pass |
+| Kanji 6 | 60 | 0 | 8 / 0 | 3 by hand (言 Gen, 戻 doll, 冷 tie for たい); 4 strut-u (tub, hut, duck, mug) passed per the owner's vowel rule; 便 tail not needed ("letter" is a gloss) | 60 pass |
+- Kun meaning tails kept: 番 (a pair), 弁 (know what's proper).
+- Okurigana left uncovered as before where the old story didn't spell it (安 好 遅 交 停 付 戻 高…).
+

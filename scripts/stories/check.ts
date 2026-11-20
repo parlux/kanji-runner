@@ -12,7 +12,6 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 import { KANJI, maxLevel } from "../../src/core/kanji";
-import { toHiragana } from "../../src/core/mnemonic";
 import { levelName } from "../../src/core/progression";
 import type { KanjiItem } from "../../src/core/types";
 import { DICTIONARY, fileLevel, parseLevels, storyFile } from "./levels";
@@ -33,16 +32,6 @@ export const BANDS: Record<Field, [number, number]> = {
   meaning: [120, 600],
   on: [40, 350],
   kun: [40, 350],
-};
-/** The old reading-story band, while `allowReading` is on. */
-const OLD_READING_BAND: [number, number] = [60, 450];
-export type Options = {
-  /**
-   * Temporary (until Task H2 rewrites Kanji 5-6): reading stories may still
-   * end in an explainer with a `<reading>`, need no `<sound>`, and keep the
-   * old length band.
-   */
-  allowReading?: boolean;
 };
 
 type Obj = Record<string, unknown>;
@@ -231,12 +220,10 @@ function checkText(
   names: Map<string, string>,
   keywords: Map<string, string>,
   r: Report,
-  opts: Options,
 ) {
   for (const e of tagErrors(text)) r.errors.push(`${where}: ${e}`);
   const len = [...plainText(text)].length;
-  const [lo, hi] =
-    field !== "meaning" && opts.allowReading ? OLD_READING_BAND : BANDS[field];
+  const [lo, hi] = BANDS[field];
   if (len < lo || len > hi)
     r.errors.push(`${where}: ${len} characters, outside ${lo}-${hi}`);
 
@@ -246,7 +233,7 @@ function checkText(
     if (!known.has(p)) r.errors.push(`${where}: part "${p}" not in parts.json`);
 
   if (field === "meaning") {
-    if (/<sound>/.test(text) && !opts.allowReading)
+    if (/<sound>/.test(text))
       r.errors.push(`${where}: <sound> belongs in on/kun stories only`);
     if (tagged(text, "kanji").length === 0)
       r.errors.push(`${where}: no <kanji> meaning word`);
@@ -257,21 +244,7 @@ function checkText(
     }
     return;
   }
-  if (!opts.allowReading) {
-    checkSound(where, field, text, k, keywords, r);
-    return;
-  }
-  const allowed =
-    field === "on"
-      ? [k.on]
-      : k.kun
-        ? [k.kun.base, k.kun.base + k.kun.okurigana]
-        : [];
-  const readings = tagged(text, "reading").map(toHiragana);
-  if (readings.length === 0) r.errors.push(`${where}: no <reading>`);
-  for (const x of readings)
-    if (!allowed.includes(x))
-      r.errors.push(`${where}: <reading>${x}</reading> is not ${allowed[0]}`);
+  checkSound(where, field, text, k, keywords, r);
 }
 
 function checkStoryFile(
@@ -281,7 +254,6 @@ function checkStoryFile(
   names: Map<string, string>,
   keywords: Map<string, string>,
   r: Report,
-  opts: Options,
 ) {
   const level = fileLevel(name);
   if (level === null || level > maxLevel(kanji)) {
@@ -326,7 +298,7 @@ function checkStoryFile(
         r.errors.push(`${where}: has ${f}, but the kanji has no main ${f}`);
       } else if (typeof v !== "string") {
         r.errors.push(`${where}: ${f} must be text`);
-      } else checkText(`${where} ${f}`, f, v, k, names, keywords, r, opts);
+      } else checkText(`${where} ${f}`, f, v, k, names, keywords, r);
     }
   }
 }
@@ -336,7 +308,6 @@ export function validate(
   dict: Dictionary,
   kanji: readonly KanjiItem[],
   levels?: readonly number[],
-  opts: Options = {},
 ): Report {
   const r: Report = { errors: [], warnings: [] };
   checkParts(dict.parts, kanji, r);
@@ -351,8 +322,7 @@ export function validate(
     : Object.keys(dict.stories).sort();
   for (const name of files) {
     if (!(name in dict.stories)) r.errors.push(`stories/${name}: missing`);
-    else
-      checkStoryFile(name, dict.stories[name], kanji, names, keywords, r, opts);
+    else checkStoryFile(name, dict.stories[name], kanji, names, keywords, r);
   }
   return r;
 }
@@ -391,9 +361,7 @@ function main() {
   const arg = args.find((a) => !a.startsWith("--"));
   const levels = arg ? parseLevels(arg, maxLevel(KANJI)) : undefined;
   const { dict, errors } = loadDictionary();
-  const r = validate(dict, KANJI, levels, {
-    allowReading: args.includes("--allow-reading"),
-  });
+  const r = validate(dict, KANJI, levels);
   const all = [...errors, ...r.errors];
   for (const w of r.warnings) console.log(`warning: ${w}`);
   for (const e of all) console.log(`error: ${e}`);

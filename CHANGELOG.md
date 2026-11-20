@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.11 (2026-11-21)
+
+- Reading stories (Kanji 5–6): no closing explainer and no kana; the sound-alike chunk is highlighted in the story (a steel **sa**fe). The checker now requires the new form.
+
 ## 1.6.10 (2026-11-21)
 
 - Reading stories get a `<sound>` highlight tag: checker rules (behind a temporary flag), card style, review page shows the reading above each story, STYLE.md rewritten.

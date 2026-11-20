@@ -17,16 +17,11 @@ import {
   soundsInput,
 } from "../../scripts/stories/prep";
 
-/** Task H2 rewrites the Kanji 5-6 reading stories and deletes this allowance. */
-const READING_PENDING = { allowReading: true };
-
 describe("committed dictionary (SPEC-own-stories)", () => {
   it("passes the validator", () => {
     const { dict, errors } = loadDictionary();
     expect(errors).toEqual([]);
-    expect(validate(dict, KANJI, undefined, READING_PENDING).errors).toEqual(
-      [],
-    );
+    expect(validate(dict, KANJI).errors).toEqual([]);
   });
 });
 
@@ -118,19 +113,6 @@ const entry = (d: Dictionary, c: string) =>
   (d.stories["kanji-01.json"] as { kanji: Record<string, Entry> }).kanji[
     c
   ] as Entry;
-/** Every on/kun in the old form: an explainer with a `<reading>`. */
-const oldForm = (): Dictionary => {
-  const d = good();
-  const r = {
-    木: ["もく", "き"],
-    休: ["きゅう", "やす"],
-  } as const;
-  for (const c of ["木", "休"] as const) {
-    entry(d, c).on = reading(`Old <reading>${r[c][0]}</reading>.`);
-    entry(d, c).kun = reading(`Old <reading>${r[c][1]}</reading>.`);
-  }
-  return d;
-};
 const errorsOf = (d: Dictionary, levels?: number[]) =>
   validate(d, FIX, levels).errors;
 
@@ -191,23 +173,7 @@ describe("validator rules", () => {
     expect(e).toMatch(/円: has kun, but the kanji has no main kun/);
   });
 
-  it("checks <reading> against the main reading while allowReading is on (kun: okurigana optional, katakana ok)", () => {
-    const errorsOf = (d: Dictionary) =>
-      validate(d, FIX, undefined, READING_PENDING).errors;
-    const d = oldForm();
-    entry(d, "木").on = reading("No reading tag here at all, just words.");
-    entry(d, "休").on = reading("<reading>く</reading> is wrong.");
-    entry(d, "休").kun = reading("<reading>やすみ</reading> is wrong too.");
-    const e = errorsOf(d).join("\n");
-    expect(e).toMatch(/木 on: no <reading>/);
-    expect(e).toMatch(/休 on: <reading>く<\/reading> is not きゅう/);
-    expect(e).toMatch(/休 kun: <reading>やすみ<\/reading> is not やす/);
-    const ok = oldForm();
-    entry(ok, "休").kun = reading("<reading>やす</reading> is fine.");
-    expect(errorsOf(ok)).toEqual([]);
-  });
-
-  it("needs a <sound> in on and kun, and bans <reading> (old form passes with allowReading)", () => {
+  it("needs a <sound> in on and kun, and bans <reading>", () => {
     const d = good();
     entry(d, "木").on = reading("A tree grows a mock trunk.");
     entry(d, "木").kun = reading(
@@ -217,9 +183,6 @@ describe("validator rules", () => {
     expect(e).toMatch(/木 on: no <sound>/);
     expect(e).toMatch(/木 kun: <reading> is not used/);
     expect(e).not.toMatch(/木 kun: no <sound>/);
-    const old = oldForm();
-    expect(errorsOf(old).join()).toMatch(/木 on: no <sound>/);
-    expect(validate(old, FIX, undefined, READING_PENDING).errors).toEqual([]);
   });
 
   it("keeps <sound> out of the meaning story", () => {
