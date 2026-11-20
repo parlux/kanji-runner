@@ -264,8 +264,8 @@
     "note": "A bent blade with a curved handle sweeping left, a sword."
   },
   "⻖": {
-    "name": "stairs",
-    "note": "Two bumps zigzag down the left of a post, like a short flight of stairs."
+    "name": "pennant",
+    "note": "A post with a double bump flying off it, like a pennant. Same shape on either side of a kanji."
   },
   "金": {
     "name": "gold",
@@ -469,7 +469,8 @@
   },
   "⻏": {
     "name": "pennant",
-    "note": "A pole on the right with a double bump flying off it, like a pennant."
+    "note": "A post with a double bump flying off it, like a pennant. Same shape on either side of a kanji.",
+    "sameAs": "⻖"
   },
   "手": {
     "name": "hand",

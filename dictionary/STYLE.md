@@ -65,7 +65,7 @@ Plus `parts.json` (part names) and `sounds.json` (sound keywords). Work from the
 ## Part names and notes (`parts.json`)
 - A part's name says what its shape looks like, so a reader can see it in the glyph. A name that only fits through history or etymology is replaced by a visible shape (⻏ is a squashed 邑 "town", so "village" fails: name what the stroke shape looks like).
 - Exception: a part that is itself a kanji in our levels keeps that kanji's meaning (or an existing more drawable name, like 日 "sun"); its note says how the shape shows it, or that it is that kanji.
-- Names are unique, 1–3 words, plain English, concrete nouns you can draw.
+- Names are unique, 1–3 words, plain English, concrete nouns you can draw. One shape, one name: a glyph that is the same shape as another part (⻏ and ⻖, the same 阝 on the right or left) gets `sameAs` and the same name, wherever it sits in a kanji.
 - Every part has a `note`: one sentence, 20–120 characters, saying what in the glyph the name points at ("Three short strokes stacked like water drops"). Describe strokes and positions, not history. Our own words.
 
 ## Example (made up, not a real entry)

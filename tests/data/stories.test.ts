@@ -252,6 +252,27 @@ describe("validator rules", () => {
     expect(errorsOf(d).join()).toMatch(/parts.json: not an object/);
   });
 
+  it("lets a sameAs part share its twin's name, and only that", () => {
+    const d = good();
+    const n = "A post with a double bump flying off it.";
+    d.parts = {
+      ...(d.parts as object),
+      "⻖": { name: "pennant", note: n },
+      "⻏": { name: "pennant", note: n, sameAs: "⻖" },
+    };
+    expect(errorsOf(d)).toEqual([]);
+    d.parts = {
+      ...(d.parts as object),
+      "⻏": { name: "flag", note: n, sameAs: "⻖" },
+    };
+    expect(errorsOf(d).join()).toMatch(/⻏: sameAs ⻖ but named "flag"/);
+    d.parts = {
+      ...(d.parts as object),
+      "⻏": { name: "pennant", note: n, sameAs: "⺿" },
+    };
+    expect(errorsOf(d).join()).toMatch(/⻏: sameAs "⺿" is not a part/);
+  });
+
   it("requires a part note of 20-120 characters", () => {
     const d = good();
     d.parts = {

@@ -94,9 +94,25 @@ function checkParts(parts: unknown, kanji: readonly KanjiItem[], r: Report) {
     }
     const words = name.trim().split(/\s+/).length;
     if (words > 3) r.errors.push(`parts.json ${p}: "${name}" is over 3 words`);
-    const other = seen.get(normName(name));
-    if (other) r.errors.push(`parts.json ${p}: "${name}" also names ${other}`);
-    seen.set(normName(name), p);
+    // `sameAs`: the same shape listed under another glyph (⻏ is ⻖ on the
+    // right), so it shares that part's name.
+    const same = (v as Obj).sameAs;
+    if (same !== undefined) {
+      const twin = typeof same === "string" ? parts[same] : undefined;
+      if (!isObj(twin) || twin.sameAs !== undefined)
+        r.errors.push(
+          `parts.json ${p}: sameAs "${String(same)}" is not a part`,
+        );
+      else if (twin.name !== name)
+        r.errors.push(
+          `parts.json ${p}: sameAs ${String(same)} but named "${name}", not "${String(twin.name)}"`,
+        );
+    } else {
+      const other = seen.get(normName(name));
+      if (other)
+        r.errors.push(`parts.json ${p}: "${name}" also names ${other}`);
+      seen.set(normName(name), p);
+    }
     const note = (v as Obj).note;
     if (note === undefined) {
       r.errors.push(`parts.json ${p}: needs a "note"`);
