@@ -48,6 +48,7 @@ const CSS = `
 .kr-study .mn-radical, .kr-study .mn-part { color: #6cc4ff; font-weight: 600; }
 .kr-study .mn-kanji { color: #ff8ad0; font-weight: 600; }
 .kr-study .mn-reading { color: #c4a0ff; font-weight: 600; }
+.kr-study .mn-sound { color: #c4a0ff; font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
 .kr-study .mn-vocabulary { color: #ffc46b; font-weight: 600; }
 .kr-study .mn-none { color: #9aa3b5; }
 .kr-study .mn-ja { color: #5fd38d; }

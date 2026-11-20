@@ -20,7 +20,7 @@ describe("parseMnemonic", () => {
       seg(" "),
       seg("x", "em"),
     ]);
-    for (const t of ["reading", "vocabulary", "ja"])
+    for (const t of ["reading", "sound", "vocabulary", "ja"])
       expect(parseMnemonic(`<${t}>z</${t}>`)).toEqual([seg("z", t)]);
   });
 

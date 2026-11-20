@@ -4,6 +4,7 @@ const MNEMONIC_TAGS = [
   "part",
   "kanji",
   "reading",
+  "sound",
   "vocabulary",
   "ja",
   "em",

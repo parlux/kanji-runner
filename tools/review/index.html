@@ -415,6 +415,18 @@
     color: var(--t-reading);
     font-weight: 600;
   }
+  .rd {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--t-reading);
+    margin-bottom: 4px;
+  }
+  .t-sound {
+    color: var(--t-reading);
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
   .t-ja {
     color: var(--t-ja);
   }
@@ -537,8 +549,8 @@
     return el;
   }
 
-  // ---- story markup: <part> <kanji> <reading> <ja> <em>, nothing else --------
-  const TAGS = new Set(["part", "kanji", "reading", "ja", "em"]);
+  // ---- story markup: <part> <kanji> <reading> <sound> <ja> <em>, nothing else --------
+  const TAGS = new Set(["part", "kanji", "reading", "sound", "ja", "em"]);
   function renderMarkup(text) {
     const root = h("div", { class: "txt" });
     const stack = [];
@@ -1110,6 +1122,9 @@
             "div",
             { class: "cell" },
             h("div", { class: "lbl", text: f }),
+            txt != null && f !== "meaning" && item[f]
+              ? h("div", { class: "rd", text: item[f] })
+              : null,
             txt == null
               ? h("div", { class: "small", text: "no main " + f + " reading" })
               : renderMarkup(txt),
