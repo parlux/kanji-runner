@@ -62,6 +62,12 @@ Plus `parts.json` (part names) and `sounds.json` (sound keywords). Work from the
 - Nothing offensive: no slurs, nothing sexual, no cruelty played for laughs, no stereotypes.
 - Nothing that only works in American (or British) English: avoid sound-alikes that depend on one accent, and spellings or words one side wouldn't know.
 
+## Part names and notes (`parts.json`)
+- A part's name says what its shape looks like, so a reader can see it in the glyph. A name that only fits through history or etymology is replaced by a visible shape (⻏ is a squashed 邑 "town", so "village" fails: name what the stroke shape looks like).
+- Exception: a part that is itself a kanji in our levels keeps that kanji's meaning (or an existing more drawable name, like 日 "sun"); its note says how the shape shows it, or that it is that kanji.
+- Names are unique, 1–3 words, plain English, concrete nouns you can draw.
+- Every part has a `note`: one sentence, 20–120 characters, saying what in the glyph the name points at ("Three short strokes stacked like water drops"). Describe strokes and positions, not history. Our own words.
+
 ## Example (made up, not a real entry)
 
 休, glosses `rest`, parts `leaning person` + `tree`, on `きゅう`, kun `やす(む)`, sound keyword for きゅう: `cue` (a pool cue).
@@ -79,4 +85,5 @@ Pass, or fail with one reason:
 - `wrong`: a part that isn't in the kanji, a wrong meaning, a reading story that doesn't make the sound.
 - `weak`: no picture, confusing, too long to remember, a sound-alike that doesn't sound alike, breaks a rule above.
 - Parts: every named part is visible in the glyph; no part named together with its own sub-parts.
+- Part names and notes: the name is a visible shape (or the part's own kanji meaning); the note is true to the glyph and in band.
 - `close`: too near WaniKani's story for this kanji (same scene, same twist or same phrasing), or uses one of WaniKani's invented radical names or recurring reading characters.

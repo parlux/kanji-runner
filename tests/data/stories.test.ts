@@ -17,14 +17,11 @@ import {
   soundsInput,
 } from "../../scripts/stories/prep";
 
-/** Task N2 writes the part notes and deletes this allowance. */
-const NOTES_PENDING = { allowMissingNotes: true };
-
 describe("committed dictionary (SPEC-own-stories)", () => {
   it("passes the validator", () => {
     const { dict, errors } = loadDictionary();
     expect(errors).toEqual([]);
-    expect(validate(dict, KANJI, undefined, NOTES_PENDING).errors).toEqual([]);
+    expect(validate(dict, KANJI).errors).toEqual([]);
   });
 });
 
@@ -255,7 +252,7 @@ describe("validator rules", () => {
     expect(errorsOf(d).join()).toMatch(/parts.json: not an object/);
   });
 
-  it("requires a part note of 20-120 characters; the temporary flag only forgives a missing one", () => {
+  it("requires a part note of 20-120 characters", () => {
     const d = good();
     d.parts = {
       亻: { name: "person" },
@@ -271,12 +268,6 @@ describe("validator rules", () => {
     expect(errorsOf(d).join("\n")).toMatch(
       /亻: note is 121 .*\n.*木: "note" must be text/,
     );
-    d.parts = { 亻: { name: "person" }, 木: { name: "tree", note: "short" } };
-    const lenient = validate(d, FIX, undefined, {
-      allowMissingNotes: true,
-    }).errors;
-    expect(lenient).toHaveLength(1);
-    expect(lenient[0]).toMatch(/木: note is 5 characters/);
   });
 
   it("checks sounds.json: hiragana keys with a keyword", () => {
