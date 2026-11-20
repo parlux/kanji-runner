@@ -156,8 +156,8 @@ Not one implementer subagent: the orchestrator runs the loop per batch (2 levels
 ### Task C2: Name the new parts, seed the shapes (content, orchestrator)
 **Description:** From `new-parts.json`: kanji parts get their gloss name, `fixed`, a note (mechanical + writer for notes); shape parts get a name, note and 2–3 alts from a writer (**opus**) per STYLE.md, judged (**sonnet**), unique; removed parts dropped. `--allow-missing-parts` removed. Commit, push; seed the new shape parts to the review page (pass 1, alts). **Owner stop:** review them on the page (Kanji 1–6's 15 first).
 **Acceptance:**
-- [ ] `parts.json` covers every component; check passes without the flag; judge pass on all new names and notes.
-- [ ] New shape parts seeded; counts logged below.
+- [x] `parts.json` covers every component; check passes without the flag; judge pass on all new names and notes.
+- [x] New shape parts seeded; counts logged below.
 
 ### Task C3: Apply the review, rewrite Kanji 1–6 stories (content, orchestrator)
 **Description:** `apply` the owner's verdicts on the new parts; rewrite every Kanji 1–6 meaning story whose parts changed (and reading stories naming a removed part) through the writer/judge loop; check, overlap; commit, push, deploy. Then Checkpoint D resumes (play Kanji 1–6).
@@ -260,3 +260,13 @@ Not one implementer subagent: the orchestrator runs the loop per batch (2 levels
 - Fallback: 235 kanji whose root has strokes outside its chunks, or no chunks, keep their KRADFILE elements (variant-mapped), so no list is partial: 本 → 一 木, 北 → 匕 爿, 金 → 王 ハ 𠆢 丷, 肉 → 冂 人. 言 and 方 stay empty, as KRADFILE lists them as themselves (like 日).
 - 人 on top (own or inherited `kvg:position`) → 𠆢 (今 会 合); a `kvg:variant` 八 on top → 丷 (前 弟 尊). 𠆢 in 茶 (inside 余) is still read as 人.
 - `confusables.json` follows the new components (its test ties it to `kanji.json`); the order still uses KRADFILE's elements, so levels didn't move. 24 Kanji 1–6 parts are kanji taught later (何 ← 可, Kanji 23); the "kanji parts come first" data test now checks only duplicates and self.
+
+### C2: new part names (2026-11-21)
+| | Entries | Judge (weak / wrong) | Final |
+|---|---|---|---|
+| Shape parts (named, alts, seeded) | 163 (11 in Kanji 1–6) | 4 / 0 (云 cloud → kite: 雲 is "cloud"; 𠂢 堇 菫 notes) | 163 seeded at pass 1 |
+| Kanji parts (fixed, not seeded) | 348 | 28 abstract names swapped for a drawable gloss (直 straight, 周 lap, 卓 desk…); 346 notes polished | 348 |
+- Removed: ⽱ paw print, 尢 crutch, 五 five, 亀 tortoise (no kanji uses them now). 母 mother kept until C3 (a story still names it).
+- `--allow-missing-parts` removed. `stories:check`: 0 errors, 57 "part not named" warnings, for C3.
+- Rough edge: 235 kanji whose KanjiVG root has loose strokes fall back to KRADFILE's flat list (乗 来 円 半 南 夫…, 10 in Kanji 1–6 with 4+ parts).
+

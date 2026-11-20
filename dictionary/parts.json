@@ -693,10 +693,6 @@
     "note": "Three strokes falling side by side, a flowing river.",
     "fixed": true
   },
-  "⽱": {
-    "name": "paw print",
-    "note": "A frame with an elbow tucked inside, like a paw print."
-  },
   "父": {
     "name": "father",
     "note": "Two short strokes over crossed ones, a father with his arms out.",
@@ -847,10 +843,6 @@
     "note": "Soil over strokes spreading like flames, red.",
     "fixed": true
   },
-  "尢": {
-    "name": "crutch",
-    "note": "A bar with a bent leg and a hook, a crutch."
-  },
   "免": {
     "name": "rabbit",
     "note": "Pointed ears on top, a boxy body, two hind legs below: a rabbit with no tail."
@@ -925,11 +917,6 @@
   "首": {
     "name": "neck",
     "note": "Horns and a nose, a neck holding up a head.",
-    "fixed": true
-  },
-  "五": {
-    "name": "five",
-    "note": "Two bars with a bent stroke between, five.",
     "fixed": true
   },
   "入": {
@@ -1041,11 +1028,6 @@
     "note": "A bar over a hooked curl with a dot, a roof tile.",
     "fixed": true
   },
-  "亀": {
-    "name": "tortoise",
-    "note": "A bent top over a field with a tail, a tortoise.",
-    "fixed": true
-  },
   "竜": {
     "name": "dragon",
     "note": "A stand over a sun-like box with a tail, a dragon.",
@@ -1076,5 +1058,2560 @@
   "爻": {
     "name": "lattice",
     "note": "Two crosses stacked, a lattice."
+  },
+  "可": {
+    "name": "approval",
+    "note": "Street post hung over a mouth: a mouth saying yes, giving its approval.",
+    "fixed": true
+  },
+  "占": {
+    "name": "fortune telling",
+    "note": "A faucet-like stick over a mouth, a fortune teller reading signs aloud.",
+    "fixed": true
+  },
+  "寺": {
+    "name": "temple",
+    "note": "Soil above a golf club, like temple grounds with a stick planted in the dirt.",
+    "fixed": true
+  },
+  "周": {
+    "name": "lap",
+    "note": "A frame wrapped around good luck, running a full lap all the way round.",
+    "fixed": true
+  },
+  "玉": {
+    "name": "jewel",
+    "note": "A king with a dot at the lower right: a small jewel set on the ruler's belt.",
+    "fixed": true
+  },
+  "七": {
+    "name": "seven",
+    "note": "A flat bar cut across by a long hooked stroke, the numeral seven.",
+    "fixed": true
+  },
+  "尺": {
+    "name": "measure",
+    "note": "A flag over two legs stepping apart, a stride you could measure.",
+    "fixed": true
+  },
+  "旦": {
+    "name": "daybreak",
+    "note": "A sun resting on one flat line, the sun just rising over the horizon.",
+    "fixed": true
+  },
+  "官": {
+    "name": "bureaucrat",
+    "note": "A roof over a stack of mouth boxes, an official at his desk under cover.",
+    "fixed": true
+  },
+  "本": {
+    "name": "book",
+    "note": "A tree with one extra bar low on its trunk marking the root: the origin, a book.",
+    "fixed": true
+  },
+  "則": {
+    "name": "rule",
+    "note": "A shellfish beside a dagger, a price sliced to fit the rule.",
+    "fixed": true
+  },
+  "且": {
+    "name": "moreover",
+    "note": "Boxes piled one on another over a base line: and moreover, one more layer.",
+    "fixed": true
+  },
+  "才": {
+    "name": "genius",
+    "note": "A hooked post crossed by one bar, a talented hand reaching out.",
+    "fixed": true
+  },
+  "少": {
+    "name": "few",
+    "note": "A little with a slash cutting off its right side, so a bit is missing: few.",
+    "fixed": true
+  },
+  "各": {
+    "name": "each",
+    "note": "A folding chair stepping down over a mouth, each one arriving in turn.",
+    "fixed": true
+  },
+  "未": {
+    "name": "not yet",
+    "note": "A tree whose upper branch is shorter than the lower one, not yet full grown.",
+    "fixed": true
+  },
+  "亭": {
+    "name": "pavilion",
+    "note": "A lid and a mouth over a street post, like a little pavilion on a pillar.",
+    "fixed": true
+  },
+  "先": {
+    "name": "before",
+    "note": "A cross-and-flick top on a pair of legs, striding out ahead of the rest.",
+    "fixed": true
+  },
+  "吏": {
+    "name": "officer",
+    "note": "A length stroke over a mouth, an officer measuring out his orders.",
+    "fixed": true
+  },
+  "直": {
+    "name": "straight",
+    "note": "A ten over an eye on a base line, an eye sighting straight along a line.",
+    "fixed": true
+  },
+  "楽": {
+    "name": "music",
+    "note": "A white drum between two small ones on a tree stand, a music rig.",
+    "fixed": true
+  },
+  "更": {
+    "name": "night watch",
+    "note": "A sun-like box over crossed scissors, the night watch cutting through the dark.",
+    "fixed": true
+  },
+  "古": {
+    "name": "old",
+    "note": "A ten over a mouth, words handed down through the ages: old.",
+    "fixed": true
+  },
+  "令": {
+    "name": "orders",
+    "note": "An umbrella over a bar and a pizza wedge, a crowd bowing under a ruler's orders.",
+    "fixed": true
+  },
+  "丁": {
+    "name": "street",
+    "note": "A flat bar on a hooked post, like a street sign on its pole.",
+    "fixed": true
+  },
+  "反": {
+    "name": "anti",
+    "note": "A cliff with a pretzel hand under it, pushing back against the slope.",
+    "fixed": true
+  },
+  "完": {
+    "name": "perfect",
+    "note": "A roof over a sawhorse, a house finished once its last beam is up.",
+    "fixed": true
+  },
+  "丙": {
+    "name": "third class",
+    "note": "A bar over a frame holding a person, like a lodger sheltered under a table.",
+    "fixed": true
+  },
+  "弔": {
+    "name": "funeral",
+    "note": "A bow with a pole straight through it, a rope hanging at a funeral.",
+    "fixed": true
+  },
+  "重": {
+    "name": "heavy",
+    "note": "A thousand over a farm, a sack weighed down with a thousand crops.",
+    "fixed": true
+  },
+  "具": {
+    "name": "tool",
+    "note": "An eye-like box standing on eight's two feet, a set of tools on a rack.",
+    "fixed": true
+  },
+  "正": {
+    "name": "correct",
+    "note": "A single bar over a stop, one line planted firmly on its foot: correct.",
+    "fixed": true
+  },
+  "夫": {
+    "name": "husband",
+    "note": "A large figure with one extra bar through the arms, a grown husband.",
+    "fixed": true
+  },
+  "泉": {
+    "name": "spring",
+    "note": "A white top over water, clear water welling up as a spring.",
+    "fixed": true
+  },
+  "皆": {
+    "name": "all",
+    "note": "Two spoons side by side over white, everyone lined up together.",
+    "fixed": true
+  },
+  "冬": {
+    "name": "winter",
+    "note": "A folding chair over two ice drops, the last season when ice forms.",
+    "fixed": true
+  },
+  "句": {
+    "name": "phrase",
+    "note": "A wrap closed around a mouth, a phrase held tight in one breath.",
+    "fixed": true
+  },
+  "千": {
+    "name": "thousand",
+    "note": "A ten with a slash across its top: one thousand.",
+    "fixed": true
+  },
+  "求": {
+    "name": "request",
+    "note": "A dot over a fountain with two strokes at its sides, hands reaching up to ask.",
+    "fixed": true
+  },
+  "次": {
+    "name": "next",
+    "note": "Two ice drops beside a yawn, one yawn following the next.",
+    "fixed": true
+  },
+  "害": {
+    "name": "harm",
+    "note": "A roof over a TV antenna and a mouth, harmful words trapped inside.",
+    "fixed": true
+  },
+  "失": {
+    "name": "lose",
+    "note": "A husband with a slash cutting across the top, something slipped from his hands.",
+    "fixed": true
+  },
+  "主": {
+    "name": "lord",
+    "note": "A dot over a king, a flame on a lamp stand: the master of the house.",
+    "fixed": true
+  },
+  "肖": {
+    "name": "resemblance",
+    "note": "A sparkle of small strokes over a moon, a likeness taking shape.",
+    "fixed": true
+  },
+  "軍": {
+    "name": "army",
+    "note": "A blanket over a car, a covered war wagon rolling out: the army.",
+    "fixed": true
+  },
+  "両": {
+    "name": "both",
+    "note": "A frame with two matching strokes inside, a pair: both.",
+    "fixed": true
+  },
+  "市": {
+    "name": "market",
+    "note": "A lid over a towel, a cloth awning over a market stall.",
+    "fixed": true
+  },
+  "林": {
+    "name": "grove",
+    "note": "Two trees side by side: a grove.",
+    "fixed": true
+  },
+  "厄": {
+    "name": "unlucky",
+    "note": "A cliff over a stamp, trouble pressing down on someone.",
+    "fixed": true
+  },
+  "孝": {
+    "name": "filial piety",
+    "note": "A stuck javelin over a child, an old man leaning on the child's shoulder.",
+    "fixed": true
+  },
+  "不": {
+    "name": "negative",
+    "note": "A flat bar with a slash and a post below, a blocked road: negative.",
+    "fixed": true
+  },
+  "台": {
+    "name": "pedestal",
+    "note": "An elbow over a mouth, like a mouth box set up on a pedestal.",
+    "fixed": true
+  },
+  "申": {
+    "name": "monkey sign",
+    "note": "A sun box with a post through its middle, a stake driven through a window.",
+    "fixed": true
+  },
+  "亜": {
+    "name": "asia",
+    "note": "Two bars with a mouth between side posts, a gate-like frame for Asia.",
+    "fixed": true
+  },
+  "交": {
+    "name": "mingle",
+    "note": "A lid over a father's crossing legs, two people crossing paths.",
+    "fixed": true
+  },
+  "契": {
+    "name": "pledge",
+    "note": "A TV antenna over a sword and a large figure, a vow cut in wood.",
+    "fixed": true
+  },
+  "尚": {
+    "name": "esteem",
+    "note": "A sparkle over a frame and a mouth, something held up high in esteem.",
+    "fixed": true
+  },
+  "甲": {
+    "name": "armor",
+    "note": "A sun box with the post running through both ends, like a turtle's shell armor.",
+    "fixed": true
+  },
+  "与": {
+    "name": "bestow",
+    "note": "A bar and a hooked crossbar over a stroke, two hands handing something over.",
+    "fixed": true
+  },
+  "単": {
+    "name": "simple",
+    "note": "Fireworks over a box crossed by a post, one plain lantern: simple.",
+    "fixed": true
+  },
+  "中": {
+    "name": "middle",
+    "note": "A post piercing the centre of a mouth: the middle.",
+    "fixed": true
+  },
+  "共": {
+    "name": "together",
+    "note": "A bar held up by eight's two legs, hands lifting a load together.",
+    "fixed": true
+  },
+  "幾": {
+    "name": "how many",
+    "note": "Two twists over a sentry, counting how many threads he guards.",
+    "fixed": true
+  },
+  "式": {
+    "name": "ceremony",
+    "note": "A stake hook over a workbench, ceremony tools laid out by the book.",
+    "fixed": true
+  },
+  "安": {
+    "name": "relax",
+    "note": "A roof over a woman: calm and relaxed at home.",
+    "fixed": true
+  },
+  "央": {
+    "name": "center",
+    "note": "A large figure with a box over its head, standing in the centre.",
+    "fixed": true
+  },
+  "右": {
+    "name": "right",
+    "note": "A slash and a bar over a mouth: the hand that feeds the mouth.",
+    "fixed": true
+  },
+  "成": {
+    "name": "turn into",
+    "note": "A boomerang over a spear, something forged into its final shape.",
+    "fixed": true
+  },
+  "化": {
+    "name": "change",
+    "note": "A coat hook beside a spoon, one body turning into another: change.",
+    "fixed": true
+  },
+  "度": {
+    "name": "degrees",
+    "note": "A shed over a tray and a pretzel hand, measuring by hand.",
+    "fixed": true
+  },
+  "祭": {
+    "name": "ritual",
+    "note": "Meat and a pretzel hand over an altar, an offering made at a ritual.",
+    "fixed": true
+  },
+  "敬": {
+    "name": "awe",
+    "note": "A hedgehog beside a fan, curled up humbly in awe.",
+    "fixed": true
+  },
+  "者": {
+    "name": "someone",
+    "note": "A stuck javelin and a bar over a sun box: someone in a hat.",
+    "fixed": true
+  },
+  "呂": {
+    "name": "spine",
+    "note": "Two mouth boxes stacked and linked, the vertebrae of a spine.",
+    "fixed": true
+  },
+  "民": {
+    "name": "people",
+    "note": "A flat clan shape with a hook on the lower side: the common people.",
+    "fixed": true
+  },
+  "去": {
+    "name": "gone",
+    "note": "Soil with an elbow on top, something that has left the ground.",
+    "fixed": true
+  },
+  "最": {
+    "name": "utmost",
+    "note": "A sun box over the take part, snatching the very top: utmost.",
+    "fixed": true
+  },
+  "由": {
+    "name": "reason",
+    "note": "A box with a post rising through its top, a jar with a stem: the reason.",
+    "fixed": true
+  },
+  "兼": {
+    "name": "concurrently",
+    "note": "Horns over a rake and two posts, two stalks gathered in one hand.",
+    "fixed": true
+  },
+  "何": {
+    "name": "what",
+    "note": "A coat hook beside approval, asking what can be done.",
+    "fixed": true
+  },
+  "廷": {
+    "name": "imperial court",
+    "note": "A spindle on top of a long stride, a procession walking into court.",
+    "fixed": true
+  },
+  "系": {
+    "name": "lineage",
+    "note": "A slash over a thread, a line linking one generation to the next.",
+    "fixed": true
+  },
+  "取": {
+    "name": "take",
+    "note": "An ear beside a pretzel hand, grabbing something by the ear.",
+    "fixed": true
+  },
+  "兄": {
+    "name": "big brother",
+    "note": "A mouth on top of legs, the older boy who talks and strides ahead.",
+    "fixed": true
+  },
+  "了": {
+    "name": "complete",
+    "note": "A hooked post with a small bar, the final stroke finished.",
+    "fixed": true
+  },
+  "憂": {
+    "name": "melancholy",
+    "note": "A head, a blanket, a heart and a folding chair, grief weighing a walker down.",
+    "fixed": true
+  },
+  "布": {
+    "name": "cloth",
+    "note": "A slash and a bar over a towel, cloth hung on a pole.",
+    "fixed": true
+  },
+  "原": {
+    "name": "meadow",
+    "note": "A cliff over white and little, an open field below a slope.",
+    "fixed": true
+  },
+  "吉": {
+    "name": "good luck",
+    "note": "A gentleman over a mouth, a kind word from a wise man: good luck.",
+    "fixed": true
+  },
+  "束": {
+    "name": "bundle",
+    "note": "A tree with a box tied around its middle, firewood bound in a bundle.",
+    "fixed": true
+  },
+  "並": {
+    "name": "row",
+    "note": "Horns and a bar over a bar chart, people standing side by side in a row.",
+    "fixed": true
+  },
+  "客": {
+    "name": "guest",
+    "note": "A roof over each, a visitor stepping in out of the rain.",
+    "fixed": true
+  },
+  "乞": {
+    "name": "beg",
+    "note": "A zigzag with a flat bar across it, a hand held out to beg.",
+    "fixed": true
+  },
+  "付": {
+    "name": "attach",
+    "note": "A coat hook beside a golf club, one thing sticking to another.",
+    "fixed": true
+  },
+  "甚": {
+    "name": "tremendously",
+    "note": "A yoke over a hooked base, far too much of something sweet.",
+    "fixed": true
+  },
+  "代": {
+    "name": "substitute",
+    "note": "A coat hook beside a stake, one person taking another's place.",
+    "fixed": true
+  },
+  "予": {
+    "name": "beforehand",
+    "note": "A pizza wedge over a hooked post, a shuttle pushed ahead.",
+    "fixed": true
+  },
+  "分": {
+    "name": "part",
+    "note": "Eight strokes splitting apart over a sword, a thing cut in two.",
+    "fixed": true
+  },
+  "章": {
+    "name": "badge",
+    "note": "A stand over early, an emblem on a pole: a badge.",
+    "fixed": true
+  },
+  "垂": {
+    "name": "droop",
+    "note": "A thousand over a soil base, a branch drooping to the ground.",
+    "fixed": true
+  },
+  "卸": {
+    "name": "wholesale",
+    "note": "Noon, a stop and a stamp side by side, goods unloaded in bulk.",
+    "fixed": true
+  },
+  "今": {
+    "name": "now",
+    "note": "An umbrella over a bar and a hook, this moment under one roof.",
+    "fixed": true
+  },
+  "果": {
+    "name": "fruit",
+    "note": "A rice field sitting on a tree, ripe fruit on the branch.",
+    "fixed": true
+  },
+  "任": {
+    "name": "entrust",
+    "note": "A coat hook beside a spindle, handing a duty to someone.",
+    "fixed": true
+  },
+  "景": {
+    "name": "scenery",
+    "note": "A sun over capital, light falling across a wide view.",
+    "fixed": true
+  },
+  "余": {
+    "name": "too much",
+    "note": "An umbrella over a little shape, a surplus tucked underneath.",
+    "fixed": true
+  },
+  "京": {
+    "name": "capital",
+    "note": "A lid, a mouth and a little: a tall tower in the big capital.",
+    "fixed": true
+  },
+  "叔": {
+    "name": "uncle",
+    "note": "A candlestick beside a pretzel hand, a younger uncle.",
+    "fixed": true
+  },
+  "毎": {
+    "name": "every",
+    "note": "A slash over a window, the same chore done every time.",
+    "fixed": true
+  },
+  "府": {
+    "name": "government office",
+    "note": "A shed over attach, a government office building.",
+    "fixed": true
+  },
+  "相": {
+    "name": "mutual",
+    "note": "A tree beside an eye, two sides looking at each other.",
+    "fixed": true
+  },
+  "利": {
+    "name": "profit",
+    "note": "Grain beside a dagger, a harvest cut and sold at a profit.",
+    "fixed": true
+  },
+  "延": {
+    "name": "prolong",
+    "note": "Correct over a long stride, a path stretched further.",
+    "fixed": true
+  },
+  "三": {
+    "name": "three",
+    "note": "Three flat bars stacked: the numeral three.",
+    "fixed": true
+  },
+  "息": {
+    "name": "breath",
+    "note": "A phone booth over a heart, air drawn from the chest.",
+    "fixed": true
+  },
+  "采": {
+    "name": "dice",
+    "note": "A claw over a tree, a hand picking from a branch.",
+    "fixed": true
+  },
+  "昔": {
+    "name": "antiquity",
+    "note": "A goal over a sun box, days long gone: antiquity.",
+    "fixed": true
+  },
+  "我": {
+    "name": "ego",
+    "note": "A spear with a hook beside a slash, a self ready to fight.",
+    "fixed": true
+  },
+  "雲": {
+    "name": "cloud",
+    "note": "Rain on top of a kite, the sky filling up with cloud.",
+    "fixed": true
+  },
+  "路": {
+    "name": "path",
+    "note": "A foot beside each, one step after another down the road.",
+    "fixed": true
+  },
+  "南": {
+    "name": "south",
+    "note": "A ten over a frame and a drying rack, the warm side of the house.",
+    "fixed": true
+  },
+  "間": {
+    "name": "interval",
+    "note": "A sun inside a gate, light through the gap between the doors.",
+    "fixed": true
+  },
+  "建": {
+    "name": "build",
+    "note": "A brush over a long stride, a plan drawn and raised.",
+    "fixed": true
+  },
+  "昆": {
+    "name": "descendants",
+    "note": "A sun over two spoons, many small creatures crawling in the light.",
+    "fixed": true
+  },
+  "旨": {
+    "name": "delicious",
+    "note": "A spoon over a sun, a tasty bite.",
+    "fixed": true
+  },
+  "義": {
+    "name": "justice",
+    "note": "A sheep over ego, doing right by yourself.",
+    "fixed": true
+  },
+  "幸": {
+    "name": "happiness",
+    "note": "Soil over a mast, a lucky day with a sturdy sail.",
+    "fixed": true
+  },
+  "列": {
+    "name": "rank",
+    "note": "Bones beside a dagger, bones lined up in a rank.",
+    "fixed": true
+  },
+  "唐": {
+    "name": "china",
+    "note": "A shed over a rake and a mouth, a grand old empire.",
+    "fixed": true
+  },
+  "介": {
+    "name": "jammed in",
+    "note": "An umbrella over a slash and a post, a person squeezed in between.",
+    "fixed": true
+  },
+  "奉": {
+    "name": "offer",
+    "note": "A Christmas tree over a post, an offering held high.",
+    "fixed": true
+  },
+  "尼": {
+    "name": "nun",
+    "note": "A flag over a spoon, a woman sitting quietly: a nun.",
+    "fixed": true
+  },
+  "売": {
+    "name": "sell",
+    "note": "A gentleman over a blanket and legs, goods carried out to market.",
+    "fixed": true
+  },
+  "友": {
+    "name": "friend",
+    "note": "A bar and a slash over a pretzel hand, two hands joined: friends.",
+    "fixed": true
+  },
+  "公": {
+    "name": "public",
+    "note": "Eight over an elbow, open to all: public.",
+    "fixed": true
+  },
+  "合": {
+    "name": "fit",
+    "note": "An umbrella over a bar and a mouth, a lid fitted on its box.",
+    "fixed": true
+  },
+  "奇": {
+    "name": "strange",
+    "note": "A large figure over approval, something odd that stands out.",
+    "fixed": true
+  },
+  "制": {
+    "name": "system",
+    "note": "A cow and a towel beside a dagger, rules cut to size.",
+    "fixed": true
+  },
+  "曽": {
+    "name": "formerly",
+    "note": "Two dots over a rice field and a sun, layers of past days.",
+    "fixed": true
+  },
+  "責": {
+    "name": "blame",
+    "note": "A TV antenna over a shellfish, a debt someone has to pay.",
+    "fixed": true
+  },
+  "是": {
+    "name": "just so",
+    "note": "A sun over a giant boot, pointing right at it: just so.",
+    "fixed": true
+  },
+  "告": {
+    "name": "tell",
+    "note": "A cow over a mouth, a shout that carries far.",
+    "fixed": true
+  },
+  "壮": {
+    "name": "robust",
+    "note": "A climbing pole beside a gentleman, a strong man.",
+    "fixed": true
+  },
+  "丘": {
+    "name": "hill",
+    "note": "An axe over a bar, a small rise in the ground.",
+    "fixed": true
+  },
+  "半": {
+    "name": "half",
+    "note": "Two dots over a ten, something cut down the middle.",
+    "fixed": true
+  },
+  "兆": {
+    "name": "portent",
+    "note": "Two pairs of cracks over legs, a shell split to read the future.",
+    "fixed": true
+  },
+  "多": {
+    "name": "many",
+    "note": "Two evenings stacked up, night after night: many.",
+    "fixed": true
+  },
+  "炎": {
+    "name": "flame",
+    "note": "One fire piled on another, a roaring blaze.",
+    "fixed": true
+  },
+  "到": {
+    "name": "arrival",
+    "note": "A podium beside a dagger, finally getting there.",
+    "fixed": true
+  },
+  "固": {
+    "name": "harden",
+    "note": "Old sealed inside a cage, set firm.",
+    "fixed": true
+  },
+  "忍": {
+    "name": "endure",
+    "note": "A blade over a heart, bearing the cut without a sound.",
+    "fixed": true
+  },
+  "早": {
+    "name": "early",
+    "note": "A sun over a ten, the sun just up: early.",
+    "fixed": true
+  },
+  "旧": {
+    "name": "old times",
+    "note": "A post beside a sun, a day that has gone by.",
+    "fixed": true
+  },
+  "貴": {
+    "name": "precious",
+    "note": "Middle over a shellfish, a treasured pearl.",
+    "fixed": true
+  },
+  "刑": {
+    "name": "punish",
+    "note": "A hurdle beside a dagger, a sentence handed down.",
+    "fixed": true
+  },
+  "曲": {
+    "name": "melody",
+    "note": "A bent frame with two posts inside, a winding tune.",
+    "fixed": true
+  },
+  "動": {
+    "name": "move",
+    "note": "Heavy beside a muscle, using strength to shift something.",
+    "fixed": true
+  },
+  "帝": {
+    "name": "emperor",
+    "note": "A lid, a blanket and a towel on a stand, the highest ruler.",
+    "fixed": true
+  },
+  "平": {
+    "name": "flat",
+    "note": "A flat bar with a dot on each side over a post, a level plain.",
+    "fixed": true
+  },
+  "能": {
+    "name": "ability",
+    "note": "A teapot over two spoons, a bear's many skills.",
+    "fixed": true
+  },
+  "充": {
+    "name": "fill",
+    "note": "A lid over a toddler, topping something up.",
+    "fixed": true
+  },
+  "北": {
+    "name": "north",
+    "note": "Two people turned back to back, away from the sun: north.",
+    "fixed": true
+  },
+  "以": {
+    "name": "because",
+    "note": "A dot beside a person-like hook, a mark pointing to the cause.",
+    "fixed": true
+  },
+  "象": {
+    "name": "elephant",
+    "note": "A boomerang over a pig, a pig-like body with a long trunk: elephant.",
+    "fixed": true
+  },
+  "倉": {
+    "name": "warehouse",
+    "note": "An umbrella over a door and a mouth, a storehouse.",
+    "fixed": true
+  },
+  "放": {
+    "name": "set free",
+    "note": "A sail beside a fan, let loose with a tap.",
+    "fixed": true
+  },
+  "争": {
+    "name": "contend",
+    "note": "A boomerang over a rake and a crowbar, two hands pulling a rope.",
+    "fixed": true
+  },
+  "員": {
+    "name": "employee",
+    "note": "A mouth over a shellfish, a member who earns his coins.",
+    "fixed": true
+  },
+  "宿": {
+    "name": "inn",
+    "note": "A roof over a lodger, a night's lodging at the inn.",
+    "fixed": true
+  },
+  "即": {
+    "name": "instant",
+    "note": "A robot beside a stamp, sitting down at once.",
+    "fixed": true
+  },
+  "区": {
+    "name": "ward",
+    "note": "Crossed scissors inside a drawer open on the right, one city block.",
+    "fixed": true
+  },
+  "凡": {
+    "name": "commonplace",
+    "note": "A table with a dot, an everyday thing.",
+    "fixed": true
+  },
+  "呈": {
+    "name": "display",
+    "note": "A mouth over a king, presenting something.",
+    "fixed": true
+  },
+  "昭": {
+    "name": "shining",
+    "note": "A sun beside call, bright light shining.",
+    "fixed": true
+  },
+  "午": {
+    "name": "noon",
+    "note": "A bar through a drying rack, a shadow pointing straight down at noon.",
+    "fixed": true
+  },
+  "会": {
+    "name": "meeting",
+    "note": "An umbrella over a kite, people gathering for a meeting.",
+    "fixed": true
+  },
+  "暴": {
+    "name": "outburst",
+    "note": "A sun over a water fight, a storm breaking loose.",
+    "fixed": true
+  },
+  "内": {
+    "name": "inside",
+    "note": "A person tucked inside a frame: inside.",
+    "fixed": true
+  },
+  "呉": {
+    "name": "give",
+    "note": "A mouth over a bar and eight, offering kind words.",
+    "fixed": true
+  },
+  "凶": {
+    "name": "villain",
+    "note": "Crossed scissors inside a bucket, a bad omen.",
+    "fixed": true
+  },
+  "票": {
+    "name": "ballot",
+    "note": "West over an altar, a slip set down to vote.",
+    "fixed": true
+  },
+  "斥": {
+    "name": "reject",
+    "note": "An axe with a dot, chopping something away.",
+    "fixed": true
+  },
+  "包": {
+    "name": "pack up",
+    "note": "A wrap over a cobra, a baby bundled in cloth.",
+    "fixed": true
+  },
+  "受": {
+    "name": "accept",
+    "note": "A claw over a blanket and a pretzel hand, receiving what is passed down.",
+    "fixed": true
+  },
+  "道": {
+    "name": "road",
+    "note": "A neck over a ramp, the way you follow.",
+    "fixed": true
+  },
+  "貫": {
+    "name": "pierce",
+    "note": "A window over a shellfish, shells strung on a thread.",
+    "fixed": true
+  },
+  "敢": {
+    "name": "daring",
+    "note": "An ear beside a fan, bold enough to listen.",
+    "fixed": true
+  },
+  "君": {
+    "name": "mister",
+    "note": "A baton over a mouth, a lord speaking.",
+    "fixed": true
+  },
+  "然": {
+    "name": "so",
+    "note": "A moon, a dog and hot coals, meat roasting over flames.",
+    "fixed": true
+  },
+  "必": {
+    "name": "certain",
+    "note": "A slash across a heart, a sure cut.",
+    "fixed": true
+  },
+  "丸": {
+    "name": "round",
+    "note": "A nine with a dot, a round ball.",
+    "fixed": true
+  },
+  "処": {
+    "name": "dispose",
+    "note": "A folding chair over a table, a place to settle things.",
+    "fixed": true
+  },
+  "男": {
+    "name": "male",
+    "note": "A rice field over a muscle, a farmer with strength.",
+    "fixed": true
+  },
+  "東": {
+    "name": "east",
+    "note": "A sun behind a tree, the sunrise in the east.",
+    "fixed": true
+  },
+  "般": {
+    "name": "carrier",
+    "note": "A boat beside a maiden, rowing goods along.",
+    "fixed": true
+  },
+  "奴": {
+    "name": "guy",
+    "note": "A woman beside a pretzel hand, a servant.",
+    "fixed": true
+  },
+  "司": {
+    "name": "director",
+    "note": "A bar over a mouth, giving orders.",
+    "fixed": true
+  },
+  "宛": {
+    "name": "address",
+    "note": "A roof over a sleeping cat, a house where the post comes to rest.",
+    "fixed": true
+  },
+  "屋": {
+    "name": "shop",
+    "note": "A flag over a podium, a roofed place of business.",
+    "fixed": true
+  },
+  "空": {
+    "name": "sky",
+    "note": "A hole over a workbench, the open sky.",
+    "fixed": true
+  },
+  "番": {
+    "name": "turn",
+    "note": "A paw over a rice field, a numbered turn.",
+    "fixed": true
+  },
+  "発": {
+    "name": "departure",
+    "note": "A tent over two and legs, sent off.",
+    "fixed": true
+  },
+  "容": {
+    "name": "form",
+    "note": "A roof over a valley, a vessel holding things.",
+    "fixed": true
+  },
+  "灰": {
+    "name": "ashes",
+    "note": "A cliff over a fire, burnt remains.",
+    "fixed": true
+  },
+  "秀": {
+    "name": "excel",
+    "note": "Grain over a folding ruler, a plant sticking up above the rest.",
+    "fixed": true
+  },
+  "夜": {
+    "name": "night",
+    "note": "A lid, a coat hook person and an evening: dark falls.",
+    "fixed": true
+  },
+  "出": {
+    "name": "exit",
+    "note": "One mountain stacked on a bucket, something coming out.",
+    "fixed": true
+  },
+  "既": {
+    "name": "previously",
+    "note": "A robot beside a chair back, finished eating.",
+    "fixed": true
+  },
+  "召": {
+    "name": "call",
+    "note": "A sword over a mouth, a summons.",
+    "fixed": true
+  },
+  "要": {
+    "name": "need",
+    "note": "West over a woman, the waist, essential.",
+    "fixed": true
+  },
+  "朱": {
+    "name": "vermilion",
+    "note": "A tree with a slash across the trunk, red-barked cinnabar.",
+    "fixed": true
+  },
+  "為": {
+    "name": "do",
+    "note": "A dot over a wrap and hot coals, performing a task.",
+    "fixed": true
+  },
+  "賞": {
+    "name": "prize",
+    "note": "Esteem over a shellfish, a reward.",
+    "fixed": true
+  },
+  "死": {
+    "name": "death",
+    "note": "Bones beside a spoon, what is left after death.",
+    "fixed": true
+  },
+  "頃": {
+    "name": "about",
+    "note": "A spoon beside a rubber duck, a moment.",
+    "fixed": true
+  },
+  "射": {
+    "name": "shoot",
+    "note": "A pot belly beside a golf club, an archer's aim.",
+    "fixed": true
+  },
+  "永": {
+    "name": "eternity",
+    "note": "A dot over water, a long river.",
+    "fixed": true
+  },
+  "天": {
+    "name": "heavens",
+    "note": "A large figure with a bar on top, the sky above.",
+    "fixed": true
+  },
+  "広": {
+    "name": "wide",
+    "note": "A shed over an elbow, a spacious room.",
+    "fixed": true
+  },
+  "舎": {
+    "name": "cottage",
+    "note": "An umbrella over a gentleman and a mouth, a small house.",
+    "fixed": true
+  },
+  "万": {
+    "name": "ten thousand",
+    "note": "A bar over a hooked stroke, a big number.",
+    "fixed": true
+  },
+  "升": {
+    "name": "measuring box",
+    "note": "A slash over a goal, a measuring box.",
+    "fixed": true
+  },
+  "因": {
+    "name": "cause",
+    "note": "A large figure inside a cage, the reason.",
+    "fixed": true
+  },
+  "同": {
+    "name": "same",
+    "note": "A frame over a bar and a mouth, alike.",
+    "fixed": true
+  },
+  "帯": {
+    "name": "sash",
+    "note": "A comb over a blanket and a towel, a belt.",
+    "fixed": true
+  },
+  "回": {
+    "name": "revolve",
+    "note": "A mouth inside a cage, going round.",
+    "fixed": true
+  },
+  "復": {
+    "name": "restore",
+    "note": "A chairlift beside a deck chair, going back.",
+    "fixed": true
+  },
+  "郷": {
+    "name": "home town",
+    "note": "A squiggle, a robot and a pennant, a native place.",
+    "fixed": true
+  },
+  "苗": {
+    "name": "seedling",
+    "note": "Grass over a rice field, a sprout.",
+    "fixed": true
+  },
+  "畜": {
+    "name": "livestock",
+    "note": "A spool over a rice field, animals kept on the farm.",
+    "fixed": true
+  },
+  "加": {
+    "name": "add",
+    "note": "A muscle beside a mouth, adding more.",
+    "fixed": true
+  },
+  "蔵": {
+    "name": "storehouse",
+    "note": "Grass over a cliff, a spear and a servant, a store.",
+    "fixed": true
+  },
+  "替": {
+    "name": "exchange",
+    "note": "Two husbands over a sun, swapped.",
+    "fixed": true
+  },
+  "農": {
+    "name": "farmers",
+    "note": "A melody over a clam, farming.",
+    "fixed": true
+  },
+  "思": {
+    "name": "think",
+    "note": "A rice field over a heart, thoughts.",
+    "fixed": true
+  },
+  "志": {
+    "name": "intention",
+    "note": "A gentleman over a heart, a goal.",
+    "fixed": true
+  },
+  "監": {
+    "name": "oversee",
+    "note": "A servant and a diving board over a dish, watching.",
+    "fixed": true
+  },
+  "光": {
+    "name": "ray",
+    "note": "A sparkle over a stool, beams spreading.",
+    "fixed": true
+  },
+  "明": {
+    "name": "bright",
+    "note": "A sun beside a moon, shining light.",
+    "fixed": true
+  },
+  "却": {
+    "name": "instead",
+    "note": "Gone beside a stamp, stepping back.",
+    "fixed": true
+  },
+  "家": {
+    "name": "house",
+    "note": "A roof over a pig, a household.",
+    "fixed": true
+  },
+  "良": {
+    "name": "good",
+    "note": "A dot over a robot, a fine fellow.",
+    "fixed": true
+  },
+  "育": {
+    "name": "bring up",
+    "note": "A lid and an elbow over a moon, raising.",
+    "fixed": true
+  },
+  "刃": {
+    "name": "blade",
+    "note": "A sword with a dot on its edge.",
+    "fixed": true
+  },
+  "串": {
+    "name": "skewer",
+    "note": "Two mouths pierced by a post, a skewer.",
+    "fixed": true
+  },
+  "朝": {
+    "name": "morning",
+    "note": "A kebab beside a moon, the dawn when the moon is still up.",
+    "fixed": true
+  },
+  "太": {
+    "name": "plump",
+    "note": "A large figure with a dot, plump.",
+    "fixed": true
+  },
+  "参": {
+    "name": "visit",
+    "note": "An elbow over a large figure and whiskers, going.",
+    "fixed": true
+  },
+  "将": {
+    "name": "general",
+    "note": "A climbing pole beside a claw and a golf club, a general.",
+    "fixed": true
+  },
+  "某": {
+    "name": "so-and-so",
+    "note": "A yoke over a tree, a certain someone left unnamed.",
+    "fixed": true
+  },
+  "意": {
+    "name": "idea",
+    "note": "A chime over a heart, a thought.",
+    "fixed": true
+  },
+  "屈": {
+    "name": "yield",
+    "note": "A flag over exit, something bent over on its way out.",
+    "fixed": true
+  },
+  "兵": {
+    "name": "soldier",
+    "note": "A hill over eight, a soldier.",
+    "fixed": true
+  },
+  "従": {
+    "name": "accompany",
+    "note": "A chairlift beside a giant boot, following.",
+    "fixed": true
+  },
+  "折": {
+    "name": "fold",
+    "note": "An anchor beside an axe, breaking.",
+    "fixed": true
+  },
+  "県": {
+    "name": "prefecture",
+    "note": "An eye over a little, a region.",
+    "fixed": true
+  },
+  "疑": {
+    "name": "doubt",
+    "note": "A spoon, a dart and a giant boot, hesitating.",
+    "fixed": true
+  },
+  "敏": {
+    "name": "cleverness",
+    "note": "Every beside a fan, quick and alert.",
+    "fixed": true
+  },
+  "左": {
+    "name": "left",
+    "note": "A slash and a bar over a workbench, the helping hand.",
+    "fixed": true
+  },
+  "守": {
+    "name": "guard",
+    "note": "A roof over a golf club, protecting.",
+    "fixed": true
+  },
+  "虚": {
+    "name": "void",
+    "note": "A tiger over a bar chart, empty.",
+    "fixed": true
+  },
+  "末": {
+    "name": "end",
+    "note": "A tree with a longer upper branch, the tip.",
+    "fixed": true
+  },
+  "雇": {
+    "name": "employ",
+    "note": "A door over a sparrow, hired.",
+    "fixed": true
+  },
+  "頼": {
+    "name": "trust",
+    "note": "A bundle beside a rubber duck, relying.",
+    "fixed": true
+  },
+  "尉": {
+    "name": "jailer",
+    "note": "A flag, an altar and a golf club, an officer.",
+    "fixed": true
+  },
+  "戻": {
+    "name": "return",
+    "note": "A door over a large figure, a return.",
+    "fixed": true
+  },
+  "戒": {
+    "name": "commandment",
+    "note": "A spear over a goal, a warning.",
+    "fixed": true
+  },
+  "異": {
+    "name": "different",
+    "note": "A rice field over together, different.",
+    "fixed": true
+  },
+  "歩": {
+    "name": "walk",
+    "note": "A stop over few, a foot placed down a few times: a walk.",
+    "fixed": true
+  },
+  "卑": {
+    "name": "lowly",
+    "note": "A slash and a field with a ten, humble.",
+    "fixed": true
+  },
+  "庶": {
+    "name": "commoner",
+    "note": "A shed over a tray and hot coals, ordinary.",
+    "fixed": true
+  },
+  "匹": {
+    "name": "equal",
+    "note": "A drawer open on the right with legs, a pair side by side.",
+    "fixed": true
+  },
+  "務": {
+    "name": "task",
+    "note": "A harpoon, a fan and a muscle, a duty.",
+    "fixed": true
+  },
+  "郎": {
+    "name": "son",
+    "note": "Good beside a pennant, a young man.",
+    "fixed": true
+  },
+  "知": {
+    "name": "know",
+    "note": "A dart beside a mouth, knowing.",
+    "fixed": true
+  },
+  "荒": {
+    "name": "wild",
+    "note": "Grass over a tombstone and a river, ruin.",
+    "fixed": true
+  },
+  "乗": {
+    "name": "ride",
+    "note": "A thousand over a tree, mounting.",
+    "fixed": true
+  },
+  "盾": {
+    "name": "shield",
+    "note": "A cliff over a ten and an eye, a shield.",
+    "fixed": true
+  },
+  "保": {
+    "name": "protect",
+    "note": "A coat hook beside a lollipop, keeping safe.",
+    "fixed": true
+  },
+  "巻": {
+    "name": "volume",
+    "note": "A scarecrow over a cobra, rolled up.",
+    "fixed": true
+  },
+  "貞": {
+    "name": "upright",
+    "note": "A faucet over a shellfish, honest.",
+    "fixed": true
+  },
+  "登": {
+    "name": "ascend",
+    "note": "A tent over beans, climbing.",
+    "fixed": true
+  },
+  "百": {
+    "name": "hundred",
+    "note": "A bar over a sun, a hundred.",
+    "fixed": true
+  },
+  "真": {
+    "name": "true",
+    "note": "A ten over a tool, genuine.",
+    "fixed": true
+  },
+  "州": {
+    "name": "state",
+    "note": "Three streams with dots, a delta.",
+    "fixed": true
+  },
+  "胃": {
+    "name": "stomach",
+    "note": "A rice field over a moon, a stomach.",
+    "fixed": true
+  },
+  "定": {
+    "name": "determine",
+    "note": "A roof over a giant boot, settled.",
+    "fixed": true
+  },
+  "表": {
+    "name": "surface",
+    "note": "A two over a garment, the outside.",
+    "fixed": true
+  },
+  "隊": {
+    "name": "regiment",
+    "note": "A pennant beside a pig, a squad.",
+    "fixed": true
+  },
+  "普": {
+    "name": "universal",
+    "note": "A row over a sun, light spread evenly everywhere.",
+    "fixed": true
+  },
+  "若": {
+    "name": "young",
+    "note": "Grass over the right-hand part, a fresh young shoot.",
+    "fixed": true
+  },
+  "名": {
+    "name": "name",
+    "note": "An evening over a mouth, a name called out at night.",
+    "fixed": true
+  },
+  "享": {
+    "name": "enjoy",
+    "note": "A lid, a mouth and a child, savouring.",
+    "fixed": true
+  },
+  "禁": {
+    "name": "ban",
+    "note": "A grove over an altar, forbidden.",
+    "fixed": true
+  },
+  "居": {
+    "name": "reside",
+    "note": "A flag over old, someone who has settled in to live there.",
+    "fixed": true
+  },
+  "童": {
+    "name": "juvenile",
+    "note": "A stand over a farm, a child.",
+    "fixed": true
+  },
+  "卓": {
+    "name": "desk",
+    "note": "A faucet over early, outstanding.",
+    "fixed": true
+  },
+  "寿": {
+    "name": "longevity",
+    "note": "Three over a golf club, long life.",
+    "fixed": true
+  },
+  "察": {
+    "name": "guess",
+    "note": "A roof over a ritual, inspecting.",
+    "fixed": true
+  },
+  "伐": {
+    "name": "fell",
+    "note": "A coat hook beside a spear, cutting down.",
+    "fixed": true
+  },
+  "量": {
+    "name": "quantity",
+    "note": "Daybreak over a farm, measuring.",
+    "fixed": true
+  },
+  "曹": {
+    "name": "office",
+    "note": "A melody over a sun, a bureau.",
+    "fixed": true
+  },
+  "維": {
+    "name": "fiber",
+    "note": "A thread beside a sparrow, a rope.",
+    "fixed": true
+  },
+  "有": {
+    "name": "possess",
+    "note": "A slash and a bar over a moon, holding.",
+    "fixed": true
+  },
+  "徴": {
+    "name": "sign",
+    "note": "A chairlift, a mountain, a king and a fan, a sign.",
+    "fixed": true
+  },
+  "宗": {
+    "name": "religion",
+    "note": "A roof over an altar, a shrine.",
+    "fixed": true
+  },
+  "波": {
+    "name": "waves",
+    "note": "Water drops beside a pelt, ripples.",
+    "fixed": true
+  },
+  "善": {
+    "name": "virtuous",
+    "note": "A sheep over a mouth, kindly.",
+    "fixed": true
+  },
+  "冒": {
+    "name": "risk",
+    "note": "A sun over an eye, daring.",
+    "fixed": true
+  },
+  "委": {
+    "name": "committee",
+    "note": "Grain over a woman, entrusted.",
+    "fixed": true
+  },
+  "恵": {
+    "name": "favor",
+    "note": "A reason over a heart, kindness.",
+    "fixed": true
+  },
+  "全": {
+    "name": "whole",
+    "note": "An umbrella over a king, entire.",
+    "fixed": true
+  },
+  "段": {
+    "name": "grade",
+    "note": "Stacked step strokes beside a maiden, stairs.",
+    "fixed": true
+  },
+  "属": {
+    "name": "belong",
+    "note": "A flag over a lizard, attached.",
+    "fixed": true
+  },
+  "焦": {
+    "name": "char",
+    "note": "A sparrow over hot coals, scorched.",
+    "fixed": true
+  },
+  "秋": {
+    "name": "autumn",
+    "note": "Grain beside a fire, the red harvest.",
+    "fixed": true
+  },
+  "疾": {
+    "name": "rapidly",
+    "note": "A leaky shed over a dart, fast.",
+    "fixed": true
+  },
+  "斬": {
+    "name": "beheading",
+    "note": "A car beside an axe, a cut.",
+    "fixed": true
+  },
+  "新": {
+    "name": "new",
+    "note": "A stand and a tree beside an axe, fresh cut.",
+    "fixed": true
+  },
+  "迷": {
+    "name": "astray",
+    "note": "Rice scattered over a ramp, a traveller lost on the road.",
+    "fixed": true
+  },
+  "侯": {
+    "name": "marquis",
+    "note": "A coat hook beside a dart, a lord.",
+    "fixed": true
+  },
+  "上": {
+    "name": "above",
+    "note": "A short bar on top of a long one with a stick, up.",
+    "fixed": true
+  },
+  "下": {
+    "name": "below",
+    "note": "A long bar above a stick with a dot, down.",
+    "fixed": true
+  },
+  "需": {
+    "name": "demand",
+    "note": "Rain over a beard, waiting.",
+    "fixed": true
+  },
+  "切": {
+    "name": "cut",
+    "note": "Seven beside a sword, slicing.",
+    "fixed": true
+  },
+  "星": {
+    "name": "star",
+    "note": "A sun over life, a twinkle.",
+    "fixed": true
+  },
+  "考": {
+    "name": "consider",
+    "note": "A stuck javelin over a cane, pondering.",
+    "fixed": true
+  },
+  "就": {
+    "name": "concerning",
+    "note": "Capital beside a broken crutch, settling.",
+    "fixed": true
+  },
+  "弱": {
+    "name": "weak",
+    "note": "Two bows with two ice drops, soft.",
+    "fixed": true
+  },
+  "臭": {
+    "name": "stinking",
+    "note": "A phone booth over a dog, smelling.",
+    "fixed": true
+  },
+  "妻": {
+    "name": "wife",
+    "note": "A rake over a woman, a wife.",
+    "fixed": true
+  },
+  "豊": {
+    "name": "bountiful",
+    "note": "A melody over beans, plenty.",
+    "fixed": true
+  },
+  "旬": {
+    "name": "season",
+    "note": "A wrap over a sun, a period.",
+    "fixed": true
+  },
+  "武": {
+    "name": "warrior",
+    "note": "A bar over a stake and a stop, arms.",
+    "fixed": true
+  },
+  "孫": {
+    "name": "grandchild",
+    "note": "A child beside lineage, descendants.",
+    "fixed": true
+  },
+  "六": {
+    "name": "six",
+    "note": "A lid over eight's legs, the numeral six.",
+    "fixed": true
+  },
+  "感": {
+    "name": "emotion",
+    "note": "A drill sergeant over a heart, a feeling in the chest.",
+    "fixed": true
+  },
+  "執": {
+    "name": "tenacious",
+    "note": "Happiness over round, gripping.",
+    "fixed": true
+  },
+  "念": {
+    "name": "wish",
+    "note": "Now over a heart, a thought.",
+    "fixed": true
+  },
+  "尊": {
+    "name": "revered",
+    "note": "A lit dynamite over a golf club, noble.",
+    "fixed": true
+  },
+  "致": {
+    "name": "send",
+    "note": "A podium beside a fan, delivering.",
+    "fixed": true
+  },
+  "丈": {
+    "name": "length",
+    "note": "A bar and crossed scissors, a measure.",
+    "fixed": true
+  },
+  "易": {
+    "name": "easy",
+    "note": "A sun over a broom, simple.",
+    "fixed": true
+  },
+  "勇": {
+    "name": "courage",
+    "note": "A pizza wedge over male, brave.",
+    "fixed": true
+  },
+  "愛": {
+    "name": "love",
+    "note": "A claw, a blanket, a heart and a folding chair, affection.",
+    "fixed": true
+  },
+  "朕": {
+    "name": "imperial we",
+    "note": "A moon beside two and large, the emperor.",
+    "fixed": true
+  },
+  "留": {
+    "name": "detain",
+    "note": "Saloon doors over a rice field, halting.",
+    "fixed": true
+  },
+  "前": {
+    "name": "in front",
+    "note": "Eight over a moon and a dagger, ahead.",
+    "fixed": true
+  },
+  "⺍": {
+    "name": "fireworks",
+    "note": "Three short strokes fanning out on top of a kanji, like a burst of fireworks.",
+    "alts": ["crown", "candle flames", "sprinkle"]
+  },
+  "乂": {
+    "name": "scissors",
+    "note": "Two strokes crossing in an X, like the blades of open scissors.",
+    "alts": ["crossed sticks", "X mark", "chopsticks"]
+  },
+  "昜": {
+    "name": "sunbeams",
+    "note": "A sun over a flat bar, with slanting strokes pouring down below it like rays.",
+    "alts": ["sunrise", "sun shower"]
+  },
+  "云": {
+    "name": "kite",
+    "note": "Two flat bars over a curling hook, a kite with its tail curling below.",
+    "alts": ["puffy cloud", "swing seat", "paper plane"]
+  },
+  "𠦝": {
+    "name": "kebab",
+    "note": "A long post skewering a sun, with a crossbar above it and below it, like a kebab.",
+    "alts": ["totem pole", "sun skewer"]
+  },
+  "开": {
+    "name": "hurdle",
+    "note": "Two crossbars held up by two legs, the left one slanting, like a track hurdle.",
+    "alts": ["torii", "bench"]
+  },
+  "甬": {
+    "name": "padlock",
+    "note": "A hooked loop on top of a barred box, like a padlock with its shackle.",
+    "alts": ["bell", "milk churn"]
+  },
+  "翟": {
+    "name": "peacock",
+    "note": "Two big feathers fanned out over a sparrow, a bird showing off its plumes.",
+    "alts": ["crested bird", "plumed bird"]
+  },
+  "𠔉": {
+    "name": "scarecrow",
+    "note": "Two horn strokes over crossbars on a spread-legged figure, like a scarecrow.",
+    "alts": ["straw man", "rice sheaf"]
+  },
+  "龰": {
+    "name": "sneaker",
+    "note": "A short post with a step at its foot and a long stroke sweeping right, like a sneaker.",
+    "alts": ["skate", "heel"]
+  },
+  "冋": {
+    "name": "TV set",
+    "note": "An open frame with a small box set inside it, like an old television set.",
+    "alts": ["fireplace", "window box"]
+  },
+  "𠂊": {
+    "name": "boomerang",
+    "note": "A short slash meeting a hooked stroke, bent like a boomerang.",
+    "alts": ["hat brim", "bent knee"]
+  },
+  "莫": {
+    "name": "sunset",
+    "note": "Grass on top, a sun in the middle, a big figure below: a sun sinking into tall grass.",
+    "alts": ["meadow", "hayfield"]
+  },
+  "业": {
+    "name": "bar chart",
+    "note": "Two tall posts with short slanting strokes beside them on one base, like a bar chart.",
+    "alts": ["candles", "crown"]
+  },
+  "龶": {
+    "name": "TV antenna",
+    "note": "Three crossbars on one post, the lowest longest, like a rooftop TV antenna.",
+    "alts": ["spine", "mast top"]
+  },
+  "咅": {
+    "name": "soapbox",
+    "note": "A standing figure on top of a box, like a speaker up on a soapbox.",
+    "alts": ["lectern", "trophy"]
+  },
+  "兌": {
+    "name": "imp",
+    "note": "Horns on top of a big mouth on two legs, like a little horned imp.",
+    "alts": ["goat", "viking"]
+  },
+  "其": {
+    "name": "bookshelf",
+    "note": "A frame with stacked shelves inside and two little feet below, like a bookshelf.",
+    "alts": ["dresser", "step stool"]
+  },
+  "甫": {
+    "name": "flyswatter",
+    "note": "A barred grid on a post, crossed at the top with a dot beside it, like a flyswatter.",
+    "alts": ["tennis racket", "trellis", "waffle"]
+  },
+  "曷": {
+    "name": "sunshade",
+    "note": "A sun above a curved hood with a crouched figure tucked under it, out of the sun.",
+    "alts": ["sun hut", "beach shelter"]
+  },
+  "亥": {
+    "name": "acrobat",
+    "note": "A lid on top of crossing, twisting strokes, like an acrobat mid-tumble.",
+    "alts": ["tumbler", "spinning top"]
+  },
+  "亦": {
+    "name": "jellyfish",
+    "note": "A lid with two strands hanging below and a dot on each side, like a jellyfish.",
+    "alts": ["chandelier", "parachute"]
+  },
+  "乍": {
+    "name": "pitchfork",
+    "note": "A slanted stroke over a post with two short prongs jutting right, like a pitchfork.",
+    "alts": ["toothbrush", "coat rack"]
+  },
+  "㑒": {
+    "name": "campsite",
+    "note": "A peaked roof and bar over a box and two figures, like a tent with campers.",
+    "alts": ["shrine", "festival"]
+  },
+  "圣": {
+    "name": "tumbleweed",
+    "note": "A crossed knot of strokes sitting on a mound of soil, a tumbleweed on the ground.",
+    "alts": ["kite", "knot"]
+  },
+  "戋": {
+    "name": "spear rack",
+    "note": "Two short bars stacked across a spear, like spears hung on a rack.",
+    "alts": ["antenna", "double spear"]
+  },
+  "兪": {
+    "name": "rocket",
+    "note": "A peaked nose and bar over a tall body and two side fins, like a rocket.",
+    "alts": ["chapel", "spaceship"]
+  },
+  "勺": {
+    "name": "scoop",
+    "note": "A curving hook with a single dot inside, a scoop holding one bean.",
+    "alts": ["spoonful", "hook"]
+  },
+  "关": {
+    "name": "alien",
+    "note": "Two little antennae over bars and a spread-legged body, like an alien.",
+    "alts": ["cheerleader", "bug man"]
+  },
+  "𡗗": {
+    "name": "Christmas tree",
+    "note": "Three crossbars on a spread-legged trunk, like a Christmas tree.",
+    "alts": ["pine tree", "haystack"]
+  },
+  "爰": {
+    "name": "claw machine",
+    "note": "A claw on top reaching down over crossed strokes, like an arcade claw machine.",
+    "alts": ["grabber", "crane game"]
+  },
+  "辟": {
+    "name": "chili stall",
+    "note": "A flag over a box beside a spiky chili, like a chili stall with its sign.",
+    "alts": ["spice shop", "market stall"]
+  },
+  "咼": {
+    "name": "cuckoo clock",
+    "note": "A small box on top of a frame holding another box, like a cuckoo clock.",
+    "alts": ["birdhouse", "stacked boxes"]
+  },
+  "壬": {
+    "name": "spindle",
+    "note": "A slash over a post crossed by a long bar and a short bar, like a spindle.",
+    "alts": ["thumbtack", "loom"]
+  },
+  "卯": {
+    "name": "saloon doors",
+    "note": "Two hooked halves facing each other, like a pair of open saloon doors.",
+    "alts": ["butterfly", "earmuffs"]
+  },
+  "𢦏": {
+    "name": "halberd",
+    "note": "A spear with an extra cross stroke at its upper left, like a halberd.",
+    "alts": ["lance", "pike"]
+  },
+  "夭": {
+    "name": "tilted hat",
+    "note": "A spread-armed figure with a slash tilted over its head, like a jaunty hat.",
+    "alts": ["windblown hat", "dancing man"]
+  },
+  "冓": {
+    "name": "scaffolding",
+    "note": "Crossbars stacked on posts over a barred frame, like a builder's scaffold.",
+    "alts": ["woodpile", "crate stack"]
+  },
+  "圭": {
+    "name": "layer cake",
+    "note": "Two mounds of soil stacked one on the other, like a two-tier cake.",
+    "alts": ["double mound", "wedding cake"]
+  },
+  "畐": {
+    "name": "cookie jar",
+    "note": "A bar and a small box over a rice field, like a full jar with its lid on.",
+    "alts": ["storage jar", "full pot"]
+  },
+  "喿": {
+    "name": "treehouse",
+    "note": "Three little boxes perched on top of a tree, like a treehouse.",
+    "alts": ["nesting tree", "noisy tree"]
+  },
+  "卆": {
+    "name": "signpost",
+    "note": "A bent, hooked stroke perched on a cross, like an arm on a signpost.",
+    "alts": ["crossroad sign", "kneeling knight"]
+  },
+  "并": {
+    "name": "rugby posts",
+    "note": "Two horn tips over two crossbars and two legs, like rugby goalposts.",
+    "alts": ["goalposts", "stile"]
+  },
+  "尞": {
+    "name": "bonfire",
+    "note": "A spread figure over a sun with tiny sparks below, like a blazing bonfire.",
+    "alts": ["torch", "beacon"]
+  },
+  "禺": {
+    "name": "gumball machine",
+    "note": "A round box on top of a frame with a twist inside, like a gumball machine.",
+    "alts": ["lantern", "jukebox"]
+  },
+  "㐮": {
+    "name": "laundry pile",
+    "note": "A lid and horns over stacked bars and a flared robe hem, like a pile of laundry.",
+    "alts": ["folded robes", "wardrobe"]
+  },
+  "廿": {
+    "name": "tray",
+    "note": "Two posts crossed by a bar and joined at the bottom, like a tray with handles.",
+    "alts": ["crate", "bread tin"]
+  },
+  "复": {
+    "name": "deck chair",
+    "note": "A diving board over a sun and a folding chair, a deck chair by the pool.",
+    "alts": ["sunlounger", "poolside"]
+  },
+  "帚": {
+    "name": "feather duster",
+    "note": "A rake head over a cover with a towel hanging below, like a feather duster.",
+    "alts": ["duster", "whisk"]
+  },
+  "袁": {
+    "name": "ball gown",
+    "note": "A small mound and a box over a flowing garment, like a long, trailing gown.",
+    "alts": ["cloak", "train"]
+  },
+  "夋": {
+    "name": "stilt walker",
+    "note": "A little head and legs standing on a crossed folding base, like a stilt walker.",
+    "alts": ["unicyclist", "juggler"]
+  },
+  "亢": {
+    "name": "cake stand",
+    "note": "A lid with its knob resting on a little table, like a cake stand.",
+    "alts": ["side table", "stool"]
+  },
+  "从": {
+    "name": "twins",
+    "note": "Two small people side by side, a pair of twins.",
+    "alts": ["pair", "buddies"]
+  },
+  "蒦": {
+    "name": "falconer",
+    "note": "Grass over a sparrow perched on a hand below, like a falconer's catch.",
+    "alts": ["bird catcher", "birdwatcher"]
+  },
+  "戠": {
+    "name": "war gong",
+    "note": "A chime hanging beside a spear, a war gong ready to sound.",
+    "alts": ["battle bell", "banner"]
+  },
+  "侖": {
+    "name": "library",
+    "note": "A peaked roof and bar over a tied scroll, scrolls stored under a roof.",
+    "alts": ["scroll shelf", "archive"]
+  },
+  "丂": {
+    "name": "cane",
+    "note": "A flat bar over a stroke that kinks and hooks down, like a walking cane.",
+    "alts": ["hockey stick", "bent nail"]
+  },
+  "氺": {
+    "name": "fountain",
+    "note": "A center hook with short strokes splashing out to each side, like a fountain.",
+    "alts": ["splash", "sprinkler"]
+  },
+  "㕣": {
+    "name": "funnel",
+    "note": "Two strokes spreading apart over a small box, like a funnel over a cup.",
+    "alts": ["megaphone", "cone"]
+  },
+  "扁": {
+    "name": "notice board",
+    "note": "A door on top of a bound scroll, like notices pinned to a door.",
+    "alts": ["bulletin", "signboard"]
+  },
+  "劦": {
+    "name": "strongmen",
+    "note": "Three muscle shapes, one big over two small, a team of strongmen.",
+    "alts": ["tug of war", "team"]
+  },
+  "氐": {
+    "name": "sled",
+    "note": "A hooked, sweeping shape resting on a flat runner below, like a sled.",
+    "alts": ["sleigh", "rocking chair"]
+  },
+  "戍": {
+    "name": "sentry",
+    "note": "A spear under a cliff ledge with a dot inside, like a sentry on guard.",
+    "alts": ["guardsman", "watchman"]
+  },
+  "亘": {
+    "name": "sandwich",
+    "note": "A sun squeezed between a top bar and a bottom bar, like a sandwich.",
+    "alts": ["burger", "sun bun"]
+  },
+  "⺗": {
+    "name": "melted heart",
+    "note": "A heart flattened at the bottom: a hook with dots splashing around it.",
+    "alts": ["puddle", "trickle"]
+  },
+  "夹": {
+    "name": "group hug",
+    "note": "A big spread figure with two little people tucked under its arms.",
+    "alts": ["carrier", "bodyguard"]
+  },
+  "壴": {
+    "name": "drum",
+    "note": "A stand on top, a box drumhead and a footed base, like a drum on its stand.",
+    "alts": ["bongo", "snare drum"]
+  },
+  "兹": {
+    "name": "sewing kit",
+    "note": "Two spools side by side under little horns, like a sewing kit.",
+    "alts": ["twin spools", "yarn"]
+  },
+  "賁": {
+    "name": "geyser",
+    "note": "Sprouting crosses spraying up over a shell, like a geyser bursting.",
+    "alts": ["volcano", "spray"]
+  },
+  "夆": {
+    "name": "lookout post",
+    "note": "A folding chair perched on a post crossed by bars, like a lookout post.",
+    "alts": ["maypole", "watchtower"]
+  },
+  "敝": {
+    "name": "rag",
+    "note": "Dots over and inside a frame beside a fan, like torn cloth flapping.",
+    "alts": ["torn cloth", "tatters"]
+  },
+  "埶": {
+    "name": "gardener",
+    "note": "Soil stacked over legs beside a round, kneeling figure, a gardener planting.",
+    "alts": ["planter", "digger"]
+  },
+  "吾": {
+    "name": "high five",
+    "note": "The numeral five held up over a mouth, like a hand raised for a high five.",
+    "alts": ["cheer", "shout"]
+  },
+  "娄": {
+    "name": "rice carrier",
+    "note": "A woman with a bundle of rice balanced on her head.",
+    "alts": ["basket woman", "porter"]
+  },
+  "奐": {
+    "name": "jack-in-the-box",
+    "note": "A hooked top over a frame and legs on a spread figure, like a jack-in-the-box.",
+    "alts": ["pop-up toy", "puppet"]
+  },
+  "坐": {
+    "name": "picnic",
+    "note": "Two little people sitting on a mound of soil, a picnic.",
+    "alts": ["campfire", "sitting pair"]
+  },
+  "乇": {
+    "name": "hanger",
+    "note": "A slash over a bar with a stroke hooking off to the right, like a clothes hanger.",
+    "alts": ["tail", "hook stand"]
+  },
+  "弗": {
+    "name": "dollar sign",
+    "note": "A zigzag crossed by two upright posts, like a dollar sign.",
+    "alts": ["bow and arrows", "quiver"]
+  },
+  "朿": {
+    "name": "thorn bush",
+    "note": "A tree with a frame caught on its trunk, like a thorny bush.",
+    "alts": ["bramble", "cactus"]
+  },
+  "尭": {
+    "name": "chimney",
+    "note": "Sprouting crosses on top of a bar and two legs, like a smoking chimney.",
+    "alts": ["smokestack", "kiln"]
+  },
+  "孚": {
+    "name": "stork",
+    "note": "A claw reaching down over a child, like a stork delivering a baby.",
+    "alts": ["crane", "baby grab"]
+  },
+  "夬": {
+    "name": "slingshot",
+    "note": "A spread figure with a hooked box at its top, like a slingshot pulled back.",
+    "alts": ["catapult", "sling"]
+  },
+  "尃": {
+    "name": "tennis player",
+    "note": "A flyswatter-like grid over a hand with a dot, a tennis player's swing.",
+    "alts": ["racket", "swing"]
+  },
+  "兀": {
+    "name": "stool",
+    "note": "A flat bar on two spreading legs, like a little stool.",
+    "alts": ["bench", "milking stool"]
+  },
+  "彔": {
+    "name": "watering can",
+    "note": "A rake head over splashing strokes, like water pouring from a can.",
+    "alts": ["shower", "sprinkler"]
+  },
+  "尗": {
+    "name": "candlestick",
+    "note": "A short arm on a post over a little hook and two dots, like a candlestick.",
+    "alts": ["lamp", "hat stand"]
+  },
+  "喬": {
+    "name": "skyscraper",
+    "note": "A tilted top over stacked boxes in a frame, like a tall skyscraper.",
+    "alts": ["tower", "high rise"]
+  },
+  "朮": {
+    "name": "apple tree",
+    "note": "A tree with a single dot by its top branch, like an apple hanging there.",
+    "alts": ["fruit tree", "bird in tree"]
+  },
+  "㐬": {
+    "name": "squid",
+    "note": "A lid and a curl on top with three strands trailing down, like a squid.",
+    "alts": ["octopus", "mop head"]
+  },
+  "丗": {
+    "name": "comb",
+    "note": "Three posts crossed by one long bar and joined below, like a comb.",
+    "alts": ["trident", "rake"]
+  },
+  "奚": {
+    "name": "marionette",
+    "note": "A claw at the top holding a looped string over a spread figure, like a marionette.",
+    "alts": ["puppet", "string doll"]
+  },
+  "劵": {
+    "name": "bodybuilder",
+    "note": "Horns and bars over a spread figure with a muscle below, flexing.",
+    "alts": ["weightlifter", "strongman"]
+  },
+  "𠂤": {
+    "name": "snowman",
+    "note": "A slash hat over two stacked bumps, like a little snowman.",
+    "alts": ["stack", "beehive"]
+  },
+  "寉": {
+    "name": "birdhouse",
+    "note": "A roof sheltering a sparrow, a bird in its birdhouse.",
+    "alts": ["nest box", "aviary"]
+  },
+  "宓": {
+    "name": "attic",
+    "note": "A roof over a heart crossed by a slash, a heart hidden in the attic.",
+    "alts": ["hideaway", "secret room"]
+  },
+  "𠂢": {
+    "name": "river delta",
+    "note": "Slanting slashes fanning down-left from one top, like a river splitting into a delta.",
+    "alts": ["branches", "fork"]
+  },
+  "攸": {
+    "name": "fan seller",
+    "note": "A person beside a post and a fan, a seller showing off his fans.",
+    "alts": ["cooling fan", "fan stand"]
+  },
+  "或": {
+    "name": "fort",
+    "note": "A spear guarding a small box on a flat bar, like a little fort.",
+    "alts": ["castle", "outpost"]
+  },
+  "离": {
+    "name": "animal trap",
+    "note": "A lid over a crossed box and a frame with a curl, like a sprung animal trap.",
+    "alts": ["cage trap", "snare"]
+  },
+  "竟": {
+    "name": "bellhop",
+    "note": "A chime with two legs striding under it, like a bellhop.",
+    "alts": ["walking bell", "bell boy"]
+  },
+  "尓": {
+    "name": "sprinkler",
+    "note": "A hooked post with a dot on each side under a slash, like a garden sprinkler.",
+    "alts": ["little umbrella", "fountain"]
+  },
+  "卬": {
+    "name": "twin stamps",
+    "note": "A short hooked stroke beside a stamp, two shapes facing each other.",
+    "alts": ["seesaw", "pair of hooks"]
+  },
+  "冘": {
+    "name": "sleeper",
+    "note": "A blanket spread over two legs, someone asleep under the covers.",
+    "alts": ["bedsheet", "napper"]
+  },
+  "䍃": {
+    "name": "can opener",
+    "note": "A claw reaching down over a tin can, about to pry it open.",
+    "alts": ["can grabber", "claw"]
+  },
+  "溥": {
+    "name": "water polo",
+    "note": "Water drops beside a racket swing, a game of water polo.",
+    "alts": ["rain tennis", "swimmer"]
+  },
+  "酋": {
+    "name": "lit dynamite",
+    "note": "Two little sparks flaring over dynamite, its fuse just lit.",
+    "alts": ["uncorked jug", "fuse"]
+  },
+  "孰": {
+    "name": "ball game",
+    "note": "A child under a lid beside a round, curled shape, playing with a ball.",
+    "alts": ["playroom", "toy box"]
+  },
+  "朋": {
+    "name": "twin moons",
+    "note": "Two moons side by side, a pair of twin moons.",
+    "alts": ["double moon", "pair"]
+  },
+  "丰": {
+    "name": "corn stalk",
+    "note": "A single stalk with three leaves crossing it, like a stalk of corn.",
+    "alts": ["wheat", "spine"]
+  },
+  "之": {
+    "name": "slide",
+    "note": "A dot on top of a zigzag that slides into a long sweep, like a playground slide.",
+    "alts": ["zigzag path", "ski run"]
+  },
+  "睘": {
+    "name": "scuba diver",
+    "note": "A net-like mask over a mouth and a flowing robe, like a scuba diver.",
+    "alts": ["masked diver", "goggles"]
+  },
+  "曼": {
+    "name": "hammock",
+    "note": "A sun over a stretched net with a crossed knot below, a hammock tied up.",
+    "alts": ["sun lounger", "net bed"]
+  },
+  "奞": {
+    "name": "bird rider",
+    "note": "A spread figure on top of a sparrow, a bird about to take off with it.",
+    "alts": ["flying man", "big bird"]
+  },
+  "丩": {
+    "name": "tangle",
+    "note": "Two hooked strokes tangled together, like a knot in a rope.",
+    "alts": ["knot", "twine"]
+  },
+  "陏": {
+    "name": "flag bearer",
+    "note": "A pennant beside a hand gripping a moon, like a flag bearer marching.",
+    "alts": ["parade", "banner man"]
+  },
+  "龍": {
+    "name": "sea serpent",
+    "note": "A standing figure over a moon beside a long zigzag body, like a sea serpent.",
+    "alts": ["great dragon", "serpent"]
+  },
+  "乡": {
+    "name": "squiggle",
+    "note": "Two little hooks above a long slash, a pen's squiggle.",
+    "alts": ["scribble", "zigzag"]
+  },
+  "于": {
+    "name": "hat stand",
+    "note": "Two bars across a post that hooks at its foot, like a hat stand.",
+    "alts": ["tent peg", "hook post"]
+  },
+  "此": {
+    "name": "spoon rack",
+    "note": "A stop shape beside a hooked spoon, like spoons hung on a rack.",
+    "alts": ["cutlery", "spoon stand"]
+  },
+  "菐": {
+    "name": "porter",
+    "note": "Stacked bars and posts piled on a figure, a porter loaded with goods.",
+    "alts": ["pack mule", "load carrier"]
+  },
+  "荅": {
+    "name": "picnic basket",
+    "note": "Grass over a lid fitted onto a box, like a picnic basket.",
+    "alts": ["hamper", "lunch box"]
+  },
+  "电": {
+    "name": "plug",
+    "note": "A barred box with a stroke curling out below, like a plug and its cord.",
+    "alts": ["power plug", "socket"]
+  },
+  "叟": {
+    "name": "searchlight",
+    "note": "A barred box on a post held over a hand, like a searchlight.",
+    "alts": ["torch", "lantern holder"]
+  },
+  "帛": {
+    "name": "white flag",
+    "note": "A white shape over a hanging towel, like a white flag of surrender.",
+    "alts": ["banner", "sheet"]
+  },
+  "夗": {
+    "name": "sleeping cat",
+    "note": "A crescent and a hooked stamp curled up side by side, like a cat asleep.",
+    "alts": ["curled cat", "nap"]
+  },
+  "厓": {
+    "name": "quarry",
+    "note": "A cliff over two stacked soil mounds, like a quarry face.",
+    "alts": ["rock face", "ledge"]
+  },
+  "朔": {
+    "name": "moonflower",
+    "note": "An upside-down sprout beside a moon, like a flower opening at night.",
+    "alts": ["night bloom", "moon garden"]
+  },
+  "𠂇": {
+    "name": "oar",
+    "note": "A flat bar crossed by a long slash, like an oar dipping in.",
+    "alts": ["paddle", "rudder"]
+  },
+  "㐄": {
+    "name": "staircase",
+    "note": "Short bars stepping down across a post, like stairs.",
+    "alts": ["stairs", "steps"]
+  },
+  "佰": {
+    "name": "lodger",
+    "note": "A person beside a capped white box, a lodger at his door.",
+    "alts": ["guest", "tenant"]
+  },
+  "呆": {
+    "name": "lollipop",
+    "note": "A small box on top of a tree trunk, like a lollipop on its stick.",
+    "alts": ["lollipop tree", "signboard"]
+  },
+  "允": {
+    "name": "toddler",
+    "note": "A small curl on top of two legs, a little person with a big head.",
+    "alts": ["tot", "little walker"]
+  },
+  "龷": {
+    "name": "hash sign",
+    "note": "Two posts crossed by two bars, like a hash sign.",
+    "alts": ["grid", "tic-tac-toe"]
+  },
+  "⺷": {
+    "name": "ram's head",
+    "note": "Horns over stacked bars on a post, a ram's head seen from the front.",
+    "alts": ["ram", "goat head"]
+  },
+  "䏍": {
+    "name": "teapot",
+    "note": "A small curl perched on a moon, like the knob on a teapot lid.",
+    "alts": ["kettle", "jug"]
+  },
+  "冉": {
+    "name": "cabinet",
+    "note": "A frame with crossbars and a post down the middle, like a cabinet.",
+    "alts": ["cupboard", "shelf unit"]
+  },
+  "寅": {
+    "name": "shrine",
+    "note": "A roof over a sprouting box on two little feet, like a household shrine.",
+    "alts": ["altar box", "temple"]
+  },
+  "亟": {
+    "name": "vise",
+    "note": "A small box and a knot squeezed between top and bottom bars, like a vise.",
+    "alts": ["clamp", "press"]
+  },
+  "屰": {
+    "name": "uprooted sprout",
+    "note": "A sprout flipped upside down, its shoots hanging below a bar.",
+    "alts": ["upside sprout", "roots"]
+  },
+  "菫": {
+    "name": "wheat sheaf",
+    "note": "Grass over a mouth box with a post running down through the bars below, like a tied sheaf.",
+    "alts": ["haystack", "sheaf"]
+  },
+  "㳟": {
+    "name": "water fight",
+    "note": "Hands raised over splashing strokes, like a water fight.",
+    "alts": ["splash party", "spray"]
+  },
+  "乎": {
+    "name": "fishing rod",
+    "note": "A hooked rod with a bar across and two dots flicking off, like a fishing rod.",
+    "alts": ["cast line", "pinwheel"]
+  },
+  "㔾": {
+    "name": "seahorse",
+    "note": "A boxy hook curling down into a tail, like a seahorse.",
+    "alts": ["curl", "snail"]
+  },
+  "禹": {
+    "name": "lizard",
+    "note": "A slash over a bug's body and a curled tail frame, like a lizard.",
+    "alts": ["gecko", "salamander"]
+  },
+  "𢆉": {
+    "name": "mast",
+    "note": "Little horns over crossbars on one post, like a ship's mast with its yards.",
+    "alts": ["radiator", "flagpole"]
+  },
+  "旡": {
+    "name": "chair back",
+    "note": "A bar over a slash and a hooking leg, like a chair seen from the side.",
+    "alts": ["bent figure", "stooped man"]
+  },
+  "苟": {
+    "name": "hedgehog",
+    "note": "Grass on top of a wrapping hook around a box, like a curled hedgehog.",
+    "alts": ["curled bush", "bramble"]
+  },
+  "甶": {
+    "name": "skull",
+    "note": "A slash poking from the top of a crossed box, like a cracked skull.",
+    "alts": ["head", "helmet"]
+  },
+  "絜": {
+    "name": "snipped thread",
+    "note": "A cutting blade over a coil of thread, snipping it clean.",
+    "alts": ["scissors cut", "cut yarn"]
+  },
+  "尹": {
+    "name": "baton",
+    "note": "A rake head pierced by a long slash, like a hand holding a baton.",
+    "alts": ["wand", "staff"]
+  },
+  "叚": {
+    "name": "rope ladder",
+    "note": "Stacked rungs on the left with a knotted rope on the right, a rope ladder.",
+    "alts": ["ladder knot", "rigging"]
+  },
+  "夸": {
+    "name": "showman",
+    "note": "A big spread figure over a bar and a hook, flexing on a stage.",
+    "alts": ["braggart", "boaster"]
+  },
+  "厷": {
+    "name": "bent arm",
+    "note": "A crossing slash with a curled elbow below, an arm bent to flex.",
+    "alts": ["flexed arm", "bicep"]
+  },
+  "龹": {
+    "name": "flailing man",
+    "note": "Two horn strokes over bars and a figure with flung arms, waving wildly.",
+    "alts": ["waving man", "cheering man"]
+  },
+  "桼": {
+    "name": "sap tree",
+    "note": "A tree with drips splashing below its trunk, oozing sap.",
+    "alts": ["dripping tree", "syrup tree"]
+  },
+  "卉": {
+    "name": "bush",
+    "note": "Crosses sprouting over a goal frame, like a little bush.",
+    "alts": ["shrub", "hedge"]
+  },
+  "咢": {
+    "name": "nutcracker",
+    "note": "Two boxes over bars and a hook, like a nutcracker's jaws.",
+    "alts": ["jaws", "grinning mouth"]
+  },
+  "丑": {
+    "name": "C-clamp",
+    "note": "A hooked frame with a bar through it, like a C-clamp.",
+    "alts": ["clamp", "bracket"]
+  },
+  "戊": {
+    "name": "battle axe",
+    "note": "A spear with a sweeping cliff stroke at its left, like a broad battle axe.",
+    "alts": ["broadaxe", "poleaxe"]
+  },
+  "戌": {
+    "name": "barricade",
+    "note": "A spear under a cliff ledge with a flat bar across inside, like a barricade.",
+    "alts": ["roadblock", "barrier"]
+  },
+  "咸": {
+    "name": "drill sergeant",
+    "note": "A spear under a cliff ledge with a small mouth inside, shouting orders.",
+    "alts": ["war cry", "shouting guard"]
+  },
+  "堇": {
+    "name": "potted shrub",
+    "note": "Grass over a plain mouth box sitting on three crossbars, like a shrub in a pot.",
+    "alts": ["planter", "topiary"]
+  },
+  "爾": {
+    "name": "spice rack",
+    "note": "A frame packed with crossed lattice under a top bar, like a spice rack.",
+    "alts": ["honeycomb", "window grille"]
   }
 }

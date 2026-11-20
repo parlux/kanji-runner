@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.15 (2026-11-21)
+
+- Story dictionary: 511 new parts from KanjiVG's structure (348 kanji parts named by meaning, 163 shapes such as 才 in 閉, 翟 peacock, 甬 padlock); 4 unused parts removed. The shapes are on the review page.
+
 ## 1.6.14 (2026-11-21)
 
 - Kanji parts cover every stroke again (本, 北, 金), and the umbrella and horns shapes are back (今, 前).
