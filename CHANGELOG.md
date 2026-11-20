@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.8 (2026-11-21)
+
+- Story dictionary: らん runway, ろ rodent, part 艮 robot (clashes between part names and sound keywords removed).
+
 ## 1.6.7 (2026-11-21)
 
 - Story dictionary: the owner's final part and sound review applied (26 part names such as 甘 yoke, 頁 rubber duck, 酉 dynamite; r-sounds now use r-words: ら rah-rah, らい rhino, りつ Ritz crackers…). Notes and the touched stories rewritten to match; review-only alternatives removed.
