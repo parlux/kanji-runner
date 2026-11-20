@@ -137,10 +137,16 @@ Not one implementer subagent: the orchestrator runs the loop per batch (2 levels
 - [x] Counts logged below.
 **Files:** `dictionary/stories/kanji-05.json`, `dictionary/stories/kanji-06.json`, `scripts/stories/check.ts`, this file
 
+### Task B1: Backfill Kanji 1–4 (content, orchestrator)
+**Description:** Added 2026-11-21 (owner): Kanji 1–4 still use WaniKani's stories, and removing WaniKani (backlog) needs them. Moved before Checkpoint D (owner, 2026-11-21: all of Kanji 1–6 before the checkpoint). Run the content loop on game levels 2–5 in two batches, current `STYLE.md` (sound highlight form). Review: in-game flags at Checkpoint D.
+**Acceptance:**
+- [ ] `kanji-01.json` to `kanji-04.json` committed; all pass check and judge.
+- [ ] Deploy green; counts logged below.
+
 ### Checkpoint D: owner (moved to the review page, 2026-11-20)
 - [x] Owner runs `supabase/story-flags.sql` once. (2026-11-20; `stories:flags` reads the table: no flags yet.)
 - [x] Owner reviews every part name and sound keyword on the review page (done 2026-11-21; applied in 1.6.7–1.6.9).
-- [ ] Owner plays Kanji 5–6 and flags stories that need work (in-game review, owner 2026-11-21, instead of the review page).
+- [ ] Owner plays Kanji 1–6 and flags stories that need work (in-game review, owner 2026-11-21, instead of the review page).
 - [ ] Owner ticks, or sends `STYLE.md` changes before D7 scales up.
 
 ### Task R3: Apply Checkpoint D's review (content, orchestrator)
@@ -155,12 +161,6 @@ Not one implementer subagent: the orchestrator runs the loop per batch (2 levels
 - [ ] Levels through the owner's level + 1 have files; all pass check and judge; no unresolved suspect.
 - [ ] Flags resolved; every seeded sample reviewed and its ✗ rewritten (random misses per level logged).
 - [ ] Counts logged below.
-
-### Task B1: Backfill Kanji 1–4 (content, orchestrator)
-**Description:** Added 2026-11-21 (owner): Kanji 1–4 still use WaniKani's stories, and removing WaniKani (backlog) needs them. Run the content loop on game levels 2–5 in two batches, current `STYLE.md` (sound highlight form). Review: in-game flags plus `stories:review -- seed` judge fails + 10 random per level.
-**Acceptance:**
-- [ ] `kanji-01.json` to `kanji-04.json` committed; all pass check and judge.
-- [ ] Seeded samples reviewed and ✗ rewritten; counts logged below.
 
 ### Task D8: Ship 1.7.0
 **Description:** Credits/README note on the dictionary, `package.json` 1.7.0, `## 1.7.0 (<date>)` in `CHANGELOG.md`, deploy.
