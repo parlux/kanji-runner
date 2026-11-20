@@ -36,3 +36,4 @@ One row per owner request, written by the `triage` skill (`.claude/skills/triage
 | 2026-11-20 | Swap backlog: own stories before overall progress | doc | Stories are the only blocker to dropping WaniKani; backlog order only | |
 | 2026-11-20 | Remove all WaniKani code from the game (separate from own stories) | idea | Owner split it out of the own-stories round | |
 | 2026-11-20 | Story review tool outside the game (approve/refine parts, sounds, stories) | sdd | New tool and review workflow; changes how round 3 is gated | |
+| 2026-11-20 | Review page: short "why it fits" explainer per part/sound/story | sdd | New field generated for ~400 items, plus seed and page changes | |

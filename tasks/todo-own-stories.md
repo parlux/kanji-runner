@@ -4,6 +4,7 @@ Spec: `docs/specs/SPEC-own-stories.md` (2026-11-20). Intent: `docs/intent/own-st
 Checkpoint D: https://claude.ai/artifact/FD3HpQjJjEHKNXaqB5vDQd (on the review page; the earlier play-based page https://claude.ai/artifact/Pzt8idETzahrdN9ohvua6S is superseded)
 Review tool: https://claude.ai/artifact/CNZAQt1csZLwyV29i5piR9
 Review: https://claude.ai/artifact/8XjjrPPLSvPDR8dkBTgdst (review page addition; intent `docs/intent/story-review.md`, 2026-11-20).
+Review (part notes): https://claude.ai/artifact/Db8Pq8NVeYCqsTvKxVsLVV (intent `docs/intent/part-notes.md`, 2026-11-20).
 Every task: `npm run check` passes before it is checked off. Never commit `.data-cache` or anything from WaniKani (text, names, overlap reports, judge files).
 
 ## Plan
@@ -11,6 +12,7 @@ Every task: `npm run check` passes before it is checked off. Never commit `.data
 - **Shared vocabulary next.** D2 names the parts and the on'yomi sound keywords once, so every story uses the same names and images.
 - **Pilot, then the card.** D3 writes Kanji 5–6 (the owner is on Kanji 5 and doesn't need Kanji 1–4) through the full writer/judge loop and tunes `STYLE.md` on what fails; D4 shows them on the card; D5 adds the flag.
 - **Review page (added 2026-11-20).** Reviewing by playing was too slow. R1 builds the seed/apply scripts, R2 the desk review page; Checkpoint D happens there (all parts and sounds, then Kanji 5–6); R3 applies it. From D7 on, every batch gets a sampled review.
+- **Part notes (added 2026-11-20, during Checkpoint D).** The owner couldn't see why some part names fit (⻏ "village"). N1 adds a `note` per part to the data, checker, seed and page; N2 writes the notes, renames history names to visible shapes and re-seeds the parts. The owner's part review resumes on the page after N2. Intent `docs/intent/part-notes.md`.
 - **Then the owner's levels only.** D6 deploys: Checkpoint D, on Kanji 5–6. After it, D7 fixes flags and writes the next levels in pairs, about one level ahead of the owner; D8 ships 1.7.0. Kanji 1–4 are left for later (owner, 2026-11-20). Later levels are written as the owner nears them (owner, 2026-11-20: a renamed part or keyword ripples into every story that uses it, so keep few stories ahead until the names have settled).
 
 ### Content tasks (D2, D3, D7): run by the orchestrator
@@ -100,6 +102,22 @@ Not one implementer subagent: the orchestrator runs the loop per batch (2 levels
 - [x] Published; link in this file's header (`Review tool: <url>`); items seeded (237 parts, 179 sounds, Kanji 5–6); a test verdict written and read back, then removed. (476 items. Round trip: verdict → listing → `apply` → notes file. The rules refuse a review write from a non-owner. Fixed on the way: saved listing files carry no version, so `apply` read nothing; `seed` now takes versions from `--version-list`, the listing's tool output.)
 - [x] `npm run check` passes.
 **Files:** `tools/review/index.html`, this file
+
+### Task N1: Part notes in data, checker, seed and page (sonnet)
+**Description:** Spec "Part notes": `stories:check` requires a part `note` (20–120 characters) behind a temporary `--allow-missing-notes` used until N2 lands (`npm test` passes it too until then); `stories:review -- rename <file>` reusing `apply`'s rename path; `seed parts` carries `note` and `was`; `seed --bump <ids file>` bumps `pass` only for listed ids; the Parts row shows the note and "was: …". Republish the page to the same link (orchestrator).
+**Acceptance:**
+- [ ] Tests: missing or out-of-band note fails (without the flag); `rename` on a fixture ripples into `<part>` text and lists touched stories, rejects duplicate or 4-word names; `seed --bump` bumps only listed ids and keeps `if_version`.
+- [ ] Screenshot at 1280×800 of the Parts tab from a fixture with a note and a `was`, light and dark.
+- [ ] `npm run check` passes.
+**Files:** `scripts/stories/check.ts`, `scripts/stories/review.ts`, `tools/review/index.html`, `tests/data/review.test.ts`, `tests/data/stories.test.ts`
+
+### Task N2: Write part notes, rename history names (content, orchestrator)
+**Description:** Save the owner's part reviews so far (`reviews` listing, kind `part`) to `.data-cache/stories/review/`. `STYLE.md` gets the "names you can see" rule. Writer (**opus**) writes all 237 notes and `renames.json` from `STYLE.md`, `parts.json`, uses and the owner's part reviews (✗ notes binding). Judge (**sonnet**) checks notes and renames; max 3 rounds. `stories:review -- rename`; writer re-reads touched Kanji 5–6 stories, judge re-checks them; `stories:check` (flag removed), `stories:overlap -- --names`; commit, push. Re-seed parts with `--bump` for renamed parts and rewritten stories; republish nothing else. Log counts below.
+**Acceptance:**
+- [ ] Every part has a note; `--allow-missing-notes` removed; all renames judged pass; touched stories pass check and judge.
+- [ ] Parts re-seeded; one renamed part checked on the page (note and "was" shown, back to "to review"); an unchanged reviewed part keeps its verdict.
+- [ ] Counts logged below (notes, renames, owner ✗ notes used, stories touched, judge rounds).
+**Files:** `dictionary/parts.json`, `dictionary/STYLE.md`, `dictionary/stories/kanji-05.json`, `dictionary/stories/kanji-06.json`, this file
 
 ### Checkpoint D: owner (moved to the review page, 2026-11-20)
 - [x] Owner runs `supabase/story-flags.sql` once. (2026-11-20; `stories:flags` reads the table: no flags yet.)

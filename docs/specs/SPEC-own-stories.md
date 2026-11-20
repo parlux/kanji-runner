@@ -84,6 +84,17 @@ The owner reviews the dictionary at a desk on a private claude.ai page, not by p
   - `apply <dir>` (the `reviews` listing, saved by the orchestrator with `out_dir`, one JSON file per document): edits to `parts.json`/`sounds.json` (validated: unique, 1–3 words); a renamed part's `<part>` text is replaced in every story using it, and those stories are listed for the writer to re-read; ✗ notes go to `.data-cache/stories/notes-<scope>.json`, the writer's rewrite input (the note and our current text only). Prints counts per scope and the random-miss count per level.
 - **Loop:** seed → owner reviews → `apply` → rewrites through the writer/judge loop (owner notes beside the judge's reasons) → `stories:check`, `stories:overlap` → commit → re-seed changed items with `pass + 1`. Owner edits to names and keywords go through `stories:check` and `stories:overlap -- --names` too. Story batches are committed after the judge, as before; the owner's review feeds the next pass and doesn't block the game.
 
+## Part notes (added 2026-11-20, intent `docs/intent/part-notes.md`)
+Each part gets a one-line "why it fits" note, and a part named after its history instead of its shape is renamed to something you can see.
+
+- **Data:** `parts.json` entries become `{ "name": "village", "note": "..." }`. `note` is required for every part: one sentence, 20–120 characters, saying what in the glyph the name points at ("Three short strokes stacked like water drops"). Our own text, never from WaniKani.
+- **Names you can see (`STYLE.md`):** a part's name says what its shape looks like. A name that only holds through history or etymology (⻏ "village", the right-hand 阝 from 邑) is replaced by a visible shape. Exception: a part that is itself a kanji in our levels keeps that kanji's meaning (as now); its note says how the shape shows it, or that it is the kanji itself. Names stay unique and 1–3 words.
+- **Pass (once, content):** a writer on **opus** reads `STYLE.md`, `parts.json`, each part's uses and the owner's part reviews so far (verdict and note, from the page); writes every note and proposes renames, each with a one-line reason, to `.data-cache/stories/renames.json` (`[{ part, from, to, why }]`). Owner ✗ notes on a part are binding input. A judge on **sonnet** checks every note (true to the glyph) and every rename (visible, unique, not a WaniKani radical name match flagged by `stories:overlap -- --names`).
+- **Ripple:** renames go through `stories:review -- rename <renames.json>`, which uses the same code as `apply`'s edit path: `parts.json` updated, `<part>` text replaced in every story using it, touched stories listed. The writer re-reads each touched story (Kanji 5–6) so the sentence still reads; the judge re-checks them.
+- **Re-seed:** `seed parts` puts `note` and, for a renamed part, `was` (the old name) on the item. `--bump <ids file>` bumps `pass` only for the listed ids (renamed parts, rewritten stories); the rest are written with their current `pass`, so the owner's verdicts on them stand.
+- **Page:** the Parts row shows the note under the name (like the Sounds row's note) and, when `was` is set, "was: village" beside the name.
+- `stories:check` fails a part with no `note` or a note out of band.
+
 ## Files
 ```
 dictionary/README.md, STYLE.md, parts.json, sounds.json, stories/kanji-NN.json   (new)
@@ -108,6 +119,7 @@ tests/data/stories.test.ts   → validator over committed dictionary + fixtures
 - `studyCards`: ours beats WaniKani; parts with names; reading blocks by presented label; missing reading → none line; meaning mode.
 - Flag queue: save, load, bad JSON ignored, push removes sent, push failure keeps.
 - Browser: study card with our story and the flag form at 390×844.
+- Part notes: `check` fails a missing or out-of-band note; `rename` ripples like an `apply` edit; `seed --bump` bumps only listed ids; page shows note and `was`.
 - Review: `seed` sample rule (all for pilot levels, judge fails + 10 seeded random, no judge file → random only); `apply` on fixtures (rename ripples into `<part>` text, duplicate or 4-word name rejected, notes file has no WaniKani text); page at 1280×800 renders the three tabs from a fixture listing.
 
 ## Boundaries
