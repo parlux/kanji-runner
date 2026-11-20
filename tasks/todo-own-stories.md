@@ -114,9 +114,9 @@ Not one implementer subagent: the orchestrator runs the loop per batch (2 levels
 ### Task N2: Write part notes, rename history names (content, orchestrator)
 **Description:** Save the owner's part reviews so far (`reviews` listing, kind `part`) to `.data-cache/stories/review/`. `STYLE.md` gets the "names you can see" rule. Writer (**opus**) writes all 237 notes and `renames.json` from `STYLE.md`, `parts.json`, uses and the owner's part reviews (✗ notes binding). Judge (**sonnet**) checks notes and renames; max 3 rounds. `stories:review -- rename`; writer re-reads touched Kanji 5–6 stories, judge re-checks them; `stories:check` (flag removed), `stories:overlap -- --names`; commit, push. Re-seed parts with `--bump` for renamed parts and rewritten stories; republish nothing else. Log counts below.
 **Acceptance:**
-- [ ] Every part has a note; `--allow-missing-notes` removed; all renames judged pass; touched stories pass check and judge.
-- [ ] Parts re-seeded; one renamed part checked on the page (note and "was" shown, back to "to review"); an unchanged reviewed part keeps its verdict.
-- [ ] Counts logged below (notes, renames, owner ✗ notes used, stories touched, judge rounds).
+- [x] Every part has a note; `--allow-missing-notes` removed; all renames judged pass; touched stories pass check and judge.
+- [x] Parts re-seeded; one renamed part checked on the page (note and "was" shown, back to "to review"); an unchanged reviewed part keeps its verdict.
+- [x] Counts logged below (notes, renames, owner ✗ notes used, stories touched, judge rounds).
 **Files:** `dictionary/parts.json`, `dictionary/STYLE.md`, `dictionary/stories/kanji-05.json`, `dictionary/stories/kanji-06.json`, this file
 
 ### Checkpoint D: owner (moved to the review page, 2026-11-20)
@@ -164,3 +164,13 @@ Not one implementer subagent: the orchestrator runs the loop per batch (2 levels
 - The 4 `close` fails scored 0.08–0.14 on overlap: the score is a hint; the side-by-side judge is the gate.
 - STYLE.md: reading minimum 80 → 60 (owner); no invisible parts; never a part plus its own sub-parts (flat KRADFILE lists); no long-vowel keyword for a short sound; every syllable produced; picture, not caption.
 - Rough edge: component lists are flat (味 lists mouth, tree, pole, eight, two), so the checker warns where the writer names only visible parts (着, 円, 味, 薬). A real fix is part data with structure: its own job.
+
+### N2: part notes and renames (2026-11-20)
+| | Entries | 1st pass (wrong / weak / close) | Fixed | Final |
+|---|---|---|---|---|
+| Part notes | 237 | 0 / 11 / 3 | by hand from the judge's suggestions | 237 written |
+| Renames | 15 | 3 close (WaniKani names for other glyphs), 1 weak (crook upside down) | coat rack → peg post, scarecrow → straw man, signpost → lamppost, shepherd's crook → fishhook | 15 applied |
+| Stories touched | 4 (路 折 落 弁) | 2 weak (路 foot + its own sub-part stop; 弁 kun missed える) | 1 round | 4 pass |
+- Owner ✗ notes used: 1 (𠂉 "hat" → diving board; note offers lean-to, flagpole). Owner overrode my revert of ⺘ reaching hand → anchor.
+- Re-seeded 237 parts (15 at pass 2) and the 4 stories (pass 2); the 4 parts the owner ✓'d keep their verdict.
+- Writer kept history-leaning names it was unsure of (隹 sparrow, 艮 mule, 虍 tiger, 歹 bones, 豸 leopard, 卩 stamp, 豕 pig, 辰 hoe): the owner decides on the page.
