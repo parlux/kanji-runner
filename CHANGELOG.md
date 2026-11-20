@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.14 (2026-11-21)
+
+- Kanji parts cover every stroke again (本, 北, 金), and the umbrella and horns shapes are back (今, 前).
+
 ## 1.6.13 (2026-11-21)
 
 - Kanji parts are now the chunks you see (閉 = gate + 才), from KanjiVG instead of the smallest strokes.

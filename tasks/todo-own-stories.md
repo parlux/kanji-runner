@@ -254,7 +254,9 @@ Not one implementer subagent: the orchestrator runs the loop per batch (2 levels
 ### C1: components from KanjiVG (2026-11-21)
 | New parts | Kanji | Shapes | Kanji 1–6 kanji changed | Kanji 1–6 new parts (kanji / shapes) | Removed parts |
 |---|---|---|---|---|---|
-| 512 | 348 | 164 | 116 of 180 | 38 (26 / 12) | 9: 丷 𠆢 母 ⽱ ユ 尢 五 無 亀 |
+| 511 | 348 | 163 | 84 of 180 | 36 (25 / 11) | 5: 母 ⽱ 尢 五 亀 |
+- First pass (before the fixes below): 512 new (348 / 164), 116 of 180 changed, 38 needed, 9 removed (also 丷 𠆢 ユ 無).
 - Uses counted once per kanji at any depth of its KanjiVG tree, over all 2136. A chunk with strokes of its own beside its sub-chunks (KanjiVG leaves some strokes ungrouped) is kept whole; breaking it up would drop strokes. Prototype 535 → 512 after mapping 21 more look-alike glyphs (疒→⽧, 耂→⺹, 辶→⻌, 覀→西, ⺕→ヨ, ⺤→爪, ⺦→爿, 己→已, 飠→食, 匸→匚…).
-- `confusables.json` follows the new components (its test ties it to `kanji.json`); the order still uses KRADFILE's elements, so levels didn't move. 26 Kanji 1–6 parts are kanji taught later (何 ← 可, Kanji 23); the "kanji parts come first" data test now checks only duplicates and self.
-- Where KanjiVG leaves a kanji's own strokes ungrouped, the list is partial: 北 → 匕, 言 → 口, 方 → 亠, 本 → 木, 有 → 月.
+- Fallback: 235 kanji whose root has strokes outside its chunks, or no chunks, keep their KRADFILE elements (variant-mapped), so no list is partial: 本 → 一 木, 北 → 匕 爿, 金 → 王 ハ 𠆢 丷, 肉 → 冂 人. 言 and 方 stay empty, as KRADFILE lists them as themselves (like 日).
+- 人 on top (own or inherited `kvg:position`) → 𠆢 (今 会 合); a `kvg:variant` 八 on top → 丷 (前 弟 尊). 𠆢 in 茶 (inside 余) is still read as 人.
+- `confusables.json` follows the new components (its test ties it to `kanji.json`); the order still uses KRADFILE's elements, so levels didn't move. 24 Kanji 1–6 parts are kanji taught later (何 ← 可, Kanji 23); the "kanji parts come first" data test now checks only duplicates and self.
