@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.13 (2026-11-21)
+
+- Kanji parts are now the chunks you see (閉 = gate + 才), from KanjiVG instead of the smallest strokes.
+
 ## 1.6.12 (2026-11-21)
 
 - Our own stories for Kanji 1–4 (120 kanji), in the sound-highlight form: Kanji 1–6 no longer need WaniKani's stories.

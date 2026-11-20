@@ -148,9 +148,9 @@ Not one implementer subagent: the orchestrator runs the loop per batch (2 levels
 ### Task C1: Components from KanjiVG (opus, highest risk: data)
 **Description:** Spec "Composite parts": `scripts/sources.ts` fetches the pinned KanjiVG release into `.data-cache`; `scripts/build-data.ts` builds `components` from it by the rule (variant table, keep/recurse, order), replacing KRADFILE; `npm run build-data` regenerates `src/data/kanji.json`; `README.md` credits KanjiVG. `stories:check` gets a temporary `--allow-missing-parts` (parts coverage → warnings), passed by `npm test`. Write `.data-cache/stories/new-parts.json` (`[{ part, kanji: bool, uses: [...], children }]`) and `removed-parts.json` for C2. Nothing in `src/` but the data file changes; the card's parts row keeps working (names missing for new parts until C2 show the glyph alone).
 **Acceptance:**
-- [ ] Tests: variant table maps every listed glyph; keep/recurse rule on fixtures (kept: named, kanji, 2+ uses; single-use recursed; leaf kept); 閉 → 門 才, 休 → ⺅ 木, 語 → 言 吾.
-- [ ] `src/data/kanji.json` regenerated; counts logged below (new parts total / kanji / shapes; Kanji 1–6 kanji changed; removed parts); no other kanji field changed (diff check).
-- [ ] `npm run check` passes (knip, deps).
+- [x] Tests: variant table maps every listed glyph; keep/recurse rule on fixtures (kept: named, kanji, 2+ uses; single-use recursed; leaf kept); 閉 → 門 才, 休 → ⺅ 木, 語 → 言 吾.
+- [x] `src/data/kanji.json` regenerated; counts logged below (new parts total / kanji / shapes; Kanji 1–6 kanji changed; removed parts); no other kanji field changed (diff check).
+- [x] `npm run check` passes (knip, deps).
 **Files:** `scripts/sources.ts`, `scripts/build-data.ts`, `src/data/kanji.json`, `scripts/stories/check.ts`, `tests/data/*`, `README.md`, `package.json`, this file
 
 ### Task C2: Name the new parts, seed the shapes (content, orchestrator)
@@ -251,3 +251,10 @@ Not one implementer subagent: the orchestrator runs the loop per batch (2 levels
 - Passed against the judge, for the owner to hear in play: と via "totem" (approved keyword), short も/の via "mole"/"No!" (as in Kanji 5–6), がく "gaggle" (owner ✓ earlier).
 - Kun meaning tails kept: 金 (money), 門 (a corner), 社 (a shrine).
 
+### C1: components from KanjiVG (2026-11-21)
+| New parts | Kanji | Shapes | Kanji 1–6 kanji changed | Kanji 1–6 new parts (kanji / shapes) | Removed parts |
+|---|---|---|---|---|---|
+| 512 | 348 | 164 | 116 of 180 | 38 (26 / 12) | 9: 丷 𠆢 母 ⽱ ユ 尢 五 無 亀 |
+- Uses counted once per kanji at any depth of its KanjiVG tree, over all 2136. A chunk with strokes of its own beside its sub-chunks (KanjiVG leaves some strokes ungrouped) is kept whole; breaking it up would drop strokes. Prototype 535 → 512 after mapping 21 more look-alike glyphs (疒→⽧, 耂→⺹, 辶→⻌, 覀→西, ⺕→ヨ, ⺤→爪, ⺦→爿, 己→已, 飠→食, 匸→匚…).
+- `confusables.json` follows the new components (its test ties it to `kanji.json`); the order still uses KRADFILE's elements, so levels didn't move. 26 Kanji 1–6 parts are kanji taught later (何 ← 可, Kanji 23); the "kanji parts come first" data test now checks only duplicates and self.
+- Where KanjiVG leaves a kanji's own strokes ungrouped, the list is partial: 北 → 匕, 言 → 口, 方 → 亠, 本 → 木, 有 → 月.
