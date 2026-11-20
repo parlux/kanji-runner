@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 import type { KanjiItem } from "../../src/core/types";
 import {
+  applyReviews,
   batches,
   idKey,
   parseDoc,
+  parseReview,
   parseJudge,
   partId,
   partItems,
@@ -14,6 +16,9 @@ import {
   storyId,
   storyItems,
   withVersions,
+  type Existing,
+  type Files,
+  type Review,
   type Write,
 } from "../../scripts/stories/review";
 
@@ -203,5 +208,158 @@ describe("review seed: batches and versions", () => {
     expect(out[2]).not.toHaveProperty("if_version");
     expect(out[2]?.data.pass).toBe(1);
     expect(parseDoc({ pass: 1 })).toBeNull();
+  });
+});
+
+describe("review apply", () => {
+  const files = (): Files => ({
+    parts: { 口: { name: "mouth" }, 日: { name: "sun" }, 木: { name: "tree" } },
+    sounds: { こう: { keyword: "cone", note: "n" }, し: { keyword: "shield" } },
+    stories: {
+      "kanji-05.json": {
+        level: "Kanji 5",
+        kanji: {
+          A: {
+            meaning: "A <part>mouth</part> and a <part>sun</part>.",
+            on: "<part>mouth</part> again",
+            kun: "none",
+          },
+          B: { meaning: "Only a <part>sun</part>.", on: "x" },
+        },
+      },
+      "kanji-06.json": {
+        level: "Kanji 6",
+        kanji: { C: { meaning: "The <part>mouth</part> speaks." } },
+      },
+    },
+  });
+  const rv = (o: Partial<Review> = {}): Review => ({ pass: 1, ...o });
+  const run = (
+    m: Record<string, Review>,
+    items: Map<string, Existing> | null = null,
+  ) => applyReviews(new Map(Object.entries(m)), files(), items);
+
+  it("a part rename rewrites <part> text in every story using it and lists them", () => {
+    const r = run({ [partId("口")]: rv({ edit: "lips" }) });
+    expect(r.files.parts["口"]).toEqual({ name: "lips" });
+    expect(r.renames).toEqual([
+      { part: "口", from: "mouth", to: "lips", touched: ["A", "C"] },
+    ]);
+    const a = (
+      r.files.stories["kanji-05.json"] as {
+        kanji: Record<string, Record<string, string>>;
+      }
+    ).kanji["A"];
+    expect(a?.["meaning"]).toBe("A <part>lips</part> and a <part>sun</part>.");
+    expect(a?.["on"]).toBe("<part>lips</part> again");
+    expect(JSON.stringify(r.files.stories["kanji-06.json"])).toContain(
+      "<part>lips</part>",
+    );
+    expect(
+      JSON.stringify(r.files.stories["kanji-05.json"]).match(/sun/g),
+    ).toHaveLength(2);
+    expect(r.changed).toEqual([
+      "parts.json",
+      "stories/kanji-05.json",
+      "stories/kanji-06.json",
+    ]);
+  });
+
+  it("rejects duplicate, empty and 4-word names but continues", () => {
+    const r = run({
+      [partId("口")]: rv({ edit: "Sun" }),
+      [partId("日")]: rv({ edit: "big hot yellow ball" }),
+      [partId("木")]: rv({ edit: "wood" }),
+    });
+    expect(r.rejected).toHaveLength(2);
+    expect(r.rejected[0]).toContain("already used");
+    expect(r.rejected[1]).toContain("over 3 words");
+    expect(r.files.parts["口"]).toEqual({ name: "mouth" });
+    expect(r.files.parts["木"]).toEqual({ name: "wood" });
+    expect(r.changed).toEqual(["parts.json"]);
+  });
+
+  it("saves a sound keyword edit, unique among keywords", () => {
+    const r = run({
+      [soundId("こう")]: rv({ edit: "coat" }),
+      [soundId("し")]: rv({ edit: "coat" }),
+    });
+    expect(r.files.sounds["こう"]).toEqual({ keyword: "coat", note: "n" });
+    expect(r.files.sounds["し"]).toEqual({ keyword: "shield" });
+    expect(r.keywords).toEqual([{ sound: "こう", from: "cone", to: "coat" }]);
+    expect(r.rejected).toHaveLength(1);
+    expect(r.changed).toEqual(["sounds.json"]);
+  });
+
+  it("✗ notes land per scope with our text and the note only", () => {
+    const r = run({
+      [partId("日")]: rv({ name: { verdict: "work", note: "too plain" } }),
+      [soundId("し")]: rv({ keyword: { verdict: "work", note: "no" } }),
+      [storyId("A")]: rv({
+        meaning: { verdict: "ok" },
+        on: { verdict: "work", note: "dull" },
+      }),
+      [storyId("C")]: rv({ meaning: { verdict: "ok" } }),
+    });
+    expect(r.notes["parts"]).toEqual([
+      { key: "日", field: "name", note: "too plain", text: "sun" },
+    ]);
+    expect(r.notes["sounds"]).toEqual([
+      { key: "し", field: "keyword", note: "no", text: "shield" },
+    ]);
+    expect(r.notes["kanji-05"]).toEqual([
+      { key: "A", field: "on", note: "dull", text: "<part>mouth</part> again" },
+    ]);
+    expect(r.notes["kanji-06"]).toBeUndefined();
+    expect(r.scopes["kanji-05"]).toEqual({
+      reviewed: 1,
+      ok: 0,
+      work: 1,
+      edits: 0,
+    });
+    expect(r.scopes["kanji-06"]).toEqual({
+      reviewed: 1,
+      ok: 1,
+      work: 0,
+      edits: 0,
+    });
+    expect(r.changed).toEqual([]);
+  });
+
+  it("counts random stories with a ✗ per level, and skips without items", () => {
+    const m = {
+      [storyId("A")]: rv({ on: { verdict: "work" } }),
+      [storyId("B")]: rv({ meaning: { verdict: "work" } }),
+      [storyId("C")]: rv({ meaning: { verdict: "work" } }),
+    };
+    expect(run(m).randomMisses).toBeNull();
+    const item = (why: string): Existing => ({ version: 1, data: { why } });
+    const items = new Map([
+      [storyId("A"), item("random")],
+      [storyId("B"), item("all")],
+      [storyId("C"), item("random")],
+    ]);
+    expect(run(m, items).randomMisses).toEqual({
+      "kanji-05": 1,
+      "kanji-06": 1,
+    });
+  });
+
+  it("parses review documents and rejects other shapes", () => {
+    expect(
+      parseReview({
+        pass: 2,
+        name: { verdict: "work", note: "n" },
+        meaning: { verdict: "maybe" },
+        edit: "x",
+        at: "t",
+      }),
+    ).toEqual({
+      pass: 2,
+      name: { verdict: "work", note: "n" },
+      edit: "x",
+      at: "t",
+    });
+    expect(parseReview({ name: { verdict: "ok" } })).toBeNull();
   });
 });

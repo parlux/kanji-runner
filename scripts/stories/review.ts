@@ -22,6 +22,7 @@ import {
   readFileSync,
   writeFileSync,
 } from "node:fs";
+import { execFileSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
 import { KANJI, maxLevel } from "../../src/core/kanji";
 import { levelName } from "../../src/core/progression";
@@ -382,6 +383,290 @@ export function withVersions(
   });
 }
 
+// --- apply -----------------------------------------------------------------
+
+export type FieldVerdict = { verdict: "ok" | "work"; note?: string };
+/** A `reviews/<id>` document as the page writes it. */
+export type Review = {
+  pass: number;
+  name?: FieldVerdict;
+  keyword?: FieldVerdict;
+  meaning?: FieldVerdict;
+  on?: FieldVerdict;
+  kun?: FieldVerdict;
+  /** New part name or sound keyword. */
+  edit?: string;
+  at?: string;
+};
+/** One ✗: our current text and the owner's note, nothing else. */
+export type Note = { key: string; field: string; note: string; text: string };
+
+const FIELD_NAMES = ["name", "keyword", "meaning", "on", "kun"] as const;
+
+/** A review's fields, or null if it isn't one. */
+export function parseReview(raw: unknown): Review | null {
+  if (!isObj(raw) || typeof raw.pass !== "number") return null;
+  const r: Review = { pass: raw.pass };
+  for (const f of FIELD_NAMES) {
+    const v = raw[f];
+    if (isObj(v) && (v.verdict === "ok" || v.verdict === "work"))
+      r[f] = {
+        verdict: v.verdict,
+        ...(typeof v.note === "string" ? { note: v.note } : {}),
+      };
+  }
+  if (typeof raw.edit === "string") r.edit = raw.edit;
+  if (typeof raw.at === "string") r.at = raw.at;
+  return r;
+}
+
+export type Files = {
+  parts: Record<string, Obj>;
+  sounds: Record<string, Obj>;
+  /** Story files by file name, as parsed: `{ level, kanji: { char: { meaning, on, kun } } }`. */
+  stories: Record<string, Obj>;
+};
+export type Scope = {
+  reviewed: number;
+  ok: number;
+  work: number;
+  edits: number;
+};
+export type ApplyResult = {
+  files: Files;
+  /** Names of the files that changed: `parts.json`, `sounds.json`, `stories/kanji-NN.json`. */
+  changed: string[];
+  notes: Record<string, Note[]>;
+  renames: { part: string; from: string; to: string; touched: string[] }[];
+  keywords: { sound: string; from: string; to: string }[];
+  rejected: string[];
+  scopes: Record<string, Scope>;
+  /** `random` stories with any ✗, by scope (needs the items listing). */
+  randomMisses: Record<string, number> | null;
+};
+
+const MAX_WORDS = 3;
+
+/** Why a new name or keyword can't be used, or null. `others` are the other names in use. */
+export function nameProblem(
+  name: string,
+  others: Iterable<string>,
+): string | null {
+  const t = name.trim();
+  if (!t) return "empty";
+  if (t.split(/\s+/).length > MAX_WORDS) return `over ${MAX_WORDS} words`;
+  for (const o of others)
+    if (o.trim().toLowerCase() === t.toLowerCase()) return "already used";
+  return null;
+}
+
+const clone = <T>(v: T): T => JSON.parse(JSON.stringify(v)) as T;
+const textOf = (v: unknown, f: string): string =>
+  isObj(v) && typeof v[f] === "string" ? (v[f] as string) : "";
+
+/**
+ * Apply the owner's reviews to the dictionary files (pure: returns new files).
+ * `items` (the items listing, by doc id) gives each story's `why`.
+ */
+export function applyReviews(
+  reviews: ReadonlyMap<string, Review>,
+  input: Files,
+  items: ReadonlyMap<string, Existing> | null,
+): ApplyResult {
+  const files = clone(input);
+  const res: ApplyResult = {
+    files,
+    changed: [],
+    notes: {},
+    renames: [],
+    keywords: [],
+    rejected: [],
+    scopes: {},
+    randomMisses: items ? {} : null,
+  };
+  const changed = new Set<string>();
+  const scopeOf = (s: string): Scope =>
+    (res.scopes[s] ??= { reviewed: 0, ok: 0, work: 0, edits: 0 });
+  const note = (scope: string, n: Note) => (res.notes[scope] ??= []).push(n);
+  const storyOf = (c: string): { file: string; entry: Obj } | null => {
+    for (const [file, f] of Object.entries(files.stories))
+      if (isObj(f.kanji) && isObj(f.kanji[c]))
+        return { file, entry: f.kanji[c] as Obj };
+    return null;
+  };
+
+  for (const [id, r] of [...reviews].sort((a, b) => a[0].localeCompare(b[0]))) {
+    const k = idKey(id);
+    if (!k) {
+      res.rejected.push(`${id}: not an item id`);
+      continue;
+    }
+    if (k.kind === "story") {
+      const s = storyOf(k.key);
+      if (!s) {
+        res.rejected.push(`${id}: no story for ${k.key}`);
+        continue;
+      }
+      const scope = s.file.replace(/\.json$/, "");
+      const sc = scopeOf(scope);
+      sc.reviewed++;
+      let miss = false;
+      for (const f of ["meaning", "on", "kun"] as const) {
+        const v = r[f];
+        if (v?.verdict === "work") {
+          miss = true;
+          note(scope, {
+            key: k.key,
+            field: f,
+            note: v.note ?? "",
+            text: textOf(s.entry, f),
+          });
+        }
+      }
+      if (miss) sc.work++;
+      else sc.ok++;
+      if (miss && res.randomMisses && items?.get(id)?.data.why === "random")
+        res.randomMisses[scope] = (res.randomMisses[scope] ?? 0) + 1;
+      continue;
+    }
+    const scope = k.kind === "part" ? "parts" : "sounds";
+    const dict = k.kind === "part" ? files.parts : files.sounds;
+    const field = k.kind === "part" ? "name" : "keyword";
+    const entry = dict[k.key];
+    const sc = scopeOf(scope);
+    if (!entry) {
+      res.rejected.push(`${id}: ${k.key} is not in ${scope}.json`);
+      continue;
+    }
+    sc.reviewed++;
+    const edit = r.edit?.trim();
+    const old = textOf(entry, field);
+    if (edit && edit !== old) {
+      const others = Object.entries(dict)
+        .filter(([key]) => key !== k.key)
+        .map(([, v]) => textOf(v, field));
+      const problem = nameProblem(edit, others);
+      if (problem)
+        res.rejected.push(`${k.key}: ${field} "${edit}" rejected (${problem})`);
+      else {
+        entry[field] = edit;
+        changed.add(`${scope}.json`);
+        sc.edits++;
+        if (k.kind === "sound")
+          res.keywords.push({ sound: k.key, from: old, to: edit });
+        else {
+          const touched: string[] = [];
+          for (const [file, f] of Object.entries(files.stories)) {
+            if (!isObj(f.kanji)) continue;
+            for (const [c, e] of Object.entries(f.kanji)) {
+              let hit = false;
+              if (isObj(e))
+                for (const t of ["meaning", "on", "kun"]) {
+                  const v = e[t];
+                  if (typeof v !== "string") continue;
+                  const next = v
+                    .split(`<part>${old}</part>`)
+                    .join(`<part>${edit}</part>`);
+                  if (next !== v) {
+                    e[t] = next;
+                    hit = true;
+                  }
+                }
+              if (hit) {
+                touched.push(c);
+                changed.add(`stories/${file}`);
+              }
+            }
+          }
+          res.renames.push({ part: k.key, from: old, to: edit, touched });
+        }
+      }
+    }
+    const v = r[field];
+    if (v?.verdict === "work") {
+      sc.work++;
+      note(scope, {
+        key: k.key,
+        field,
+        note: v.note ?? "",
+        text: textOf(entry, field),
+      });
+    } else sc.ok++;
+  }
+  res.changed = [...changed].sort();
+  return res;
+}
+
+function readFiles(): Files {
+  const stories: Record<string, Obj> = {};
+  for (const f of readdirSync(`${DICTIONARY}/stories`).sort())
+    if (f.endsWith(".json"))
+      stories[f] = readJson(`${DICTIONARY}/stories/${f}`) as Obj;
+  return {
+    parts: readJson(`${DICTIONARY}/parts.json`) as Record<string, Obj>,
+    sounds: readJson(`${DICTIONARY}/sounds.json`) as Record<string, Obj>,
+    stories,
+  };
+}
+
+function applyMain(args: string[]) {
+  const dir = args.find(
+    (a, i) => !a.startsWith("--") && args[i - 1] !== "--items",
+  );
+  if (!dir)
+    throw new Error(
+      "usage: stories:review -- apply <reviews dir> [--items <items dir>]",
+    );
+  const itemsDir = args[args.indexOf("--items") + 1];
+  const items =
+    args.includes("--items") && itemsDir ? readListing(itemsDir) : null;
+  const reviews = new Map<string, Review>();
+  for (const [id, doc] of readListing(dir)) {
+    const r = parseReview(doc.data);
+    if (r) reviews.set(id, r);
+    else console.warn(`warning: ${id} is not a review, skipped`);
+  }
+  const res = applyReviews(reviews, readFiles(), items);
+  const written = res.changed.map((c) => `${DICTIONARY}/${c}`);
+  for (const c of res.changed) {
+    const data =
+      c === "parts.json"
+        ? res.files.parts
+        : c === "sounds.json"
+          ? res.files.sounds
+          : res.files.stories[c.slice(8)];
+    writeFileSync(`${DICTIONARY}/${c}`, JSON.stringify(data, null, 2) + "\n");
+  }
+  mkdirSync(CACHE, { recursive: true });
+  for (const [scope, notes] of Object.entries(res.notes)) {
+    const file = `${CACHE}/notes-${scope}.json`;
+    writeFileSync(file, JSON.stringify(notes, null, 2) + "\n");
+    written.push(file);
+  }
+  if (written.length)
+    execFileSync("npx", ["prettier", "--write", ...written], {
+      stdio: "ignore",
+    });
+  for (const r of res.renames)
+    console.log(
+      `part ${r.part}: "${r.from}" → "${r.to}"; re-read stories: ${r.touched.join(" ") || "none"}`,
+    );
+  for (const k of res.keywords)
+    console.log(`sound ${k.sound}: "${k.from}" → "${k.to}"`);
+  for (const m of res.rejected) console.log(`rejected: ${m}`);
+  for (const [scope, c] of Object.entries(res.scopes).sort())
+    console.log(
+      `${scope}: ${c.reviewed} reviewed, ${c.ok} ok, ${c.work} need work, ${c.edits} edited, ${res.notes[scope]?.length ?? 0} notes`,
+    );
+  if (!res.randomMisses)
+    console.log("random-miss count skipped: pass --items <items listing dir>");
+  else
+    for (const [scope, n] of Object.entries(res.randomMisses).sort())
+      console.log(
+        `${scope}: ${n} random stories with a ✗${n > 2 ? " → seed the whole level and revisit STYLE.md" : ""}`,
+      );
+}
+
 // --- CLI -------------------------------------------------------------------
 
 const readJson = (file: string): unknown =>
@@ -449,6 +734,7 @@ function seedMain(args: string[]) {
 function main() {
   const [cmd, ...rest] = process.argv.slice(2);
   if (cmd === "seed") seedMain(rest);
+  else if (cmd === "apply") applyMain(rest);
   else {
     console.error(
       "usage: stories:review -- seed <parts|sounds|levels> | apply <dir>",
