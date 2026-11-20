@@ -95,9 +95,9 @@ Not one implementer subagent: the orchestrator runs the loop per batch (2 levels
 ### Task R2: Review page (sonnet, published by the orchestrator)
 **Description:** `tools/review/index.html`, one self-contained page (spec "Review page": tabs, rows, keyboard, saves, filters, counters), `db` + `user` capabilities, works empty and shows a load error after 10 s. The subagent builds and checks it against a fixture listing offline; the orchestrator publishes it, seeds parts, sounds and Kanji 5–6, and checks one verdict round trip with `ArtifactData`.
 **Acceptance:**
-- [ ] Screenshot at 1280×800 of each tab from a fixture, tags rendered as on the card, light and dark.
+- [x] Screenshot at 1280×800 of each tab from a fixture, tags rendered as on the card, light and dark.
 - [ ] Published; link in this file's header (`Review tool: <url>`); items seeded (237 parts, 179 sounds, Kanji 5–6); a test verdict written and read back, then removed.
-- [ ] `npm run check` passes.
+- [x] `npm run check` passes.
 **Files:** `tools/review/index.html`, this file
 
 ### Checkpoint D: owner (moved to the review page, 2026-11-20)

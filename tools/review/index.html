@@ -1,0 +1,1340 @@
+<title>Dictionary Review</title>
+<meta name="claude:viewport-fit-sides" content="cover" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;700&display=swap"
+/>
+<style>
+  /* Layout: a full-width desk tool. Sticky bar (tabs, filters, counters), then dense rows of CSS grid, one per item; rows stack below 900px. */
+  :root {
+    --bg: #f5f7fa;
+    --surface: #ffffff;
+    --ink: #18202b;
+    --muted: #5b6676;
+    --line: #d9dee6;
+    --accent: #d97a06;
+    --accent-soft: #fdf0dc;
+    --track: #e8ecf2;
+    --ok: #2e8a4e;
+    --ok-soft: #e3f3e8;
+    --bad: #c8343a;
+    --bad-soft: #fbe6e7;
+    --focus: #2f6fd6;
+    --t-part: #0a6bb0;
+    --t-kanji: #b81f78;
+    --t-reading: #6a40c2;
+    --t-ja: #1c7f48;
+    --f-display: "Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+    --f-body: "Inter", system-ui, -apple-system, sans-serif;
+    --f-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+    --f-jp:
+      "Noto Sans JP", "Hiragino Sans", "Yu Gothic", "Meiryo", system-ui,
+      sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #11161d;
+      --surface: #19212b;
+      --ink: #e6ebf1;
+      --muted: #9aa5b4;
+      --line: #2c3744;
+      --accent: #f3a33a;
+      --accent-soft: #3a2a14;
+      --track: #1f2833;
+      --ok: #5cc27e;
+      --ok-soft: #173123;
+      --bad: #ef5b5f;
+      --bad-soft: #3a1b1e;
+      --focus: #6a9cf0;
+      --t-part: #6cc4ff;
+      --t-kanji: #ff8ad0;
+      --t-reading: #c4a0ff;
+      --t-ja: #5fd38d;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #11161d;
+    --surface: #19212b;
+    --ink: #e6ebf1;
+    --muted: #9aa5b4;
+    --line: #2c3744;
+    --accent: #f3a33a;
+    --accent-soft: #3a2a14;
+    --track: #1f2833;
+    --ok: #5cc27e;
+    --ok-soft: #173123;
+    --bad: #ef5b5f;
+    --bad-soft: #3a1b1e;
+    --focus: #6a9cf0;
+    --t-part: #6cc4ff;
+    --t-kanji: #ff8ad0;
+    --t-reading: #c4a0ff;
+    --t-ja: #5fd38d;
+    color-scheme: dark;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font: 14px/1.5 var(--f-body);
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 0 48px;
+  }
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+    color: inherit;
+  }
+  .bar {
+    position: sticky;
+    top: env(safe-area-inset-top, 0px);
+    z-index: 5;
+    background: var(--bg);
+    border-bottom: 1px solid var(--line);
+    padding-block: 12px 8px;
+    display: grid;
+    gap: 8px;
+  }
+  .bar-top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 24px;
+  }
+  h1 {
+    font: 700 1.25rem var(--f-display);
+    margin: 0;
+  }
+  .tabs {
+    display: flex;
+    gap: 4px;
+  }
+  .tab {
+    border: 1px solid var(--line);
+    background: var(--surface);
+    border-radius: 6px;
+    padding: 4px 12px;
+    cursor: pointer;
+    display: inline-flex;
+    gap: 8px;
+    align-items: baseline;
+  }
+  .tab[aria-selected="true"] {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    font-weight: 600;
+  }
+  .tab small {
+    font: 500 0.72rem var(--f-mono);
+    color: var(--muted);
+  }
+  .bar-filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 16px;
+  }
+  .bar-filters label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--muted);
+  }
+  select {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 3px 8px;
+  }
+  .stats {
+    margin-left: auto;
+    font: 500 0.82rem var(--f-mono);
+    color: var(--muted);
+  }
+  .stats b {
+    color: var(--ink);
+    font-weight: 500;
+  }
+  .stats .w {
+    color: var(--bad);
+  }
+  .keys {
+    font: 400 0.72rem var(--f-mono);
+    color: var(--muted);
+  }
+  kbd {
+    font: 500 0.72rem var(--f-mono);
+    border: 1px solid var(--line);
+    border-bottom-width: 2px;
+    border-radius: 4px;
+    padding: 0 4px;
+    background: var(--surface);
+  }
+
+  .banner {
+    margin-top: 12px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+  }
+  .banner.err {
+    border-color: var(--bad);
+    background: var(--bad-soft);
+  }
+  .banner.warn {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+
+  .head,
+  .row {
+    display: grid;
+    column-gap: 14px;
+    align-items: start;
+  }
+  .head {
+    padding: 8px 10px 4px;
+    font: 500 0.7rem var(--f-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .rows {
+    display: grid;
+    gap: 6px;
+    margin-top: 4px;
+  }
+  .row {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 8px 10px;
+  }
+  .row.focus {
+    outline: 2px solid var(--focus);
+    outline-offset: 1px;
+  }
+  .row.done-ok {
+    border-left: 4px solid var(--ok);
+  }
+  .row.done-work {
+    border-left: 4px solid var(--bad);
+  }
+  .cols-part {
+    grid-template-columns: 64px 230px minmax(0, 1fr) minmax(0, 300px);
+  }
+  .cols-sound {
+    grid-template-columns: 76px 210px minmax(0, 1fr) minmax(0, 1fr) minmax(
+        0,
+        300px
+      );
+  }
+  .cols-story {
+    grid-template-columns: 70px 230px repeat(3, minmax(0, 1fr));
+  }
+  .glyph {
+    font: 400 2.6rem/1.1 var(--f-jp);
+    text-align: center;
+  }
+  .glyph.kana {
+    font-size: 2rem;
+  }
+  .cell {
+    min-width: 0;
+    display: grid;
+    gap: 6px;
+    align-content: start;
+  }
+  .lbl {
+    display: none; /* the column header names it; shown again when rows stack */
+    font: 500 0.68rem var(--f-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .name-input {
+    width: 100%;
+    box-sizing: border-box;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 5px 8px;
+    font-weight: 600;
+  }
+  .name-input.pending {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+  .small {
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+  .uses {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .chip {
+    font: 400 1.05rem/1 var(--f-jp);
+    padding: 4px 6px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--bg);
+  }
+  .why {
+    display: inline-block;
+    font: 500 0.68rem var(--f-mono);
+    padding: 1px 7px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--track);
+    color: var(--muted);
+  }
+  .why.hot {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    color: var(--ink);
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 6px;
+    align-items: center;
+  }
+  .gloss b {
+    font-weight: 700;
+  }
+  .reading {
+    font: 400 0.95rem var(--f-jp);
+  }
+  .pn {
+    color: var(--t-part);
+    font-weight: 600;
+  }
+  .pn .g {
+    font-family: var(--f-jp);
+    color: var(--ink);
+    font-weight: 400;
+    margin-right: 2px;
+  }
+  .judge {
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+  .judge b {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .txt {
+    line-height: 1.5;
+    white-space: pre-line;
+  }
+  .t-part {
+    color: var(--t-part);
+    font-weight: 600;
+  }
+  .t-kanji {
+    color: var(--t-kanji);
+    font-weight: 600;
+  }
+  .t-reading {
+    color: var(--t-reading);
+    font-weight: 600;
+  }
+  .t-ja {
+    color: var(--t-ja);
+  }
+  .t-em {
+    font-style: italic;
+    font-weight: 600;
+  }
+  .vc {
+    display: grid;
+    gap: 6px;
+  }
+  .vbtns {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+  .vb {
+    border: 1px solid var(--line);
+    background: var(--bg);
+    border-radius: 6px;
+    width: 38px;
+    height: 28px;
+    cursor: pointer;
+    font-size: 1rem;
+    line-height: 1;
+  }
+  .vb:hover {
+    border-color: var(--muted);
+  }
+  .vb.ok[aria-pressed="true"] {
+    background: var(--ok-soft);
+    border-color: var(--ok);
+    color: var(--ok);
+    font-weight: 700;
+  }
+  .vb.work[aria-pressed="true"] {
+    background: var(--bad-soft);
+    border-color: var(--bad);
+    color: var(--bad);
+    font-weight: 700;
+  }
+  .state {
+    font: 500 0.7rem var(--f-mono);
+    color: var(--muted);
+  }
+  textarea.note {
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 56px;
+    resize: vertical;
+    background: var(--bg);
+    border: 1px solid var(--bad);
+    border-radius: 6px;
+    padding: 5px 8px;
+  }
+  .prev {
+    font-size: 0.78rem;
+    color: var(--muted);
+    border-left: 3px solid var(--accent);
+    padding-left: 8px;
+  }
+  .rowmsg {
+    grid-column: 1 / -1;
+    font-size: 0.8rem;
+  }
+  .rowmsg.err {
+    color: var(--bad);
+  }
+  .empty {
+    text-align: center;
+    color: var(--muted);
+    padding: 40px 0;
+  }
+  :focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 1px;
+  }
+
+  @media (max-width: 900px) {
+    .head {
+      display: none;
+    }
+    .lbl {
+      display: block;
+    }
+    .row {
+      grid-template-columns: 56px minmax(0, 1fr) !important;
+      row-gap: 10px;
+    }
+    .row > :nth-child(n + 3) {
+      grid-column: 1 / -1;
+    }
+    .stats {
+      margin-left: 0;
+    }
+  }
+</style>
+
+<div id="app"></div>
+
+<script>
+  "use strict";
+  const LIMIT = 1000; // db.d.ts: a query returns at most 1000 documents
+  const MAX_LEVEL = 70;
+  const app = document.getElementById("app");
+
+  // ---- tiny DOM helper ------------------------------------------------------
+  function h(tag, attrs, ...kids) {
+    const el = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs || {})) {
+      if (v == null || v === false) continue;
+      if (k === "class") el.className = v;
+      else if (k === "text") el.textContent = v;
+      else if (k === "value") el.value = v;
+      else el.setAttribute(k, v === true ? "" : String(v));
+    }
+    for (const kid of kids.flat(Infinity))
+      if (kid != null && kid !== false)
+        el.append(kid.nodeType ? kid : document.createTextNode(String(kid)));
+    return el;
+  }
+
+  // ---- story markup: <part> <kanji> <reading> <ja> <em>, nothing else --------
+  const TAGS = new Set(["part", "kanji", "reading", "ja", "em"]);
+  function renderMarkup(text) {
+    const root = h("div", { class: "txt" });
+    const stack = [];
+    const top = () => (stack.length ? stack[stack.length - 1].el : root);
+    for (const piece of String(text).split(/(<\/?[a-z]+>)/)) {
+      const m = /^<(\/?)([a-z]+)>$/.exec(piece);
+      if (m && TAGS.has(m[2])) {
+        if (!m[1]) {
+          const el = h("span", { class: "t-" + m[2] });
+          top().append(el);
+          stack.push({ name: m[2], el });
+        } else if (stack.length && stack[stack.length - 1].name === m[2])
+          stack.pop();
+        // a stray closing tag is dropped
+      } else if (piece) top().append(document.createTextNode(piece));
+    }
+    return root;
+  }
+
+  // ---- state ----------------------------------------------------------------
+  const S = {
+    tab: "part",
+    level: null,
+    status: "todo",
+    showExtra: false,
+    focusId: null,
+  };
+  let db = null;
+  let canWrite = true;
+  const srcs = new Map(); // source name -> Map(id -> data)
+  const sizes = new Map();
+  const unsubs = new Map();
+  const loaded = new Set();
+  let items = new Map();
+  let reviews = new Map();
+  let loadFailed = null;
+  let timedOut = false;
+  const drafts = new Map(); // "n:id:field" | "e:id" -> unsaved text
+  const errs = new Map(); // id -> message of the last failed save
+  const saving = new Set();
+  const pinned = new Set(); // rows touched since the filters last changed stay listed
+  const chains = new Map();
+  let pendingFocus = null;
+  let visibleIds = [];
+
+  // ---- data ---------------------------------------------------------------
+  function errText(e) {
+    const code = e && e.code;
+    if (code === "revoked") return "Access to this page was withdrawn.";
+    if (code === "invalid_argument")
+      return "The database refused this write (are you signed in as the owner?).";
+    if (code === "quota_exceeded") return "The database is full.";
+    return (e && e.message) || "The save failed.";
+  }
+
+  function listen(name, query) {
+    if (unsubs.has(name)) unsubs.get(name)();
+    unsubs.set(
+      name,
+      query.onSnapshot(
+        (snap) => {
+          const m = new Map();
+          for (const d of snap.docs) m.set(d.id, d.data());
+          srcs.set(name, m);
+          sizes.set(name, snap.size);
+          if (!snap.metadata.fromCache) loaded.add(name);
+          if (loaded.size) timedOut = false;
+          remerge();
+        },
+        (e) => {
+          loadFailed = errText(e);
+          schedule();
+        },
+      ),
+    );
+  }
+
+  function remerge() {
+    const merge = (prefix) => {
+      const out = new Map();
+      for (const [name, m] of srcs)
+        if (name.startsWith(prefix)) for (const [k, v] of m) out.set(k, v);
+      return out;
+    };
+    items = merge("items:");
+    reviews = merge("reviews:");
+    ensureLevelSubs();
+    schedule();
+  }
+
+  // Stories can outgrow one query (1000 documents). Then the selected level
+  // gets its own subscriptions, which fill in what the capped one cut off.
+  let levelSubFor = null;
+  function storiesCapped() {
+    return (
+      (sizes.get("items:story") || 0) >= LIMIT ||
+      (sizes.get("reviews:story") || 0) >= LIMIT
+    );
+  }
+  function ensureLevelSubs() {
+    if (!db) return;
+    const want = storiesCapped() && S.level ? S.level : null;
+    if (want === levelSubFor) return;
+    levelSubFor = want;
+    for (const n of ["items:lvl", "reviews:lvl"]) {
+      if (unsubs.has(n)) unsubs.get(n)();
+      unsubs.delete(n);
+      srcs.delete(n);
+    }
+    if (!want) return;
+    for (const coll of ["items", "reviews"])
+      listen(
+        coll + ":lvl",
+        db
+          .collection(coll)
+          .where("kind", "==", "story")
+          .where("level", "==", want)
+          .limit(LIMIT),
+      );
+  }
+
+  function start() {
+    for (const coll of ["items", "reviews"])
+      for (const kind of ["part", "sound", "story"])
+        listen(
+          coll + ":" + kind,
+          db.collection(coll).where("kind", "==", kind).limit(LIMIT),
+        );
+    setTimeout(() => {
+      if (!loaded.size && !loadFailed) {
+        timedOut = true;
+        schedule();
+      }
+    }, 10000);
+  }
+
+  // ---- item views -----------------------------------------------------------
+  const levelNum = (l) => Number((/\d+/.exec(l) || [0])[0]);
+  const fieldsOf = (item) => {
+    if (item.kind === "part") return ["name"];
+    if (item.kind === "sound") return ["keyword"];
+    const f = ["meaning"];
+    if (item.text && item.text.on != null) f.push("on");
+    if (item.text && item.text.kun != null) f.push("kun");
+    return f;
+  };
+  const curReview = (item, rev) =>
+    rev && typeof rev.pass === "number" && rev.pass >= item.pass ? rev : null;
+  function fstate(item, rev, f) {
+    const v = rev && rev[f];
+    if (!v || (v.verdict !== "ok" && v.verdict !== "work"))
+      return { s: "todo" };
+    if (curReview(item, rev)) return { s: v.verdict, note: v.note || "" };
+    return { s: "todo", prev: v };
+  }
+  function summary(item, rev) {
+    const st = fieldsOf(item).map((f) => fstate(item, rev, f).s);
+    return {
+      todo: st.includes("todo"),
+      work: st.includes("work"),
+      done: !st.includes("todo"),
+    };
+  }
+  const curName = (item) => (item.kind === "part" ? item.name : item.keyword);
+
+  function levels() {
+    const set = new Set();
+    for (const it of items.values())
+      if (it.kind === "story" && it.level) set.add(it.level);
+    if (storiesCapped())
+      for (let n = 1; n <= MAX_LEVEL; n++) set.add("Kanji " + n);
+    return [...set].sort((a, b) => levelNum(a) - levelNum(b));
+  }
+
+  function tabItems(kind) {
+    return [...items.entries()]
+      .filter(([, it]) => it.kind === kind)
+      .sort((a, b) => (a[0] < b[0] ? -1 : 1));
+  }
+
+  // Items of the tab (and level) that the counters cover: extras never count.
+  function scopeItems(kind) {
+    return tabItems(kind).filter(
+      ([, it]) => kind !== "story" || it.level === S.level,
+    );
+  }
+  function counts(list) {
+    let n = 0;
+    let reviewed = 0;
+    let work = 0;
+    for (const [id, it] of list) {
+      if (it.why === "extra") continue;
+      const sm = summary(it, reviews.get(id));
+      n++;
+      if (sm.done) reviewed++;
+      if (sm.work) work++;
+    }
+    return { n, reviewed, work };
+  }
+
+  function visibleList() {
+    const list = scopeItems(S.tab).filter(([id, it]) => {
+      if (pinned.has(id)) return true;
+      const extra = it.why === "extra";
+      if (extra && !S.showExtra) return false;
+      const sm = summary(it, reviews.get(id));
+      if (S.status === "todo") return sm.todo;
+      if (S.status === "ok") return sm.done && !sm.work;
+      if (S.status === "work") return sm.work;
+      return true;
+    });
+    visibleIds = list.map(([id]) => id);
+    return list;
+  }
+
+  // ---- saving ---------------------------------------------------------------
+  function baseDoc(item, rev) {
+    const cur = curReview(item, rev);
+    const doc = { pass: item.pass, kind: item.kind };
+    if (item.level) doc.level = item.level;
+    if (cur) {
+      for (const f of fieldsOf(item)) if (cur[f]) doc[f] = { ...cur[f] };
+      if (typeof cur.edit === "string") doc.edit = cur.edit;
+    }
+    return doc;
+  }
+
+  // build(item, review) returns the full new doc, or null when nothing changes.
+  function save(id, build, after) {
+    pinned.add(id);
+    const run = async () => {
+      const item = items.get(id);
+      const doc = item && build(item, reviews.get(id));
+      if (!doc) return;
+      doc.at = new Date().toISOString();
+      saving.add(id);
+      errs.delete(id);
+      schedule();
+      try {
+        await db.doc("reviews/" + id).set(doc);
+        if (after) after();
+      } catch (e) {
+        errs.set(id, errText(e));
+      } finally {
+        saving.delete(id);
+        schedule();
+      }
+    };
+    const p = (chains.get(id) || Promise.resolve()).then(run);
+    chains.set(id, p);
+    return p;
+  }
+
+  const setVerdict = (id, f, verdict) =>
+    save(id, (item, rev) => {
+      if (fstate(item, rev, f).s === verdict) return null;
+      const doc = baseDoc(item, rev);
+      const keep = doc[f] && doc[f].note;
+      doc[f] = { verdict };
+      if (verdict === "work" && keep) doc[f].note = keep;
+      return doc;
+    });
+
+  const setNote = (id, f, text) =>
+    save(
+      id,
+      (item, rev) => {
+        const st = fstate(item, rev, f);
+        const note = text.trim();
+        if (st.s !== "work" || (st.note || "") === note) return null;
+        const doc = baseDoc(item, rev);
+        doc[f] = note ? { verdict: "work", note } : { verdict: "work" };
+        return doc;
+      },
+      () => drafts.delete("n:" + id + ":" + f),
+    );
+
+  const setEdit = (id, text) =>
+    save(
+      id,
+      (item, rev) => {
+        const val = text.trim();
+        const cur = curReview(item, rev);
+        const shown =
+          cur && typeof cur.edit === "string" ? cur.edit : curName(item);
+        if (!val || val === shown) return null;
+        const doc = baseDoc(item, rev);
+        if (val === curName(item)) delete doc.edit;
+        else doc.edit = val;
+        return doc;
+      },
+      () => drafts.delete("e:" + id),
+    );
+
+  const approve = (id) =>
+    save(id, (item, rev) => {
+      const open = fieldsOf(item).filter(
+        (f) => fstate(item, rev, f).s === "todo",
+      );
+      if (!open.length) return null;
+      const doc = baseDoc(item, rev);
+      for (const f of open) doc[f] = { verdict: "ok" };
+      return doc;
+    });
+
+  // ---- rendering ------------------------------------------------------------
+  let scheduled = false;
+  function schedule() {
+    if (scheduled) return;
+    scheduled = true;
+    requestAnimationFrame(() => {
+      scheduled = false;
+      render();
+    });
+  }
+
+  function verdictCell(id, item, rev, f) {
+    const st = fstate(item, rev, f);
+    const key = "n:" + id + ":" + f;
+    const cell = h(
+      "div",
+      { class: "vc" },
+      h(
+        "div",
+        { class: "vbtns" },
+        h("button", {
+          class: "vb ok",
+          type: "button",
+          text: "✓",
+          "aria-label": "Approve " + f,
+          "aria-pressed": String(st.s === "ok"),
+          "data-act": "ok",
+          "data-id": id,
+          "data-f": f,
+          disabled: !canWrite,
+        }),
+        h("button", {
+          class: "vb work",
+          type: "button",
+          text: "✗",
+          "aria-label": "Needs work: " + f,
+          "aria-pressed": String(st.s === "work"),
+          "data-act": "work",
+          "data-id": id,
+          "data-f": f,
+          disabled: !canWrite,
+        }),
+        h("span", { class: "state", text: st.s === "todo" ? "to review" : "" }),
+      ),
+    );
+    if (st.prev)
+      cell.append(
+        h(
+          "div",
+          { class: "prev" },
+          "Previous note (" + (st.prev.verdict === "ok" ? "✓" : "✗") + "): ",
+          st.prev.note || "no note",
+        ),
+      );
+    if (st.s === "work") {
+      const ta = h("textarea", {
+        class: "note",
+        id: "ta-" + id + "-" + f,
+        placeholder: "What is wrong, in a line or two",
+        "aria-label": "Note for " + f,
+        "data-key": key,
+        "data-id": id,
+        "data-f": f,
+        disabled: !canWrite,
+      });
+      ta.value = drafts.has(key) ? drafts.get(key) : st.note || "";
+      cell.append(ta);
+    }
+    return cell;
+  }
+
+  function nameCell(id, item, rev) {
+    const cur = curReview(item, rev);
+    const saved =
+      cur && typeof cur.edit === "string" ? cur.edit : curName(item);
+    const key = "e:" + id;
+    const input = h("input", {
+      class: "name-input" + (saved !== curName(item) ? " pending" : ""),
+      id: "in-" + id,
+      type: "text",
+      "aria-label": item.kind === "part" ? "Part name" : "Sound keyword",
+      "data-key": key,
+      "data-id": id,
+      disabled: !canWrite,
+    });
+    input.value = drafts.has(key) ? drafts.get(key) : saved;
+    const cell = h(
+      "div",
+      { class: "cell" },
+      h("div", {
+        class: "lbl",
+        text: item.kind === "part" ? "name" : "keyword",
+      }),
+      input,
+    );
+    if (saved !== curName(item))
+      cell.append(
+        h("div", {
+          class: "small",
+          text: "edit pending, now: " + curName(item),
+        }),
+      );
+    return cell;
+  }
+
+  function whyChip(item) {
+    const j = item.judge && item.judge.verdict;
+    const label =
+      item.why === "judge-fail" && j ? "judge-fail: " + j : item.why;
+    return h("span", {
+      class: "why" + (item.why === "judge-fail" ? " hot" : ""),
+      text: label,
+    });
+  }
+
+  function usesCell(item) {
+    return h(
+      "div",
+      { class: "cell" },
+      h("div", { class: "lbl", text: "used in" }),
+      h(
+        "div",
+        { class: "uses" },
+        (item.uses || []).map((u) => h("span", { class: "chip", text: u })),
+      ),
+    );
+  }
+
+  function rowFor(id, item) {
+    const rev = reviews.get(id);
+    const sm = summary(item, rev);
+    const row = h("div", {
+      class:
+        "row cols-" +
+        item.kind +
+        (sm.done ? (sm.work ? " done-work" : " done-ok") : "") +
+        (S.focusId === id ? " focus" : ""),
+      "data-row": id,
+    });
+    if (item.kind === "part") {
+      row.append(
+        h("div", { class: "glyph", text: item.key }),
+        nameCell(id, item, rev),
+        usesCell(item),
+        verdictCell(id, item, rev, "name"),
+      );
+    } else if (item.kind === "sound") {
+      row.append(
+        h("div", { class: "glyph kana", text: item.key }),
+        nameCell(id, item, rev),
+        h(
+          "div",
+          { class: "cell" },
+          h("div", { class: "lbl", text: "note" }),
+          h("div", { class: "txt", text: item.note || "" }),
+        ),
+        usesCell(item),
+        verdictCell(id, item, rev, "keyword"),
+      );
+    } else {
+      const g = item.glosses || [];
+      const info = h(
+        "div",
+        { class: "cell" },
+        h(
+          "div",
+          { class: "gloss" },
+          g.map((x, i) => [i ? ", " : "", i ? x : h("b", { text: x })]),
+        ),
+        h("div", {
+          class: "reading",
+          text: "on " + (item.on || "-") + "  kun " + (item.kun || "-"),
+        }),
+        h(
+          "div",
+          { class: "meta" },
+          (item.parts || []).map((p) =>
+            h(
+              "span",
+              { class: "pn" },
+              h("span", { class: "g", text: p.part }),
+              p.name,
+            ),
+          ),
+        ),
+        h("div", { class: "meta" }, whyChip(item)),
+      );
+      if (item.judge && item.judge.reason)
+        info.append(
+          h(
+            "div",
+            { class: "judge" },
+            h("b", { text: "judge " + item.judge.verdict + ": " }),
+            item.judge.reason,
+          ),
+        );
+      row.append(h("div", { class: "glyph", text: item.key }), info);
+      for (const f of ["meaning", "on", "kun"]) {
+        const txt = item.text && item.text[f];
+        row.append(
+          h(
+            "div",
+            { class: "cell" },
+            h("div", { class: "lbl", text: f }),
+            txt == null
+              ? h("div", { class: "small", text: "no main " + f + " reading" })
+              : renderMarkup(txt),
+            txt == null ? null : verdictCell(id, item, rev, f),
+          ),
+        );
+      }
+    }
+    if (errs.has(id))
+      row.append(
+        h("div", {
+          class: "rowmsg err",
+          role: "alert",
+          text:
+            "Not saved: " +
+            errs.get(id) +
+            " Your text is kept; change it or press ✓/✗ again to retry.",
+        }),
+      );
+    else if (saving.has(id))
+      row.append(h("div", { class: "rowmsg small", text: "saving..." }));
+    return row;
+  }
+
+  function header() {
+    const tabs = h("div", { class: "tabs", role: "tablist" });
+    for (const [k, label] of [
+      ["part", "Parts"],
+      ["sound", "Sounds"],
+      ["story", "Stories"],
+    ]) {
+      const c = counts(tabItems(k));
+      const left = c.n - c.reviewed;
+      tabs.append(
+        h(
+          "button",
+          {
+            class: "tab",
+            role: "tab",
+            type: "button",
+            "data-tab": k,
+            "aria-selected": String(S.tab === k),
+          },
+          label,
+          h("small", { text: left + " left" }),
+        ),
+      );
+    }
+    const filters = h("div", { class: "bar-filters" });
+    if (S.tab === "story") {
+      const sel = h(
+        "select",
+        { id: "level", "data-filter": "level" },
+        levels().map((l) =>
+          h("option", { value: l, text: l, selected: l === S.level }),
+        ),
+      );
+      filters.append(h("label", {}, "Level", sel));
+    }
+    const st = h(
+      "select",
+      { id: "status", "data-filter": "status" },
+      [
+        ["todo", "to review"],
+        ["ok", "ok"],
+        ["work", "needs work"],
+        ["all", "all"],
+      ].map(([v, t]) =>
+        h("option", { value: v, text: t, selected: v === S.status }),
+      ),
+    );
+    filters.append(h("label", {}, "Show", st));
+    if (S.tab === "story") {
+      filters.append(
+        h(
+          "label",
+          {},
+          h("input", {
+            type: "checkbox",
+            id: "extra",
+            "data-filter": "extra",
+            checked: S.showExtra,
+          }),
+          "Show the rest of the level",
+        ),
+      );
+    }
+    const c = counts(scopeItems(S.tab));
+    filters.append(
+      h(
+        "div",
+        { class: "stats", role: "status" },
+        h("b", { text: String(c.reviewed) }),
+        " of " + c.n + " reviewed, ",
+        h("span", { class: c.work ? "w" : "" }, c.work + " need work"),
+      ),
+    );
+    return h(
+      "div",
+      { class: "bar" },
+      h(
+        "div",
+        { class: "bar-top" },
+        h("h1", { text: "Dictionary review" }),
+        tabs,
+        h(
+          "div",
+          { class: "keys" },
+          h("kbd", { text: "j" }),
+          " ",
+          h("kbd", { text: "k" }),
+          " move  ",
+          h("kbd", { text: "a" }),
+          " approve  ",
+          h("kbd", { text: "x" }),
+          " note  ",
+          h("kbd", { text: "Esc" }),
+          " leave field",
+        ),
+      ),
+      filters,
+    );
+  }
+
+  function render() {
+    if (!db) return;
+    const lv = levels();
+    if (!S.level || !lv.includes(S.level)) {
+      S.level = lv[0] || null;
+      ensureLevelSubs();
+    }
+    const active = document.activeElement;
+    const keep =
+      active && active.dataset && active.dataset.key
+        ? {
+            key: active.dataset.key,
+            a: active.selectionStart,
+            b: active.selectionEnd,
+          }
+        : null;
+    const scrollY = window.scrollY;
+    const frag = document.createDocumentFragment();
+    frag.append(header());
+    if (loadFailed)
+      frag.append(
+        h("div", {
+          class: "banner err",
+          role: "alert",
+          text: "Could not read the data: " + loadFailed,
+        }),
+      );
+    else if (timedOut)
+      frag.append(
+        h("div", {
+          class: "banner warn",
+          role: "alert",
+          text: "The data can't be reached yet. Check your connection; this page keeps trying.",
+        }),
+      );
+    if (!canWrite)
+      frag.append(
+        h("div", {
+          class: "banner warn",
+          text: "Read only: only the owner of this page can save verdicts.",
+        }),
+      );
+    if (S.tab === "story" && storiesCapped())
+      frag.append(
+        h("div", {
+          class: "banner warn",
+          text: "More than 1000 stories are stored. The selected level is read on its own.",
+        }),
+      );
+    const list = visibleList();
+    if (!list.some(([id]) => id === S.focusId)) S.focusId = null;
+    if (!list.length) {
+      const total = scopeItems(S.tab).length;
+      frag.append(
+        h("div", {
+          class: "empty",
+          text: loaded.size
+            ? total
+              ? "Nothing in this view. Change the filter above."
+              : "No items yet. They appear here once seeded."
+            : "Loading...",
+        }),
+      );
+    } else {
+      const headCls = "head cols-" + S.tab;
+      const labels = {
+        part: ["", "Name", "Used in", "Verdict"],
+        sound: ["", "Keyword", "Note", "Used in", "Verdict"],
+        story: ["", "Readings and parts", "Meaning", "On", "Kun"],
+      }[S.tab];
+      frag.append(
+        h(
+          "div",
+          { class: headCls },
+          labels.map((t) => h("div", { text: t })),
+        ),
+      );
+      const rows = h("div", { class: "rows", id: "rows" });
+      for (const [id, it] of list) rows.append(rowFor(id, it));
+      frag.append(rows);
+    }
+    app.replaceChildren(frag);
+    window.scrollTo(0, scrollY);
+    const target = pendingFocus || (keep && keep.key);
+    if (target) {
+      const el = app.querySelector('[data-key="' + target + '"]');
+      if (el) {
+        el.focus({ preventScroll: !pendingFocus });
+        if (!pendingFocus && keep && el.setSelectionRange && keep.a != null)
+          el.setSelectionRange(keep.a, keep.b);
+        pendingFocus = null; // kept until the note exists (the write must land first)
+      }
+    }
+  }
+
+  function focusRow(delta) {
+    if (!visibleIds.length) return;
+    const i = visibleIds.indexOf(S.focusId);
+    const n =
+      i < 0
+        ? delta > 0
+          ? 0
+          : visibleIds.length - 1
+        : Math.min(visibleIds.length - 1, Math.max(0, i + delta));
+    S.focusId = visibleIds[n];
+    for (const r of app.querySelectorAll(".row.focus"))
+      r.classList.remove("focus");
+    const el = app.querySelector('[data-row="' + S.focusId + '"]');
+    if (el) {
+      el.classList.add("focus");
+      el.scrollIntoView({ block: "nearest" });
+    }
+  }
+
+  // ---- events ---------------------------------------------------------------
+  function resetView() {
+    pinned.clear();
+    S.focusId = null;
+  }
+  app.addEventListener("click", (e) => {
+    const t = e.target.closest("[data-tab],[data-act]");
+    if (!t) return;
+    if (t.dataset.tab) {
+      S.tab = t.dataset.tab;
+      resetView();
+      render();
+    } else if (t.dataset.act) {
+      S.focusId = t.dataset.id;
+      const f = t.dataset.f;
+      if (t.dataset.act === "work")
+        pendingFocus = "n:" + t.dataset.id + ":" + f;
+      setVerdict(t.dataset.id, f, t.dataset.act);
+      schedule();
+    }
+  });
+  app.addEventListener("change", (e) => {
+    const t = e.target;
+    if (!t.dataset.filter) return;
+    if (t.dataset.filter === "level") {
+      S.level = t.value;
+      ensureLevelSubs();
+    } else if (t.dataset.filter === "status") S.status = t.value;
+    else if (t.dataset.filter === "extra") S.showExtra = t.checked;
+    resetView();
+    render();
+  });
+  app.addEventListener("input", (e) => {
+    const t = e.target;
+    if (t.dataset.key) drafts.set(t.dataset.key, t.value);
+  });
+  app.addEventListener("focusout", (e) => {
+    const t = e.target;
+    if (!t.dataset || !t.dataset.key || !canWrite) return;
+    if (t.classList.contains("note"))
+      setNote(t.dataset.id, t.dataset.f, t.value);
+    else if (t.classList.contains("name-input")) setEdit(t.dataset.id, t.value);
+  });
+  app.addEventListener("focusin", (e) => {
+    const row = e.target.closest && e.target.closest("[data-row]");
+    if (row && row.dataset.row !== S.focusId) {
+      S.focusId = row.dataset.row;
+      for (const r of app.querySelectorAll(".row.focus"))
+        r.classList.remove("focus");
+      row.classList.add("focus");
+    }
+  });
+  document.addEventListener("keydown", (e) => {
+    const t = e.target;
+    const typing =
+      t &&
+      (t.tagName === "INPUT" ||
+        t.tagName === "TEXTAREA" ||
+        t.tagName === "SELECT");
+    if (e.key === "Escape") {
+      if (typing || (t && t.blur)) t.blur();
+      return;
+    }
+    if (typing && e.key === "Enter" && t.classList.contains("name-input")) {
+      t.blur();
+      return;
+    }
+    if (typing || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.key === "j") focusRow(1);
+    else if (e.key === "k") focusRow(-1);
+    else if ((e.key === "a" || e.key === "x") && S.focusId && canWrite) {
+      const id = S.focusId;
+      const item = items.get(id);
+      if (!item) return;
+      if (e.key === "a") approve(id);
+      else {
+        const rev = reviews.get(id);
+        const fs = fieldsOf(item).filter(
+          (f) => !(item.kind === "story" && item.text && item.text[f] == null),
+        );
+        const f = fs.find((x) => fstate(item, rev, x).s === "todo") || fs[0];
+        pendingFocus = "n:" + id + ":" + f;
+        setVerdict(id, f, "work");
+        schedule();
+      }
+    } else return;
+    e.preventDefault();
+  });
+
+  // ---- boot -----------------------------------------------------------------
+  async function boot() {
+    const claude = window.claude;
+    if (claude && claude.use) {
+      try {
+        db = await claude.use("db");
+      } catch (e) {
+        db = null;
+      }
+    }
+    if (!db) {
+      app.append(
+        h("div", {
+          class: "banner err",
+          role: "alert",
+          text: "This page needs its database. Open it on claude.ai, signed in as the owner.",
+        }),
+      );
+      return;
+    }
+    try {
+      const user = await claude.use("user");
+      if (user) canWrite = await user.isOwner();
+    } catch (e) {
+      canWrite = true;
+    }
+    start();
+    render();
+  }
+  boot();
+</script>
