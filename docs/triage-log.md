@@ -38,3 +38,5 @@ One row per owner request, written by the `triage` skill (`.claude/skills/triage
 | 2026-11-20 | Story review tool outside the game (approve/refine parts, sounds, stories) | sdd | New tool and review workflow; changes how round 3 is gated | |
 | 2026-11-20 | Review page: short "why it fits" explainer per part/sound/story | sdd | New field generated for ~400 items, plus seed and page changes | |
 | 2026-11-20 | Same shape listed as two parts (⻖ stairs / ⻏ pennant) should be one part | fix | One data merge plus a checker exception; inside the open part-notes work | |
+| 2026-11-20 | Review page: save buttons optimistically | fix | Page-only, clear outcome | |
+| 2026-11-20 | Run another round on parts and sounds from owner notes so far | sdd (in round) | Continues Checkpoint D review inside the own-stories round; vowel rule added to STYLE | |

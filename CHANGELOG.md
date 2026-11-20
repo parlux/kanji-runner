@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.2 (2026-11-20)
+
+- Review page saves verdicts optimistically: a click shows at once, a brief "saved ✓" confirms the write, and a failed save reverts the row with an error.
+
 ## 1.6.1 (2026-11-20)
 
 - Word lists no longer reserve a quarter of each level for one-kanji words, which brought in odd readings (行 ぎょう, 下 もと). One-kanji words now compete with compounds on usefulness.

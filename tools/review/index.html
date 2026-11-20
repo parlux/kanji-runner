@@ -215,6 +215,25 @@
     border: 1px solid var(--line);
     border-radius: 8px;
     padding: 8px 10px;
+    position: relative;
+  }
+  .savedmark {
+    position: absolute;
+    top: 3px;
+    right: 8px;
+    font: 500 0.7rem var(--f-mono);
+    color: var(--ok);
+    pointer-events: none;
+    animation: savedfade 1s linear both;
+  }
+  @keyframes savedfade {
+    0%,
+    60% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
   }
   .row.focus {
     outline: 2px solid var(--focus);
@@ -529,7 +548,10 @@
   let timedOut = false;
   const drafts = new Map(); // "n:id:field" | "e:id" -> unsaved text
   const errs = new Map(); // id -> message of the last failed save
-  const saving = new Set();
+  const optimistic = new Map(); // id -> review doc applied locally, ahead of the snapshot
+  const savedAt = new Map(); // id -> time of the last successful write (for the "saved" mark)
+  const revOf = (id) =>
+    optimistic.has(id) ? optimistic.get(id) : reviews.get(id);
   const pinned = new Set(); // rows touched since the filters last changed stay listed
   const chains = new Map();
   let pendingFocus = null;
@@ -576,6 +598,11 @@
     };
     items = merge("items:");
     reviews = merge("reviews:");
+    // drop overlays the snapshot has caught up with (settled writes only)
+    for (const [id, doc] of optimistic) {
+      const r = reviews.get(id);
+      if (doc.settled && r && r.at === doc.at) optimistic.delete(id);
+    }
     ensureLevelSubs();
     schedule();
   }
@@ -682,7 +709,7 @@
     let work = 0;
     for (const [id, it] of list) {
       if (it.why === "extra") continue;
-      const sm = summary(it, reviews.get(id));
+      const sm = summary(it, revOf(id));
       n++;
       if (sm.done) reviewed++;
       if (sm.work) work++;
@@ -695,7 +722,7 @@
       if (pinned.has(id)) return true;
       const extra = it.why === "extra";
       if (extra && !S.showExtra) return false;
-      const sm = summary(it, reviews.get(id));
+      const sm = summary(it, revOf(id));
       if (S.status === "todo") return sm.todo;
       if (S.status === "ok") return sm.done && !sm.work;
       if (S.status === "work") return sm.work;
@@ -718,23 +745,47 @@
   }
 
   // build(item, review) returns the full new doc, or null when nothing changes.
+  // The new doc is built and shown at once (optimistic overlay); only the
+  // write itself is chained per id, so rapid clicks stay ordered.
   function save(id, build, after) {
     pinned.add(id);
+    const item = items.get(id);
+    const doc = item && build(item, revOf(id));
+    if (!doc) return Promise.resolve();
+    doc.at = new Date().toISOString();
+    optimistic.set(id, doc);
+    errs.delete(id);
+    savedAt.delete(id);
+    schedule();
     const run = async () => {
-      const item = items.get(id);
-      const doc = item && build(item, reviews.get(id));
-      if (!doc) return;
-      doc.at = new Date().toISOString();
-      saving.add(id);
-      errs.delete(id);
-      schedule();
+      const { settled, ...plain } = doc; // eslint-disable-line no-unused-vars
       try {
-        await db.doc("reviews/" + id).set(doc);
+        await db.doc("reviews/" + id).set(plain);
         if (after) after();
+        doc.settled = true;
+        const r = reviews.get(id);
+        if (r && r.at === doc.at && optimistic.get(id) === doc)
+          optimistic.delete(id);
+        if (!optimistic.has(id) || optimistic.get(id) === doc) {
+          savedAt.set(id, Date.now());
+          setTimeout(() => {
+            if (Date.now() - (savedAt.get(id) || 0) >= 1000) {
+              savedAt.delete(id);
+              schedule();
+            }
+          }, 1050);
+        }
+        // safety net: never let an overlay outlive the snapshot for long
+        setTimeout(() => {
+          if (optimistic.get(id) === doc) {
+            optimistic.delete(id);
+            schedule();
+          }
+        }, 10000);
       } catch (e) {
+        if (optimistic.get(id) === doc) optimistic.delete(id);
         errs.set(id, errText(e));
       } finally {
-        saving.delete(id);
         schedule();
       }
     };
@@ -933,7 +984,7 @@
   }
 
   function rowFor(id, item) {
-    const rev = reviews.get(id);
+    const rev = revOf(id);
     const sm = summary(item, rev);
     const row = h("div", {
       class:
@@ -1027,8 +1078,11 @@
             " Your text is kept; change it or press ✓/✗ again to retry.",
         }),
       );
-    else if (saving.has(id))
-      row.append(h("div", { class: "rowmsg small", text: "saving..." }));
+    else if (savedAt.has(id)) {
+      const mark = h("div", { class: "savedmark", text: "saved ✓" });
+      mark.style.animationDelay = "-" + (Date.now() - savedAt.get(id)) + "ms";
+      row.append(mark);
+    }
     return row;
   }
 
@@ -1322,7 +1376,7 @@
       if (!item) return;
       if (e.key === "a") approve(id);
       else {
-        const rev = reviews.get(id);
+        const rev = revOf(id);
         const fs = fieldsOf(item).filter(
           (f) => !(item.kind === "story" && item.text && item.text[f] == null),
         );
