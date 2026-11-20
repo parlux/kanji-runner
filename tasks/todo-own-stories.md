@@ -12,7 +12,7 @@ Every task: `npm run check` passes before it is checked off. Never commit `.data
 - **Pipeline first.** D1 builds the format, validator, prep, WaniKani fetch and overlap check, so every story after it is checked the same way.
 - **Shared vocabulary next.** D2 names the parts and the on'yomi sound keywords once, so every story uses the same names and images.
 - **Pilot, then the card.** D3 writes Kanji 5–6 (the owner is on Kanji 5 and doesn't need Kanji 1–4) through the full writer/judge loop and tunes `STYLE.md` on what fails; D4 shows them on the card; D5 adds the flag.
-- **Review page (added 2026-11-20).** Reviewing by playing was too slow. R1 builds the seed/apply scripts, R2 the desk review page; Checkpoint D happens there (all parts and sounds, then Kanji 5–6); R3 applies it. From D7 on, every batch gets a sampled review.
+- **Review page (added 2026-11-20).** Reviewing by playing was too slow. R1 builds the seed/apply scripts, R2 the desk review page; Checkpoint D happens there (all parts and sounds, then Kanji 5–6); R3 applies it. Stories are reviewed in the game with flags instead (owner, 2026-11-21). From D7 on, every batch gets a sampled review.
 - **Part notes (added 2026-11-20, during Checkpoint D).** The owner couldn't see why some part names fit (⻏ "village"). N1 adds a `note` per part to the data, checker, seed and page; N2 writes the notes, renames history names to visible shapes and re-seeds the parts. The owner's part review resumes on the page after N2. Intent `docs/intent/part-notes.md`.
 - **Sound highlight (added 2026-11-21, after the part and sound review).** Reading stories drop the closing explainer and the kana; a `<sound>` tag highlights the sound-alike chunk in place. H1 adds the tag to the checker, card and page; H2 rewrites Kanji 5–6's on/kun stories and re-seeds them. The owner's story review (rest of Checkpoint D) happens on the new form. Intent `docs/intent/sound-highlight.md`.
 - **Then the owner's levels only.** D6 deploys: Checkpoint D, on Kanji 5–6. After it, D7 fixes flags and writes the next levels in pairs, about one level ahead of the owner; D8 ships 1.7.0. Kanji 1–4 are left for later (owner, 2026-11-20). Later levels are written as the owner nears them (owner, 2026-11-20: a renamed part or keyword ripples into every story that uses it, so keep few stories ahead until the names have settled).
@@ -130,16 +130,17 @@ Not one implementer subagent: the orchestrator runs the loop per batch (2 levels
 **Files:** `src/core/mnemonic.ts`, `src/game/ui/study.ts` (or its CSS), `scripts/stories/check.ts`, `tools/review/index.html`, `dictionary/STYLE.md`, tests
 
 ### Task H2: Rewrite Kanji 5–6 reading stories (content, orchestrator)
-**Description:** Writer (**opus**) rewrites every `on` and `kun` field in `kanji-05.json` and `kanji-06.json` to the new form from `STYLE.md`, `sounds.json` and the current stories (same scene and keyword, explainer and kana dropped, kun tail only when the meaning differs). `stories:check` (flag removed), `stories:overlap`; judge (**sonnet**) checks highlights and tails; max 3 rounds. Commit, push, deploy; re-seed Kanji 5–6 stories with every story bumped. Log counts below.
+**Description:** Writer (**opus**) rewrites every `on` and `kun` field in `kanji-05.json` and `kanji-06.json` to the new form from `STYLE.md`, `sounds.json` and the current stories (same scene and keyword, explainer and kana dropped, kun tail only when the meaning differs). `stories:check` (flag removed), `stories:overlap`; judge (**sonnet**) checks highlights and tails; max 3 rounds. Commit, push, deploy. No re-seed: the owner reviews the stories in the game with the Flag button (owner, 2026-11-21). Log counts below.
 **Acceptance:**
 - [ ] Every on/kun field in Kanji 5–6 rewritten; `--allow-reading` removed; all pass check and judge.
-- [ ] Stories re-seeded; one checked on the page (reading above, highlight shown); deploy green.
+- [ ] Deploy green; one Kanji 5 card checked live (highlight shown, no explainer).
 - [ ] Counts logged below.
 **Files:** `dictionary/stories/kanji-05.json`, `dictionary/stories/kanji-06.json`, `scripts/stories/check.ts`, this file
 
 ### Checkpoint D: owner (moved to the review page, 2026-11-20)
 - [x] Owner runs `supabase/story-flags.sql` once. (2026-11-20; `stories:flags` reads the table: no flags yet.)
-- [ ] Owner reviews every part name and sound keyword on the review page, then all of Kanji 5–6.
+- [x] Owner reviews every part name and sound keyword on the review page (done 2026-11-21; applied in 1.6.7–1.6.9).
+- [ ] Owner plays Kanji 5–6 and flags stories that need work (in-game review, owner 2026-11-21, instead of the review page).
 - [ ] Owner ticks, or sends `STYLE.md` changes before D7 scales up.
 
 ### Task R3: Apply Checkpoint D's review (content, orchestrator)
@@ -154,6 +155,12 @@ Not one implementer subagent: the orchestrator runs the loop per batch (2 levels
 - [ ] Levels through the owner's level + 1 have files; all pass check and judge; no unresolved suspect.
 - [ ] Flags resolved; every seeded sample reviewed and its ✗ rewritten (random misses per level logged).
 - [ ] Counts logged below.
+
+### Task B1: Backfill Kanji 1–4 (content, orchestrator)
+**Description:** Added 2026-11-21 (owner): Kanji 1–4 still use WaniKani's stories, and removing WaniKani (backlog) needs them. Run the content loop on game levels 2–5 in two batches, current `STYLE.md` (sound highlight form). Review: in-game flags plus `stories:review -- seed` judge fails + 10 random per level.
+**Acceptance:**
+- [ ] `kanji-01.json` to `kanji-04.json` committed; all pass check and judge.
+- [ ] Seeded samples reviewed and ✗ rewritten; counts logged below.
 
 ### Task D8: Ship 1.7.0
 **Description:** Credits/README note on the dictionary, `package.json` 1.7.0, `## 1.7.0 (<date>)` in `CHANGELOG.md`, deploy.
