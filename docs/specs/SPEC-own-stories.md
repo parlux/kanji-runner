@@ -99,6 +99,16 @@ Each part gets a one-line "why it fits" note, and a part named after its history
 - **Fixed parts (owner, 2026-11-20):** a part named by its own character's meaning (126 today: 戈 spear, 豕 pig…) has `"fixed": true`; `seed parts` skips it and its review item is removed, so it can't be ✗'d by accident.
 - **Same shape, one name (owner, 2026-11-20):** a glyph that is the same shape as another part (⻏ is ⻖ on the right side) has `"sameAs": "<twin glyph>"` and shares the twin's name and note; the checker allows that one duplicate and fails a `sameAs` that names a missing part or a different name. Renaming a twin means renaming both.
 
+## Sound highlight (added 2026-11-21, intent `docs/intent/sound-highlight.md`)
+Reading stories show where the sound sits instead of explaining it.
+
+- **Markup:** a new tag `<sound>` wraps the sound-alike chunk inside an English word: `a <sound>den</sound>tist`. One per word that carries a piece of the reading, in reading order; the closest chunk when the spelling isn't exact (`<sound>Sa</sound>fe` for せい). No attributes, no nesting, inside `on` and `kun` only.
+- **Reading stories (`on`, `kun`):** no closing explainer sentence and no kana: `<reading>` is no longer used in our stories (WaniKani's mnemonics still use it; the card's parser keeps it). A kun story may end with a short meaning tail ("…a pair") only when the kun word's meaning differs from the kanji's glosses; it may still use `<ja>` for the okurigana word when the scene needs it. Band: 40–350 characters.
+- **Checker (`stories:check`):** `on`/`kun` need at least one `<sound>`; `<sound>` in `meaning` or `<reading>` in our stories fails; `<sound>` text is 1–6 Latin letters. When the kanji's on'yomi has a `sounds.json` keyword, the `on` story must highlight a chunk of that keyword (the `<sound>` chunk plus the letters around it in the same word spell the keyword, ignoring case; for a multi-word keyword, one of its words).
+- **Card:** `mn-sound` styled like the reading colour, bold, underlined. The heading "Reading on: しん" above each block stays as the kana reference.
+- **Review page:** `<sound>` rendered the same way; each On and Kun cell shows its reading (from the item's `on`/`kun`) at the top, above the story.
+- **Rewrite (content, once):** a writer on **opus** rewrites every `on` and `kun` field in Kanji 5–6 to the new form, keeping the scene and keyword; a judge on **sonnet** checks the highlight sits on the right chunk, the syllables come out in order, and the kun tail rule. Stories are re-seeded (`seed 6-7`, all bumped) for the owner's review.
+
 ## Files
 ```
 dictionary/README.md, STYLE.md, parts.json, sounds.json, stories/kanji-NN.json   (new)
