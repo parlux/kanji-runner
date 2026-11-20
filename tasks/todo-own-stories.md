@@ -6,6 +6,7 @@ Review tool: https://claude.ai/artifact/CNZAQt1csZLwyV29i5piR9
 Review: https://claude.ai/artifact/8XjjrPPLSvPDR8dkBTgdst (review page addition; intent `docs/intent/story-review.md`, 2026-11-20).
 Review (part notes): https://claude.ai/artifact/Db8Pq8NVeYCqsTvKxVsLVV (intent `docs/intent/part-notes.md`, 2026-11-20).
 Sound highlight: intent `docs/intent/sound-highlight.md` (2026-11-21); the owner waived the spec page.
+Composite parts: intent `docs/intent/composite-parts.md` (2026-11-21); the owner waived the spec page.
 Every task: `npm run check` passes before it is checked off. Never commit `.data-cache` or anything from WaniKani (text, names, overlap reports, judge files).
 
 ## Plan
@@ -15,6 +16,7 @@ Every task: `npm run check` passes before it is checked off. Never commit `.data
 - **Review page (added 2026-11-20).** Reviewing by playing was too slow. R1 builds the seed/apply scripts, R2 the desk review page; Checkpoint D happens there (all parts and sounds, then Kanji 5–6); R3 applies it. Stories are reviewed in the game with flags instead (owner, 2026-11-21). From D7 on, every batch gets a sampled review.
 - **Part notes (added 2026-11-20, during Checkpoint D).** The owner couldn't see why some part names fit (⻏ "village"). N1 adds a `note` per part to the data, checker, seed and page; N2 writes the notes, renames history names to visible shapes and re-seeds the parts. The owner's part review resumes on the page after N2. Intent `docs/intent/part-notes.md`.
 - **Sound highlight (added 2026-11-21, after the part and sound review).** Reading stories drop the closing explainer and the kana; a `<sound>` tag highlights the sound-alike chunk in place. H1 adds the tag to the checker, card and page; H2 rewrites Kanji 5–6's on/kun stories and re-seeds them. The owner's story review (rest of Checkpoint D) happens on the new form. Intent `docs/intent/sound-highlight.md`.
+- **Composite parts (added 2026-11-21, from the owner's flag on 閉 at Checkpoint D).** KRADFILE's flat stroke lists make stories name "one, slash, crowbar". C1 switches components to KanjiVG one level down; C2 names the new parts and seeds the shapes to the review page (owner stop: review them); C3 applies the review, rewrites the changed Kanji 1–6 stories and deploys for Checkpoint D. Intent `docs/intent/composite-parts.md`.
 - **Then the owner's levels only.** D6 deploys: Checkpoint D, on Kanji 5–6. After it, D7 fixes flags and writes the next levels in pairs, about one level ahead of the owner; D8 ships 1.7.0. Kanji 1–4 are left for later (owner, 2026-11-20). Later levels are written as the owner nears them (owner, 2026-11-20: a renamed part or keyword ripples into every story that uses it, so keep few stories ahead until the names have settled).
 
 ### Content tasks (D2, D3, D7): run by the orchestrator
@@ -142,6 +144,26 @@ Not one implementer subagent: the orchestrator runs the loop per batch (2 levels
 **Acceptance:**
 - [x] `kanji-01.json` to `kanji-04.json` committed; all pass check and judge.
 - [x] Deploy green; counts logged below. (9e639b8, live kanji-01…04 chunks.)
+
+### Task C1: Components from KanjiVG (opus, highest risk: data)
+**Description:** Spec "Composite parts": `scripts/sources.ts` fetches the pinned KanjiVG release into `.data-cache`; `scripts/build-data.ts` builds `components` from it by the rule (variant table, keep/recurse, order), replacing KRADFILE; `npm run build-data` regenerates `src/data/kanji.json`; `README.md` credits KanjiVG. `stories:check` gets a temporary `--allow-missing-parts` (parts coverage → warnings), passed by `npm test`. Write `.data-cache/stories/new-parts.json` (`[{ part, kanji: bool, uses: [...], children }]`) and `removed-parts.json` for C2. Nothing in `src/` but the data file changes; the card's parts row keeps working (names missing for new parts until C2 show the glyph alone).
+**Acceptance:**
+- [ ] Tests: variant table maps every listed glyph; keep/recurse rule on fixtures (kept: named, kanji, 2+ uses; single-use recursed; leaf kept); 閉 → 門 才, 休 → ⺅ 木, 語 → 言 吾.
+- [ ] `src/data/kanji.json` regenerated; counts logged below (new parts total / kanji / shapes; Kanji 1–6 kanji changed; removed parts); no other kanji field changed (diff check).
+- [ ] `npm run check` passes (knip, deps).
+**Files:** `scripts/sources.ts`, `scripts/build-data.ts`, `src/data/kanji.json`, `scripts/stories/check.ts`, `tests/data/*`, `README.md`, `package.json`, this file
+
+### Task C2: Name the new parts, seed the shapes (content, orchestrator)
+**Description:** From `new-parts.json`: kanji parts get their gloss name, `fixed`, a note (mechanical + writer for notes); shape parts get a name, note and 2–3 alts from a writer (**opus**) per STYLE.md, judged (**sonnet**), unique; removed parts dropped. `--allow-missing-parts` removed. Commit, push; seed the new shape parts to the review page (pass 1, alts). **Owner stop:** review them on the page (Kanji 1–6's 15 first).
+**Acceptance:**
+- [ ] `parts.json` covers every component; check passes without the flag; judge pass on all new names and notes.
+- [ ] New shape parts seeded; counts logged below.
+
+### Task C3: Apply the review, rewrite Kanji 1–6 stories (content, orchestrator)
+**Description:** `apply` the owner's verdicts on the new parts; rewrite every Kanji 1–6 meaning story whose parts changed (and reading stories naming a removed part) through the writer/judge loop; check, overlap; commit, push, deploy. Then Checkpoint D resumes (play Kanji 1–6).
+**Acceptance:**
+- [ ] Every changed Kanji 1–6 story rewritten; all pass check and judge; "part not named" warnings counted before/after.
+- [ ] Deploy green; counts logged below.
 
 ### Checkpoint D: owner (moved to the review page, 2026-11-20)
 - [x] Owner runs `supabase/story-flags.sql` once. (2026-11-20; `stories:flags` reads the table: no flags yet.)

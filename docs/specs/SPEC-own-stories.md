@@ -109,6 +109,18 @@ Reading stories show where the sound sits instead of explaining it.
 - **Review page:** `<sound>` rendered the same way; each On and Kun cell shows its reading (from the item's `on`/`kun`) at the top, above the story.
 - **Rewrite (content, once):** a writer on **opus** rewrites every `on` and `kun` field in Kanji 5–6 to the new form, keeping the scene and keyword; a judge on **sonnet** checks the highlight sits on the right chunk, the syllables come out in order, and the kun tail rule. Stories are re-seeded (`seed 6-7`, all bumped) for the owner's review.
 
+## Composite parts (added 2026-11-21, intent `docs/intent/composite-parts.md`)
+Parts are the chunks you see, not the smallest strokes.
+
+- **Source:** KanjiVG (`kanjivg-20250816.xml.gz` from the `r20250816` GitHub release, CC BY-SA 3.0, credited in `README.md` next to EDRDG) replaces KRADFILE for `components` in `src/data/kanji.json`. `scripts/build-data.ts` reads each kanji's top-level element groups (`kvg:element`; a split element counted once; unnamed groups descended).
+- **Rule:** for each child chunk, after mapping variant code points to the glyph `parts.json` already uses (氵→⺡, 亻→⺅, 扌→⺘, 艹→⺾, 丿→ノ, 忄→⺖, 刂→⺉, 八→ハ, 灬→⺣, 丨→｜, 礻→⺭, 衤→⻂, 罒→⺲…; the table lives in the build script and is tested): keep it as a part if it is already in `parts.json`, is a kanji in our list, or is a child of 2+ kanji; otherwise replace it by its own children, recursively. A chunk with no KanjiVG children stays as it is. Order follows the glyph (KanjiVG order). Prototype count (2026-11-21): 535 new parts (348 kanji, 187 shapes); 106 of Kanji 1–6's 180 kanji change.
+- **Kanji 1–6 only needs:** 41 new parts (26 kanji, 15 shapes). All new parts are named now so later levels build on settled names.
+- **Parts no longer used** by any kanji are removed from `parts.json` (listed in the task log). Approved names of parts still in use don't change.
+- **Naming (content):** a part that is a kanji in our levels gets that kanji's first gloss (or a more drawable gloss if the first collides with an existing name), `"fixed": true` and a note. A shape part gets a visible-shape name, a note and 2–3 `alts` (STYLE.md rules), writer **opus**, judge **sonnet**, names unique.
+- **Checker:** a temporary `--allow-missing-parts` lets `stories:check` and `npm test` pass while `parts.json` doesn't yet cover the new components; C2 removes it.
+- **Review:** new shape parts are seeded to the review page (`seed parts`, pass 1); fixed kanji parts are not. The owner reviews them, then `apply`.
+- **Stories:** every Kanji 1–6 meaning story whose kanji's parts changed is rewritten to name the new parts (same scene where it still fits); reading stories that mention a removed part are touched up. Writer/judge loop, then deploy and Checkpoint D (play Kanji 1–6).
+
 ## Files
 ```
 dictionary/README.md, STYLE.md, parts.json, sounds.json, stories/kanji-NN.json   (new)
