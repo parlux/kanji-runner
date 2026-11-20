@@ -106,9 +106,9 @@ Not one implementer subagent: the orchestrator runs the loop per batch (2 levels
 ### Task N1: Part notes in data, checker, seed and page (sonnet)
 **Description:** Spec "Part notes": `stories:check` requires a part `note` (20–120 characters) behind a temporary `--allow-missing-notes` used until N2 lands (`npm test` passes it too until then); `stories:review -- rename <file>` reusing `apply`'s rename path; `seed parts` carries `note` and `was`; `seed --bump <ids file>` bumps `pass` only for listed ids; the Parts row shows the note and "was: …". Republish the page to the same link (orchestrator).
 **Acceptance:**
-- [ ] Tests: missing or out-of-band note fails (without the flag); `rename` on a fixture ripples into `<part>` text and lists touched stories, rejects duplicate or 4-word names; `seed --bump` bumps only listed ids and keeps `if_version`.
-- [ ] Screenshot at 1280×800 of the Parts tab from a fixture with a note and a `was`, light and dark.
-- [ ] `npm run check` passes.
+- [x] Tests: missing or out-of-band note fails (without the flag); `rename` on a fixture ripples into `<part>` text and lists touched stories, rejects duplicate or 4-word names; `seed --bump` bumps only listed ids and keeps `if_version`.
+- [x] Screenshot at 1280×800 of the Parts tab from a fixture with a note and a `was`, light and dark.
+- [x] `npm run check` passes.
 **Files:** `scripts/stories/check.ts`, `scripts/stories/review.ts`, `tools/review/index.html`, `tests/data/review.test.ts`, `tests/data/stories.test.ts`
 
 ### Task N2: Write part notes, rename history names (content, orchestrator)

@@ -111,7 +111,7 @@ tests/data/stories.test.ts   → validator over committed dictionary + fixtures
 ```
 
 ## Commands
-`npm run stories:prep -- <levels>`, `stories:check`, `stories:wk`, `stories:overlap -- <levels>`, `stories:flags`, `stories:review -- seed|apply`, plus `npm run check`.
+`npm run stories:prep -- <levels>`, `stories:check`, `stories:wk`, `stories:overlap -- <levels>`, `stories:flags`, `stories:review -- seed|apply|rename` (`seed` also takes `--bump <ids.json>` and `--renames <renames.json>`; `stories:check -- --allow-missing-notes` until Task N2), plus `npm run check`.
 
 ## Testing
 - Validator unit tests on fixtures (each rule fails on a broken fixture); the validator runs over the committed dictionary in `npm test`.

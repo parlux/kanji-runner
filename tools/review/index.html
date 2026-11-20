@@ -275,6 +275,25 @@
     font-size: 0.8rem;
     color: var(--muted);
   }
+  .namewrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .namewrap .name-input {
+    flex: 1;
+    min-width: 0;
+  }
+  .was {
+    font-size: 0.8rem;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .pnote {
+    font-size: 0.85rem;
+    line-height: 1.4;
+    color: var(--muted);
+  }
   .uses {
     display: flex;
     flex-wrap: wrap;
@@ -869,8 +888,17 @@
         class: "lbl",
         text: item.kind === "part" ? "name" : "keyword",
       }),
-      input,
+      item.kind === "part" && item.was
+        ? h(
+            "div",
+            { class: "namewrap" },
+            input,
+            h("span", { class: "was", text: "was: " + item.was }),
+          )
+        : input,
     );
+    if (item.kind === "part" && item.note)
+      cell.append(h("div", { class: "pnote", text: item.note }));
     if (saved !== curName(item))
       cell.append(
         h("div", {
