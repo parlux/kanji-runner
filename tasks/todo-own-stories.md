@@ -140,7 +140,7 @@ Not one implementer subagent: the orchestrator runs the loop per batch (2 levels
 ### Task B1: Backfill Kanji 1–4 (content, orchestrator)
 **Description:** Added 2026-11-21 (owner): Kanji 1–4 still use WaniKani's stories, and removing WaniKani (backlog) needs them. Moved before Checkpoint D (owner, 2026-11-21: all of Kanji 1–6 before the checkpoint). Run the content loop on game levels 2–5 in two batches, current `STYLE.md` (sound highlight form). Review: in-game flags at Checkpoint D.
 **Acceptance:**
-- [ ] `kanji-01.json` to `kanji-04.json` committed; all pass check and judge.
+- [x] `kanji-01.json` to `kanji-04.json` committed; all pass check and judge.
 - [ ] Deploy green; counts logged below.
 
 ### Checkpoint D: owner (moved to the review page, 2026-11-20)
@@ -218,4 +218,14 @@ Not one implementer subagent: the orchestrator runs the loop per batch (2 levels
 | Kanji 6 | 60 | 0 | 8 / 0 | 3 by hand (言 Gen, 戻 doll, 冷 tie for たい); 4 strut-u (tub, hut, duck, mug) passed per the owner's vowel rule; 便 tail not needed ("letter" is a gloss) | 60 pass |
 - Kun meaning tails kept: 番 (a pair), 弁 (know what's proper).
 - Okurigana left uncovered as before where the old story didn't spell it (安 好 遅 交 停 付 戻 高…).
+
+### B1: Kanji 1–4 backfill (2026-11-21)
+| Level | Fields | Overlap suspects | Judge 1st pass (weak / wrong / close) | Fixed by hand | Final |
+|---|---|---|---|---|---|
+| Kanji 1 | 90 | 0 | 6 / 0 / 1 | 出 meaning (no sub-parts), 食 on (close: shock of hair) | 90 pass |
+| Kanji 2 | 86 | 0 | 3 / 0 / 1 | 月 on (gecko + tsu), 母 kun (close: harps) | 86 pass |
+| Kanji 3 | 87 | 1 (品 kun) | 3 / 0 / 2 | 十 on, 品 kun (close), 半 meaning (cake set up) | 87 pass |
+| Kanji 4 | 84 | 0 | 3 / 0 / 1 | 料 meaning (close: canteen tray), 午 kun (umami) | 84 pass |
+- Passed against the judge, for the owner to hear in play: と via "totem" (approved keyword), short も/の via "mole"/"No!" (as in Kanji 5–6), がく "gaggle" (owner ✓ earlier).
+- Kun meaning tails kept: 金 (money), 門 (a corner), 社 (a shrine).
 

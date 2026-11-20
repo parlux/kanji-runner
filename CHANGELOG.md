@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.12 (2026-11-21)
+
+- Our own stories for Kanji 1–4 (120 kanji), in the sound-highlight form: Kanji 1–6 no longer need WaniKani's stories.
+
 ## 1.6.11 (2026-11-21)
 
 - Reading stories (Kanji 5–6): no closing explainer and no kana; the sound-alike chunk is highlighted in the story (a steel **sa**fe). The checker now requires the new form.
