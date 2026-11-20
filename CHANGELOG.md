@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.9 (2026-11-21)
+
+- Story dictionary: せい keyword "safe" (was "sail", the part name of 方); 性 reading story rewritten.
+
 ## 1.6.8 (2026-11-21)
 
 - Story dictionary: らん runway, ろ rodent, part 艮 robot (clashes between part names and sound keywords removed).

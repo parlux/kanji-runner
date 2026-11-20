@@ -46,3 +46,5 @@ One row per owner request, written by the `triage` skill (`.claude/skills/triage
 | 2026-11-21 | Alts for every part on the review page | sdd (in round) | Continues the Checkpoint D part review; data only, alts field already exists | |
 | 2026-11-21 | Final part/sound review: apply it | sdd (in round) | Applies Checkpoint D review data; notes and touched stories rewritten | |
 | 2026-11-21 | らん runway, ろ rodent, 艮 robot | fix | Three owner-picked data entries | |
+| 2026-11-21 | せい keyword safe | fix | One owner-picked keyword, one story | |
+| 2026-11-21 | Highlight the sound in on/kun stories instead of an explainer sentence | sdd | Style and markup change across every reading story, plus game rendering | |
