@@ -146,6 +146,20 @@ describe("review seed: items", () => {
     });
   });
 
+  it("part items carry the note and, for a renamed part, was", () => {
+    const p = partItems(
+      { 口: { name: "lips", note: "A small open box." }, 日: { name: "sun" } },
+      ks,
+      new Map([["口", "mouth"]]),
+    );
+    expect(p[0]?.data).toMatchObject({
+      note: "A small open box.",
+      was: "mouth",
+    });
+    expect(p[1]?.data).not.toHaveProperty("note");
+    expect(p[1]?.data).not.toHaveProperty("was");
+  });
+
   it("uses are capped at 8", () => {
     const many = Array.from({ length: 12 }, (_, i) =>
       kanji("k" + i, 2, ["口"]),
@@ -215,6 +229,18 @@ describe("review seed: batches and versions", () => {
         new Map([["part-0", { version: null, data: { pass: 1 } }]]),
       ),
     ).toThrow(/version-list/);
+  });
+
+  it("--bump bumps only listed ids; all existing items keep if_version", () => {
+    const existing = new Map([
+      ["part-0", { version: 3, data: { pass: 2 } }],
+      ["part-1", { version: 5, data: { pass: 4 } }],
+    ]);
+    const out = withVersions(w(3), existing, new Set(["part-1", "part-2"]));
+    expect(out[0]).toMatchObject({ if_version: 3, data: { pass: 2 } });
+    expect(out[1]).toMatchObject({ if_version: 5, data: { pass: 5 } });
+    expect(out[2]).not.toHaveProperty("if_version");
+    expect(out[2]?.data.pass).toBe(1);
   });
 
   it("reads versions from a listing's tool output", () => {

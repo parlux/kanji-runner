@@ -13,6 +13,12 @@
  *   `pass + 1` for items that already exist, and `if_version` from
  *   `--version-list <file>` (the listing's tool output saved as text: saved
  *   files carry no version, the output's `"<id>" … version N` lines do).
+ *   `--bump <ids.json>` (a JSON array of doc ids) limits the `pass + 1` to
+ *   those ids; other existing items keep their `pass` (and get `if_version`).
+ *   `seed parts` puts the part `note`, and with `--renames <file>` (the
+ *   `rename` input, `[{ part, from, to, why }]`) `was` (the old name).
+ * - `rename <file>`: applies part renames (parts.json and every story's
+ *   `<part>` text, as `apply`'s edit does) and lists the touched stories.
  * - `apply <dir> [--items <dir>]`: see the second half of this file.
  *
  * Nothing here carries WaniKani text: `close` reasons are never copied.
@@ -59,6 +65,8 @@ export type ItemData = {
   name?: string;
   keyword?: string;
   note?: string;
+  /** Part's old name, when it was renamed. */
+  was?: string;
   level?: string;
   glosses?: string[];
   on?: string | null;
@@ -224,11 +232,13 @@ const asNames = (
   return out;
 };
 
+/** `was`: part glyph → old name, for renamed parts. */
 export function partItems(
   parts: unknown,
   kanji: readonly KanjiItem[],
+  was: ReadonlyMap<string, string> = new Map(),
 ): Write[] {
-  return [...asNames(parts, "name")].map(([p, { text }]) => ({
+  return [...asNames(parts, "name")].map(([p, { text, note }]) => ({
     op: "set",
     collection: "items",
     doc_id: partId(p),
@@ -238,6 +248,8 @@ export function partItems(
       pass: 1,
       why: "all",
       name: text,
+      ...(note ? { note } : {}),
+      ...(was.has(p) ? { was: was.get(p) } : {}),
       uses: kanji
         .filter((k) => k.components.includes(p))
         .slice(0, USES)
@@ -379,10 +391,14 @@ export function parseVersionList(text: string): Map<string, number> {
   return out;
 }
 
-/** Writes for items that exist get `if_version` and `pass + 1`. */
+/**
+ * Writes for items that exist get `if_version` and `pass + 1`; with `bump`,
+ * only listed ids get the `+ 1` (the rest keep their current `pass`).
+ */
 export function withVersions(
   writes: readonly Write[],
   existing: ReadonlyMap<string, Existing>,
+  bump?: ReadonlySet<string>,
 ): Write[] {
   return writes.map((w) => {
     const old = existing.get(w.doc_id);
@@ -395,7 +411,7 @@ export function withVersions(
     return {
       ...w,
       if_version: old.version,
-      data: { ...w.data, pass: pass + 1 },
+      data: { ...w.data, pass: !bump || bump.has(w.doc_id) ? pass + 1 : pass },
     };
   });
 }
@@ -828,20 +844,30 @@ function seedMain(args: string[]) {
     const versions = parseVersionList(readFileSync(vlist, "utf8"));
     for (const [id, doc] of existing) doc.version ??= versions.get(id) ?? null;
   }
+  const bumpFile = flag("--bump");
+  const bump = bumpFile
+    ? new Set(
+        (readJson(bumpFile) as unknown[]).filter(
+          (x): x is string => typeof x === "string",
+        ),
+      )
+    : undefined;
+  const renamesFile = flag("--renames");
+  const was = new Map<string, string>();
+  if (renamesFile)
+    for (const r of readJson(renamesFile) as Rename[]) was.set(r.part, r.from);
+  const valueFlags = ["--versions", "--version-list", "--bump", "--renames"];
   const target = args.find(
-    (a, i) =>
-      !a.startsWith("--") &&
-      args[i - 1] !== "--versions" &&
-      args[i - 1] !== "--version-list",
+    (a, i) => !a.startsWith("--") && !valueFlags.includes(args[i - 1] ?? ""),
   );
   if (!target)
     throw new Error(
-      "usage: stories:review -- seed parts|sounds|<levels> [--all] [--versions <dir> --version-list <file>]",
+      "usage: stories:review -- seed parts|sounds|<levels> [--all] [--versions <dir> --version-list <file>] [--bump <ids.json>] [--renames <renames.json>]",
     );
   const put = (scope: string, writes: Write[]) =>
-    writeFiles(scope, existing ? withVersions(writes, existing) : writes);
+    writeFiles(scope, existing ? withVersions(writes, existing, bump) : writes);
   if (target === "parts")
-    put("parts", partItems(readJson(`${DICTIONARY}/parts.json`), KANJI));
+    put("parts", partItems(readJson(`${DICTIONARY}/parts.json`), KANJI, was));
   else if (target === "sounds")
     put("sounds", soundItems(readJson(`${DICTIONARY}/sounds.json`), KANJI));
   else {
