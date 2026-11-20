@@ -10,6 +10,7 @@ A story dictionary in `dictionary/`, kept separate from the game code: our own n
 ## User stories
 - As a player with no WaniKani account, I open Study after a run and every kanji card shows its parts with names, a meaning story and a story for each reading I was shown.
 - As the owner, I tap **Flag** on a card whose story doesn't work, optionally type why, and it reaches the repo's rewrite list without my writing it down.
+- As the owner, at my desk, I go through part names, sound keywords and a sample of each level's stories on a review page: ✓, or ✗ with a note, and I fix a name or keyword by typing it. My notes come back as rewrites in the next pass.
 - As the owner, I can trust nothing in `dictionary/` was copied or derived from WaniKani: a judge compared every entry against WaniKani's own and passed it.
 
 ## Dictionary (`dictionary/`, committed)
@@ -64,10 +65,30 @@ A story dictionary in `dictionary/`, kept separate from the game code: our own n
 - `supabase/story-flags.sql`: `story_flags (id bigint identity, user_id uuid default auth.uid(), kanji text, level text, note text, build text, created_at timestamptz default now(), resolved_at timestamptz)`, RLS own-insert/own-select. The owner runs it once in the Supabase SQL editor.
 - `npm run stories:flags [-- --resolve <id,…>]`: reads unresolved flags with the service-role key from `.env.local` and prints id, kanji, level, note, date and our current story; `--resolve` marks them resolved after a rewrite pass.
 
+## Review page (added 2026-11-20, intent `docs/intent/story-review.md`)
+The owner reviews the dictionary at a desk on a private claude.ai page, not by playing. The page never calls an LLM and shows no WaniKani text; the orchestrator seeds it, reads the verdicts back and runs the rewrites. `dictionary/` stays the only thing the game reads.
+
+- **Source:** `tools/review/index.html` (committed, one self-contained page), published with the Artifact tool, with the `db` and `user` capabilities. The link goes in the task list header (`Review tool: <url>`).
+- **Data (the page's database):**
+  - `items/<id>`, written by the orchestrator only. Ids: `part-<codepoint hex>`, `sound-<hiragana>`, `story-<kanji>`. Fields: `kind` (`part`/`sound`/`story`), `key`, `level` (stories), `pass` (1, then +1 per rewrite), `why` (`all`, `judge-fail`, `random`, `extra`), `judge` (first-pass verdict: `pass`/`wrong`/`weak`/`close`, plus the judge's reason for `wrong`/`weak` only; `close` reasons can quote WaniKani and are never shown), and the content: part `name`, glyph, uses (kanji in our levels, up to 8); sound `keyword`, `note`, uses; story `glosses`, main `on`/`kun`, parts with names, `meaning`/`on`/`kun` texts.
+  - `reviews/<id>`, written by the page (the owner). Fields: `pass` (the item pass it reviews), per field (`name`/`keyword` for parts and sounds; `meaning`/`on`/`kun` for stories) a `verdict` (`ok`/`work`) and `note`, plus `edit` (new name or keyword, parts and sounds only), `at`. A review whose `pass` is below the item's shows as "to review" again, with the old note shown.
+- **Layout (desk, dense):** tabs **Parts**, **Sounds**, **Stories**, each a table, one row per item. Filter by level (stories) and status (to review / ok / needs work / all), counters per tab ("41 of 237 reviewed, 6 need work").
+  - Parts row: glyph (large), name (editable inline), uses as kanji chips, ✓ / ✗ + note.
+  - Sounds row: kana, keyword (editable inline), note, uses, ✓ / ✗ + note.
+  - Stories row: kanji (large), glosses and readings, parts with names, then one cell each for meaning, on, kun: the text with tags rendered (part, kanji, reading colours as on the card), a ✓ / ✗ per cell and a note field that opens on ✗. A "why" tag (judge fail: weak, random…) per row.
+  - Keyboard: `j`/`k` next/previous row, `a` approves the row's to-review fields, `x` opens the first note, `Esc` closes. Saves on each verdict, edit or note blur; a failed save shows on the row and keeps the input.
+  - "Show the rest of the level" lists a level's unsampled stories for browsing (seeded with `why: extra`, verdicts optional).
+- **Sample (stories):** pilot levels Kanji 5–6: every kanji (`all`). Later levels: every kanji the judge failed at least once or marked close (`judge-fail`), plus 10 random others (`random`, seeded by level so a re-run picks the same). Rule: more than 2 `random` stories in a level with a field marked ✗ → the whole level is seeded for review and `STYLE.md` is revisited before the next batch.
+- **Scripts (`scripts/stories/review.ts`, `npm run stories:review -- <cmd>`):**
+  - `seed <parts|sounds|levels>`: writes the items for that scope to `.data-cache/stories/review/seed-*.json` in the `ArtifactData` batch shape, applying the sample rule; reads judge files when present (no judge file → `random` only, with a warning).
+  - `apply <reviews.json>` (the orchestrator saves the `reviews` listing there): edits to `parts.json`/`sounds.json` (validated: unique, 1–3 words); a renamed part's `<part>` text is replaced in every story using it, and those stories are listed for the writer to re-read; ✗ notes go to `.data-cache/stories/notes-<scope>.json`, the writer's rewrite input (the note and our current text only). Prints counts per scope and the random-miss count per level.
+- **Loop:** seed → owner reviews → `apply` → rewrites through the writer/judge loop (owner notes beside the judge's reasons) → `stories:check`, `stories:overlap` → commit → re-seed changed items with `pass + 1`. Owner edits to names and keywords go through `stories:check` and `stories:overlap -- --names` too. Story batches are committed after the judge, as before; the owner's review feeds the next pass and doesn't block the game.
+
 ## Files
 ```
 dictionary/README.md, STYLE.md, parts.json, sounds.json, stories/kanji-NN.json   (new)
-scripts/stories/prep.ts, check.ts, wk.ts, overlap.ts, flags.ts                    (new)
+scripts/stories/prep.ts, check.ts, wk.ts, overlap.ts, flags.ts, review.ts          (new)
+tools/review/index.html      → the review page (new)
 src/game/dictionary.ts       → lazy loader (new)
 src/core/study.ts            → our entries first on the card
 src/core/mnemonic.ts         → `part` tag
@@ -79,7 +100,7 @@ tests/data/stories.test.ts   → validator over committed dictionary + fixtures
 ```
 
 ## Commands
-`npm run stories:prep -- <levels>`, `stories:check`, `stories:wk`, `stories:overlap -- <levels>`, `stories:flags`, plus `npm run check`.
+`npm run stories:prep -- <levels>`, `stories:check`, `stories:wk`, `stories:overlap -- <levels>`, `stories:flags`, `stories:review -- seed|apply`, plus `npm run check`.
 
 ## Testing
 - Validator unit tests on fixtures (each rule fails on a broken fixture); the validator runs over the committed dictionary in `npm test`.
@@ -87,14 +108,16 @@ tests/data/stories.test.ts   → validator over committed dictionary + fixtures
 - `studyCards`: ours beats WaniKani; parts with names; reading blocks by presented label; missing reading → none line; meaning mode.
 - Flag queue: save, load, bad JSON ignored, push removes sent, push failure keeps.
 - Browser: study card with our story and the flag form at 390×844.
+- Review: `seed` sample rule (all for pilot levels, judge fails + 10 seeded random, no judge file → random only); `apply` on fixtures (rename ripples into `<part>` text, duplicate or 4-word name rejected, notes file has no WaniKani text); page at 1280×800 renders the three tabs from a fixture listing.
 
 ## Boundaries
 - Always: `npm run check` before commit; push after each slice; the writer works only from `STYLE.md`, `parts.json`, `sounds.json` and the prep input; every committed entry has a judge pass; log batch counts in the task list.
 - Ask first: changing the dictionary file format after the first checkpoint.
-- Never: commit or bundle anything from WaniKani (text, names list, similarity reports, judge files); let the writer read `.data-cache/stories/wk-library.json`, `overlap-*` or the judge's WaniKani excerpts; change gates, levels, the save format or the WaniKani path's behaviour for kanji without our story.
+- Never: commit or bundle anything from WaniKani (text, names list, similarity reports, judge files), or put it on the review page; let the writer read `.data-cache/stories/wk-library.json`, `overlap-*` or the judge's WaniKani excerpts; change gates, levels, the save format or the WaniKani path's behaviour for kanji without our story.
 
 ## Success criteria
 - **Early levels only** (owner, 2026-11-20): the owner's current levels first (Kanji 5–6), then pairs of levels about one ahead of the owner; Kanji 1–4 later; later levels are written as the owner nears them, so a renamed part or keyword ripples into few stories. Every committed entry passes `stories:check` and has a judge `pass`; every part has a name; no unresolved overlap suspect.
-- First checkpoint: Kanji 5–6 done, deployed; the owner reviews a handful and plays with our stories on the phone.
+- First checkpoint (Checkpoint D, moved to the review page 2026-11-20): Kanji 5–6 done and deployed; the owner reviews all parts, all sounds and all of Kanji 5–6 on the review page.
+- Review page: all parts and sounds take the owner about an hour; a later level's sample about 15 minutes; notes come back as rewrites in the next pass.
 - Main chunk grows ≤ 10 KB; a level's stories load in under 300 ms on the phone after the first study open.
 - The flag round trip works: flag on the phone → `npm run stories:flags` lists it.

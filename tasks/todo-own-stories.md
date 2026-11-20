@@ -1,13 +1,15 @@
 # Tasks: our own stories (v1.7.0)
 
 Spec: `docs/specs/SPEC-own-stories.md` (2026-11-20). Intent: `docs/intent/own-stories.md`. Epic: `docs/ideas/useful-japanese.md` (round 3). Started 2026-11-20. The owner approved going straight to the first checkpoint (no spec sign-off).
-Checkpoint D: https://claude.ai/artifact/Pzt8idETzahrdN9ohvua6S
+Checkpoint D: https://claude.ai/artifact/Pzt8idETzahrdN9ohvua6S (superseded: Checkpoint D moved to the review page, see Task R2)
+Review tool intent: `docs/intent/story-review.md` (2026-11-20).
 Every task: `npm run check` passes before it is checked off. Never commit `.data-cache` or anything from WaniKani (text, names, overlap reports, judge files).
 
 ## Plan
 - **Pipeline first.** D1 builds the format, validator, prep, WaniKani fetch and overlap check, so every story after it is checked the same way.
 - **Shared vocabulary next.** D2 names the parts and the on'yomi sound keywords once, so every story uses the same names and images.
 - **Pilot, then the card.** D3 writes Kanji 5–6 (the owner is on Kanji 5 and doesn't need Kanji 1–4) through the full writer/judge loop and tunes `STYLE.md` on what fails; D4 shows them on the card; D5 adds the flag.
+- **Review page (added 2026-11-20).** Reviewing by playing was too slow. R1 builds the seed/apply scripts, R2 the desk review page; Checkpoint D happens there (all parts and sounds, then Kanji 5–6); R3 applies it. From D7 on, every batch gets a sampled review.
 - **Then the owner's levels only.** D6 deploys: Checkpoint D, on Kanji 5–6. After it, D7 fixes flags and writes the next levels in pairs, about one level ahead of the owner; D8 ships 1.7.0. Kanji 1–4 are left for later (owner, 2026-11-20). Later levels are written as the owner nears them (owner, 2026-11-20: a renamed part or keyword ripples into every story that uses it, so keep few stories ahead until the names have settled).
 
 ### Content tasks (D2, D3, D7): run by the orchestrator
@@ -82,16 +84,38 @@ Not one implementer subagent: the orchestrator runs the loop per batch (2 levels
 **Acceptance:**
 - [x] Deploy green; live study card shows our story. (81662af: the live bundle loads `kanji-05`, `kanji-06` and `parts` chunks and has the Flag button.)
 
-### Checkpoint D: owner
+### Task R1: Review scripts, seed and apply (sonnet)
+**Description:** `scripts/stories/review.ts` with `npm run stories:review -- seed|apply` (spec "Review page": item shape, ids, sample rule, apply rules). Seed output is in the `ArtifactData` batch shape. Nothing seeded or written carries WaniKani text (no `close` reasons).
+**Acceptance:**
+- [ ] `seed parts`, `seed sounds`, `seed 6-7` write files; pilot levels get every kanji, later levels judge fails + 10 seeded random (same picks on a re-run); no judge file → random only, with a warning.
+- [ ] `apply` tests on fixtures: a part rename rewrites `<part>` text in every story using it and lists them; duplicate or 4-word names rejected; sound keyword edit saved; ✗ notes land in `notes-<scope>.json` with our text and the note only; random-miss count per level printed.
+- [ ] `npm run check` passes (knip and deps included).
+**Files:** `scripts/stories/review.ts`, `package.json`, `tests/data/review.test.ts`, this file
+
+### Task R2: Review page (sonnet, published by the orchestrator)
+**Description:** `tools/review/index.html`, one self-contained page (spec "Review page": tabs, rows, keyboard, saves, filters, counters), `db` + `user` capabilities, works empty and shows a load error after 10 s. The subagent builds and checks it against a fixture listing offline; the orchestrator publishes it, seeds parts, sounds and Kanji 5–6, and checks one verdict round trip with `ArtifactData`.
+**Acceptance:**
+- [ ] Screenshot at 1280×800 of each tab from a fixture, tags rendered as on the card, light and dark.
+- [ ] Published; link in this file's header (`Review tool: <url>`); items seeded (237 parts, 179 sounds, Kanji 5–6); a test verdict written and read back, then removed.
+- [ ] `npm run check` passes.
+**Files:** `tools/review/index.html`, this file
+
+### Checkpoint D: owner (moved to the review page, 2026-11-20)
 - [x] Owner runs `supabase/story-flags.sql` once. (2026-11-20; `stories:flags` reads the table: no flags yet.)
-- [ ] Owner reads a handful of Kanji 5–6 stories on the checkpoint page and plays a few runs on the phone with Study; flags anything weak.
+- [ ] Owner reviews every part name and sound keyword on the review page, then all of Kanji 5–6.
 - [ ] Owner ticks, or sends `STYLE.md` changes before D7 scales up.
 
+### Task R3: Apply Checkpoint D's review (content, orchestrator)
+**Description:** `stories:review -- apply` on the owner's verdicts; renamed parts and keywords ripple into the stories using them; ✗ stories rewritten through the writer/judge loop with the owner's notes; `stories:check`, `stories:overlap` (with `--names`), commit, push; re-seed changed items at `pass + 1` for a quick second look. `STYLE.md` updated where the notes cluster; changes listed below.
+**Acceptance:**
+- [ ] Every ✗ from Checkpoint D rewritten or answered on the page; all entries pass check and judge.
+- [ ] Changed items re-seeded; counts logged below.
+
 ### Task D7: Flags, and a few levels ahead (content, orchestrator)
-**Description:** Owner's flags first (rewrite, resolve; a renamed part or keyword means rewriting every story using it), then the loop on the next levels in pairs, about one level ahead of the owner.
+**Description:** Owner's flags first (rewrite, resolve; a renamed part or keyword means rewriting every story using it), then the loop on the next levels in pairs, about one level ahead of the owner. Each batch adds review steps after the commit: `stories:review -- seed <levels>` (judge fails + 10 random), owner reviews on the page, `apply`, rewrites. More than 2 random misses in a level → the whole level seeded and `STYLE.md` revisited before the next batch.
 **Acceptance:**
 - [ ] Levels through the owner's level + 1 have files; all pass check and judge; no unresolved suspect.
-- [ ] Flags from Checkpoint D resolved.
+- [ ] Flags resolved; every seeded sample reviewed and its ✗ rewritten (random misses per level logged).
 - [ ] Counts logged below.
 
 ### Task D8: Ship 1.7.0
