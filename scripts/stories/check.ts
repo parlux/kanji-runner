@@ -94,6 +94,7 @@ function checkParts(parts: unknown, kanji: readonly KanjiItem[], r: Report) {
     }
     const words = name.trim().split(/\s+/).length;
     if (words > 3) r.errors.push(`parts.json ${p}: "${name}" is over 3 words`);
+    checkAlts(`parts.json ${p}`, v as Obj, name, r);
     // `sameAs`: the same shape listed under another glyph (⻏ is ⻖ on the
     // right), so it shares that part's name.
     const same = (v as Obj).sameAs;
@@ -136,6 +137,27 @@ function checkParts(parts: unknown, kanji: readonly KanjiItem[], r: Report) {
       r.warnings.push(`parts.json ${p}: not a component of any kanji`);
 }
 
+/** `alts` (review page only): 1-3 other names to offer, each 1-3 words. */
+function checkAlts(where: string, v: Obj, name: string, r: Report) {
+  const a = v.alts;
+  if (a === undefined) return;
+  if (
+    !Array.isArray(a) ||
+    a.length < 1 ||
+    a.length > 3 ||
+    a.some((x) => typeof x !== "string" || !x.trim())
+  ) {
+    r.errors.push(`${where}: "alts" must be 1-3 non-empty strings`);
+    return;
+  }
+  for (const x of a as string[]) {
+    if (x.trim().split(/\s+/).length > 3)
+      r.errors.push(`${where}: alt "${x}" is over 3 words`);
+    if (normName(x) === normName(name))
+      r.errors.push(`${where}: alt "${x}" is the name itself`);
+  }
+}
+
 function checkSounds(sounds: unknown, r: Report) {
   if (!isObj(sounds)) {
     r.errors.push("sounds.json: not an object");
@@ -148,6 +170,8 @@ function checkSounds(sounds: unknown, r: Report) {
       r.errors.push(`sounds.json ${s}: needs a "keyword"`);
     else if (v.note !== undefined && typeof v.note !== "string")
       r.errors.push(`sounds.json ${s}: "note" must be text`);
+    if (isObj(v) && typeof v.keyword === "string" && v.keyword.trim())
+      checkAlts(`sounds.json ${s}`, v, v.keyword, r);
   }
 }
 

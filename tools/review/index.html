@@ -325,6 +325,36 @@
     border-radius: 6px;
     background: var(--bg);
   }
+  .alts {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    margin-top: 4px;
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+  button.alt {
+    font: inherit;
+    color: var(--ink, inherit);
+    padding: 1px 8px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--bg);
+    cursor: pointer;
+  }
+  button.alt:hover {
+    border-color: var(--accent);
+  }
+  button.alt.sel {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    font-weight: 600;
+  }
+  button.alt:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
   .why {
     display: inline-block;
     font: 500 0.68rem var(--f-mono);
@@ -950,6 +980,27 @@
     );
     if (item.kind === "part" && item.note)
       cell.append(h("div", { class: "pnote", text: item.note }));
+    if (Array.isArray(item.alts) && item.alts.length) {
+      const shown = drafts.has(key) ? drafts.get(key).trim() : saved;
+      cell.append(
+        h(
+          "div",
+          { class: "alts" },
+          h("span", { text: "try:" }),
+          item.alts.map((a) =>
+            h("button", {
+              type: "button",
+              class: "alt" + (a === shown ? " sel" : ""),
+              text: a,
+              "data-alt": a,
+              "data-id": id,
+              "aria-pressed": a === shown ? "true" : "false",
+              disabled: !canWrite,
+            }),
+          ),
+        ),
+      );
+    }
     if (saved !== curName(item))
       cell.append(
         h("div", {
@@ -1306,9 +1357,14 @@
     S.focusId = null;
   }
   app.addEventListener("click", (e) => {
-    const t = e.target.closest("[data-tab],[data-act]");
+    const t = e.target.closest("[data-tab],[data-act],[data-alt]");
     if (!t) return;
-    if (t.dataset.tab) {
+    if (t.dataset.alt !== undefined) {
+      S.focusId = t.dataset.id;
+      drafts.set("e:" + t.dataset.id, t.dataset.alt);
+      setEdit(t.dataset.id, t.dataset.alt);
+      schedule();
+    } else if (t.dataset.tab) {
       S.tab = t.dataset.tab;
       resetView();
       render();

@@ -24,6 +24,8 @@ export default defineConfig(({ command }) => ({
     pool: "threads",
     isolate: false,
     maxWorkers: 3,
+    // Simulation tests take ~5 s each under a full parallel run on a slow machine.
+    testTimeout: 20_000,
     include: ["tests/**/*.test.ts"],
   },
 }));

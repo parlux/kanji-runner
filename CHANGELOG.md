@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.4 (2026-11-20)
+
+- Review page: alternative names show as chips; one click picks one. Round 3 of part names from the owner's review (巴 bed, 廾 goal, 毋 window, 巛 speed zone, 耒 plough, 生 life, 屮 sprout and nine more).
+
 ## 1.6.3 (2026-11-20)
 
 - Story dictionary: 126 parts named by their own meaning (戈 spear, 豕 pig…) are marked fixed and left off the review page; round 2 of part names, sound keywords (vowel rule) and Kanji 5–6 stories.

@@ -65,6 +65,8 @@ export type ItemData = {
   name?: string;
   keyword?: string;
   note?: string;
+  /** Other names the page offers as chips (review only). */
+  alts?: string[];
   /** Part's old name, when it was renamed. */
   was?: string;
   level?: string;
@@ -220,14 +222,21 @@ export function sample(
 const asNames = (
   v: unknown,
   field: string,
-): Map<string, { text: string; note?: string }> => {
-  const out = new Map<string, { text: string; note?: string }>();
+): Map<string, { text: string; note?: string; alts?: string[] }> => {
+  const out = new Map<
+    string,
+    { text: string; note?: string; alts?: string[] }
+  >();
   if (isObj(v))
     for (const [k, e] of Object.entries(v))
       if (isObj(e) && typeof e[field] === "string")
         out.set(k, {
           text: e[field] as string,
           note: typeof e.note === "string" ? e.note : undefined,
+          alts:
+            Array.isArray(e.alts) && e.alts.length
+              ? (e.alts as string[])
+              : undefined,
         });
   return out;
 };
@@ -244,7 +253,7 @@ export function partItems(
     isObj(parts) && isObj(parts[p]) && parts[p].fixed === true;
   return [...asNames(parts, "name")]
     .filter(([p]) => !fixed(p))
-    .map(([p, { text, note }]) => ({
+    .map(([p, { text, note, alts }]) => ({
       op: "set",
       collection: "items",
       doc_id: partId(p),
@@ -255,6 +264,7 @@ export function partItems(
         why: "all",
         name: text,
         ...(note ? { note } : {}),
+        ...(alts ? { alts } : {}),
         ...(was.has(p) ? { was: was.get(p) } : {}),
         uses: kanji
           .filter((k) => k.components.includes(p))
@@ -268,7 +278,7 @@ export function soundItems(
   sounds: unknown,
   kanji: readonly KanjiItem[],
 ): Write[] {
-  return [...asNames(sounds, "keyword")].map(([s, { text, note }]) => ({
+  return [...asNames(sounds, "keyword")].map(([s, { text, note, alts }]) => ({
     op: "set",
     collection: "items",
     doc_id: soundId(s),
@@ -279,6 +289,7 @@ export function soundItems(
       why: "all",
       keyword: text,
       note: note ?? "",
+      ...(alts ? { alts } : {}),
       uses: kanji
         .filter((k) => k.on === s)
         .slice(0, USES)

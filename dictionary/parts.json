@@ -66,11 +66,13 @@
   },
   "𠂉": {
     "name": "diving board",
-    "note": "A short slash leaning over a flat bar, like a diving board on its post. Also: lean-to, flagpole."
+    "note": "A short slash leaning over a flat bar, like a diving board on its post.",
+    "alts": ["lean-to", "flagpole"]
   },
   "⺡": {
     "name": "water drops",
-    "note": "Three short strokes stacked down the left side, like drops of water. Also: tadpoles, splashes."
+    "note": "Three short strokes stacked down the left side, like drops of water.",
+    "alts": ["tadpoles", "splashes"]
   },
   "田": {
     "name": "rice field",
@@ -211,8 +213,9 @@
     "fixed": true
   },
   "寸": {
-    "name": "thumb",
-    "note": "A cross with a hook and a dot beside it, a thumb's width."
+    "name": "golf club",
+    "note": "A crossbar with a hooked stroke swinging down through it and a dot beside it: a golf club and ball.",
+    "alts": ["hockey stick", "walking cane"]
   },
   "夂": {
     "name": "folding chair",
@@ -258,8 +261,8 @@
     "note": "Three short strokes fanning out on top, a little sparkle."
   },
   "廾": {
-    "name": "bench",
-    "note": "A flat bar on two legs, the left one bent: a bench."
+    "name": "goal",
+    "note": "A crossbar on two posts, the right one hooked: a goal."
   },
   "巾": {
     "name": "towel",
@@ -291,8 +294,9 @@
     "fixed": true
   },
   "卜": {
-    "name": "wand",
-    "note": "A post with a short tick off its side, a wand with a spark."
+    "name": "faucet",
+    "note": "An upright pipe with a short spout sticking out its side: a faucet.",
+    "alts": ["door handle", "budding twig"]
   },
   "刀": {
     "name": "sword",
@@ -310,7 +314,8 @@
   },
   "⺖": {
     "name": "heartbeat",
-    "note": "A tall line with a short blip on each side, like a heartbeat spike. Also: antenna, trident."
+    "note": "A tall line with a short blip on each side, like a heartbeat spike.",
+    "alts": ["antenna", "trident"]
   },
   "彳": {
     "name": "peg post",
@@ -462,8 +467,9 @@
     "note": "A shed with two short drips down its left wall, a leaky shed."
   },
   "⺹": {
-    "name": "straw man",
-    "note": "A cross on a base with a slash poking out the side, a straw man."
+    "name": "stuck javelin",
+    "note": "A cross on a ground line, a long slash stabbed through it: a javelin stuck in soil.",
+    "alts": ["sundial", "garden stake"]
   },
   "弓": {
     "name": "bow",
@@ -545,8 +551,9 @@
     "fixed": true
   },
   "マ": {
-    "name": "knot",
-    "note": "A short bend with a stroke crossing its tail, like a tied knot."
+    "name": "pizza wedge",
+    "note": "A bar bending down to a point at the lower left, a dot tucked inside: a pizza wedge.",
+    "alts": ["funnel", "bird beak"]
   },
   "穴": {
     "name": "hole",
@@ -590,8 +597,8 @@
     "note": "A frame crossed by bars and a post, a fence panel."
   },
   "毋": {
-    "name": "no sign",
-    "note": "A box with one long bar straight through it and a line down the middle: a no sign."
+    "name": "window",
+    "note": "A box with one long bar straight through it and a line down the middle: a window."
   },
   "食": {
     "name": "food",
@@ -626,8 +633,9 @@
     "fixed": true
   },
   "爿": {
-    "name": "bed",
-    "note": "A post with short strokes on its left, a bed stood on its end."
+    "name": "climbing pole",
+    "note": "A tall post on the right, short strokes jutting from its left: footholds on a climbing pole.",
+    "alts": ["split log", "ladder"]
   },
   "廴": {
     "name": "long stride",
@@ -703,8 +711,9 @@
     "fixed": true
   },
   "生": {
-    "name": "sprout",
-    "note": "A slash and three bars on a post, a sprout growing from the soil."
+    "name": "life",
+    "note": "A stem with leaves branching off and a base line: a living plant, life.",
+    "fixed": true
   },
   "皮": {
     "name": "pelt",
@@ -775,12 +784,14 @@
     "note": "A slash over rice grains, a sieve shaking them loose."
   },
   "元": {
-    "name": "starting block",
-    "note": "Two bars over a pair of legs, a runner on a starting block."
+    "name": "sawhorse",
+    "note": "Two bars resting on two splayed legs: a sawhorse.",
+    "alts": ["ironing board", "trestle"]
   },
   "乃": {
-    "name": "ribbon",
-    "note": "A tall bent stroke looping back on itself, a ribbon."
+    "name": "lightning bolt",
+    "note": "A top bar that zigzags down the right side like lightning, a leg swept left.",
+    "alts": ["folding ruler", "swan neck"]
   },
   "韋": {
     "name": "pagoda",
@@ -819,8 +830,9 @@
     "fixed": true
   },
   "耒": {
-    "name": "TV aerial",
-    "note": "Three crossbars stacked on a mast with two legs splayed below, like a TV aerial."
+    "name": "plough",
+    "note": "A handle with crossbars and two prongs digging in below: a plough.",
+    "fixed": true
   },
   "舛": {
     "name": "dance steps",
@@ -850,12 +862,13 @@
     "note": "A bar with a bent leg and a hook, a crutch."
   },
   "免": {
-    "name": "excuse note",
-    "note": "A bent top over a sun-like box and legs: an excuse note."
+    "name": "rabbit",
+    "note": "Pointed ears on top, a boxy body, two hind legs below: a rabbit with no tail.",
+    "alts": ["kangaroo", "diving helmet"]
   },
   "巴": {
-    "name": "swirl",
-    "note": "A box with a coiling stroke curling out, a swirl."
+    "name": "bed",
+    "note": "A box on top with a long base curling under it, like a bed seen from the side."
   },
   "長": {
     "name": "long",
@@ -867,12 +880,13 @@
     "note": "A box with bars and a sweep through it, a torso."
   },
   "屮": {
-    "name": "pitchfork",
-    "note": "A post with two side prongs curving up beside it, like a pitchfork."
+    "name": "sprout",
+    "note": "A short stem with two shoots curving up beside it: a sprout.",
+    "fixed": true
   },
   "巛": {
-    "name": "winding river",
-    "note": "Three wavy strokes side by side, a winding river."
+    "name": "speed zone",
+    "note": "Three wavy lines side by side, like the chevrons of a speed zone."
   },
   "及": {
     "name": "long arm",
@@ -1063,8 +1077,9 @@
     "fixed": true
   },
   "久": {
-    "name": "hourglass",
-    "note": "A bent stroke and a long sweep, an hourglass tipping."
+    "name": "skier",
+    "note": "A crouched bent body and one long sweep out to the right: a skier on a ski.",
+    "alts": ["ski jumper", "tobogganer"]
   },
   "鬯": {
     "name": "herb pot",

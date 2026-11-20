@@ -160,6 +160,21 @@ describe("review seed: items", () => {
     expect(p[1]?.data).not.toHaveProperty("was");
   });
 
+  it("items carry alts when present, and omit them otherwise", () => {
+    const p = partItems(
+      { 口: { name: "lips", alts: ["door", "box"] }, 日: { name: "sun" } },
+      ks,
+    );
+    expect(p[0]?.data.alts).toEqual(["door", "box"]);
+    expect(p[1]?.data).not.toHaveProperty("alts");
+    const s = soundItems(
+      { こう: { keyword: "cone", alts: ["cove"] }, か: { keyword: "car" } },
+      ks,
+    );
+    expect(s[0]?.data.alts).toEqual(["cove"]);
+    expect(s[1]?.data).not.toHaveProperty("alts");
+  });
+
   it("fixed parts (named by their own meaning) are not seeded", () => {
     const p = partItems(
       { 口: { name: "mouth", fixed: true }, 日: { name: "sun" } },

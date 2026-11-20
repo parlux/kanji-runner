@@ -291,6 +291,33 @@ describe("validator rules", () => {
     );
   });
 
+  it("checks alts on parts and sounds", () => {
+    const d = good();
+    const note = "A trunk with branches above and roots below it.";
+    d.parts = {
+      亻: { name: "person", note, alts: ["man", "stick figure"] },
+      木: { name: "tree", note, alts: ["Tree"] },
+    };
+    d.sounds = { きゅう: { keyword: "cue", alts: ["a", "b", "c", "d"] } };
+    let e = errorsOf(d).join("\n");
+    expect(e).toMatch(/木: alt "Tree" is the name itself/);
+    expect(e).toMatch(/きゅう: "alts" must be 1-3 non-empty strings/);
+    expect(e).not.toMatch(/亻/);
+    d.parts = {
+      亻: { name: "person", note, alts: [] },
+      木: { name: "tree", note, alts: ["one two three four", " "] },
+    };
+    d.sounds = { きゅう: { keyword: "cue", alts: ["queue"] } };
+    e = errorsOf(d).join("\n");
+    expect(e).toMatch(/亻: "alts" must be/);
+    expect(e).toMatch(/木: "alts" must be/);
+    d.parts = {
+      亻: { name: "person", note },
+      木: { name: "tree", note, alts: ["a b c d"] },
+    };
+    expect(errorsOf(d).join("\n")).toMatch(/alt "a b c d" is over 3 words/);
+  });
+
   it("checks sounds.json: hiragana keys with a keyword", () => {
     const d = good();
     d.sounds = { キュウ: { keyword: "cue" }, もく: { note: "x" } };
