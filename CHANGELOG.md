@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.10 (2026-11-21)
+
+- Reading stories get a `<sound>` highlight tag: checker rules (behind a temporary flag), card style, review page shows the reading above each story, STYLE.md rewritten.
+
 ## 1.6.9 (2026-11-21)
 
 - Story dictionary: せい keyword "safe" (was "sail", the part name of 方); 性 reading story rewritten.

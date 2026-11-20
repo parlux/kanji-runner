@@ -124,9 +124,9 @@ Not one implementer subagent: the orchestrator runs the loop per batch (2 levels
 ### Task H1: `<sound>` tag in checker, card and review page (sonnet)
 **Description:** Spec "Sound highlight": `<sound>` in `MNEMONIC_TAGS` and the card CSS (`mn-sound`); `stories:check` rules (on/kun need a `<sound>`, no `<reading>` in our stories, no `<sound>` in `meaning`, 1–6 Latin letters, on story highlights its `sounds.json` keyword, band 40–350) behind a temporary `--allow-reading` that `npm test` passes until H2 lands; the review page renders `<sound>` and shows each On/Kun cell's reading above the story. `STYLE.md` reading-story rules and example rewritten to the new form. Republish the page (orchestrator).
 **Acceptance:**
-- [ ] Tests: each new check rule fails a broken fixture and passes a good one; `parseMnemonic` keeps `<sound>`.
-- [ ] Screenshot at 390×844 of a study card with a `<sound>` story (fixture entry), and at 1280×800 of the review page Stories tab from a fixture, light and dark.
-- [ ] `npm run check` passes.
+- [x] Tests: each new check rule fails a broken fixture and passes a good one; `parseMnemonic` keeps `<sound>`.
+- [x] Screenshot at 390×844 of a study card with a `<sound>` story (fixture entry), and at 1280×800 of the review page Stories tab from a fixture, light and dark.
+- [x] `npm run check` passes.
 **Files:** `src/core/mnemonic.ts`, `src/game/ui/study.ts` (or its CSS), `scripts/stories/check.ts`, `tools/review/index.html`, `dictionary/STYLE.md`, tests
 
 ### Task H2: Rewrite Kanji 5–6 reading stories (content, orchestrator)

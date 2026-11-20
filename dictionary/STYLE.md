@@ -28,7 +28,7 @@ Plus `parts.json` (part names) and `sounds.json` (sound keywords). Work from the
 ```
 
 - Every kanji of the level, no others. `meaning` always; `on` only when the input has `on`, `kun` only when it has `kun`.
-- Markup, nothing else: `<part>` a part name, `<kanji>` the kanji's meaning word, `<reading>` the reading in kana, `<ja>` other Japanese text, `<em>` emphasis. No attributes, no nesting tricks, every tag closed.
+- Markup, nothing else: `<part>` a part name, `<kanji>` the kanji's meaning word, `<sound>` the sound-alike chunk of a reading story (below), `<ja>` other Japanese text, `<em>` emphasis. No attributes, no nesting tricks, every tag closed.
 - Run `npm run stories:check -- <levels>` and fix every error. Read the warnings.
 
 ## Meaning story
@@ -42,7 +42,7 @@ Plus `parts.json` (part names) and `sounds.json` (sound keywords). Work from the
 
 ## Reading stories (`on`, `kun`)
 
-- 1–3 sentences, 60–450 characters of plain text.
+- 1–3 sentences, 40–350 characters of plain text.
 - Ties the meaning (or the meaning story's scene) to the reading's sound.
 - When `onSound` has a keyword, use it: the same sound always calls up the same image across all kanji. Only the keyword's matching syllable is the sound (the `sounds.json` note says how much counts); make that clear, don't make the reader say the whole word. Without a keyword, pick an English sound-alike and say how it sounds.
 - Sounds that come in sets (しょう / しょ / しょく, よう / よ / よく): make the length or final consonant obvious in the scene, so the reader can't mix up the set.
@@ -50,7 +50,10 @@ Plus `parts.json` (part names) and `sounds.json` (sound keywords). Work from the
 - Never borrow a long-vowel keyword for a short sound, in `on` or `kun` stories: "toe" is とう, so it can't stand for short と (おっと, おとこ); "dough" is どう, not ど. Find a sound-alike with the short vowel.
 - The story must produce every syllable of the reading, and a sound-alike keeps its real ending ("oats" gives おつ only if the s stays as つ; don't drop letters that are part of the reading).
 - A picture, not a caption: "it sounds like the English word X" with no scene, or a hook that only restates the meaning, is weak.
-- Spell the reading in `<reading>` kana, exactly the hiragana from the input: `<reading>きゅう</reading>`. For `kun`, the base (`<reading>やす</reading>`) or base plus okurigana (`<reading>やすむ</reading>`); the story may use the okurigana word (`<ja>休む</ja>`). Every `<reading>` tag must hold that story's reading, nothing else.
+- Show the sound, don't explain it. No closing sentence that says what the reading is, and no kana at all: `<reading>` is not used in our stories. The reading story ends with the scene.
+- Wrap the chunk of an English word that carries the sound in `<sound>`: `a steel <sound>sa</sound>fe`. One `<sound>` per word that carries a piece of the reading, in reading order, so the reader hears the syllables in sequence. 1–6 Latin letters, no nesting, `on` and `kun` only (never in `meaning`). When the spelling isn't exact, mark the closest chunk (`<sound>Sa</sound>fe` for せい). Sneeze or noise sounds count as words (`'<sound>tsu</sound>!'`).
+- `on`: when `onSound` has a keyword, the `<sound>` chunk plus the letters touching it in the same word must spell the keyword (or one word of a multi-word keyword), ignoring case. The checker enforces it.
+- `kun`: highlight the pieces of the kun reading (the base, without okurigana) the same way. The story may use the okurigana word (`<ja>休む</ja>`) when the scene needs it. Add a short meaning tail ("…: a pair") only when the kun word's meaning differs from the kanji's glosses; otherwise stop at the scene.
 
 ## Building on earlier levels
 
@@ -75,10 +78,10 @@ Plus `parts.json` (part names) and `sounds.json` (sound keywords). Work from the
 休, glosses `rest`, parts `coat hook` + `tree`, on `きゅう`, kun `やす(む)`, sound keyword for きゅう: `cue` (a pool cue).
 
 - meaning: `A tired hiker hangs his jacket on a <part>coat hook</part> nailed to a <part>tree</part> and flops down in its shade, snoring. The tree doesn't mind: it was planning a day off too. Both of them <kanji>rest</kanji> until the moon comes up.`
-- on: `The resting person uses a pool <em>cue</em> to scratch their back without getting up: <reading>きゅう</reading>. Even rest needs the right tool.`
-- kun: `A friend shakes the sleeper: "Get up!" A sleepy voice answers "<reading>やす</reading>… ya, sue me, I'm on a break." <ja>休む</ja> means to take that break.`
+- on: `The resting person uses a pool <sound>cue</sound> to scratch their back without getting up. Even rest needs the right tool.`
+- kun: `A friend shakes the sleeper: "Get up!" A sleepy voice answers "<sound>Ya</sound>, <sound>sue</sound> me, I'm on a break." That is how <ja>休む</ja> goes.`
 
-Why it works: every part named and visible in the scene, the meaning lands last in `<kanji>`, each reading story reuses the meaning scene and hangs the sound on one clear sound-alike.
+Why it works: every part named and visible in the scene, the meaning lands last in `<kanji>`, each reading story reuses the meaning scene and marks its sound-alike chunks with `<sound>`, no kana and no explainer.
 
 ## Judge's checklist
 
