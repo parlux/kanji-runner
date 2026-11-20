@@ -156,9 +156,8 @@
     "note": "A huge oak: a held \"oh\", drop the k."
   },
   "りょう": {
-    "keyword": "leotard",
-    "note": "A dancer's leotard: \"lee-oh\" said fast and held. Trio is the short りょ.",
-    "alts": ["ryokan", "Rio Grande"]
+    "keyword": "ryokan",
+    "note": "A ryokan, a Japanese inn: a held \"ryoh\". Rioja is the short りょ."
   },
   "へい": {
     "keyword": "hay",
@@ -286,8 +285,7 @@
   },
   "ふく": {
     "keyword": "hook",
-    "note": "A big hook: \"hook\" is \"huk\", close to \"fuku\".",
-    "alts": ["kung fu kick", "hookah pipe"]
+    "note": "A big hook: \"hook\" is \"huk\", close to \"fuku\"."
   },
   "かつ": {
     "keyword": "katsu",
@@ -366,18 +364,16 @@
     "note": "A gold ring: \"rin(g)\"."
   },
   "りゅう": {
-    "keyword": "lure",
-    "note": "A shiny fishing lure: \"lyoor\", a held \"ryoo\".",
-    "alts": ["reunion", "reuse"]
+    "keyword": "reunion",
+    "note": "A family reunion: \"ree-YOO\" said fast, a held \"ryoo\"."
   },
   "ぞう": {
     "keyword": "zodiac",
     "note": "A zodiac wheel of signs: its first part, a held \"zoh\"."
   },
   "らん": {
-    "keyword": "lunch",
-    "note": "A lunchbox: 'lun', said the Japanese way 'lahn' → らん.",
-    "alts": ["runway", "runner", "rung"]
+    "keyword": "runner",
+    "note": "A runner: \"run\" is \"rahn\", the u of cup, close to \"ran\"."
   },
   "ぼ": {
     "keyword": "bonsai",
@@ -448,9 +444,8 @@
     "note": "A crowd of mice: \"mai\", drop the s."
   },
   "ねん": {
-    "keyword": "nectar",
-    "note": "Flower nectar: its first part, \"nek\", close to \"nen\".",
-    "alts": ["sea anemone", "nemesis"]
+    "keyword": "linen",
+    "note": "Crisp bed linen: its last part, \"nen\"."
   },
   "ひん": {
     "keyword": "hinge",
@@ -509,18 +504,16 @@
     "note": "A baboon: its end, \"boon\", said short."
   },
   "らい": {
-    "keyword": "lion",
-    "note": "A lion: its first part, \"lai\".",
-    "alts": ["rhino", "rifle", "rice"]
+    "keyword": "rhino",
+    "note": "A charging rhino: its first part, \"rai\"."
   },
   "めん": {
     "keyword": "menu",
     "note": "A café menu: its first part, \"men\"."
   },
   "りょ": {
-    "keyword": "trio",
-    "note": "A trio of singers: drop the t, \"rio\", said fast \"ryo\". Leotard is the long りょう.",
-    "alts": ["Rio", "Rioja"]
+    "keyword": "Rioja",
+    "note": "A glass of Rioja: its first part, \"rio\", said fast \"ryo\". Ryokan is the long りょう."
   },
   "あん": {
     "keyword": "uncle",
@@ -535,9 +528,8 @@
     "note": "A dentist: its first part, \"den\"."
   },
   "りつ": {
-    "keyword": "lizard",
-    "note": "A lizard: its first part, \"liz\", close to \"ritsu\".",
-    "alts": ["Ritz crackers", "Ritz hotel"]
+    "keyword": "Ritz crackers",
+    "note": "A box of Ritz crackers: \"rits\", close to \"ritsu\"."
   },
   "ぎょう": {
     "keyword": "gyoza",
@@ -568,9 +560,8 @@
     "note": "A goodie bag: its first part, a short \"gu\". Goo is the long ぐう."
   },
   "れつ": {
-    "keyword": "lettuce",
-    "note": "A head of lettuce: its first part, \"let\".",
-    "alts": ["retsina", "guitar frets"]
+    "keyword": "retsina",
+    "note": "A glass of retsina: its first part, \"rets\"."
   },
   "えつ": {
     "keyword": "etching",
@@ -650,8 +641,7 @@
   },
   "らく": {
     "keyword": "rucksack",
-    "note": "A heavy rucksack: its first part, \"rahk\", the u of cup, an open \"ah\", close to \"raku\".",
-    "alts": ["raku pottery", "Iraq", "rock"]
+    "note": "A heavy rucksack: its first part, \"rahk\", the u of cup, an open \"ah\", close to \"raku\"."
   },
   "きゃく": {
     "keyword": "kayak",
@@ -722,8 +712,7 @@
     "note": "A blob of goo: \"goo\" is the held \"goo\"."
   },
   "ら": {
-    "keyword": "llama",
-    "note": "A llama: its first syllable \"lah\", a true \"ah\".",
-    "alts": ["rah-rah", "raja", "Ra"]
+    "keyword": "rah-rah",
+    "note": "A cheerleader's \"rah-rah\": one short \"rah\", a true \"ah\"."
   }
 }

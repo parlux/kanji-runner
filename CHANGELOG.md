@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.7 (2026-11-21)
+
+- Story dictionary: the owner's final part and sound review applied (26 part names such as 甘 yoke, 頁 rubber duck, 酉 dynamite; r-sounds now use r-words: ら rah-rah, らい rhino, りつ Ritz crackers…). Notes and the touched stories rewritten to match; review-only alternatives removed.
+
 ## 1.6.6 (2026-11-21)
 
 - Review page: every part up for review now offers 2-3 alternative names (91 parts newly given options).

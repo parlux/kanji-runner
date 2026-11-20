@@ -44,3 +44,4 @@ One row per owner request, written by the `triage` skill (`.claude/skills/triage
 | 2026-11-20 | Show alternative names on the review page | fix | Optional alts field, seed and page chips | |
 | 2026-11-21 | Options for the remaining parts and sounds; sounds tab says 0 left with r-sounds unapproved | fix | Data alts plus a one-line tab count fix | |
 | 2026-11-21 | Alts for every part on the review page | sdd (in round) | Continues the Checkpoint D part review; data only, alts field already exists | |
+| 2026-11-21 | Final part/sound review: apply it | sdd (in round) | Applies Checkpoint D review data; notes and touched stories rewritten | |

@@ -11,13 +11,11 @@
   },
   "ノ": {
     "name": "slash",
-    "note": "One stroke sweeping down to the left, like a quick slash.",
-    "alts": ["sweep", "feather", "comet"]
+    "note": "One stroke sweeping down to the left, like a quick slash."
   },
   "｜": {
     "name": "pole",
-    "note": "A single straight vertical stroke, standing like a pole.",
-    "alts": ["stick", "line", "pillar"]
+    "note": "A single straight vertical stroke, standing like a pole."
   },
   "日": {
     "name": "sun",
@@ -26,8 +24,7 @@
   },
   "ハ": {
     "name": "eight",
-    "note": "Two strokes spreading apart at the bottom, the numeral eight.",
-    "alts": ["legs", "eaves", "tent flaps"]
+    "note": "Two strokes spreading apart at the bottom, the numeral eight."
   },
   "二": {
     "name": "two",
@@ -46,13 +43,11 @@
   },
   "亠": {
     "name": "lid",
-    "note": "A dot sitting on a flat bar, like the knob on a lid.",
-    "alts": ["top hat", "pot lid", "tiny roof"]
+    "note": "A dot sitting on a flat bar, like the knob on a lid."
   },
   "丷": {
     "name": "horns",
-    "note": "Two short strokes pointing in toward each other, like little horns.",
-    "alts": ["antennae", "eyebrows", "devil horns"]
+    "note": "Two short strokes pointing in toward each other, like little horns."
   },
   "目": {
     "name": "eye",
@@ -71,13 +66,11 @@
   },
   "𠂉": {
     "name": "diving board",
-    "note": "A short slash leaning over a flat bar, like a diving board on its post.",
-    "alts": ["lean-to", "flagpole"]
+    "note": "A short slash leaning over a flat bar, like a diving board on its post."
   },
   "⺡": {
     "name": "water drops",
-    "note": "Three short strokes stacked down the left side, like drops of water.",
-    "alts": ["tadpoles", "splashes"]
+    "note": "Three short strokes stacked down the left side, like drops of water."
   },
   "田": {
     "name": "rice field",
@@ -86,8 +79,7 @@
   },
   "⺅": {
     "name": "coat hook",
-    "note": "An upright post with a short arm slanting off its top, like a coat hook.",
-    "alts": ["walking stick", "flagpole", "signpost"]
+    "note": "An upright post with a short arm slanting off its top, like a coat hook."
   },
   "丶": {
     "name": "dot",
@@ -106,13 +98,11 @@
   },
   "又": {
     "name": "pretzel",
-    "note": "Two strokes crossing and folding back on themselves, a pretzel twist.",
-    "alts": ["crossed legs", "fork", "scissors"]
+    "note": "Two strokes crossing and folding back on themselves, a pretzel twist."
   },
   "⺘": {
     "name": "anchor",
-    "note": "A post with a crossbar, hooked at the foot with a rising stroke: an anchor.",
-    "alts": ["trident", "harpoon", "grappling hook"]
+    "note": "A post with a crossbar, hooked at the foot with a rising stroke: an anchor."
   },
   "儿": {
     "name": "legs",
@@ -120,9 +110,8 @@
     "fixed": true
   },
   "幺": {
-    "name": "loop",
-    "note": "Two small bent strokes stacked into a twisted loop with a dot.",
-    "alts": ["thread", "knot", "twist"]
+    "name": "twist",
+    "note": "Two small bent strokes stacked into a twist with a dot."
   },
   "⺾": {
     "name": "grass",
@@ -136,18 +125,15 @@
   },
   "厶": {
     "name": "elbow",
-    "note": "A bent stroke with a dot inside, like an elbow crooked in.",
-    "alts": ["nose", "triangle", "knee"]
+    "note": "A bent stroke with a dot inside, like an elbow crooked in."
   },
   "宀": {
     "name": "roof",
-    "note": "A dot on top of a wide hooked cover: a roof over the house.",
-    "alts": ["house", "hood", "tent"]
+    "note": "A dot on top of a wide hooked cover: a roof over the house."
   },
   "冂": {
     "name": "frame",
-    "note": "Two sides and a top joined, an open frame with no floor.",
-    "alts": ["doorframe", "goalposts", "archway"]
+    "note": "Two sides and a top joined, an open frame with no floor."
   },
   "王": {
     "name": "king",
@@ -156,13 +142,11 @@
   },
   "𠆢": {
     "name": "umbrella",
-    "note": "Two strokes sloping down from a peak, an open umbrella.",
-    "alts": ["tent peak", "roof peak", "witch hat"]
+    "note": "Two strokes sloping down from a peak, an open umbrella."
   },
   "勹": {
     "name": "wrap",
-    "note": "A stroke that bends over and hooks around, wrapping what's under it.",
-    "alts": ["hood", "umbrella", "wrapping"]
+    "note": "A stroke that bends over and hooks around, wrapping what's under it."
   },
   "言": {
     "name": "speech",
@@ -176,8 +160,7 @@
   },
   "冖": {
     "name": "blanket",
-    "note": "A wide flat cover with both ends turned down, like a blanket.",
-    "alts": ["tablecloth", "crown", "cover"]
+    "note": "A wide flat cover with both ends turned down, like a blanket."
   },
   "心": {
     "name": "heart",
@@ -196,8 +179,7 @@
   },
   "亅": {
     "name": "crowbar",
-    "note": "A vertical stroke with a hook at the bottom, like a crowbar.",
-    "alts": ["hook", "fishing rod", "cane"]
+    "note": "A vertical stroke with a hook at the bottom, like a crowbar."
   },
   "尸": {
     "name": "flag",
@@ -206,8 +188,7 @@
   },
   "⻌": {
     "name": "ramp",
-    "note": "A dot, a zigzag down, then a long sweep along the bottom, like a ramp.",
-    "alts": ["slide", "road", "surfboard"]
+    "note": "A dot, a zigzag down, then a long sweep along the bottom, like a ramp."
   },
   "匕": {
     "name": "spoon",
@@ -231,33 +212,27 @@
   },
   "寸": {
     "name": "golf club",
-    "note": "A crossbar with a hooked stroke swinging down through it and a dot beside it: a golf club and ball.",
-    "alts": ["hockey stick", "walking cane"]
+    "note": "A crossbar with a hooked stroke swinging down through it and a dot beside it: a golf club and ball."
   },
   "夂": {
     "name": "folding chair",
-    "note": "Strokes crossing near the bottom like the legs of a folding chair.",
-    "alts": ["walking legs", "crossed sticks", "fishtail"]
+    "note": "Strokes crossing near the bottom like the legs of a folding chair."
   },
   "⺣": {
     "name": "hot coals",
-    "note": "Four dots in a row along the bottom, glowing hot coals.",
-    "alts": ["fire dots", "footprints", "embers"]
+    "note": "Four dots in a row along the bottom, glowing hot coals."
   },
   "攵": {
-    "name": "baton",
-    "note": "A short stick on top held over two crossed strokes: a swung baton.",
-    "alts": ["whip", "hammer", "fan"]
+    "name": "fan",
+    "note": "A short stick on top over two crossed strokes, like a folding fan opened out."
   },
   "⺉": {
     "name": "dagger",
-    "note": "Two upright strokes, the right one long and hooked, a dagger.",
-    "alts": ["sword", "chopsticks", "knife"]
+    "note": "Two upright strokes, the right one long and hooked, a dagger."
   },
   "ヨ": {
     "name": "rake",
-    "note": "Three prongs joined by one spine, the head of a rake.",
-    "alts": ["comb", "fork", "letter E"]
+    "note": "Three prongs joined by one spine, the head of a rake."
   },
   "禾": {
     "name": "grain",
@@ -276,18 +251,15 @@
   },
   "广": {
     "name": "shed",
-    "note": "A dot and roof with one wall sweeping down, an open shed.",
-    "alts": ["cliff", "carport", "lean-to"]
+    "note": "A dot and roof with one wall sweeping down, an open shed."
   },
   "⺌": {
     "name": "sparkle",
-    "note": "Three short strokes fanning out on top, a little sparkle.",
-    "alts": ["fireworks", "crown", "sprinkler"]
+    "note": "Three short strokes fanning out on top, a little sparkle."
   },
   "廾": {
     "name": "goal",
-    "note": "A crossbar on two posts, the right one hooked: a goal.",
-    "alts": ["hands", "stool", "table"]
+    "note": "A crossbar on two posts, the right one hooked: a goal."
   },
   "巾": {
     "name": "towel",
@@ -301,8 +273,7 @@
   },
   "力": {
     "name": "muscle",
-    "note": "A bent stroke crossed by a sweep, a flexed arm showing muscle.",
-    "alts": ["arm", "plough", "biceps"]
+    "note": "A bent stroke crossed by a sweep, a flexed arm showing muscle."
   },
   "冫": {
     "name": "ice",
@@ -321,8 +292,7 @@
   },
   "卜": {
     "name": "faucet",
-    "note": "An upright pipe with a short spout sticking out its side: a faucet.",
-    "alts": ["door handle", "budding twig"]
+    "note": "An upright pipe with a short spout sticking out its side: a faucet."
   },
   "刀": {
     "name": "sword",
@@ -331,8 +301,7 @@
   },
   "⻖": {
     "name": "pennant",
-    "note": "A post with a double bump flying off it, like a pennant. Same shape on either side of a kanji.",
-    "alts": ["ear", "flag", "number 3"]
+    "note": "A post with a double bump flying off it, like a pennant. Same shape on either side of a kanji."
   },
   "金": {
     "name": "gold",
@@ -341,13 +310,11 @@
   },
   "⺖": {
     "name": "heartbeat",
-    "note": "A tall line with a short blip on each side, like a heartbeat spike.",
-    "alts": ["antenna", "trident"]
+    "note": "A tall line with a short blip on each side, like a heartbeat spike."
   },
   "彳": {
-    "name": "peg post",
-    "note": "Two short slashes stacked on a post, like pegs on a peg post.",
-    "alts": ["chairlift", "ski lift"]
+    "name": "chairlift",
+    "note": "Two short slashes hanging off a post, like chairs on a chairlift."
   },
   "米": {
     "name": "rice",
@@ -381,8 +348,7 @@
   },
   "凵": {
     "name": "bucket",
-    "note": "Two sides and a floor with the top open, a bucket.",
-    "alts": ["box", "tray", "pit"]
+    "note": "Two sides and a floor with the top open, a bucket."
   },
   "羊": {
     "name": "sheep",
@@ -396,13 +362,11 @@
   },
   "艮": {
     "name": "mule",
-    "note": "A box with a leg kicking out behind at the bottom, a stubborn mule.",
-    "alts": ["stubborn goat", "kicking leg", "dresser"]
+    "note": "A box with a leg kicking out behind at the bottom, a stubborn mule."
   },
   "頁": {
-    "name": "big head",
-    "note": "A box with lines inside on two short legs, a big head walking.",
-    "alts": ["duck", "rubber duck", "waddling duck"]
+    "name": "rubber duck",
+    "note": "A box with lines inside on two short legs, like a waddling rubber duck."
   },
   "車": {
     "name": "car",
@@ -421,18 +385,15 @@
   },
   "乙": {
     "name": "zigzag",
-    "note": "One stroke that zigzags across and down, then hooks up.",
-    "alts": ["swan", "fishhook", "lightning"]
+    "note": "One stroke that zigzags across and down, then hooks up."
   },
   "⺲": {
     "name": "net",
-    "note": "A wide box with two strokes inside, a fishing net.",
-    "alts": ["eye", "window grille", "tray"]
+    "note": "A wide box with two strokes inside, a fishing net."
   },
   "囗": {
     "name": "cage",
-    "note": "A big box wrapping the whole kanji, something trapped inside: a cage.",
-    "alts": ["box", "fence", "frame"]
+    "note": "A big box wrapping the whole kanji, something trapped inside: a cage."
   },
   "矢": {
     "name": "dart",
@@ -445,29 +406,24 @@
     "fixed": true
   },
   "方": {
-    "name": "compass",
-    "note": "A dot on a bar over a hooked sweep, a compass needle pointing.",
-    "alts": ["flag", "sail", "signpost"]
+    "name": "sail",
+    "note": "A dot on a bar over a hooked sweep, a sail on its mast."
   },
   "工": {
     "name": "workbench",
-    "note": "Two flat bars joined by one post, like a workbench seen from the side.",
-    "alts": ["I-beam", "dumbbell", "anvil"]
+    "note": "Two flat bars joined by one post, like a workbench seen from the side."
   },
   "示": {
     "name": "altar",
-    "note": "Two bars over a post with a dot each side, an altar with offerings.",
-    "alts": ["table", "shrine", "candle stand"]
+    "note": "Two bars over a post with a dot each side, an altar with offerings."
   },
   "干": {
     "name": "drying rack",
-    "note": "Two bars on one tall post, like a drying rack for laundry.",
-    "alts": ["antenna", "pole", "trident"]
+    "note": "Two bars on one tall post, like a drying rack for laundry."
   },
   "里": {
     "name": "farm",
-    "note": "A rice field box on top of soil, a farm.",
-    "alts": ["field", "rice paddy", "farmhouse"]
+    "note": "A rice field box on top of soil, a farm."
   },
   "欠": {
     "name": "yawn",
@@ -475,9 +431,8 @@
     "fixed": true
   },
   "已": {
-    "name": "snake",
-    "note": "A stroke folding back on itself into a coil, a snake ready to strike.",
-    "alts": ["coil", "cobra", "number 2"]
+    "name": "cobra",
+    "note": "A stroke folding back on itself into a coil, a cobra ready to strike."
   },
   "火": {
     "name": "fire",
@@ -490,9 +445,8 @@
     "fixed": true
   },
   "殳": {
-    "name": "club",
-    "note": "A small table on top of a pretzel twist, a club being swung.",
-    "alts": ["hammer", "boat oar", "mallet"]
+    "name": "maiden",
+    "note": "A small headdress on top over a twisting skirt, a maiden curtseying."
   },
   "石": {
     "name": "stone",
@@ -500,19 +454,16 @@
     "fixed": true
   },
   "酉": {
-    "name": "jug",
-    "note": "A box with a neck on top and a line across inside, a jug.",
-    "alts": ["wine jar", "bottle", "barrel"]
+    "name": "dynamite",
+    "note": "A box with a fuse-like neck on top and a band across it: a stick of dynamite."
   },
   "⽧": {
     "name": "leaky shed",
-    "note": "A shed with two short drips down its left wall, a leaky shed.",
-    "alts": ["sick bed", "hospital", "dripping roof"]
+    "note": "A shed with two short drips down its left wall, a leaky shed."
   },
   "⺹": {
     "name": "stuck javelin",
-    "note": "A cross on a ground line, a long slash stabbed through it: a javelin stuck in soil.",
-    "alts": ["sundial", "garden stake"]
+    "note": "A cross on a ground line, a long slash stabbed through it: a javelin stuck in soil."
   },
   "弓": {
     "name": "bow",
@@ -531,18 +482,15 @@
   },
   "匚": {
     "name": "drawer",
-    "note": "A top, a side and a floor with the right side open, a drawer.",
-    "alts": ["box", "crate", "cabinet"]
+    "note": "A top, a side and a floor with the right side open, a drawer."
   },
   "音": {
     "name": "chime",
-    "note": "Stand on top of a sun: a chime ringing out a sound.",
-    "alts": ["bell", "speaker", "radio"]
+    "note": "Stand on top of a sun: a chime ringing out a sound."
   },
   "彡": {
     "name": "whiskers",
-    "note": "Three slanted strokes stacked to the left, like whiskers.",
-    "alts": ["hair", "rain", "brush strokes"]
+    "note": "Three slanted strokes stacked to the left, like whiskers."
   },
   "牛": {
     "name": "cow",
@@ -550,9 +498,8 @@
     "fixed": true
   },
   "疋": {
-    "name": "boot",
-    "note": "A bar and short post over a long curving leg that kicks out right, like a boot.",
-    "alts": ["giant boot", "clown boot", "big boot"]
+    "name": "giant boot",
+    "note": "A bar and short post over a long curving leg that kicks out right, a giant boot."
   },
   "門": {
     "name": "gate",
@@ -566,8 +513,7 @@
   },
   "⺨": {
     "name": "fishhook",
-    "note": "A long curve hooked at the foot with two slashes at the top, like a fishhook.",
-    "alts": ["claw", "monkey tail", "scythe"]
+    "note": "A long curve hooked at the foot with two slashes at the top, like a fishhook."
   },
   "戸": {
     "name": "door",
@@ -581,14 +527,12 @@
   },
   "辛": {
     "name": "chili",
-    "note": "A stand on top of a cross: a chili pepper standing on its stem.",
-    "alts": ["needle", "stake", "spicy pepper"]
+    "note": "A stand on top of a cross: a chili pepper standing on its stem."
   },
   "⻏": {
     "name": "pennant",
     "note": "A post with a double bump flying off it, like a pennant. Same shape on either side of a kanji.",
-    "sameAs": "⻖",
-    "alts": ["ear", "flag", "number 3"]
+    "sameAs": "⻖"
   },
   "手": {
     "name": "hand",
@@ -602,8 +546,7 @@
   },
   "マ": {
     "name": "pizza wedge",
-    "note": "A bar bending down to a point at the lower left, a dot tucked inside: a pizza wedge.",
-    "alts": ["funnel", "bird beak"]
+    "note": "A bar bending down to a point at the lower left, a dot tucked inside: a pizza wedge."
   },
   "穴": {
     "name": "hole",
@@ -612,8 +555,7 @@
   },
   "⺭": {
     "name": "lamppost",
-    "note": "A dot of light over a bent arm and a post: a lamppost.",
-    "alts": ["street lamp", "candle", "shrine post"]
+    "note": "A dot of light over a bent arm and a post: a lamppost."
   },
   "足": {
     "name": "foot",
@@ -626,14 +568,12 @@
     "fixed": true
   },
   "甘": {
-    "name": "candy",
-    "note": "A box with two posts poking up and a bar inside, a candy.",
-    "alts": ["yoke", "carrying pole", "palanquin"]
+    "name": "yoke",
+    "note": "A bar across two posts with a bar inside, a yoke with its buckets."
   },
   "自": {
-    "name": "nose",
-    "note": "A dot over an eye box, like a nose between the eyes.",
-    "alts": ["ladder", "phone", "filing cabinet"]
+    "name": "phone booth",
+    "note": "A dot over a tall box with bars inside, like a phone booth."
   },
   "馬": {
     "name": "horse",
@@ -647,13 +587,11 @@
   },
   "用": {
     "name": "fence",
-    "note": "A frame crossed by bars and a post, a fence panel.",
-    "alts": ["gate", "grid", "barrel"]
+    "note": "A frame crossed by bars and a post, a fence panel."
   },
   "毋": {
     "name": "window",
-    "note": "A box with one long bar straight through it and a line down the middle: a window.",
-    "alts": ["cross box", "crossed window", "four-pane window"]
+    "note": "A box with one long bar straight through it and a line down the middle: a window."
   },
   "食": {
     "name": "food",
@@ -667,13 +605,11 @@
   },
   "比": {
     "name": "two spoons",
-    "note": "Two spoons side by side, both facing the same way.",
-    "alts": ["twins", "two chairs", "two sevens"]
+    "note": "Two spoons side by side, both facing the same way."
   },
   "勿": {
     "name": "broom",
-    "note": "A wrapping stroke with two slashes hanging off it, a broom.",
-    "alts": ["flag", "brush", "rake"]
+    "note": "A wrapping stroke with two slashes hanging off it, a broom."
   },
   "母": {
     "name": "mother",
@@ -682,8 +618,7 @@
   },
   "⻂": {
     "name": "weathervane",
-    "note": "A dot, a bent arm and a post with two ticks flying left and right, like a weathervane.",
-    "alts": ["coat rack", "scarecrow", "kite"]
+    "note": "A dot, a bent arm and a post with two ticks flying left and right, like a weathervane."
   },
   "井": {
     "name": "well",
@@ -692,8 +627,7 @@
   },
   "爿": {
     "name": "climbing pole",
-    "note": "A tall post on the right, short strokes jutting from its left: footholds on a climbing pole.",
-    "alts": ["split log", "ladder"]
+    "note": "A tall post on the right, short strokes jutting from its left: footholds on a climbing pole."
   },
   "廴": {
     "name": "long stride",
@@ -707,8 +641,7 @@
   },
   "弋": {
     "name": "stake",
-    "note": "A slanted post with a crossbar and a dot at the top, a stake.",
-    "alts": ["arrow", "spear", "peg"]
+    "note": "A slanted post with a crossbar and a dot at the top, a stake."
   },
   "舟": {
     "name": "boat",
@@ -727,18 +660,15 @@
   },
   "癶": {
     "name": "tent",
-    "note": "Two halves splaying out from the top, like a tent opening.",
-    "alts": ["stepping feet", "spread legs", "open door"]
+    "note": "Two halves splaying out from the top, like a tent opening."
   },
   "見": {
-    "name": "binoculars",
-    "note": "An eye on top of legs, looking through binoculars.",
-    "alts": ["eye on legs", "camera", "peeping eye"]
+    "name": "camera",
+    "note": "An eye on top of legs, like a camera on a tripod."
   },
   "至": {
-    "name": "finish line",
-    "note": "A small elbow bend over a long bar and a soil base: a finish line you reach.",
-    "alts": ["trophy", "arrow landing", "podium"]
+    "name": "podium",
+    "note": "A small elbow bend over a long bar and a soil base, like a podium."
   },
   "聿": {
     "name": "brush",
@@ -752,13 +682,11 @@
   },
   "亡": {
     "name": "tombstone",
-    "note": "A dot over a bent stroke, like a small tombstone.",
-    "alts": ["corner", "dead end", "shelf"]
+    "note": "A dot over a bent stroke, like a small tombstone."
   },
   "文": {
-    "name": "tattoo",
-    "note": "A dot and bar over crossing strokes, a tattoo pattern.",
-    "alts": ["dancer", "bow tie", "kite"]
+    "name": "dancer",
+    "note": "A dot of a head and a bar of arms over crossing legs, a dancer mid-spin."
   },
   "川": {
     "name": "river",
@@ -767,8 +695,7 @@
   },
   "⽱": {
     "name": "paw print",
-    "note": "A frame with an elbow tucked inside, like a paw print.",
-    "alts": ["cupboard", "dog kennel", "fish trap"]
+    "note": "A frame with an elbow tucked inside, like a paw print."
   },
   "父": {
     "name": "father",
@@ -786,14 +713,12 @@
     "fixed": true
   },
   "辰": {
-    "name": "hoe",
-    "note": "A cliff top over two bars and a long flaring stroke below, like a hoe's blade.",
-    "alts": ["clam", "shovel", "snow plough"]
+    "name": "clam",
+    "note": "A cliff top over two bars and a long flaring stroke below, like a clam opening."
   },
   "冊": {
     "name": "scroll",
-    "note": "Several tall strips bound by one bar, a scroll of bamboo slats.",
-    "alts": ["book", "fence", "picket gate"]
+    "note": "Several tall strips bound by one bar, a scroll of bamboo slats."
   },
   "谷": {
     "name": "valley",
@@ -822,23 +747,19 @@
   },
   "ユ": {
     "name": "staple",
-    "note": "A three-sided bracket open to the left, a staple.",
-    "alts": ["bracket", "letter U", "hook"]
+    "note": "A three-sided bracket open to the left, a staple."
   },
   "非": {
     "name": "fishbone",
-    "note": "Two rows of short bars on two spines, a fishbone.",
-    "alts": ["ribs", "ladder", "comb"]
+    "note": "Two rows of short bars on two spines, a fishbone."
   },
   "隶": {
     "name": "mop",
-    "note": "A rake on a post with strands hanging off, a mop.",
-    "alts": ["broom", "dust mop", "feather duster"]
+    "note": "A rake on a post with strands hanging off, a mop."
   },
   "行": {
     "name": "crossroads",
-    "note": "Peg post on the left, two bars and a hook on the right: crossroads.",
-    "alts": ["street", "intersection", "two walkers"]
+    "note": "Peg post on the left, two bars and a hook on the right: crossroads."
   },
   "支": {
     "name": "branch",
@@ -851,34 +772,28 @@
     "fixed": true
   },
   "釆": {
-    "name": "sieve",
-    "note": "A slash over rice grains, a sieve shaking them loose.",
-    "alts": ["paw", "rice grains", "sprinkler"]
+    "name": "paw",
+    "note": "A slash over rice grains, like a paw with its claws spread."
   },
   "元": {
     "name": "sawhorse",
-    "note": "Two bars resting on two splayed legs: a sawhorse.",
-    "alts": ["ironing board", "trestle"]
+    "note": "Two bars resting on two splayed legs: a sawhorse."
   },
   "乃": {
-    "name": "lightning bolt",
-    "note": "A top bar that zigzags down the right side like lightning, a leg swept left.",
-    "alts": ["folding ruler", "swan neck"]
+    "name": "folding ruler",
+    "note": "A top bar that zigzags down the right side like a folding ruler, a leg swept left."
   },
   "韋": {
     "name": "pagoda",
-    "note": "Boxes and bars stacked up one post, tier on tier, like a pagoda.",
-    "alts": ["tower", "stack", "totem pole"]
+    "note": "Boxes and bars stacked up one post, tier on tier, like a pagoda."
   },
   "啇": {
     "name": "hanging lantern",
-    "note": "A dot on top, horns and a box with a cross inside: a hanging lantern.",
-    "alts": ["lantern", "lighthouse", "beehive"]
+    "note": "A dot on top, horns and a box with a cross inside: a hanging lantern."
   },
   "玄": {
-    "name": "dark thread",
-    "note": "A lid over a twisted loop, a dark thread.",
-    "alts": ["thread", "spool", "spinning top"]
+    "name": "spool",
+    "note": "A lid over a twisted loop, thread wound on a spool."
   },
   "品": {
     "name": "goods",
@@ -897,8 +812,7 @@
   },
   "也": {
     "name": "scorpion",
-    "note": "A hook curling around a post with a tail, a scorpion.",
-    "alts": ["skateboarder", "snail", "kettle"]
+    "note": "A hook curling around a post with a tail, a scorpion."
   },
   "斗": {
     "name": "ladle",
@@ -911,9 +825,8 @@
     "fixed": true
   },
   "舛": {
-    "name": "dance steps",
-    "note": "Two halves facing apart, two feet doing dance steps.",
-    "alts": ["two feet", "mismatched legs", "dancers"]
+    "name": "mismatched legs",
+    "note": "Two halves facing apart, a pair of mismatched legs."
   },
   "矛": {
     "name": "harpoon",
@@ -927,8 +840,7 @@
   },
   "而": {
     "name": "beard",
-    "note": "A bar over a frame with strands hanging down, a beard.",
-    "alts": ["comb", "jellyfish", "mustache"]
+    "note": "A bar over a frame with strands hanging down, a beard."
   },
   "赤": {
     "name": "red",
@@ -937,18 +849,15 @@
   },
   "尢": {
     "name": "crutch",
-    "note": "A bar with a bent leg and a hook, a crutch.",
-    "alts": ["walking cane", "bent knee", "pickaxe"]
+    "note": "A bar with a bent leg and a hook, a crutch."
   },
   "免": {
     "name": "rabbit",
-    "note": "Pointed ears on top, a boxy body, two hind legs below: a rabbit with no tail.",
-    "alts": ["kangaroo", "diving helmet"]
+    "note": "Pointed ears on top, a boxy body, two hind legs below: a rabbit with no tail."
   },
   "巴": {
     "name": "bed",
-    "note": "A box on top with a long base curling under it, like a bed seen from the side.",
-    "alts": ["snake", "hammock", "sofa"]
+    "note": "A box on top with a long base curling under it, like a bed seen from the side."
   },
   "長": {
     "name": "long",
@@ -956,9 +865,8 @@
     "fixed": true
   },
   "身": {
-    "name": "torso",
-    "note": "A box with bars and a sweep through it, a torso.",
-    "alts": ["body", "pot belly", "backpack"]
+    "name": "pot belly",
+    "note": "A box with bars and a sweep through it, a round pot belly."
   },
   "屮": {
     "name": "sprout",
@@ -967,23 +875,19 @@
   },
   "巛": {
     "name": "speed zone",
-    "note": "Three wavy lines side by side, like the chevrons of a speed zone.",
-    "alts": ["river", "waves", "rain streaks"]
+    "note": "Three wavy lines side by side, like the chevrons of a speed zone."
   },
   "及": {
-    "name": "long arm",
-    "note": "A hooked stroke with a long arm sweeping out, reaching.",
-    "alts": ["lasso", "reaching hand", "catch net"]
+    "name": "catch net",
+    "note": "A hooked stroke with a long arm sweeping out, like a net swung to catch."
   },
   "斉": {
-    "name": "neat rows",
-    "note": "Bars and two posts in tidy order, neat rows.",
-    "alts": ["ladder", "tidy shelf", "bookcase"]
+    "name": "ladder",
+    "note": "Bars stacked over two posts, like the rungs and rails of a ladder."
   },
   "尤": {
     "name": "broken crutch",
-    "note": "A crutch with an extra dot, a broken crutch.",
-    "alts": ["tagged crutch", "bent knee", "cane and fly"]
+    "note": "A crutch with an extra dot, a broken crutch."
   },
   "魚": {
     "name": "fish",
@@ -1002,8 +906,7 @@
   },
   "屯": {
     "name": "hitching post",
-    "note": "A bar over a hooked stroke, a hitching post.",
-    "alts": ["seedling", "tent peg", "hairpin"]
+    "note": "A bar over a hooked stroke, a hitching post."
   },
   "岡": {
     "name": "ridge",
@@ -1012,8 +915,7 @@
   },
   "豸": {
     "name": "leopard",
-    "note": "Strokes crouching like a beast with a long tail, a leopard.",
-    "alts": ["cat", "panther", "badger"]
+    "note": "Strokes crouching like a beast with a long tail, a leopard."
   },
   "气": {
     "name": "steam",
@@ -1032,8 +934,7 @@
   },
   "入": {
     "name": "entrance",
-    "note": "Two strokes leaning in, an entrance.",
-    "alts": ["doorway", "tipi", "arrowhead"]
+    "note": "Two strokes leaning in, an entrance."
   },
   "革": {
     "name": "leather",
@@ -1046,14 +947,12 @@
     "fixed": true
   },
   "色": {
-    "name": "paint palette",
-    "note": "A bent top over a coiling swirl, a paint palette.",
-    "alts": ["swirl", "snail", "kneeling person"]
+    "name": "hermit crab",
+    "note": "A bent top over a coiling swirl, a hermit crab in its shell."
   },
   "彑": {
-    "name": "bent rake",
-    "note": "A rake with a slanted handle crossing it, a bent rake.",
-    "alts": ["crossed rake", "fork", "snowplough"]
+    "name": "iron",
+    "note": "A flat base with a slanted handle crossing it, like a clothes iron."
   },
   "鬲": {
     "name": "cauldron",
@@ -1102,8 +1001,7 @@
   },
   "世": {
     "name": "family photo",
-    "note": "Three posts crossed by a bar with a long base: a family photo.",
-    "alts": ["picket fence", "bookshelf", "table"]
+    "note": "Three posts crossed by a bar with a long base: a family photo."
   },
   "肉": {
     "name": "meat",
@@ -1112,8 +1010,7 @@
   },
   "無": {
     "name": "empty basket",
-    "note": "A woven grid of posts over four dots, an empty basket.",
-    "alts": ["basket", "broom", "fire grill"]
+    "note": "A woven grid of posts over four dots, an empty basket."
   },
   "髟": {
     "name": "long hair",
@@ -1121,9 +1018,8 @@
     "fixed": true
   },
   "片": {
-    "name": "splinter",
-    "note": "A post with bars and a sweep, a splinter.",
-    "alts": ["tai chi pose", "kung fu stance", "crane stance"]
+    "name": "tai chi pose",
+    "note": "A post with bars and a sweep, like a body held in a tai chi pose."
   },
   "歯": {
     "name": "tooth",
@@ -1156,9 +1052,8 @@
     "fixed": true
   },
   "奄": {
-    "name": "canopy",
-    "note": "Large spreads wide over a boxed tail, like a canopy.",
-    "alts": ["umbrella", "parasol", "tent"]
+    "name": "parasol",
+    "note": "Large spreads wide over a boxed tail, like a parasol over its handle."
   },
   "麦": {
     "name": "barley",
@@ -1172,17 +1067,14 @@
   },
   "久": {
     "name": "skier",
-    "note": "A crouched bent body and one long sweep out to the right: a skier on a ski.",
-    "alts": ["ski jumper", "tobogganer"]
+    "note": "A crouched bent body and one long sweep out to the right: a skier on a ski."
   },
   "鬯": {
     "name": "herb pot",
-    "note": "A pot with dots inside and a spoon below, an herb pot.",
-    "alts": ["cauldron", "wine pot", "flower pot"]
+    "note": "A pot with dots inside and a spoon below, an herb pot."
   },
   "爻": {
     "name": "lattice",
-    "note": "Two crosses stacked, a lattice.",
-    "alts": ["crosses", "x marks", "stitches"]
+    "note": "Two crosses stacked, a lattice."
   }
 }
