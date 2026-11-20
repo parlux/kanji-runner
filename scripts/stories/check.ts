@@ -25,14 +25,24 @@ export type Dictionary = {
 };
 export type Report = { errors: string[]; warnings: string[] };
 
-const TAGS = new Set(["part", "kanji", "reading", "ja", "em"]);
+const TAGS = new Set(["part", "kanji", "reading", "sound", "ja", "em"]);
 const FIELDS = ["meaning", "on", "kun"] as const;
 type Field = (typeof FIELDS)[number];
 /** Plain-text length bands, in characters. */
 export const BANDS: Record<Field, [number, number]> = {
   meaning: [120, 600],
-  on: [60, 450],
-  kun: [60, 450],
+  on: [40, 350],
+  kun: [40, 350],
+};
+/** The old reading-story band, while `allowReading` is on. */
+const OLD_READING_BAND: [number, number] = [60, 450];
+export type Options = {
+  /**
+   * Temporary (until Task H2 rewrites Kanji 5-6): reading stories may still
+   * end in an explainer with a `<reading>`, need no `<sound>`, and keep the
+   * old length band.
+   */
+  allowReading?: boolean;
 };
 
 type Obj = Record<string, unknown>;
@@ -175,17 +185,58 @@ function checkSounds(sounds: unknown, r: Report) {
   }
 }
 
+/** The new reading-story rules: `<sound>` chunks, no `<reading>`. */
+function checkSound(
+  where: string,
+  field: Field,
+  text: string,
+  k: KanjiItem,
+  keywords: Map<string, string>,
+  r: Report,
+) {
+  if (/<reading>/.test(text))
+    r.errors.push(`${where}: <reading> is not used in our stories`);
+  const chunks = [
+    ...text
+      .replace(/<(?!\/?sound>)[^<>]*>/g, "")
+      .matchAll(/([A-Za-z]*)<sound>([^<]*)<\/sound>([A-Za-z]*)/g),
+  ];
+  if (!/<sound>/.test(text)) r.errors.push(`${where}: no <sound>`);
+  for (const m of text.matchAll(/<sound>([^<]*)<\/sound>/g))
+    if (!/^[A-Za-z]{1,6}$/.test(m[1] ?? ""))
+      r.errors.push(
+        `${where}: <sound>${m[1]}</sound> is not 1-6 Latin letters`,
+      );
+  const kw = field === "on" && k.on ? keywords.get(k.on) : undefined;
+  if (kw) {
+    const words = kw
+      .toLowerCase()
+      .split(/[\s-]+/)
+      .filter(Boolean);
+    const hit = chunks.some((m) =>
+      words.includes(
+        ((m[1] ?? "") + (m[2] ?? "") + (m[3] ?? "")).toLowerCase(),
+      ),
+    );
+    if (!hit)
+      r.errors.push(`${where}: no <sound> chunk spells the keyword "${kw}"`);
+  }
+}
+
 function checkText(
   where: string,
   field: Field,
   text: string,
   k: KanjiItem,
   names: Map<string, string>,
+  keywords: Map<string, string>,
   r: Report,
+  opts: Options,
 ) {
   for (const e of tagErrors(text)) r.errors.push(`${where}: ${e}`);
   const len = [...plainText(text)].length;
-  const [lo, hi] = BANDS[field];
+  const [lo, hi] =
+    field !== "meaning" && opts.allowReading ? OLD_READING_BAND : BANDS[field];
   if (len < lo || len > hi)
     r.errors.push(`${where}: ${len} characters, outside ${lo}-${hi}`);
 
@@ -195,6 +246,8 @@ function checkText(
     if (!known.has(p)) r.errors.push(`${where}: part "${p}" not in parts.json`);
 
   if (field === "meaning") {
+    if (/<sound>/.test(text) && !opts.allowReading)
+      r.errors.push(`${where}: <sound> belongs in on/kun stories only`);
     if (tagged(text, "kanji").length === 0)
       r.errors.push(`${where}: no <kanji> meaning word`);
     for (const c of k.components) {
@@ -202,6 +255,10 @@ function checkText(
       if (name && !used.has(normName(name)))
         r.warnings.push(`${where}: part ${c} "${name}" not named`);
     }
+    return;
+  }
+  if (!opts.allowReading) {
+    checkSound(where, field, text, k, keywords, r);
     return;
   }
   const allowed =
@@ -222,7 +279,9 @@ function checkStoryFile(
   file: unknown,
   kanji: readonly KanjiItem[],
   names: Map<string, string>,
+  keywords: Map<string, string>,
   r: Report,
+  opts: Options,
 ) {
   const level = fileLevel(name);
   if (level === null || level > maxLevel(kanji)) {
@@ -267,7 +326,7 @@ function checkStoryFile(
         r.errors.push(`${where}: has ${f}, but the kanji has no main ${f}`);
       } else if (typeof v !== "string") {
         r.errors.push(`${where}: ${f} must be text`);
-      } else checkText(`${where} ${f}`, f, v, k, names, r);
+      } else checkText(`${where} ${f}`, f, v, k, names, keywords, r, opts);
     }
   }
 }
@@ -277,17 +336,23 @@ export function validate(
   dict: Dictionary,
   kanji: readonly KanjiItem[],
   levels?: readonly number[],
+  opts: Options = {},
 ): Report {
   const r: Report = { errors: [], warnings: [] };
   checkParts(dict.parts, kanji, r);
   checkSounds(dict.sounds, r);
   const names = partNames(dict.parts);
+  const keywords = new Map<string, string>();
+  if (isObj(dict.sounds))
+    for (const [s, v] of Object.entries(dict.sounds))
+      if (isObj(v) && typeof v.keyword === "string") keywords.set(s, v.keyword);
   const files = levels
     ? levels.map(storyFile)
     : Object.keys(dict.stories).sort();
   for (const name of files) {
     if (!(name in dict.stories)) r.errors.push(`stories/${name}: missing`);
-    else checkStoryFile(name, dict.stories[name], kanji, names, r);
+    else
+      checkStoryFile(name, dict.stories[name], kanji, names, keywords, r, opts);
   }
   return r;
 }
@@ -326,7 +391,9 @@ function main() {
   const arg = args.find((a) => !a.startsWith("--"));
   const levels = arg ? parseLevels(arg, maxLevel(KANJI)) : undefined;
   const { dict, errors } = loadDictionary();
-  const r = validate(dict, KANJI, levels);
+  const r = validate(dict, KANJI, levels, {
+    allowReading: args.includes("--allow-reading"),
+  });
   const all = [...errors, ...r.errors];
   for (const w of r.warnings) console.log(`warning: ${w}`);
   for (const e of all) console.log(`error: ${e}`);

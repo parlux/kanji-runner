@@ -17,11 +17,16 @@ import {
   soundsInput,
 } from "../../scripts/stories/prep";
 
+/** Task H2 rewrites the Kanji 5-6 reading stories and deletes this allowance. */
+const READING_PENDING = { allowReading: true };
+
 describe("committed dictionary (SPEC-own-stories)", () => {
   it("passes the validator", () => {
     const { dict, errors } = loadDictionary();
     expect(errors).toEqual([]);
-    expect(validate(dict, KANJI).errors).toEqual([]);
+    expect(validate(dict, KANJI, undefined, READING_PENDING).errors).toEqual(
+      [],
+    );
   });
 });
 
@@ -92,18 +97,16 @@ const good = (): Dictionary => ({
           meaning: meaning(
             "A <part>tree</part> is just a <kanji>tree</kanji>.",
           ),
-          on: reading("A tree grows a <reading>もく</reading> mock trunk."),
-          kun: reading("A key, <reading>き</reading>, hangs on the tree."),
+          on: reading("A tree grows a <sound>mo</sound>ck trunk."),
+          kun: reading("A <sound>key</sound> hangs on the tree."),
         },
         休: {
           meaning: meaning(
             "A <part>person</part> hugs a <part>tree</part> to <kanji>rest</kanji>.",
           ),
-          on: reading(
-            "A pool <em>cue</em> scratches a back: <reading>キュウ</reading>.",
-          ),
+          on: reading("A pool <sound>cue</sound> scratches a back."),
           kun: reading(
-            "<reading>やすむ</reading>: <ja>休む</ja> is to take a break.",
+            "<sound>Ya</sound>, <sound>sue</sound> me: <ja>休む</ja> is a break.",
           ),
         },
       },
@@ -115,6 +118,19 @@ const entry = (d: Dictionary, c: string) =>
   (d.stories["kanji-01.json"] as { kanji: Record<string, Entry> }).kanji[
     c
   ] as Entry;
+/** Every on/kun in the old form: an explainer with a `<reading>`. */
+const oldForm = (): Dictionary => {
+  const d = good();
+  const r = {
+    木: ["もく", "き"],
+    休: ["きゅう", "やす"],
+  } as const;
+  for (const c of ["木", "休"] as const) {
+    entry(d, c).on = reading(`Old <reading>${r[c][0]}</reading>.`);
+    entry(d, c).kun = reading(`Old <reading>${r[c][1]}</reading>.`);
+  }
+  return d;
+};
 const errorsOf = (d: Dictionary, levels?: number[]) =>
   validate(d, FIX, levels).errors;
 
@@ -165,8 +181,8 @@ describe("validator rules", () => {
       kanji: {
         円: {
           meaning: meaning("A coin is a <kanji>yen</kanji>."),
-          on: reading("<reading>えん</reading> rhymes with end."),
-          kun: reading("<reading>えん</reading> again."),
+          on: reading("An <sound>en</sound>velope holds the coin."),
+          kun: reading("<sound>En</sound> again."),
         },
       },
     };
@@ -175,8 +191,10 @@ describe("validator rules", () => {
     expect(e).toMatch(/円: has kun, but the kanji has no main kun/);
   });
 
-  it("checks <reading> against the main reading (kun: okurigana optional, katakana ok)", () => {
-    const d = good();
+  it("checks <reading> against the main reading while allowReading is on (kun: okurigana optional, katakana ok)", () => {
+    const errorsOf = (d: Dictionary) =>
+      validate(d, FIX, undefined, READING_PENDING).errors;
+    const d = oldForm();
     entry(d, "木").on = reading("No reading tag here at all, just words.");
     entry(d, "休").on = reading("<reading>く</reading> is wrong.");
     entry(d, "休").kun = reading("<reading>やすみ</reading> is wrong too.");
@@ -184,9 +202,75 @@ describe("validator rules", () => {
     expect(e).toMatch(/木 on: no <reading>/);
     expect(e).toMatch(/休 on: <reading>く<\/reading> is not きゅう/);
     expect(e).toMatch(/休 kun: <reading>やすみ<\/reading> is not やす/);
-    const ok = good();
+    const ok = oldForm();
     entry(ok, "休").kun = reading("<reading>やす</reading> is fine.");
     expect(errorsOf(ok)).toEqual([]);
+  });
+
+  it("needs a <sound> in on and kun, and bans <reading> (old form passes with allowReading)", () => {
+    const d = good();
+    entry(d, "木").on = reading("A tree grows a mock trunk.");
+    entry(d, "木").kun = reading(
+      "A <reading>き</reading>, <sound>key</sound>.",
+    );
+    const e = errorsOf(d).join("\n");
+    expect(e).toMatch(/木 on: no <sound>/);
+    expect(e).toMatch(/木 kun: <reading> is not used/);
+    expect(e).not.toMatch(/木 kun: no <sound>/);
+    const old = oldForm();
+    expect(errorsOf(old).join()).toMatch(/木 on: no <sound>/);
+    expect(validate(old, FIX, undefined, READING_PENDING).errors).toEqual([]);
+  });
+
+  it("keeps <sound> out of the meaning story", () => {
+    const d = good();
+    entry(d, "木").meaning = meaning(
+      "A <part>tree</part> <sound>oak</sound> is a <kanji>tree</kanji>.",
+    );
+    expect(errorsOf(d).join()).toMatch(
+      /木 meaning: <sound> belongs in on\/kun/,
+    );
+  });
+
+  it("needs <sound> text of 1-6 Latin letters", () => {
+    const d = good();
+    entry(d, "木").on = reading(
+      "A <sound>モ</sound> and a <sound>mockery</sound>.",
+    );
+    entry(d, "木").kun = reading("A <sound>k ey</sound>.");
+    const e = errorsOf(d).join("\n");
+    expect(e).toMatch(/木 on: <sound>モ<\/sound> is not 1-6 Latin/);
+    expect(e).toMatch(/木 on: <sound>mockery<\/sound> is not 1-6 Latin/);
+    expect(e).toMatch(/木 kun: <sound>k ey<\/sound> is not 1-6 Latin/);
+    entry(d, "木").on = reading("A <sound>mockery</sound>."); // 7 letters
+    expect(errorsOf(d).join()).toMatch(/not 1-6/);
+    entry(d, "木").on = reading("A <sound>mocker</sound>.");
+    entry(d, "木").kun = reading("A <sound>Key</sound>.");
+    expect(errorsOf(d)).toEqual([]);
+  });
+
+  it("makes the on story highlight its sounds.json keyword", () => {
+    const d = good();
+    entry(d, "休").on = reading("A pool <sound>cu</sound>rve bends the back.");
+    expect(errorsOf(d).join()).toMatch(
+      /休 on: no <sound> chunk spells the keyword "cue"/,
+    );
+    entry(d, "休").on = reading("A pool <sound>cue</sound>s the back.");
+    expect(errorsOf(d).join()).toMatch(/spells the keyword/);
+    // letters touching the chunk count; case is ignored; kun is not checked
+    entry(d, "休").on = reading(
+      "A <sound>Cu</sound>e scratches. <sound>Zz</sound>.",
+    );
+    expect(errorsOf(d)).toEqual([]);
+    entry(d, "休").on = reading(
+      "A <em>pool</em> <sound>c</sound>ue <sound>u</sound>.",
+    );
+    expect(errorsOf(d)).toEqual([]);
+    d.sounds = { きゅう: { keyword: "ice cream" } };
+    entry(d, "休").on = reading("An <sound>ic</sound>icle dream.");
+    expect(errorsOf(d).join()).toMatch(/keyword "ice cream"/);
+    entry(d, "休").on = reading("The <sound>cream</sound> helps.");
+    expect(errorsOf(d)).toEqual([]);
   });
 
   it("allows only the five tags, balanced, no stray brackets", () => {
@@ -208,10 +292,10 @@ describe("validator rules", () => {
   it("keeps plain-text lengths in band", () => {
     const d = good();
     entry(d, "木").meaning = "A <part>tree</part> <kanji>tree</kanji>.";
-    entry(d, "木").on = reading("<reading>もく</reading>" + "x".repeat(450));
+    entry(d, "木").on = reading("<reading>もく</reading>" + "x".repeat(350));
     const e = errorsOf(d).join("\n");
     expect(e).toMatch(/木 meaning: 12 characters, outside 120-600/);
-    expect(e).toMatch(/木 on: \d+ characters, outside 60-450/);
+    expect(e).toMatch(/木 on: \d+ characters, outside 40-350/);
   });
 
   it("needs a <kanji> meaning word in the meaning story", () => {
