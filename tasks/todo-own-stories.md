@@ -106,7 +106,7 @@ Not one implementer subagent: the orchestrator runs the loop per batch (2 levels
 - [ ] Owner ticks, or sends `STYLE.md` changes before D7 scales up.
 
 ### Task R3: Apply Checkpoint D's review (content, orchestrator)
-**Description:** `stories:review -- apply` on the owner's verdicts; renamed parts and keywords ripple into the stories using them; ✗ stories rewritten through the writer/judge loop with the owner's notes; `stories:check`, `stories:overlap` (with `--names`), commit, push; re-seed changed items at `pass + 1` for a quick second look. `STYLE.md` updated where the notes cluster; changes listed below.
+**Description:** `stories:review -- apply` on the owner's verdicts; renamed parts and keywords ripple into the stories using them; ✗ stories rewritten through the writer/judge loop with the owner's notes; `stories:check`, `stories:overlap` (with `--names`), commit, push; re-seed changed items at `pass + 1` for a quick second look. First make `apply` skip reviews whose `pass` is below the item's (R1 rough edge: needs `--items`). `STYLE.md` updated where the notes cluster; changes listed below.
 **Acceptance:**
 - [ ] Every ✗ from Checkpoint D rewritten or answered on the page; all entries pass check and judge.
 - [ ] Changed items re-seeded; counts logged below.
