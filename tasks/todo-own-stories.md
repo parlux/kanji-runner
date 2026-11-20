@@ -87,9 +87,9 @@ Not one implementer subagent: the orchestrator runs the loop per batch (2 levels
 ### Task R1: Review scripts, seed and apply (sonnet)
 **Description:** `scripts/stories/review.ts` with `npm run stories:review -- seed|apply` (spec "Review page": item shape, ids, sample rule, apply rules). Seed output is in the `ArtifactData` batch shape. Nothing seeded or written carries WaniKani text (no `close` reasons).
 **Acceptance:**
-- [ ] `seed parts`, `seed sounds`, `seed 6-7` write files; pilot levels get every kanji, later levels judge fails + 10 seeded random (same picks on a re-run); no judge file → random only, with a warning.
-- [ ] `apply` tests on fixtures: a part rename rewrites `<part>` text in every story using it and lists them; duplicate or 4-word names rejected; sound keyword edit saved; ✗ notes land in `notes-<scope>.json` with our text and the note only; random-miss count per level printed.
-- [ ] `npm run check` passes (knip and deps included).
+- [x] `seed parts`, `seed sounds`, `seed 6-7` write files; pilot levels get every kanji, later levels judge fails + 10 seeded random (same picks on a re-run); no judge file → random only, with a warning.
+- [x] `apply` tests on fixtures: a part rename rewrites `<part>` text in every story using it and lists them; duplicate or 4-word names rejected; sound keyword edit saved; ✗ notes land in `notes-<scope>.json` with our text and the note only; random-miss count per level printed.
+- [x] `npm run check` passes (knip and deps included).
 **Files:** `scripts/stories/review.ts`, `package.json`, `tests/data/review.test.ts`, this file
 
 ### Task R2: Review page (sonnet, published by the orchestrator)
