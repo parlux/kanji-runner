@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.6 (2026-11-21)
+
+- Review page: every part up for review now offers 2-3 alternative names (91 parts newly given options).
+
 ## 1.6.5 (2026-11-21)
 
 - Review page: each tab also counts items marked ✗ (the r-sounds showed "0 left" while still needing work). Name and keyword options for the last 5 parts and 11 sounds (r-sounds now offer r-words).
