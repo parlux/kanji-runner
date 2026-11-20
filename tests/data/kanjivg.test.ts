@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { KANJI } from "../../src/core/kanji";
 import {
   chunkUses,
   components,
@@ -137,5 +138,12 @@ describe("KanjiVG components (SPEC-own-stories: Composite parts)", () => {
     expect(out.get("閉")).toEqual(["門", "才"]);
     expect(out.get("休")).toEqual(["⺅", "木"]);
     expect(out.get("語")).toEqual(["言", "吾"]);
+  });
+
+  it("is what the committed kanji data holds", () => {
+    const of = (c: string) => KANJI.find((k) => k.char === c)?.components;
+    expect(of("閉")).toEqual(["門", "才"]);
+    expect(of("休")).toEqual(["⺅", "木"]);
+    expect(of("語")).toEqual(["言", "吾"]);
   });
 });

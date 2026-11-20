@@ -223,3 +223,51 @@ export function components(
     [...trees].map(([char, cs]) => [char, composite(char, cs, keep)]),
   );
 }
+
+/** A component `parts.json` doesn't name yet, for the part namers. */
+export type NewPart = {
+  part: string;
+  /** A kanji in our list (named by its gloss) rather than a shape. */
+  kanji: boolean;
+  /** Kanji that list it, in the given (progression) order. */
+  uses: string[];
+  /** Its own chunks in KanjiVG (first occurrence). */
+  children: string[];
+};
+
+/**
+ * New parts (in order of first use) and the `named` parts no kanji lists
+ * any more (in `named` order).
+ */
+export function partsReport(
+  kanji: { char: string; components: string[] }[],
+  trees: Map<string, Chunk[]>,
+  named: readonly string[],
+  chars: ReadonlySet<string>,
+): { added: NewPart[]; removed: string[] } {
+  const children = new Map<string, string[]>();
+  const walk = (cs: Chunk[]) => {
+    for (const c of cs) {
+      if (!children.has(c.element))
+        children.set(
+          c.element,
+          c.children.map((k) => k.element),
+        );
+      walk(c.children);
+    }
+  };
+  for (const cs of trees.values()) walk(cs);
+  const uses = new Map<string, string[]>();
+  for (const k of kanji)
+    for (const c of k.components) uses.set(c, [...(uses.get(c) ?? []), k.char]);
+  const known = new Set(named);
+  const added = [...uses]
+    .filter(([part]) => !known.has(part))
+    .map(([part, u]) => ({
+      part,
+      kanji: chars.has(part),
+      uses: u,
+      children: children.get(part) ?? [],
+    }));
+  return { added, removed: named.filter((p) => !uses.has(p)) };
+}

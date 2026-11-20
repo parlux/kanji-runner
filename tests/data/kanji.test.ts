@@ -55,13 +55,12 @@ describe("kanji data", () => {
     expect(counts.at(-1)).toBeLessThanOrEqual(30);
   });
 
-  it("puts every component that is a kanji before the kanji using it", () => {
-    const index = new Map(kanji.map((k, i) => [k.char, i]));
-    for (const [i, k] of kanji.entries()) {
-      for (const c of k.components) {
-        if (index.has(c))
-          expect(index.get(c), `${c} in ${k.char}`).toBeLessThan(i);
-      }
+  // Parts come from KanjiVG; the order's building blocks stay KRADFILE's
+  // elements (SPEC-useful-order), so a kanji part may be taught later (何 可).
+  it("lists each kanji's parts once, never the kanji itself", () => {
+    for (const k of kanji) {
+      expect(new Set(k.components).size, k.char).toBe(k.components.length);
+      expect(k.components, k.char).not.toContain(k.char);
     }
   });
 

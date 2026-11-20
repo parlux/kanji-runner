@@ -612,8 +612,8 @@ describe("studyCards with our dictionary", () => {
     expect(c.mnemonics).toEqual({ meaning: "<part>axe</part> m" });
     expect(c.radicals).toBeUndefined();
     expect(c.parts).toEqual([
-      { char: "斤", name: "axe" },
       { char: "⺘", name: "reaching hand" },
+      { char: "斤", name: "axe" },
     ]);
   });
 

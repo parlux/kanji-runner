@@ -2,14 +2,21 @@
 /**
  * Dev-only data build: `npm run data:build`.
  *
- * Downloads KANJIDIC2, KRADFILE and JMdict (EDRDG, CC BY-SA 4.0) and the
+ * Downloads KANJIDIC2, KRADFILE and JMdict (EDRDG, CC BY-SA 4.0), KanjiVG
+ * (CC BY-SA 3.0) for the parts each kanji shows, and the
  * TUBELEX Japanese word frequencies (BSD-3-Clause; unpacked with the `xz`
  * command), and Tatoeba's Japanese sentences (CC BY 2.0 FR) for word value,
  * into the gitignored `.data-cache/` (pass `--refresh` to download again) and writes compact JSON
  * into `src/data/`. Output depends only on the cached files, so running it
  * twice gives identical JSON.
  */
-import { readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import {
+  components as composite,
+  parseKanjivg,
+  partsReport,
+  type Chunk,
+} from "./kanjivg";
 import { orderReport, usefulOrder, type OrderOverride } from "./order";
 import {
   commonWords,
@@ -94,6 +101,7 @@ async function main(): Promise<void> {
   for (const c of Object.keys(readingOverrides))
     if (!components.has(c))
       throw new Error(`reading override ${c}: not a Jōyō kanji`);
+  const { shown, trees } = await shownComponents(raw, refresh);
   const jmdict = (await cached("jmdict", refresh)).toString("utf8");
   const counts = countReadings(commonWords(jmdict), raw);
   // Taught readings don't depend on the order; candidates need them first.
@@ -155,10 +163,11 @@ async function main(): Promise<void> {
     on: taught.get(k.char)?.on ?? null,
     kun: taught.get(k.char)?.kun ?? null,
     readings: allReadings(k),
-    components: components.get(k.char) ?? [],
+    components: shown.get(k.char) ?? [],
   }));
   writeJsonLines("src/data/kanji.json", kanji);
   writeConfusables(kanji);
+  writePartsReport(kanji, trees);
 
   const report = glossReport(sorted, kanji, glossOverrides);
   writeFileSync(`${CACHE}/gloss-report.txt`, report);
@@ -204,6 +213,49 @@ async function main(): Promise<void> {
   writeFileSync(`${CACHE}/word-report.txt`, wordText);
   console.log(
     `${wordText.split("\n")[0]}; word report written to ${CACHE}/word-report.txt`,
+  );
+}
+
+const PARTS = "dictionary/parts.json";
+
+/** Each kanji's parts from KanjiVG, by the composite-parts rule. */
+async function shownComponents(
+  raw: RawKanji[],
+  refresh: boolean,
+): Promise<{ shown: Map<string, string[]>; trees: Map<string, Chunk[]> }> {
+  const chars = new Set(raw.map((k) => k.char));
+  const xml = (await cached("kanjivg", refresh)).toString("utf8");
+  const trees = parseKanjivg(xml, chars);
+  const missing = [...chars].filter((c) => !trees.has(c));
+  if (missing.length) throw new Error(`not in KanjiVG: ${missing.join("")}`);
+  const named = new Set(Object.keys(readJson<object>(PARTS)));
+  return { shown: composite(trees, named, chars), trees };
+}
+
+/**
+ * For the part namers (Task C2): `stories/new-parts.json`, every component
+ * parts.json doesn't name yet, and `stories/removed-parts.json`, the parts
+ * no kanji uses any more.
+ */
+function writePartsReport(
+  kanji: { char: string; components: string[] }[],
+  trees: Map<string, Chunk[]>,
+) {
+  const named = Object.keys(readJson<object>(PARTS));
+  const chars = new Set(kanji.map((k) => k.char));
+  const { added, removed } = partsReport(kanji, trees, named, chars);
+  mkdirSync(`${CACHE}/stories`, { recursive: true });
+  writeFileSync(
+    `${CACHE}/stories/new-parts.json`,
+    JSON.stringify(added, null, 2) + "\n",
+  );
+  writeFileSync(
+    `${CACHE}/stories/removed-parts.json`,
+    JSON.stringify(removed, null, 2) + "\n",
+  );
+  const kanjiParts = added.filter((p) => p.kanji).length;
+  console.log(
+    `parts: ${added.length} new (${kanjiParts} kanji, ${added.length - kanjiParts} shapes), ${removed.length} removed (${removed.join(" ")}); written to ${CACHE}/stories/new-parts.json and removed-parts.json`,
   );
 }
 

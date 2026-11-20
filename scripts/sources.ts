@@ -3,6 +3,8 @@
  * Dev-only data sources shared by `build-data.ts` and `coverage.ts`: the
  * pinned download list, the `.data-cache/` download cache (gzip, xz, bzip2
  * and zip files are unpacked on read), and the KANJIDIC2 and KRADFILE parsers.
+ * KRADFILE's flat element lists drive the order and the look-alikes; the
+ * parts shown on the study card come from KanjiVG (`kanjivg.ts`).
  */
 import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -13,6 +15,9 @@ export const SOURCES = {
   kanjidic: "http://www.edrdg.org/kanjidic/kanjidic2.xml.gz",
   kradfile: "http://ftp.edrdg.org/pub/Nihongo/kradfile.gz",
   jmdict: "http://ftp.edrdg.org/pub/Nihongo/JMdict_e.gz",
+  /** Kanji element trees (CC BY-SA 3.0), pinned to a release. */
+  kanjivg:
+    "https://github.com/KanjiVG/kanjivg/releases/download/r20250816/kanjivg-20250816.xml.gz",
   /**
    * Everyday word frequency (SPEC-word-gates `byUsage`): TUBELEX, YouTube
    * subtitles, UniDic 3.1.0 lemmas. Pinned to a commit so builds repeat.
