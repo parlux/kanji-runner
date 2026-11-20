@@ -78,7 +78,19 @@ function partNames(parts: unknown): Map<string, string> {
   return out;
 }
 
-function checkParts(parts: unknown, kanji: readonly KanjiItem[], r: Report) {
+/** Part note band, in characters. */
+export const NOTE_BAND: [number, number] = [20, 120];
+export type Options = {
+  /** Temporary (until Task N2 writes the notes): a missing part note is not an error. */
+  allowMissingNotes?: boolean;
+};
+
+function checkParts(
+  parts: unknown,
+  kanji: readonly KanjiItem[],
+  r: Report,
+  opts: Options,
+) {
   if (!isObj(parts)) {
     r.errors.push("parts.json: not an object");
     return;
@@ -95,6 +107,20 @@ function checkParts(parts: unknown, kanji: readonly KanjiItem[], r: Report) {
     const other = seen.get(normName(name));
     if (other) r.errors.push(`parts.json ${p}: "${name}" also names ${other}`);
     seen.set(normName(name), p);
+    const note = (v as Obj).note;
+    if (note === undefined) {
+      if (!opts.allowMissingNotes)
+        r.errors.push(`parts.json ${p}: needs a "note"`);
+    } else if (typeof note !== "string") {
+      r.errors.push(`parts.json ${p}: "note" must be text`);
+    } else {
+      const len = [...note.trim()].length;
+      const [lo, hi] = NOTE_BAND;
+      if (len < lo || len > hi)
+        r.errors.push(
+          `parts.json ${p}: note is ${len} characters, outside ${lo}-${hi}`,
+        );
+    }
   }
   if (Object.keys(parts).length === 0) return;
   const components = new Set(kanji.flatMap((k) => k.components));
@@ -222,9 +248,10 @@ export function validate(
   dict: Dictionary,
   kanji: readonly KanjiItem[],
   levels?: readonly number[],
+  opts: Options = {},
 ): Report {
   const r: Report = { errors: [], warnings: [] };
-  checkParts(dict.parts, kanji, r);
+  checkParts(dict.parts, kanji, r, opts);
   checkSounds(dict.sounds, r);
   const names = partNames(dict.parts);
   const files = levels
@@ -267,10 +294,13 @@ export function loadDictionary(dir: string = DICTIONARY): {
 }
 
 function main() {
-  const arg = process.argv[2];
+  const args = process.argv.slice(2);
+  const arg = args.find((a) => !a.startsWith("--"));
   const levels = arg ? parseLevels(arg, maxLevel(KANJI)) : undefined;
   const { dict, errors } = loadDictionary();
-  const r = validate(dict, KANJI, levels);
+  const r = validate(dict, KANJI, levels, {
+    allowMissingNotes: args.includes("--allow-missing-notes"),
+  });
   const all = [...errors, ...r.errors];
   for (const w of r.warnings) console.log(`warning: ${w}`);
   for (const e of all) console.log(`error: ${e}`);

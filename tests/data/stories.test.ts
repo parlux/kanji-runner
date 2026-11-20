@@ -17,11 +17,14 @@ import {
   soundsInput,
 } from "../../scripts/stories/prep";
 
+/** Task N2 writes the part notes and deletes this allowance. */
+const NOTES_PENDING = { allowMissingNotes: true };
+
 describe("committed dictionary (SPEC-own-stories)", () => {
   it("passes the validator", () => {
     const { dict, errors } = loadDictionary();
     expect(errors).toEqual([]);
-    expect(validate(dict, KANJI).errors).toEqual([]);
+    expect(validate(dict, KANJI, undefined, NOTES_PENDING).errors).toEqual([]);
   });
 });
 
@@ -73,7 +76,16 @@ const PAD = " The scene stays with you for a long time after.";
 const meaning = (s: string) => s + PAD.repeat(3);
 const reading = (s: string) => s + PAD.repeat(2);
 const good = (): Dictionary => ({
-  parts: { 亻: { name: "person" }, 木: { name: "tree" } },
+  parts: {
+    亻: {
+      name: "person",
+      note: "A standing figure: one stroke leaning on another.",
+    },
+    木: {
+      name: "tree",
+      note: "A trunk with branches above and roots below it.",
+    },
+  },
   sounds: { きゅう: { keyword: "cue" } },
   stories: {
     "kanji-01.json": {
@@ -241,6 +253,30 @@ describe("validator rules", () => {
     expect(errorsOf(d).join()).toMatch(/no name for component 木/);
     d.parts = [];
     expect(errorsOf(d).join()).toMatch(/parts.json: not an object/);
+  });
+
+  it("requires a part note of 20-120 characters; the temporary flag only forgives a missing one", () => {
+    const d = good();
+    d.parts = {
+      亻: { name: "person" },
+      木: { name: "tree", note: "too short" },
+    };
+    const e = errorsOf(d).join("\n");
+    expect(e).toMatch(/parts.json 亻: needs a "note"/);
+    expect(e).toMatch(/parts.json 木: note is 9 characters, outside 20-120/);
+    d.parts = {
+      亻: { name: "person", note: "x".repeat(121) },
+      木: { name: "tree", note: 5 },
+    };
+    expect(errorsOf(d).join("\n")).toMatch(
+      /亻: note is 121 .*\n.*木: "note" must be text/,
+    );
+    d.parts = { 亻: { name: "person" }, 木: { name: "tree", note: "short" } };
+    const lenient = validate(d, FIX, undefined, {
+      allowMissingNotes: true,
+    }).errors;
+    expect(lenient).toHaveLength(1);
+    expect(lenient[0]).toMatch(/木: note is 5 characters/);
   });
 
   it("checks sounds.json: hiragana keys with a keyword", () => {
