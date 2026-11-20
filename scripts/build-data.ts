@@ -101,7 +101,7 @@ async function main(): Promise<void> {
   for (const c of Object.keys(readingOverrides))
     if (!components.has(c))
       throw new Error(`reading override ${c}: not a Jōyō kanji`);
-  const { shown, trees } = await shownComponents(raw, refresh);
+  const { shown, trees } = await shownComponents(raw, components, refresh);
   const jmdict = (await cached("jmdict", refresh)).toString("utf8");
   const counts = countReadings(commonWords(jmdict), raw);
   // Taught readings don't depend on the order; candidates need them first.
@@ -221,15 +221,20 @@ const PARTS = "dictionary/parts.json";
 /** Each kanji's parts from KanjiVG, by the composite-parts rule. */
 async function shownComponents(
   raw: RawKanji[],
+  krad: Map<string, string[]>,
   refresh: boolean,
-): Promise<{ shown: Map<string, string[]>; trees: Map<string, Chunk[]> }> {
+): Promise<{ shown: Map<string, string[]>; trees: Map<string, Chunk> }> {
   const chars = new Set(raw.map((k) => k.char));
   const xml = (await cached("kanjivg", refresh)).toString("utf8");
   const trees = parseKanjivg(xml, chars);
   const missing = [...chars].filter((c) => !trees.has(c));
   if (missing.length) throw new Error(`not in KanjiVG: ${missing.join("")}`);
   const named = new Set(Object.keys(readJson<object>(PARTS)));
-  return { shown: composite(trees, named, chars), trees };
+  const { components: shown, fallbacks } = composite(trees, named, chars, krad);
+  console.log(
+    `parts: ${fallbacks.length} kanji with strokes outside their KanjiVG chunks use the KRADFILE fallback`,
+  );
+  return { shown, trees };
 }
 
 /**
@@ -239,7 +244,7 @@ async function shownComponents(
  */
 function writePartsReport(
   kanji: { char: string; components: string[] }[],
-  trees: Map<string, Chunk[]>,
+  trees: Map<string, Chunk>,
 ) {
   const named = Object.keys(readJson<object>(PARTS));
   const chars = new Set(kanji.map((k) => k.char));
