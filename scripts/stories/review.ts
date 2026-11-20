@@ -10,7 +10,9 @@
  *   the kanji the judge failed (`judge-fail`) plus `RANDOM_PER_LEVEL` seeded
  *   random others (`random`); `--all` adds the rest as `extra`.
  *   `--versions <dir>` (an `items` listing saved with `out_dir`) adds
- *   `if_version` and `pass + 1` for items that already exist.
+ *   `pass + 1` for items that already exist, and `if_version` from
+ *   `--version-list <file>` (the listing's tool output saved as text: saved
+ *   files carry no version, the output's `"<id>" … version N` lines do).
  * - `apply <dir> [--items <dir>]`: see the second half of this file.
  *
  * Nothing here carries WaniKani text: `close` reasons are never copied.
@@ -344,11 +346,12 @@ export function batches(writes: readonly Write[]): Write[][] {
 }
 
 /** An existing document: its version and the fields (as written on the page). */
-export type Existing = { version: number; data: Obj };
+export type Existing = { version: number | null; data: Obj };
 
 /** Read a listing saved with `out_dir`: `<dir>/items/<id>.json` or `<dir>/<id>.json`; fields at top level or under `data`. */
 export function readListing(dir: string): Map<string, Existing> {
-  const base = existsSync(`${dir}/items`) ? `${dir}/items` : dir;
+  const sub = ["items", "reviews"].find((c) => existsSync(`${dir}/${c}`));
+  const base = sub ? `${dir}/${sub}` : dir;
   const out = new Map<string, Existing>();
   for (const f of readdirSync(base).sort()) {
     if (!f.endsWith(".json")) continue;
@@ -363,7 +366,17 @@ export function parseDoc(raw: unknown): Existing | null {
   if (!isObj(raw)) return null;
   const version = typeof raw.version === "number" ? raw.version : null;
   const data = isObj(raw.data) ? raw.data : raw;
-  return version === null ? null : { version, data };
+  return { version, data };
+}
+
+/** `"<id>" … version N` lines (an `ArtifactData` list result) → versions. */
+export function parseVersionList(text: string): Map<string, number> {
+  const out = new Map<string, number>();
+  for (const m of text.matchAll(
+    /"([A-Za-z0-9_\-.~:@+]+)"[^"\n]*version (\d+)/g,
+  ))
+    out.set(m[1] as string, Number(m[2]));
+  return out;
 }
 
 /** Writes for items that exist get `if_version` and `pass + 1`. */
@@ -375,6 +388,10 @@ export function withVersions(
     const old = existing.get(w.doc_id);
     if (!old) return w;
     const pass = typeof old.data.pass === "number" ? old.data.pass : 1;
+    if (old.version === null)
+      throw new Error(
+        `${w.doc_id} exists but has no version: pass --version-list`,
+      );
     return {
       ...w,
       if_version: old.version,
@@ -697,12 +714,20 @@ function seedMain(args: string[]) {
   const all = args.includes("--all");
   const vdir = flag("--versions");
   const existing = vdir ? readListing(vdir) : null;
+  const vlist = flag("--version-list");
+  if (existing && vlist) {
+    const versions = parseVersionList(readFileSync(vlist, "utf8"));
+    for (const [id, doc] of existing) doc.version ??= versions.get(id) ?? null;
+  }
   const target = args.find(
-    (a, i) => !a.startsWith("--") && args[i - 1] !== "--versions",
+    (a, i) =>
+      !a.startsWith("--") &&
+      args[i - 1] !== "--versions" &&
+      args[i - 1] !== "--version-list",
   );
   if (!target)
     throw new Error(
-      "usage: stories:review -- seed parts|sounds|<levels> [--all] [--versions <dir>]",
+      "usage: stories:review -- seed parts|sounds|<levels> [--all] [--versions <dir> --version-list <file>]",
     );
   const put = (scope: string, writes: Write[]) =>
     writeFiles(scope, existing ? withVersions(writes, existing) : writes);

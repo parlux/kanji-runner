@@ -2,6 +2,7 @@
 
 Spec: `docs/specs/SPEC-own-stories.md` (2026-11-20). Intent: `docs/intent/own-stories.md`. Epic: `docs/ideas/useful-japanese.md` (round 3). Started 2026-11-20. The owner approved going straight to the first checkpoint (no spec sign-off).
 Checkpoint D: https://claude.ai/artifact/Pzt8idETzahrdN9ohvua6S (superseded: Checkpoint D moved to the review page, see Task R2)
+Review tool: https://claude.ai/artifact/CNZAQt1csZLwyV29i5piR9
 Review: https://claude.ai/artifact/8XjjrPPLSvPDR8dkBTgdst (review page addition; intent `docs/intent/story-review.md`, 2026-11-20).
 Every task: `npm run check` passes before it is checked off. Never commit `.data-cache` or anything from WaniKani (text, names, overlap reports, judge files).
 
@@ -96,7 +97,7 @@ Not one implementer subagent: the orchestrator runs the loop per batch (2 levels
 **Description:** `tools/review/index.html`, one self-contained page (spec "Review page": tabs, rows, keyboard, saves, filters, counters), `db` + `user` capabilities, works empty and shows a load error after 10 s. The subagent builds and checks it against a fixture listing offline; the orchestrator publishes it, seeds parts, sounds and Kanji 5–6, and checks one verdict round trip with `ArtifactData`.
 **Acceptance:**
 - [x] Screenshot at 1280×800 of each tab from a fixture, tags rendered as on the card, light and dark.
-- [ ] Published; link in this file's header (`Review tool: <url>`); items seeded (237 parts, 179 sounds, Kanji 5–6); a test verdict written and read back, then removed.
+- [x] Published; link in this file's header (`Review tool: <url>`); items seeded (237 parts, 179 sounds, Kanji 5–6); a test verdict written and read back, then removed. (476 items. Round trip: verdict → listing → `apply` → notes file. The rules refuse a review write from a non-owner. Fixed on the way: saved listing files carry no version, so `apply` read nothing; `seed` now takes versions from `--version-list`, the listing's tool output.)
 - [x] `npm run check` passes.
 **Files:** `tools/review/index.html`, this file
 

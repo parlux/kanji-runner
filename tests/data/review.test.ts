@@ -5,6 +5,7 @@ import {
   batches,
   idKey,
   parseDoc,
+  parseVersionList,
   parseReview,
   parseJudge,
   partId,
@@ -207,7 +208,20 @@ describe("review seed: batches and versions", () => {
     expect(out[1]).toMatchObject({ if_version: 5, data: { pass: 5 } });
     expect(out[2]).not.toHaveProperty("if_version");
     expect(out[2]?.data.pass).toBe(1);
-    expect(parseDoc({ pass: 1 })).toBeNull();
+    expect(() =>
+      withVersions(
+        w(1),
+        new Map([["part-0", { version: null, data: { pass: 1 } }]]),
+      ),
+    ).toThrow(/version-list/);
+  });
+
+  it("reads versions from a listing's tool output", () => {
+    const text = `- "story-6298"  202 bytes  version 3  "/x/story-6298.json"\n- set "items"/"part-4e00" (version 1)`;
+    expect([...parseVersionList(text)]).toEqual([
+      ["story-6298", 3],
+      ["part-4e00", 1],
+    ]);
   });
 });
 
