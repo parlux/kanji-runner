@@ -1,7 +1,7 @@
 # Tasks: our own stories (v1.7.0)
 
 Spec: `docs/specs/SPEC-own-stories.md` (2026-11-20). Intent: `docs/intent/own-stories.md`. Epic: `docs/ideas/useful-japanese.md` (round 3). Started 2026-11-20. The owner approved going straight to the first checkpoint (no spec sign-off).
-Checkpoint D: https://claude.ai/artifact/FD3HpQjJjEHKNXaqB5vDQd (on the review page; the earlier play-based page https://claude.ai/artifact/Pzt8idETzahrdN9ohvua6S is superseded)
+Checkpoint D: https://claude.ai/artifact/1oDceuTuxQf87tyqBgTpEX (play Kanji 1–6, 2026-11-21; earlier: https://claude.ai/artifact/FD3HpQjJjEHKNXaqB5vDQd on the review page; the earlier play-based page https://claude.ai/artifact/Pzt8idETzahrdN9ohvua6S is superseded)
 Review tool: https://claude.ai/artifact/CNZAQt1csZLwyV29i5piR9
 Review: https://claude.ai/artifact/8XjjrPPLSvPDR8dkBTgdst (review page addition; intent `docs/intent/story-review.md`, 2026-11-20).
 Review (part notes): https://claude.ai/artifact/Db8Pq8NVeYCqsTvKxVsLVV (intent `docs/intent/part-notes.md`, 2026-11-20).
@@ -133,7 +133,7 @@ Not one implementer subagent: the orchestrator runs the loop per batch (2 levels
 **Description:** Writer (**opus**) rewrites every `on` and `kun` field in `kanji-05.json` and `kanji-06.json` to the new form from `STYLE.md`, `sounds.json` and the current stories (same scene and keyword, explainer and kana dropped, kun tail only when the meaning differs). `stories:check` (flag removed), `stories:overlap`; judge (**sonnet**) checks highlights and tails; max 3 rounds. Commit, push, deploy. No re-seed: the owner reviews the stories in the game with the Flag button (owner, 2026-11-21). Log counts below.
 **Acceptance:**
 - [x] Every on/kun field in Kanji 5–6 rewritten; `--allow-reading` removed; all pass check and judge.
-- [ ] Deploy green; one Kanji 5 card checked live (highlight shown, no explainer).
+- [x] Deploy green; one Kanji 5 card checked live (highlight shown, no explainer). (Live chunks checked: `<sound>` present, no `<reading>` in kanji-05.)
 - [x] Counts logged below.
 **Files:** `dictionary/stories/kanji-05.json`, `dictionary/stories/kanji-06.json`, `scripts/stories/check.ts`, this file
 
@@ -141,7 +141,7 @@ Not one implementer subagent: the orchestrator runs the loop per batch (2 levels
 **Description:** Added 2026-11-21 (owner): Kanji 1–4 still use WaniKani's stories, and removing WaniKani (backlog) needs them. Moved before Checkpoint D (owner, 2026-11-21: all of Kanji 1–6 before the checkpoint). Run the content loop on game levels 2–5 in two batches, current `STYLE.md` (sound highlight form). Review: in-game flags at Checkpoint D.
 **Acceptance:**
 - [x] `kanji-01.json` to `kanji-04.json` committed; all pass check and judge.
-- [ ] Deploy green; counts logged below.
+- [x] Deploy green; counts logged below. (9e639b8, live kanji-01…04 chunks.)
 
 ### Checkpoint D: owner (moved to the review page, 2026-11-20)
 - [x] Owner runs `supabase/story-flags.sql` once. (2026-11-20; `stories:flags` reads the table: no flags yet.)
