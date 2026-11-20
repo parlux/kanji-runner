@@ -1,7 +1,7 @@
 # Tasks: our own stories (v1.7.0)
 
 Spec: `docs/specs/SPEC-own-stories.md` (2026-11-20). Intent: `docs/intent/own-stories.md`. Epic: `docs/ideas/useful-japanese.md` (round 3). Started 2026-11-20. The owner approved going straight to the first checkpoint (no spec sign-off).
-Checkpoint D: https://claude.ai/artifact/Pzt8idETzahrdN9ohvua6S (superseded: Checkpoint D moved to the review page, see Task R2)
+Checkpoint D: https://claude.ai/artifact/FD3HpQjJjEHKNXaqB5vDQd (on the review page; the earlier play-based page https://claude.ai/artifact/Pzt8idETzahrdN9ohvua6S is superseded)
 Review tool: https://claude.ai/artifact/CNZAQt1csZLwyV29i5piR9
 Review: https://claude.ai/artifact/8XjjrPPLSvPDR8dkBTgdst (review page addition; intent `docs/intent/story-review.md`, 2026-11-20).
 Every task: `npm run check` passes before it is checked off. Never commit `.data-cache` or anything from WaniKani (text, names, overlap reports, judge files).
