@@ -482,6 +482,98 @@ const textOf = (v: unknown, f: string): string =>
   isObj(v) && typeof v[f] === "string" ? (v[f] as string) : "";
 
 /**
+ * Replace `<part>from</part>` with `<part>to</part>` in every story; returns the
+ * touched kanji and adds the changed `stories/<file>` names to `changed`.
+ * Shared by `apply`'s edit path and `rename`.
+ */
+function rewriteStories(
+  files: Files,
+  from: string,
+  to: string,
+  changed: Set<string>,
+): string[] {
+  const touched: string[] = [];
+  for (const [file, f] of Object.entries(files.stories)) {
+    if (!isObj(f.kanji)) continue;
+    for (const [c, e] of Object.entries(f.kanji)) {
+      let hit = false;
+      if (isObj(e))
+        for (const t of ["meaning", "on", "kun"]) {
+          const v = e[t];
+          if (typeof v !== "string") continue;
+          const next = v
+            .split(`<part>${from}</part>`)
+            .join(`<part>${to}</part>`);
+          if (next !== v) {
+            e[t] = next;
+            hit = true;
+          }
+        }
+      if (hit) {
+        touched.push(c);
+        changed.add(`stories/${file}`);
+      }
+    }
+  }
+  return touched;
+}
+
+/** One entry of `renames.json`. */
+export type Rename = { part: string; from: string; to: string; why: string };
+
+/**
+ * Apply renames to the dictionary files (pure: returns new files). Each is
+ * checked like an `apply` edit (unique, 1-3 words) plus `from` matching the
+ * current name; a bad one is rejected and the rest go on.
+ */
+export function applyRenames(
+  renames: readonly Rename[],
+  input: Files,
+): Pick<ApplyResult, "files" | "changed" | "renames" | "rejected"> {
+  const files = clone(input);
+  const res = {
+    files,
+    changed: [] as string[],
+    renames: [] as ApplyResult["renames"],
+    rejected: [] as string[],
+  };
+  const changed = new Set<string>();
+  for (const r of renames) {
+    const entry = files.parts[r.part];
+    if (!entry) {
+      res.rejected.push(`${r.part}: not in parts.json`);
+      continue;
+    }
+    const old = textOf(entry, "name");
+    if (old !== r.from) {
+      res.rejected.push(
+        `${r.part}: "from" is "${r.from}", the name is "${old}"`,
+      );
+      continue;
+    }
+    const others = Object.entries(files.parts)
+      .filter(([key]) => key !== r.part)
+      .map(([, v]) => textOf(v, "name"));
+    const to = r.to.trim();
+    const problem = nameProblem(to, others);
+    if (problem) {
+      res.rejected.push(`${r.part}: name "${r.to}" rejected (${problem})`);
+      continue;
+    }
+    entry.name = to;
+    changed.add("parts.json");
+    res.renames.push({
+      part: r.part,
+      from: old,
+      to,
+      touched: rewriteStories(files, old, to, changed),
+    });
+  }
+  res.changed = [...changed].sort();
+  return res;
+}
+
+/**
  * Apply the owner's reviews to the dictionary files (pure: returns new files).
  * `items` (the items listing, by doc id) gives each story's `why`.
  */
@@ -572,29 +664,7 @@ export function applyReviews(
         if (k.kind === "sound")
           res.keywords.push({ sound: k.key, from: old, to: edit });
         else {
-          const touched: string[] = [];
-          for (const [file, f] of Object.entries(files.stories)) {
-            if (!isObj(f.kanji)) continue;
-            for (const [c, e] of Object.entries(f.kanji)) {
-              let hit = false;
-              if (isObj(e))
-                for (const t of ["meaning", "on", "kun"]) {
-                  const v = e[t];
-                  if (typeof v !== "string") continue;
-                  const next = v
-                    .split(`<part>${old}</part>`)
-                    .join(`<part>${edit}</part>`);
-                  if (next !== v) {
-                    e[t] = next;
-                    hit = true;
-                  }
-                }
-              if (hit) {
-                touched.push(c);
-                changed.add(`stories/${file}`);
-              }
-            }
-          }
+          const touched = rewriteStories(files, old, edit, changed);
           res.renames.push({ part: k.key, from: old, to: edit, touched });
         }
       }
@@ -626,6 +696,57 @@ function readFiles(): Files {
   };
 }
 
+/** Write the changed dictionary files; returns their paths. */
+function writeChanged(res: Pick<ApplyResult, "files" | "changed">): string[] {
+  const written = res.changed.map((c) => `${DICTIONARY}/${c}`);
+  for (const c of res.changed) {
+    const data =
+      c === "parts.json"
+        ? res.files.parts
+        : c === "sounds.json"
+          ? res.files.sounds
+          : res.files.stories[c.slice(8)];
+    writeFileSync(`${DICTIONARY}/${c}`, JSON.stringify(data, null, 2) + "\n");
+  }
+  return written;
+}
+
+const printRenames = (renames: ApplyResult["renames"]) => {
+  for (const r of renames)
+    console.log(
+      `part ${r.part}: "${r.from}" → "${r.to}"; re-read stories: ${r.touched.join(" ") || "none"}`,
+    );
+};
+
+function renameMain(args: string[]) {
+  const file = args[0];
+  if (!file) throw new Error("usage: stories:review -- rename <renames.json>");
+  const raw = readJson(file);
+  if (!Array.isArray(raw)) throw new Error(`${file}: expected an array`);
+  const list: Rename[] = raw.map((e, i) => {
+    if (
+      !isObj(e) ||
+      typeof e.part !== "string" ||
+      typeof e.from !== "string" ||
+      typeof e.to !== "string"
+    )
+      throw new Error(`${file}[${i}]: needs part, from, to, why`);
+    return { part: e.part, from: e.from, to: e.to, why: String(e.why ?? "") };
+  });
+  const res = applyRenames(list, readFiles());
+  const written = writeChanged(res);
+  if (written.length)
+    execFileSync("npx", ["prettier", "--write", ...written], {
+      stdio: "ignore",
+    });
+  printRenames(res.renames);
+  for (const m of res.rejected) console.log(`rejected: ${m}`);
+  console.log(
+    `rename: ${res.renames.length} applied, ${res.rejected.length} rejected`,
+  );
+  if (res.rejected.length) process.exitCode = 1;
+}
+
 function applyMain(args: string[]) {
   const dir = args.find(
     (a, i) => !a.startsWith("--") && args[i - 1] !== "--items",
@@ -644,16 +765,7 @@ function applyMain(args: string[]) {
     else console.warn(`warning: ${id} is not a review, skipped`);
   }
   const res = applyReviews(reviews, readFiles(), items);
-  const written = res.changed.map((c) => `${DICTIONARY}/${c}`);
-  for (const c of res.changed) {
-    const data =
-      c === "parts.json"
-        ? res.files.parts
-        : c === "sounds.json"
-          ? res.files.sounds
-          : res.files.stories[c.slice(8)];
-    writeFileSync(`${DICTIONARY}/${c}`, JSON.stringify(data, null, 2) + "\n");
-  }
+  const written = writeChanged(res);
   mkdirSync(CACHE, { recursive: true });
   for (const [scope, notes] of Object.entries(res.notes)) {
     const file = `${CACHE}/notes-${scope}.json`;
@@ -664,10 +776,7 @@ function applyMain(args: string[]) {
     execFileSync("npx", ["prettier", "--write", ...written], {
       stdio: "ignore",
     });
-  for (const r of res.renames)
-    console.log(
-      `part ${r.part}: "${r.from}" → "${r.to}"; re-read stories: ${r.touched.join(" ") || "none"}`,
-    );
+  printRenames(res.renames);
   for (const k of res.keywords)
     console.log(`sound ${k.sound}: "${k.from}" → "${k.to}"`);
   for (const m of res.rejected) console.log(`rejected: ${m}`);
@@ -760,9 +869,10 @@ function main() {
   const [cmd, ...rest] = process.argv.slice(2);
   if (cmd === "seed") seedMain(rest);
   else if (cmd === "apply") applyMain(rest);
+  else if (cmd === "rename") renameMain(rest);
   else {
     console.error(
-      "usage: stories:review -- seed <parts|sounds|levels> | apply <dir>",
+      "usage: stories:review -- seed <parts|sounds|levels> | apply <dir> | rename <file>",
     );
     process.exit(1);
   }

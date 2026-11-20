@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { KanjiItem } from "../../src/core/types";
 import {
+  applyRenames,
   applyReviews,
   batches,
   idKey,
@@ -289,6 +290,50 @@ describe("review apply", () => {
     expect(r.rejected[0]).toContain("already used");
     expect(r.rejected[1]).toContain("over 3 words");
     expect(r.files.parts["口"]).toEqual({ name: "mouth" });
+    expect(r.files.parts["木"]).toEqual({ name: "wood" });
+    expect(r.changed).toEqual(["parts.json"]);
+  });
+
+  it("rename ripples like an apply edit, keeps the note, lists touched stories", () => {
+    const input = files();
+    input.parts["口"] = { name: "mouth", note: "A small box, open." };
+    const r = applyRenames(
+      [{ part: "口", from: "mouth", to: "lips", why: "visible" }],
+      input,
+    );
+    expect(r.files.parts["口"]).toEqual({
+      name: "lips",
+      note: "A small box, open.",
+    });
+    expect(r.renames).toEqual([
+      { part: "口", from: "mouth", to: "lips", touched: ["A", "C"] },
+    ]);
+    expect(JSON.stringify(r.files.stories)).not.toContain("<part>mouth</part>");
+    expect(r.changed).toEqual([
+      "parts.json",
+      "stories/kanji-05.json",
+      "stories/kanji-06.json",
+    ]);
+    // same result as apply's edit path
+    const viaApply = run({ [partId("口")]: rv({ edit: "lips" }) });
+    expect(r.files.stories).toEqual(viaApply.files.stories);
+    expect(input.parts["口"]?.["name"]).toBe("mouth");
+  });
+
+  it("rename rejects duplicate, 4-word and stale-from names, and goes on", () => {
+    const r = applyRenames(
+      [
+        { part: "口", from: "mouth", to: "Sun", why: "" },
+        { part: "日", from: "sun", to: "big hot yellow ball", why: "" },
+        { part: "木", from: "old", to: "wood", why: "" },
+        { part: "木", from: "tree", to: "wood", why: "" },
+      ],
+      files(),
+    );
+    expect(r.rejected).toHaveLength(3);
+    expect(r.rejected[0]).toContain("already used");
+    expect(r.rejected[1]).toContain("over 3 words");
+    expect(r.rejected[2]).toContain('"from" is "old"');
     expect(r.files.parts["木"]).toEqual({ name: "wood" });
     expect(r.changed).toEqual(["parts.json"]);
   });
