@@ -17,11 +17,14 @@ import {
   soundsInput,
 } from "../../scripts/stories/prep";
 
+/** Task C2 names the KanjiVG components and deletes this allowance. */
+const PARTS_PENDING = { allowMissingParts: true };
+
 describe("committed dictionary (SPEC-own-stories)", () => {
   it("passes the validator", () => {
     const { dict, errors } = loadDictionary();
     expect(errors).toEqual([]);
-    expect(validate(dict, KANJI).errors).toEqual([]);
+    expect(validate(dict, KANJI, undefined, PARTS_PENDING).errors).toEqual([]);
   });
 });
 
@@ -295,6 +298,9 @@ describe("validator rules", () => {
     expect(e).toMatch(/parts.json 日: needs a "name"/);
     d.parts = { 亻: { name: "person" } };
     expect(errorsOf(d).join()).toMatch(/no name for component 木/);
+    const allowed = validate(d, FIX, undefined, PARTS_PENDING);
+    expect(allowed.errors.join()).not.toMatch(/no name for component/);
+    expect(allowed.warnings.join()).toMatch(/no name for component 木/);
     d.parts = [];
     expect(errorsOf(d).join()).toMatch(/parts.json: not an object/);
   });

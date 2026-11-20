@@ -79,7 +79,20 @@ function partNames(parts: unknown): Map<string, string> {
 
 /** Part note band, in characters. */
 export const NOTE_BAND: [number, number] = [20, 120];
-function checkParts(parts: unknown, kanji: readonly KanjiItem[], r: Report) {
+export type Options = {
+  /**
+   * Temporary (until Task C2 names the KanjiVG components): a component
+   * without a name in parts.json is a warning, not an error.
+   */
+  allowMissingParts?: boolean;
+};
+
+function checkParts(
+  parts: unknown,
+  kanji: readonly KanjiItem[],
+  r: Report,
+  opts: Options,
+) {
   if (!isObj(parts)) {
     r.errors.push("parts.json: not an object");
     return;
@@ -130,7 +143,10 @@ function checkParts(parts: unknown, kanji: readonly KanjiItem[], r: Report) {
   if (Object.keys(parts).length === 0) return;
   const components = new Set(kanji.flatMap((k) => k.components));
   for (const c of components)
-    if (!(c in parts)) r.errors.push(`parts.json: no name for component ${c}`);
+    if (!(c in parts))
+      (opts.allowMissingParts ? r.warnings : r.errors).push(
+        `parts.json: no name for component ${c}`,
+      );
   for (const p of Object.keys(parts))
     if (!components.has(p))
       r.warnings.push(`parts.json ${p}: not a component of any kanji`);
@@ -308,9 +324,10 @@ export function validate(
   dict: Dictionary,
   kanji: readonly KanjiItem[],
   levels?: readonly number[],
+  opts: Options = {},
 ): Report {
   const r: Report = { errors: [], warnings: [] };
-  checkParts(dict.parts, kanji, r);
+  checkParts(dict.parts, kanji, r, opts);
   checkSounds(dict.sounds, r);
   const names = partNames(dict.parts);
   const keywords = new Map<string, string>();
@@ -361,7 +378,9 @@ function main() {
   const arg = args.find((a) => !a.startsWith("--"));
   const levels = arg ? parseLevels(arg, maxLevel(KANJI)) : undefined;
   const { dict, errors } = loadDictionary();
-  const r = validate(dict, KANJI, levels);
+  const r = validate(dict, KANJI, levels, {
+    allowMissingParts: args.includes("--allow-missing-parts"),
+  });
   const all = [...errors, ...r.errors];
   for (const w of r.warnings) console.log(`warning: ${w}`);
   for (const e of all) console.log(`error: ${e}`);
