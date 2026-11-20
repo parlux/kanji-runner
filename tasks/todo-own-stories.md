@@ -174,3 +174,14 @@ Not one implementer subagent: the orchestrator runs the loop per batch (2 levels
 - Owner ✗ notes used: 1 (𠂉 "hat" → diving board; note offers lean-to, flagpole). Owner overrode my revert of ⺘ reaching hand → anchor.
 - Re-seeded 237 parts (15 at pass 2) and the 4 stories (pass 2); the 4 parts the owner ✓'d keep their verdict.
 - Writer kept history-leaning names it was unsure of (隹 sparrow, 艮 mule, 虍 tiger, 歹 bones, 豸 leopard, 卩 stamp, 豕 pig, 辰 hoe): the owner decides on the page.
+
+### Round 2 from the owner's first review (2026-11-20)
+| | Changed | Judge 1st pass (weak / close) | Final |
+|---|---|---|---|
+| Sound keywords (all 179 audited for the new vowel rule) | 47 (8 owner ✗, 38 vowel audit, 1 note only) | 6 / 1 | fixed by hand: yuzu, lunch, sugar cube, goon; satsuma, jacuzzi, jury left for the owner |
+| Parts | 9: ⺅ coat hook, ⻌ ramp, 韋 pagoda (totem pole is と's keyword), 屮 pitchfork / 耒 TV aerial (owner), notes on ⺖ ⺡ 口 囗 | 1 / 2 | all pass |
+| Kanji 5–6 story fields | 40 (17 keyword, 6 coat hook, 17 vowel audit) | 10 weak (kun okurigana not produced, long/lax vowels) | fixed by hand: 7 tags to the base, 主 遅 五 落 rewritten |
+- Re-seeded 88 items at pass + 1 (32 stories, 9 parts, 47 sounds).
+- STYLE.md: vowel rule (あ "ah", no flat a; う no w; strut u counts as あ for this owner); example now uses coat hook.
+- Flagged, unchanged: がく gaggle, きゃく kayak (flat a, owner ✓); おん on switch (accent).
+- Rough edge: `tests/core/kanji-words.test.ts` "wordreading rows" times out at 5 s under full `npm run check` load; passes alone.
