@@ -23,7 +23,8 @@
     "stories:check": "tsx scripts/stories/check.ts",
     "stories:wk": "tsx scripts/stories/wk.ts",
     "stories:overlap": "tsx scripts/stories/overlap.ts",
-    "stories:flags": "tsx scripts/stories/flags.ts"
+    "stories:flags": "tsx scripts/stories/flags.ts",
+    "stories:review": "tsx scripts/stories/review.ts"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
