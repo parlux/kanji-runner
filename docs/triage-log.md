@@ -40,3 +40,4 @@ One row per owner request, written by the `triage` skill (`.claude/skills/triage
 | 2026-11-20 | Same shape listed as two parts (⻖ stairs / ⻏ pennant) should be one part | fix | One data merge plus a checker exception; inside the open part-notes work | |
 | 2026-11-20 | Review page: save buttons optimistically | fix | Page-only, clear outcome | |
 | 2026-11-20 | Run another round on parts and sounds from owner notes so far | sdd (in round) | Continues Checkpoint D review inside the own-stories round; vowel rule added to STYLE | |
+| 2026-11-20 | Parts named by their own meaning (spear, pig) are settled; hide them from review | fix | One flag in parts.json, seed skips it, items removed | |

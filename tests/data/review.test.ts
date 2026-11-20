@@ -160,6 +160,14 @@ describe("review seed: items", () => {
     expect(p[1]?.data).not.toHaveProperty("was");
   });
 
+  it("fixed parts (named by their own meaning) are not seeded", () => {
+    const p = partItems(
+      { 口: { name: "mouth", fixed: true }, 日: { name: "sun" } },
+      ks,
+    );
+    expect(p.map((w) => w.data.key)).toEqual(["日"]);
+  });
+
   it("uses are capped at 8", () => {
     const many = Array.from({ length: 12 }, (_, i) =>
       kanji("k" + i, 2, ["口"]),

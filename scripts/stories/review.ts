@@ -238,24 +238,30 @@ export function partItems(
   kanji: readonly KanjiItem[],
   was: ReadonlyMap<string, string> = new Map(),
 ): Write[] {
-  return [...asNames(parts, "name")].map(([p, { text, note }]) => ({
-    op: "set",
-    collection: "items",
-    doc_id: partId(p),
-    data: {
-      kind: "part",
-      key: p,
-      pass: 1,
-      why: "all",
-      name: text,
-      ...(note ? { note } : {}),
-      ...(was.has(p) ? { was: was.get(p) } : {}),
-      uses: kanji
-        .filter((k) => k.components.includes(p))
-        .slice(0, USES)
-        .map((k) => k.char),
-    },
-  }));
+  // `fixed` parts are named by their own meaning (戈 spear, 豕 pig): settled,
+  // so they are not put up for review.
+  const fixed = (p: string) =>
+    isObj(parts) && isObj(parts[p]) && parts[p].fixed === true;
+  return [...asNames(parts, "name")]
+    .filter(([p]) => !fixed(p))
+    .map(([p, { text, note }]) => ({
+      op: "set",
+      collection: "items",
+      doc_id: partId(p),
+      data: {
+        kind: "part",
+        key: p,
+        pass: 1,
+        why: "all",
+        name: text,
+        ...(note ? { note } : {}),
+        ...(was.has(p) ? { was: was.get(p) } : {}),
+        uses: kanji
+          .filter((k) => k.components.includes(p))
+          .slice(0, USES)
+          .map((k) => k.char),
+      },
+    }));
 }
 
 export function soundItems(

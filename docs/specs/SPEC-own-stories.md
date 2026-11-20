@@ -94,6 +94,7 @@ Each part gets a one-line "why it fits" note, and a part named after its history
 - **Re-seed:** `seed parts` puts `note` and, for a renamed part, `was` (the old name) on the item. `--bump <ids file>` bumps `pass` only for the listed ids (renamed parts, rewritten stories); the rest are written with their current `pass`, so the owner's verdicts on them stand.
 - **Page:** the Parts row shows the note under the name (like the Sounds row's note) and, when `was` is set, "was: village" beside the name.
 - `stories:check` fails a part with no `note` or a note out of band.
+- **Fixed parts (owner, 2026-11-20):** a part named by its own character's meaning (126 today: 戈 spear, 豕 pig…) has `"fixed": true`; `seed parts` skips it and its review item is removed, so it can't be ✗'d by accident.
 - **Same shape, one name (owner, 2026-11-20):** a glyph that is the same shape as another part (⻏ is ⻖ on the right side) has `"sameAs": "<twin glyph>"` and shares the twin's name and note; the checker allows that one duplicate and fails a `sameAs` that names a missing part or a different name. Renaming a twin means renaming both.
 
 ## Files

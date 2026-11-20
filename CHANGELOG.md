@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.3 (2026-11-20)
+
+- Story dictionary: 126 parts named by their own meaning (戈 spear, 豕 pig…) are marked fixed and left off the review page; round 2 of part names, sound keywords (vowel rule) and Kanji 5–6 stories.
+
 ## 1.6.2 (2026-11-20)
 
 - Review page saves verdicts optimistically: a click shows at once, a brief "saved ✓" confirms the write, and a failed save reverts the row with an error.
