@@ -319,7 +319,8 @@
   },
   "彳": {
     "name": "peg post",
-    "note": "Two short slashes stacked on a post, like pegs on a peg post."
+    "note": "Two short slashes stacked on a post, like pegs on a peg post.",
+    "alts": ["chairlift", "ski lift"]
   },
   "米": {
     "name": "rice",
@@ -371,7 +372,8 @@
   },
   "頁": {
     "name": "big head",
-    "note": "A box with lines inside on two short legs, a big head walking."
+    "note": "A box with lines inside on two short legs, a big head walking.",
+    "alts": ["duck", "rubber duck", "waddling duck"]
   },
   "車": {
     "name": "car",
@@ -505,7 +507,8 @@
   },
   "疋": {
     "name": "boot",
-    "note": "A bar and short post over a long curving leg that kicks out right, like a boot."
+    "note": "A bar and short post over a long curving leg that kicks out right, like a boot.",
+    "alts": ["giant boot", "clown boot", "big boot"]
   },
   "門": {
     "name": "gate",
@@ -576,7 +579,8 @@
   },
   "甘": {
     "name": "candy",
-    "note": "A box with two posts poking up and a bar inside, a candy."
+    "note": "A box with two posts poking up and a bar inside, a candy.",
+    "alts": ["yoke", "carrying pole", "palanquin"]
   },
   "自": {
     "name": "nose",
@@ -1030,7 +1034,8 @@
   },
   "片": {
     "name": "splinter",
-    "note": "A post with bars and a sweep, a splinter."
+    "note": "A post with bars and a sweep, a splinter.",
+    "alts": ["tai chi pose", "kung fu stance", "crane stance"]
   },
   "歯": {
     "name": "tooth",

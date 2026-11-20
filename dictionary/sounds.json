@@ -157,7 +157,8 @@
   },
   "りょう": {
     "keyword": "leotard",
-    "note": "A dancer's leotard: \"lee-oh\" said fast and held. Trio is the short りょ."
+    "note": "A dancer's leotard: \"lee-oh\" said fast and held. Trio is the short りょ.",
+    "alts": ["ryokan", "Rio Grande"]
   },
   "へい": {
     "keyword": "hay",
@@ -285,7 +286,8 @@
   },
   "ふく": {
     "keyword": "hook",
-    "note": "A big hook: \"hook\" is \"huk\", close to \"fuku\"."
+    "note": "A big hook: \"hook\" is \"huk\", close to \"fuku\".",
+    "alts": ["kung fu kick", "hookah pipe"]
   },
   "かつ": {
     "keyword": "katsu",
@@ -365,7 +367,8 @@
   },
   "りゅう": {
     "keyword": "lure",
-    "note": "A shiny fishing lure: \"lyoor\", a held \"ryoo\"."
+    "note": "A shiny fishing lure: \"lyoor\", a held \"ryoo\".",
+    "alts": ["reunion", "reuse"]
   },
   "ぞう": {
     "keyword": "zodiac",
@@ -373,7 +376,8 @@
   },
   "らん": {
     "keyword": "lunch",
-    "note": "A lunchbox: 'lun', said the Japanese way 'lahn' → らん."
+    "note": "A lunchbox: 'lun', said the Japanese way 'lahn' → らん.",
+    "alts": ["runway", "runner", "rung"]
   },
   "ぼ": {
     "keyword": "bonsai",
@@ -445,7 +449,8 @@
   },
   "ねん": {
     "keyword": "nectar",
-    "note": "Flower nectar: its first part, \"nek\", close to \"nen\"."
+    "note": "Flower nectar: its first part, \"nek\", close to \"nen\".",
+    "alts": ["sea anemone", "nemesis"]
   },
   "ひん": {
     "keyword": "hinge",
@@ -505,7 +510,8 @@
   },
   "らい": {
     "keyword": "lion",
-    "note": "A lion: its first part, \"lai\"."
+    "note": "A lion: its first part, \"lai\".",
+    "alts": ["rhino", "rifle", "rice"]
   },
   "めん": {
     "keyword": "menu",
@@ -513,7 +519,8 @@
   },
   "りょ": {
     "keyword": "trio",
-    "note": "A trio of singers: drop the t, \"rio\", said fast \"ryo\". Leotard is the long りょう."
+    "note": "A trio of singers: drop the t, \"rio\", said fast \"ryo\". Leotard is the long りょう.",
+    "alts": ["Rio", "Rioja"]
   },
   "あん": {
     "keyword": "uncle",
@@ -529,7 +536,8 @@
   },
   "りつ": {
     "keyword": "lizard",
-    "note": "A lizard: its first part, \"liz\", close to \"ritsu\"."
+    "note": "A lizard: its first part, \"liz\", close to \"ritsu\".",
+    "alts": ["Ritz crackers", "Ritz hotel"]
   },
   "ぎょう": {
     "keyword": "gyoza",
@@ -561,7 +569,8 @@
   },
   "れつ": {
     "keyword": "lettuce",
-    "note": "A head of lettuce: its first part, \"let\"."
+    "note": "A head of lettuce: its first part, \"let\".",
+    "alts": ["retsina", "guitar frets"]
   },
   "えつ": {
     "keyword": "etching",
@@ -641,7 +650,8 @@
   },
   "らく": {
     "keyword": "rucksack",
-    "note": "A heavy rucksack: its first part, \"rahk\", the u of cup, an open \"ah\", close to \"raku\"."
+    "note": "A heavy rucksack: its first part, \"rahk\", the u of cup, an open \"ah\", close to \"raku\".",
+    "alts": ["raku pottery", "Iraq", "rock"]
   },
   "きゃく": {
     "keyword": "kayak",
@@ -713,6 +723,7 @@
   },
   "ら": {
     "keyword": "llama",
-    "note": "A llama: its first syllable \"lah\", a true \"ah\"."
+    "note": "A llama: its first syllable \"lah\", a true \"ah\".",
+    "alts": ["rah-rah", "raja", "Ra"]
   }
 }

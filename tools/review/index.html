@@ -1157,7 +1157,9 @@
             "aria-selected": String(S.tab === k),
           },
           label,
-          h("small", { text: left + " left" }),
+          h("small", {
+            text: left + " left" + (c.work ? " · " + c.work + " ✗" : ""),
+          }),
         ),
       );
     }

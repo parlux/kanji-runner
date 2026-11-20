@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.5 (2026-11-21)
+
+- Review page: each tab also counts items marked ✗ (the r-sounds showed "0 left" while still needing work). Name and keyword options for the last 5 parts and 11 sounds (r-sounds now offer r-words).
+
 ## 1.6.4 (2026-11-20)
 
 - Review page: alternative names show as chips; one click picks one. Round 3 of part names from the owner's review (巴 bed, 廾 goal, 毋 window, 巛 speed zone, 耒 plough, 生 life, 屮 sprout and nine more).

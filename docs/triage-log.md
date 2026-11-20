@@ -42,3 +42,4 @@ One row per owner request, written by the `triage` skill (`.claude/skills/triage
 | 2026-11-20 | Run another round on parts and sounds from owner notes so far | sdd (in round) | Continues Checkpoint D review inside the own-stories round; vowel rule added to STYLE | |
 | 2026-11-20 | Parts named by their own meaning (spear, pig) are settled; hide them from review | fix | One flag in parts.json, seed skips it, items removed | |
 | 2026-11-20 | Show alternative names on the review page | fix | Optional alts field, seed and page chips | |
+| 2026-11-21 | Options for the remaining parts and sounds; sounds tab says 0 left with r-sounds unapproved | fix | Data alts plus a one-line tab count fix | |
