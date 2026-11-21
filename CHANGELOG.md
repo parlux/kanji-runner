@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.18 (2026-11-21)
+
+- Kanji 1–6 meaning stories rewritten for the new composite parts (50 stories, 16 reading stories adjusted); 母 dropped from the parts list.
+
 ## 1.6.17 (2026-11-21)
 
 - Parts review applied (first batch, all Kanji 1–6 shapes): 龰 skate, 业 candles, 丩 tuning fork, 乡 scribble, 亘 burger, 𠂇 rudder; reviewed parts drop their alts.

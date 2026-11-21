@@ -2,7 +2,7 @@
   "level": "Kanji 4",
   "kanji": {
     "学": {
-      "meaning": "A <part>child</part> sits under a <part>blanket</part> with a torch, long past bedtime. A <part>sparkle</part> of ideas pops up over the blanket every time she turns a page. She isn't playing in there: she's trying to <kanji>study</kanji>.",
+      "meaning": "A <part>child</part> sits under a <part>blanket</part> with a torch, long past bedtime. <part>Fireworks</part> of ideas burst over the blanket every time she turns a page. She isn't playing in there: she's trying to <kanji>study</kanji>.",
       "on": "A <sound>gag</sound>gle of geese honks outside the window, but she keeps on reading.",
       "kun": "'<sound>Ma</sound>! <sound>Na</sound>an, please!' she calls from under the blanket, still reading about <sound>bu</sound>lldozers."
     },
@@ -36,9 +36,9 @@
       "kun": "The shellfish ties a string to its shell and flies it like a <sound>ki</sound>te over the beach."
     },
     "側": {
-      "meaning": "A <part>shellfish</part> is squeezed between a <part>coat hook</part> on its left and a <part>dagger</part> on its right. Whichever way it shuffles, something pointy waits there. It picks the hook, the friendlier <kanji>side</kanji>.",
-      "on": "Then someone hangs a smelly <sound>sock</sound> on the hook, and the shellfish switches sides.",
-      "kun": "On the other side, a bulb of <sound>ga</sound>rlic makes it cry '<sound>Wah</sound>!'"
+      "meaning": "The school has one <part>rule</part>, painted in big red letters by the door: coats go on the left wall only. Each kid hangs a jacket on a <part>coat hook</part> with their name above it, never on the right. Pick a wall and keep to your <kanji>side</kanji>.",
+      "on": "Then someone hangs a smelly <sound>sock</sound> on a hook, and every kid switches sides.",
+      "kun": "On the other side, a bulb of <sound>ga</sound>rlic makes them all cry '<sound>Wah</sound>!'"
     },
     "北": {
       "meaning": "A <part>climbing pole</part> and a <part>spoon</part> stand back to back, both shivering. They kept walking up the map until the snow reached their knees and a polar bear started staring at the spoon. They've gone too far <kanji>north</kanji>.",
@@ -79,8 +79,8 @@
       "kun": "'<sound>Ah</sound>!' he says. 'Look, <sound>Roo</sound>, I have the moon!' and shows it to his kangaroo."
     },
     "祖": {
-      "meaning": "A <part>lamppost</part> glows beside a stone: an <part>eye</part> carved on a <part>one</part>-plank base. Every evening the family lights the lamp, and the stone eye seems to watch over them the way great-great-grandma did. It's a stone for an <kanji>ancestor</kanji>.",
-      "on": "Great-great-grandma's old <sound>so</sound>fa still stands by the stone, and nobody else sits in it."
+      "meaning": "Beside a glowing <part>lamppost</part> stands the statue of great-great-grandpa <part>Moreover</part>: stone boxes piled one on another on a wide base, because he never stopped adding 'and moreover...' to every story. The family still lights the lamp for him each evening. He's their <kanji>ancestor</kanji>.",
+      "on": "Great-great-grandpa's old <sound>so</sound>fa still stands by the statue, and nobody else sits in it."
     },
     "斤": {
       "meaning": "Two slanted strokes at the top, a flat bar, and a long handle down to the ground. A woodcutter lifts it, swings it, and thunk: the log splits in two. It's a heavy <kanji>axe</kanji>.",
@@ -107,7 +107,7 @@
       "kun": "A <sound>to</sound>tem pole falls across the road, a kid yells '<sound>Ma</sound>!', and a kanga<sound>roo</sound> stops dead."
     },
     "足": {
-      "meaning": "A round <part>mouth</part> of a kneecap sits on top, and under it a <part>stop</part> line where the foot plants flat on the ground. Kneecap, shin, foot: march, kick, hop. It's a <kanji>leg</kanji>.",
+      "meaning": "A round <part>mouth</part> of a kneecap sits on top, and under it a <part>skate</part> blade where the foot glides over the ice. Kneecap, shin, foot: glide, kick, hop. It's a <kanji>leg</kanji>.",
       "on": "Pull a smelly <sound>sock</sound> over the foot, and the whole leg is ready to go.",
       "kun": "'<sound>Ah</sound>!' A <sound>shee</sound>p has stepped right on your foot."
     },
@@ -126,7 +126,7 @@
       "on": "It writes down every order in blue <sound>in</sound>k on the back of its shell."
     },
     "閉": {
-      "meaning": "Inside the <part>gate</part>, a <part>one</part>-plank bar is jammed across with a <part>crowbar</part>, and a <part>slash</part> of rope is tied round it. Push all you like, those doors won't budge. The gate is <kanji>closed</kanji>.",
+      "meaning": "Inside the <part>gate</part>, a <part>genius</part> has rigged one clever hooked bolt across the doors, so no key in the world can open them. Push all you like, those doors won't budge. The gate is <kanji>closed</kanji>.",
       "on": "A big pile of <sound>hay</sound> is stacked against the gate too, just to be sure.",
       "kun": "A <sound>to</sound>tem pole, a <sound>jee</sound>p and a kanga<sound>roo</sound> wait outside the shut gate."
     },

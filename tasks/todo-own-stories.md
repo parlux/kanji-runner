@@ -162,8 +162,8 @@ Not one implementer subagent: the orchestrator runs the loop per batch (2 levels
 ### Task C3: Apply the review, rewrite Kanji 1–6 stories (content, orchestrator)
 **Description:** `apply` the owner's verdicts on the new parts; rewrite every Kanji 1–6 meaning story whose parts changed (and reading stories naming a removed part) through the writer/judge loop; check, overlap; commit, push, deploy. Then Checkpoint D resumes (play Kanji 1–6).
 **Acceptance:**
-- [ ] Every changed Kanji 1–6 story rewritten; all pass check and judge; "part not named" warnings counted before/after.
-- [ ] Deploy green; counts logged below.
+- [x] Every changed Kanji 1–6 story rewritten; all pass check and judge; "part not named" warnings counted before/after.
+- [x] Deploy green; counts logged below.
 
 ### Checkpoint D: owner (moved to the review page, 2026-11-20)
 - [x] Owner runs `supabase/story-flags.sql` once. (2026-11-20; `stories:flags` reads the table: no flags yet.)
@@ -269,4 +269,14 @@ Not one implementer subagent: the orchestrator runs the loop per batch (2 levels
 - Removed: ⽱ paw print, 尢 crutch, 五 five, 亀 tortoise (no kanji uses them now). 母 mother kept until C3 (a story still names it).
 - `--allow-missing-parts` removed. `stories:check`: 0 errors, 57 "part not named" warnings, for C3.
 - Rough edge: 235 kanji whose KanjiVG root has loose strokes fall back to KRADFILE's flat list (乗 来 円 半 南 夫…, 10 in Kanji 1–6 with 4+ parts).
+
+### C3: review applied, Kanji 1–6 rewritten (2026-11-21)
+| | Entries | Judge round 1 (close / weak / wrong) | Final |
+|---|---|---|---|
+| Parts review, batch 1 | 31 new shapes reviewed (all 11 in Kanji 1–6) | | 6 renamed: 龰 skate, 业 candles, 丩 tuning fork, 乡 scribble, 亘 burger, 𠂇 rudder; 132 still to review |
+| Meaning stories with changed parts | 58 (50 rewritten, 8 already fit) | 6 / 3 / 0 (時 国 朝 側 店 値 close; 祖 切 weak) | all pass after round 2 |
+| Reading stories adjusted to the new scenes | 16 | | all pass |
+- 時 kun "totem" kept (judge: weak, long vowel): totem is the と keyword, as before.
+- 母 removed from parts.json (no kanji uses it now). らん's stale "runner" review edit fixed on the page (apply had reverted runway).
+- `stories:check`: 0 errors; warnings 56 → 12, all on KRADFILE-fallback kanji (乗 年 金 来 半 円).
 

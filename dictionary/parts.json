@@ -611,11 +611,6 @@
     "name": "broom",
     "note": "A wrapping stroke with two slashes hanging off it, a broom."
   },
-  "母": {
-    "name": "mother",
-    "note": "A box with two dots inside and a bar across, a mother.",
-    "fixed": true
-  },
   "⻂": {
     "name": "weathervane",
     "note": "A dot, a bent arm and a post with two ticks flying left and right, like a weathervane."
