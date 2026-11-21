@@ -576,6 +576,7 @@
     level: null,
     status: "todo",
     showExtra: false,
+    early: false, // Parts: only parts in Kanji 1–6 (game levels ≤ 7)
     focusId: null,
   };
   let db = null;
@@ -733,10 +734,18 @@
     return [...set].sort((a, b) => levelNum(a) - levelNum(b));
   }
 
+  // Parts sort by the first level that uses them (Kanji 1 first), then id.
+  const firstOf = (it) => (typeof it.first === "number" ? it.first : 1e9);
   function tabItems(kind) {
     return [...items.entries()]
       .filter(([, it]) => it.kind === kind)
-      .sort((a, b) => (a[0] < b[0] ? -1 : 1));
+      .sort((a, b) =>
+        kind === "part" && firstOf(a[1]) !== firstOf(b[1])
+          ? firstOf(a[1]) - firstOf(b[1])
+          : a[0] < b[0]
+            ? -1
+            : 1,
+      );
   }
 
   // Items of the tab (and level) that the counters cover: extras never count.
@@ -764,6 +773,7 @@
       if (pinned.has(id)) return true;
       const extra = it.why === "extra";
       if (extra && !S.showExtra) return false;
+      if (S.tab === "part" && S.early && firstOf(it) > 7) return false;
       const sm = summary(it, revOf(id));
       if (S.status === "todo") return sm.todo;
       if (S.status === "ok") return sm.done && !sm.work;
@@ -1037,7 +1047,14 @@
     return h(
       "div",
       { class: "cell" },
-      h("div", { class: "lbl", text: "used in" }),
+      h("div", {
+        class: "lbl",
+        text:
+          "used in" +
+          (typeof item.first === "number"
+            ? " · from Kanji " + (item.first - 1)
+            : ""),
+      }),
       h(
         "div",
         { class: "uses" },
@@ -1202,6 +1219,21 @@
       ),
     );
     filters.append(h("label", {}, "Show", st));
+    if (S.tab === "part") {
+      filters.append(
+        h(
+          "label",
+          {},
+          h("input", {
+            type: "checkbox",
+            id: "early",
+            "data-filter": "early",
+            checked: S.early,
+          }),
+          "Kanji 1–6 only",
+        ),
+      );
+    }
     if (S.tab === "story") {
       filters.append(
         h(
@@ -1402,6 +1434,7 @@
       ensureLevelSubs();
     } else if (t.dataset.filter === "status") S.status = t.value;
     else if (t.dataset.filter === "extra") S.showExtra = t.checked;
+    else if (t.dataset.filter === "early") S.early = t.checked;
     resetView();
     render();
   });

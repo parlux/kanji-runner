@@ -62,6 +62,8 @@ export type ItemData = {
   pass: number;
   why: Why;
   uses?: string[];
+  /** Parts: the first game level with a kanji that uses it. */
+  first?: number;
   name?: string;
   keyword?: string;
   note?: string;
@@ -241,6 +243,15 @@ const asNames = (
   return out;
 };
 
+/** `{ first }`: the lowest game level of a kanji using part `p`, or `{}` if none. */
+export function firstLevel(
+  kanji: readonly KanjiItem[],
+  p: string,
+): { first?: number } {
+  const ls = kanji.filter((k) => k.components.includes(p)).map((k) => k.level);
+  return ls.length ? { first: Math.min(...ls) } : {};
+}
+
 /** `was`: part glyph → old name, for renamed parts. */
 export function partItems(
   parts: unknown,
@@ -266,6 +277,7 @@ export function partItems(
         ...(note ? { note } : {}),
         ...(alts ? { alts } : {}),
         ...(was.has(p) ? { was: was.get(p) } : {}),
+        ...firstLevel(kanji, p),
         uses: kanji
           .filter((k) => k.components.includes(p))
           .slice(0, USES)

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.16 (2026-11-21)
+
+- Review page: Parts sort by the first level that uses them, show "from Kanji N", and a "Kanji 1–6 only" filter; part seeds carry `first`.
+
 ## 1.6.15 (2026-11-21)
 
 - Story dictionary: 511 new parts from KanjiVG's structure (348 kanji parts named by meaning, 163 shapes such as 才 in 閉, 翟 peacock, 甬 padlock); 4 unused parts removed. The shapes are on the review page.
