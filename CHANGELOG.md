@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.17 (2026-11-21)
+
+- Parts review applied (first batch, all Kanji 1–6 shapes): 龰 skate, 业 candles, 丩 tuning fork, 乡 scribble, 亘 burger, 𠂇 rudder; reviewed parts drop their alts.
+
 ## 1.6.16 (2026-11-21)
 
 - Review page: Parts sort by the first level that uses them, show "from Kanji N", and a "Kanji 1–6 only" filter; part seeds carry `first`.
