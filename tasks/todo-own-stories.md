@@ -281,3 +281,13 @@ Not one implementer subagent: the orchestrator runs the loop per batch (2 levels
 - `stories:check`: 0 errors; warnings 56 → 12, all on KRADFILE-fallback kanji (乗 年 金 来 半 円).
 - Parts review, batch 2 (2026-11-24): the remaining 132 shapes reviewed, 0 ✗; 5 renamed (⺗ trickle, 乍 coat rack, 兪 spaceship, 叟 lantern holder, 圭 double mound), no stories touched. 佰 "guest" refused (客's name): asked the owner. Review page: 𢆉 drawn from KanjiVG, Noto Sans SC fallback (1.6.19).
 
+### D7 batch 1: Kanji 7–8 (2026-11-24)
+| Level | Fields | Overlap suspects (≥ 0.2) | 1st pass fails (wrong / weak / close) | Rounds | Final |
+|---|---|---|---|---|---|
+| Kanji 7 | 85 | 1 (浴 on, judged close) | 0 / 0 / 1 (浴 on: same punchline) | 2 | 85 pass, 0 suspects |
+| Kanji 8 | 87 | 0 | 0 / 1 / 1 (助 on: lamp not in the scene; 正 meaning: same scene) | 2 | 87 pass |
+- 正's on/kun followed the new meaning scene (licence → medal), judged with it.
+- `stories:check`: 0 errors, 7 warnings, all on KRADFILE-fallback kanji (免 無 段).
+- Writer notes: no-keyword sounds improvised (病 びょう, 熱 ねつ, 風 ふう, 和 わ, 税 ぜい, 曲 きょく); 且 "moreover" isn't drawable (助 uses it as the word); 替 has two 夫 but one part entry.
+- Review page: 23 seeded (3 judge-fail, 10 random per level), pass 1.
+- WaniKani library now fetched in the cloud session (`kanji-runner` environment, token as a network secret; Node needs `NODE_USE_ENV_PROXY=1`).
