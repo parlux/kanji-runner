@@ -2,9 +2,9 @@
   "level": "Kanji 16",
   "kanji": {
     "聞": {
-      "meaning": "You press your <part>ear</part> to the crack of a locked <part>gate</part>. On the other side, voices are whispering secrets. You hold your breath and keep very still. Every single word, you <kanji>hear</kanji>.",
-      "on": "On the other side, a ba<sound>boon</sound> has its ear pressed to the same crack, and you both jump.",
-      "kun": "You'd hear even better with the gate open, if only you had the <sound>key</sound>."
+      "meaning": "A castle <part>gate</part> has no bell and no knocker, just a huge stone <part>ear</part> carved in the middle. Whisper your name into it and the doors creak open; mumble, and nothing happens. It only lets in those it can <kanji>hear</kanji>.",
+      "on": "A ba<sound>boon</sound> bellows its name into the stone ear so loudly that the doors fly open and knock it flat.",
+      "kun": "If the ear won't hear you, there's always the spare <sound>key</sound> under the doormat."
     },
     "期": {
       "meaning": "On a <part>bookshelf</part> sits a row of diaries, one for each <part>moon</part>: a new full moon, a new book. When the last page is full, it goes back on the shelf and the next one starts. Each book holds one <kanji>period</kanji> of time.",
@@ -16,8 +16,8 @@
       "kun": "'<sound>Ee</sound>k!' squeals the mayor, hopping into a <sound>tu</sound>b of cold water to soothe her foot."
     },
     "秋": {
-      "meaning": "The <part>grain</part> is cut, and the farmers burn the old stalks in a crackling <part>fire</part>. The leaves turn red and orange like the flames, and the air smells of smoke. The harvest is in: it's <kanji>autumn</kanji>.",
-      "on": "One farmer tosses a worn-out old <sound>shoe</sound> on the bonfire too.",
+      "meaning": "A scarecrow stuffed with <part>grain</part> stalks shivers in the first chilly wind, so the farmer lights a small <part>fire</part> at his feet and roasts chestnuts on it. Geese honk south overhead and everyone digs out a jumper. It's <kanji>autumn</kanji>.",
+      "on": "The scarecrow warms one straw foot, then the other, until his old <sound>shoe</sound> starts to smoke.",
       "kun": "'<sound>Ah</sound>!' sighs the farmer, warming his hands, then spots the barn <sound>key</sound> buried in a pile of leaves."
     },
     "堂": {
@@ -71,7 +71,7 @@
     },
     "魚": {
       "meaning": "A <part>boomerang</part> sails over a flooded <part>rice field</part>, knocks something silvery out of the water, and it lands flapping on the <part>hot coals</part> of your campfire. Sizzle! Caught and cooked in one throw: a <kanji>fish</kanji>.",
-      "on": "Back in the paddy, a frog gives one short, cross croak, '<sound>Gyo</sound>!', because you got there first.",
+      "on": "Beside it on the coals you toss a plate of <sound>gyo</sound>za, and they crackle as the fish sizzles.",
       "kun": "Next you grill a <sound>sa</sound>rdine and a <sound>ca</sound>rp and wrap them both in warm <sound>na</sound>an."
     },
     "酸": {
@@ -81,7 +81,7 @@
     },
     "源": {
       "meaning": "Follow the stream uphill through the <part>meadow</part>, past cows and wildflowers, and you'll find <part>water drops</part> bubbling straight out of a crack in the ground. Every river starts somewhere: this is its <kanji>source</kanji>.",
-      "on": "'A<sound>gain</sound>!' cries a little girl, splashing in the spring for the tenth time.",
+      "on": "A hiker named <sound>Gen</sound> gets there first and guards the spring with a grin.",
       "kun": "A <sound>mee</sound>rkat shares a <sound>na</sound>an with a <sound>mo</sound>le under a <sound>to</sound>tem pole beside the spring."
     },
     "顔": {
