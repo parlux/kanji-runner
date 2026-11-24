@@ -178,6 +178,7 @@ Not one implementer subagent: the orchestrator runs the loop per batch (2 levels
 - [x] Changed items re-seeded; counts logged below. (Nothing to re-seed: the only changes are the owner's own 5 renames. `apply` now skips reviews older than the item's pass.)
 
 ### Task D7: Flags, and a few levels ahead (content, orchestrator)
+**Amended 2026-11-24 (owner):** names have settled (every part and sound reviewed), so write all remaining levels now (Kanji 9–72, game levels 10–73), not one ahead. The owner waived the sampled review ("fine with your stories"); in-game flags are the safety net. Batches of 2 levels, several in parallel, deploy every few batches.
 **Description:** Owner's flags first (rewrite, resolve; a renamed part or keyword means rewriting every story using it), then the loop on the next levels in pairs, about one level ahead of the owner. Each batch adds review steps after the commit: `stories:review -- seed <levels>` (judge fails + 10 random), owner reviews on the page, `apply`, rewrites. More than 2 random misses in a level → the whole level seeded and `STYLE.md` revisited before the next batch.
 **Acceptance:**
 - [ ] Levels through the owner's level + 1 have files; all pass check and judge; no unresolved suspect.
