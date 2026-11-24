@@ -50,3 +50,4 @@ One row per owner request, written by the `triage` skill (`.claude/skills/triage
 | 2026-11-21 | Highlight the sound in on/kun stories instead of an explainer sentence | sdd | Style and markup change across every reading story, plus game rendering | |
 | 2026-11-21 | Composite parts (owner flag on 閉: one slash crowbar) | sdd | New data source for components, new part names, story rewrites | |
 | 2026-11-21 | Review page: Kanji 1–6 parts first / filter | fix | One tool page plus one seed field, clear outcome | |
+| 2026-11-24 | Review page: "mast" part (𢆉) not rendering | fix | One tool page: font fallback plus a drawn glyph, clear outcome | |

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.19 (2026-11-24)
+
+- Review page: parts missing from Noto Sans JP now show (Noto Sans SC fallback for 㑒 𠂇 㐄 䏍 㳟; 𢆉 "mast" drawn from KanjiVG strokes, as no web font has it).
+
 ## 1.6.18 (2026-11-21)
 
 - Kanji 1–6 meaning stories rewritten for the new composite parts (50 stories, 16 reading stories adjusted); 母 dropped from the parts list.
