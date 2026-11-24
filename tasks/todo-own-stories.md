@@ -279,4 +279,5 @@ Not one implementer subagent: the orchestrator runs the loop per batch (2 levels
 - 時 kun "totem" kept (judge: weak, long vowel): totem is the と keyword, as before.
 - 母 removed from parts.json (no kanji uses it now). らん's stale "runner" review edit fixed on the page (apply had reverted runway).
 - `stories:check`: 0 errors; warnings 56 → 12, all on KRADFILE-fallback kanji (乗 年 金 来 半 円).
+- Parts review, batch 2 (2026-11-24): the remaining 132 shapes reviewed, 0 ✗; 5 renamed (⺗ trickle, 乍 coat rack, 兪 spaceship, 叟 lantern holder, 圭 double mound), no stories touched. 佰 "guest" refused (客's name): asked the owner. Review page: 𢆉 drawn from KanjiVG, Noto Sans SC fallback (1.6.19).
 

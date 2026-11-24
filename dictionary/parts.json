@@ -2891,9 +2891,9 @@
     "note": "A lid with two strands hanging below and a dot on each side, like a jellyfish."
   },
   "乍": {
-    "name": "pitchfork",
+    "name": "coat rack",
     "note": "A slanted stroke over a post with two short prongs jutting right, like a pitchfork.",
-    "alts": ["toothbrush", "coat rack"]
+    "alts": ["toothbrush"]
   },
   "㑒": {
     "name": "campsite",
@@ -2910,9 +2910,9 @@
     "alts": ["antenna", "double spear"]
   },
   "兪": {
-    "name": "rocket",
+    "name": "spaceship",
     "note": "A peaked nose and bar over a tall body and two side fins, like a rocket.",
-    "alts": ["chapel", "spaceship"]
+    "alts": ["chapel"]
   },
   "勺": {
     "name": "scoop",
@@ -2968,9 +2968,9 @@
     "alts": ["woodpile", "crate stack"]
   },
   "圭": {
-    "name": "layer cake",
+    "name": "double mound",
     "note": "Two mounds of soil stacked one on the other, like a two-tier cake.",
-    "alts": ["double mound", "wedding cake"]
+    "alts": ["wedding cake"]
   },
   "畐": {
     "name": "cookie jar",
@@ -3095,9 +3095,9 @@
     "note": "A sun squeezed between a top bar and a bottom bar, like a burger in its bun."
   },
   "⺗": {
-    "name": "melted heart",
+    "name": "trickle",
     "note": "A heart flattened at the bottom: a hook with dots splashing around it.",
-    "alts": ["puddle", "trickle"]
+    "alts": ["puddle"]
   },
   "夹": {
     "name": "group hug",
@@ -3377,9 +3377,9 @@
     "alts": ["power plug", "socket"]
   },
   "叟": {
-    "name": "searchlight",
+    "name": "lantern holder",
     "note": "A barred box on a post held over a hand, like a searchlight.",
-    "alts": ["torch", "lantern holder"]
+    "alts": ["torch"]
   },
   "帛": {
     "name": "white flag",

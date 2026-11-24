@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.20 (2026-11-24)
+
+- Parts review, second batch applied: the remaining 132 new shape parts reviewed; 5 renamed (⺗ trickle, 乍 coat rack, 兪 spaceship, 叟 lantern holder, 圭 double mound). No story used them yet.
+
 ## 1.6.19 (2026-11-24)
 
 - Review page: parts missing from Noto Sans JP now show (Noto Sans SC fallback for 㑒 𠂇 㐄 䏍 㳟; 𢆉 "mast" drawn from KanjiVG strokes, as no web font has it).
