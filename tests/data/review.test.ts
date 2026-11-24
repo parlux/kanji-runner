@@ -303,6 +303,18 @@ describe("review apply", () => {
     items: Map<string, Existing> | null = null,
   ) => applyReviews(new Map(Object.entries(m)), files(), items);
 
+  it("skips reviews of an older pass than the item's, only with items", () => {
+    const m = { [partId("口")]: rv({ edit: "lips" }) };
+    const items = new Map<string, Existing>([
+      [partId("口"), { version: 3, data: { kind: "part", pass: 2 } }],
+    ]);
+    const r = run(m, items);
+    expect(r.stale).toEqual([partId("口")]);
+    expect(r.files.parts["口"]).toEqual({ name: "mouth" });
+    expect(r.changed).toEqual([]);
+    expect(run(m).files.parts["口"]).toEqual({ name: "lips" });
+  });
+
   it("a part rename rewrites <part> text in every story using it and lists them", () => {
     const r = run({ [partId("口")]: rv({ edit: "lips" }) });
     expect(r.files.parts["口"]).toEqual({ name: "lips" });

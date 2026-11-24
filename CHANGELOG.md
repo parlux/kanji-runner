@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.21 (2026-11-24)
+
+- `stories:review -- apply --items` skips reviews of an older pass than their item (listed as skipped).
+
 ## 1.6.20 (2026-11-24)
 
 - Parts review, second batch applied: the remaining 132 new shape parts reviewed; 5 renamed (⺗ trickle, 乍 coat rack, 兪 spaceship, 叟 lantern holder, 圭 double mound). No story used them yet.

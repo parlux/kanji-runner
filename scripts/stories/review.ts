@@ -502,6 +502,8 @@ export type ApplyResult = {
   renames: { part: string; from: string; to: string; touched: string[] }[];
   keywords: { sound: string; from: string; to: string }[];
   rejected: string[];
+  /** Reviews of an older pass than the item's (needs the items listing): ignored. */
+  stale: string[];
   scopes: Record<string, Scope>;
   /** `random` stories with any ✗, by scope (needs the items listing). */
   randomMisses: Record<string, number> | null;
@@ -635,6 +637,7 @@ export function applyReviews(
     renames: [],
     keywords: [],
     rejected: [],
+    stale: [],
     scopes: {},
     randomMisses: items ? {} : null,
   };
@@ -650,6 +653,11 @@ export function applyReviews(
   };
 
   for (const [id, r] of [...reviews].sort((a, b) => a[0].localeCompare(b[0]))) {
+    const pass = items?.get(id)?.data.pass;
+    if (typeof pass === "number" && r.pass < pass) {
+      res.stale.push(id);
+      continue;
+    }
     const k = idKey(id);
     if (!k) {
       res.rejected.push(`${id}: not an item id`);
@@ -825,6 +833,10 @@ function applyMain(args: string[]) {
   for (const k of res.keywords)
     console.log(`sound ${k.sound}: "${k.from}" → "${k.to}"`);
   for (const m of res.rejected) console.log(`rejected: ${m}`);
+  if (res.stale.length)
+    console.log(
+      `skipped ${res.stale.length} review(s) older than their item's pass: ${res.stale.join(" ")}`,
+    );
   for (const [scope, c] of Object.entries(res.scopes).sort())
     console.log(
       `${scope}: ${c.reviewed} reviewed, ${c.ok} ok, ${c.work} need work, ${c.edits} edited, ${res.notes[scope]?.length ?? 0} notes`,

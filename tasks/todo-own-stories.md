@@ -168,14 +168,14 @@ Not one implementer subagent: the orchestrator runs the loop per batch (2 levels
 ### Checkpoint D: owner (moved to the review page, 2026-11-20)
 - [x] Owner runs `supabase/story-flags.sql` once. (2026-11-20; `stories:flags` reads the table: no flags yet.)
 - [x] Owner reviews every part name and sound keyword on the review page (done 2026-11-21; applied in 1.6.7–1.6.9).
-- [ ] Owner plays Kanji 1–6 and flags stories that need work (in-game review, owner 2026-11-21, instead of the review page).
-- [ ] Owner ticks, or sends `STYLE.md` changes before D7 scales up.
+- [x] Owner plays Kanji 1–6 and flags stories that need work (in-game review, owner 2026-11-21, instead of the review page). (2026-11-24: played, "happy for now".)
+- [x] Owner ticks, or sends `STYLE.md` changes before D7 scales up. (2026-11-24, no `STYLE.md` changes; 佰 stays "lodger".)
 
 ### Task R3: Apply Checkpoint D's review (content, orchestrator)
 **Description:** `stories:review -- apply` on the owner's verdicts; renamed parts and keywords ripple into the stories using them; ✗ stories rewritten through the writer/judge loop with the owner's notes; `stories:check`, `stories:overlap` (with `--names`), commit, push; re-seed changed items at `pass + 1` for a quick second look. First make `apply` skip reviews whose `pass` is below the item's (R1 rough edge: needs `--items`). `STYLE.md` updated where the notes cluster; changes listed below.
 **Acceptance:**
-- [ ] Every ✗ from Checkpoint D rewritten or answered on the page; all entries pass check and judge.
-- [ ] Changed items re-seeded; counts logged below.
+- [x] Every ✗ from Checkpoint D rewritten or answered on the page; all entries pass check and judge. (0 ✗: parts batch 2 all ✓; in-game play happy.)
+- [x] Changed items re-seeded; counts logged below. (Nothing to re-seed: the only changes are the owner's own 5 renames. `apply` now skips reviews older than the item's pass.)
 
 ### Task D7: Flags, and a few levels ahead (content, orchestrator)
 **Description:** Owner's flags first (rewrite, resolve; a renamed part or keyword means rewriting every story using it), then the loop on the next levels in pairs, about one level ahead of the owner. Each batch adds review steps after the commit: `stories:review -- seed <levels>` (judge fails + 10 random), owner reviews on the page, `apply`, rewrites. More than 2 random misses in a level → the whole level seeded and `STYLE.md` revisited before the next batch.
