@@ -292,3 +292,19 @@ Not one implementer subagent: the orchestrator runs the loop per batch (2 levels
 - Writer notes: no-keyword sounds improvised (病 びょう, 熱 ねつ, 風 ふう, 和 わ, 税 ぜい, 曲 きょく); 且 "moreover" isn't drawable (助 uses it as the word); 替 has two 夫 but one part entry.
 - Review page: 23 seeded (3 judge-fail, 10 random per level), pass 1.
 - WaniKani library now fetched in the cloud session (`kanji-runner` environment, token as a network secret; Node needs `NODE_USE_ENV_PROXY=1`).
+
+### D7 round 2: Kanji 9–16, 4 batches in parallel (2026-11-24)
+| Level | 1st pass fails (wrong / weak / close) | Rounds | Final |
+|---|---|---|---|
+| Kanji 9 | 0 / 0 / 0 | 1 | all pass |
+| Kanji 10 | 0 / 0 / 2 (婦 晴 meaning) | 2 | all pass |
+| Kanji 11 | 1 / 2 / 0 (進 kun sugar≠su; 万 pole unnamed; 現 on "again") | 2 | all pass |
+| Kanji 12 | 0 / 0 / 0 | 1 | all pass |
+| Kanji 13 | 0 / 1 / 3 (喫 kun; 毛 器 on, 連 meaning) | 2 | all pass |
+| Kanji 14 | 0 / 0 / 2 (服 meaning; 供 on "Tokyo") | 2 | all pass |
+| Kanji 15 | 0 / 0 / 0 | 1 | all pass |
+| Kanji 16 | 0 / 2 / 2 (魚 源 on; 聞 秋 meaning) | 3 | all pass but 魚 on (weak, kept) |
+- 魚 on: no English word glides gy into a short o; four tries judged weak (Gyo!, gyoza = long ぎょう keyword, "Ugh-yo!", "leggy octopus"). Kept "leggy octopus" by hand; owner flags if it bothers.
+- Overlap pre-pass: 2 suspects (毛 on judged close, 息 on pass); 9 of 17 close fails scored below 0.2, so the judge stays the gate.
+- Owner waived review: nothing seeded.
+- Tokens (each agent's final context size as reported; billed input over all turns is higher, mostly cache reads): writers 546,907 (134.5k–140.1k each), judges 501,576 (114.9k–141.7k each), total 1,048,483 for 8 levels, about 131k per level. Wall time about 15 minutes per batch with rewrites.

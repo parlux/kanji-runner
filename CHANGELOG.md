@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.23 (2026-11-24)
+
+- Our own stories for Kanji 9–16 (241 kanji).
+
 ## 1.6.22 (2026-11-24)
 
 - Our own stories for Kanji 7–8 (60 kanji, 172 fields).
