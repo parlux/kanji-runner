@@ -51,3 +51,4 @@ One row per owner request, written by the `triage` skill (`.claude/skills/triage
 | 2026-11-21 | Composite parts (owner flag on 閉: one slash crowbar) | sdd | New data source for components, new part names, story rewrites | |
 | 2026-11-21 | Review page: Kanji 1–6 parts first / filter | fix | One tool page plus one seed field, clear outcome | |
 | 2026-11-24 | Review page: "mast" part (𢆉) not rendering | fix | One tool page: font fallback plus a drawn glyph, clear outcome | |
+| 2026-11-25 | Warm-ups always the same 3 top-box kanji: rotate strong items, least-recently-seen first | sdd | Changes core SRS item selection (fix check 5) | |
