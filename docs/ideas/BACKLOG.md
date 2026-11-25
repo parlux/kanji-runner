@@ -7,6 +7,7 @@ Epic: [Useful Japanese, then drop WaniKani](useful-japanese.md). Its rounds come
 
 ## In progress
 - [Our own stories, no WaniKani needed](own-stories.md): epic round 3; tasks `tasks/todo-own-stories.md`.
+- Warm-up rotation (owner request, no idea file): tasks `tasks/todo-warm-up-rotation.md`, at Checkpoint W.
 
 ## Next
 1. [Show overall progress](overall-progress.md): epic round 4; levels, plus coverage and JLPT share from round 2, as the yardstick for the assessment.

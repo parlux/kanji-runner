@@ -1,6 +1,7 @@
 # Tasks: rotate the warm-ups (v1.6.25)
 
 Spec: `docs/specs/SPEC-warm-up-rotation.md` (2026-11-25). Intent: `docs/intent/warm-up-rotation.md`. Started 2026-11-25. The owner waived spec approval: straight to the checkpoint. Version is a patch, not a minor: v1.7.0 is reserved for the open own-stories round.
+Checkpoint W: https://claude.ai/artifact/3UXKQGtki6vtAoqVyqMKpW
 Every task: `npm run check` passes before it is checked off.
 
 ### Task W1: Warm-ups rotate through strong items (sonnet)
