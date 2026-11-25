@@ -285,27 +285,27 @@ describe("WaniKani pool", () => {
     }
   });
 
-  it("warm-ups are the highest-box known items", () => {
+  it("warm-ups rotate: seeded strong kanji without records count as oldest", () => {
     const base = syntheticList(30);
     const list: WkPoolInput = {
       kanji: base.kanji,
       extras: new Map(
         base.kanji.map((k, i) => [
           k.char,
-          { srsStage: i < 3 ? 9 : 1, due: false, similar: [] },
+          { srsStage: i < 6 ? 9 : 1, due: false, similar: [] },
         ]),
       ),
     };
-    const top = new Set(base.kanji.slice(0, 3).map((k) => k.char));
+    const top = new Set(base.kanji.slice(0, 6).map((k) => k.char));
     for (let seed = 0; seed < 20; seed++) {
       const rows = buildPoolRun(
         seed,
         kanaDone(),
         wanikaniPool(kanaDone(), KANA, list),
       );
-      // box 5: the 3 seeded-9 kanji's meanings and readings, or a box-5 kana
-      for (const r of rows.slice(0, 3))
-        expect(r.type === "kana" || top.has(r.prompt)).toBe(true);
+      // the strong kana have a record (lastSeen 1); the seeded-9 kanji's
+      // meanings and readings have none, so they count as oldest
+      for (const r of rows.slice(0, 3)) expect(top.has(r.prompt)).toBe(true);
     }
   });
 

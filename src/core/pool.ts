@@ -69,6 +69,8 @@ export type Selection = {
   weight: (e: Entry) => number;
   /** Warm-ups prefer these, once there are enough of them. */
   current: (e: Entry) => boolean;
+  /** When the item was last answered (its record's `lastSeen`), else 0: no record counts as oldest. */
+  lastSeen: (e: Entry) => number;
 };
 
 /** Everything a run is built from: selection plus the distractor sources. */
@@ -98,6 +100,7 @@ export function builtInSelection(
     box,
     known: (e) => record(e) !== undefined,
     weight: (e) => weight(box(e)),
+    lastSeen: (e) => record(e)?.lastSeen ?? 0,
     current: (e) =>
       (e.type === "kana" ? kanaLevel(e.item) : e.item.level) ===
       progress.unlockedLevel,
@@ -224,6 +227,7 @@ export function wanikaniPool(
     weight: (e) => weight(box(e)) * (extras(e)?.due ? WK_DUE_BOOST : 1),
     // warm-ups: the highest-box known items of the whole pool
     current: () => true,
+    lastSeen: (e) => record(e)?.lastSeen ?? 0,
     kana: kana.filter((k) => kanaLevel(k) <= next),
     kanji: list.kanji,
     words: NONE_WORDS,

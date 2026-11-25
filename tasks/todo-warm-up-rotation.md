@@ -5,10 +5,10 @@ Every task: `npm run check` passes before it is checked off.
 
 ### Task W1: Warm-ups rotate through strong items (sonnet)
 `Selection.lastSeen`, `WARM_UP_MIN_BOX`, the new warm-up rule in `select`, tests per the spec. Bump to 1.6.25 with a changelog line.
-- [ ] Tests from the spec's "Tests" section pass; existing warm-up tests updated.
-- [ ] `npm run test:slow` passes (core selection change).
-- [ ] `package.json` 1.6.25; `CHANGELOG.md` has `## 1.6.25 (2026-11-25)` with one line.
-- [ ] `npm run check` passes.
+- [x] Tests from the spec's "Tests" section pass; existing warm-up tests updated.
+- [x] `npm run test:slow` passes (core selection change).
+- [x] `package.json` 1.6.25; `CHANGELOG.md` has `## 1.6.25 (2026-11-25)` with one line.
+- [x] `npm run check` passes.
 
 ### Checkpoint W: owner plays a few Kanji 5 runs
 - [ ] The first 3 questions change from run to run and are still easy; owner ticks to close.

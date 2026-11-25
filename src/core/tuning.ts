@@ -28,8 +28,16 @@ export const BASE_REWARD = {
 
 export const ROWS_PER_RUN = 14;
 // Item selection (SRS). See run.ts.
-/** The first N questions are warm-ups: the strongest known items, always wall gates. */
+/**
+ * The first N questions are warm-ups: strong known items, longest-unseen first
+ * (see `WARM_UP_MIN_BOX`), always wall gates.
+ */
 export const WARM_UPS = 3;
+/**
+ * Only items at this box or higher rotate through the warm-ups. Same value as
+ * `READING_UNLOCK_BOX`. With fewer than `WARM_UPS` of them, the highest boxes win.
+ */
+export const WARM_UP_MIN_BOX = 3;
 /** Most never-seen items introduced per run, taken in progression order. */
 export const MAX_NEW_PER_RUN = 4;
 /** Of those, at most this many may be words, meaning or reading (kanji keep priority). */
