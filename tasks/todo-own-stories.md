@@ -324,3 +324,20 @@ Writers got a "lessons from the last round" list (accent-dependent sounds, made-
 - 8 first-pass fails (round 2: 17); 7 are close, all caught by the side-by-side judge, none by the overlap score (1 suspect, 混 on, judged pass).
 - `stories:check`: 0 errors, 10 warnings, all flat-fallback kanji.
 - Tokens (final context size per agent): writers 593,578 (139.4k–161.5k), judges 475,219 (111.7k–123.5k), total 1,068,797 for 8 levels, about 134k per level.
+
+### D7 round 4: Kanji 25–32, 4 batches in parallel (2026-11-25)
+Writers' lessons list now leads with "skip the most literal picture of the parts" and "sounds in reading order".
+| Level | 1st pass fails (wrong / weak / close) | Rounds | Final |
+|---|---|---|---|
+| Kanji 25 | 0 / 2 / 2 (軽 "boot" is British; 散 diving board unnamed; 弱 逃 meaning) | 2 | all pass |
+| Kanji 26 | 0 / 0 / 1 (省 meaning; round 2 weak: eye only an idiom, fixed by hand) | 3 | all pass |
+| Kanji 27 | 0 / 0 / 1 (辺 meaning) | 2 | all pass |
+| Kanji 28 | 0 / 1 / 1 (刑 cruelty played for laughs; 島 kun) | 2 | all pass |
+| Kanji 29 | 0 / 0 / 0 | 1 | all pass |
+| Kanji 30 | 0 / 1 / 1 (植 kun "ukulele" ≠ う; 否 meaning) | 2 | all pass |
+| Kanji 31 | 1 / 0 / 0 (許 kun highlight on the wrong syllable) | 2 | all pass |
+| Kanji 32 | 0 / 0 / 1 (触 on) | 2 | all pass |
+- 11 first-pass fails (round 3: 8); 7 close, all caught by the judge; the overlap score's 2 suspects were 1 close (辺 on) and 1 pass.
+- きょう has no keyword: used in 5 kanji in Kanji 29–30 alone ("key" + "Oh!"). A shared keyword is the owner's call.
+- `stories:check`: 0 errors; warnings only on flat-fallback kanji.
+- Tokens (final context size per agent): writers 570,603 (138.9k–146.2k), judges 504,093 (117.0k–135.8k), total 1,074,696 for 8 levels, about 134k per level.
