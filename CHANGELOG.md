@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.26 (2026-11-25)
+
+- Warm-ups rotate through your strong current-level items, longest-unseen first, instead of repeating the same 3.
+
 ## 1.6.25 (2026-11-25)
 
 - Our own stories for Kanji 25–32 (240 kanji).

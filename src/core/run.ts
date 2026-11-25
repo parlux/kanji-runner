@@ -23,6 +23,7 @@ import {
   ROWS_PER_RUN,
   TWO_OPTION_ROWS,
   WARM_UPS,
+  WARM_UP_MIN_BOX,
 } from "./tuning";
 import type { GateRow, KanaItem, KanjiItem, Progress, WordItem } from "./types";
 
@@ -51,8 +52,10 @@ function weightedDraw(
 }
 
 /**
- * The run's 14 prompts. Warm-ups first: the highest-box known items of the current level
- * (all known items while it has fewer than 3; ties at random). Then up to 4 new items in progression order, shuffled in among
+ * The run's 14 prompts. Warm-ups first: of the current level's known items at
+ * box 3 or higher (all known items while it has fewer than 3), the 3 seen
+ * longest ago, ties at random; with fewer than 3 strong items, the highest
+ * boxes. Then up to 4 new items in progression order, shuffled in among
  * known items drawn by weight 2^(5 − box), no repeats. Only while the pool is
  * too small to fill a run (early on) does a further weighted pass repeat items.
  */
@@ -83,11 +86,17 @@ export function select(rng: Rng, sel: Selection): Entry[] {
   }
   // Warm-ups come from the current level's known items once it has enough,
   // so placed lower levels don't fill them; else from all known items.
-  // Stable sort after a shuffle: highest box first, ties in random order.
+  // Among those at box >= WARM_UP_MIN_BOX, take the longest-unseen WARM_UPS
+  // (shuffle then stable sort: ties in random order) so they rotate. With
+  // fewer strong items: highest box first, ties in random order.
   const current = known.filter(sel.current);
-  const warm = shuffle(rng, current.length >= WARM_UPS ? current : known)
-    .sort((a, b) => box(b) - box(a))
-    .slice(0, WARM_UPS);
+  const base = current.length >= WARM_UPS ? current : known;
+  const strong = base.filter((e) => box(e) >= WARM_UP_MIN_BOX);
+  const warm = (
+    strong.length >= WARM_UPS
+      ? shuffle(rng, strong).sort((a, b) => sel.lastSeen(a) - sel.lastSeen(b))
+      : shuffle(rng, base).sort((a, b) => box(b) - box(a))
+  ).slice(0, WARM_UPS);
   const rest = known.filter((e) => !warm.includes(e));
   const need = ROWS_PER_RUN - warm.length - fresh.length;
   const out = [

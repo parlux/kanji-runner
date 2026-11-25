@@ -4,7 +4,7 @@ import { KANJI } from "../../src/core/kanji";
 import { mainReadings, showReading } from "../../src/core/distractors";
 import { createRng } from "../../src/core/rng";
 import { buildRun, selectEntries, unlockedPool } from "../../src/core/run";
-import { defaultProgress, itemKey } from "../../src/core/srs";
+import { defaultProgress, itemKey, recordRun } from "../../src/core/srs";
 import { buildTrack, isCharge } from "../../src/core/track";
 import { ROWS_PER_RUN, WARM_UPS } from "../../src/core/tuning";
 import type { GateRow, Progress } from "../../src/core/types";
@@ -66,18 +66,64 @@ describe("buildRun selection", () => {
     }
   });
 
-  it("warm-ups are the highest-box known items and are wall gates", () => {
+  it("warm-ups are the 3 longest-unseen strong items and are wall gates", () => {
     const boxes: Record<string, number> = {};
     hira.slice(0, 30).forEach((k, i) => {
-      boxes[`${k.char}:kana`] = i < 4 ? 5 : i % 4; // 4 items at box 5, rest ≤ 3
+      boxes[`${k.char}:kana`] = i < 6 ? 5 : i % 3; // 6 items at box 5, rest <= 2
+    });
+    const p = withItems(boxes);
+    hira.slice(0, 6).forEach((k, i) => {
+      const r = p.items[`${k.char}:kana`];
+      if (r) r.lastSeen = 100 - i; // the last of the six is the oldest
+    });
+    const oldest = hira.slice(3, 6).map((k) => `${k.char}:kana`);
+    for (const seed of forSeeds(50)) {
+      const rows = buildRun(seed, p, KANA, KANJI);
+      expect(rows.slice(0, WARM_UPS).map(keyOf).sort()).toEqual(
+        [...oldest].sort(),
+      );
+      const track = buildTrack(seed, ROWS_PER_RUN);
+      for (let q = 0; q < WARM_UPS; q++) expect(isCharge(track, q)).toBe(false);
+    }
+  });
+
+  it("warm-ups rotate through every strong item when all answers are right", () => {
+    const boxes: Record<string, number> = {};
+    const strong = hira.slice(0, 6).map((k) => `${k.char}:kana`);
+    for (const k of strong) boxes[k] = 5;
+    // many weak known items, so strong ones are rarely drawn outside the warm-ups
+    for (const k of hira.slice(6, 40)) boxes[`${k.char}:kana`] = 0;
+    for (const seed of forSeeds(30)) {
+      let p = withItems(boxes);
+      const turns: string[][] = [];
+      for (let run = 0; run < 4; run++) {
+        const rows = buildRun(seed + run, p, KANA, KANJI);
+        turns.push(rows.slice(0, WARM_UPS).map(keyOf));
+        p = recordRun(
+          p,
+          rows,
+          rows.map(() => true),
+          true,
+          100 * (run + 1),
+        );
+      }
+      // every strong item has a turn within two runs, none repeats before that
+      for (const pair of [turns.slice(0, 2), turns.slice(2, 4)])
+        expect([...pair.flat()].sort()).toEqual([...strong].sort());
+    }
+  });
+
+  it("with fewer than 3 strong items, warm-ups are the highest boxes", () => {
+    const boxes: Record<string, number> = {};
+    hira.slice(0, 30).forEach((k, i) => {
+      boxes[`${k.char}:kana`] = i < 2 ? 4 + i : i % 3; // box 4, 5, rest <= 2
     });
     const p = withItems(boxes);
     for (const seed of forSeeds(50)) {
-      const rows = buildRun(seed, p, KANA, KANJI);
-      for (const r of rows.slice(0, WARM_UPS))
-        expect(p.items[keyOf(r)]?.box).toBe(5);
-      const track = buildTrack(seed, ROWS_PER_RUN);
-      for (let q = 0; q < WARM_UPS; q++) expect(isCharge(track, q)).toBe(false);
+      const warm = buildRun(seed, p, KANA, KANJI).slice(0, WARM_UPS);
+      expect(warm.map(keyOf)).toContain(`${hira[0]?.char}:kana`);
+      expect(warm.map(keyOf)).toContain(`${hira[1]?.char}:kana`);
+      expect(p.items[keyOf(warm[2] as GateRow)]?.box).toBe(2);
     }
   });
 
