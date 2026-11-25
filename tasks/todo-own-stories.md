@@ -308,3 +308,19 @@ Not one implementer subagent: the orchestrator runs the loop per batch (2 levels
 - Overlap pre-pass: 2 suspects (毛 on judged close, 息 on pass); 9 of 17 close fails scored below 0.2, so the judge stays the gate.
 - Owner waived review: nothing seeded.
 - Tokens (each agent's final context size as reported; billed input over all turns is higher, mostly cache reads): writers 546,907 (134.5k–140.1k each), judges 501,576 (114.9k–141.7k each), total 1,048,483 for 8 levels, about 131k per level. Wall time about 15 minutes per batch with rewrites.
+
+### D7 round 3: Kanji 17–24, 4 batches in parallel (2026-11-25)
+Writers got a "lessons from the last round" list (accent-dependent sounds, made-up noises, place names, stock scenes, unnamed visible parts, `<sound>` format); judges were told to accept best real-word attempts for sounds with no English match (きょう, ぎょ, げん…).
+| Level | 1st pass fails (wrong / weak / close) | Rounds | Final |
+|---|---|---|---|
+| Kanji 17 | 0 / 0 / 1 (銀 meaning) | 2 | all pass |
+| Kanji 18 | 0 / 0 / 1 (相 meaning) | 2 | all pass |
+| Kanji 19 | 0 / 0 / 0 | 1 | all pass |
+| Kanji 20 | 1 / 0 / 0 (処 kun sounds out of order) | 2 | all pass |
+| Kanji 21 | 0 / 0 / 0 | 1 | all pass |
+| Kanji 22 | 0 / 0 / 0 | 1 | all pass |
+| Kanji 23 | 0 / 0 / 4 (容 材 様 総) | 2 | all pass |
+| Kanji 24 | 0 / 0 / 1 (細 meaning) | 2 | all pass |
+- 8 first-pass fails (round 2: 17); 7 are close, all caught by the side-by-side judge, none by the overlap score (1 suspect, 混 on, judged pass).
+- `stories:check`: 0 errors, 10 warnings, all flat-fallback kanji.
+- Tokens (final context size per agent): writers 593,578 (139.4k–161.5k), judges 475,219 (111.7k–123.5k), total 1,068,797 for 8 levels, about 134k per level.

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.24 (2026-11-25)
+
+- Our own stories for Kanji 17–24 (240 kanji).
+
 ## 1.6.23 (2026-11-24)
 
 - Our own stories for Kanji 9–16 (241 kanji).
