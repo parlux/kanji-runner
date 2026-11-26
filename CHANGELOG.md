@@ -3,6 +3,7 @@
 ## 1.6.29 (2026-11-26)
 
 - Our own stories for Kanji 41–48 (240 kanji).
+- 盲 has no kun story: its kun reading めくら is a slur. Story fields can now be left out on purpose (`null`).
 
 ## 1.6.28 (2026-11-26)
 

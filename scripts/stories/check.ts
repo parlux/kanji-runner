@@ -295,6 +295,10 @@ function checkStoryFile(
       const v = entry[f];
       if (v === undefined) {
         if (has[f]) r.errors.push(`${where}: ${f} missing`);
+      } else if (v === null && f !== "meaning") {
+        // Left out on purpose (e.g. 盲's kun is a slur): the card shows no story.
+        if (!has[f])
+          r.errors.push(`${where}: has ${f}, but the kanji has no main ${f}`);
       } else if (!has[f]) {
         r.errors.push(`${where}: has ${f}, but the kanji has no main ${f}`);
       } else if (typeof v !== "string") {

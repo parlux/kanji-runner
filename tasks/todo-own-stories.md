@@ -371,5 +371,5 @@ The 5-hour usage limit stopped 3 agents mid-round; they resumed after the reset.
 | Kanji 47 | 0 / 2 / 1 (懸 cluttered, 譲 kun "yuzu" is the reading; 繁) | 2 | all pass |
 | Kanji 48 | 0 / 1 / 2 (袖 muddled; 鋼 鈍) | 2 | all pass |
 - 17 first-pass fails (round 5: 8). 11 close; 3 kun stories used a whole "taco" for たく (gives たこ; taco is only the on keyword): add to the writers' lessons.
-- Open, owner's call: 盲 kun めくら is a slur; the story is neutral but teaches the word.
+- 盲 kun めくら is a slur: dropped (owner, 2026-11-26). `null` now means "left out on purpose" in check, type and README.
 - Tokens (final context size per agent): writers 572,148 (135.8k–144.9k), judges 514,611 (120.4k–133.9k), total 1,086,759 for 8 levels, about 136k per level.

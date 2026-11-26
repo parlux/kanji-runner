@@ -173,6 +173,25 @@ describe("validator rules", () => {
     expect(e).toMatch(/円: has kun, but the kanji has no main kun/);
   });
 
+  it("accepts on/kun null as left out on purpose, only where the reading exists", () => {
+    const d = good();
+    entry(d, "木").kun = null;
+    expect(errorsOf(d)).toEqual([]);
+    d.stories["kanji-02.json"] = {
+      level: "Kanji 2",
+      kanji: {
+        円: {
+          meaning: meaning("A coin is a <kanji>yen</kanji>."),
+          on: reading("An <sound>en</sound>velope holds the coin."),
+          kun: null,
+        },
+      },
+    };
+    expect(errorsOf(d).join("\n")).toMatch(
+      /円: has kun, but the kanji has no main kun/,
+    );
+  });
+
   it("needs a <sound> in on and kun, and bans <reading>", () => {
     const d = good();
     entry(d, "木").on = reading("A tree grows a mock trunk.");
