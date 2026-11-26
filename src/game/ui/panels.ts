@@ -117,11 +117,15 @@ export function createPanels(d: PanelDeps): Panels {
     else openLogin(d.sync, d.adopt);
   };
 
-  // a paused run shows its last answered gate with that item's study card
+  // a paused run or boss clash shows its last answered gate with that item's study card
   const pauseCard = (): void => {
     const scene = d.scene();
     // meaning mode: no card (it shows readings), the plain "Paused" instead
-    if (scene.kind !== "run" || !scene.paused || d.session().meaning)
+    if (
+      (scene.kind !== "run" && scene.kind !== "boss") ||
+      !scene.paused ||
+      d.session().meaning
+    )
       return syncPauseCard(null, "", () => {});
     const { run } = scene;
     // wait for our stories rather than flash the other card first

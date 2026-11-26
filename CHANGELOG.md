@@ -1,9 +1,13 @@
 # Changelog
 
-## 1.6.27 (2026-11-26)
+## 1.6.28 (2026-11-26)
 
 - Our own stories for Kanji 33–40 (240 kanji).
 - New sound keyword: きょう = Kyoto; the 11 earlier きょう stories now use it.
+
+## 1.6.27 (2026-11-26)
+
+- Tapping or pressing P during the boss clash pauses it and shows the last answer's study card, as in a run.
 
 ## 1.6.26 (2026-11-25)
 

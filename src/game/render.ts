@@ -33,7 +33,9 @@ export function render(
   }
   if (view3d && scene.kind === "boss") {
     ctx.clearRect(0, 0, w, h);
-    return renderBossOverlay(ctx, w, h, scene, view3d);
+    renderBossOverlay(ctx, w, h, scene, view3d);
+    if (scene.paused) renderPaused(ctx, w, h, hasPauseCard(scene.run, session));
+    return;
   }
   ctx.fillStyle = COLORS.bg;
   ctx.fillRect(0, 0, w, h);

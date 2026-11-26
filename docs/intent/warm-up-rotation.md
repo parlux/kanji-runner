@@ -1,6 +1,6 @@
 # Intent: rotate the warm-ups
 
-Status: confirmed by the owner, 2026-11-25, after an interview. Spec: `docs/specs/SPEC-warm-up-rotation.md`. Tasks: `tasks/todo-warm-up-rotation.md`. The owner waived spec approval: straight to the checkpoint.
+Status: confirmed by the owner, 2026-11-25, after an interview. Spec: `docs/specs/done/SPEC-warm-up-rotation.md`. Tasks: `tasks/done/todo-warm-up-rotation.md`. The owner waived spec approval: straight to the checkpoint. Shipped in 1.6.26; the owner ticked Checkpoint W on 2026-11-25.
 
 ## Statement of intent
 - **Outcome:** a run still opens with 3 questions you can answer, but they rotate through all the strong current-level items instead of being the same 3 every run.

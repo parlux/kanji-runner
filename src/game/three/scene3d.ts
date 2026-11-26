@@ -390,7 +390,7 @@ export function createView3d(canvas: HTMLCanvasElement): View3d | null {
     alpha: 1,
   };
   let haze: Haze = hazeFor(pose, 0, shapeDistance());
-  // animation time: stands still while the run is paused
+  // animation time: stands still while the run or the boss clash is paused
   let clock = 0;
   let last = performance.now();
   const v = new Vector3();
@@ -414,7 +414,7 @@ export function createView3d(canvas: HTMLCanvasElement): View3d | null {
       const now = performance.now();
       const dt = Math.min(0.1, (now - last) / 1000);
       last = now;
-      const paused = s.kind === "run" && s.paused;
+      const paused = s.paused === true;
       if (!paused) clock += dt;
       const place = bossPlace(s.run.track, pace);
       const size = s.kind === "boss" ? s.boss : bossHp(s.run, s.seed);

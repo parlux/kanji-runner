@@ -49,8 +49,15 @@ export type Scene =
       paused: boolean;
       cheer?: number;
     }
-  /** The clash after the last question: `t` seconds in, against a boss of `boss` units. */
-  | { kind: "boss"; seed: number; run: RunState; boss: number; t: number }
+  /** The clash after the last question: `t` seconds in, against a boss of `boss` units. Pausable like a run. */
+  | {
+      kind: "boss";
+      seed: number;
+      run: RunState;
+      boss: number;
+      t: number;
+      paused?: boolean;
+    }
   /** `boss` is null when the army died before reaching the boss. */
   | { kind: "end"; seed: number; run: RunState; boss: BossResult | null };
 
@@ -263,7 +270,10 @@ export function handleAction(
     case "start":
       return startAction(scene, action, newSeed, session);
     case "boss":
-      return { scene, session };
+      return {
+        scene: action === "pause" ? { ...scene, paused: !scene.paused } : scene,
+        session,
+      };
     // Play again starts the next run as the start screen's Play does; Home goes back
     case "end":
       if (action === "confirm")
@@ -292,7 +302,8 @@ export function updateScene(
   dragDx = 0,
   pace = 1,
 ): Scene {
-  if (scene.kind === "boss") return stepBoss(scene, dt, steer, dragDx);
+  if (scene.kind === "boss")
+    return scene.paused ? scene : stepBoss(scene, dt, steer, dragDx);
   if (scene.kind !== "run" || scene.paused) return scene;
   const { seed } = scene;
   if (scene.cheer !== undefined) {

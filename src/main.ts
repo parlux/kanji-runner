@@ -90,13 +90,12 @@ const act = (action: Action): void => {
   session = next.session;
 };
 const steerAxis = bindKeys(act);
-// a tap pauses or resumes a run, does nothing during the boss clash, hits the end
+// a tap pauses or resumes a run or the boss clash, hits the end
 // screen's buttons (Play again, Study, Home; elsewhere nothing), and on the start
 // screen hits the placement controls or else starts a run
 const takeDrag = bindDrag(stage.canvas, (x, y) => {
   if (panels.anyOpen()) return;
-  if (scene.kind === "run") return act("pause");
-  if (scene.kind === "boss") return;
+  if (scene.kind === "run" || scene.kind === "boss") return act("pause");
   if (scene.kind === "end") {
     const w = window.innerWidth;
     const h = window.innerHeight;

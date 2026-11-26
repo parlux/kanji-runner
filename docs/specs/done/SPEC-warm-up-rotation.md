@@ -1,6 +1,6 @@
 # Spec: rotate the warm-ups
 
-Intent: `docs/intent/warm-up-rotation.md` (2026-11-25). Tasks: `tasks/todo-warm-up-rotation.md`. Extends the warm-up rule in `done/SPEC.md` ("Warm-ups") and `done/SPEC-wanikani.md` (warm-ups "as in v1"); where they disagree, this spec wins.
+Intent: `docs/intent/warm-up-rotation.md` (2026-11-25). Tasks: `tasks/done/todo-warm-up-rotation.md`. Extends the warm-up rule in `SPEC.md` ("Warm-ups") and `SPEC-wanikani.md` (warm-ups "as in v1"); where they disagree, this spec wins.
 
 ## Problem
 Warm-ups (the first `WARM_UPS` = 3 questions) are the highest-box known items of the current level, ties at random. Answering a warm-up right keeps it at box 5, so once exactly 3 items sit at box 5 they are the warm-ups of every run.
