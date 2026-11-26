@@ -22,7 +22,7 @@ import { studyOffered, type Scene, type Session } from "../scenes";
 import { createWkState, type WkState } from "../wkstate";
 import { createWkClient } from "../../wanikani/client";
 import { createStoryStore } from "../../wanikani/storystore";
-import { syncPauseCard } from "./pausecard";
+import { hidePauseCard, syncPauseCard } from "./pausecard";
 import { openSettings, settingsOpen, syncSettings } from "./settings";
 import { openStudy, studyOpen } from "./study";
 import { dictionary, dictionaryReady, loadDictionary } from "../dictionary";
@@ -117,22 +117,27 @@ export function createPanels(d: PanelDeps): Panels {
     else openLogin(d.sync, d.adopt);
   };
 
-  // a paused run or boss clash shows its last answered gate with that item's study card
+  const setSpeed = (s: SpeedPreset): void => {
+    speed = s;
+    saveSpeed(store, speed);
+  };
+
+  // a paused run or boss clash shows the pause panel: with an answer, the last
+  // answered gate and that item's study card (never in meaning mode: it shows readings)
   const pauseCard = (): void => {
     const scene = d.scene();
-    // meaning mode: no card (it shows readings), the plain "Paused" instead
-    if (
-      (scene.kind !== "run" && scene.kind !== "boss") ||
-      !scene.paused ||
-      d.session().meaning
-    )
-      return syncPauseCard(null, "", () => {});
+    if ((scene.kind !== "run" && scene.kind !== "boss") || !scene.paused)
+      return hidePauseCard();
     const { run } = scene;
+    const pick = { current: speed, onSpeed: setSpeed };
+    const resume = (): void => d.act("pause");
+    if (d.session().meaning || run.results.length === 0)
+      return syncPauseCard(null, "plain", pick, resume);
     // wait for our stories rather than flash the other card first
     const levels = levelsOf(run.rows.map((r) => r.prompt));
     if (!dictionaryReady(levels)) {
       void loadDictionary(levels);
-      return syncPauseCard(null, "", () => {});
+      return syncPauseCard(null, "plain", pick, resume);
     }
     const last = lastAnswer(
       run.rows,
@@ -147,7 +152,8 @@ export function createPanels(d: PanelDeps): Panels {
     syncPauseCard(
       last,
       `${scene.seed}:${run.results.length}`,
-      () => d.act("pause"),
+      pick,
+      resume,
       onFlag,
     );
   };
@@ -165,10 +171,7 @@ export function createPanels(d: PanelDeps): Panels {
           hasToken: wk.token() !== null,
           sync: !d.session().meaning ? d.sync.status() : null,
         }),
-        onSpeed: (s) => {
-          speed = s;
-          saveSpeed(store, speed);
-        },
+        onSpeed: setSpeed,
         onToken: () => openToken(),
         onSync: openSync,
         build: __BUILD__,

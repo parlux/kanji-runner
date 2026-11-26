@@ -1,7 +1,6 @@
 import type { Scene, Session } from "./scenes";
 import type { SyncStatus } from "../sync/sync";
 import {
-  hasPauseCard,
   renderBossOverlay,
   renderPaused,
   renderRunOverlay,
@@ -28,13 +27,13 @@ export function render(
   if (view3d && scene.kind === "run") {
     ctx.clearRect(0, 0, w, h);
     renderRunOverlay(ctx, w, h, scene.run, view3d);
-    if (scene.paused) renderPaused(ctx, w, h, hasPauseCard(scene.run, session));
+    if (scene.paused) renderPaused(ctx, w, h);
     return;
   }
   if (view3d && scene.kind === "boss") {
     ctx.clearRect(0, 0, w, h);
     renderBossOverlay(ctx, w, h, scene, view3d);
-    if (scene.paused) renderPaused(ctx, w, h, hasPauseCard(scene.run, session));
+    if (scene.paused) renderPaused(ctx, w, h);
     return;
   }
   ctx.fillStyle = COLORS.bg;

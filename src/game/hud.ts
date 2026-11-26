@@ -2,7 +2,7 @@ import { bossWon } from "../core/boss";
 import { crowdWidth } from "../core/crowd";
 import type { RunState } from "../core/sim";
 import { streakTier, type StreakTier } from "../core/scoring";
-import type { Scene, Session } from "./scenes";
+import type { Scene } from "./scenes";
 import {
   CROWD_DEPTH,
   DIST_SCALE,
@@ -33,23 +33,10 @@ const TIER_POPUP: Record<StreakTier, string> = {
 /** What the 3D view gives the overlay: where things are on screen, how hazy, and the boss. */
 export type TrackView = { project: Projector; haze: Haze; boss?: BossView };
 
-/** Whether a paused run shows the DOM pause card (never in meaning mode: it shows readings). */
-export const hasPauseCard = (run: RunState, session: Session): boolean =>
-  run.results.length > 0 && !session.meaning;
-
-/** With `lastPanel`, the DOM pause panel (src/game/pausecard.ts) shows the title and hint. */
-export function renderPaused(
-  ctx: Ctx,
-  w: number,
-  h: number,
-  lastPanel: boolean,
-): void {
+/** The pause dimming and build label; the DOM pause panel (src/game/ui/pausecard.ts) has the rest. */
+export function renderPaused(ctx: Ctx, w: number, h: number): void {
   ctx.fillStyle = "rgba(0,0,0,0.6)";
   ctx.fillRect(0, 0, w, h);
-  if (!lastPanel) {
-    text(ctx, "Paused", w / 2, h / 2 - 20, 40);
-    text(ctx, "Tap or P to resume", w / 2, h / 2 + 24, 20, COLORS.dim);
-  }
   text(ctx, __BUILD__, w / 2, h - 24, 14, COLORS.dim);
 }
 

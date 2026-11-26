@@ -1,4 +1,5 @@
 import type { LastAnswer } from "../../core/study";
+import { SPEED_PRESETS, type SpeedPreset } from "../../core/tuning";
 import { cardEl, installStudyCss, type FlagFn } from "./study";
 
 const CSS = `
@@ -17,6 +18,11 @@ const CSS = `
 .kr-pause .verdict .bad { color: #ff6b6b; font-weight: 600; }
 .kr-pause .scroll { min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 .kr-pause .card .tag { display: none; }
+.kr-pause .seg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px; padding: 4px; background: #1d2230; border: 1px solid #5a6478; border-radius: 12px; }
+.kr-pause .seg button { font: inherit; cursor: pointer; height: 44px; border: 0;
+  border-radius: 9px; background: none; color: #9aa3b5; }
+.kr-pause .seg button[aria-checked="true"] { background: #2f6b48; color: #f2f2f2; font-weight: 600; }
 .kr-pause .hint { text-align: center; font-size: 15px; color: #9aa3b5; }
 `;
 
@@ -37,8 +43,38 @@ function span(className: string, text: string): HTMLElement {
   return s;
 }
 
+const SPEEDS = Object.keys(SPEED_PRESETS) as SpeedPreset[];
+
+/** The speed row's current preset and what a tap on a preset does. */
+export type PauseSpeed = {
+  current: SpeedPreset;
+  onSpeed: (s: SpeedPreset) => void;
+};
+
+function speedRow({ current, onSpeed }: PauseSpeed): HTMLElement {
+  const row = document.createElement("div");
+  row.className = "seg";
+  row.setAttribute("role", "radiogroup");
+  row.setAttribute("aria-label", "Speed");
+  for (const s of SPEEDS) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.textContent = s.charAt(0).toUpperCase() + s.slice(1);
+    b.setAttribute("role", "radio");
+    b.setAttribute("aria-checked", String(s === current));
+    b.onclick = (e) => {
+      // a speed change does not resume
+      e.stopPropagation();
+      onSpeed(s);
+    };
+    row.append(b);
+  }
+  return row;
+}
+
 function panel(
-  last: LastAnswer,
+  last: LastAnswer | null,
+  speed: PauseSpeed,
   onTap: () => void,
   onFlag?: FlagFn,
 ): HTMLElement {
@@ -51,44 +87,52 @@ function panel(
   box.onclick = onTap;
   const title = document.createElement("h2");
   title.textContent = "Paused";
-  const verdict = document.createElement("div");
-  verdict.className = "verdict";
-  verdict.append(
-    span("kind", `Last: ${ASKED[last.type]}`),
-    span("", last.prompt),
-    last.correct
-      ? span("ok", `✓ ${last.picked}`)
-      : span("bad", `✗ ${last.picked}`),
-  );
-  if (!last.correct) verdict.append(span("ok", `→ ${last.answer}`));
-  const scroll = document.createElement("div");
-  scroll.className = "scroll";
-  if (last.card) scroll.append(cardEl(last.card, onFlag));
+  box.append(title);
+  if (last) {
+    const verdict = document.createElement("div");
+    verdict.className = "verdict";
+    verdict.append(
+      span("kind", `Last: ${ASKED[last.type]}`),
+      span("", last.prompt),
+      last.correct
+        ? span("ok", `✓ ${last.picked}`)
+        : span("bad", `✗ ${last.picked}`),
+    );
+    if (!last.correct) verdict.append(span("ok", `→ ${last.answer}`));
+    const scroll = document.createElement("div");
+    scroll.className = "scroll";
+    if (last.card) scroll.append(cardEl(last.card, onFlag));
+    box.append(verdict, scroll);
+  }
   const hint = document.createElement("div");
   hint.className = "hint";
   hint.textContent = "Tap or P to resume";
-  box.append(title, verdict, scroll, hint);
+  box.append(speedRow(speed), hint);
   root.append(box);
   return root;
 }
 
+/** Removes the pause panel (not paused). */
+export function hidePauseCard(): void {
+  shown?.el.remove();
+  shown = null;
+}
+
 /**
- * Shows the pause screen's last-answer panel, or removes it for null. Call
- * every frame: it rebuilds only when `key` changes. A tap on the panel calls
- * `onTap` (resume); taps around it fall through to the canvas.
+ * Shows the pause panel: the title, the last answer with its study card (null:
+ * none), the speed row and the hint. Call every frame: it rebuilds only when
+ * `key` or the speed changes. A tap on the panel calls `onTap` (resume); taps
+ * around it fall through to the canvas.
  */
 export function syncPauseCard(
   last: LastAnswer | null,
   key: string,
+  speed: PauseSpeed,
   onTap: () => void,
   onFlag?: FlagFn,
 ): void {
-  if (!last) {
-    shown?.el.remove();
-    shown = null;
-    return;
-  }
-  if (shown?.key === key) return;
+  const full = `${key}:${speed.current}`;
+  if (shown?.key === full) return;
   shown?.el.remove();
   installStudyCss();
   if (!document.getElementById("kr-pause-css")) {
@@ -97,7 +141,7 @@ export function syncPauseCard(
     style.textContent = CSS;
     document.head.append(style);
   }
-  const el = panel(last, onTap, onFlag);
+  const el = panel(last, speed, onTap, onFlag);
   document.body.append(el);
-  shown = { el, key };
+  shown = { el, key: full };
 }
