@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.31 (2026-11-26)
+
+- Change speed from the pause screen: a Relaxed / Normal / Fast row on every pause.
+
 ## 1.6.30 (2026-11-26)
 
 - Fix: a test type left 1.6.29's check failing (null story fields).
