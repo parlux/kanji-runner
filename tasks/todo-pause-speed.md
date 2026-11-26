@@ -1,6 +1,7 @@
 # Tasks: change speed from the pause screen
 
 Spec: `docs/specs/SPEC-pause-speed.md` (2026-11-26). Intent: `docs/intent/pause-speed.md`. Started 2026-11-26. The owner waived spec approval: straight to the checkpoint. Version: next patch after `main`'s (own-stories round keeps 1.7.0).
+Checkpoint P: https://claude.ai/artifact/EhHkQ634HdBMcJDjHGAnB8
 Every task: `npm run check` passes before it is checked off.
 
 ### Task P1: Speed row on every pause screen (sonnet)
