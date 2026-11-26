@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.6.30 (2026-11-26)
+
+- Fix: a test type left 1.6.29's check failing (null story fields).
+
+## 1.6.29 (2026-11-26)
+
+- Our own stories for Kanji 41–48 (240 kanji).
+- 盲 has no kun story: its kun reading めくら is a slur. Story fields can now be left out on purpose (`null`).
+
+## 1.6.28 (2026-11-26)
+
+- Our own stories for Kanji 33–40 (240 kanji).
+- New sound keyword: きょう = Kyoto; the 11 earlier きょう stories now use it.
+
 ## 1.6.27 (2026-11-26)
 
 - Tapping or pressing P during the boss clash pauses it and shows the last answer's study card, as in a run.

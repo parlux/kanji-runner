@@ -341,3 +341,35 @@ Writers' lessons list now leads with "skip the most literal picture of the parts
 - きょう has no keyword: used in 5 kanji in Kanji 29–30 alone ("key" + "Oh!"). A shared keyword is the owner's call.
 - `stories:check`: 0 errors; warnings only on flat-fallback kanji.
 - Tokens (final context size per agent): writers 570,603 (138.9k–146.2k), judges 504,093 (117.0k–135.8k), total 1,074,696 for 8 levels, about 134k per level.
+
+### D7 round 5: Kanji 33–40, plus the きょう keyword (2026-11-25/26)
+Owner asked for a shared きょう keyword: Kyoto (sounds.json; first part = held "kyoh"; an allowed place name like ryokan/gyoza are loanwords). 11 earlier on stories (Kanji 11–32) rewritten to use it; judge rule: a character must say the name, not an object holding a note. 6 passed first time, 5 after one round.
+STYLE.md now records the owner's 2026-11-20 cup-vowel rule (the u of cup counts as あ); judges had kept failing tub/duck/won. Three such fails (硬 委 腕) were overruled.
+The 5-hour usage limit stopped 3 agents mid-round; they resumed after the reset.
+| Level | 1st pass fails (wrong / weak / close) | Rounds | Final |
+|---|---|---|---|
+| Kanji 33 | 0 / 1 / 1 (善 sheep + its horns; 則) + 2 overruled | 2 | all pass |
+| Kanji 34 | 0 / 0 / 1 (鳴 kun) + 1 overruled | 2 | all pass |
+| Kanji 35 | 0 / 0 / 0 | 1 | all pass |
+| Kanji 36 | 1 / 0 / 2 (漁 on gyoza for short ぎょ; 踏 州) | 2 | all pass |
+| Kanji 37 | 0 / 1 / 0 (麻 cluttered) | 2 | all pass |
+| Kanji 38 | 0 / 0 / 0 | 1 | all pass |
+| Kanji 39 | 0 / 0 / 0 | 1 | all pass |
+| Kanji 40 | 0 / 1 / 0 (択 taco half-highlighted, fixed by hand) | 1 | all pass |
+- 8 real first-pass fails (round 4: 11).
+- Tokens (final context size per agent; the 3 resumed agents may under-report): writers 583,649, judges 491,435, total 1,075,084 for 8 levels (about 134k per level); Kyoto rewrite + judge 153,188 more.
+
+### D7 round 6: Kanji 41–48 (2026-11-26)
+| Level | 1st pass fails (wrong / weak / close) | Rounds | Final |
+|---|---|---|---|
+| Kanji 41 | 0 / 0 / 1 (灰) | 2 | all pass |
+| Kanji 42 | 1 / 0 / 4 (蓄 kun taco=たこ; 脅 殿 署 meaning, 軟 on) | 2 | all pass |
+| Kanji 43 | 1 / 0 / 0 (巧 kun taco=たこ) | 2 | all pass |
+| Kanji 44 | 0 / 0 / 1 (遂) | 2 | all pass |
+| Kanji 45 | 1 / 0 / 1 (雇 kun "toe" long; 肩) | 2 | all pass |
+| Kanji 46 | 1 / 0 / 0 (匠 kun taco=たこ) | 2 | all pass |
+| Kanji 47 | 0 / 2 / 1 (懸 cluttered, 譲 kun "yuzu" is the reading; 繁) | 2 | all pass |
+| Kanji 48 | 0 / 1 / 2 (袖 muddled; 鋼 鈍) | 2 | all pass |
+- 17 first-pass fails (round 5: 8). 11 close; 3 kun stories used a whole "taco" for たく (gives たこ; taco is only the on keyword): add to the writers' lessons.
+- 盲 kun めくら is a slur: dropped (owner, 2026-11-26). `null` now means "left out on purpose" in check, type and README.
+- Tokens (final context size per agent): writers 572,148 (135.8k–144.9k), judges 514,611 (120.4k–133.9k), total 1,086,759 for 8 levels, about 136k per level.

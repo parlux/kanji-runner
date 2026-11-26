@@ -108,7 +108,7 @@ const good = (): Dictionary => ({
     },
   },
 });
-type Entry = Record<string, string>;
+type Entry = Record<string, string | null>;
 const entry = (d: Dictionary, c: string) =>
   (d.stories["kanji-01.json"] as { kanji: Record<string, Entry> }).kanji[
     c
@@ -171,6 +171,25 @@ describe("validator rules", () => {
     const e = errorsOf(d).join("\n");
     expect(e).toMatch(/木: kun missing/);
     expect(e).toMatch(/円: has kun, but the kanji has no main kun/);
+  });
+
+  it("accepts on/kun null as left out on purpose, only where the reading exists", () => {
+    const d = good();
+    entry(d, "木").kun = null;
+    expect(errorsOf(d)).toEqual([]);
+    d.stories["kanji-02.json"] = {
+      level: "Kanji 2",
+      kanji: {
+        円: {
+          meaning: meaning("A coin is a <kanji>yen</kanji>."),
+          on: reading("An <sound>en</sound>velope holds the coin."),
+          kun: null,
+        },
+      },
+    };
+    expect(errorsOf(d).join("\n")).toMatch(
+      /円: has kun, but the kanji has no main kun/,
+    );
   });
 
   it("needs a <sound> in on and kun, and bans <reading>", () => {

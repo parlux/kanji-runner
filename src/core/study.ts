@@ -47,7 +47,12 @@ type StoryVocab = {
 type KanjiCard = Extract<StudyCard, { kind: "kanji" }>;
 
 /** Our own story for one kanji (`dictionary/stories/`): meaning, and one per main reading. */
-export type DictEntry = { meaning: string; on?: string; kun?: string };
+/** `on`/`kun` null: left out on purpose (the card shows no story for it). */
+export type DictEntry = {
+  meaning: string;
+  on?: string | null;
+  kun?: string | null;
+};
 
 /** Our own dictionary: part names by component glyph, and story entries by kanji. */
 export type Dictionary = {
