@@ -388,3 +388,17 @@ The 5-hour usage limit stopped all 4 writers before they saved anything; they re
 | Kanji 56 | 0 / 2 / 0 (郎 kun unlinked; 憶 on half-highlighted, fixed by hand) | 2 | all pass |
 - 15 first-pass fails (round 6: 17).
 - Tokens (final context size per agent; resumed writers may under-report): writers 581,994 (137.3k–154.2k), judges 529,050 (130.1k–133.7k), total 1,111,044 for 8 levels, about 139k per level.
+
+### D7 round 8: Kanji 57–64 (2026-11-26)
+| Level | 1st pass fails (wrong / weak / close) | Rounds | Final |
+|---|---|---|---|
+| Kanji 57 | 0 / 1 / 0 (尉 innuendo, fixed by hand) | 2 | all pass |
+| Kanji 58 | 0 / 0 / 1 (伯) | 2 | all pass |
+| Kanji 59 | 1 / 1 / 0 (后 part + own sub-part; 伐 kun unlinked) | 2 | all pass |
+| Kanji 60 | 0 / 0 / 1 (紺 on) | 2 | all pass |
+| Kanji 61 | 0 / 1 / 1 (貼 kun okurigana highlighted; 帽) | 2 | all pass |
+| Kanji 62 | 0 / 1 / 3 (肪 body-shaming; 腫 閑 娠) | 2 | all pass |
+| Kanji 63 | 0 / 1 / 0 (肯 kun list) | 2 | all pass |
+| Kanji 64 | 0 / 1 / 0 (曹 muddled; 諭 recast, it shared 癒's cast) | 2 | all pass |
+- 14 first-pass fails (round 7: 15). WaniKani's library has no stories for some rarer kanji here, so fewer entries were compared (53–83 per level).
+- Tokens (final context size per agent): writers 569,233 (138.2k–148.2k), judges 475,495 (116.3k–121.0k), total 1,044,728 for 8 levels, about 131k per level.
