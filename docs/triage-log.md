@@ -52,3 +52,4 @@ One row per owner request, written by the `triage` skill (`.claude/skills/triage
 | 2026-11-21 | Review page: Kanji 1–6 parts first / filter | fix | One tool page plus one seed field, clear outcome | |
 | 2026-11-24 | Review page: "mast" part (𢆉) not rendering | fix | One tool page: font fallback plus a drawn glyph, clear outcome | |
 | 2026-11-25 | Warm-ups always the same 3 top-box kanji: rotate strong items, least-recently-seen first | sdd | Changes core SRS item selection (fix check 5) | owner: "just fix it", then back to sdd |
+| 2026-11-26 | No study card when pausing during the boss fight | fix | Pause was never wired for the boss clash; local change in game/, clear outcome | |

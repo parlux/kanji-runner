@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.27 (2026-11-26)
+
+- Tapping or pressing P during the boss clash pauses it and shows the last answer's study card, as in a run.
+
 ## 1.6.26 (2026-11-25)
 
 - Warm-ups rotate through your strong current-level items, longest-unseen first, instead of repeating the same 3.

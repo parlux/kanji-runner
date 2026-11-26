@@ -386,9 +386,21 @@ describe("boss", () => {
     });
   });
 
-  it("ignores input during the clash", () => {
+  it("ignores input other than pause during the clash", () => {
     const boss: Scene = { kind: "boss", seed: 7, run: run.run, boss: 3, t: 0 };
     expect(handleAction(boss, "confirm", () => 1, session).scene).toBe(boss);
+  });
+
+  it("pauses and resumes the clash: time and steering stand still while paused", () => {
+    const boss: Scene = { kind: "boss", seed: 7, run: run.run, boss: 3, t: 1 };
+    const paused = handleAction(boss, "pause", () => 1, session).scene;
+    expect(paused).toMatchObject({ kind: "boss", paused: true, t: 1 });
+    expect(updateScene(paused, STEP, -1, -1)).toBe(paused);
+    const resumed = handleAction(paused, "pause", () => 1, session).scene;
+    expect(resumed).toMatchObject({ kind: "boss", paused: false });
+    const next = updateScene(resumed, STEP, 0);
+    if (next.kind !== "boss") throw new Error(`got ${next.kind}`);
+    expect(next.t).toBeCloseTo(1 + STEP, 9);
   });
 
   it("steers during the clash as in the run, clamped, without changing the result", () => {
@@ -430,11 +442,6 @@ describe("boss", () => {
     expect(n1).toBe(n0);
     if (e0.kind !== "end" || e1.kind !== "end") throw new Error("end");
     expect(e1.boss).toEqual(e0.boss);
-  });
-
-  it("ignores taps during the clash", () => {
-    const boss: Scene = { kind: "boss", seed: 7, run: run.run, boss: 3, t: 0 };
-    expect(handleAction(boss, "pause", () => 1, session).scene).toBe(boss);
   });
 
   const reached = (
