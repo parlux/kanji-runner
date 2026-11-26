@@ -108,7 +108,7 @@ const good = (): Dictionary => ({
     },
   },
 });
-type Entry = Record<string, string>;
+type Entry = Record<string, string | null>;
 const entry = (d: Dictionary, c: string) =>
   (d.stories["kanji-01.json"] as { kanji: Record<string, Entry> }).kanji[
     c
