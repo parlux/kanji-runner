@@ -1,6 +1,6 @@
 # Intent: change speed from the pause screen
 
-Status: confirmed by the owner, 2026-11-26, after an interview. Spec: `docs/specs/SPEC-pause-speed.md`. Tasks: `tasks/todo-pause-speed.md`. The owner waived spec approval: straight to the checkpoint.
+Status: confirmed by the owner, 2026-11-26, after an interview. Spec: `docs/specs/done/SPEC-pause-speed.md`. Tasks: `tasks/done/todo-pause-speed.md`. The owner waived spec approval: straight to the checkpoint. Shipped in 1.6.32; the owner ticked Checkpoint P on 2026-11-26.
 
 ## Statement of intent
 - **Outcome:** every pause screen (run or boss clash, with or without a study card) shows a Relaxed / Normal / Fast row. One tap changes the speed; the run continues at it on resume.

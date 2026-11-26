@@ -7,7 +7,6 @@ Epic: [Useful Japanese, then drop WaniKani](useful-japanese.md). Its rounds come
 
 ## In progress
 - [Our own stories, no WaniKani needed](own-stories.md): epic round 3; tasks `tasks/todo-own-stories.md`.
-- Speed on the pause screen (owner request, no idea file): tasks `tasks/todo-pause-speed.md`.
 
 ## Next
 1. [Show overall progress](overall-progress.md): epic round 4; levels, plus coverage and JLPT share from round 2, as the yardstick for the assessment.
