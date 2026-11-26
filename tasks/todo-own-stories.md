@@ -373,3 +373,18 @@ The 5-hour usage limit stopped 3 agents mid-round; they resumed after the reset.
 - 17 first-pass fails (round 5: 8). 11 close; 3 kun stories used a whole "taco" for たく (gives たこ; taco is only the on keyword): add to the writers' lessons.
 - 盲 kun めくら is a slur: dropped (owner, 2026-11-26). `null` now means "left out on purpose" in check, type and README.
 - Tokens (final context size per agent): writers 572,148 (135.8k–144.9k), judges 514,611 (120.4k–133.9k), total 1,086,759 for 8 levels, about 136k per level.
+
+### D7 round 7: Kanji 49–56 (2026-11-26)
+The 5-hour usage limit stopped all 4 writers before they saved anything; they resumed after the reset.
+| Level | 1st pass fails (wrong / weak / close) | Rounds | Final |
+|---|---|---|---|
+| Kanji 49 | 0 / 0 / 1 (騎 on) | 2 | all pass |
+| Kanji 50 | 0 / 0 / 1 (鉢) | 2 | all pass |
+| Kanji 51 | 1 / 0 / 2 (懇 kun bingo = long ご; 騰 胆) | 2 | all pass |
+| Kanji 52 | 0 / 1 / 3 (亜 cluttered; 秒 刷 軒) | 2 | all pass |
+| Kanji 53 | 0 / 0 / 1 (墨 kun) | 2 | all pass |
+| Kanji 54 | 0 / 1 / 0 (嬢: child at work) | 2 | all pass |
+| Kanji 55 | 0 / 0 / 1 (幣 on; round 2 still close, fixed by hand) | 3 | all pass |
+| Kanji 56 | 0 / 2 / 0 (郎 kun unlinked; 憶 on half-highlighted, fixed by hand) | 2 | all pass |
+- 15 first-pass fails (round 6: 17).
+- Tokens (final context size per agent; resumed writers may under-report): writers 581,994 (137.3k–154.2k), judges 529,050 (130.1k–133.7k), total 1,111,044 for 8 levels, about 139k per level.

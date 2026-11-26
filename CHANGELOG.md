@@ -1,8 +1,12 @@
 # Changelog
 
-## 1.6.31 (2026-11-26)
+## 1.6.32 (2026-11-26)
 
 - Change speed from the pause screen: a Relaxed / Normal / Fast row on every pause.
+
+## 1.6.31 (2026-11-26)
+
+- Our own stories for Kanji 49–56 (240 kanji).
 
 ## 1.6.30 (2026-11-26)
 
