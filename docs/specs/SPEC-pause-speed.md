@@ -1,6 +1,6 @@
 # Spec: change speed from the pause screen
 
-Intent: `docs/intent/pause-speed.md` (2026-11-26). Tasks: `tasks/todo-pause-speed.md`. Extends the pause screen (`done/SPEC-summary.md` and later: the pause card) and the speed setting.
+Intent: `docs/intent/pause-speed.md` (2026-11-26). Tasks: `tasks/todo-pause-speed.md`. Extends the pause card (`done/SPEC-reveal.md`) and the speed setting.
 
 ## Today
 - Speed presets `SPEED_PRESETS` (relaxed 0.7, normal 0.85, fast 1.0) are read every frame (`src/main.ts`, `panels.speed()`), so a change applies at once. Settings saves them with `saveSpeed` (device only, not synced).
