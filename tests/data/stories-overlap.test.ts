@@ -91,7 +91,7 @@ describe("overlap reports", () => {
     );
     const lines = report.split("\n");
     expect(lines[0]).toBe(
-      `overlap kanji-01.json: 1 entries compared, 1 suspect (score >= ${SUSPECT})`,
+      `overlap kanji-001.json: 1 entries compared, 1 suspect (score >= ${SUSPECT})`,
     );
     expect(lines[1]).toMatch(/^0\.\d\d SUSPECT 休 meaning/);
   });

@@ -1,0 +1,38 @@
+{
+  "level": "Kanji 40",
+  "kanji": {
+    "信": {
+      "meaning": "A stranger hangs his hat on your <part>coat hook</part> and gives a <part>speech</part>: 'Lend me your bike, I'll bring it back by six.' No proof, no deposit. You hand it over anyway. That's <kanji>faith</kanji>.",
+      "on": "At six on the dot he's back with your bike, limping: he banged his <sound>shin</sound> on the pedal."
+    },
+    "刻": {
+      "meaning": "An <part>acrobat</part> tumbles across the room and, mid-flip, flicks a <part>dagger</part> at a block of wood. Scratch, scratch: each flip carves one more letter of her name. When she lands, it's there for good. She can <kanji>engrave</kanji> anything.",
+      "on": "A <sound>cock</sound>atoo lands on the block and pecks a curly tail onto the last letter.",
+      "kun": "Next she carves a <sound>key</sound> into the wood and sells it at the ba<sound>za</sound>ar."
+    },
+    "走": {
+      "meaning": "Your feet kick up <part>soil</part> as you race down the track, one foot pushing off like a <part>skate</part> blade, long stride after long stride. Wind in your hair, heart pounding: you <kanji>run</kanji>.",
+      "on": "Then you step on a bar of <sound>soa</sound>p and slide the rest of the way.",
+      "kun": "You run past a <sound>hu</sound>t where a knight waves his <sound>shi</sound>eld and cheers you on."
+    },
+    "起": {
+      "meaning": "A <part>runner</part> is fast asleep on the track when a <part>cobra</part> slithers over and hisses right in her ear. Her eyes snap open and she's off like a shot. Nothing will <kanji>rouse</kanji> you faster.",
+      "on": "She had locked the cobra in a box, but it stole the <sound>key</sound>.",
+      "kun": "'<sound>Oh</sound>!' she gasps as the cobra's tongue tickles her nose, and she leaps out of bed."
+    },
+    "馬": {
+      "meaning": "A tall shape with a flowing mane gallops across a bed of <part>hot coals</part>, four hooves flicking up sparks. It snorts, it neighs, and it never once slows down. It's a brave <kanji>horse</kanji>.",
+      "on": "After its run, the coals are just right for a <sound>ba</sound>rbecue.",
+      "kun": "The horse slurps a bowl of <sound>u</sound>don and drinks tea from a giant <sound>mu</sound>g."
+    },
+    "駅": {
+      "meaning": "Long ago a <part>horse</part> ran from town to town, and at every stop someone would <part>measure</part> out oats and water. Fresh horse in, tired horse out. Today the trains still stop at the same spot: the <kanji>station</kanji>.",
+      "on": "On the platform, a spiky <sound>ech</sound>idna waits for the next train."
+    },
+    "返": {
+      "meaning": "You roll a ball up a <part>ramp</part>, but the ramp is <part>anti</part> everything: it shoves the ball straight back down to your feet. Up it goes again, and back it comes. Whatever you send, it will <kanji>return</kanji>.",
+      "on": "A <sound>hen</sound> at the top kicks the ball back down with one claw.",
+      "kun": "You give a <sound>ca</sound>rp back to the pond and an <sound>e</sound>gg back to the hen."
+    }
+  }
+}

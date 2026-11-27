@@ -1,0 +1,33 @@
+{
+  "level": "Kanji 8",
+  "kanji": {
+    "週": {
+      "meaning": "A runner does one <part>lap</part> of the track each day, then rolls down the <part>ramp</part> counting out loud: Monday, Tuesday... When she says Sunday she reaches the bottom: one whole <kanji>week</kanji>.",
+      "on": "At the bottom the runner kicks off a <sound>shoe</sound>, one for each day of the week."
+    },
+    "先": {
+      "meaning": "A mound of <part>soil</part> with a <part>slash</part> of weed sticking out of it grows a pair of <part>legs</part> and races everyone to the finish line. It always gets there first, long <kanji>before</kanji> the rest.",
+      "on": "A <sound>sen</sound>try at the finish line salutes the muddy winner.",
+      "kun": "It crosses the line ahead of a <sound>sa</sound>rdine and a brass <sound>key</sound>, both still running."
+    },
+    "地": {
+      "meaning": "A <part>scorpion</part> scuttles across the <part>soil</part> and digs in its tail. It burrows down and down until it hits solid rock: the hard <kanji>ground</kanji> under everything.",
+      "on": "A <sound>chee</sound>tah sprints over the ground, and the scorpion pops back up to watch it pass."
+    },
+    "士": {
+      "meaning": "Flip a mound of <part>soil</part> upside down and you get this: a wide brim on top, a short neat base below, a straight post in between. It tips its brim to everyone and holds every door. It's a <kanji>gentleman</kanji>.",
+      "on": "He holds up a polished <sound>shi</sound>eld to keep the rain off strangers.",
+      "kun": "He serves <sound>sa</sound>shimi, a cow says '<sound>Mu</sound>!', and he slices <sound>rye</sound> bread with his long sword."
+    },
+    "売": {
+      "meaning": "A <part>gentleman</part> stands on a folded <part>blanket</part> draped over a pair of <part>legs</part>. His helper underneath walks him down the street while he shouts: 'Blankets! Warm blankets!' Everything must go. He wants to <kanji>sell</kanji>.",
+      "on": "He sells the last blanket and buys a shiny <sound>bi</sound>ke with the money.",
+      "kun": "'<sound>Ooh</sound>!' says a buyer, stroking the soft blanket."
+    },
+    "会": {
+      "meaning": "Rain pours. Two strangers dash under the same <part>umbrella</part>, their <part>kite</part> strings tangled together below it. By the time they've untangled them and the rain stops, they've swapped names and phone numbers. A lucky <kanji>meeting</kanji>.",
+      "on": "Then the wind snatches the umbrella, and it flies off like a <sound>ki</sound>te.",
+      "kun": "'<sound>Ah</sound>, hello again!' they both say, when they bump into each other a week later."
+    }
+  }
+}

@@ -47,7 +47,7 @@ export const WK_DUE_BOOST = 4;
 /** The story library is refetched when older than this. */
 export const STORY_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 /** Katakana loanwords that join each kanji level, in list order. See words.ts. */
-export const WORDS_PER_LEVEL = 5;
+export const WORDS_PER_LEVEL = 1;
 /** Rows 1..N have 2 options; later rows have 3. */
 export const TWO_OPTION_ROWS = 7;
 

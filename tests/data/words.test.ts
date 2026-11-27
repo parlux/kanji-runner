@@ -19,11 +19,12 @@ const lastKanjiLevel = (w: string) =>
   Math.max(...[...w].map((c) => levelOf.get(c) ?? 0));
 
 const expectPresent = (w: string, reading: string) => {
-  expect(find(w), w).toMatchObject({ reading, level: lastKanjiLevel(w) });
+  expect(find(w), w).toMatchObject({ reading });
+  expect(find(w)?.level, w).toBeGreaterThanOrEqual(lastKanjiLevel(w));
 };
 
 describe("kanji words data (SPEC-word-gates)", () => {
-  it("has the everyday words at their last kanji's level", () => {
+  it("has the everyday words, no earlier than their last kanji", () => {
     expectPresent("一人", "ひとり");
     expectPresent("大人", "おとな");
     expectPresent("お金", "おかね");
@@ -70,16 +71,12 @@ describe("kanji words data (SPEC-word-gates)", () => {
     }
   });
 
-  it("gives each word its last kanji's level, in teaching order", () => {
+  // SPEC-overall-progress §2: a word may spill into a later level, never earlier.
+  it("puts each word at or after its last kanji's level, in teaching order", () => {
     for (const { word, level } of words)
-      expect(level, word).toBe(lastKanjiLevel(word));
+      expect(level, word).toBeGreaterThanOrEqual(lastKanjiLevel(word));
     const levels = words.map((w) => w.level);
     expect(levels).toEqual([...levels].sort((a, b) => a - b));
     expect(new Set(words.map((w) => w.word)).size).toBe(words.length);
-  });
-
-  it("fills levels 2–10 with 30 words each", () => {
-    for (let l = 2; l <= 10; l++)
-      expect(words.filter((w) => w.level === l).length, `L${l}`).toBe(30);
   });
 });

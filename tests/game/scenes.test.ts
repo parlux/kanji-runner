@@ -182,7 +182,8 @@ describe("afterStep", () => {
     };
     const after = afterStep(meaning, run, ended, 1);
     const card = endLevelCard(after);
-    expect(card).toMatchObject({ level: 2, total: 30, unlocked: null });
+    // meaning mode counts kanji only: Kanji 1 has 7
+    expect(card).toMatchObject({ level: 2, total: 7, unlocked: null });
     expect(card.gained).toBe(card.learned);
   });
 
@@ -305,8 +306,8 @@ describe("placement picker", () => {
   it("clamps the pick and cancels without changing progress", () => {
     const low = act({ kind: "start", pick: -1 }, fresh, "left");
     expect(low.scene).toEqual({ kind: "start", pick: -1 });
-    const high = act({ kind: "start", pick: 72 }, fresh, "right");
-    expect(high.scene).toEqual({ kind: "start", pick: 72 });
+    const high = act({ kind: "start", pick: 296 }, fresh, "right");
+    expect(high.scene).toEqual({ kind: "start", pick: 296 });
     const back = act({ kind: "start", pick: 5 }, fresh, "back");
     expect(back).toEqual({ scene: { kind: "start" }, session: fresh });
   });

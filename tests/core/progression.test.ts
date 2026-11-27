@@ -72,7 +72,7 @@ describe("levels", () => {
     expect(levelKeys(0, KANA, KANJI)).not.toContain("ア:kana");
     expect(levelKeys(2, KANA, KANJI)).toContain("一:meaning");
     expect(levelKeys(2, KANA, KANJI)).toContain("一:reading");
-    expect(maxLevel(KANJI)).toBe(73);
+    expect(maxLevel(KANJI)).toBe(297);
   });
 
   it("a kanji level's items include its words, loanwords too", () => {
@@ -264,7 +264,7 @@ describe("placement", () => {
   });
 
   it("clamps to the last level", () => {
-    expect(place(defaultProgress(), 99, KANA, KANJI).unlockedLevel).toBe(73);
+    expect(place(defaultProgress(), 999, KANA, KANJI).unlockedLevel).toBe(297);
   });
 });
 

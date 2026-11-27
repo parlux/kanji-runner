@@ -1,0 +1,40 @@
+{
+  "level": "Kanji 11",
+  "kanji": {
+    "痛": {
+      "meaning": "In a <part>leaky shed</part>, you fumble with a rusty <part>padlock</part> on the toolbox. A drip hits your eye, the lock snaps shut on your finger, and you hop back onto a nail. Ow: <kanji>pain</kanji>.",
+      "on": "You hiss through your teeth like a kettle, '<sound>Tsooo</sound>!', and hop around the shed.",
+      "kun": "You squeal '<sound>Ee</sound>!', kick a <sound>tu</sound>b across the shed and squeal '<sound>Ee</sound>!' again."
+    },
+    "品": {
+      "meaning": "Three <part>mouth</part> boxes are stacked in a pyramid on a shop shelf, one on top and two below. Each is wrapped and ready, with a little label that says 'take me home'. A shop full of boxes like that is full of <kanji>goods</kanji>.",
+      "on": "The shop door swings on a squeaky <sound>hin</sound>ge every time someone carries a box out.",
+      "kun": "A <sound>shee</sound>p nudges a box of <sound>na</sound>an along the shelf and the whole pyramid of boxes topples."
+    },
+    "切": {
+      "meaning": "A <part>seven</part> guards the birthday cake: its flat bar lies across the top, and its long hooked stroke slices straight down through it like a blade. Beside it, a <part>sword</part> swings at the other side. Two strokes, two neat halves: the cake is <kanji>cut</kanji>.",
+      "on": "A red <sound>set</sound>ter dog grabs the bigger half and runs off with it.",
+      "kun": "The sword's next swing cuts a brass <sound>key</sound> in half, and a kanga<sound>roo</sound> catches the pieces."
+    },
+    "門": {
+      "meaning": "Two tall doors stand face to face, each with two little windows up top and a long post down to the ground. Fling them both wide and the whole town parade can march through. That's a <kanji>gate</kanji>.",
+      "on": "A <sound>mon</sound>ster guards the gate and only lets in visitors who bring snacks.",
+      "kun": "A <sound>ca</sound>r towing a <sound>do</sound>lphin in a trailer swings past the gate too fast and clips its edge: a corner."
+    },
+    "間": {
+      "meaning": "The two <part>gate</part> doors stand slightly apart, and the <part>sun</part> peeks through the crack between them. Shut them and it's dark; open them a little and a strip of light shines in. That narrow strip is the <kanji>interval</kanji>, the space in between.",
+      "on": "Someone slides a single <sound>car</sound>nation into the gap between the doors.",
+      "kun": "You press one <sound>eye</sound> to the gap and see a <sound>du</sound>ck staring back."
+    },
+    "開": {
+      "meaning": "Inside a <part>gate</part> stands a track <part>hurdle</part>. A kid kicks a ball, it clears the hurdle and slams into the gate doors, and they swing wide. Bang! The gate is <kanji>open</kanji>.",
+      "on": "The ball sails out through the open gate and tangles in a <sound>ki</sound>te string.",
+      "kun": "The fans go wild: a <sound>hee</sound>l kicked high, a '<sound>Rah</sound>!', and a <sound>cu</sound>ckoo popping out of the clock."
+    },
+    "昼": {
+      "meaning": "Someone stretches a tape <part>measure</part> from the horizon up to the sun. At <part>daybreak</part> it reads almost nothing; by lunchtime the tape is all the way out, the whole office squints on a bench, and there's no shade anywhere. It's the middle of the <kanji>daytime</kanji>.",
+      "on": "Everyone on the bench is <sound>chew</sound>ing gum after lunch, blowing bubbles in the sun.",
+      "kun": "Someone kicks off a high <sound>hee</sound>l to sunbathe, and a kanga<sound>roo</sound> hops off with it."
+    }
+  }
+}

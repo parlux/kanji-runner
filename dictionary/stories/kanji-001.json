@@ -1,0 +1,40 @@
+{
+  "level": "Kanji 1",
+  "kanji": {
+    "日": {
+      "meaning": "A tall window with one bar across the middle, and the <part>sun</part> blazing in it. It glows at dawn, goes dark at dusk, and glows again the next morning. One trip of the sun past that window is one <kanji>day</kanji>.",
+      "on": "The sun warms your k<sound>nee</sound> all afternoon while a <sound>chee</sound>tah naps across your lap.",
+      "kun": "The sun peeks in through the window bars and giggles: '<sound>Hee</sound>!'"
+    },
+    "一": {
+      "meaning": "A single flat plank lies on the ground: no second plank, no post, nothing on top. Hold up a finger to count it. It's the <part>one</part> plank, and you'll find it inside lots of other kanji, always meaning <kanji>one</kanji>.",
+      "on": "A plank bridge just wide enough for one. An <sound>ea</sound>gle lands on it, then a <sound>chee</sound>tah steps on, and crack! Room for one only.",
+      "kun": "'<sound>Hee</sound>!' giggles the chef, setting down one lonely cube of <sound>to</sound>fu on a huge plate."
+    },
+    "人": {
+      "meaning": "Two sticks lean on each other so they won't fall over. Kick one and both topple; together they stand, and even start to stroll away on their own two legs. That walking pair of sticks is the <part>person</part> shape: a <kanji>person</kanji>.",
+      "on": "The stick person chews on a knobbly <sound>gin</sound>ger root and sneezes so hard it nearly falls apart.",
+      "kun": "'<sound>Hee</sound>!' giggles the stick person, peeking out from behind a <sound>to</sound>tem pole."
+    },
+    "大": {
+      "meaning": "A man spreads his arms as wide as they'll go and plants his legs apart: 'The fish I caught was THIS big!' He fills the whole doorway. With every retelling the fish grows, and so do his arms. Everything about it is <kanji>large</kanji>.",
+      "on": "To prove it, he rolls a pair of <sound>di</sound>ce, each one as big as a fridge.",
+      "kun": "'<sound>Ohh</sound>!' gasps the crowd, long and slow, as the fish in the story gets bigger and bigger."
+    },
+    "手": {
+      "meaning": "A hooked post with three bars across it and a little curl on top stands up and waves at you. The bars wiggle like fingers, the curl flicks like a thumb. It wants a high five: it's a <kanji>hand</kanji>.",
+      "on": "The hand grabs a fistful of <sound>su</sound>gar cubes and won't let go.",
+      "kun": "The hand pats a <sound>te</sound>ddy bear gently on the head."
+    },
+    "下": {
+      "meaning": "A <part>faucet</part> hangs upside down under a <part>one</part>-plank shelf, dripping on everything beneath it. Whatever is down there gets wet. That's what you get for standing <kanji>below</kanji>.",
+      "on": "A <sound>ca</sound>rp swims in a bucket below the dripping faucet, mouth open, catching every drop.",
+      "kun": "<sound>She</sound> drops her <sound>ta</sound>co, and it lands on the floor far below, right under the drip."
+    },
+    "車": {
+      "meaning": "From a bridge you look straight down on it: a box seat, one long axle stabbing through the middle, a bar of wheels at the front and another at the back. It honks at you. It's a <kanji>car</kanji>.",
+      "on": "A <sound>shu</sound>ttlecock lands on the car's roof and rides along all the way to town.",
+      "kun": "A <sound>cu</sound>ckoo drives the car, a kanga<sound>roo</sound> sits in the back, and both wave to <sound>Ma</sound> as they speed past."
+    }
+  }
+}

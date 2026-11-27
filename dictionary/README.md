@@ -7,7 +7,7 @@ Our own memory stories for every kanji in the game: a name for every kanji part,
 - `STYLE.md`: the style guide the writer follows and the judge checks against.
 - `parts.json`: `{ "<part>": { "name": "person" } }` for every component in `src/data/kanji.json`. Names are unique and short (1–3 words), from open data (KANJIDIC2, Kangxi radical meanings) or our own choice.
 - `sounds.json`: `{ "<hiragana>": { "keyword": "cue", "note": "a pool cue" } }`, one English sound-alike per common on'yomi, reused by every reading story with that sound.
-- `stories/kanji-NN.json`: one file per kanji level, named as the player sees it (`kanji-01.json` is "Kanji 1", game level 2). Per kanji `meaning`, plus `on` and `kun` when the kanji has that main reading. `on` or `kun` may be `null` to leave that story out on purpose (盲's kun めくら is a slur, owner 2026-11-26); the card then shows no story for it. Tags: `<part>`, `<kanji>`, `<reading>`, `<ja>`, `<em>`.
+- `stories/kanji-NNN.json`: one file per kanji level, named as the player sees it (`kanji-001.json` is "Kanji 1", game level 2; 296 files, a level being 15 new things, SPEC-overall-progress §2). Per kanji `meaning`, plus `on` and `kun` when the kanji has that main reading. `on` or `kun` may be `null` to leave that story out on purpose (盲's kun めくら is a slur, owner 2026-11-26); the card then shows no story for it. Tags: `<part>`, `<kanji>`, `<reading>`, `<ja>`, `<em>`.
 
 ## How it's made
 

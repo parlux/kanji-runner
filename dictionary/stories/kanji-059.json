@@ -1,0 +1,42 @@
+{
+  "level": "Kanji 59",
+  "kanji": {
+    "春": {
+      "meaning": "The old <part>Christmas tree</part> is still in the garden, and now the <part>sun</part> shines warm right under it. Its needles turn green again, buds pop out, and birds start building nests in it. It's <kanji>springtime</kanji>.",
+      "on": "You drag out a garden chair and a fat cu<sound>shion</sound> to sit under it in the warm air.",
+      "kun": "'<sound>Ha</sound>!' you laugh, as a <sound>roo</sound>k drops a twig on your head for its nest."
+    },
+    "昨": {
+      "meaning": "The <part>sun</part> sets behind the <part>coat rack</part> in the hall, where your coat from the day before still hangs, crumpled, its pockets full of old receipts. You meant to wash it. That was <kanji>yesterday</kanji>.",
+      "on": "On the shelf beside it, a fat <sound>suc</sound>culent you forgot to water is still waiting."
+    },
+    "族": {
+      "meaning": "A boat with a big <part>sail</part> drifts up to an island, and from a <part>diving board</part> on the cliff, people leap into the sea to meet it, each with a <part>dart</part> tucked behind one ear. Grandparents, kids, cousins: one dart, one <kanji>tribe</kanji>.",
+      "on": "Each child has a <sound>zo</sound>diac sign painted on one cheek and a <sound>cu</sound>ckoo feather in its hair."
+    },
+    "供": {
+      "meaning": "The whole class hangs its homework on the <part>coat hook</part> by the door, then, all <part>together</part>, lifts the bundle onto the teacher's desk. It's done, it's in, no more changes. They <kanji>submit</kanji> it.",
+      "on": "The teacher picks up the top sheet and reads its title aloud, '<sound>Kyo</sound>to, the Old City', holding the start so long the whole class giggles.",
+      "kun": "Then they offer the teacher a <sound>so</sound>fa to rest on and a warm <sound>na</sound>an."
+    },
+    "渡": {
+      "meaning": "A ferry sloshes through the <part>water drops</part> of a cold river while the captain checks his compass, turning a few <part>degrees</part> left, then right. Cars, bikes and goats ride on his deck. The whole trip is one long <kanji>transit</kanji>.",
+      "on": "On the far bank, the passengers tie the ferry up to a <sound>to</sound>tem pole.",
+      "kun": "'<sound>Wah</sound>!' squeals a goat as a wave splashes the deck and knocks a <sound>ta</sound>co out of its mouth."
+    },
+    "察": {
+      "meaning": "Under the temple <part>roof</part>, a priest begins a strange <part>ritual</part>: he shakes a bowl, drops a pebble and squints at where it lands. Will it rain tomorrow? Will the cat come home? He doesn't know. He can only <kanji>guess</kanji>.",
+      "on": "This time he squints at the peel of a <sound>sats</sound>uma and guesses: sunny."
+    },
+    "警": {
+      "meaning": "A teacher stands so tall that the whole class goes quiet in <part>awe</part>. Then comes the <part>speech</part>: no running, no shouting, no gum under the desks. Fingers wag, eyebrows rise. She is about to <kanji>admonish</kanji> them.",
+      "on": "One kid hides a slice of birthday <sound>ca</sound>ke under his desk, and gets told off for that too.",
+      "kun": "'<sound>Ee</sound>!' squeals the kid. '<sound>Ma</sound>, she's telling off my <sound>shee</sound>p as well!'"
+    },
+    "告": {
+      "meaning": "A <part>cow</part> lifts its head over the fence, opens its <part>mouth</part>, and instead of mooing says in plain words: 'The grass really is greener over there.' The farmer drops his bucket. It's a <kanji>revelation</kanji>.",
+      "on": "A <sound>coc</sound>katoo on the fence repeats the news to the whole farm.",
+      "kun": "'<sound>Tsu</sound>!' the cow sneezes, then tells the farmer the weather."
+    }
+  }
+}

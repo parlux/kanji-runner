@@ -4,7 +4,7 @@
  *
  * - `npm run stories:overlap -- <levels>`: scores each of our entries against
  *   WaniKani's story for the same kanji (meaning vs meaning mnemonic, on/kun
- *   vs reading mnemonic) and writes `.data-cache/stories/overlap-NN.txt`,
+ *   vs reading mnemonic) and writes `.data-cache/stories/overlap-NNN.txt`,
  *   highest first, marking scores at or over `SUSPECT` as suspects.
  * - `npm run stories:overlap -- --names`: `parts.json` names and `sounds.json`
  *   keywords that equal a WaniKani radical name → `overlap-names.txt`

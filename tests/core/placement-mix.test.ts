@@ -50,9 +50,10 @@ describe("run mix after placing to Katakana", () => {
     expect(s.runsWithKana).toBe(1);
   });
 
-  it("after all 30 Kanji 1 are introduced: kanji are most of the run, kana still appear", () => {
+  // Kanji 1 is 7 kanji (15 items with its words and loanword, SPEC-overall-progress §2).
+  it("after all of Kanji 1 is introduced: kanji are a third of the run, kana still appear", () => {
     const s = share(introduced());
-    expect(s.kanjiShare).toBeGreaterThan(0.6);
+    expect(s.kanjiShare).toBeGreaterThan(0.3);
     expect(s.kanjiShare).toBeLessThan(0.9);
     expect(s.runsWithKana).toBeGreaterThan(0.5);
   });

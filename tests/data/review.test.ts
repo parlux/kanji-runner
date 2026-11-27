@@ -280,7 +280,7 @@ describe("review apply", () => {
     parts: { 口: { name: "mouth" }, 日: { name: "sun" }, 木: { name: "tree" } },
     sounds: { こう: { keyword: "cone", note: "n" }, し: { keyword: "shield" } },
     stories: {
-      "kanji-05.json": {
+      "kanji-005.json": {
         level: "Kanji 5",
         kanji: {
           A: {
@@ -291,7 +291,7 @@ describe("review apply", () => {
           B: { meaning: "Only a <part>sun</part>.", on: "x" },
         },
       },
-      "kanji-06.json": {
+      "kanji-006.json": {
         level: "Kanji 6",
         kanji: { C: { meaning: "The <part>mouth</part> speaks." } },
       },
@@ -322,22 +322,22 @@ describe("review apply", () => {
       { part: "口", from: "mouth", to: "lips", touched: ["A", "C"] },
     ]);
     const a = (
-      r.files.stories["kanji-05.json"] as {
+      r.files.stories["kanji-005.json"] as {
         kanji: Record<string, Record<string, string>>;
       }
     ).kanji["A"];
     expect(a?.["meaning"]).toBe("A <part>lips</part> and a <part>sun</part>.");
     expect(a?.["on"]).toBe("<part>lips</part> again");
-    expect(JSON.stringify(r.files.stories["kanji-06.json"])).toContain(
+    expect(JSON.stringify(r.files.stories["kanji-006.json"])).toContain(
       "<part>lips</part>",
     );
     expect(
-      JSON.stringify(r.files.stories["kanji-05.json"]).match(/sun/g),
+      JSON.stringify(r.files.stories["kanji-005.json"]).match(/sun/g),
     ).toHaveLength(2);
     expect(r.changed).toEqual([
       "parts.json",
-      "stories/kanji-05.json",
-      "stories/kanji-06.json",
+      "stories/kanji-005.json",
+      "stories/kanji-006.json",
     ]);
   });
 
@@ -372,8 +372,8 @@ describe("review apply", () => {
     expect(JSON.stringify(r.files.stories)).not.toContain("<part>mouth</part>");
     expect(r.changed).toEqual([
       "parts.json",
-      "stories/kanji-05.json",
-      "stories/kanji-06.json",
+      "stories/kanji-005.json",
+      "stories/kanji-006.json",
     ]);
     // same result as apply's edit path
     const viaApply = run({ [partId("口")]: rv({ edit: "lips" }) });
@@ -427,17 +427,17 @@ describe("review apply", () => {
     expect(r.notes["sounds"]).toEqual([
       { key: "し", field: "keyword", note: "no", text: "shield" },
     ]);
-    expect(r.notes["kanji-05"]).toEqual([
+    expect(r.notes["kanji-005"]).toEqual([
       { key: "A", field: "on", note: "dull", text: "<part>mouth</part> again" },
     ]);
-    expect(r.notes["kanji-06"]).toBeUndefined();
-    expect(r.scopes["kanji-05"]).toEqual({
+    expect(r.notes["kanji-006"]).toBeUndefined();
+    expect(r.scopes["kanji-005"]).toEqual({
       reviewed: 1,
       ok: 0,
       work: 1,
       edits: 0,
     });
-    expect(r.scopes["kanji-06"]).toEqual({
+    expect(r.scopes["kanji-006"]).toEqual({
       reviewed: 1,
       ok: 1,
       work: 0,
@@ -460,8 +460,8 @@ describe("review apply", () => {
       [storyId("C"), item("random")],
     ]);
     expect(run(m, items).randomMisses).toEqual({
-      "kanji-05": 1,
-      "kanji-06": 1,
+      "kanji-005": 1,
+      "kanji-006": 1,
     });
   });
 

@@ -1,0 +1,34 @@
+{
+  "level": "Kanji 6",
+  "kanji": {
+    "右": {
+      "meaning": "A <part>slash</part> and a <part>one</part>-plank arm cross over a <part>mouth</part>, like a hand reaching down to feed it. You always eat with this hand, the one you write with: your <kanji>right</kanji>.",
+      "on": "Your right hand twirls chopsticks through a big bowl of <sound>u</sound>don.",
+      "kun": "A <sound>mee</sound>rkat grabs the noodles with its right paw: '<sound>Gee</sound>, hot!'"
+    },
+    "曜": {
+      "meaning": "Every morning the <part>sun</part> comes up, and a <part>peacock</part> beside it fans out its two big feathers and squawks the name of the day: Monday, Tuesday, Wednesday... It never squawks at the weekend. It only knows each <kanji>weekday</kanji>.",
+      "on": "The peacock flicks a <sound>yo</sound>-yo once for each weekday, then takes the weekend off."
+    },
+    "火": {
+      "meaning": "Two sparks pop off either side, and in the middle a figure throws up its arms and flares out at the bottom like a dancer in a twirling skirt. It crackles, it spits, it's hot: <kanji>fire</kanji>.",
+      "on": "A <sound>ca</sound>rp leaps out of the pond and spits water to put out the fire.",
+      "kun": "'<sound>Hee</sound>!' giggles the flame, as it tickles your marshmallow."
+    },
+    "月": {
+      "meaning": "A tall window with two bars inside and a curved left leg leans against the night sky. Through it you watch the <part>moon</part> grow fat, then thin, then fat again. One full turn of that moon is one <kanji>month</kanji>.",
+      "on": "A <sound>ge</sound>cko climbs up the moon's face, then sneezes '<sound>Tsu</sound>!'",
+      "kun": "The moon sneezes, '<sound>Tsu</sound>!', and drops a silver <sound>key</sound> into the sea."
+    },
+    "前": {
+      "meaning": "Two <part>horns</part> sit on a <part>one</part>-plank bar like a hat. Under it, the <part>moon</part> and a <part>dagger</part> race each other. The dagger keeps stabbing at the moon's back, but the moon stays <kanji>in front</kanji>.",
+      "on": "They race straight across a <sound>zen</sound> garden and wreck the raked sand.",
+      "kun": "'<sound>Ma</sound>!' calls the dagger, '<sound>eh</sound>, wait for me!' But the moon stays out front."
+    },
+    "夕": {
+      "meaning": "Two slanted strokes and a dot: a thin crescent moon just rising. The sun has gone, the sky turns orange, and the dot is the first star coming out. Time to go home: it's <kanji>evening</kanji>.",
+      "on": "In the evening sky the crescent looks like a thin <sound>sec</sound>tor sliced from a pie.",
+      "kun": "<sound>You</sound> sit out on the porch in the evening and wave at the moon."
+    }
+  }
+}

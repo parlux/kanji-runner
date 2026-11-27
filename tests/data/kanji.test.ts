@@ -4,7 +4,9 @@ import type { KanjiItem } from "../../src/core/types";
 
 const kanji = data as KanjiItem[];
 const KATAKANA = /[゠-ヿ]/;
-const level = new Map(kanji.map((k) => [k.char, k.level]));
+/** Position in teaching order; the useful-order targets were set in 30-kanji blocks. */
+const pos = new Map(kanji.map((k, i) => [k.char, i]));
+const within = (blocks: number) => blocks * 30;
 
 describe("kanji data", () => {
   it("holds the 2136 Jōyō kanji once each", () => {
@@ -44,17 +46,6 @@ describe("kanji data", () => {
     expect(kanji.find((k) => k.char === "一")?.on).toBe("いち");
   });
 
-  it("fills every level with 30 kanji except the last", () => {
-    const sizes = new Map<number, number>();
-    for (const k of kanji) sizes.set(k.level, (sizes.get(k.level) ?? 0) + 1);
-    const levels = [...sizes.keys()];
-    expect(levels).toEqual(levels.map((_, i) => i + 2));
-    const counts = [...sizes.values()];
-    expect(counts.slice(0, -1).every((n) => n === 30)).toBe(true);
-    expect(counts.at(-1)).toBeGreaterThan(0);
-    expect(counts.at(-1)).toBeLessThanOrEqual(30);
-  });
-
   // Parts come from KanjiVG; the order's building blocks stay KRADFILE's
   // elements (SPEC-useful-order), so a kanji part may be taught later (何 可).
   it("lists each kanji's parts once, never the kanji itself", () => {
@@ -64,22 +55,22 @@ describe("kanji data", () => {
     }
   });
 
-  // SPEC-useful-order: travel kanji by Kanji 5 (levels 2–6).
-  it("teaches 円, 出, 入, 口, 何, 時 by Kanji 5", () => {
+  // SPEC-useful-order: travel kanji among the first 150 (old Kanji 1–5).
+  it("teaches 円, 出, 入, 口, 何, 時 among the first 150 kanji", () => {
     for (const c of "円出入口何時")
-      expect(level.get(c), c).toBeLessThanOrEqual(6);
+      expect(pos.get(c), c).toBeLessThan(within(5));
   });
 
-  // 駅 still waits until Kanji 10 after the U4 tuning: few theme words use
+  // 駅 still waits until old Kanji 10 (first 300) after the U4 tuning: few theme words use
   // it, and 馬 comes with it (shortfall logged in the task list).
-  it.fails("teaches 駅 by Kanji 5", () => {
-    expect(level.get("駅")).toBeLessThanOrEqual(6);
+  it.fails("teaches 駅 among the first 150 kanji", () => {
+    expect(pos.get("駅")).toBeLessThan(within(5));
   });
 
-  it("teaches 干, 乙, 弓, 矛 in Kanji 1–3 only as a building block", () => {
-    const early = kanji.filter((k) => k.level <= 4);
+  it("teaches 干, 乙, 弓, 矛 in the first 90 kanji only as a building block", () => {
+    const early = kanji.slice(0, within(3));
     for (const c of "干乙弓矛")
-      if ((level.get(c) ?? 99) <= 4)
+      if ((pos.get(c) ?? 9999) < within(3))
         expect(
           early.some((k) => k.components.includes(c)),
           c,

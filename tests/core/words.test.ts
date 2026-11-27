@@ -82,22 +82,21 @@ describe("level assignment", () => {
     glosses: [`g${i}`],
   }));
 
-  it("puts WORDS_PER_LEVEL (5) words on each level from 2", () => {
+  it("puts WORDS_PER_LEVEL (1) word on each level from 2", () => {
     expect(assignLevels(entries, 30).map((w) => w.level)).toEqual([
-      2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4,
+      2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13,
     ]);
   });
 
   it("caps at the last level", () => {
-    expect(assignLevels(entries, 3).map((w) => w.level)).toEqual([
-      2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3,
+    expect(assignLevels(entries, 5).map((w) => w.level)).toEqual([
+      2, 3, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5,
     ]);
   });
 
   it("the real list starts at level 2 and stays within the kanji levels", () => {
     expect(WORDS[0]?.level).toBe(2);
-    expect(WORDS[4]?.level).toBe(2);
-    expect(WORDS[5]?.level).toBe(3);
+    expect(WORDS[1]?.level).toBe(3);
     const top = maxLevel(KANJI);
     expect(WORDS.every((w) => w.level >= 2 && w.level <= top)).toBe(true);
   });

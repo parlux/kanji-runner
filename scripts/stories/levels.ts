@@ -1,13 +1,13 @@
 /** Shared helpers for the story pipeline (SPEC-own-stories): level files and level arguments. */
 export const DICTIONARY = "dictionary";
 
-/** Story file name for a game level: level 2 ("Kanji 1") → `kanji-01.json`. */
+/** Story file name for a game level: level 2 ("Kanji 1") → `kanji-001.json`. */
 export const storyFile = (level: number): string =>
-  `kanji-${String(level - 1).padStart(2, "0")}.json`;
+  `kanji-${String(level - 1).padStart(3, "0")}.json`;
 
-/** Game level of a story file name, or null if the name isn't `kanji-NN.json`. */
+/** Game level of a story file name, or null if the name isn't `kanji-NNN.json`. */
 export function fileLevel(name: string): number | null {
-  const m = /^kanji-(\d{2,})\.json$/.exec(name);
+  const m = /^kanji-(\d{3,})\.json$/.exec(name);
   return m ? Number(m[1]) + 1 : null;
 }
 

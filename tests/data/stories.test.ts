@@ -27,9 +27,9 @@ describe("committed dictionary (SPEC-own-stories)", () => {
 
 describe("level helpers", () => {
   it("names files by the level the player sees", () => {
-    expect(storyFile(2)).toBe("kanji-01.json");
-    expect(storyFile(73)).toBe("kanji-72.json");
-    expect(fileLevel("kanji-01.json")).toBe(2);
+    expect(storyFile(2)).toBe("kanji-001.json");
+    expect(storyFile(73)).toBe("kanji-072.json");
+    expect(fileLevel("kanji-001.json")).toBe(2);
     expect(fileLevel("kanji-1.json")).toBeNull();
   });
 
@@ -85,7 +85,7 @@ const good = (): Dictionary => ({
   },
   sounds: { きゅう: { keyword: "cue" } },
   stories: {
-    "kanji-01.json": {
+    "kanji-001.json": {
       level: "Kanji 1",
       kanji: {
         木: {
@@ -110,7 +110,7 @@ const good = (): Dictionary => ({
 });
 type Entry = Record<string, string | null>;
 const entry = (d: Dictionary, c: string) =>
-  (d.stories["kanji-01.json"] as { kanji: Record<string, Entry> }).kanji[
+  (d.stories["kanji-001.json"] as { kanji: Record<string, Entry> }).kanji[
     c
   ] as Entry;
 const errorsOf = (d: Dictionary, levels?: number[]) =>
@@ -126,22 +126,23 @@ describe("validator rules", () => {
 
   it("checks the file shape and name against the level", () => {
     const d = good();
-    d.stories["kanji-01.json"] = { level: "Kanji 2", kanji: {}, extra: 1 };
-    d.stories["kanji-99.json"] = { level: "Kanji 98", kanji: {} };
+    d.stories["kanji-001.json"] = { level: "Kanji 2", kanji: {}, extra: 1 };
+    d.stories["kanji-099.json"] = { level: "Kanji 98", kanji: {} };
     d.stories["notes.json"] = {};
     const e = errorsOf(d).join("\n");
-    expect(e).toMatch(/kanji-01.json: level should be "Kanji 1"/);
+    expect(e).toMatch(/kanji-001.json: level should be "Kanji 1"/);
     expect(e).toMatch(/unexpected key "extra"/);
-    expect(e).toMatch(/kanji-99.json: not a kanji level file/);
+    expect(e).toMatch(/kanji-099.json: not a kanji level file/);
     expect(e).toMatch(/notes.json: not a kanji level file/);
-    d.stories["kanji-01.json"] = [];
+    d.stories["kanji-001.json"] = [];
     expect(errorsOf(d).join()).toMatch(/needs \{ "level", "kanji" \}/);
   });
 
   it("needs every kanji of the level and no others", () => {
     const d = good();
-    const k = (d.stories["kanji-01.json"] as { kanji: Record<string, unknown> })
-      .kanji;
+    const k = (
+      d.stories["kanji-001.json"] as { kanji: Record<string, unknown> }
+    ).kanji;
     k["円"] = k["木"];
     delete k["木"];
     const e = errorsOf(d).join("\n");
@@ -151,14 +152,14 @@ describe("validator rules", () => {
 
   it("requires asked-for level files", () => {
     expect(errorsOf(good(), [2, 3])).toEqual([
-      "stories/kanji-02.json: missing",
+      "stories/kanji-002.json: missing",
     ]);
   });
 
   it("has on/kun exactly when the main reading exists", () => {
     const d = good();
     delete entry(d, "木").kun;
-    d.stories["kanji-02.json"] = {
+    d.stories["kanji-002.json"] = {
       level: "Kanji 2",
       kanji: {
         円: {
@@ -177,7 +178,7 @@ describe("validator rules", () => {
     const d = good();
     entry(d, "木").kun = null;
     expect(errorsOf(d)).toEqual([]);
-    d.stories["kanji-02.json"] = {
+    d.stories["kanji-002.json"] = {
       level: "Kanji 2",
       kanji: {
         円: {
@@ -296,7 +297,7 @@ describe("validator rules", () => {
       /休 meaning: part "bush" not in parts.json/,
     );
     expect(r.warnings).toEqual([
-      'stories/kanji-01.json 休 meaning: part 木 "tree" not named',
+      'stories/kanji-001.json 休 meaning: part 木 "tree" not named',
     ]);
   });
 
@@ -406,7 +407,7 @@ describe("prep inputs", () => {
     expect(input).toMatchObject({
       level: "Kanji 1",
       gameLevel: 2,
-      output: "dictionary/stories/kanji-01.json",
+      output: "dictionary/stories/kanji-001.json",
     });
     expect(input.kanji[1]).toEqual({
       char: "休",

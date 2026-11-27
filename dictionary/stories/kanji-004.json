@@ -1,0 +1,35 @@
+{
+  "level": "Kanji 4",
+  "kanji": {
+    "木": {
+      "meaning": "A straight trunk, one crossbar of branches, and two roots digging into the dirt below. Birds perch on the crossbar, a squirrel runs up the trunk, and a dog sniffs every root. It's a <kanji>tree</kanji>.",
+      "on": "The squirrel wears a tiny <sound>moc</sound>casin on each paw to climb the tree quietly.",
+      "kun": "A <sound>ki</sound>wi bird pecks at the roots, looking for worms."
+    },
+    "本": {
+      "meaning": "Someone nails a short <part>one</part>-plank bar low on a <part>tree</part> trunk, right where the roots begin, and carves one line of words into it each day. Years later the whole tree is covered in writing. It has turned into a <kanji>book</kanji>.",
+      "on": "A goose with a <sound>hon</sound>king voice sits on the plank and reads the tree out loud.",
+      "kun": "A <sound>mo</sound>le digs down to where the roots begin and finds a tiny <sound>to</sound>tem buried at the very origin of the tree."
+    },
+    "生": {
+      "meaning": "A stem pushes up out of a flat line of ground, sprouting one leaf, then another. Water it, sing to it, and it keeps on growing, greener every day. That little sprout is <kanji>life</kanji>.",
+      "on": "Someone locks the sprout inside a steel <sound>sa</sound>fe to keep it alive, but it grows right through the door.",
+      "kun": "'<sound>Ee</sound>k!' squeals the gardener, as the sprout bursts out of the safe."
+    },
+    "向": {
+      "meaning": "A <part>mouth</part> sits inside a <part>frame</part> like a face at a window, a little <part>slash</part> of an antenna on the roof above. It shouts at the hills: 'Hello over there!' The hills shout back. Whatever the mouth is calling to is far away, out <kanji>yonder</kanji>.",
+      "on": "It holds an ice cream <sound>co</sound>ne to its lips like a megaphone to shout even further.",
+      "kun": "Out yonder, a cow turns to face the window and answers with one short '<sound>Mu</sound>!'"
+    },
+    "山": {
+      "meaning": "Three peaks share one wide base, the middle one poking highest into the clouds. Goats live on the left peak, a hermit on the right, and snow sits on the middle. Together they make one big <kanji>mountain</kanji>.",
+      "on": "On the tallest peak, the hermit builds a <sound>sun</sound>dae as big as a snowdrift.",
+      "kun": "'<sound>Yah</sound>, <sound>Ma</sound>, I made it!' shouts a goat from the very top of the mountain."
+    },
+    "出": {
+      "meaning": "A small <part>mountain</part> rises out of a <part>bucket</part>, and a single trail climbs straight up through both. Hikers squeeze in at the bottom of the bucket and keep going until they pop out of the very top peak: the only way out, the mountain's <kanji>exit</kanji>.",
+      "on": "Climbers sliding out of the exit land in a heap of <sound>su</sound>gar and sneeze: '<sound>Tsu</sound>!'",
+      "kun": "Out you come onto a sunny wooden <sound>de</sound>ck at the foot of the mountain."
+    }
+  }
+}

@@ -41,10 +41,10 @@ export function parseResolve(argv: readonly string[]): number[] | null {
   return ids.map(Number);
 }
 
-/** The story file name for a level as the player sees it ("Kanji 5" → kanji-05.json), or null. */
+/** The story file name for a level as the player sees it ("Kanji 5" → kanji-005.json), or null. */
 export function storyFileOfLevel(level: string): string | null {
   const m = /^Kanji (\d+)$/.exec(level);
-  return m ? `kanji-${String(Number(m[1])).padStart(2, "0")}.json` : null;
+  return m ? `kanji-${String(Number(m[1])).padStart(3, "0")}.json` : null;
 }
 
 type Entry = { meaning?: string; on?: string; kun?: string };

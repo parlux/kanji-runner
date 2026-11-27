@@ -5,7 +5,7 @@
  * - `npm run stories:review -- seed parts|sounds|<levels> [--all] [--versions <dir>]`
  *   writes `.data-cache/stories/review/seed-<scope>-NN.json`: JSON arrays of at
  *   most 50 `ArtifactData` batch writes (`set` on `items`), each file under
- *   1 MiB. `<levels>` are game levels (`N` or `A-B`); scope is `kanji-NN`.
+ *   1 MiB. `<levels>` are game levels (`N` or `A-B`); scope is `kanji-NNN`.
  *   Pilot levels (`PILOT_LEVELS`) seed every kanji (`all`); later levels seed
  *   the kanji the judge failed (`judge-fail`) plus `RANDOM_PER_LEVEL` seeded
  *   random others (`random`); `--all` adds the rest as `extra`.
@@ -496,7 +496,7 @@ export type Scope = {
 };
 export type ApplyResult = {
   files: Files;
-  /** Names of the files that changed: `parts.json`, `sounds.json`, `stories/kanji-NN.json`. */
+  /** Names of the files that changed: `parts.json`, `sounds.json`, `stories/kanji-NNN.json`. */
   changed: string[];
   notes: Record<string, Note[]>;
   renames: { part: string; from: string; to: string; touched: string[] }[];
@@ -856,7 +856,7 @@ const readJson = (file: string): unknown =>
   JSON.parse(readFileSync(file, "utf8"));
 
 function readJudge(level: number): ReadonlyMap<string, JudgeSummary> | null {
-  const file = `${CACHE}/judge-${storyFile(level).slice(6, 8)}.json`;
+  const file = `${CACHE}/judge-${storyFile(level).slice(6, -5)}.json`;
   if (!existsSync(file)) return null;
   return parseJudge(readJson(file));
 }

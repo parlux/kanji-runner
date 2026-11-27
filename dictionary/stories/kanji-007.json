@@ -1,0 +1,44 @@
+{
+  "level": "Kanji 7",
+  "kanji": {
+    "名": {
+      "meaning": "In the <part>evening</part> dark you can't see who's coming up the path. So a <part>mouth</part> calls out into the night, and a voice answers with one word: who they are. In the dark you only know them by their <kanji>name</kanji>.",
+      "on": "Lost in a hedge <sound>ma</sound>ze at night, you shout your name until a friend finds you.",
+      "kun": "Your friend holds up a warm <sound>na</sound>an with your name written on it."
+    },
+    "二": {
+      "meaning": "Two planks stacked, the top one short and the bottom one long, like a bunk bed for sticks. The short stick sleeps on top, the long one underneath. Count the sleepers: <kanji>two</kanji>.",
+      "on": "Both sticks are sewn to their bunks with a single sewing <sound>nee</sound>dle so they can't roll out.",
+      "kun": "The two sticks share one <sound>fu</sound>ton and one <sound>ta</sound>co for breakfast."
+    },
+    "発": {
+      "meaning": "A <part>tent</part> folds up its flaps, and under it <part>two</part> planks on a pair of <part>legs</part> start running. The whole campsite packs up and sprints for the bus. Time for <kanji>departure</kanji>!",
+      "on": "The campers burst out of their <sound>huts</sound> before sunrise.",
+      "kun": "Each camper grabs one <sound>ta</sound>co for the road, and the bus pulls out."
+    },
+    "水": {
+      "meaning": "Drop a stone into a pond and this is the splash: a tall spout shooting up the middle, drops flying out to the left and right. Your shoes are soaked. It's <kanji>water</kanji>.",
+      "on": "A wrapped <sound>swee</sound>t falls into the pond and fizzes in the water.",
+      "kun": "A <sound>mee</sound>rkat squirts water at a bee, which buzzes off with a short, cross '<sound>Zu</sound>!'"
+    },
+    "土": {
+      "meaning": "A post sticks up out of a long, flat field, a short crossbar nailed near its top. Pull it up and clumps of brown dirt cling to its bottom. Plant your seeds around it in the <kanji>soil</kanji>.",
+      "on": "A <sound>do</sound>lphin flops onto the field and digs in the soil, very confused.",
+      "kun": "The dust makes you sneeze, '<sound>Tsu</sound>!', right in a sleeping <sound>chee</sound>tah's face."
+    },
+    "場": {
+      "meaning": "On a patch of bare <part>soil</part>, <part>sunbeams</part> pour down through the clouds onto one bright spot. Here's where the picnic goes. Spread the blanket in the light and mark it: the perfect <kanji>location</kanji>.",
+      "on": "A <sound>jo</sound>ey hops in and claims the spot before anyone else.",
+      "kun": "'<sound>Bah</sound>!' grumbles a man who wanted that very spot."
+    },
+    "寸": {
+      "meaning": "A <part>golf club</part> swings down past a tiny ball. Missed by a hair! The golfer crouches and checks the gap with a ruler: exactly one thumb's width. He writes down the <kanji>measurement</kanji>.",
+      "on": "His caddie offers him a roll of <sound>su</sound>shi, but he's too busy measuring and only mutters '<sound>Nn</sound>.'"
+    },
+    "時": {
+      "meaning": "Every morning the <part>sun</part> clocks in at the <part>temple</part>, punching its card in the machine by the door. One day it oversleeps and rolls in at noon, still yawning. The head monk taps his watch: 'And what <kanji>time</kanji> do you call this?'",
+      "on": "A <sound>jee</sound>p honks at the monk: 'Hurry up, your time is up!'",
+      "kun": "On a <sound>to</sound>tem pole by the gate hangs a big brass <sound>key</sound> to wind the clock."
+    }
+  }
+}

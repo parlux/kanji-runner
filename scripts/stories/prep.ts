@@ -3,7 +3,7 @@
  * Writer input files for the story dictionary (SPEC-own-stories: Pipeline).
  *
  * - `npm run stories:prep -- <levels>` (game levels, `N` or `A-B`): one file
- *   per level, `.data-cache/stories/in/kanji-NN.json`, with what the writer
+ *   per level, `.data-cache/stories/in/kanji-NNN.json`, with what the writer
  *   needs per kanji (see `KanjiInput`).
  * - `npm run stories:prep -- --parts`: every component, the kanji that use it,
  *   whether it is one of our kanji, and its KANJIDIC2 meaning when the cached

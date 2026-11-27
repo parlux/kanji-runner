@@ -1,0 +1,40 @@
+{
+  "level": "Kanji 38",
+  "kanji": {
+    "窓": {
+      "meaning": "You punch a <part>hole</part> in the wall of your room, lean your <part>elbow</part> on the edge and look out. The fresh air and the view of the hills lift your <part>heart</part>. Add a sheet of glass and you've made a <kanji>window</kanji>.",
+      "on": "Then you scrub the new glass with a big slippery bar of <sound>soa</sound>p.",
+      "kun": "You set a <sound>mu</sound>g on the sill and spot a <sound>do</sound>lphin leaping in the bay."
+    },
+    "矢": {
+      "meaning": "A boy bounces on a <part>diving board</part> above a <part>large</part> target painted on the pool floor. He throws something small and feathered with a sharp tip, and it sails down and sticks right in the middle. Thunk: a <kanji>dart</kanji>.",
+      "on": "His next throw bounces off a knight's <sound>shi</sound>eld floating in the pool.",
+      "kun": "He ties a ball of <sound>ya</sound>rn to the dart so he can reel it back in."
+    },
+    "医": {
+      "meaning": "A <part>drawer</part> slides open in the clinic, full of tiny needles, each shaped like a <part>dart</part>. The patient goes pale. 'Just a little prick,' says the one in the white coat, and it's over before you can say ouch. That's the <kanji>doctor</kanji>.",
+      "on": "Next patient: an <sound>ee</sound>l with a sore throat, wriggling all over the table.",
+      "kun": "One dart of medicine and the <sound>ee</sound>l is cured, swimming happily home: to heal."
+    },
+    "知": {
+      "meaning": "A quiz host fires a question, and the answer shoots out of your <part>mouth</part> as fast as a <part>dart</part>, straight to the bullseye. No guessing, no 'um', no looking it up. You just <kanji>know</kanji>.",
+      "on": "A <sound>chee</sound>tah in the next seat slams the buzzer even faster.",
+      "kun": "The prize is a golden knight's <sound>shi</sound>eld with your name on it."
+    },
+    "鉄": {
+      "meaning": "A miner digs for <part>gold</part>, but every nugget he finds he manages to <part>lose</part>: down a crack, into the river, through a hole in his pocket. All he has left is a heavy grey lump that won't go anywhere. Plain old <kanji>iron</kanji>.",
+      "on": "He drops the lump in his fish tank, and a tiny <sound>tet</sound>ra fish sulks behind it.",
+      "kun": "A <sound>cu</sound>ckoo, a <sound>ro</sound>dent, a bulb of <sound>ga</sound>rlic and a fishing <sound>ne</sound>t all end up stuck to his heavy lump."
+    },
+    "塩": {
+      "meaning": "At the seaside you stand on a mound of <part>soil</part>, bounce off a <part>diving board</part> with your <part>mouth</part> wide open and swallow a gulp of sea water. Spluttering, you spit it into a <part>dish</part> and leave it in the sun. White crystals appear: <kanji>salt</kanji>.",
+      "on": "A fishing boat's <sound>en</sound>gine chugs past, its deck piled with sacks of salt.",
+      "kun": "A knight dips his <sound>shi</sound>eld in the dish, licks it and gasps: '<sound>Oh</sound>!'"
+    },
+    "音": {
+      "meaning": "You <part>stand</part> on a hill as the <part>sun</part> comes up, and it rings like a giant gong: bonnng! Birds wake, dogs bark, the whole valley hums. Every morning starts with that <kanji>sound</kanji>.",
+      "on": "Someone flicks a big <sound>on</sound> switch, and the gong rings even louder.",
+      "kun": "'<sound>Oh</sound>!' you cover your ears as the sound bounces back off a <sound>to</sound>tem pole."
+    }
+  }
+}

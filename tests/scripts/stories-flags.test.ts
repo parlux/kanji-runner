@@ -22,7 +22,7 @@ describe("stories:flags helpers", () => {
     expect(() => parseResolve(["--resolve"])).toThrow();
   });
   it("maps a level name to its story file", () => {
-    expect(storyFileOfLevel("Kanji 5")).toBe("kanji-05.json");
+    expect(storyFileOfLevel("Kanji 5")).toBe("kanji-005.json");
     expect(storyFileOfLevel("Kana")).toBeNull();
   });
   it("prints our story without tags", () => {

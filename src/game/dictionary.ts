@@ -13,9 +13,9 @@ const parts = new Map<string, string>();
 const done = new Map<string, Promise<void>>();
 const settled = new Set<string>();
 
-/** The file key for a game level: "kanji-05.json" is game level 6 (Kanji 5). */
+/** The file key for a game level: "kanji-005.json" is game level 6 (Kanji 5). */
 const fileOf = (level: number): string =>
-  `/dictionary/stories/kanji-${String(level - 1).padStart(2, "0")}.json`;
+  `/dictionary/stories/kanji-${String(level - 1).padStart(3, "0")}.json`;
 
 function once(key: string, load: () => Promise<void>): Promise<void> {
   let p = done.get(key);
