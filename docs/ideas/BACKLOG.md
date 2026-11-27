@@ -18,3 +18,4 @@ Epic: [Useful Japanese, then drop WaniKani](useful-japanese.md). Its rounds come
 8. [Fold the round skills into one project flow](skill-audit.md): process.
 9. [Remove WaniKani from the game](remove-wanikani.md): epic; after own stories, so the shared game has no WaniKani token, fetch or mode.
 10. [Part notes on the study card](part-notes-on-card.md): game; show the "why it fits" part note on the card, left out of round 3.
+11. [When on'yomi, when kun'yomi](on-kun-explainer.md): study card; teach which reading a word uses, not just a story per reading.

@@ -54,3 +54,4 @@ One row per owner request, written by the `triage` skill (`.claude/skills/triage
 | 2026-11-25 | Warm-ups always the same 3 top-box kanji: rotate strong items, least-recently-seen first | sdd | Changes core SRS item selection (fix check 5) | owner: "just fix it", then back to sdd |
 | 2026-11-26 | No study card when pausing during the boss fight | fix | Pause was never wired for the boss clash; local change in game/, clear outcome | |
 | 2026-11-26 | Change speed from the pause screen mid-run | sdd | New control on the pause card: placement is a phone look call; no card before first answer or in meaning mode | |
+| 2026-11-20 | Explain when on'yomi vs kun'yomi is used on the card | idea | Owner: raw idea, refine later | |
