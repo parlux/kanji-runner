@@ -23,8 +23,8 @@ Spec §1 "Groups" and §4 "Data". `GROUP_SIZE`, `groupOf`, `groupName` with the 
 
 ### Task P4: End card, start screen, study card (sonnet)
 Spec §3. Level card and start-screen block: new copy, group name, kanji/words line, no unlock mark, dim reading-to-go segment, "Progress ›" affordance (tap target only, the view comes in P5). Study card stage line.
-- [ ] Offscreen 390×844 renders: end card (gain, unlock, last level, with/without reading-to-go), start block, study card stages; paths in the report.
-- [ ] `npm run check` passes.
+- [x] Offscreen 390×844 renders: end card (gain, unlock, last level, with/without reading-to-go), start block, study card stages; paths in the report.
+- [x] `npm run check` passes.
 
 ### Task P5: Overall view; ship 1.8.0 (opus: new screen layout)
 Spec §4. `src/game/screens/progress.ts`, open from the start block, Back/Esc, past groups collapsed, current group's levels open, scrolling list, coverage line. Bump `package.json` to 1.8.0 and add `## 1.8.0 (<date>)` to `CHANGELOG.md`.
