@@ -121,6 +121,17 @@ describe("row text", () => {
     expect(rowTone(item({ change: "same" }))).toBe("dim");
   });
 
+  it("a missed meaning shows no answer line: the row already shows the meaning", () => {
+    const miss = item({
+      change: "slip",
+      gates: [
+        { gate: "meaning", from: 4, to: 0, missed: true, answers: ["nearby"] },
+      ],
+    });
+    expect(rowTone(miss)).toBe("bad");
+    expect(answerText(miss)).toBe("");
+  });
+
   it("truncate ends in an ellipsis within the width", () => {
     const m = (t: string): number => t.length * 10;
     expect(truncate("abc", 30, m)).toBe("abc");

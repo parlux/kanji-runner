@@ -37,9 +37,17 @@ const ROW_MIN = 20;
 /** An item row at `y` from the top of the list's content (before scrolling). */
 type EndRow = { item: RunItem; y: number; h: number };
 
-/** Whether the row shows the right answer under the item: any gate missed. */
-const showsAnswer = (item: RunItem): boolean =>
-  item.gates.some((g) => g.missed);
+/**
+ * Missed gates whose right answer the row doesn't already show: readings. A
+ * missed meaning (or kana, or loanword) answer is the meaning on the row itself.
+ */
+const answerGates = (item: RunItem) =>
+  item.gates.filter(
+    (g) => g.missed && (g.gate === "reading" || g.gate === "wordreading"),
+  );
+
+/** Whether the row shows the right answer under the item: a reading missed. */
+const showsAnswer = (item: RunItem): boolean => answerGates(item).length > 0;
 
 /**
  * The end screen's item list between `top` and `bottom`: rows stacked from 0
@@ -101,11 +109,10 @@ export function changeText(item: RunItem): string {
     .join(" · ");
 }
 
-/** The right answers of the missed gates ("にち・じつ"), for the second line. */
+/** The right readings of the missed reading gates ("にち・じつ"), for the second line. */
 export const answerText = (item: RunItem): string =>
-  item.gates
-    .filter((g) => g.missed)
-    .map((g) => (g.answers ?? []).join(isMeaning(g.gate) ? " · " : "・"))
+  answerGates(item)
+    .map((g) => (g.answers ?? []).join("・"))
     .filter(Boolean)
     .join(" · ");
 
