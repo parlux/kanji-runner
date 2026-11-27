@@ -34,7 +34,7 @@ Spec §5 (owner feedback at Checkpoint R). Missing → learned → also this run
 - [x] Tests: row order (missing, learned, also), change shown only on met rows, level after an unlock, hit test and drag-not-tap, scroll clamp.
 - [x] Offscreen 390×844 renders: mid-level run, run that unlocks, run with slips and other-level reviews (scrolled), compact 390×700; a study card opened from an end row; paths in the report.
 - [x] `package.json` 1.10.0; `CHANGELOG.md` has the 1.10.0 section.
-- [ ] `npm run check` passes; deploy green.
+- [x] `npm run check` passes; deploy green.
 
 ### Checkpoint R: owner plays
 - [ ] After a few runs: the list shows your level's 15, missing and learned at a glance, plus what this run moved; the row wording reads well.
