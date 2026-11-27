@@ -7,6 +7,7 @@ Epic: [Useful Japanese, then drop WaniKani](useful-japanese.md). Its rounds come
 
 ## In progress
 - [Show overall progress](overall-progress.md): epic round 4, plus 15-item levels finished in full (kanji and words, meaning and reading, box 3), grouped by 25. Spec `docs/specs/SPEC-overall-progress.md`, tasks `tasks/todo-overall-progress.md`.
+- [Items met after a run, what's in a level](run-items.md): from Checkpoint P; end screen lists items and stage changes, progress view opens a level. Spec `docs/specs/SPEC-run-items.md`, tasks `tasks/todo-run-items.md`.
 
 ## Next
 1. **Checkpoint: assess against WaniKani** ([epic](useful-japanese.md#rounds)): no code; ready by mid-February 2027. Pause WaniKani, compare coverage, decide on the 2027-03-14 renewal.
