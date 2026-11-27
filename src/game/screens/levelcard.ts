@@ -1,6 +1,7 @@
 import { levelName, type LevelCard } from "../../core/progression";
 import { COLORS, END_PAD, panel, put, type Ctx } from "../draw";
 import { FONT } from "../labels";
+import { kindLine, unlockLine } from "../levelcopy";
 
 /** The level card: level and learned count, the bar, "+N learned this run" (dim at +0) and what's left to unlock. Returns its bottom. */
 export function renderLevelCard(
@@ -16,7 +17,9 @@ export function renderLevelCard(
   const cw = w - 2 * END_PAD;
   // a row of the characters learned this run, when there are any
   const charsH = card.learnedNow.length ? (compact ? 28 : 32) : 0;
-  const h = 2 * pad + 22 + step + 14 + step + 16 + charsH;
+  const kinds = kindLine(card);
+  const kindsH = kinds ? 18 : 0;
+  const h = 2 * pad + 22 + step + 14 + step + 16 + kindsH + charsH;
   panel(ctx, x, top, cw, h, 12);
   const left = x + 14;
   const right = x + cw - 14;
@@ -53,6 +56,14 @@ export function renderLevelCard(
     ctx.fill();
     ctx.fillStyle = COLORS.goodFill;
     ctx.fillRect(left + before, y, (bw * card.gained) / card.total, 14);
+    // met but not yet read: dim, right after the learned part
+    ctx.fillStyle = COLORS.wall;
+    ctx.fillRect(
+      left + (bw * card.learned) / card.total,
+      y,
+      (bw * card.readingToGo) / card.total,
+      14,
+    );
   }
   ctx.restore();
 
@@ -72,12 +83,7 @@ export function renderLevelCard(
     card.unlocked !== null,
     bw / 2,
   );
-  const next = levelName(card.level + 1);
-  const unlock = card.last
-    ? "Last level"
-    : card.toUnlock > 0
-      ? `${card.toUnlock} more to unlock ${next}`
-      : `${next} unlocks next run`;
+  const unlock = unlockLine(card.level, card.toUnlock, card.last);
   put(
     ctx,
     unlock,
@@ -89,6 +95,10 @@ export function renderLevelCard(
     false,
     bw - noteW - 12,
   );
+  if (kinds) {
+    y += 18;
+    put(ctx, kinds, left, y, 13, COLORS.dim, "left", false, bw);
+  }
   if (charsH) renderLearnedNow(ctx, card.learnedNow, left, right, y + charsH);
   return top + h;
 }
