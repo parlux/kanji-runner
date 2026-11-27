@@ -10,6 +10,44 @@ const PLACED_BOX = 4;
 export const levelName = (level: number): string =>
   level === 0 ? "Hiragana" : level === 1 ? "Katakana" : `Kanji ${level - 1}`;
 
+/** Kanji levels per group. */
+export const GROUP_SIZE = 25;
+
+/** Group names, index = group: 0 is the kana levels, then one per 25 kanji. */
+const GROUP_NAMES = [
+  "Kana",
+  "Foundations",
+  "Everyday",
+  "Getting around",
+  "Out and about",
+  "Signs and notices",
+  "Daily life",
+  "Reading the news",
+  "Wider reading",
+  "Advanced",
+  "Fluent reading",
+  "Nearly all",
+  "Every Jōyō kanji",
+];
+
+/** The group of a level: 0 for the kana levels, Kanji k (level k + 1) is in ⌈k / 25⌉. */
+export const groupOf = (level: number): number =>
+  level < 2 ? 0 : Math.ceil((level - 1) / GROUP_SIZE);
+
+export const groupName = (group: number): string => GROUP_NAMES[group] ?? "";
+
+/** The first and last level of a group; the last group stops at `max`. */
+export const groupLevels = (
+  group: number,
+  max: number,
+): { first: number; last: number } =>
+  group === 0
+    ? { first: 0, last: 1 }
+    : {
+        first: (group - 1) * GROUP_SIZE + 2,
+        last: Math.min(group * GROUP_SIZE + 1, max),
+      };
+
 // moved to dependency-free modules so words.ts can use them without a cycle
 export { maxLevel } from "./kanji";
 

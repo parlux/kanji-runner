@@ -3,6 +3,9 @@ import { KANA } from "../../src/core/kana";
 import { KANJI } from "../../src/core/kanji";
 import {
   applyUnlock,
+  groupLevels,
+  groupName,
+  groupOf,
   levelCard,
   levelKeys,
   levelName,
@@ -88,6 +91,38 @@ describe("levels", () => {
     }
     expect(levelKeys(3, KANA, KANJI)).toHaveLength(kanjiCount(3) * 2);
     expect(levelKeys(3, [], KANJI, WORDS, true)).toHaveLength(kanjiCount(3));
+  });
+
+  it("groups: kana, then 25 kanji levels each, the last holds the rest", () => {
+    // [level, group]: Hiragana, Katakana, Kanji 1, 25, 26, 50, 51, 275, 276, 296
+    const cases = [
+      [0, 0],
+      [1, 0],
+      [2, 1],
+      [26, 1],
+      [27, 2],
+      [51, 2],
+      [52, 3],
+      [276, 11],
+      [277, 12],
+      [297, 12],
+    ];
+    for (const [level = 0, group] of cases) expect(groupOf(level)).toBe(group);
+    expect(maxLevel(KANJI)).toBe(297);
+    expect(groupOf(maxLevel(KANJI))).toBe(12);
+    expect(groupName(0)).toBe("Kana");
+    expect(groupName(1)).toBe("Foundations");
+    expect(groupName(12)).toBe("Every Jōyō kanji");
+    expect(groupName(13)).toBe("");
+    const max = maxLevel(KANJI);
+    expect(groupLevels(0, max)).toEqual({ first: 0, last: 1 });
+    expect(groupLevels(1, max)).toEqual({ first: 2, last: 26 });
+    expect(groupLevels(2, max)).toEqual({ first: 27, last: 51 });
+    expect(groupLevels(12, max)).toEqual({ first: 277, last: 297 });
+    for (let l = 0; l <= max; l++) {
+      const r = groupLevels(groupOf(l), max);
+      expect(l >= r.first && l <= r.last).toBe(true);
+    }
   });
 
   it("has human names", () => {
