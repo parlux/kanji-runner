@@ -7,8 +7,8 @@ Every task: `npm run check` passes before it is checked off. Each task is one co
 
 ### Task R1: Run items (sonnet, core)
 Spec §1. `runItems` in a new core module: entries per item met, change kind, order, right answer on misses, mode rules.
-- [ ] `runitems.test.ts` from the spec passes.
-- [ ] `npm run check` passes (knip: used by tests only until R2; mark or wire accordingly).
+- [x] `runitems.test.ts` from the spec passes.
+- [x] `npm run check` passes (knip: used by tests only until R2; mark or wire accordingly).
 
 ### Task R2: End screen item list; session log removed (sonnet)
 Spec §2. New list between the level card and the buttons; stat tiles, missed list and session line removed; session log code, storage and tests removed (stored keys left alone).
