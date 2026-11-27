@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.9.0 (2026-11-28)
+
+- The end screen lists every kanji and word you met, with its stage change (changed first; misses in red, and a missed reading shows the right reading).
+- The stat tiles, the missed list and the session line are gone.
+- Progress view: tap past groups to expand them, tap any level (even a locked one) to see its items and their stages, tap an item for its study card.
+
 ## 1.8.0 (2026-11-28)
 
 - Learned now means right three times running, for the meaning and the reading (words: the word and its reading). It is live: a slip un-learns an item until you get it back.

@@ -24,8 +24,8 @@ Spec §3–4 except the study card. Past groups toggle; level rows open the leve
 
 ### Task R4: Study card from the level page; ship 1.9.0 (sonnet)
 Spec §4 "Tap an item". One-item study card from the level page, closes back to it. Bump `package.json` to 1.9.0 and add `## 1.9.0 (<date>)` to `CHANGELOG.md`.
-- [ ] Offscreen 390×844 render of a study card opened from the level page; path in the report.
-- [ ] `package.json` 1.9.0; `CHANGELOG.md` has the 1.9.0 section.
+- [x] Offscreen 390×844 render of a study card opened from the level page; path in the report.
+- [x] `package.json` 1.9.0; `CHANGELOG.md` has the 1.9.0 section.
 - [ ] `npm run check` passes; deploy green.
 
 ### Checkpoint R: owner plays
