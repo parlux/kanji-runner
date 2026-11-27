@@ -188,7 +188,7 @@ Not one implementer subagent: the orchestrator runs the loop per batch (2 levels
 ### Task D8: Ship 1.7.0
 **Description:** Credits/README note on the dictionary, `package.json` 1.7.0, `## 1.7.0 (<date>)` in `CHANGELOG.md`, deploy.
 **Acceptance:**
-- [ ] Version and changelog; deploy green.
+- [x] Version and changelog; deploy green. (1.7.0, deaf8db, deploy green 2026-11-27.)
 
 ### Checkpoint D2: owner
 - [x] Owner plays on with our stories only; ticks to close the round. (2026-11-27: played Kanji 5–6, "close the round".)
