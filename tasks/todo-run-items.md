@@ -18,9 +18,9 @@ Spec §2. New list between the level card and the buttons; stat tiles, missed li
 
 ### Task R3: Progress view: groups expand, level page (opus: layout and taps)
 Spec §3–4 except the study card. Past groups toggle; level rows open the level page; drag vs tap; level page header, rows, order, locked dim, scroll, Back keeps scroll.
-- [ ] Progress tests from the spec pass.
-- [ ] Offscreen 390×844 renders: a past group expanded, level page (current, learned, locked); paths in the report.
-- [ ] `npm run check` passes.
+- [x] Progress tests from the spec pass.
+- [x] Offscreen 390×844 renders: a past group expanded, level page (current, learned, locked); paths in the report.
+- [x] `npm run check` passes.
 
 ### Task R4: Study card from the level page; ship 1.9.0 (sonnet)
 Spec §4 "Tap an item". One-item study card from the level page, closes back to it. Bump `package.json` to 1.9.0 and add `## 1.9.0 (<date>)` to `CHANGELOG.md`.
