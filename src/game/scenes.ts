@@ -215,7 +215,8 @@ export function studyOffered(
 /**
  * The start screen: `confirm` starts a run; ←/→ or `place` open the placement
  * picker at the current placement (unlocked level − 1, −1 = none). In the
- * picker ←/→ change the pick, `confirm` applies it, `back` closes it.
+ * picker ←/→ change the pick (`leftTen`/`rightTen` by 10), `confirm` applies
+ * it, `back` closes it.
  */
 function startAction(
   scene: Extract<Scene, { kind: "start" }>,
@@ -245,8 +246,11 @@ function startAction(
   const bottom = session.meaning ? 1 : -1;
   switch (action) {
     case "left":
-    case "right": {
-      const next = pick + (action === "left" ? -1 : 1);
+    case "right":
+    case "leftTen":
+    case "rightTen": {
+      const step = { left: -1, right: 1, leftTen: -10, rightTen: 10 }[action];
+      const next = pick + step;
       return {
         scene: { kind: "start", pick: Math.max(bottom, Math.min(top, next)) },
         session,

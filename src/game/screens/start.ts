@@ -242,16 +242,13 @@ function renderPicker(
     16,
     target < unlocked ? COLORS.chargeLine : COLORS.dim,
   );
+  button(ctx, l.minusTen, "−10", 20);
+  button(ctx, l.plusTen, "+10", 20);
   button(ctx, l.apply, "Apply", 22, ON_FILL);
   button(ctx, l.cancel, "Cancel", 18);
-  text(
-    ctx,
-    "←/→ choose · Enter apply · Esc cancel",
-    w / 2,
-    l.cancel.y + l.cancel.h + 28,
-    14,
-    COLORS.dim,
-  );
+  const keys = "←/→ choose · PgDn/PgUp ±10 · Enter apply · Esc cancel";
+  const keysY = l.cancel.y + l.cancel.h + 28;
+  text(ctx, keys, w / 2, keysY, fitSize(ctx, keys, 14, w - 32), COLORS.dim);
 }
 
 /** Current level, a learned bar with the unlock mark, and what it unlocks. */

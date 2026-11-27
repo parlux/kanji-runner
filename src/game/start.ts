@@ -24,11 +24,14 @@ export function startLayout(w: number, h: number) {
     /** "I already know some…": opens the placement picker. */
     place: { x, y: play.y + play.h + 8, w: bw, h: 40 },
     /** The picker panel, drawn behind its buttons. */
-    panel: { x: x - 8, y: h * 0.26, w: bw + 16, h: h * 0.44 },
+    panel: { x: x - 8, y: h * 0.26, w: bw + 16, h: h * 0.29 + 180 },
     minus: { x, y: pickY - step / 2, w: step, h: step },
     plus: { x: x + bw - step, y: pickY - step / 2, w: step, h: step },
-    apply: { x, y: h * 0.55, w: bw, h: 52 },
-    cancel: { x, y: h * 0.55 + 64, w: bw, h: 44 },
+    /** −10 / +10: 296 kanji levels are too many to step one by one. */
+    minusTen: { x, y: h * 0.55, w: (bw - 12) / 2, h: 44 },
+    plusTen: { x: x + (bw + 12) / 2, y: h * 0.55, w: (bw - 12) / 2, h: 44 },
+    apply: { x, y: h * 0.55 + 56, w: bw, h: 52 },
+    cancel: { x, y: h * 0.55 + 120, w: bw, h: 44 },
     /** The build stamp, bottom centre (not a button: a tap there starts nothing). */
     stamp: { x: w / 2 - 80, y: h - 20, w: 160, h: 20 },
   };
@@ -116,6 +119,8 @@ export function startTap(
   }
   if (inside(l.minus, x, y)) return "left";
   if (inside(l.plus, x, y)) return "right";
+  if (inside(l.minusTen, x, y)) return "leftTen";
+  if (inside(l.plusTen, x, y)) return "rightTen";
   if (inside(l.apply, x, y)) return "confirm";
   if (inside(l.cancel, x, y)) return "back";
   return null;

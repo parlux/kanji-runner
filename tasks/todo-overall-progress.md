@@ -12,9 +12,9 @@ Spec §1 except groups. `stageName`; `LEARNED_BOX` 3; learned = every gate ≥ 3
 
 ### Task P2: Levels of 15 new things (sonnet; highest risk: data)
 Spec §2. `scripts/levels.ts` slicer, used by `build-data.ts` after the picker; re-level `kanji.json` and `words.json` in place with it (one-off run); `coverage.ts` reads levels from `kanji.json`; `WORDS_PER_LEVEL` 1; re-split `dictionary/stories/` into 296 three-digit files and update the story scripts; fix "30 per level" docs and comments.
-- [ ] `levels.test.ts` and the data test from the spec pass (15 items per level, loanwords one per level 2–232, kanji order unchanged, no word before its kanji, word set unchanged, story files match levels).
-- [ ] `npm run stories:check` and `npm run test:slow` pass.
-- [ ] `npm run check` passes.
+- [x] `levels.test.ts` and the data test from the spec pass (15 items per level, loanwords one per level 2–232, kanji order unchanged, no word before its kanji, word set unchanged, story files match levels).
+- [x] `npm run stories:check` and `npm run test:slow` pass.
+- [x] `npm run check` passes.
 
 ### Task P3: Groups and travel coverage (sonnet, core + script)
 Spec §1 "Groups" and §4 "Data". `GROUP_SIZE`, `groupOf`, `groupName` with the draft names; `scripts/travel.ts` + `npm run data:travel` → `src/data/travel.json`; `src/core/coverage.ts` with `travelCoverage`.

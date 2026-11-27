@@ -312,6 +312,15 @@ describe("placement picker", () => {
     expect(back).toEqual({ scene: { kind: "start" }, session: fresh });
   });
 
+  it("steps 10 with leftTen/rightTen, clamped (296 kanji levels)", () => {
+    const up = act({ kind: "start", pick: -1 }, fresh, "rightTen", "rightTen");
+    expect(up.scene).toEqual({ kind: "start", pick: 19 });
+    const top = act({ kind: "start", pick: 290 }, fresh, "rightTen");
+    expect(top.scene).toEqual({ kind: "start", pick: 296 });
+    const low = act({ kind: "start", pick: 3 }, fresh, "leftTen");
+    expect(low.scene).toEqual({ kind: "start", pick: -1 });
+  });
+
   it("re-opens at the placed level, so re-picking lower is easy", () => {
     const placed = act({ kind: "start" }, fresh, "place", "right", "confirm");
     expect(placed.session.progress.unlockedLevel).toBe(1);
@@ -339,6 +348,8 @@ describe("start screen taps", () => {
   it("in the picker only its buttons act", () => {
     expect(startTap(true, W, H, ...mid(l.minus))).toBe("left");
     expect(startTap(true, W, H, ...mid(l.plus))).toBe("right");
+    expect(startTap(true, W, H, ...mid(l.minusTen))).toBe("leftTen");
+    expect(startTap(true, W, H, ...mid(l.plusTen))).toBe("rightTen");
     expect(startTap(true, W, H, ...mid(l.apply))).toBe("confirm");
     expect(startTap(true, W, H, ...mid(l.cancel))).toBe("back");
     expect(startTap(true, W, H, ...mid(l.place))).toBeNull();
