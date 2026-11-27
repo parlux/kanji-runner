@@ -24,8 +24,6 @@ import { CACHE, cached, jouyouKanji, STORIES } from "./sources";
 
 /** Kanji 1, 3, 5, 10 and 20 (level 2 is Kanji 1). */
 const KANJI_LEVELS = [1, 3, 5, 10, 20];
-/** Kanji per level from level 2 (`LEVEL_SIZE` in `build-data.ts`). */
-const LEVEL_SIZE = 30;
 const TRAVEL = ["menu", "signs", "phrasebook"];
 
 /** The kanji tokens of a line, in order, repeats kept. */
@@ -100,19 +98,22 @@ type Order = { name: string; known: (count: number) => Set<string> };
 
 const pct = (x: number) => String(Math.round(x * 100)).padStart(3);
 
-/** The report: per text, one row per order, `coverage/lines` in %. */
+/**
+ * The report: per text, one row per order, `coverage/lines` in %. `kanjiBy(n)`
+ * is how many kanji the shipped levels teach by Kanji n; every order is
+ * measured at that count.
+ */
 export function coverageTable(
   texts: { name: string; lines: string[] }[],
   orders: Order[],
+  kanjiBy: (n: number) => number,
 ): string {
   const head = ["text", "order", ...KANJI_LEVELS.map((n) => `Kanji ${n}`)];
   const rows: string[][] = [];
   const avg = new Map<string, number[][]>();
   for (const t of texts)
     for (const o of orders) {
-      const ms = KANJI_LEVELS.map((n) =>
-        measure(t.lines, o.known(n * LEVEL_SIZE)),
-      );
+      const ms = KANJI_LEVELS.map((n) => measure(t.lines, o.known(kanjiBy(n))));
       rows.push([
         t.name,
         o.name,
@@ -163,12 +164,13 @@ async function main(): Promise<void> {
     stories.push(...aozoraLines(sjis.decode(await cached(s, refresh))));
   texts.push({ name: "stories", lines: stories });
 
-  const shipped = (
-    JSON.parse(readFileSync("src/data/kanji.json", "utf8")) as {
-      char: string;
-      level: number;
-    }[]
-  ).map((k) => k.char);
+  const shippedKanji = JSON.parse(
+    readFileSync("src/data/kanji.json", "utf8"),
+  ) as { char: string; level: number }[];
+  const shipped = shippedKanji.map((k) => k.char);
+  // level 2 is Kanji 1
+  const kanjiBy = (n: number) =>
+    shippedKanji.filter((k) => k.level <= n + 1).length;
   const { raw, components } = await jouyouKanji(refresh);
   const today = byGrade(raw, components, []);
   const prefix = (order: string[]) => (n: number) => new Set(order.slice(0, n));
@@ -185,7 +187,7 @@ async function main(): Promise<void> {
     >;
     orders.push({ name: "wanikani", known: (n) => wkKnown(levels, n) });
   }
-  const report = coverageTable(texts, orders);
+  const report = coverageTable(texts, orders, kanjiBy);
   writeFileSync(`${CACHE}/coverage-report.txt`, report);
   console.log(report);
   console.log(`coverage report written to ${CACHE}/coverage-report.txt`);

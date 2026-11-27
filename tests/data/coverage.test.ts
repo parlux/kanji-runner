@@ -77,6 +77,7 @@ describe("coverage table", () => {
         { name: "a", known: () => all },
         { name: "b", known: () => new Set() },
       ],
+      (n) => n * 15,
     );
     const rows = table.split("\n");
     expect(rows[1]).toMatch(/^text\s+order\s+Kanji 1\s+Kanji 3/);

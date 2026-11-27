@@ -7,9 +7,11 @@
  *    after the named filters in `FILTERS`, plus how many entries each removed,
  *    and the lone-kanji `racers` for the order. No ranking happens here beyond
  *    keeping one entry per spelling. Candidates are built before levels
- *    exist; `setLevels` gives them their level once the order is known.
+ *    exist; `setLevels` gives them their pick level (30-kanji blocks) once
+ *    the order is known.
  * 2. `WORD_PICKER(usage, value)(candidates, KANJI_WORDS_PER_LEVEL)` → the
- *    words to teach, in teaching order (level, then rank within the level).
+ *    words to teach, in pick order (pick level, then rank within it). The
+ *    shipped levels come afterwards from `sliceLevels` (`scripts/levels.ts`).
  *    `usage` is the everyday frequency list (`parseUsage`), `value` each
  *    candidate's usefulness (`scripts/useful.ts`).
  *
@@ -350,7 +352,7 @@ export type WordPicker = (
   perLevel: number,
 ) => Candidate[];
 
-/** Kanji words per level (SPEC-word-gates). */
+/** Kanji words per pick level, a block of 30 kanji (SPEC-word-gates); not the shipped levels. */
 export const KANJI_WORDS_PER_LEVEL = 30;
 
 /** Share of each kind a level aims at; compounds take the rest. */

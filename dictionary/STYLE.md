@@ -4,7 +4,7 @@ How to write (and judge) the stories in this dictionary. The writer follows it; 
 
 ## What you get
 
-For each level, an input file from `npm run stories:prep -- <levels>` (in `.data-cache/stories/in/kanji-NN.json`). Per kanji:
+For each level, an input file from `npm run stories:prep -- <levels>` (in `.data-cache/stories/in/kanji-NNN.json`). Per kanji:
 
 - `char`, `glosses` (the first gloss is the meaning the game asks for), `on` (main on'yomi, hiragana, or null), `kun` (main kun'yomi as the game shows it, okurigana in brackets: `やす(む)`, or null), `readings` (all readings, for context only).
 - `components`: the kanji's parts, each with its name from `parts.json` (null if not named yet).
@@ -16,7 +16,7 @@ Plus `parts.json` (part names) and `sounds.json` (sound keywords). Work from the
 
 ## Output
 
-`dictionary/stories/kanji-NN.json` (`kanji-01.json` is "Kanji 1", game level 2):
+`dictionary/stories/kanji-NNN.json` (`kanji-001.json` is "Kanji 1", game level 2):
 
 ```json
 {
