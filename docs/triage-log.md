@@ -57,3 +57,4 @@ One row per owner request, written by the `triage` skill (`.claude/skills/triage
 | 2026-11-27 | Show overall progress (backlog #1) | sdd | Epic round, outcome still a one-line idea | |
 | 2026-11-27 | End-of-run level card: "19 of 30 learned" vs "5 more to unlock" don't match | sdd | Numbers are right (unlock at 80% = 24/30) but unexplained; copy/look call, folded into the progress round | |
 | 2026-11-28 | End of run: show the kanji and words met and their levels; session stats matter less | sdd | End-screen rethink: what to show, what to drop, look judged on the phone | |
+| 2026-11-28 | Checkpoint R: end rows don't open study cards; "10 of 15 learned" but which? | sdd (amend round) | Changes the end list's content and order; spec §5, task R5 | |

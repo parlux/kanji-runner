@@ -29,7 +29,15 @@ Spec §4 "Tap an item". One-item study card from the level page, closes back to 
 - [x] `package.json` 1.9.0; `CHANGELOG.md` has the 1.9.0 section.
 - [x] `npm run check` passes; deploy green.
 
+### Task R5: End list shows the level's 15 first; rows open study cards; ship 1.10.0 (opus: layout and taps)
+Spec §5 (owner feedback at Checkpoint R). Missing → learned → also this run; this run's change on met rows; tap a row → study card; scroll. Bump `package.json` to 1.10.0 and add `## 1.10.0 (<date>)` to `CHANGELOG.md`.
+- [ ] Tests: row order (missing, learned, also), change shown only on met rows, level after an unlock, hit test and drag-not-tap, scroll clamp.
+- [ ] Offscreen 390×844 renders: mid-level run, run that unlocks, run with slips and other-level reviews (scrolled), compact 390×700; a study card opened from an end row; paths in the report.
+- [ ] `package.json` 1.10.0; `CHANGELOG.md` has the 1.10.0 section.
+- [ ] `npm run check` passes; deploy green.
+
 ### Checkpoint R: owner plays
-- [ ] After a few runs: the list says what you met and what moved; the row wording reads well.
+- [ ] After a few runs: the list shows your level's 15, missing and learned at a glance, plus what this run moved; the row wording reads well.
+- [ ] Tapping an end-screen row opens its study card.
 - [ ] Start screen → level block → Kanji 1 shows its 15 items; an item opens its study card.
 - [ ] Nothing missed from the old end screen (stat tiles, session line).

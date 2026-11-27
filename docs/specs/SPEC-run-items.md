@@ -37,6 +37,17 @@ A canvas screen inside the progress scene; Back (button, Esc) returns to the pro
 - Rows scroll if they don't fit.
 - **Tap an item:** opens its study card (the existing DOM study overlay, one card) with the stage line; closing it returns to the level page. The overlay's "Play again" is not shown here; it closes instead.
 
+## 5. Amendment after Checkpoint R (owner, 2026-11-28): the level first
+Owner: "I want the list to show me the 15, clearly showing which are learned and which are missing. That's the core thing." This replaces §2's list content and order; §2's removals, colours and fit rules stay.
+- **Rows, in order:**
+  1. **Missing:** every item of the level shown on the level card (`levelCard(...).level`; after an unlock, the new level) that is not learned, in teaching order. Drawn bright, with both stages on the right ("M Learned · R Met"; single stage for kana/loanwords).
+  2. **Learned:** that level's learned items, teaching order, drawn dim with a tick.
+  3. **Also this run:** items met this run that are not in that level (warm-ups, reviews, other levels), as full rows in `runItems` order (new, up, slip, same), under a small dim label "Also this run".
+- **This run's change** shows on any row whose item was met: the stage change replaces the plain stages ("Recalled → Learned" good, slip bad with the right reading on a second line as in §2). Rows not met this run show their stages only.
+- **Tap a row** (any of the three parts): opens that item's study card (`openItemStudy`, the level page's single-card overlay with Back). Drag scrolls, never taps (as §3). The Study button for misses stays.
+- **Fit:** rows compact (≥ 30 px at 390×844, ≥ 24 px compact); the list scrolls between the level card and the buttons; it opens at the top (missing first).
+- Version: **1.10.0**.
+
 ## Commands
 `npm run check` before every tick; `npm run check:fast` per slice. Offscreen renders at 390×844 for the end screen and both progress screens.
 
