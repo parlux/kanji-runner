@@ -19,6 +19,8 @@ export function startLayout(w: number, h: number) {
     /** The Normal / Meanings only switch, two halves. */
     modeNormal: { x, y: modeY, w: bw / 2, h: 60 },
     modeMeaning: { x: x + bw / 2, y: modeY, w: bw / 2, h: 60 },
+    /** The level block (name, bar, counts, "Progress ›"): opens the overall view. */
+    progress: { x, y: h * 0.46 - 24, w: bw, h: 122 },
     /** Starts a run. */
     play,
     /** "I already know some…": opens the placement picker. */
@@ -101,7 +103,8 @@ const inside = (r: Rect, x: number, y: number): boolean =>
 
 /**
  * The action for a tap at (x, y) on the start screen. Without the picker open
- * Play starts a run and "I already know some…" opens the picker; other taps do
+ * Play starts a run, the level block opens the overall view and "I already
+ * know some…" opens the picker; other taps do
  * nothing. With it open only its buttons act.
  */
 export function startTap(
@@ -115,6 +118,7 @@ export function startTap(
   const l = startLayout(w, h);
   if (!picking) {
     if (inside(l.play, x, y)) return "confirm";
+    if (inside(l.progress, x, y)) return "progress";
     return placement && inside(l.place, x, y) ? "place" : null;
   }
   if (inside(l.minus, x, y)) return "left";

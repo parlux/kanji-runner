@@ -2,7 +2,8 @@ import { createDrag } from "./drag";
 
 /**
  * `left`/`right` (`leftTen`/`rightTen` step 10)/`back`/`place` drive the start
- * screen's placement picker; `study` opens the study screen from the end screen.
+ * screen's placement picker; `study` opens the study screen from the end screen;
+ * `progress` (a tap on the start screen's level block) opens the overall view.
  */
 export type Action =
   | "confirm"
@@ -13,7 +14,8 @@ export type Action =
   | "rightTen"
   | "back"
   | "place"
-  | "study";
+  | "study"
+  | "progress";
 
 const KEYS: Record<string, Action> = {
   Enter: "confirm",

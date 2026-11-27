@@ -5,6 +5,7 @@ import type { SyncStatus } from "../../sync/sync";
 import { startLayout, syncAlert, syncLabel, type Rect } from "../start";
 import { button, COLORS, type Ctx } from "../draw";
 import { fitSize, FONT, text } from "../labels";
+import { groupedLevelName, unlockLine } from "../levelcopy";
 
 export function renderStart(
   ctx: Ctx,
@@ -24,7 +25,7 @@ export function renderStart(
   text(ctx, "Kanji Runner", w / 2, h * 0.17, Math.min(52, w / 8));
   renderModeSwitch(ctx, w, h, session, otherLevel);
   renderLevel(ctx, w, h * 0.46, session);
-  unlockedNote(ctx, w, h * 0.46 + 92, session, 22);
+  unlockedNote(ctx, w, h * 0.46 + 118, session, 22);
   renderPlay(ctx, l.play);
   if (!canPlay) {
     const msg = "This device can't run the 3D game";
@@ -251,7 +252,7 @@ function renderPicker(
   text(ctx, keys, w / 2, keysY, fitSize(ctx, keys, 14, w - 32), COLORS.dim);
 }
 
-/** Current level, a learned bar with the unlock mark, and what it unlocks. */
+/** Group and level, a learned bar with its dim reading-to-go part, the counts and "Progress ›". */
 function renderLevel(ctx: Ctx, w: number, y: number, session: Session): void {
   const level = session.progress.unlockedLevel;
   const p = levelProgress(
@@ -262,22 +263,26 @@ function renderLevel(ctx: Ctx, w: number, y: number, session: Session): void {
     levelWords(session),
     session.meaning,
   );
-  text(ctx, levelName(level), w / 2, y, 30);
+  const name = groupedLevelName(level);
+  text(ctx, name, w / 2, y, fitSize(ctx, name, 30, w - 32));
   const bw = Math.min(300, w - 64);
   const bx = (w - bw) / 2;
   const by = y + 28;
   const bh = 12;
   ctx.fillStyle = COLORS.track;
   ctx.fillRect(bx, by, bw, bh);
-  ctx.fillStyle = COLORS.good;
-  if (p.total) ctx.fillRect(bx, by, (bw * p.learned) / p.total, bh);
-  const unlocks =
-    level >= maxLevel(KANJI)
-      ? "last level"
-      : p.learned >= p.total
-        ? `${levelName(level + 1)} unlocks next run`
-        : `${p.total - p.learned} more to unlock ${levelName(level + 1)}`;
-  const line = `${p.learned}/${p.total} learned · ${unlocks}`;
+  if (p.total) {
+    ctx.fillStyle = COLORS.good;
+    ctx.fillRect(bx, by, (bw * p.learned) / p.total, bh);
+    ctx.fillStyle = COLORS.wall;
+    ctx.fillRect(
+      bx + (bw * p.learned) / p.total,
+      by,
+      (bw * p.readingToGo) / p.total,
+      bh,
+    );
+  }
+  const line = `${p.learned}/${p.total} learned · ${unlockLine(level, p.total - p.learned, level >= maxLevel(KANJI))}`;
   text(
     ctx,
     line,
@@ -286,4 +291,5 @@ function renderLevel(ctx: Ctx, w: number, y: number, session: Session): void {
     fitSize(ctx, line, 15, w - 32),
     COLORS.dim,
   );
+  text(ctx, "Progress ›", w / 2, by + bh + 46, 14, COLORS.soldier);
 }

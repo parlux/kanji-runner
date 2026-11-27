@@ -342,7 +342,17 @@ describe("start screen taps", () => {
     expect(startTap(false, W, H, ...mid(l.play))).toBe("confirm");
     expect(startTap(false, W, H, ...mid(l.place))).toBe("place");
     expect(startTap(false, W, H, ...mid(l.place), false)).toBeNull();
-    expect(startTap(false, W, H, W / 2, H / 2)).toBeNull();
+    expect(startTap(false, W, H, W / 2, H * 0.2)).toBeNull();
+  });
+
+  it('the level block is the P5 hook: it reports "progress" and nothing happens yet', () => {
+    expect(startTap(false, W, H, ...mid(l.progress))).toBe("progress");
+    expect(startTap(true, W, H, ...mid(l.progress))).toBeNull();
+    const session = createSession(defaultProgress());
+    const start: Scene = { kind: "start" };
+    const r = handleAction(start, "progress", () => 1, session);
+    expect(r.scene).toBe(start);
+    expect(r.session).toBe(session);
   });
 
   it("in the picker only its buttons act", () => {

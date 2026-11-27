@@ -230,6 +230,8 @@ function startAction(
       const next = { ...session, unlocked: null, before: null };
       return { scene: newRun(newSeed(), next), session: next };
     }
+    // the overall view (Task P5) opens here; until then the tap does nothing
+    if (action === "progress") return { scene, session };
     // placement is off in WaniKani mode: WaniKani's level gates the pool
     if (
       !session.wk &&
