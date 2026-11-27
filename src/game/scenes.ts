@@ -1,6 +1,7 @@
 import { bossSize, bossWon } from "../core/boss";
 import {
   applyUnlock,
+  groupOf,
   levelCard,
   maxLevel,
   place,
@@ -8,6 +9,7 @@ import {
   type LevelCard,
 } from "../core/progression";
 import { mergeProgress } from "../core/merge";
+import { levelPage, type LevelPage } from "../core/levelpage";
 import { overall, type Overall } from "../core/overall";
 import { builtInPool, meaningPool, wanikaniPool } from "../core/pool";
 import { reaskRun } from "../core/reask";
@@ -39,6 +41,16 @@ import type { KanaItem, Progress, WordItem } from "../core/types";
 import type { WkList } from "../wanikani/parse";
 import { endListArea, endListLayout } from "./endlist";
 import type { Action } from "./input";
+import {
+  clampScroll,
+  levelPageHit,
+  levelPageLayout,
+  progressHit,
+  progressLayout,
+  resolveScroll,
+  scrollBy,
+  type LevelPageHit,
+} from "./progress";
 
 export type Scene =
   /** `pick` is set while the placement picker is open: "I know up to level pick". */
@@ -61,10 +73,18 @@ export type Scene =
       paused?: boolean;
     }
   /**
-   * The overall view: `view` is computed once on opening; `scroll` is the
-   * list's offset (px), null until first scrolled (see `resolveScroll`).
+   * The overall view: `view` is computed on opening and when a group is
+   * toggled; `scroll` is the list's offset (px), null until first scrolled
+   * (see `resolveScroll`); `expanded` the groups opened by a tap (not saved).
+   * `page` is the level page open on top, with its own scroll.
    */
-  | { kind: "progress"; view: Overall; scroll: number | null }
+  | {
+      kind: "progress";
+      view: Overall;
+      scroll: number | null;
+      expanded: number[];
+      page?: { view: LevelPage; scroll: number };
+    }
   /** `boss` is null when the army died before reaching the boss. */
   | {
       kind: "end";
@@ -323,18 +343,110 @@ function startAction(
   }
 }
 
-/** The overall view of the session's progress, scrolled to the current level. */
-const openProgress = (session: Session): Scene => ({
-  kind: "progress",
-  view: overall(
+/** The overall view's data with `expanded` groups open. */
+const overallOf = (session: Session, expanded: readonly number[]): Overall =>
+  overall(
     session.progress,
     session.kana,
     KANJI,
     levelWords(session),
     session.meaning,
-  ),
+    expanded,
+  );
+
+/** The overall view of the session's progress, scrolled to the current level. */
+const openProgress = (session: Session): Scene => ({
+  kind: "progress",
+  view: overallOf(session, []),
   scroll: null,
+  expanded: [],
 });
+
+type ProgressScene = Extract<Scene, { kind: "progress" }>;
+
+/**
+ * An item tapped on the level page (its key and kind), for its study card.
+ * The hook for opening it: nothing acts on it yet.
+ */
+export type StudyRequest = Extract<LevelPageHit, { kind: "item" }>["item"];
+
+/**
+ * A tap at (x, y) on the overall view or its level page. Overall view: Back →
+ * start screen; a group row other than the current group toggles it (the
+ * scroll is pinned first, so rows above don't jump); a level row opens its
+ * level page. Level page: Back → the overall view as it was; an item row → a
+ * `study` request, the scene unchanged.
+ */
+export function progressTap(
+  scene: ProgressScene,
+  w: number,
+  h: number,
+  x: number,
+  y: number,
+  session: Session,
+): { scene: Scene; study: StudyRequest | null } {
+  const { page } = scene;
+  if (page) {
+    const hit = levelPageHit(w, h, page.view, page.scroll, x, y);
+    if (hit?.kind === "back") return { scene: closePage(scene), study: null };
+    return { scene, study: hit?.kind === "item" ? hit.item : null };
+  }
+  const hit = progressHit(w, h, scene.view, scene.scroll, x, y);
+  if (hit?.kind === "back") return { scene: { kind: "start" }, study: null };
+  if (hit?.kind === "level") {
+    const view = levelPage(
+      session.progress,
+      hit.level,
+      session.kana,
+      KANJI,
+      levelWords(session),
+      session.meaning,
+    );
+    return { scene: { ...scene, page: { view, scroll: 0 } }, study: null };
+  }
+  if (hit?.kind === "group" && hit.group !== groupOf(scene.view.level)) {
+    const { expanded } = scene;
+    const next = expanded.includes(hit.group)
+      ? expanded.filter((g) => g !== hit.group)
+      : [...expanded, hit.group];
+    const max = progressLayout(w, h, scene.view).maxScroll;
+    return {
+      scene: {
+        ...scene,
+        view: overallOf(session, next),
+        expanded: next,
+        scroll: resolveScroll(scene.scroll, max),
+      },
+      study: null,
+    };
+  }
+  return { scene, study: null };
+}
+
+/** The overall view under the level page, at its scroll and expanded groups. */
+const closePage = (scene: ProgressScene): Scene => {
+  const { view, scroll, expanded } = scene;
+  return { kind: "progress", view, scroll, expanded };
+};
+
+/** The overall view or its level page scrolled by `dy` px (positive = further down). */
+export function scrollProgress(
+  scene: ProgressScene,
+  dy: number,
+  w: number,
+  h: number,
+): Scene {
+  const { page } = scene;
+  if (page) {
+    const max = levelPageLayout(w, h, page.view).maxScroll;
+    return {
+      ...scene,
+      page: { ...page, scroll: clampScroll(page.scroll + dy, max) },
+    };
+  }
+  const max = progressLayout(w, h, scene.view).maxScroll;
+  return { ...scene, scroll: scrollBy(scene.scroll, dy, max) };
+}
 
 /** The scene, and the session (placement changes progress), after an action. */
 export function handleAction(
@@ -346,9 +458,15 @@ export function handleAction(
   switch (scene.kind) {
     case "start":
       return startAction(scene, action, newSeed, session);
+    // Back (Esc) closes the level page, else returns to the start screen
     case "progress":
       return {
-        scene: action === "back" ? { kind: "start" } : scene,
+        scene:
+          action !== "back"
+            ? scene
+            : scene.page
+              ? closePage(scene)
+              : { kind: "start" },
         session,
       };
     case "boss":

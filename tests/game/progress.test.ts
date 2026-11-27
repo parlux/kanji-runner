@@ -8,7 +8,7 @@ import { WORDS } from "../../src/core/words";
 import {
   clampScroll,
   progressLayout,
-  progressTap,
+  progressHit,
   resolveScroll,
   scrollBy,
 } from "../../src/game/progress";
@@ -68,10 +68,46 @@ describe("scrolling", () => {
   });
 });
 
-describe("progressTap", () => {
-  it("hits Back only", () => {
-    const { back } = progressLayout(W, H, fresh);
-    expect(progressTap(W, H, fresh, back.x + 10, back.y + 10)).toBe(true);
-    expect(progressTap(W, H, fresh, W / 2, 300)).toBe(false);
+describe("progressHit", () => {
+  it("hits Back, group rows and level rows under the scroll", () => {
+    const l = progressLayout(W, H, fresh);
+    expect(
+      progressHit(W, H, fresh, null, l.back.x + 10, l.back.y + 10),
+    ).toEqual({ kind: "back" });
+    const y0 = l.listTop;
+    expect(progressHit(W, H, fresh, null, W / 2, y0 + 10)).toEqual({
+      kind: "group",
+      group: 0,
+    });
+    expect(progressHit(W, H, fresh, null, W / 2, y0 + 54 + 10)).toEqual({
+      kind: "level",
+      level: 0,
+    });
+    // the dimmed next level and group are hit too
+    expect(progressHit(W, H, fresh, null, W / 2, y0 + 96 + 10)).toEqual({
+      kind: "level",
+      level: 1,
+    });
+    expect(progressHit(W, H, fresh, null, W / 2, y0 + 138 + 10)).toEqual({
+      kind: "group",
+      group: 1,
+    });
+    // below the last row, outside the list or the side gutter: nothing
+    expect(progressHit(W, H, fresh, null, W / 2, y0 + 200)).toBeNull();
+    expect(progressHit(W, H, fresh, null, W / 2, y0 - 5)).toBeNull();
+    expect(progressHit(W, H, fresh, null, 5, y0 + 10)).toBeNull();
+  });
+
+  it("counts the scroll; null scroll means the end of the list", () => {
+    const l = progressLayout(W, H, deep);
+    const last = l.rows.at(-1);
+    const y = l.listBottom - 5;
+    const hit = progressHit(W, H, deep, null, W / 2, y);
+    expect(last?.row.kind).toBe("group");
+    expect(hit).toEqual({ kind: "group", group: 3 });
+    expect(progressHit(W, H, deep, 0, W / 2, l.listTop + 5)).toEqual({
+      kind: "group",
+      group: 0,
+    });
   });
 });

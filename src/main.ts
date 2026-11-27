@@ -1,10 +1,5 @@
 import { bindDrag, bindKeys, bindScroll, type Action } from "./game/input";
-import {
-  clampScroll,
-  progressLayout,
-  progressTap,
-  scrollBy,
-} from "./game/progress";
+import { clampScroll } from "./game/progress";
 import { startLoop } from "./game/loop";
 import { render } from "./game/render";
 import type { TrackView } from "./game/hud";
@@ -15,6 +10,8 @@ import {
   createSession,
   endScrollMax,
   handleAction,
+  progressTap,
+  scrollProgress,
   updateScene,
   type Scene,
 } from "./game/scenes";
@@ -104,7 +101,8 @@ const takeDrag = bindDrag(stage.canvas, (x, y) => {
   const w = window.innerWidth;
   const h = window.innerHeight;
   if (scene.kind === "progress") {
-    if (progressTap(w, h, scene.view, x, y)) act("back");
+    // `study` (an item row on the level page) is for its study card: not opened yet
+    scene = progressTap(scene, w, h, x, y, session).scene;
     return;
   }
   const picking = scene.pick !== undefined;
@@ -137,12 +135,7 @@ bindScroll(stage.canvas, (dy) => {
     return;
   }
   if (scene.kind !== "progress" || panels.anyOpen()) return;
-  const max = progressLayout(
-    window.innerWidth,
-    window.innerHeight,
-    scene.view,
-  ).maxScroll;
-  scene = { ...scene, scroll: scrollBy(scene.scroll, dy, max) };
+  scene = scrollProgress(scene, dy, window.innerWidth, window.innerHeight);
 });
 
 let lastKind: Scene["kind"] = "start";
