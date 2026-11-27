@@ -3,6 +3,15 @@ import { COLORS, END_PAD, panel, put, type Ctx } from "../draw";
 import { FONT } from "../labels";
 import { kindLine, unlockLine } from "../levelcopy";
 
+/** The level card's height (px). */
+export function levelCardHeight(card: LevelCard, compact: boolean): number {
+  const pad = compact ? 12 : 16;
+  const step = compact ? 8 : 10;
+  const charsH = card.learnedNow.length ? (compact ? 28 : 32) : 0;
+  const kindsH = kindLine(card) ? 18 : 0;
+  return 2 * pad + 22 + step + 14 + step + 16 + kindsH + charsH;
+}
+
 /** The level card: level and learned count, the bar, "+N learned this run" (dim at +0) and what's left to unlock. Returns its bottom. */
 export function renderLevelCard(
   ctx: Ctx,
@@ -18,8 +27,7 @@ export function renderLevelCard(
   // a row of the characters learned this run, when there are any
   const charsH = card.learnedNow.length ? (compact ? 28 : 32) : 0;
   const kinds = kindLine(card);
-  const kindsH = kinds ? 18 : 0;
-  const h = 2 * pad + 22 + step + 14 + step + 16 + kindsH + charsH;
+  const h = levelCardHeight(card, compact);
   panel(ctx, x, top, cw, h, 12);
   const left = x + 14;
   const right = x + cw - 14;
