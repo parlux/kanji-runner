@@ -2,6 +2,7 @@
 
 Spec: `docs/specs/SPEC-run-items.md` (2026-11-28). Intent: `docs/intent/run-items.md`. Idea: `docs/ideas/run-items.md`.
 Review: https://claude.ai/artifact/D5iiauMNbxjQCLhMtxswQU
+Checkpoint R: https://claude.ai/artifact/Pn8ysGJ3MqvKN57tywJkEX
 Started while Checkpoint P (`tasks/todo-overall-progress.md`) waits on the owner's days of play; this is the active list for "implement the next round".
 Every task: `npm run check` passes before it is checked off. Each task is one commit series on the session branch, pushed.
 
@@ -26,7 +27,7 @@ Spec §3–4 except the study card. Past groups toggle; level rows open the leve
 Spec §4 "Tap an item". One-item study card from the level page, closes back to it. Bump `package.json` to 1.9.0 and add `## 1.9.0 (<date>)` to `CHANGELOG.md`.
 - [x] Offscreen 390×844 render of a study card opened from the level page; path in the report.
 - [x] `package.json` 1.9.0; `CHANGELOG.md` has the 1.9.0 section.
-- [ ] `npm run check` passes; deploy green.
+- [x] `npm run check` passes; deploy green.
 
 ### Checkpoint R: owner plays
 - [ ] After a few runs: the list says what you met and what moved; the row wording reads well.
