@@ -50,8 +50,7 @@ export function render(
       otherLevel,
       canPlay,
     );
-  if (scene.kind === "progress")
-    return renderProgress(ctx, w, h, scene.view, scene.scroll);
+  if (scene.kind === "progress") return renderProgress(ctx, w, h, scene);
   if (scene.kind === "end")
     return renderEnd(ctx, w, h, scene.run, scene.boss, session, scene.scroll);
   // a run or boss clash without the 3D view is never entered: only the backdrop

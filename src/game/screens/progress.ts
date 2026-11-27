@@ -1,11 +1,31 @@
+import type { LevelPage, LevelPageItem } from "../../core/levelpage";
 import { gainLabel, type Overall, type OverallRow } from "../../core/overall";
 import { levelName } from "../../core/progression";
-import { button, COLORS, put, type Ctx } from "../draw";
+import { truncate } from "../endlist";
+import { button, COLORS, panel, put, type Ctx } from "../draw";
 import { FONT, fitSize, text } from "../labels";
-import { progressLayout, resolveScroll } from "../progress";
+import {
+  clampScroll,
+  levelPageLayout,
+  progressLayout,
+  resolveScroll,
+} from "../progress";
+import type { Scene } from "../scenes";
+
+/** The progress scene: the level page when one is open, else the overall view. */
+export function renderProgress(
+  ctx: Ctx,
+  w: number,
+  h: number,
+  scene: Extract<Scene, { kind: "progress" }>,
+): void {
+  if (scene.page)
+    return renderLevelPage(ctx, w, h, scene.page.view, scene.page.scroll);
+  renderOverall(ctx, w, h, scene.view, scene.scroll);
+}
 
 /** The overall view (SPEC-overall-progress §4): header, coverage, the scrolling group list, Back. */
-export function renderProgress(
+function renderOverall(
   ctx: Ctx,
   w: number,
   h: number,
@@ -31,19 +51,106 @@ export function renderProgress(
     renderRow(ctx, w, y, r.h, r.row);
   }
   ctx.restore();
-  // a thin scroll thumb when the list doesn't fit
-  if (l.maxScroll > 0) {
-    const track = l.listBottom - l.listTop;
-    const thumb = Math.max(24, (track * track) / (track + l.maxScroll));
-    ctx.fillStyle = COLORS.wall;
-    ctx.fillRect(
-      w - 6,
-      l.listTop + ((track - thumb) * s) / l.maxScroll,
-      3,
-      thumb,
-    );
-  }
+  thumb(ctx, w, l, s);
   button(ctx, l.back, "Back", 20);
+}
+
+/** A thin scroll thumb at the right edge when the list doesn't fit. */
+function thumb(
+  ctx: Ctx,
+  w: number,
+  l: { listTop: number; listBottom: number; maxScroll: number },
+  s: number,
+): void {
+  if (l.maxScroll <= 0) return;
+  const track = l.listBottom - l.listTop;
+  const th = Math.max(24, (track * track) / (track + l.maxScroll));
+  ctx.fillStyle = COLORS.wall;
+  ctx.fillRect(w - 6, l.listTop + ((track - th) * s) / l.maxScroll, 3, th);
+}
+
+/**
+ * The level page (SPEC-run-items §4): title, "11 of 15 learned", the bar with
+ * its dim reading-to-go part, the item rows (scrolling), Back. A locked level
+ * is drawn dim below the header.
+ */
+function renderLevelPage(
+  ctx: Ctx,
+  w: number,
+  h: number,
+  page: LevelPage,
+  scroll: number,
+): void {
+  const l = levelPageLayout(w, h, page);
+  text(ctx, page.title, w / 2, 44, fitSize(ctx, page.title, 24, w - 32));
+  const count = `${page.learned} of ${page.total} learned${page.locked ? " · locked" : ""}`;
+  text(ctx, count, w / 2, 76, 15, COLORS.dim);
+  const share = (n: number) => (page.total ? n / page.total : 0);
+  bar(ctx, 20, 94, w - 40, 12, share(page.learned), share(page.readingToGo));
+
+  const s = clampScroll(scroll, l.maxScroll);
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(0, l.listTop, w, l.listBottom - l.listTop);
+  ctx.clip();
+  if (page.locked) ctx.globalAlpha = 0.45;
+  for (const r of l.rows) {
+    const y = l.listTop + r.y - s;
+    if (y + r.h < l.listTop || y > l.listBottom) continue;
+    renderItem(ctx, w, y, r.h, r.item);
+  }
+  ctx.restore();
+  thumb(ctx, w, l, s);
+  button(ctx, l.back, "Back", 20);
+}
+
+/** An item row: the item large, its reading over its meaning (dim, cut), the stages right, a tick when learned. */
+function renderItem(
+  ctx: Ctx,
+  w: number,
+  top: number,
+  h: number,
+  item: LevelPageItem,
+): void {
+  const x = 20;
+  const rw = w - 40;
+  panel(ctx, x, top + 2, rw, h - 4, 8);
+  const y = top + h / 2;
+  const itemW = put(
+    ctx,
+    item.key,
+    x + 12,
+    y,
+    24,
+    COLORS.text,
+    "left",
+    false,
+    84,
+  );
+  const right = x + rw - 12;
+  const stagesRight = item.learned ? right - 20 : right;
+  if (item.learned) tick(ctx, right - 7, y);
+  const stagesW = put(
+    ctx,
+    item.stages,
+    stagesRight,
+    y,
+    12,
+    item.learned ? COLORS.good : COLORS.dim,
+    "right",
+  );
+  const midX = x + 12 + Math.max(itemW, 28) + 12;
+  const room = stagesRight - stagesW - 10 - midX;
+  const lines = [
+    item.reading ? { s: item.reading, px: 14, color: COLORS.text } : null,
+    item.meaning ? { s: item.meaning, px: 12, color: COLORS.dim } : null,
+  ].filter((t) => t !== null);
+  lines.forEach((t, i) => {
+    ctx.font = `${t.px}px ${FONT}`;
+    const shown = truncate(t.s, room, (q) => ctx.measureText(q).width);
+    const ly = lines.length === 1 ? y : y + (i === 0 ? -8 : 9);
+    if (shown && room >= 24) put(ctx, shown, midX, ly, t.px, t.color, "left");
+  });
 }
 
 /** "You can read 34% of the kanji in travel text", the % bold; under it, dim, what the current level adds. */
@@ -157,7 +264,7 @@ function renderRow(
   ctx.restore();
 }
 
-/** A bar: the track, then the share filled green. */
+/** A bar: the track, then the share filled green, then `toGo` dim (reading to go). */
 function bar(
   ctx: Ctx,
   x: number,
@@ -165,6 +272,7 @@ function bar(
   w: number,
   h: number,
   share: number,
+  toGo = 0,
 ): void {
   ctx.save();
   ctx.beginPath();
@@ -174,6 +282,8 @@ function bar(
   ctx.clip();
   ctx.fillStyle = COLORS.good;
   ctx.fillRect(x, y, w * share, h);
+  ctx.fillStyle = COLORS.wall;
+  ctx.fillRect(x + w * share, y, w * toGo, h);
   ctx.restore();
 }
 
