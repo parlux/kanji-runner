@@ -10,6 +10,7 @@ import {
   type StudyCard,
   type Story,
   canStudy,
+  itemCard,
   lastAnswer,
   presentedReadings,
   runKanji,
@@ -774,5 +775,28 @@ describe("withStages / stageLine", () => {
 
   it("a card without boxes has no line", () => {
     expect(stageLine(kana)).toBeNull();
+  });
+});
+
+describe("itemCard", () => {
+  const char = KANJI[0]?.char ?? "";
+  it("builds an unmissed card for a kanji and a kana", () => {
+    const k = itemCard({ key: char, kind: "kanji" }, KANJI, KANA);
+    expect(k).toMatchObject({ kind: "kanji", char, missed: false });
+    const a = itemCard({ key: "あ", kind: "kana" }, KANJI, KANA);
+    expect(a).toMatchObject({ kind: "kana", char: "あ", missed: false });
+  });
+  it("builds word cards and returns null for unknown items", () => {
+    const w: WordItem = {
+      word: "人々",
+      reading: "ひとびと",
+      glosses: ["people"],
+      level: 1,
+    } as WordItem;
+    expect(
+      itemCard({ key: "人々", kind: "word" }, KANJI, KANA, undefined, [w]),
+    ).toMatchObject({ kind: "word", reading: "ひとびと", missed: false });
+    expect(itemCard({ key: "zz", kind: "kanji" }, KANJI, KANA)).toBeNull();
+    expect(itemCard({ key: "zz", kind: "loanword" }, KANJI, KANA)).toBeNull();
   });
 });

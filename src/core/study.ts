@@ -109,7 +109,7 @@ type StudyCardBody =
       char: string;
       romaji: string;
       script: KanaItem["script"];
-      missed: true;
+      missed: boolean;
     }
   | {
       kind: "word";
@@ -380,6 +380,39 @@ export function studyCards(
     if (k) out.push(kanjiCard(k, false, stories, presented.get(k.char), dict));
   }
   return out;
+}
+
+/**
+ * The card for one item tapped on the level page (`key` is the char or word;
+ * `kind` as on `LevelPageItem`), never marked missed. Null if the item is not
+ * in the given lists. `dict` (our stories) wins over `stories`.
+ */
+export function itemCard(
+  item: { key: string; kind: "kana" | "kanji" | "word" | "loanword" },
+  kanji: readonly KanjiItem[],
+  kana: readonly KanaItem[],
+  stories?: ReadonlyMap<string, Story>,
+  words: readonly WordItem[] = [],
+  dict?: Dictionary,
+): StudyCard | null {
+  if (item.kind === "kana") {
+    const k = kana.find((x) => x.char === item.key);
+    return k
+      ? {
+          kind: "kana",
+          char: k.char,
+          romaji: k.romaji,
+          script: k.script,
+          missed: false,
+        }
+      : null;
+  }
+  if (item.kind === "kanji") {
+    const k = kanji.find((x) => x.char === item.key);
+    return k ? kanjiCard(k, false, stories, undefined, dict) : null;
+  }
+  const w = words.find((x) => x.word === item.key);
+  return w ? wordCard(w, false, kana, kanji) : null;
 }
 
 /** The kanji asked on the run's answered gates (not kana or words), in order of first sight. */
