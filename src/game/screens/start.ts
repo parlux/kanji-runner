@@ -1,11 +1,6 @@
-import {
-  levelName,
-  levelProgress,
-  maxLevel,
-  UNLOCK_SHARE,
-} from "../../core/progression";
+import { levelName, levelProgress, maxLevel } from "../../core/progression";
 import { KANJI } from "../../core/kanji";
-import type { Session } from "../scenes";
+import { levelWords, type Session } from "../scenes";
 import type { SyncStatus } from "../../sync/sync";
 import { startLayout, syncAlert, syncLabel, type Rect } from "../start";
 import { button, COLORS, type Ctx } from "../draw";
@@ -262,7 +257,14 @@ function renderPicker(
 /** Current level, a learned bar with the unlock mark, and what it unlocks. */
 function renderLevel(ctx: Ctx, w: number, y: number, session: Session): void {
   const level = session.progress.unlockedLevel;
-  const p = levelProgress(session.progress, level, session.kana, KANJI);
+  const p = levelProgress(
+    session.progress,
+    level,
+    session.kana,
+    KANJI,
+    levelWords(session),
+    session.meaning,
+  );
   text(ctx, levelName(level), w / 2, y, 30);
   const bw = Math.min(300, w - 64);
   const bx = (w - bw) / 2;
@@ -272,14 +274,12 @@ function renderLevel(ctx: Ctx, w: number, y: number, session: Session): void {
   ctx.fillRect(bx, by, bw, bh);
   ctx.fillStyle = COLORS.good;
   if (p.total) ctx.fillRect(bx, by, (bw * p.learned) / p.total, bh);
-  ctx.fillStyle = COLORS.text;
-  ctx.fillRect(bx + bw * UNLOCK_SHARE - 1, by - 4, 2, bh + 8);
   const unlocks =
     level >= maxLevel(KANJI)
       ? "last level"
-      : p.learned >= p.needed
+      : p.learned >= p.total
         ? `${levelName(level + 1)} unlocks next run`
-        : `${p.needed} needed for ${levelName(level + 1)}`;
+        : `${p.total - p.learned} more to unlock ${levelName(level + 1)}`;
   const line = `${p.learned}/${p.total} learned · ${unlocks}`;
   text(
     ctx,

@@ -34,7 +34,7 @@ import {
   ROWS_PER_RUN,
   STEER_MAX_SPEED,
 } from "../core/tuning";
-import type { KanaItem, Progress } from "../core/types";
+import type { KanaItem, Progress, WordItem } from "../core/types";
 import type { WkList } from "../wanikani/parse";
 import type { Action } from "./input";
 
@@ -113,6 +113,13 @@ export function adoptProgress(session: Session, synced: Progress): Session {
 }
 
 /**
+ * The words that count toward a level: Built-in mode's; none in WaniKani or
+ * Meaning mode (they ask no words).
+ */
+export const levelWords = (session: Session): readonly WordItem[] =>
+  session.meaning || session.wk ? [] : WORDS;
+
+/**
  * A new run. WaniKani runs have re-asks on (built with `reaskRun`, same rows
  * as `buildPoolRun`); Built-in runs have none and are unchanged.
  */
@@ -155,6 +162,8 @@ export function afterStep(
     recordRun(session.progress, rows, results, won, now, reask ?? undefined),
     session.kana,
     KANJI,
+    levelWords(session),
+    session.meaning,
   );
   const gained = progress.unlockedLevel > session.progress.unlockedLevel;
   return {
@@ -176,6 +185,8 @@ export function endLevelCard(session: Session): LevelCard {
     session.progress,
     session.kana,
     KANJI,
+    levelWords(session),
+    session.meaning,
   );
 }
 

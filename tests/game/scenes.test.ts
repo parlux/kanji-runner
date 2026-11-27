@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { KANA } from "../../src/core/kana";
 import { KANJI } from "../../src/core/kanji";
 import { levelKeys, meaningProgress } from "../../src/core/progression";
+import { WORDS } from "../../src/core/words";
 import { crowdWidth } from "../../src/core/crowd";
 import { bossSize } from "../../src/core/boss";
 import { builtInPool, wanikaniPool } from "../../src/core/pool";
@@ -111,13 +112,14 @@ describe("afterStep", () => {
     expect(afterStep(session, { kind: "start" }, run, 1)).toBe(session);
   });
 
-  it("unlocks the next level when a run brings it to 80%", () => {
-    // 23/30 of Kanji 1 learned; the run's answers push one more to box 2
+  it("unlocks the next level when a run learns its last item", () => {
+    // every gate of Kanji 1's kanji and words learned but the last kanji's meaning
     const progress = { ...defaultProgress(), unlockedLevel: 2 };
-    const keys = levelKeys(2, KANA, KANJI);
+    const keys = levelKeys(2, KANA, KANJI, WORDS);
+    const last = 0; // the first kanji's meaning, at box 2
     keys.forEach((k, i) => {
       progress.items[k] = {
-        box: i < 23 ? 2 : 1,
+        box: i === last ? 2 : 3,
         seen: 1,
         correct: 1,
         wrong: 0,
@@ -127,7 +129,7 @@ describe("afterStep", () => {
     const s = { ...createSession(progress), progress };
     const row = {
       type: "meaning" as const,
-      prompt: (keys[29] as string).split(":")[0] as string,
+      prompt: (keys[last] as string).split(":")[0] as string,
       options: ["a", "b"],
       answerIndex: 0,
       answer: "a",

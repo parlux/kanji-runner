@@ -69,13 +69,17 @@ export function kanjiNeeded(word: string): string[] {
 
 /**
  * A word may be asked once its level is unlocked and what it needs is learned:
- * every kana of a loanword, the meaning of every kanji of a kanji word (box ≥ 2).
+ * every kana of a loanword, meaning and reading of every kanji of a kanji word
+ * (box ≥ LEARNED_BOX).
  */
 export function isWordEligible(word: WordItem, progress: Progress): boolean {
   const needs =
     word.kind === "loanword"
       ? kanaNeeded(word.word).map((c) => itemKey(c, "kana"))
-      : kanjiNeeded(word.word).map((c) => itemKey(c, "meaning"));
+      : kanjiNeeded(word.word).flatMap((c) => [
+          itemKey(c, "meaning"),
+          itemKey(c, "reading"),
+        ]);
   return (
     word.level <= progress.unlockedLevel &&
     needs.every((k) => (progress.items[k]?.box ?? 0) >= LEARNED_BOX)

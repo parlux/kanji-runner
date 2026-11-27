@@ -6,9 +6,9 @@ Every task: `npm run check` passes before it is checked off. Each task is one co
 
 ### Task P1: Stages, learned at 3, words count, unlock at 100% (sonnet, core)
 Spec §1 except groups. `stageName`; `LEARNED_BOX` 3; learned = every gate ≥ 3; a level's items include its words; `levelProgress`, `levelCard` (`kanji`, `words`, `readingToGo`), `applyUnlock`, `place` (readings and words), `isWordEligible` (kanji learned). Remove `UNLOCK_SHARE` (its screen uses draw no mark for now; Task P4 redoes the copy).
-- [ ] Tests from the spec's "Testing" (`srs`, `progression`, `words`) pass; existing progression, placement and word tests updated.
-- [ ] `npm run test:slow` passes (update expectations that assumed box 2 or 80%, and say which in the report).
-- [ ] `npm run check` passes.
+- [x] Tests from the spec's "Testing" (`srs`, `progression`, `words`) pass; existing progression, placement and word tests updated.
+- [x] `npm run test:slow` passes (update expectations that assumed box 2 or 80%, and say which in the report).
+- [x] `npm run check` passes.
 
 ### Task P2: Levels of 15 new things (sonnet; highest risk: data)
 Spec §2. `scripts/levels.ts` slicer, used by `build-data.ts` after the picker; re-level `kanji.json` and `words.json` in place with it (one-off run); `coverage.ts` reads levels from `kanji.json`; `WORDS_PER_LEVEL` 1; re-split `dictionary/stories/` into 296 three-digit files and update the story scripts; fix "30 per level" docs and comments.

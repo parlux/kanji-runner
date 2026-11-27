@@ -4,6 +4,7 @@ import {
   itemKey,
   recordRun,
   review,
+  stageName,
   weight,
 } from "../../src/core/srs";
 import type { GateRow } from "../../src/core/types";
@@ -68,5 +69,18 @@ describe("recordRun", () => {
     const before = defaultProgress();
     recordRun(before, [row("あ", "kana")], [true], true, 1);
     expect(before).toEqual(defaultProgress());
+  });
+});
+
+describe("stageName", () => {
+  it("names boxes 0-5", () => {
+    expect([0, 1, 2, 3, 4, 5].map(stageName)).toEqual([
+      "New",
+      "Met",
+      "Recalled",
+      "Learned",
+      "Strong",
+      "Solid",
+    ]);
   });
 });

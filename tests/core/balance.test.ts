@@ -34,10 +34,13 @@ describe("balance bot (perfect steering)", () => {
 describe("balance bot with words in the pool (perfect steering)", () => {
   // all kana and the kanji of levels 2-8 learned: words are the new items
   const progress = { ...defaultProgress(), unlockedLevel: 8 };
-  const known = { box: 2, seen: 1, correct: 1, wrong: 0, lastSeen: 1 };
+  const known = { box: 3, seen: 1, correct: 1, wrong: 0, lastSeen: 1 };
   for (const k of KANA) progress.items[itemKey(k.char, "kana")] = known;
   for (const k of KANJI)
-    if (k.level <= 8) progress.items[itemKey(k.char, "meaning")] = known;
+    if (k.level <= 8) {
+      progress.items[itemKey(k.char, "meaning")] = known;
+      progress.items[itemKey(k.char, "reading")] = known;
+    }
   const build = (seed: number) => ({
     rows: buildRun(seed, progress, KANA, KANJI, WORDS),
   });
@@ -54,10 +57,13 @@ describe("balance bot with words in the pool (perfect steering)", () => {
 describe("balance bot with word readings in the pool (perfect steering)", () => {
   // as above, with the words themselves at box 3: their reading gates are asked
   const progress = { ...defaultProgress(), unlockedLevel: 8 };
-  const known = { box: 2, seen: 1, correct: 1, wrong: 0, lastSeen: 1 };
+  const known = { box: 3, seen: 1, correct: 1, wrong: 0, lastSeen: 1 };
   for (const k of KANA) progress.items[itemKey(k.char, "kana")] = known;
   for (const k of KANJI)
-    if (k.level <= 8) progress.items[itemKey(k.char, "meaning")] = known;
+    if (k.level <= 8) {
+      progress.items[itemKey(k.char, "meaning")] = known;
+      progress.items[itemKey(k.char, "reading")] = known;
+    }
   for (const w of WORDS)
     if (w.level <= 8)
       progress.items[itemKey(w.word, "word")] = { ...known, box: 3 };

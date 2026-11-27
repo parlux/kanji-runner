@@ -330,7 +330,7 @@ describe("WaniKani pool", () => {
 });
 
 describe("words in the Built-in pool", () => {
-  const learnedKana = (p: Progress, box = 2): Progress => {
+  const learnedKana = (p: Progress, box = 3): Progress => {
     for (const k of KANA) p.items[itemKey(k.char, "kana")] = rec(box);
     return p;
   };
@@ -374,7 +374,10 @@ describe("words in the Built-in pool", () => {
     // every kanji known, no word known: only new words are left to introduce
     const p = at(6);
     for (const k of KANJI)
-      if (k.level <= 6) p.items[itemKey(k.char, "meaning")] = rec(2);
+      if (k.level <= 6) {
+        p.items[itemKey(k.char, "meaning")] = rec(3);
+        p.items[itemKey(k.char, "reading")] = rec(3);
+      }
     const pool = builtInPool(p, KANA, KANJI, WORDS);
     expect(
       pool.entries.filter((e) => e.type === "word").length,
@@ -400,7 +403,10 @@ describe("words in the Built-in pool", () => {
   it("builds word rows asking the first gloss", () => {
     const p = at(8);
     for (const k of KANJI)
-      if (k.level <= 8) p.items[itemKey(k.char, "meaning")] = rec(2);
+      if (k.level <= 8) {
+        p.items[itemKey(k.char, "meaning")] = rec(3);
+        p.items[itemKey(k.char, "reading")] = rec(3);
+      }
     const rows = [];
     for (let seed = 0; seed < 50; seed++)
       rows.push(...buildRun(seed, p, KANA, KANJI, WORDS));

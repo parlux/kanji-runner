@@ -38,6 +38,8 @@ const MIGRATIONS: Record<number, (old: Json, start: number) => Json> = {
       { ...defaultProgress(), unlockedLevel: start, items },
       KANA,
       KANJI,
+      [],
+      start > 0, // Meaning store: meanings only
     );
     return { ...old, version: 2, unlockedLevel };
   },

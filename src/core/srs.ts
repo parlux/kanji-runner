@@ -9,9 +9,15 @@ import type {
 
 export const MAX_BOX = 5;
 /** An item counts as learned for unlocking at this box or higher. */
-export const LEARNED_BOX = 2;
+export const LEARNED_BOX = 3;
 /** A kanji's reading gate unlocks once its meaning box reaches this. */
 export const READING_UNLOCK_BOX = 3;
+
+const STAGE_NAMES = ["New", "Met", "Recalled", "Learned", "Strong", "Solid"];
+
+/** The stage name of a box: New, Met, Recalled, Learned, Strong, Solid. */
+export const stageName = (box: number): string =>
+  STAGE_NAMES[Math.max(0, Math.min(MAX_BOX, box))] as string;
 
 export const itemKey = (char: string, type: GateType): string =>
   `${char}:${type}`;

@@ -124,8 +124,8 @@ describe("isWordEligible", () => {
   };
 
   it("needs the level unlocked and every kana learned", () => {
-    expect(isWordEligible(coffee, progress(3, { コ: 2, ヒ: 5 }))).toBe(true);
-    expect(isWordEligible(coffee, progress(9, { コ: 2, ヒ: 2 }))).toBe(true);
+    expect(isWordEligible(coffee, progress(3, { コ: 3, ヒ: 5 }))).toBe(true);
+    expect(isWordEligible(coffee, progress(9, { コ: 3, ヒ: 3 }))).toBe(true);
   });
 
   it("is not eligible before its level", () => {
@@ -133,7 +133,7 @@ describe("isWordEligible", () => {
   });
 
   it("is not eligible with a kana below LEARNED_BOX or unseen", () => {
-    expect(isWordEligible(coffee, progress(3, { コ: 5, ヒ: 1 }))).toBe(false);
+    expect(isWordEligible(coffee, progress(3, { コ: 5, ヒ: 2 }))).toBe(false);
     expect(isWordEligible(coffee, progress(3, { コ: 5 }))).toBe(false);
   });
 
@@ -144,9 +144,9 @@ describe("isWordEligible", () => {
       glosses: ["t"],
       level: 2,
     };
-    const learned = { テ: 2, イ: 2, シ: 2, ツ: 2 };
+    const learned = { テ: 3, イ: 3, シ: 3, ツ: 3 };
     expect(isWordEligible(tissue, progress(2, learned))).toBe(false);
-    expect(isWordEligible(tissue, progress(2, { ...learned, ユ: 2 }))).toBe(
+    expect(isWordEligible(tissue, progress(2, { ...learned, ユ: 3 }))).toBe(
       true,
     );
   });

@@ -94,18 +94,27 @@ describe("schema 2 migration", () => {
     expect(migrate({ ...v1(5, {}), version: 2 })?.unlockedLevel).toBe(5);
   });
 
-  it("levels 2-12 learned in the old order land on the first level under 80%", () => {
-    const out = migrate(v1(13, oldOrderItems())) as Progress;
+  it("levels 2-12 learned in the old order land on the first level not fully learned", () => {
+    const items = {
+      ...oldOrderItems(),
+      ...Object.fromEntries(
+        [...OLD_ORDER_LEVELS_2_TO_12].map((c) => [
+          itemKey(c, "reading"),
+          rec(LEARNED_BOX),
+        ]),
+      ),
+    };
+    const out = migrate(v1(13, items)) as Progress;
     const perLevel: Record<number, string> = {};
     for (let l = 2; l <= 7; l++) {
       const p = levelProgress(out, l, KANA, KANJI);
       perLevel[l] = `${p.learned}/${p.total}`;
     }
     const here = levelProgress(out, out.unlockedLevel, KANA, KANJI);
-    expect(here.learned).toBeLessThan(here.needed);
+    expect(here.learned).toBeLessThan(here.total);
     for (let l = 0; l < out.unlockedLevel; l++) {
       const p = levelProgress(out, l, KANA, KANJI);
-      expect(p.learned).toBeGreaterThanOrEqual(p.needed);
+      expect(p.learned).toBeGreaterThanOrEqual(p.total);
     }
     expect(out.unlockedLevel).toBeGreaterThanOrEqual(2);
   });

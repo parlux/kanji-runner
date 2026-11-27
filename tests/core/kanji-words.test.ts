@@ -25,12 +25,15 @@ const kw = (word: string): WordItem => {
   if (!w) throw new Error(`no kanji word ${word}`);
   return w;
 };
-/** Kanji meanings of levels ≤ `upTo` learned at `box`; unlocked level `level`. */
-const learned = (level: number, upTo: number, box = 2): Progress => {
+/** Kanji meanings and readings of levels ≤ `upTo` at `box`; unlocked level `level`. */
+const learned = (level: number, upTo: number, box = 3): Progress => {
   const p: Progress = { ...defaultProgress(), unlockedLevel: level };
   for (const k of KANA) p.items[itemKey(k.char, "kana")] = rec(5);
   for (const k of KANJI)
-    if (k.level <= upTo) p.items[itemKey(k.char, "meaning")] = rec(box);
+    if (k.level <= upTo) {
+      p.items[itemKey(k.char, "meaning")] = rec(box);
+      p.items[itemKey(k.char, "reading")] = rec(box);
+    }
   return p;
 };
 const kanjiWords = WORDS.filter((w) => w.kind !== "loanword");
@@ -62,7 +65,7 @@ describe("kanjiNeeded", () => {
 
 describe("kanji word eligibility", () => {
   const w = kw("一人");
-  it("needs every kanji's meaning at box 2, and the level", () => {
+  it("needs every kanji's meaning and reading at box 3, and the level", () => {
     expect(isWordEligible(w, learned(w.level, w.level))).toBe(true);
     const p = learned(w.level, w.level);
     p.items[itemKey("人", "meaning")] = rec(1);
@@ -73,7 +76,16 @@ describe("kanji word eligibility", () => {
     expect(isWordEligible(w, p)).toBe(false);
     expect(isWordEligible(w, learned(w.level - 1, w.level))).toBe(false);
   });
-  it("ignores kana boxes and reading records", () => {
+  it("is not eligible while one kanji's reading is below 3 or missing", () => {
+    const p = learned(w.level, w.level);
+    p.items[itemKey("人", "reading")] = rec(2);
+    expect(isWordEligible(w, p)).toBe(false);
+    p.items = Object.fromEntries(
+      Object.entries(p.items).filter(([k]) => k !== itemKey("人", "reading")),
+    );
+    expect(isWordEligible(w, p)).toBe(false);
+  });
+  it("ignores kana boxes", () => {
     const p = learned(w.level, w.level);
     p.items = Object.fromEntries(
       Object.entries(p.items).filter(([k]) => !k.endsWith(":kana")),

@@ -1,8 +1,4 @@
-import {
-  levelName,
-  UNLOCK_SHARE,
-  type LevelCard,
-} from "../../core/progression";
+import { levelName, type LevelCard } from "../../core/progression";
 import { COLORS, END_PAD, panel, put, type Ctx } from "../draw";
 import { FONT } from "../labels";
 
@@ -40,7 +36,7 @@ export function renderLevelCard(
     right - left - nameW - 12,
   );
 
-  // the bar: learned before the run, learned this run (faded), the unlock mark
+  // the bar: learned before the run, learned this run (faded)
   y += 11 + step;
   const bw = right - left;
   ctx.save();
@@ -59,10 +55,6 @@ export function renderLevelCard(
     ctx.fillRect(left + before, y, (bw * card.gained) / card.total, 14);
   }
   ctx.restore();
-  if (!card.last) {
-    ctx.fillStyle = COLORS.soldier;
-    ctx.fillRect(left + bw * UNLOCK_SHARE - 1, y - 4, 2, 22);
-  }
 
   y += 14 + step + 8;
   const gainedNote =
