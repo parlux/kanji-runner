@@ -13,8 +13,10 @@ import {
   lastAnswer,
   presentedReadings,
   runKanji,
+  stageLine,
   storiesWithFallback,
   studyCards,
+  withStages,
   wordBreakdown,
 } from "../../src/core/study";
 import type {
@@ -722,5 +724,55 @@ describe("studyCards with our dictionary", () => {
     ];
     const la = lastAnswer(rows, [true], 0, KANJI, KANA, undefined, [], dict);
     expect(la?.card?.kind === "kanji" && la.card.own).toBe(true);
+  });
+});
+
+describe("withStages / stageLine", () => {
+  const prog = (items: Record<string, number>): Progress => ({
+    ...defaultProgress(),
+    items: Object.fromEntries(
+      Object.entries(items).map(([k, box]) => [k, { box } as never]),
+    ),
+  });
+  const kanji = studyCards([], KANJI, KANA, undefined, [KANJI[0]?.char ?? ""]);
+  const char = KANJI[0]?.char ?? "";
+  const kana: StudyCard = {
+    kind: "kana",
+    char: "あ",
+    romaji: "a",
+    script: "hiragana",
+    missed: true,
+  };
+  const loan: StudyCard = {
+    kind: "word",
+    char: "ビル",
+    meanings: ["building"],
+    breakdown: [],
+    missed: true,
+  };
+  const kword: StudyCard = { ...loan, char: "人々", reading: "ひとびと" };
+
+  it("kanji and kanji words show meaning and reading", () => {
+    const p = prog({
+      [`${char}:meaning`]: 2,
+      [`${char}:reading`]: 0,
+      "人々:word": 3,
+    });
+    const [k, w] = withStages([...kanji, kword], p, false);
+    expect(stageLine(k as StudyCard)).toBe("Meaning: Recalled · Reading: New");
+    expect(stageLine(w as StudyCard)).toBe("Meaning: Learned · Reading: New");
+  });
+
+  it("kana, loanwords and meaning-mode kanji show one stage", () => {
+    const p = prog({ "あ:kana": 1, "ビル:word": 5, [`${char}:meaning`]: 4 });
+    const [a, b] = withStages([kana, loan], p, false);
+    expect(stageLine(a as StudyCard)).toBe("Stage: Met");
+    expect(stageLine(b as StudyCard)).toBe("Stage: Solid");
+    const [m] = withStages(kanji, p, true);
+    expect(stageLine(m as StudyCard)).toBe("Stage: Strong");
+  });
+
+  it("a card without boxes has no line", () => {
+    expect(stageLine(kana)).toBeNull();
   });
 });

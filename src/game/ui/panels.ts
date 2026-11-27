@@ -11,6 +11,7 @@ import {
   runKanji,
   storiesWithFallback,
   studyCards,
+  withStages,
 } from "../../core/study";
 import { addFlag } from "../../storage/flags";
 import { levelName } from "../../core/progression";
@@ -194,6 +195,7 @@ export function createPanels(d: PanelDeps): Panels {
       void loadDictionary(
         levelsOf([...missed.map((m) => m.prompt), ...seen]),
       ).then(() => {
+        const { progress, meaning } = d.session();
         const cards = studyCards(
           missed,
           kanjiList(),
@@ -205,7 +207,11 @@ export function createPanels(d: PanelDeps): Panels {
           dictionary,
         );
         // its Play again is the end screen's: a new run straight away
-        openStudy(cards, () => d.act("confirm"), onFlag);
+        openStudy(
+          withStages(cards, progress, meaning),
+          () => d.act("confirm"),
+          onFlag,
+        );
       });
     },
     studyAvailable,

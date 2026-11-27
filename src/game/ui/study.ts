@@ -1,5 +1,5 @@
 import { mnemonicNodes } from "../../core/mnemonic";
-import type { StoryRadical, StudyCard } from "../../core/study";
+import { stageLine, type StoryRadical, type StudyCard } from "../../core/study";
 import { NOTE_MAX } from "../../storage/flags";
 
 /** Called when the player sends a flag for a kanji's story (with the optional note). */
@@ -24,6 +24,7 @@ const CSS = `
   min-width: 44px; padding: 2px 6px; background: #111; border: 1px solid #5a6478; }
 .kr-study .crumb .ch { font-size: 22px; line-height: 1.2; }
 .kr-study .crumb .rm { font-size: 12px; color: #5fd38d; text-align: center; }
+.kr-study .stage { font-size: 13px; color: #9aa3b5; }
 .kr-study .wordreading { font-size: 20px; color: #46e0d6; }
 .kr-study .info { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 6px;
   overflow-wrap: anywhere; }
@@ -198,6 +199,9 @@ export function cardEl(c: StudyCard, onFlag?: FlagFn): HTMLElement {
       info.append(el("div", "row", "parts"), parts);
     }
   }
+  const stage = stageLine(c);
+  // dim, right under the answer (the meaning line)
+  if (stage) info.querySelector(".meaning")?.after(el("div", "stage", stage));
   const card = el(
     "div",
     c.kind === "word" ? "card word" : "card",

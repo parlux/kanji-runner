@@ -1,8 +1,9 @@
 import { plainReading, showReading, mainReadings } from "./distractors";
 import { storyReadings } from "./mnemonic";
 import type { Missed } from "./run";
+import { itemKey, stageName } from "./srs";
 import { kanjiNeeded } from "./words";
-import type { GateRow, KanaItem, KanjiItem, WordItem } from "./types";
+import type { GateRow, KanaItem, KanjiItem, Progress, WordItem } from "./types";
 
 /** WaniKani's mnemonics (raw text). */
 export type Mnemonics = { meaning?: string; reading?: string };
@@ -44,7 +45,7 @@ type StoryVocab = {
   story: string;
 };
 
-type KanjiCard = Extract<StudyCard, { kind: "kanji" }>;
+type KanjiCard = Extract<StudyCardBody, { kind: "kanji" }>;
 
 /** Our own story for one kanji (`dictionary/stories/`): meaning, and one per main reading. */
 /** `on`/`kun` null: left out on purpose (the card shows no story for it). */
@@ -73,7 +74,12 @@ type ReadingStory =
   | { reading: string; none: true };
 
 /** One study card: what to learn about an item missed in a run. */
-export type StudyCard =
+export type StudyCard = StudyCardBody & {
+  /** The item's boxes now: [meaning, reading] for kanji and kanji words, [box] for the rest (see `withStages`). */
+  boxes?: readonly number[];
+};
+
+type StudyCardBody =
   | {
       kind: "kanji";
       char: string;
@@ -482,4 +488,43 @@ export function lastAnswer(
     correct,
     card,
   };
+}
+
+/**
+ * The cards with their items' current boxes from `progress`: meaning and
+ * reading for kanji and kanji words, one box for kana, loanwords and (meaning
+ * mode) kanji, which have a single gate.
+ */
+export function withStages(
+  cards: readonly StudyCard[],
+  progress: Progress,
+  meaning: boolean,
+): StudyCard[] {
+  const box = (char: string, type: GateRow["type"]): number =>
+    progress.items[itemKey(char, type)]?.box ?? 0;
+  return cards.map((c) => {
+    if (c.kind === "kana") return { ...c, boxes: [box(c.char, "kana")] };
+    if (c.kind === "word")
+      return {
+        ...c,
+        boxes: c.reading
+          ? [box(c.char, "word"), box(c.char, "wordreading")]
+          : [box(c.char, "word")],
+      };
+    return {
+      ...c,
+      boxes: meaning
+        ? [box(c.char, "meaning")]
+        : [box(c.char, "meaning"), box(c.char, "reading")],
+    };
+  });
+}
+
+/** "Meaning: Recalled · Reading: New", or "Stage: Met" for a single gate; null without boxes. */
+export function stageLine(c: StudyCard): string | null {
+  const [a, b] = c.boxes ?? [];
+  if (a === undefined) return null;
+  return b === undefined
+    ? `Stage: ${stageName(a)}`
+    : `Meaning: ${stageName(a)} · Reading: ${stageName(b)}`;
 }
