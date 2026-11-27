@@ -1,6 +1,6 @@
 # Story dictionary
 
-Our own memory stories for every kanji in the game: a name for every kanji part, a meaning story and a story per main reading. The game shows them on the study and pause cards. Spec: `docs/specs/SPEC-own-stories.md`.
+Our own memory stories for every kanji in the game: a name for every kanji part, a meaning story and a story per main reading. The game shows them on the study and pause cards. Spec: `docs/specs/done/SPEC-own-stories.md`.
 
 ## Files
 

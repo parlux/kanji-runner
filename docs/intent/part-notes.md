@@ -1,6 +1,6 @@
 # Intent: a "why it fits" note per part, and names you can see
 
-Status: confirmed by the owner, 2026-11-20, after an interview. Round: own stories (epic round 3), added during Checkpoint D. Spec: `docs/specs/SPEC-own-stories.md`, section "Part notes". Tasks: `tasks/todo-own-stories.md` (N1, N2).
+Status: confirmed by the owner, 2026-11-20, after an interview. Round: own stories (epic round 3), added during Checkpoint D. Spec: `docs/specs/done/SPEC-own-stories.md`, section "Part notes". Tasks: `tasks/done/todo-own-stories.md` (N1, N2).
 
 ## Statement of intent
 - **Outcome:** each part on the review page shows a one-line note on why its name fits ("looks like stretched fingers reaching"), so the owner can judge before rejecting.

@@ -1,6 +1,6 @@
 # Our own stories, no WaniKani needed
 
-Status: in progress, 2026-11-20. Intent `docs/intent/own-stories.md`, spec `docs/specs/SPEC-own-stories.md`, tasks `tasks/todo-own-stories.md`. Round 3 of the [useful Japanese epic](useful-japanese.md).
+Status: done, 2026-11-27 (shipped in 1.7.0; started 2026-11-20). Intent `docs/intent/own-stories.md`, spec `docs/specs/done/SPEC-own-stories.md`, tasks `tasks/done/todo-own-stories.md`. Round 3 of the [useful Japanese epic](../useful-japanese.md).
 
 ## Idea
 Create our own stories so the game no longer needs WaniKani at all.

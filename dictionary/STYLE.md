@@ -1,6 +1,6 @@
 # Story style guide
 
-How to write (and judge) the stories in this dictionary. The writer follows it; the judge checks every entry against it. Spec: `docs/specs/SPEC-own-stories.md`.
+How to write (and judge) the stories in this dictionary. The writer follows it; the judge checks every entry against it. Spec: `docs/specs/done/SPEC-own-stories.md`.
 
 ## What you get
 

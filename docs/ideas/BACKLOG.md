@@ -6,7 +6,7 @@ Open ideas in priority order; the top one is next. The owner orders it. New idea
 Epic: [Useful Japanese, then drop WaniKani](useful-japanese.md). Its rounds come first; other ideas slot between them only when the owner wants a break.
 
 ## In progress
-- [Our own stories, no WaniKani needed](own-stories.md): epic round 3; tasks `tasks/todo-own-stories.md`.
+Nothing yet: the next round starts from the top of "Next".
 
 ## Next
 1. [Show overall progress](overall-progress.md): epic round 4; levels, plus coverage and JLPT share from round 2, as the yardstick for the assessment.
