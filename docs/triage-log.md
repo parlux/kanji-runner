@@ -54,3 +54,5 @@ One row per owner request, written by the `triage` skill (`.claude/skills/triage
 | 2026-11-25 | Warm-ups always the same 3 top-box kanji: rotate strong items, least-recently-seen first | sdd | Changes core SRS item selection (fix check 5) | owner: "just fix it", then back to sdd |
 | 2026-11-26 | No study card when pausing during the boss fight | fix | Pause was never wired for the boss clash; local change in game/, clear outcome | |
 | 2026-11-26 | Change speed from the pause screen mid-run | sdd | New control on the pause card: placement is a phone look call; no card before first answer or in meaning mode | |
+| 2026-11-27 | Show overall progress (backlog #1) | sdd | Epic round, outcome still a one-line idea | |
+| 2026-11-27 | End-of-run level card: "19 of 30 learned" vs "5 more to unlock" don't match | sdd | Numbers are right (unlock at 80% = 24/30) but unexplained; copy/look call, folded into the progress round | |
