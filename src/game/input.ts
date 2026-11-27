@@ -75,7 +75,9 @@ export function bindDrag(
     el.setPointerCapture(e.pointerId);
     drag.down(e.pointerId, e.clientX, e.clientY, e.timeStamp);
   });
-  el.addEventListener("pointermove", (e) => drag.move(e.pointerId, e.clientX));
+  el.addEventListener("pointermove", (e) =>
+    drag.move(e.pointerId, e.clientX, e.clientY),
+  );
   el.addEventListener("pointerup", (e) => {
     if (drag.up(e.pointerId, e.clientX, e.clientY, e.timeStamp)) {
       const r = el.getBoundingClientRect();

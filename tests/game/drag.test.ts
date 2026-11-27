@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createDrag, TAP_MAX_MS } from "../../src/game/drag";
+import { createDrag, TAP_MAX_MOVE, TAP_MAX_MS } from "../../src/game/drag";
 import { DRAG_GAIN } from "../../src/core/tuning";
 
 const W = 400;
@@ -37,5 +37,17 @@ describe("drag", () => {
     expect(d.up(1, 150, 100, 100)).toBe(false);
     d.down(1, 100, 100, 0);
     expect(d.up(1, 100, 100, TAP_MAX_MS + 1)).toBe(false);
+  });
+
+  it("a drag that came back to where it started is a scroll, not a tap", () => {
+    const d = createDrag(() => W);
+    d.down(1, 100, 100, 0);
+    d.move(1, 100, 100 + TAP_MAX_MOVE + 20);
+    d.move(1, 100, 101);
+    expect(d.up(1, 100, 101, 100)).toBe(false);
+    // a few px of jitter is still a tap
+    d.down(1, 100, 100, 0);
+    d.move(1, 101, 100 + TAP_MAX_MOVE - 3);
+    expect(d.up(1, 100, 101, 100)).toBe(true);
   });
 });
