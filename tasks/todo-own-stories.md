@@ -181,9 +181,9 @@ Not one implementer subagent: the orchestrator runs the loop per batch (2 levels
 **Amended 2026-11-24 (owner):** names have settled (every part and sound reviewed), so write all remaining levels now (Kanji 9–72, game levels 10–73), not one ahead. The owner waived the sampled review ("fine with your stories"); in-game flags are the safety net. Batches of 2 levels, several in parallel, deploy every few batches.
 **Description:** Owner's flags first (rewrite, resolve; a renamed part or keyword means rewriting every story using it), then the loop on the next levels in pairs, about one level ahead of the owner. Each batch adds review steps after the commit: `stories:review -- seed <levels>` (judge fails + 10 random), owner reviews on the page, `apply`, rewrites. More than 2 random misses in a level → the whole level seeded and `STYLE.md` revisited before the next batch.
 **Acceptance:**
-- [ ] Levels through the owner's level + 1 have files; all pass check and judge; no unresolved suspect.
-- [ ] Flags resolved; every seeded sample reviewed and its ✗ rewritten (random misses per level logged).
-- [ ] Counts logged below.
+- [x] Levels through the owner's level + 1 have files; all pass check and judge; no unresolved suspect. (All 72 levels, owner's amendment 2026-11-24; 2026-11-27.)
+- [x] Flags resolved; every seeded sample reviewed and its ✗ rewritten (random misses per level logged). (No flags; owner waived the sampled review from Kanji 9 on.)
+- [x] Counts logged below.
 
 ### Task D8: Ship 1.7.0
 **Description:** Credits/README note on the dictionary, `package.json` 1.7.0, `## 1.7.0 (<date>)` in `CHANGELOG.md`, deploy.
@@ -402,3 +402,19 @@ The 5-hour usage limit stopped all 4 writers before they saved anything; they re
 | Kanji 64 | 0 / 1 / 0 (曹 muddled; 諭 recast, it shared 癒's cast) | 2 | all pass |
 - 14 first-pass fails (round 7: 15). WaniKani's library has no stories for some rarer kanji here, so fewer entries were compared (53–83 per level).
 - Tokens (final context size per agent): writers 569,233 (138.2k–148.2k), judges 475,495 (116.3k–121.0k), total 1,044,728 for 8 levels, about 131k per level.
+
+### D7 round 9: Kanji 65–72, the last levels (2026-11-26/27)
+The 5-hour usage limit stopped 3 judges; they resumed after the reset. WaniKani's library has few of these rare kanji (Kanji 72: none), so the judge compared fewer side by side.
+| Level | 1st pass fails (wrong / weak / close) | Rounds | Final |
+|---|---|---|---|
+| Kanji 65 | 0 / 0 / 0 | 1 | all pass |
+| Kanji 66 | 0 / 2 / 1 (彙 kun list; 吟 on "Gee… Nn"; 凄) | 2 | all pass |
+| Kanji 67 | 1 / 2 / 0 (暫 kun missing ら; 蜜 on, 旬); round 2 led 蜜 and 旬 into known mnemonics (orchestrator's suggestions), fixed in round 3 | 3 | all pass |
+| Kanji 68 | 0 / 1 / 0 (拶 cluttered) | 2 | all pass |
+| Kanji 69 | 0 / 2 / 0 (鬱 on long Oo; 嘲 kun unlinked) | 2 | all pass |
+| Kanji 70 | 0 / 0 / 1 (恭 kun chant) | 2 | all pass |
+| Kanji 71 | 2 / 1 / 0 (但 kun okurigana highlighted; 遡 kun "No!"; 恣 kun list) | 2 | all pass |
+| Kanji 72 | 0 / 1 / 0 (蔽 kun one お for おお) | 2 | all pass |
+- 14 first-pass fails. Lesson: the orchestrator's example fixes should avoid the obvious picture too (蜜 mitts, 旬 wrapped sun were themselves close).
+- Tokens (final context size per agent): writers 613,951, judges 455,530, total 1,069,481 for 216 kanji.
+- **D7 total (Kanji 7–72, 1,936 kanji):** about 9.0M tokens on this measure (9 rounds of ~1.05–1.11M, plus 0.29M for Kanji 7–8 and 0.15M for the Kyoto keyword rewrite).

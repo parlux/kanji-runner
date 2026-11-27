@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.34 (2026-11-27)
+
+- Our own stories for Kanji 65–72 (216 kanji): every level now has our own stories.
+
 ## 1.6.33 (2026-11-26)
 
 - Our own stories for Kanji 57–64 (240 kanji).
