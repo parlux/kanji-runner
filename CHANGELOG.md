@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.10.0 (2026-11-28)
+
+- The end screen now lists your level's 15 items: missing first, then learned (with a tick), then everything else you met this run.
+- Each row shows its stages, or this run's change if you met it.
+- Tap any row for its study card.
+
 ## 1.9.0 (2026-11-28)
 
 - The end screen lists every kanji and word you met, with its stage change (changed first; misses in red, and a missed reading shows the right reading).
