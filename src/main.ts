@@ -101,8 +101,10 @@ const takeDrag = bindDrag(stage.canvas, (x, y) => {
   const w = window.innerWidth;
   const h = window.innerHeight;
   if (scene.kind === "progress") {
-    // `study` (an item row on the level page) is for its study card: not opened yet
-    scene = progressTap(scene, w, h, x, y, session).scene;
+    const hit = progressTap(scene, w, h, x, y, session);
+    scene = hit.scene;
+    // an item row on the level page opens its study card; Back closes it
+    if (hit.study) panels.openItemStudy(hit.study);
     return;
   }
   const picking = scene.pick !== undefined;

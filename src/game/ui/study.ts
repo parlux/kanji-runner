@@ -244,12 +244,14 @@ export function cardEl(c: StudyCard, onFlag?: FlagFn): HTMLElement {
  * Opens the study screen over the canvas: one scrollable card per missed item
  * (marked "missed"), then one per other kanji from the run.
  * "Play again" closes it and calls `onPlay`; Escape or "Back" just closes it.
- * Does nothing if already open.
+ * With `single` (one item, from the level page) there is no "Play again": a
+ * "Back" button and Escape close it. Does nothing if already open.
  */
 export function openStudy(
   cards: readonly StudyCard[],
   onPlay: () => void,
   onFlag?: FlagFn,
+  single = false,
 ) {
   if (open) return;
   installStudyCss();
@@ -275,15 +277,16 @@ export function openStudy(
   const back = el("button", "", "Back");
   back.type = "button";
   back.onclick = close;
+  if (single) back.className = "primary";
   const again = el("button", "primary", "Play again");
   again.type = "button";
   again.onclick = play;
   overlay.append(
-    el("h2", "", `Study (${cards.length})`),
+    el("h2", "", single ? "Study" : `Study (${cards.length})`),
     list,
-    el("footer", "", back, again),
+    el("footer", "", ...(single ? [back] : [back, again])),
   );
   document.body.append(overlay);
   open = overlay;
-  again.focus();
+  (single ? back : again).focus();
 }

@@ -11,6 +11,7 @@ import {
   runKanji,
   storiesWithFallback,
   studyCards,
+  itemCard,
   withStages,
 } from "../../core/study";
 import { addFlag } from "../../storage/flags";
@@ -19,7 +20,12 @@ import { loadSpeed, saveSpeed } from "../../storage/speed";
 import { loginOpen, openLogin } from "../../sync/login";
 import type { Sync } from "../../sync/sync";
 import type { Action } from "../input";
-import { studyOffered, type Scene, type Session } from "../scenes";
+import {
+  studyOffered,
+  type Scene,
+  type Session,
+  type StudyRequest,
+} from "../scenes";
 import { createWkState, type WkState } from "../wkstate";
 import { createWkClient } from "../../wanikani/client";
 import { createStoryStore } from "../../wanikani/storystore";
@@ -54,6 +60,8 @@ export type Panels = {
   /** Opens the study screen for the last run (end screen only). */
   openStudy: () => void;
   studyAvailable: () => boolean;
+  /** Opens one item's study card over the level page; Back closes it. */
+  openItemStudy: (item: StudyRequest) => void;
   /** Call every frame: the pause card and the open settings panel. */
   sync: () => void;
 };
@@ -215,6 +223,26 @@ export function createPanels(d: PanelDeps): Panels {
       });
     },
     studyAvailable,
+    openItemStudy: (item) => {
+      void loadDictionary(levelsOf([item.key])).then(() => {
+        const { progress, meaning } = d.session();
+        const card = itemCard(
+          item,
+          kanjiList(),
+          KANA,
+          stories(),
+          WORDS,
+          dictionary,
+        );
+        if (card)
+          openStudy(
+            withStages([card], progress, meaning),
+            () => {},
+            onFlag,
+            true,
+          );
+      });
+    },
     sync: () => {
       pauseCard();
       syncSettings();
