@@ -18,6 +18,7 @@ import {
   SAW_RATE,
   SAW_W,
   STEER_MAX_SPEED,
+  FIRST_QUESTION_DISTANCE,
   VIEW_DISTANCE,
 } from "../../src/core/tuning";
 import { stride } from "../sweep";
@@ -69,7 +70,9 @@ function longestDeadStretch(t: Track, step = 0.01): number {
   };
   let longest = 0;
   let run = 0;
-  for (let d = 0; d <= last; d += step) {
+  // the opening runway is empty on purpose (FIRST_QUESTION_DISTANCE)
+  const start = Math.max(0, FIRST_QUESTION_DISTANCE - VIEW_DISTANCE);
+  for (let d = start; d <= last; d += step) {
     run = busy(d) ? 0 : run + step;
     longest = Math.max(longest, run);
   }
@@ -77,7 +80,7 @@ function longestDeadStretch(t: Track, step = 0.01): number {
 }
 
 describe("dead time", () => {
-  it("never leaves more than 1.5 s (at base speed) with nothing to do outside the calm stretches", () => {
+  it("never leaves more than 1.5 s (at base speed) with nothing to do outside the calm stretches and the opening runway", () => {
     const worst = Math.max(
       ...TRACKS.slice(0, stride(200, 40)).map((t) => longestDeadStretch(t)),
     );

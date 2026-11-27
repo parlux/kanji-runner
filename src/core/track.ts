@@ -17,6 +17,7 @@ import {
   SAW_W,
   SQUAD_QUESTIONS,
   SQUADS_ENABLED,
+  FIRST_QUESTION_DISTANCE,
   VIEW_DISTANCE,
 } from "./tuning";
 
@@ -80,7 +81,7 @@ export function isCharge(track: Track, q: number): boolean {
 const TRACK_SALT = 0x9e3779b9;
 
 /**
- * Seeded beat layout: the first question VIEW_DISTANCE in (a full reading time),
+ * Seeded beat layout: the first question FIRST_QUESTION_DISTANCE in (runway, then a full reading time),
  * then HAZARDS_MIN–HAZARDS_MAX hazards HAZARD_SPACING apart, then a calm stretch
  * right before each next question. After the second question each gap rolls
  * once (PACK_GAP_CHANCE) for a pack: that gap has PACK_BEAT beats and the last
@@ -99,7 +100,7 @@ export function buildTrack(
     : [];
   const questions: number[] = [];
   const hazards: Hazard[] = [];
-  let pos = Math.max(VIEW_DISTANCE, CALM_DISTANCE);
+  let pos = Math.max(FIRST_QUESTION_DISTANCE, VIEW_DISTANCE, CALM_DISTANCE);
   for (let q = 0; q < questionCount; q++) {
     questions.push(pos);
     if (q === questionCount - 1) break;

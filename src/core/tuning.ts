@@ -54,6 +54,12 @@ export const TWO_OPTION_ROWS = 7;
 // Track and speed. Distances are in "track units"; 1 unit/s at 1.0×.
 /** How far ahead rows and hazards become visible. Equals the first row's lead time in seconds. */
 export const VIEW_DISTANCE = 3.0;
+/**
+ * Where the first question sits (track units): VIEW_DISTANCE plus some empty
+ * runway, so a run starts with the track clear and the first gate rolls into
+ * view (owner, 2026-11-28: "the first gate is too close").
+ */
+export const FIRST_QUESTION_DISTANCE = 5.0;
 export const BASE_SPEED = 1.6;
 /** Player speed presets: multipliers on BASE_SPEED (the ramp still applies on top). */
 export const SPEED_PRESETS = { relaxed: 0.7, normal: 0.85, fast: 1.0 } as const;

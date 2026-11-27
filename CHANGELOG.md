@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.10.1 (2026-11-28)
+
+- More runway before the first gate: it now sits 5 track units in (was 3), so a run starts on a clear track and the gate rolls into view.
+
 ## 1.10.0 (2026-11-28)
 
 - The end screen now lists your level's 15 items: missing first, then learned (with a tick), then everything else you met this run.
