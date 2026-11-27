@@ -28,8 +28,8 @@ Spec §3. Level card and start-screen block: new copy, group name, kanji/words l
 
 ### Task P5: Overall view; ship 1.8.0 (opus: new screen layout)
 Spec §4. `src/game/screens/progress.ts`, open from the start block, Back/Esc, past groups collapsed, current group's levels open, scrolling list, coverage line. Bump `package.json` to 1.8.0 and add `## 1.8.0 (<date>)` to `CHANGELOG.md`.
-- [ ] Offscreen 390×844 renders: fresh save, mid-way save (a slipped item in a passed level), meaning mode; paths in the report.
-- [ ] `package.json` 1.8.0; `CHANGELOG.md` has the 1.8.0 section.
+- [x] Offscreen 390×844 renders: fresh save, mid-way save (a slipped item in a passed level), meaning mode; paths in the report.
+- [x] `package.json` 1.8.0; `CHANGELOG.md` has the 1.8.0 section.
 - [ ] `npm run check` passes; deploy green.
 
 ### Checkpoint P: owner sets their level and plays

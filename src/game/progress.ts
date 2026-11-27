@@ -7,7 +7,7 @@ const LEVEL_H = 42;
 const PAD = 20;
 
 /** A list row at `y` from the top of the list's content (before scrolling). */
-export type PlacedRow = { row: OverallRow; y: number; h: number };
+type PlacedRow = { row: OverallRow; y: number; h: number };
 
 /**
  * The overall view's layout: the header lines, the Back button at the bottom,

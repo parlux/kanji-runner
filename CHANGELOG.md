@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.8.0 (2026-11-28)
+
+- Learned now means right three times running, for the meaning and the reading (words: the word and its reading). It is live: a slip un-learns an item until you get it back.
+- Words count: a level is its kanji and its words.
+- Levels of 15 new things: Kanji 1–296 instead of 72 levels of 30 kanji. A level unlocks when every one of its 15 is learned.
+- The level picker steps by 10 too (−10 / +10, PgDn / PgUp).
+- Levels sit in named groups of 25 (Kana, Foundations, Everyday, …).
+- The study card shows each gate's stage (New, Met, Recalled, Learned, Strong, Solid).
+- New copy on the end card and start screen: "11/15 learned · 4 more to unlock Kanji 10", the kanji and words split, and how many still need their reading.
+- A progress view (tap the level block on the start screen): how far you are of 296, your groups and levels, and how much of the kanji in travel text you can read.
+- Existing saves point at the old, bigger levels: set your level again with "I already know some…".
+
 ## 1.7.0 (2026-11-27)
 
 - Our own stories for every kanji (Kanji 1–72): a meaning story plus on and kun reading stories, built from named parts and shared sound keywords, with the sound highlighted in place. No WaniKani needed for stories any more.
