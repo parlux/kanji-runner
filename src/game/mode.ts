@@ -1,9 +1,8 @@
-import { MEANING_SESSION_KEY, SESSION_KEY } from "../storage/session";
 import { MEANING_STORAGE_KEY, STORAGE_KEY } from "../storage/storage";
 import type { Session } from "./scenes";
 
-/** Where a session's results go: its progress and session-log keys, and whether it syncs. */
-export type Persistence = { progress: string; log: string; sync: boolean };
+/** Where a session's results go: its progress key, and whether it syncs. */
+export type Persistence = { progress: string; sync: boolean };
 
 /**
  * Meaning mode saves under its own keys and
@@ -11,6 +10,6 @@ export type Persistence = { progress: string; log: string; sync: boolean };
  */
 export function persistence(session: Session): Persistence {
   return session.meaning
-    ? { progress: MEANING_STORAGE_KEY, log: MEANING_SESSION_KEY, sync: false }
-    : { progress: STORAGE_KEY, log: SESSION_KEY, sync: true };
+    ? { progress: MEANING_STORAGE_KEY, sync: false }
+    : { progress: STORAGE_KEY, sync: true };
 }

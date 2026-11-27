@@ -1,18 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { meaningProgress } from "../../src/core/progression";
-import type { SessionLog } from "../../src/core/session";
 import { defaultProgress } from "../../src/core/srs";
 import {
   loadMeaningMode,
   MEANING_MODE_KEY,
   saveMeaningMode,
 } from "../../src/storage/meaning";
-import {
-  loadMeaningSessionLog,
-  MEANING_SESSION_KEY,
-  saveMeaningSessionLog,
-  SESSION_KEY,
-} from "../../src/storage/session";
 import {
   loadMeaningProgress,
   MEANING_STORAGE_KEY,
@@ -33,23 +26,9 @@ function spyStore() {
   return { store, data, reads, writes };
 }
 
-const log: SessionLog = {
-  startedAt: 1,
-  lastRunAt: 2,
-  runs: 1,
-  items: [{ prompt: "水", type: "meaning", state: "missing" }],
-  fixedThisRun: [],
-};
-
 describe("meaning-mode storage", () => {
   it("uses distinct keys", () => {
-    const keys = [
-      STORAGE_KEY,
-      SESSION_KEY,
-      MEANING_MODE_KEY,
-      MEANING_STORAGE_KEY,
-      MEANING_SESSION_KEY,
-    ];
+    const keys = [STORAGE_KEY, MEANING_MODE_KEY, MEANING_STORAGE_KEY];
     expect(new Set(keys).size).toBe(keys.length);
   });
 
@@ -67,11 +46,8 @@ describe("meaning-mode storage", () => {
     expect(loadMeaningProgress(store).unlockedLevel).toBe(2);
   });
 
-  it("round trips the session log and the flag", () => {
+  it("round trips the flag", () => {
     const { store } = spyStore();
-    expect(loadMeaningSessionLog(store)).toBeNull();
-    expect(saveMeaningSessionLog(store, log)).toBe(true);
-    expect(loadMeaningSessionLog(store)).toEqual(log);
     expect(loadMeaningMode(store)).toBe(false);
     saveMeaningMode(store, true);
     expect(loadMeaningMode(store)).toBe(true);
@@ -79,19 +55,15 @@ describe("meaning-mode storage", () => {
     expect(loadMeaningMode(store)).toBe(false);
   });
 
-  it("never reads or writes the owner's save or session log", () => {
+  it("never reads or writes the owner's save", () => {
     const { store, data, reads, writes } = spyStore();
     data.set(STORAGE_KEY, JSON.stringify(defaultProgress()));
-    data.set(SESSION_KEY, JSON.stringify(log));
     const before = [...data.entries()];
     loadMeaningProgress(store);
     saveMeaningProgress(store, meaningProgress());
-    loadMeaningSessionLog(store);
-    saveMeaningSessionLog(store, log);
     loadMeaningMode(store);
     saveMeaningMode(store, true);
-    for (const k of [...reads, ...writes])
-      expect([STORAGE_KEY, SESSION_KEY]).not.toContain(k);
+    for (const k of [...reads, ...writes]) expect(STORAGE_KEY).not.toBe(k);
     expect(before.every(([k, v]) => data.get(k) === v)).toBe(true);
   });
 });

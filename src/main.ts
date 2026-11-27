@@ -1,5 +1,10 @@
 import { bindDrag, bindKeys, bindScroll, type Action } from "./game/input";
-import { progressLayout, progressTap, scrollBy } from "./game/progress";
+import {
+  clampScroll,
+  progressLayout,
+  progressTap,
+  scrollBy,
+} from "./game/progress";
 import { startLoop } from "./game/loop";
 import { render } from "./game/render";
 import type { TrackView } from "./game/hud";
@@ -8,6 +13,7 @@ import {
   adoptProgress,
   afterStep,
   createSession,
+  endScrollMax,
   handleAction,
   updateScene,
   type Scene,
@@ -16,11 +22,6 @@ import { endTap, modeTap, settingsTap, startTap, syncTap } from "./game/start";
 import { SPEED_PRESETS } from "./core/tuning";
 import { removeLegacyKeys } from "./storage/legacy";
 import { createPanels } from "./game/ui/panels";
-import {
-  loadMeaningSessionLog,
-  loadSessionLog,
-  saveSessionLog,
-} from "./storage/session";
 import {
   loadMeaningProgress,
   loadProgress,
@@ -41,12 +42,8 @@ let scene: Scene = { kind: "start" };
 // "Meanings only" plays its own save; the owner's is not read or written then.
 const loadSession = (meaning: boolean) =>
   meaning
-    ? createSession(
-        loadMeaningProgress(localStorage),
-        loadMeaningSessionLog(localStorage),
-        true,
-      )
-    : createSession(loadProgress(localStorage), loadSessionLog(localStorage));
+    ? createSession(loadMeaningProgress(localStorage), true)
+    : createSession(loadProgress(localStorage));
 let session = loadSession(loadMeaningMode(localStorage));
 // the other mode's level, for the start screen's mode switch
 const otherLevelOf = (meaning: boolean): number =>
@@ -127,8 +124,18 @@ const takeDrag = bindDrag(stage.canvas, (x, y) => {
   const action = startTap(scene.pick !== undefined, w, h, x, y, !session.wk);
   if (action) act(action);
 });
-// the overall view's list scrolls by drag and wheel
+// the overall view's list and the end screen's item list scroll by drag and wheel
 bindScroll(stage.canvas, (dy) => {
+  if (scene.kind === "end" && !panels.anyOpen()) {
+    const max = endScrollMax(
+      window.innerWidth,
+      window.innerHeight,
+      scene,
+      session,
+    );
+    scene = { ...scene, scroll: clampScroll((scene.scroll ?? 0) + dy, max) };
+    return;
+  }
   if (scene.kind !== "progress" || panels.anyOpen()) return;
   const max = progressLayout(
     window.innerWidth,
@@ -164,10 +171,7 @@ startLoop(
     const settled = afterStep(session, scene, next, Date.now());
     // save (under this mode's keys), then sync if this mode syncs, after every run
     const keys = settled !== session ? persistence(session) : null;
-    if (keys) {
-      saveProgress(localStorage, settled.progress, keys.progress);
-      if (settled.log) saveSessionLog(localStorage, settled.log, keys.log);
-    }
+    if (keys) saveProgress(localStorage, settled.progress, keys.progress);
     session = settled;
     if (keys?.sync) void sync.push().then(adopt);
     scene = next;

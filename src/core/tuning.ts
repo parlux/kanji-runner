@@ -325,9 +325,3 @@ export const REASK_MAX_BOX = 2;
 export const REASK_GAP_MIN = 3;
 /** ... and at most this many rows after it. */
 export const REASK_GAP_MAX = 5;
-
-/** A session ends after this many minutes without a run. */
-export const SESSION_IDLE_MINUTES = 30;
-
-/** The end screen's session line wraps to at most this many lines. */
-export const SESSION_LINE_MAX_LINES = 2;

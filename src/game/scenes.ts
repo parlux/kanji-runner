@@ -25,7 +25,7 @@ import {
 } from "../core/sim";
 import { enemiesWon } from "../core/horde";
 import { buildTrack } from "../core/track";
-import { logRun, type SessionLog } from "../core/session";
+import { runItems, type RunItem } from "../core/runitems";
 import { recordRun } from "../core/srs";
 import {
   CHEER_SECONDS,
@@ -37,6 +37,7 @@ import {
 } from "../core/tuning";
 import type { KanaItem, Progress, WordItem } from "../core/types";
 import type { WkList } from "../wanikani/parse";
+import { endListArea, endListLayout } from "./endlist";
 import type { Action } from "./input";
 
 export type Scene =
@@ -65,7 +66,14 @@ export type Scene =
    */
   | { kind: "progress"; view: Overall; scroll: number | null }
   /** `boss` is null when the army died before reaching the boss. */
-  | { kind: "end"; seed: number; run: RunState; boss: BossResult | null };
+  | {
+      kind: "end";
+      seed: number;
+      run: RunState;
+      boss: BossResult | null;
+      /** The item list's scroll offset (px); 0 when missing. */
+      scroll?: number;
+    };
 
 /** How the boss clash went: the boss's size and whether the army won (a tie is a loss). */
 export type BossResult = { size: number; won: boolean };
@@ -83,8 +91,6 @@ export type Session = {
   before: Progress | null;
   /** The taught WaniKani kanji when runs use WaniKani mode, else null (Built-in). */
   wk: WkList | null;
-  /** This sitting's missed and fixed items; updated once per finished run. */
-  log: SessionLog | null;
   /**
    * "Meanings only": kanji meaning gates of the Built-in list, its own save,
    * never synced, no reveal or study cards.
@@ -93,18 +99,13 @@ export type Session = {
 };
 
 /** A session plays and saves the stored progress (in "Meanings only": its own save). */
-export function createSession(
-  stored: Progress,
-  storedLog: SessionLog | null = null,
-  meaning = false,
-): Session {
+export function createSession(stored: Progress, meaning = false): Session {
   return {
     progress: stored,
     kana: meaning ? [] : KANA,
     unlocked: null,
     before: null,
     wk: null,
-    log: storedLog,
     meaning,
   };
 }
@@ -175,7 +176,6 @@ export function afterStep(
   return {
     ...session,
     progress,
-    log: logRun(session.log, rows, results, now),
     unlocked: gained ? progress.unlockedLevel : null,
     before: session.progress,
   };
@@ -194,6 +194,48 @@ export function endLevelCard(session: Session): LevelCard {
     levelWords(session),
     session.meaning,
   );
+}
+
+let itemsCache: {
+  run: RunState;
+  before: Progress | null;
+  items: RunItem[];
+} | null = null;
+
+/**
+ * Every item met in the last run, with how it moved (`runItems`), from the
+ * mode's own kanji and words. Cached per run: the end screen asks every frame.
+ */
+export function endItems(run: RunState, session: Session): RunItem[] {
+  if (itemsCache?.run === run && itemsCache.before === session.before)
+    return itemsCache.items;
+  const items = runItems(
+    session.before ?? session.progress,
+    session.progress,
+    run.rows,
+    run.results,
+    session.kana,
+    session.wk?.kanji ?? KANJI,
+    levelWords(session),
+  );
+  itemsCache = { run, before: session.before, items };
+  return items;
+}
+
+/** How far the end screen's item list scrolls, at this screen size. */
+export function endScrollMax(
+  w: number,
+  h: number,
+  scene: Extract<Scene, { kind: "end" }>,
+  session: Session,
+): number {
+  const { top, bottom } = endListArea(
+    w,
+    h,
+    endLevelCard(session),
+    studyOffered(scene.run, scene.boss, session),
+  );
+  return endListLayout(top, bottom, endItems(scene.run, session)).maxScroll;
 }
 
 /**

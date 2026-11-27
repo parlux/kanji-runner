@@ -1,38 +1,30 @@
 import { gateReached, type RunState } from "../../core/sim";
-import { SESSION_LINE_MAX_LINES } from "../../core/tuning";
-import { KANJI } from "../../core/kanji";
-import { WORDS } from "../../core/words";
-import { missedItems } from "../../core/run";
+import type { RunItem } from "../../core/runitems";
 import {
-  sessionTokens,
-  wrapTokens,
-  type PanelToken,
-  type SessionLog,
-} from "../../core/session";
-import {
+  endItems,
   endLevelCard,
   studyOffered,
   type BossResult,
   type Session,
 } from "../scenes";
+import {
+  answerText,
+  changeText,
+  endGap,
+  endListArea,
+  endListLayout,
+  rowTone,
+  truncate,
+} from "../endlist";
+import { clampScroll } from "../progress";
 import { endLayout, type Rect } from "../start";
 import { COLORS, END_PAD, panel, put, type Ctx } from "../draw";
 import { FONT, text } from "../labels";
 import { renderLevelCard } from "./levelcard";
 
-/** The missed list's rows never get thinner than this because of the session line. */
-const MISSED_MIN_ROW_H = 20;
-/** Widest a missed item's prompt is drawn on the end screen (px); only words reach it. */
-const MISSED_PROMPT_MAX_W = 132;
-const SESSION_ITEM_PX = 16;
-const SESSION_LABEL_PX = 14;
-const SESSION_LINE_H = 20;
-const SESSION_GAP = 5;
-
 /**
- * The end screen, top to bottom: result, level card, stat tiles, missed rows,
- * the session line, then the buttons. Short screens get tighter gaps; the
- * missed rows shrink to the space left.
+ * The end screen, top to bottom: result, level card, the item list (scrolls
+ * when long), then the buttons. Short screens get tighter gaps and rows.
  */
 export function renderEnd(
   ctx: Ctx,
@@ -41,9 +33,10 @@ export function renderEnd(
   run: RunState,
   boss: BossResult | null,
   session: Session,
+  scroll = 0,
 ): void {
   const compact = h < 760;
-  const gap = compact ? 10 : 18;
+  const gap = endGap(h);
   const inner = w - 2 * END_PAD;
   let y = compact ? 22 : 40;
 
@@ -74,213 +67,100 @@ export function renderEnd(
   }
   y += 26 + gap;
 
-  y = renderLevelCard(ctx, w, y, compact, endLevelCard(session)) + gap;
-  y = renderStatTiles(ctx, w, y, compact, run) + gap;
-
-  // the session line sits just above the buttons; the missed rows fill what's between
-  const buttons = endLayout(w, h, studyOffered(run, boss, session));
-  const listTop = y + 24;
-  const misses = missedItems(
-    run.rows,
-    run.results,
-    run.track.charges,
-    session.wk?.kanji ?? KANJI,
-    WORDS,
-  );
-  const line = (maxLines: number) =>
-    session.log ? layoutSessionLine(ctx, inner, session.log, maxLines) : null;
-  const sessionTop = (l: ReturnType<typeof line>): number =>
-    buttons.play.y - gap - (l ? l.lines.length * SESSION_LINE_H : 0);
-  let sl = line(SESSION_LINE_MAX_LINES);
-  const pitch = (l: ReturnType<typeof line>): number =>
-    (sessionTop(l) - gap - listTop) / Math.max(1, misses.length);
-  if (sl && sl.lines.length > 1 && pitch(sl) < MISSED_MIN_ROW_H) sl = line(1);
-
-  // the session line follows the list, never lower than just above the buttons
-  let listBottom = y + 54;
-  if (misses.length === 0) {
-    put(ctx, "No misses!", w / 2, y + 26, 26, COLORS.good, "center", true);
-  } else {
-    put(
-      ctx,
-      `Missed (${misses.length})`,
-      END_PAD,
-      y + 8,
-      14,
-      COLORS.dim,
-      "left",
-    );
-    const p = Math.min(64, pitch(sl));
-    const rowGap = Math.min(8, p * 0.15);
-    const rowH = p - rowGap;
-    misses.forEach((m, i) => {
-      const top = listTop + p * i;
-      renderMissedRow(ctx, w, top, rowH, m);
-    });
-    listBottom = listTop + p * misses.length - rowGap;
+  const card = endLevelCard(session);
+  renderLevelCard(ctx, w, y, compact, card);
+  const study = studyOffered(run, boss, session);
+  const { top, bottom } = endListArea(w, h, card, study);
+  const list = endListLayout(top, bottom, endItems(run, session));
+  const offset = clampScroll(scroll, list.maxScroll);
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(0, top, w, bottom - top);
+  ctx.clip();
+  for (const r of list.rows) {
+    const ry = top + r.y - offset;
+    if (ry + r.h >= top && ry <= bottom) renderItemRow(ctx, w, ry, r.h, r.item);
   }
-  if (sl)
-    renderSessionLine(
-      ctx,
-      Math.min(listBottom + gap, sessionTop(sl)),
-      sl.lines,
-      sl.hidden,
-    );
-  renderEndButtons(ctx, buttons);
+  ctx.restore();
+  if (list.maxScroll > 0) renderScrollBar(ctx, w, list, offset);
+  renderEndButtons(ctx, endLayout(w, h, study));
 }
 
-/** Accuracy, gates right and best streak, three tiles in a row. Returns their bottom. */
-function renderStatTiles(
+/** A thin bar at the list's right edge showing where the view sits in a long list. */
+function renderScrollBar(
   ctx: Ctx,
   w: number,
-  top: number,
-  compact: boolean,
-  run: RunState,
-): number {
-  const correct = run.results.filter(Boolean).length;
-  const answered = run.results.length;
-  const accuracy = answered ? Math.round((correct / answered) * 100) : 0;
-  const tiles: [string, string, string][] = [
-    [`${accuracy}%`, "Accuracy", COLORS.text],
-    [`${correct}/${answered}`, "Gates right", COLORS.text],
-    [String(run.bestStreak), "Best streak", COLORS.soldier],
-  ];
-  const th = compact ? 54 : 64;
-  const tw = (w - 2 * END_PAD - 16) / 3;
-  tiles.forEach(([value, label, color], i) => {
-    const x = END_PAD + i * (tw + 8);
-    panel(ctx, x, top, tw, th, 10);
-    put(
-      ctx,
-      value,
-      x + tw / 2,
-      top + th * 0.4,
-      22,
-      color,
-      "center",
-      true,
-      tw - 12,
-    );
-    put(
-      ctx,
-      label,
-      x + tw / 2,
-      top + th * 0.76,
-      12,
-      COLORS.dim,
-      "center",
-      false,
-      tw - 8,
-    );
-  });
-  return top + th;
+  list: ReturnType<typeof endListLayout>,
+  offset: number,
+): void {
+  const view = list.bottom - list.top;
+  const barH = Math.max(24, (view * view) / list.content);
+  const barY = list.top + (offset / list.maxScroll) * (view - barH);
+  ctx.fillStyle = COLORS.wallEdge;
+  ctx.beginPath();
+  ctx.roundRect(w - 8, barY, 3, barH, 1.5);
+  ctx.fill();
 }
 
-/** One missed gate as a rounded row: gate number, prompt, answers, a "charge" tag. */
-function renderMissedRow(
+/**
+ * One item as a rounded row: the item large on the left, its meaning dim
+ * (cut with "…"), the stage change on the right; a missed gate's right answer
+ * on a second dim line.
+ */
+function renderItemRow(
   ctx: Ctx,
   w: number,
   top: number,
   rowH: number,
-  m: ReturnType<typeof missedItems>[number],
+  item: RunItem,
 ): void {
   const x = END_PAD;
   const rw = w - 2 * END_PAD;
-  panel(ctx, x, top, rw, rowH, Math.min(10, rowH / 2));
-  const y = top + rowH / 2;
-  // fonts fill a thin row: on a tight list they stay readable rather than to scale
-  const size = Math.min(30, rowH * 0.85);
-  const small = Math.min(13, rowH * 0.7);
-  put(ctx, String(m.q), x + 14, y, small, COLORS.dim, "left");
-  const promptX = x + 14 + 18 + 14;
-  // a long word shrinks to MISSED_PROMPT_MAX_W and pushes its answer right
-  const promptW = put(
+  const answer = answerText(item);
+  const mainH = answer ? rowH - 16 : rowH;
+  panel(ctx, x, top, rw, rowH, Math.min(8, mainH / 2));
+  const y = top + mainH / 2;
+  const tone = COLORS[rowTone(item)];
+  const dim = item.change === "same" && !answer;
+  const itemPx = Math.min(22, mainH * 0.8);
+  const itemW = put(
     ctx,
-    m.prompt,
-    promptX,
+    item.key,
+    x + 10,
     y,
-    size,
-    COLORS.text,
+    itemPx,
+    dim ? COLORS.dim : COLORS.text,
     "left",
     false,
-    MISSED_PROMPT_MAX_W,
+    78,
   );
-  let right = x + rw - 14;
-  if (m.charge) {
-    ctx.font = `${Math.round(small)}px ${FONT}`;
-    const tagW = ctx.measureText("charge").width + 12;
-    const tagH = Math.min(rowH - 2, small + 8);
-    ctx.strokeStyle = COLORS.chargeLine;
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.roundRect(
-      right - tagW + 0.5,
-      y - tagH / 2 + 0.5,
-      tagW - 1,
-      tagH - 1,
-      6,
+  // the stage change on the right, shrunk a little when both gates are shown
+  const change = changeText(item);
+  const changePx = Math.min(item.gates.length > 1 ? 11 : 13, mainH * 0.6);
+  ctx.font = `${Math.round(changePx)}px ${FONT}`;
+  const changeW = ctx.measureText(change).width;
+  const right = x + rw - 10;
+  put(ctx, change, right, y, changePx, tone, "right");
+  // the meaning fills what's left between them; dropped when it would crowd
+  const meaningX = x + 10 + itemW + 10;
+  const room = right - changeW - 10 - meaningX;
+  const meaningPx = Math.min(13, mainH * 0.6);
+  ctx.font = `${Math.round(meaningPx)}px ${FONT}`;
+  const shown = truncate(item.meaning, room, (t) => ctx.measureText(t).width);
+  if (shown && room >= 24)
+    put(ctx, shown, meaningX, y, meaningPx, COLORS.dim, "left");
+  if (answer)
+    put(
+      ctx,
+      answer,
+      x + 10,
+      top + mainH + 6,
+      12,
+      COLORS.dim,
+      "left",
+      false,
+      rw - 20,
     );
-    ctx.stroke();
-    put(ctx, "charge", right - tagW / 2, y, small, COLORS.chargeLine);
-    right -= tagW + 10;
-  }
-  const answerX = Math.max(promptX + 44, promptX + promptW + 14);
-  // a kanji word shows its reading and meaning, whichever gate it was missed on
-  const answer = m.word
-    ? `${m.word.reading} · ${m.word.meaning}`
-    : m.answers.join(" · ");
-  put(
-    ctx,
-    answer,
-    answerX,
-    y,
-    Math.min(20, rowH * 0.7),
-    COLORS.good,
-    "left",
-    false,
-    Math.max(1, right - answerX),
-  );
-}
-
-/** The session line wrapped to `maxLines` across `avail` px. */
-function layoutSessionLine(
-  ctx: Ctx,
-  avail: number,
-  log: SessionLog,
-  maxLines: number,
-) {
-  const measure = (t: PanelToken): number => {
-    ctx.font = `${t.kind === "item" ? SESSION_ITEM_PX : SESSION_LABEL_PX}px ${FONT}`;
-    return ctx.measureText(t.kind === "item" ? t.entry.prompt : t.s).width;
-  };
-  return wrapTokens(sessionTokens(log), avail, maxLines, SESSION_GAP, measure);
-}
-
-/** "Session · run 3 · fixed 左 玉 · still missing 右 石": fixed this run in good colour. */
-function renderSessionLine(
-  ctx: Ctx,
-  top: number,
-  lines: PanelToken[][],
-  hidden: number,
-): void {
-  lines.forEach((tokens, li) => {
-    const y = top + SESSION_LINE_H * (li + 0.5);
-    let x = END_PAD;
-    const draw = (s: string, color: string, size: number): void => {
-      x += put(ctx, s, x, y, size, color, "left") + SESSION_GAP;
-    };
-    for (const t of tokens) {
-      if (t.kind === "label") draw(t.s, COLORS.dim, SESSION_LABEL_PX);
-      else
-        draw(
-          t.entry.prompt,
-          t.entry.thisRun ? COLORS.good : COLORS.text,
-          SESSION_ITEM_PX,
-        );
-    }
-    if (hidden && li === lines.length - 1)
-      draw(`+${hidden}`, COLORS.dim, SESSION_LABEL_PX);
-  });
 }
 
 /** Play again (filled), then Study and Home (outlined). */

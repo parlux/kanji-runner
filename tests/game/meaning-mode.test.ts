@@ -20,7 +20,6 @@ import {
   type Rect,
 } from "../../src/game/start";
 import type { Action } from "../../src/game/input";
-import { MEANING_SESSION_KEY, SESSION_KEY } from "../../src/storage/session";
 import { MEANING_STORAGE_KEY, STORAGE_KEY } from "../../src/storage/storage";
 
 const act = (
@@ -33,7 +32,7 @@ const act = (
     session,
   });
 
-const meaning = (): Session => createSession(meaningProgress(), null, true);
+const meaning = (): Session => createSession(meaningProgress(), true);
 
 describe("meaning-mode session", () => {
   it("is kana-free and Built-in", () => {
@@ -94,7 +93,7 @@ describe("meaning-mode session", () => {
     );
   });
 
-  it("a finished run updates its own progress and log, without kana", () => {
+  it("a finished run updates its own progress, without kana", () => {
     const s = meaning();
     const start = act({ kind: "start" }, s, "confirm");
     let scene = start.scene;
@@ -104,10 +103,6 @@ describe("meaning-mode session", () => {
         const after = afterStep(start.session, scene, next, 1000);
         expect(after.meaning).toBe(true);
         expect(after.progress.stats.runs).toBe(1);
-        expect(after.log?.runs).toBe(1);
-        expect(after.log?.items.every((it) => it.type === "meaning")).toBe(
-          true,
-        );
       }
       scene = next;
     }
@@ -119,7 +114,6 @@ describe("persistence", () => {
   it("owner session: owner keys, synced", () => {
     expect(persistence(createSession(defaultProgress()))).toEqual({
       progress: STORAGE_KEY,
-      log: SESSION_KEY,
       sync: true,
     });
   });
@@ -128,11 +122,9 @@ describe("persistence", () => {
     const p = persistence(meaning());
     expect(p).toEqual({
       progress: MEANING_STORAGE_KEY,
-      log: MEANING_SESSION_KEY,
       sync: false,
     });
     expect(p?.progress).not.toBe(STORAGE_KEY);
-    expect(p?.log).not.toBe(SESSION_KEY);
   });
 });
 

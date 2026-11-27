@@ -12,9 +12,9 @@ Spec §1. `runItems` in a new core module: entries per item met, change kind, or
 
 ### Task R2: End screen item list; session log removed (sonnet)
 Spec §2. New list between the level card and the buttons; stat tiles, missed list and session line removed; session log code, storage and tests removed (stored keys left alone).
-- [ ] Layout tests (16 rows fit at 390×844, scroll clamp) pass.
-- [ ] Offscreen 390×844 renders: good run, slips, new items, long list scrolled, compact 390×700; paths in the report.
-- [ ] `npm run check` passes.
+- [x] Layout tests (16 rows fit at 390×844, scroll clamp) pass.
+- [x] Offscreen 390×844 renders: good run, slips, new items, long list scrolled, compact 390×700; paths in the report.
+- [x] `npm run check` passes.
 
 ### Task R3: Progress view: groups expand, level page (opus: layout and taps)
 Spec §3–4 except the study card. Past groups toggle; level rows open the level page; drag vs tap; level page header, rows, order, locked dim, scroll, Back keeps scroll.

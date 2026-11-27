@@ -29,16 +29,16 @@ export function endListArea(
 
 /** Gap between rows, and the extra height of a row that shows its right answer (px). */
 const ROW_GAP = 2;
-const ANSWER_H = 14;
+const ANSWER_H = 16;
 /** Row height (without the gap) at most / least; a long list scrolls at the least. */
 const ROW_MAX = 32;
 const ROW_MIN = 20;
 
 /** An item row at `y` from the top of the list's content (before scrolling). */
-export type EndRow = { item: RunItem; y: number; h: number };
+type EndRow = { item: RunItem; y: number; h: number };
 
 /** Whether the row shows the right answer under the item: any gate missed. */
-export const showsAnswer = (item: RunItem): boolean =>
+const showsAnswer = (item: RunItem): boolean =>
   item.gates.some((g) => g.missed);
 
 /**
