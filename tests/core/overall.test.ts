@@ -123,3 +123,28 @@ describe("overall", () => {
     expect(gainLabel(0)).toBe("+0%");
   });
 });
+
+describe("overall: expanded groups", () => {
+  it("an expanded past group lists all its levels; the next group's are dim", () => {
+    const p = midway();
+    const o = overall(p, KANA, KANJI, WORDS, false, [1, 3]);
+    const names = o.rows.map((r) => r.name);
+    const at = names.indexOf("Foundations");
+    expect(o.rows[at]).toMatchObject({ kind: "group", group: 1, open: true });
+    expect(names.slice(at + 1, at + 3)).toEqual(["Kanji 1", "Kanji 2"]);
+    expect(names[at + 25]).toBe("Kanji 25");
+    expect(names[at + 26]).toBe("Everyday");
+    expect(o.rows[at + 12]).toMatchObject({ kind: "level", dim: false });
+    // Kanji 12 has the slipped reading
+    expect(o.rows.find((r) => r.name === "Kanji 12")).toMatchObject({
+      learned: 14,
+    });
+    const next = names.indexOf("Getting around");
+    expect(o.rows[next]).toMatchObject({ open: true, dim: true });
+    expect(o.rows.length - next - 1).toBe(25);
+    expect(o.rows.slice(next + 1).every((r) => r.dim)).toBe(true);
+    // a collapsed group is still one row
+    expect(o.rows[0]).toMatchObject({ name: "Kana", open: false });
+    expect(names[1]).toBe("Foundations");
+  });
+});

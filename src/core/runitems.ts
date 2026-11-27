@@ -1,4 +1,4 @@
-import { mainReadings, showReading } from "./distractors";
+import { firstReading } from "./distractors";
 import { missedItems } from "./run";
 import { itemKey } from "./srs";
 import type {
@@ -144,7 +144,7 @@ function describe(
   if (row.type === "meaning" || row.type === "reading") {
     const k = kanji.find((x) => x.char === row.prompt);
     if (!k) return undefined;
-    const reading = mainReadings(k).map(showReading)[0];
+    const reading = firstReading(k);
     return {
       key: k.char,
       kind: "kanji",

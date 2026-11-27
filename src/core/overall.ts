@@ -14,13 +14,15 @@ import type { KanaItem, KanjiItem, Progress, WordItem } from "./types";
 export type OverallRow =
   | {
       kind: "group";
+      /** The group's index (0 = Kana). */
+      group: number;
       name: string;
       /** "Kanji 1–25" or "Hiragana–Katakana". */
       range: string;
       /** Levels whose items are all learned now, of the group's levels. */
       finished: number;
       levels: number;
-      /** The current group: its level rows follow. */
+      /** The current group, or a group expanded by a tap: its level rows follow. */
       open: boolean;
       /** The next group, not reached yet. */
       dim: boolean;
@@ -62,7 +64,8 @@ const kanjiLearned = (
  * The overall view's data: header, coverage and rows. Groups from the first
  * (Kana; meaning mode: Foundations) up to the current one, past groups as one
  * row, the current group open (its levels up to the unlocked one, then the next
- * level dimmed), then the next group dimmed.
+ * level dimmed), then the next group dimmed. Groups in `expanded` (past
+ * groups, the next group) list all their level rows too, the next group's dim.
  */
 export function overall(
   progress: Progress,
@@ -70,6 +73,7 @@ export function overall(
   kanji: readonly KanjiItem[],
   words: readonly WordItem[],
   meaning: boolean,
+  expanded: readonly number[] = [],
 ): Overall {
   const max = maxLevel(kanji);
   const level = Math.max(meaning ? 2 : 0, progress.unlockedLevel);
@@ -97,6 +101,7 @@ export function overall(
     for (let l = first; l <= last; l++) if (finished(l)) done++;
     return {
       kind: "group",
+      group: g,
       name: groupName(g),
       range: `${levelName(first)}–${levelName(last).replace("Kanji ", "")}`,
       finished: done,
@@ -107,13 +112,20 @@ export function overall(
   };
 
   const rows: OverallRow[] = [];
-  for (let g = meaning ? 1 : 0; g < group; g++)
-    rows.push(groupRow(g, false, false));
+  /** A collapsed or expanded group that isn't the current one. */
+  const otherGroup = (g: number, dim: boolean): void => {
+    const open = expanded.includes(g);
+    rows.push(groupRow(g, open, dim));
+    if (!open) return;
+    const { first, last } = groupLevels(g, max);
+    for (let l = first; l <= last; l++) rows.push(levelRow(l, dim));
+  };
+  for (let g = meaning ? 1 : 0; g < group; g++) otherGroup(g, false);
   rows.push(groupRow(group, true, false));
   for (let l = groupLevels(group, max).first; l <= level; l++)
     rows.push(levelRow(l, false));
   if (level < max) rows.push(levelRow(level + 1, true));
-  if (groupOf(max) > group) rows.push(groupRow(group + 1, false, true));
+  if (groupOf(max) > group) otherGroup(group + 1, true);
 
   const known = new Set(
     kanji

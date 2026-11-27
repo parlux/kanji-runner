@@ -270,6 +270,10 @@ export function mainReadings(k: KanjiItem): Reading[] {
   return out;
 }
 
+/** The first main reading as shown ("にち", "あ(げる)"), or undefined when it has none. */
+export const firstReading = (k: KanjiItem): string | undefined =>
+  mainReadings(k).map(showReading)[0];
+
 /** The main reading shown for this kanji in run `turn` (e.g. the run's seed): rotates. */
 export function shownReading(k: KanjiItem, turn: number): Reading {
   const rs = mainReadings(k);

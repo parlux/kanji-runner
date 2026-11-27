@@ -55,7 +55,7 @@ export { maxLevel } from "./kanji";
 type Words = readonly WordItem[];
 
 /** One thing to learn: its gate keys (meaning/word first, reading second). */
-type LevelItem = {
+export type LevelItem = {
   char: string;
   part: "kana" | "kanji" | "word";
   keys: string[];
@@ -66,7 +66,7 @@ type LevelItem = {
  * and reading gates) and every word of that level (word and reading gates; a
  * loanword has one). Meaning mode (`meaning`): kanji meaning only, no words.
  */
-function levelItems(
+export function levelItems(
   level: number,
   kana: readonly KanaItem[],
   kanji: readonly KanjiItem[],
