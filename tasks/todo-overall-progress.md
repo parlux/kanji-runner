@@ -10,9 +10,9 @@ Spec §1 except groups. `stageName`; `LEARNED_BOX` 3; learned = every gate ≥ 3
 - [ ] `npm run test:slow` passes (update expectations that assumed box 2 or 80%, and say which in the report).
 - [ ] `npm run check` passes.
 
-### Task P2: Levels of 8 (sonnet; highest risk: data)
-Spec §2. Re-level `kanji.json` and `words.json` in place (one-off transform, not committed as a script); `LEVEL_SIZE` 8 in `build-data.ts` and `coverage.ts`; `KANJI_WORDS_PER_LEVEL` 8; `MAX_NUMBER_WORDS_PER_LEVEL` 1; `WORDS_PER_LEVEL` 1; re-split `dictionary/stories/` into 267 three-digit files and update the story scripts; fix "30 per level" docs and comments.
-- [ ] Data test from the spec passes (8 per level, order unchanged against the previous `kanji.json`, word level = max kanji level, loanwords one per level 2–232, story files match levels).
+### Task P2: Levels of 15 new things (sonnet; highest risk: data)
+Spec §2. `scripts/levels.ts` slicer, used by `build-data.ts` after the picker; re-level `kanji.json` and `words.json` in place with it (one-off run); `coverage.ts` reads levels from `kanji.json`; `WORDS_PER_LEVEL` 1; re-split `dictionary/stories/` into 296 three-digit files and update the story scripts; fix "30 per level" docs and comments.
+- [ ] `levels.test.ts` and the data test from the spec pass (15 items per level, loanwords one per level 2–232, kanji order unchanged, no word before its kanji, word set unchanged, story files match levels).
 - [ ] `npm run stories:check` and `npm run test:slow` pass.
 - [ ] `npm run check` passes.
 
@@ -35,5 +35,5 @@ Spec §4. `src/game/screens/progress.ts`, open from the start block, Back/Esc, p
 ### Checkpoint P: owner sets their level and plays
 - [ ] With the picker, drop to where you want to start; play a few runs.
 - [ ] The end card's numbers add up; the kanji/words line and "need their reading" make sense or go.
-- [ ] The overall view shows Kanji N of 267, the groups, the current group's levels and a coverage %.
+- [ ] The overall view shows Kanji N of 296, the groups, the current group's levels and a coverage %.
 - [ ] Over the next days: does a level take a few days, and does the word tail at a level's end feel OK? (Size is a one-line change.)

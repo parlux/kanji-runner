@@ -6,7 +6,7 @@ Open ideas in priority order; the top one is next. The owner orders it. New idea
 Epic: [Useful Japanese, then drop WaniKani](useful-japanese.md). Its rounds come first; other ideas slot between them only when the owner wants a break.
 
 ## In progress
-- [Show overall progress](overall-progress.md): epic round 4, plus 8-kanji levels finished in full (kanji and words, meaning and reading, box 3), grouped by 25. Spec `docs/specs/SPEC-overall-progress.md`, tasks `tasks/todo-overall-progress.md`.
+- [Show overall progress](overall-progress.md): epic round 4, plus 15-item levels finished in full (kanji and words, meaning and reading, box 3), grouped by 25. Spec `docs/specs/SPEC-overall-progress.md`, tasks `tasks/todo-overall-progress.md`.
 
 ## Next
 1. **Checkpoint: assess against WaniKani** ([epic](useful-japanese.md#rounds)): no code; ready by mid-February 2027. Pause WaniKani, compare coverage, decide on the 2027-03-14 renewal.
