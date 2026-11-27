@@ -2,6 +2,7 @@
 
 Spec: `docs/specs/SPEC-overall-progress.md` (revised 2026-11-28). Intent: `docs/intent/overall-progress.md`. Idea: `docs/ideas/overall-progress.md`.
 Review: https://claude.ai/artifact/EC1jrjNRmNUtALM3M2rDVA
+Checkpoint P: https://claude.ai/artifact/1JHdCwgH8gyEKXvTnXPV3b
 Every task: `npm run check` passes before it is checked off. Each task is one commit series on the session branch, pushed.
 
 ### Task P1: Stages, learned at 3, words count, unlock at 100% (sonnet, core)
@@ -30,7 +31,7 @@ Spec §3. Level card and start-screen block: new copy, group name, kanji/words l
 Spec §4. `src/game/screens/progress.ts`, open from the start block, Back/Esc, past groups collapsed, current group's levels open, scrolling list, coverage line. Bump `package.json` to 1.8.0 and add `## 1.8.0 (<date>)` to `CHANGELOG.md`.
 - [x] Offscreen 390×844 renders: fresh save, mid-way save (a slipped item in a passed level), meaning mode; paths in the report.
 - [x] `package.json` 1.8.0; `CHANGELOG.md` has the 1.8.0 section.
-- [ ] `npm run check` passes; deploy green.
+- [x] `npm run check` passes; deploy green.
 
 ### Checkpoint P: owner sets their level and plays
 - [ ] With the picker, drop to where you want to start; play a few runs.
