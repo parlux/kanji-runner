@@ -11,7 +11,7 @@ export const levelName = (level: number): string =>
   level === 0 ? "Hiragana" : level === 1 ? "Katakana" : `Kanji ${level - 1}`;
 
 /** Kanji levels per group. */
-export const GROUP_SIZE = 25;
+const GROUP_SIZE = 25;
 
 /** Group names, index = group: 0 is the kana levels, then one per 25 kanji. */
 const GROUP_NAMES = [

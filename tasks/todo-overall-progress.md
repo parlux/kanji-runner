@@ -18,8 +18,8 @@ Spec §2. `scripts/levels.ts` slicer, used by `build-data.ts` after the picker; 
 
 ### Task P3: Groups and travel coverage (sonnet, core + script)
 Spec §1 "Groups" and §4 "Data". `GROUP_SIZE`, `groupOf`, `groupName` with the draft names; `scripts/travel.ts` + `npm run data:travel` → `src/data/travel.json`; `src/core/coverage.ts` with `travelCoverage`.
-- [ ] Group tests and `coverage.test.ts` from the spec pass; `travelCoverage` matches `measure`'s mean.
-- [ ] `npm run check` passes (knip: `travelCoverage` and the group helpers may be used only by tests until P4/P5; mark or wire accordingly).
+- [x] Group tests and `coverage.test.ts` from the spec pass; `travelCoverage` matches `measure`'s mean.
+- [x] `npm run check` passes (knip: `travelCoverage` and the group helpers may be used only by tests until P4/P5; mark or wire accordingly).
 
 ### Task P4: End card, start screen, study card (sonnet)
 Spec §3. Level card and start-screen block: new copy, group name, kanji/words line, no unlock mark, dim reading-to-go segment, "Progress ›" affordance (tap target only, the view comes in P5). Study card stage line.
