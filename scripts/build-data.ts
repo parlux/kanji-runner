@@ -38,6 +38,7 @@ import {
   type Candidate,
   type UsageRanks,
 } from "./words";
+import { sliceLevels } from "./levels";
 import { CACHE, cached, jouyouKanji, type RawKanji } from "./sources";
 import {
   easyCounts,
@@ -49,8 +50,11 @@ import {
   type Usefulness,
 } from "./useful";
 
-/** Kanji levels 2+ hold 30 kanji each (SPEC: Progression and levels). */
-const LEVEL_SIZE = 30;
+/**
+ * The word picker works in blocks of 30 kanji ("pick levels"); the levels
+ * shipped come from `sliceLevels` afterwards (SPEC-overall-progress §2).
+ */
+const PICK_BLOCK = 30;
 
 type Kun = { base: string; okurigana: string };
 
@@ -143,16 +147,33 @@ async function main(): Promise<void> {
     }),
     readJson<OrderOverride[]>("scripts/order-overrides.json"),
   );
-  const levelAt = (i: number) => 2 + Math.floor(i / LEVEL_SIZE);
-  const orderText = orderReport(order, why, levelAt);
-  writeFileSync(`${CACHE}/order-report.txt`, orderText);
   const orderSecs = ((performance.now() - orderStart) / 1000).toFixed(1);
-  console.log(
-    `${orderText.split("\n")[0]}; ${orderSecs} s; order report written to ${CACHE}/order-report.txt`,
-  );
   const pos = new Map(order.map((c, i) => [c, i]));
   const sorted = [...raw].sort(
     (a, b) => (pos.get(a.char) ?? 0) - (pos.get(b.char) ?? 0),
+  );
+  const pickLevel = new Map(
+    sorted.map((k, i) => [k.char, 2 + Math.floor(i / PICK_BLOCK)]),
+  );
+  setLevels(candidates, pickLevel);
+  const value = new Map(candidates.map((c) => [c, useful.get(c)?.value ?? 0]));
+  const picked = WORD_PICKER(usage, value)(candidates, KANJI_WORDS_PER_LEVEL);
+  const loanwords = readJson<unknown[]>("src/data/loanwords.json").length;
+  const sliced = sliceLevels(
+    sorted.map((k) => k.char),
+    picked.map((w) => w.word),
+    loanwords,
+  );
+  const levelAt = (i: number) => sliced.kanji[i] ?? 0;
+  const words = sliced.wordOrder.map((i) => ({
+    ...(picked[i] as Candidate),
+    level: sliced.words[i] ?? 0,
+  }));
+
+  const orderText = orderReport(order, why, levelAt);
+  writeFileSync(`${CACHE}/order-report.txt`, orderText);
+  console.log(
+    `${orderText.split("\n")[0]}; ${orderSecs} s; order report written to ${CACHE}/order-report.txt`,
   );
   const kanji = sorted.map((k, i) => ({
     char: k.char,
@@ -196,9 +217,6 @@ async function main(): Promise<void> {
     `${summary}; reading report written to ${CACHE}/reading-report.txt`,
   );
 
-  setLevels(candidates, new Map(kanji.map((k) => [k.char, k.level])));
-  const value = new Map(candidates.map((c) => [c, useful.get(c)?.value ?? 0]));
-  const words = WORD_PICKER(usage, value)(candidates, KANJI_WORDS_PER_LEVEL);
   writeJsonLines(
     "src/data/words.json",
     words.map(({ word, reading, glosses, kind, level }) => ({
