@@ -32,7 +32,7 @@ From the owner's WaniKani levels 1–7 (approximate counts, scratchpad only, not
    - **Cost:** the new kanji a word needs, weighted by how complex they are.
    - **Each level:** pick the most useful words for the cost, within a budget of new kanji. A kanji's building blocks still come before it, so stories keep working.
    - **Check:** measure coverage (phrasebook, menu, station signs, a free graded reader) against today's order and against the owner's WaniKani levels (scratchpad only).
-3. **[Our own stories](own-stories.md).** After the reorder, because a kanji's story builds on earlier parts and round 2 changes which parts come first. Stories only need to stay ahead of the owner, so this can ship the first levels and keep growing after WaniKani is dropped.
+3. **[Our own stories](done/own-stories.md).** Done 2026-11-27 (1.7.0). After the reorder, because a kanji's story builds on earlier parts and round 2 changes which parts come first. Stories only need to stay ahead of the owner, so this can ship the first levels and keep growing after WaniKani is dropped.
 4. **[Show overall progress](overall-progress.md).** Levels, plus coverage and JLPT share from round 2's numbers, so the assessment has a yardstick besides feel.
 5. **Checkpoint: assess against WaniKani.** No code. Ready to start by mid-February 2027, leaving a few weeks before the 2027-03-14 renewal. Pause WaniKani and use only the app; compare its coverage numbers with the owner's WaniKani levels (scratchpad only); then decide whether to renew. If the app falls short, the gaps found become the next rounds.
 

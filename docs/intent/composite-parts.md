@@ -1,6 +1,6 @@
 # Intent: composite parts, the chunks you can see
 
-Status: confirmed by the owner, 2026-11-21, after an interview (from the owner's flag on 閉: "Surely the 'one slash crowbar' can become a composite shape"). Round: own stories (epic round 3), during Checkpoint D. Spec: `docs/specs/SPEC-own-stories.md`, section "Composite parts". Tasks: `tasks/todo-own-stories.md` (C1–C3). The owner waived the spec page.
+Status: confirmed by the owner, 2026-11-21, after an interview (from the owner's flag on 閉: "Surely the 'one slash crowbar' can become a composite shape"). Round: own stories (epic round 3), during Checkpoint D. Spec: `docs/specs/done/SPEC-own-stories.md`, section "Composite parts". Tasks: `tasks/done/todo-own-stories.md` (C1–C3). The owner waived the spec page.
 
 ## Statement of intent
 - **Outcome:** a kanji's parts are the chunks you see, one level down (閉 = gate + 才), not KRADFILE's smallest strokes (gate + one + slash + crowbar).

@@ -1,6 +1,6 @@
 # Intent: our own stories
 
-Status: confirmed by the owner, 2026-11-20, after an interview. Epic: `docs/ideas/useful-japanese.md` (round 3). Idea: `docs/ideas/own-stories.md`. Spec: `docs/specs/SPEC-own-stories.md`.
+Status: confirmed by the owner, 2026-11-20, after an interview. Epic: `docs/ideas/useful-japanese.md` (round 3). Idea: `docs/ideas/done/own-stories.md`. Spec: `docs/specs/done/SPEC-own-stories.md`.
 
 ## Statement of intent
 - **Outcome:** a story dictionary in this repo, separate from the game code: our own part names and, for the early levels first (growing as the owner goes), a meaning story and a reading story. The study card shows ours instead of WaniKani's.

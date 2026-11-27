@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.7.0 (2026-11-27)
+
+- Our own stories for every kanji (Kanji 1–72): a meaning story plus on and kun reading stories, built from named parts and shared sound keywords, with the sound highlighted in place. No WaniKani needed for stories any more.
+- Parts come from KanjiVG one level down (composite parts), each with a name and a note on why it fits.
+- Flag a story from the study card; a desk review page for parts, sounds and stories.
+
 ## 1.6.34 (2026-11-27)
 
 - Our own stories for Kanji 65–72 (216 kanji): every level now has our own stories.

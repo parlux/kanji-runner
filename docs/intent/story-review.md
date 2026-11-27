@@ -1,6 +1,6 @@
 # Intent: a review page for the story dictionary
 
-Status: confirmed by the owner, 2026-11-20, after an interview. Round: own stories (epic round 3), added before Task D7. Spec: `docs/specs/SPEC-own-stories.md`, section "Review page". Tasks: `tasks/todo-own-stories.md`.
+Status: confirmed by the owner, 2026-11-20, after an interview. Round: own stories (epic round 3), added before Task D7. Spec: `docs/specs/done/SPEC-own-stories.md`, section "Review page". Tasks: `tasks/done/todo-own-stories.md`.
 
 ## Statement of intent
 - **Outcome:** a desk review page for the dictionary, separate from the game. The owner goes through LLM-written part names, sound keywords and stories in a dense table, approves or writes a note, and edits names and keywords directly. The orchestrator turns notes into rewrites with the writer/judge loop, then checks and commits them.

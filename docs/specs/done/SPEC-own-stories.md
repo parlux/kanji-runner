@@ -1,6 +1,6 @@
 # Spec: our own stories
 
-Status: 2026-11-20. Intent: `docs/intent/own-stories.md`. Epic: `docs/ideas/useful-japanese.md` (round 3). Tasks: `tasks/todo-own-stories.md`.
+Status: 2026-11-20. Intent: `docs/intent/own-stories.md`. Epic: `docs/ideas/useful-japanese.md` (round 3). Tasks: `tasks/done/todo-own-stories.md`.
 
 **Extends** `docs/specs/done/SPEC-stories.md`, `SPEC-reading-stories.md` and `SPEC-compound-stories.md` (the WaniKani study card): where our dictionary has a kanji, the card shows ours instead. The WaniKani path stays, untouched, for kanji the dictionary doesn't have yet; removing it is a later round.
 

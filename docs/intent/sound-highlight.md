@@ -1,6 +1,6 @@
 # Intent: highlight the sound in reading stories
 
-Status: confirmed by the owner, 2026-11-21, after an interview. Round: own stories (epic round 3), added during Checkpoint D. Spec: `docs/specs/SPEC-own-stories.md`, section "Sound highlight". Tasks: `tasks/todo-own-stories.md` (H1, H2). The owner waived spec approval: straight to the checkpoint.
+Status: confirmed by the owner, 2026-11-21, after an interview. Round: own stories (epic round 3), added during Checkpoint D. Spec: `docs/specs/done/SPEC-own-stories.md`, section "Sound highlight". Tasks: `tasks/done/todo-own-stories.md` (H1, H2). The owner waived spec approval: straight to the checkpoint.
 
 ## Statement of intent
 - **Outcome:** on and kun stories lose the closing explainer sentence ("Sail, drop the l, 'say': せい."). The sound-alike chunk of each word is highlighted in place ("a **den**tist sets up…"): one highlight per word, in reading order, the closest chunk even when the spelling isn't exact (**Sa**fe for せい).
