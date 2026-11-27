@@ -7,6 +7,7 @@ import {
   type TrackView,
 } from "./hud";
 import { renderEnd } from "./screens/end";
+import { renderProgress } from "./screens/progress";
 import { renderStart } from "./screens/start";
 import { COLORS, type Ctx } from "./draw";
 
@@ -49,6 +50,8 @@ export function render(
       otherLevel,
       canPlay,
     );
+  if (scene.kind === "progress")
+    return renderProgress(ctx, w, h, scene.view, scene.scroll);
   if (scene.kind === "end")
     return renderEnd(ctx, w, h, scene.run, scene.boss, session);
   // a run or boss clash without the 3D view is never entered: only the backdrop

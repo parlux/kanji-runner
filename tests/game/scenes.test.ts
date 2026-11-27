@@ -345,14 +345,21 @@ describe("start screen taps", () => {
     expect(startTap(false, W, H, W / 2, H * 0.2)).toBeNull();
   });
 
-  it('the level block is the P5 hook: it reports "progress" and nothing happens yet', () => {
+  it("the level block opens the overall view; Back (Esc) returns to the start screen", () => {
     expect(startTap(false, W, H, ...mid(l.progress))).toBe("progress");
     expect(startTap(true, W, H, ...mid(l.progress))).toBeNull();
     const session = createSession(defaultProgress());
-    const start: Scene = { kind: "start" };
-    const r = handleAction(start, "progress", () => 1, session);
-    expect(r.scene).toBe(start);
+    const r = handleAction({ kind: "start" }, "progress", () => 1, session);
+    expect(r.scene).toMatchObject({ kind: "progress", scroll: null });
     expect(r.session).toBe(session);
+    if (r.scene.kind !== "progress") throw new Error("not opened");
+    expect(r.scene.view.title).toBe("Hiragana · Kana");
+    expect(handleAction(r.scene, "confirm", () => 1, session).scene).toBe(
+      r.scene,
+    );
+    const back = handleAction(r.scene, "back", () => 1, session);
+    expect(back.scene).toEqual({ kind: "start" });
+    expect(back.session).toBe(session);
   });
 
   it("in the picker only its buttons act", () => {
@@ -630,7 +637,8 @@ describe("re-asks in runs", () => {
       const of = run.reask?.links.find((l) => l.row === q)?.of;
       return q === 0 || of === 0;
     });
-    if (next.kind === "start") throw new Error("no end");
+    if (next.kind === "start" || next.kind === "progress")
+      throw new Error("no end");
     const { rows, results, track } = next.run;
     const link = next.run.reask?.links.find((l) => l.of === 0);
     if (!link) throw new Error("no re-ask of row 0");
@@ -654,7 +662,8 @@ describe("re-asks in runs", () => {
         return of === 0 ? seed % 3 === 0 : seed % 2 === 1;
       };
       const { prev, next } = play(startRun(seed, wkSession), wrong);
-      if (next.kind === "start") throw new Error("no end");
+      if (next.kind === "start" || next.kind === "progress")
+        throw new Error("no end");
       const after = afterStep(wkSession, prev, next, 50);
       const { rows, results } = next.run;
       const reask = next.run.reask;

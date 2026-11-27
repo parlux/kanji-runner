@@ -88,3 +88,32 @@ export function bindDrag(
   el.addEventListener("touchend", (e) => e.preventDefault());
   return drag.take;
 }
+
+/**
+ * Binds vertical scrolling on `el`: a pointer drag and the wheel call
+ * `onScroll` with the px to move the content up (positive = further down).
+ */
+export function bindScroll(
+  el: HTMLElement,
+  onScroll: (dy: number) => void,
+): void {
+  let active: { id: number; y: number } | null = null;
+  el.addEventListener("pointerdown", (e) => {
+    active ??= { id: e.pointerId, y: e.clientY };
+  });
+  el.addEventListener("pointermove", (e) => {
+    if (active?.id !== e.pointerId) return;
+    onScroll(active.y - e.clientY);
+    active.y = e.clientY;
+  });
+  const end = (e: PointerEvent): void => {
+    if (active?.id === e.pointerId) active = null;
+  };
+  el.addEventListener("pointerup", end);
+  el.addEventListener("pointercancel", end);
+  el.addEventListener(
+    "wheel",
+    (e) => onScroll(e.deltaMode === 1 ? e.deltaY * 16 : e.deltaY),
+    { passive: true },
+  );
+}

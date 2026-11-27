@@ -1,4 +1,5 @@
-import { bindDrag, bindKeys, type Action } from "./game/input";
+import { bindDrag, bindKeys, bindScroll, type Action } from "./game/input";
+import { progressLayout, progressTap, scrollBy } from "./game/progress";
 import { startLoop } from "./game/loop";
 import { render } from "./game/render";
 import type { TrackView } from "./game/hud";
@@ -105,6 +106,10 @@ const takeDrag = bindDrag(stage.canvas, (x, y) => {
   }
   const w = window.innerWidth;
   const h = window.innerHeight;
+  if (scene.kind === "progress") {
+    if (progressTap(w, h, scene.view, x, y)) act("back");
+    return;
+  }
   const picking = scene.pick !== undefined;
   if (!picking && settingsTap(w, h, x, y)) return panels.openSettings();
   const mode = !picking ? modeTap(w, h, x, y) : null;
@@ -121,6 +126,16 @@ const takeDrag = bindDrag(stage.canvas, (x, y) => {
     return panels.openSync();
   const action = startTap(scene.pick !== undefined, w, h, x, y, !session.wk);
   if (action) act(action);
+});
+// the overall view's list scrolls by drag and wheel
+bindScroll(stage.canvas, (dy) => {
+  if (scene.kind !== "progress" || panels.anyOpen()) return;
+  const max = progressLayout(
+    window.innerWidth,
+    window.innerHeight,
+    scene.view,
+  ).maxScroll;
+  scene = { ...scene, scroll: scrollBy(scene.scroll, dy, max) };
 });
 
 let lastKind: Scene["kind"] = "start";

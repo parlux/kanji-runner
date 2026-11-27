@@ -8,6 +8,7 @@ import {
   type LevelCard,
 } from "../core/progression";
 import { mergeProgress } from "../core/merge";
+import { overall, type Overall } from "../core/overall";
 import { builtInPool, meaningPool, wanikaniPool } from "../core/pool";
 import { reaskRun } from "../core/reask";
 import { buildPoolRun, missedItems } from "../core/run";
@@ -58,6 +59,11 @@ export type Scene =
       t: number;
       paused?: boolean;
     }
+  /**
+   * The overall view: `view` is computed once on opening; `scroll` is the
+   * list's offset (px), null until first scrolled (see `resolveScroll`).
+   */
+  | { kind: "progress"; view: Overall; scroll: number | null }
   /** `boss` is null when the army died before reaching the boss. */
   | { kind: "end"; seed: number; run: RunState; boss: BossResult | null };
 
@@ -230,8 +236,7 @@ function startAction(
       const next = { ...session, unlocked: null, before: null };
       return { scene: newRun(newSeed(), next), session: next };
     }
-    // the overall view (Task P5) opens here; until then the tap does nothing
-    if (action === "progress") return { scene, session };
+    if (action === "progress") return { scene: openProgress(session), session };
     // placement is off in WaniKani mode: WaniKani's level gates the pool
     if (
       !session.wk &&
@@ -276,6 +281,19 @@ function startAction(
   }
 }
 
+/** The overall view of the session's progress, scrolled to the current level. */
+const openProgress = (session: Session): Scene => ({
+  kind: "progress",
+  view: overall(
+    session.progress,
+    session.kana,
+    KANJI,
+    levelWords(session),
+    session.meaning,
+  ),
+  scroll: null,
+});
+
 /** The scene, and the session (placement changes progress), after an action. */
 export function handleAction(
   scene: Scene,
@@ -286,6 +304,11 @@ export function handleAction(
   switch (scene.kind) {
     case "start":
       return startAction(scene, action, newSeed, session);
+    case "progress":
+      return {
+        scene: action === "back" ? { kind: "start" } : scene,
+        session,
+      };
     case "boss":
       return {
         scene: action === "pause" ? { ...scene, paused: !scene.paused } : scene,
