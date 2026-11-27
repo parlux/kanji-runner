@@ -1,5 +1,4 @@
 import { gateReached, type RunState } from "../../core/sim";
-import type { RunItem } from "../../core/runitems";
 import {
   endItems,
   endLevelCard,
@@ -10,6 +9,7 @@ import {
 import {
   answerText,
   changeText,
+  type EndEntry,
   endGap,
   endListArea,
   endListLayout,
@@ -21,6 +21,7 @@ import { endLayout, type Rect } from "../start";
 import { COLORS, END_PAD, panel, put, type Ctx } from "../draw";
 import { FONT, text } from "../labels";
 import { renderLevelCard } from "./levelcard";
+import { tick } from "./progress";
 
 /**
  * The end screen, top to bottom: result, level card, the item list (scrolls
@@ -71,15 +72,21 @@ export function renderEnd(
   renderLevelCard(ctx, w, y, compact, card);
   const study = studyOffered(run, boss, session);
   const { top, bottom } = endListArea(w, h, card, study);
-  const list = endListLayout(top, bottom, endItems(run, session));
+  const list = endListLayout(top, bottom, endItems(run, session), compact);
   const offset = clampScroll(scroll, list.maxScroll);
   ctx.save();
   ctx.beginPath();
   ctx.rect(0, top, w, bottom - top);
   ctx.clip();
+  for (const l of list.labels) {
+    const ly = top + l.y - offset;
+    if (ly + 10 >= top && ly - 10 <= bottom)
+      put(ctx, l.text, END_PAD + 2, ly, 12, COLORS.dim, "left");
+  }
   for (const r of list.rows) {
     const ry = top + r.y - offset;
-    if (ry + r.h >= top && ry <= bottom) renderItemRow(ctx, w, ry, r.h, r.item);
+    if (ry + r.h >= top && ry <= bottom)
+      renderItemRow(ctx, w, ry, r.h, r.entry);
   }
   ctx.restore();
   if (list.maxScroll > 0) renderScrollBar(ctx, w, list, offset);
@@ -103,29 +110,32 @@ function renderScrollBar(
 }
 
 /**
- * One item as a rounded row: the item large on the left, its meaning dim
- * (cut with "…"), the stage change on the right; a missed gate's right answer
- * on a second dim line.
+ * One item as a rounded row: the item large on the left, its meaning dim (cut
+ * with "…"), on the right this run's change if it was met (good / bad tones),
+ * else its stages (bright while missing, dim when learned); learned rows dim
+ * with a tick. A missed reading's right answer on a second dim line.
  */
 function renderItemRow(
   ctx: Ctx,
   w: number,
   top: number,
   rowH: number,
-  item: RunItem,
+  entry: EndEntry,
 ): void {
   const x = END_PAD;
   const rw = w - 2 * END_PAD;
-  const answer = answerText(item);
+  const { met } = entry;
+  const learned = entry.section === "learned";
+  const answer = met ? answerText(met) : "";
   const mainH = answer ? rowH - 16 : rowH;
   panel(ctx, x, top, rw, rowH, Math.min(8, mainH / 2));
   const y = top + mainH / 2;
-  const tone = COLORS[rowTone(item)];
-  const dim = item.change === "same" && !answer;
+  const dim =
+    learned || (entry.section === "also" && met?.change === "same" && !answer);
   const itemPx = Math.min(22, mainH * 0.8);
   const itemW = put(
     ctx,
-    item.key,
+    entry.key,
     x + 10,
     y,
     itemPx,
@@ -134,19 +144,25 @@ function renderItemRow(
     false,
     78,
   );
-  // the stage change on the right, shrunk a little when both gates are shown
-  const change = changeText(item);
-  const changePx = Math.min(item.gates.length > 1 ? 11 : 13, mainH * 0.6);
+  // right: the tick when learned, then this run's change or the stages
+  let right = x + rw - 10;
+  if (learned) {
+    tick(ctx, right - 7, y);
+    right -= 22;
+  }
+  const change = met ? changeText(met) : entry.stages;
+  const two = met ? met.gates.length > 1 : change.includes("·");
+  const changePx = Math.min(two ? 11 : 13, mainH * 0.6);
+  const tone = met ? COLORS[rowTone(met)] : learned ? COLORS.dim : COLORS.text;
   ctx.font = `${Math.round(changePx)}px ${FONT}`;
   const changeW = ctx.measureText(change).width;
-  const right = x + rw - 10;
   put(ctx, change, right, y, changePx, tone, "right");
   // the meaning fills what's left between them; dropped when it would crowd
   const meaningX = x + 10 + itemW + 10;
   const room = right - changeW - 10 - meaningX;
   const meaningPx = Math.min(13, mainH * 0.6);
   ctx.font = `${Math.round(meaningPx)}px ${FONT}`;
-  const shown = truncate(item.meaning, room, (t) => ctx.measureText(t).width);
+  const shown = truncate(entry.meaning, room, (t) => ctx.measureText(t).width);
   if (shown && room >= 24)
     put(ctx, shown, meaningX, y, meaningPx, COLORS.dim, "left");
   if (answer)

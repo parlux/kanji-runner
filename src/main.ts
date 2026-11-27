@@ -8,6 +8,7 @@ import {
   adoptProgress,
   afterStep,
   createSession,
+  endItemTap,
   endScrollMax,
   handleAction,
   progressTap,
@@ -86,7 +87,7 @@ const act = (action: Action): void => {
 };
 const steerAxis = bindKeys(act);
 // a tap pauses or resumes a run or the boss clash, hits the end
-// screen's buttons (Play again, Study, Home; elsewhere nothing), and on the start
+// screen's buttons (Play again, Study, Home) or its item rows, and on the start
 // screen hits the placement controls or else starts a run
 const takeDrag = bindDrag(stage.canvas, (x, y) => {
   if (panels.anyOpen()) return;
@@ -95,7 +96,10 @@ const takeDrag = bindDrag(stage.canvas, (x, y) => {
     const w = window.innerWidth;
     const h = window.innerHeight;
     const action = endTap(panels.studyAvailable(), w, h, x, y);
-    if (action) act(action);
+    if (action) return act(action);
+    // a row of the item list opens that item's study card
+    const item = endItemTap(w, h, scene, session, x, y);
+    if (item) panels.openItemStudy(item);
     return;
   }
   const w = window.innerWidth;

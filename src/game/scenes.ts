@@ -27,7 +27,7 @@ import {
 } from "../core/sim";
 import { enemiesWon } from "../core/horde";
 import { buildTrack } from "../core/track";
-import { runItems, type RunItem } from "../core/runitems";
+import { runItems } from "../core/runitems";
 import { recordRun } from "../core/srs";
 import {
   CHEER_SECONDS,
@@ -39,7 +39,14 @@ import {
 } from "../core/tuning";
 import type { KanaItem, Progress, WordItem } from "../core/types";
 import type { WkList } from "../wanikani/parse";
-import { endListArea, endListLayout } from "./endlist";
+import { END_PAD } from "./draw";
+import {
+  endEntries,
+  endListArea,
+  endListHit,
+  endListLayout,
+  type EndEntry,
+} from "./endlist";
 import type { Action } from "./input";
 import {
   clampScroll,
@@ -219,16 +226,22 @@ export function endLevelCard(session: Session): LevelCard {
 let itemsCache: {
   run: RunState;
   before: Progress | null;
-  items: RunItem[];
+  progress: Progress;
+  entries: EndEntry[];
 } | null = null;
 
 /**
- * Every item met in the last run, with how it moved (`runItems`), from the
- * mode's own kanji and words. Cached per run: the end screen asks every frame.
+ * The end screen's list (`endEntries`): the level card's level, missing then
+ * learned, then the other items met in the last run (`runItems`, from the
+ * mode's own kanji and words). Cached per run: the end screen asks every frame.
  */
-export function endItems(run: RunState, session: Session): RunItem[] {
-  if (itemsCache?.run === run && itemsCache.before === session.before)
-    return itemsCache.items;
+export function endItems(run: RunState, session: Session): EndEntry[] {
+  if (
+    itemsCache?.run === run &&
+    itemsCache.before === session.before &&
+    itemsCache.progress === session.progress
+  )
+    return itemsCache.entries;
   const items = runItems(
     session.before ?? session.progress,
     session.progress,
@@ -238,8 +251,38 @@ export function endItems(run: RunState, session: Session): RunItem[] {
     session.wk?.kanji ?? KANJI,
     levelWords(session),
   );
-  itemsCache = { run, before: session.before, items };
-  return items;
+  const page = levelPage(
+    session.progress,
+    endLevelCard(session).level,
+    session.kana,
+    KANJI,
+    levelWords(session),
+    session.meaning,
+  );
+  const entries = endEntries(page, items);
+  itemsCache = {
+    run,
+    before: session.before,
+    progress: session.progress,
+    entries,
+  };
+  return entries;
+}
+
+/** The end screen's list layout at this screen size. */
+function endList(
+  w: number,
+  h: number,
+  scene: Extract<Scene, { kind: "end" }>,
+  session: Session,
+) {
+  const { top, bottom } = endListArea(
+    w,
+    h,
+    endLevelCard(session),
+    studyOffered(scene.run, scene.boss, session),
+  );
+  return endListLayout(top, bottom, endItems(scene.run, session), h < 760);
 }
 
 /** How far the end screen's item list scrolls, at this screen size. */
@@ -249,13 +292,25 @@ export function endScrollMax(
   scene: Extract<Scene, { kind: "end" }>,
   session: Session,
 ): number {
-  const { top, bottom } = endListArea(
-    w,
-    h,
-    endLevelCard(session),
-    studyOffered(scene.run, scene.boss, session),
-  );
-  return endListLayout(top, bottom, endItems(scene.run, session)).maxScroll;
+  return endList(w, h, scene, session).maxScroll;
+}
+
+/**
+ * The item under a tap at (x, y) on the end screen's list, at the scene's
+ * scroll, for its study card; null off the rows.
+ */
+export function endItemTap(
+  w: number,
+  h: number,
+  scene: Extract<Scene, { kind: "end" }>,
+  session: Session,
+  x: number,
+  y: number,
+): StudyRequest | null {
+  const list = endList(w, h, scene, session);
+  const scroll = clampScroll(scene.scroll ?? 0, list.maxScroll);
+  const hit = endListHit(list, scroll, w, END_PAD, x, y);
+  return hit ? { key: hit.key, kind: hit.kind } : null;
 }
 
 /**

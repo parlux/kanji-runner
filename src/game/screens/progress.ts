@@ -288,7 +288,7 @@ function bar(
 }
 
 /** A green tick centred at (x, y). */
-function tick(ctx: Ctx, x: number, y: number): void {
+export function tick(ctx: Ctx, x: number, y: number): void {
   ctx.strokeStyle = COLORS.good;
   ctx.lineWidth = 2.5;
   ctx.lineCap = "round";
