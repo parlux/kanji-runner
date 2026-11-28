@@ -15,6 +15,7 @@ import { type Haze } from "./three/camera";
 import { renderBossText, renderTrackText } from "./three/overlay";
 import { fitSize, outlinedText, text } from "./labels";
 import { COLORS, type Ctx } from "./draw";
+import { muteRect } from "./start";
 
 /** How long (in track distance) a clip-loss pop-up stays up. */
 const CLIP_POPUP_DIST = 0.8;
@@ -32,6 +33,47 @@ const TIER_POPUP: Record<StreakTier, string> = {
 
 /** What the 3D view gives the overlay: where things are on screen, how hazy, and the boss. */
 export type TrackView = { project: Projector; haze: Haze; boss?: BossView };
+
+/** The run's mute button: a speaker, struck through when muted. */
+export function renderMuteButton(ctx: Ctx, w: number, muted: boolean): void {
+  const r = muteRect(w);
+  const cx = r.x + r.w / 2;
+  const cy = r.y + r.h / 2;
+  ctx.fillStyle = "rgba(20, 24, 36, 0.6)";
+  ctx.beginPath();
+  ctx.arc(cx, cy, 20, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = COLORS.wall;
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  const color = muted ? COLORS.bad : COLORS.text;
+  ctx.fillStyle = color;
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2;
+  ctx.lineCap = "round";
+  ctx.beginPath();
+  ctx.moveTo(cx - 9, cy - 3);
+  ctx.lineTo(cx - 5, cy - 3);
+  ctx.lineTo(cx, cy - 8);
+  ctx.lineTo(cx, cy + 8);
+  ctx.lineTo(cx - 5, cy + 3);
+  ctx.lineTo(cx - 9, cy + 3);
+  ctx.closePath();
+  ctx.fill();
+  ctx.beginPath();
+  if (muted) {
+    ctx.moveTo(cx + 4, cy - 4);
+    ctx.lineTo(cx + 12, cy + 4);
+    ctx.moveTo(cx + 12, cy - 4);
+    ctx.lineTo(cx + 4, cy + 4);
+  } else {
+    ctx.arc(cx, cy, 6, -0.9, 0.9);
+    ctx.moveTo(cx + 12 * Math.cos(-0.9), cy + 12 * Math.sin(-0.9));
+    ctx.arc(cx, cy, 12, -0.9, 0.9);
+  }
+  ctx.stroke();
+  ctx.lineCap = "butt";
+}
 
 /** The pause dimming and build label; the DOM pause panel (src/game/ui/pausecard.ts) has the rest. */
 export function renderPaused(ctx: Ctx, w: number, h: number): void {

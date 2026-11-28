@@ -16,7 +16,16 @@ import {
   updateScene,
   type Scene,
 } from "./game/scenes";
-import { endTap, modeTap, settingsTap, startTap, syncTap } from "./game/start";
+import {
+  endTap,
+  modeTap,
+  muteTap,
+  settingsTap,
+  startTap,
+  syncTap,
+  toggled,
+  toggleTap,
+} from "./game/start";
 import { SPEED_PRESETS } from "./core/tuning";
 import { removeLegacyKeys } from "./storage/legacy";
 import { createPanels } from "./game/ui/panels";
@@ -31,6 +40,12 @@ import { createSyncFromEnv } from "./sync/sync";
 import { createStage } from "./game/stage";
 import { createEngine, unlockOnGesture } from "./audio/engine";
 import { createVoice } from "./audio/voice";
+import {
+  audible,
+  loadAudioSettings,
+  saveAudioSettings,
+  type AudioSettings,
+} from "./audio/settings";
 import { speakStep } from "./game/speak";
 
 const stage = createStage();
@@ -42,6 +57,20 @@ unlockOnGesture(window, () => {
   engine.unlock();
   voice.unlock();
 });
+
+// switches and mute: saved on their own, and applied to the buses and the voice
+let audio = loadAudioSettings(localStorage);
+const applyAudio = (): void => {
+  for (const bus of ["voice", "sfx", "music"] as const)
+    engine.setOn(bus, audible(audio, bus));
+  voice.setEnabled(audible(audio, "voice"));
+};
+const setAudio = (next: AudioSettings): void => {
+  audio = next;
+  saveAudioSettings(localStorage, audio);
+  applyAudio();
+};
+applyAudio();
 
 // drop the old tuned camera, gear and horde values saved on this device
 removeLegacyKeys(localStorage);
@@ -103,7 +132,12 @@ const steerAxis = bindKeys(act);
 // screen hits the placement controls or else starts a run
 const takeDrag = bindDrag(stage.canvas, (x, y) => {
   if (panels.anyOpen()) return;
-  if (scene.kind === "run" || scene.kind === "boss") return act("pause");
+  if (scene.kind === "run" || scene.kind === "boss") {
+    // the mute button is not a pause tap
+    if (muteTap(window.innerWidth, x, y))
+      return setAudio({ ...audio, muted: !audio.muted });
+    return act("pause");
+  }
   if (scene.kind === "end") {
     const w = window.innerWidth;
     const h = window.innerHeight;
@@ -124,6 +158,8 @@ const takeDrag = bindDrag(stage.canvas, (x, y) => {
     return;
   }
   const picking = scene.pick !== undefined;
+  const sw = !picking ? toggleTap(w, h, x, y) : null;
+  if (sw) return setAudio(toggled(audio, sw));
   if (!picking && settingsTap(w, h, x, y)) return panels.openSettings();
   const mode = !picking ? modeTap(w, h, x, y) : null;
   if (mode && (mode === "meaning") !== session.meaning) {
@@ -210,6 +246,7 @@ startLoop(
       track,
       otherLevel,
       stage.webgl() !== "failed",
+      audio,
     );
     panels.sync();
   },

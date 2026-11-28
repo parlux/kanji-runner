@@ -1,7 +1,21 @@
 import type { SyncStatus } from "../sync/sync";
+import type { AudioSettings } from "../audio/settings";
 import type { Action } from "./input";
 
 export type Rect = { x: number; y: number; w: number; h: number };
+
+const TOGGLE_KINDS = ["voice", "sfx", "music"] as const;
+const TOGGLE_GAP = 8;
+/** The switches' settings keys, in the order they are drawn. */
+export type ToggleKind = (typeof TOGGLE_KINDS)[number];
+
+/** The run's mute button: top centre, between the question count and the streak. */
+export const muteRect = (w: number): Rect => ({
+  x: w / 2 - 24,
+  y: 4,
+  w: 48,
+  h: 48,
+});
 
 /** Start screen controls, shared by the renderer and tap hit-testing. */
 export function startLayout(w: number, h: number) {
@@ -10,6 +24,7 @@ export function startLayout(w: number, h: number) {
   const pickY = h * 0.42;
   const step = 64;
   const modeY = h * 0.27;
+  const togW = (bw - 2 * TOGGLE_GAP) / 3;
   const play = { x, y: h - 190, w: bw, h: 60 };
   return {
     /** The settings gear, top right. */
@@ -34,6 +49,16 @@ export function startLayout(w: number, h: number) {
     plusTen: { x: x + (bw + 12) / 2, y: h * 0.55, w: (bw - 12) / 2, h: 44 },
     apply: { x, y: h * 0.55 + 56, w: bw, h: 52 },
     cancel: { x, y: h * 0.55 + 120, w: bw, h: 44 },
+    /** Voice / Sound / Music switches in a row, above Play (thumb-sized). */
+    toggles: TOGGLE_KINDS.map((kind, i) => ({
+      kind,
+      rect: {
+        x: x + i * (togW + TOGGLE_GAP),
+        y: play.y - 84,
+        w: togW,
+        h: 52,
+      },
+    })),
     /** The build stamp, bottom centre (not a button: a tap there starts nothing). */
     stamp: { x: w / 2 - 80, y: h - 20, w: 160, h: 20 },
   };
@@ -163,3 +188,25 @@ export function modeTap(
   if (inside(l.modeMeaning, x, y)) return "meaning";
   return null;
 }
+
+/** The switch a start screen tap (picker closed) hits, or null. */
+export function toggleTap(
+  w: number,
+  h: number,
+  x: number,
+  y: number,
+): ToggleKind | null {
+  return (
+    startLayout(w, h).toggles.find((t) => inside(t.rect, x, y))?.kind ?? null
+  );
+}
+
+/** Whether a tap in a run hits the mute button. */
+export const muteTap = (w: number, x: number, y: number): boolean =>
+  inside(muteRect(w), x, y);
+
+/** The settings after a switch is tapped. */
+export const toggled = (s: AudioSettings, kind: ToggleKind): AudioSettings => ({
+  ...s,
+  [kind]: !s[kind],
+});

@@ -1,3 +1,4 @@
+import type { AudioSettings } from "../../audio/settings";
 import { levelName, levelProgress, maxLevel } from "../../core/progression";
 import { KANJI } from "../../core/kanji";
 import { levelWords, type Session } from "../scenes";
@@ -16,6 +17,7 @@ export function renderStart(
   sync: SyncStatus,
   otherLevel: number | null,
   canPlay: boolean,
+  audio: AudioSettings,
 ): void {
   if (pick !== undefined) return renderPicker(ctx, w, h, session, pick);
   const l = startLayout(w, h);
@@ -26,6 +28,7 @@ export function renderStart(
   renderModeSwitch(ctx, w, h, session, otherLevel);
   renderLevel(ctx, w, h * 0.46, session);
   unlockedNote(ctx, w, h * 0.46 + 118, session, 22);
+  renderToggles(ctx, w, h, audio);
   renderPlay(ctx, l.play);
   if (!canPlay) {
     const msg = "This device can't run the 3D game";
@@ -142,6 +145,30 @@ function renderModeSwitch(
     ? "Kanji → English meanings"
     : "Kana, readings and meanings";
   text(ctx, sub, w / 2, outer.y + outer.h + 20, 13, COLORS.dim);
+}
+
+const TOGGLE_NAMES = { voice: "Voice", sfx: "Sound", music: "Music" };
+
+/** Voice / Sound / Music: a pill each, filled green when on. */
+function renderToggles(
+  ctx: Ctx,
+  w: number,
+  h: number,
+  audio: AudioSettings,
+): void {
+  for (const { kind, rect: r } of startLayout(w, h).toggles) {
+    const on = audio[kind];
+    ctx.fillStyle = on ? ON_FILL : COLORS.track;
+    ctx.beginPath();
+    ctx.roundRect(r.x, r.y, r.w, r.h, 12);
+    ctx.fill();
+    ctx.strokeStyle = on ? COLORS.good : COLORS.wall;
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    const color = on ? COLORS.text : COLORS.dim;
+    text(ctx, TOGGLE_NAMES[kind], r.x + r.w / 2, r.y + 19, 16, color);
+    text(ctx, on ? "On" : "Off", r.x + r.w / 2, r.y + 39, 12, color);
+  }
 }
 
 /** The big green Play button. */

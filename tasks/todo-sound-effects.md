@@ -13,10 +13,10 @@ Spec §1, §2, §5 (voice bus, fallback, no ducking yet). `src/core/speech.ts`; 
 
 ### Task A2: Toggles, mute, settings; ship 1.12.0 (sonnet)
 Spec §6. Start-screen toggles (Voice now; Sound and Music shown, wired as their slices land, or hidden until then), run mute button, saved settings.
-- [ ] `settings.test.ts` passes.
-- [ ] Offscreen 390×844 renders: start screen with toggles, a run with the mute button; paths in the report.
-- [ ] `package.json` 1.12.0; `CHANGELOG.md` has the 1.12.0 section.
-- [ ] `npm run check` passes; deploy green.
+- [x] `settings.test.ts` passes.
+- [x] Offscreen 390×844 renders: start screen with toggles, a run with the mute button; paths in the report.
+- [x] `package.json` 1.12.0; `CHANGELOG.md` has the 1.12.0 section.
+- [x] `npm run check` passes; deploy green (deploy pending a merge to main).
 
 ### Task A3: Clip build and voice samples (opus: tooling and terms)
 Spec §3, §4. `scripts/voice/build.ts` and `coverage.ts`; get a VOICEVOX engine running (cloud: ask for GitHub access to `VOICEVOX/voicevox_engine` releases; else write the owner's Mac steps); render the 8 test words in 4–5 candidates; check each candidate's terms; publish a sample page (Artifact) with players and the terms per candidate.

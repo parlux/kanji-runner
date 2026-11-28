@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.12.0 (2026-11-28)
+
+- Every gate now says its reading in your phone's Japanese voice, right or wrong.
+- Voice, Sound and Music switches on the start screen.
+- A mute button in runs, top centre.
+- Sound and Music arrive in later versions.
+
 ## 1.11.0 (2026-11-28)
 
 - New scheduler: each item comes back when it's due, by the real time since you last answered it and its stage (Met: next run, Recalled: ~1 h, Learned: ~1 day, Strong: ~4 days, Solid: ~2 weeks). A miss still sends it back to New.
