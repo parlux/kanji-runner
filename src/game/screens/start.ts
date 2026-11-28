@@ -1,4 +1,5 @@
 import type { AudioSettings } from "../../audio/settings";
+import { VOICE_CREDIT } from "../../audio/voice";
 import { levelName, levelProgress, maxLevel } from "../../core/progression";
 import { KANJI } from "../../core/kanji";
 import { levelWords, type Session } from "../scenes";
@@ -49,7 +50,8 @@ export function renderStart(
     ctx.fillStyle = COLORS.dim;
     ctx.fillRect(w / 2 - tw / 2, cy + 10, tw, 1);
   }
-  // the about line: the kanji data's licence requires this credit
+  // the about lines: the voice's terms and the kanji data's licence ask for these credits
+  text(ctx, `Voice: ${VOICE_CREDIT}`, w / 2, h - 50, 11, COLORS.dim);
   text(
     ctx,
     "Kanji data: KANJIDIC2, KRADFILE · © EDRDG, CC BY-SA 4.0",
