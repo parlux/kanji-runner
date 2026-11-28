@@ -38,7 +38,7 @@ import { loadMeaningMode, saveMeaningMode } from "./storage/meaning";
 import { persistence } from "./game/mode";
 import { createSyncFromEnv } from "./sync/sync";
 import { createStage } from "./game/stage";
-import { createEngine, unlockOnGesture } from "./audio/engine";
+import { createEngine, onHiddenChange, unlockOnGesture } from "./audio/engine";
 import { createVoice, VOICE_ID } from "./audio/voice";
 import { createSfx } from "./audio/sfx";
 import { createMusic, moodFor } from "./audio/music";
@@ -71,6 +71,11 @@ const music = createMusic(engine, `${import.meta.env.BASE_URL}music/`);
 unlockOnGesture(window, () => {
   engine.unlock();
   voice.unlock();
+});
+// no sound while the tab is in the background or the screen is off
+onHiddenChange(document, (hidden) => {
+  engine.setHidden(hidden);
+  if (hidden) voice.stop();
 });
 
 // switches and mute: saved on their own, and applied to the buses and the voice

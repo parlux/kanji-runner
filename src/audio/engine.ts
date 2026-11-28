@@ -38,6 +38,8 @@ export type AudioEngine = {
   setOn(name: Bus, on: boolean): void;
   /** The duck's gain on the sfx and music buses (1 = none; see `duck.ts`). */
   setDuck(level: number): void;
+  /** Suspends all sound while the page is hidden (tab switch, screen off); resumes when shown. */
+  setHidden(hidden: boolean): void;
 };
 
 const BUSES: readonly Bus[] = ["voice", "sfx", "music"];
@@ -49,6 +51,7 @@ export function createEngine(
   let ctx: AudioContext | null = null;
   let buses: Record<Bus, GainNode> | null = null;
   let failed = false;
+  let hidden = false;
   const open: Record<Bus, boolean> = { voice: true, sfx: true, music: true };
   let duck = 1;
   let dips: BiquadFilterNode[] = [];
@@ -117,7 +120,8 @@ export function createEngine(
           buses = made;
           dips = madeDips;
         }
-        if (ctx && ctx.state !== "running") void ctx.resume().catch(() => {});
+        if (ctx && !hidden && ctx.state !== "running")
+          void ctx.resume().catch(() => {});
       } catch {
         failed = true;
         ctx = null;
@@ -131,6 +135,16 @@ export function createEngine(
       open[name] = on;
       try {
         apply(name, false);
+      } catch {
+        // audio failures are silent
+      }
+    },
+    setHidden(h) {
+      hidden = h;
+      try {
+        if (!ctx) return;
+        if (h) void ctx.suspend().catch(() => {});
+        else if (ctx.state !== "running") void ctx.resume().catch(() => {});
       } catch {
         // audio failures are silent
       }
@@ -149,6 +163,16 @@ export function createEngine(
       }
     },
   };
+}
+
+/** Calls `onChange(hidden)` when the page is hidden or shown (tab switch, screen off, app switch). */
+export function onHiddenChange(
+  doc: Pick<Document, "addEventListener" | "visibilityState">,
+  onChange: (hidden: boolean) => void,
+): void {
+  doc.addEventListener("visibilitychange", () =>
+    onChange(doc.visibilityState === "hidden"),
+  );
 }
 
 /** Calls `unlock` on every tap and key press (cheap once running; iOS may suspend the context again). */

@@ -10,6 +10,8 @@ export type Mood = { track: Track; lift: boolean };
 const FADE_S = 0.4;
 /** The run loop plays this much faster, and higher, at the boss. */
 export const BOSS_RATE = 1.06;
+/** Each loop's musical length in seconds; the file may run a few ms longer (encoder padding). */
+const LOOP_S: Record<Track, number> = { menu: 40, run: 105.93 };
 /** Seconds the boss lift takes to ease in or out. */
 const RATE_EASE_S = 0.25;
 
@@ -75,6 +77,9 @@ export function createMusic(
           const src = ctx.createBufferSource();
           src.buffer = s.buf;
           src.loop = true;
+          // loop the music, not the encoder's padding at the end
+          src.loopStart = 0;
+          src.loopEnd = Math.min(LOOP_S[t], s.buf.duration);
           const gain = ctx.createGain();
           gain.gain.value = 0;
           src.connect(gain);

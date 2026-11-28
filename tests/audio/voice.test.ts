@@ -1,6 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createDuck, voiceDuck } from "../../src/audio/duck";
-import { BUS_LEVEL, createEngine } from "../../src/audio/engine";
+import {
+  BUS_LEVEL,
+  createEngine,
+  onHiddenChange,
+} from "../../src/audio/engine";
 import {
   createVoice,
   type ClipEnv,
@@ -294,6 +298,69 @@ describe("engine", () => {
     expect(e.bus("music")?.gain.value).toBe(0);
     e.setOn("music", true);
     expect(e.bus("music")?.gain.value).toBeCloseTo(BUS_LEVEL.music * 0.35);
+  });
+
+  it("suspends while the page is hidden and resumes when shown, not on a tap meanwhile", () => {
+    const log: string[] = [];
+    class Ctx {
+      state = "running";
+      currentTime = 0;
+      destination = {};
+      createGain = node;
+      createBiquadFilter = node;
+      createDynamicsCompressor = node;
+      suspend() {
+        log.push("suspend");
+        this.state = "suspended";
+        return Promise.resolve();
+      }
+      resume() {
+        log.push("resume");
+        this.state = "running";
+        return Promise.resolve();
+      }
+    }
+    function node() {
+      const p = () => ({ value: 1, cancelScheduledValues() {} });
+      return {
+        connect: (to: unknown) => to,
+        gain: p(),
+        frequency: p(),
+        Q: p(),
+        threshold: p(),
+        knee: p(),
+        ratio: p(),
+        attack: p(),
+        release: p(),
+      };
+    }
+    const e = createEngine({
+      AudioContext: Ctx as unknown as typeof AudioContext,
+    });
+    e.setHidden(true); // before a context: nothing to do
+    e.setHidden(false);
+    e.unlock();
+    e.setHidden(true);
+    e.unlock(); // a stray gesture while hidden keeps it suspended
+    e.setHidden(false);
+    expect(log).toEqual(["suspend", "resume"]);
+  });
+
+  it("reports the page hidden and shown", () => {
+    let fire = () => {};
+    const doc = {
+      visibilityState: "visible" as DocumentVisibilityState,
+      addEventListener: (_: string, f: () => void) => {
+        fire = f;
+      },
+    };
+    const seen: boolean[] = [];
+    onHiddenChange(doc as unknown as Document, (h) => seen.push(h));
+    doc.visibilityState = "hidden";
+    fire();
+    doc.visibilityState = "visible";
+    fire();
+    expect(seen).toEqual([true, false]);
   });
 
   it("stays silent when the context cannot be made", () => {

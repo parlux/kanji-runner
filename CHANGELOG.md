@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.15.2 (2026-11-28)
+
+- Fix: music and voice stop when you switch tabs or turn the screen off, and come back when you return.
+- Fix: the menu music loops without a hitch (a quarter-second of silence at the end of the file is gone).
+
 ## 1.15.1 (2026-11-28)
 
 - Fix: the gate voice is clearer over the music. Music plays at half volume and effects a little lower; while a gate speaks they drop further and clear the speech range; the voice gets a clarity lift for phone speakers.
