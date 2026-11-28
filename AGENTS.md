@@ -13,6 +13,7 @@
 ## Layers (checked by `npm run deps`, part of `check`)
 - `core/` imports only `core/` and `data/`.
 - `storage/`, `sync/`, `wanikani/` never import `game/`.
+- `audio/` never imports `game/`, `storage/`, `sync/` or `wanikani/`.
 - Only `game/` imports `game/three/`; `main.ts` goes through `game/view3d.ts`.
 - No import cycles. Type-only imports count.
 

@@ -15,6 +15,12 @@ module.exports = {
       to: { path: "^src/game/" },
     },
     {
+      name: "audio-not-game-or-persistence",
+      severity: "error",
+      from: { path: "^src/audio/" },
+      to: { path: "^src/(game|storage|sync|wanikani)/" },
+    },
+    {
       name: "three-only-from-game",
       severity: "error",
       from: { path: "^src/", pathNot: "^src/game/" },

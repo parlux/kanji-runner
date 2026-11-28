@@ -1,0 +1,69 @@
+/** The three buses, each a gain into the master. */
+type Bus = "voice" | "sfx" | "music";
+
+/** What the engine needs from the page; absent pieces mean no sound, never an error. */
+export type EngineEnv = {
+  AudioContext?: typeof AudioContext;
+  navigator?: { audioSession?: { type: string } };
+};
+
+export type AudioEngine = {
+  /**
+   * Creates the AudioContext (once) and resumes it. Call from a user gesture:
+   * iOS only starts audio there. Also asks Safari to play with the ringer
+   * switch off. Safe to call again.
+   */
+  unlock(): void;
+  /** The context, or null before the first unlock or where audio is missing. */
+  context(): AudioContext | null;
+  /** A bus's gain node (into the master), or null without a context. */
+  bus(name: Bus): GainNode | null;
+};
+
+const BUSES: readonly Bus[] = ["voice", "sfx", "music"];
+
+/** One AudioContext with voice, sfx and music buses into a master gain. */
+export function createEngine(
+  env: EngineEnv = globalThis as unknown as EngineEnv,
+): AudioEngine {
+  let ctx: AudioContext | null = null;
+  let buses: Record<Bus, GainNode> | null = null;
+  let failed = false;
+  return {
+    unlock() {
+      try {
+        // Safari: "playback" plays with the ringer switch off
+        if (env.navigator?.audioSession)
+          env.navigator.audioSession.type = "playback";
+        if (!ctx && !failed && env.AudioContext) {
+          ctx = new env.AudioContext();
+          const master = ctx.createGain();
+          master.connect(ctx.destination);
+          const made = {} as Record<Bus, GainNode>;
+          for (const b of BUSES) {
+            const g = ctx.createGain();
+            g.connect(master);
+            made[b] = g;
+          }
+          buses = made;
+        }
+        if (ctx && ctx.state !== "running") void ctx.resume().catch(() => {});
+      } catch {
+        failed = true;
+        ctx = null;
+        buses = null;
+      }
+    },
+    context: () => ctx,
+    bus: (name) => buses?.[name] ?? null,
+  };
+}
+
+/** Calls `unlock` on every tap and key press (cheap once running; iOS may suspend the context again). */
+export function unlockOnGesture(
+  target: Pick<EventTarget, "addEventListener">,
+  unlock: () => void,
+): void {
+  for (const type of ["pointerdown", "touchend", "keydown"])
+    target.addEventListener(type, unlock, { capture: true, passive: true });
+}
