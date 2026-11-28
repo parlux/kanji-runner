@@ -18,6 +18,8 @@ export type Voice = {
   prepare(lines: readonly Spoken[]): void;
   /** Stops the current line. */
   stop(): void;
+  /** Off: nothing is said, and the current line stops at once. */
+  setEnabled(on: boolean): void;
   /** Call from a user gesture: iOS lets speech start only after one. */
   unlock(): void;
 };
@@ -30,6 +32,7 @@ export function createVoice(env: SpeechEnv = globalThis): Voice {
   const synth = env.speechSynthesis;
   const Utterance = env.SpeechSynthesisUtterance;
   let unlocked = false;
+  let enabled = true;
   const speak = (text: string): void => {
     if (!synth || !Utterance) return;
     try {
@@ -43,15 +46,22 @@ export function createVoice(env: SpeechEnv = globalThis): Voice {
       // no voice: stay silent
     }
   };
+  const stop = (): void => {
+    try {
+      synth?.cancel();
+    } catch {
+      // nothing to stop
+    }
+  };
   return {
-    say: (line) => speak(line.reading),
+    say: (line) => {
+      if (enabled) speak(line.reading);
+    },
     prepare: () => {},
-    stop: () => {
-      try {
-        synth?.cancel();
-      } catch {
-        // nothing to stop
-      }
+    stop,
+    setEnabled: (on) => {
+      enabled = on;
+      if (!on) stop();
     },
     unlock: () => {
       if (unlocked) return;

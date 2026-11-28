@@ -48,6 +48,17 @@ describe("voice", () => {
     expect(log).toEqual(["cancel", "speak  ja-JP -"]);
   });
 
+  it("says nothing and stops the line when disabled", () => {
+    const { env, log } = stubSpeech([]);
+    const v = createVoice(env);
+    v.setEnabled(false);
+    v.say({ text: "あ", reading: "あ" });
+    expect(log).toEqual(["cancel"]);
+    v.setEnabled(true);
+    v.say({ text: "あ", reading: "あ" });
+    expect(log).toEqual(["cancel", "cancel", "speak あ ja-JP -"]);
+  });
+
   it("is silent and error-free without speech", () => {
     const v = createVoice({});
     expect(() => {
@@ -74,6 +85,7 @@ describe("engine", () => {
     const node = (name: string) => ({
       connect: (to: { name: string }) => connects.push(`${name}>${to.name}`),
       name,
+      gain: { value: 1 },
     });
     let gains = 0;
     class Ctx {
@@ -102,6 +114,27 @@ describe("engine", () => {
     expect(resumed).toBe(2);
     expect(connects).toEqual(["g0>out", "g1>g0", "g2>g0", "g3>g0"]);
     expect(e.bus("music")).not.toBeNull();
+  });
+
+  it("gives a closed bus gain 0, before and after the context exists", () => {
+    class Ctx {
+      state = "running";
+      destination = {};
+      createGain() {
+        return { connect: () => {}, gain: { value: 1 } };
+      }
+    }
+    const e = createEngine({
+      AudioContext: Ctx as unknown as typeof AudioContext,
+    });
+    e.setOn("sfx", false);
+    e.unlock();
+    expect(e.bus("sfx")?.gain.value).toBe(0);
+    expect(e.bus("voice")?.gain.value).toBe(1);
+    e.setOn("voice", false);
+    e.setOn("sfx", true);
+    expect(e.bus("voice")?.gain.value).toBe(0);
+    expect(e.bus("sfx")?.gain.value).toBe(1);
   });
 
   it("stays silent when the context cannot be made", () => {

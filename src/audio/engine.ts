@@ -18,6 +18,8 @@ export type AudioEngine = {
   context(): AudioContext | null;
   /** A bus's gain node (into the master), or null without a context. */
   bus(name: Bus): GainNode | null;
+  /** Opens or closes a bus (gain 1 or 0); kept for buses made later. */
+  setOn(name: Bus, on: boolean): void;
 };
 
 const BUSES: readonly Bus[] = ["voice", "sfx", "music"];
@@ -29,6 +31,7 @@ export function createEngine(
   let ctx: AudioContext | null = null;
   let buses: Record<Bus, GainNode> | null = null;
   let failed = false;
+  const open: Record<Bus, boolean> = { voice: true, sfx: true, music: true };
   return {
     unlock() {
       try {
@@ -42,6 +45,7 @@ export function createEngine(
           const made = {} as Record<Bus, GainNode>;
           for (const b of BUSES) {
             const g = ctx.createGain();
+            g.gain.value = open[b] ? 1 : 0;
             g.connect(master);
             made[b] = g;
           }
@@ -56,6 +60,10 @@ export function createEngine(
     },
     context: () => ctx,
     bus: (name) => buses?.[name] ?? null,
+    setOn(name, on) {
+      open[name] = on;
+      if (buses) buses[name].gain.value = on ? 1 : 0;
+    },
   };
 }
 

@@ -25,6 +25,7 @@ function logVoice() {
     say: (l) => said.push(l),
     prepare: () => prepared++,
     stop: () => {},
+    setEnabled: () => {},
     unlock: () => {},
   };
   return { voice, said, prepared: () => prepared };
