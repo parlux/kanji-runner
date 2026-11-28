@@ -8,3 +8,4 @@ skills-lock.json
 src/data/kanji.json
 src/data/confusables.json
 src/data/words.json
+public/voice

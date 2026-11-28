@@ -25,7 +25,9 @@
     "stories:wk": "tsx scripts/stories/wk.ts",
     "stories:overlap": "tsx scripts/stories/overlap.ts",
     "stories:flags": "tsx scripts/stories/flags.ts",
-    "stories:review": "tsx scripts/stories/review.ts"
+    "stories:review": "tsx scripts/stories/review.ts",
+    "voice:build": "tsx scripts/voice/build.ts",
+    "voice:coverage": "tsx scripts/voice/coverage.ts"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",

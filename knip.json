@@ -2,5 +2,5 @@
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "entry": ["index.html"],
   "project": ["src/**", "scripts/**", "tests/**"],
-  "ignoreBinaries": ["xz", "bzip2"]
+  "ignoreBinaries": ["xz", "bzip2", "ffmpeg", "ffprobe"]
 }
