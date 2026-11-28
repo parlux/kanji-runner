@@ -20,9 +20,9 @@ Spec §6. Start-screen toggles (Voice now; Sound and Music shown, wired as their
 
 ### Task A3: Clip build and voice samples (opus: tooling and terms)
 Spec §3, §4. `scripts/voice/build.ts` and `coverage.ts`; get a VOICEVOX engine running (cloud: ask for GitHub access to `VOICEVOX/voicevox_engine` releases; else write the owner's Mac steps); render the 8 test words in 4–5 candidates; check each candidate's terms; publish a sample page (Artifact) with players and the terms per candidate.
-- [ ] `npm run voice:build` works against a running engine for a handful of keys; report how the engine was run.
-- [ ] Sample page link in the report; each candidate's terms summarised with a link.
-- [ ] `npm run check` passes.
+- [x] `npm run voice:build` works against a running engine for a handful of keys; report how the engine was run. (Engine 0.26.2 Linux CPU release in the session scratchpad; steps in `scripts/voice/README.md`.)
+- [x] Sample page link in the report; each candidate's terms summarised with a link. (Page written; published by orchestrator.)
+- [x] `npm run check` passes.
 
 ### Checkpoint V: owner picks the voice
 - [ ] Listen on the sample page; pick one character (and style, if it has several).
