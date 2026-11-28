@@ -100,5 +100,5 @@ Choosing the voice in settings (`docs/ideas/voice-choice.md`); human recordings;
 
 ## Open questions
 - The character: owner's pick at Checkpoint V.
-- Where clips get generated (cloud with GitHub access to the engine release, or the owner's Mac): settled in A3.
+- ~~Where clips get generated~~: settled in A3: the VOICEVOX engine's Linux CPU release runs in a cloud session (`scripts/voice/README.md`); the Mac steps stay as a fallback.
 - Timing (voice delay after the chime), `DUCK_LEVEL` and loudness: tuned at the checkpoint.

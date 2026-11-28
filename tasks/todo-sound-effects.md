@@ -2,6 +2,7 @@
 
 Spec: `docs/specs/SPEC-sound-effects.md` (2026-11-28). Intent: `docs/intent/sound-effects.md`. Ideas: `docs/ideas/sound-effects.md`, `docs/ideas/soundtrack.md`.
 Review: https://claude.ai/artifact/3JXQ6DPMb442Perp7cFZu7
+Voice samples (Checkpoint V): https://claude.ai/artifact/CR5Q6CpsxNeeWepGt8mU6G
 Runs while Checkpoints P, R and S wait on the owner's play; this is the active list for "implement the next round".
 Every task: `npm run check` passes before it is checked off. Each task is one commit series on the session branch, pushed.
 
