@@ -1,6 +1,6 @@
 # Intent: what you met, and what's in a level
 
-Status: confirmed by the owner, 2026-11-28, after an interview at Checkpoint P (v1.8.0). Idea: `docs/ideas/run-items.md`. Spec: `docs/specs/SPEC-run-items.md`. Tasks: `tasks/todo-run-items.md`.
+Status: confirmed by the owner, 2026-11-28, after an interview at Checkpoint P (v1.8.0). Idea: `docs/ideas/done/run-items.md`. Spec: `docs/specs/done/SPEC-run-items.md`. Tasks: `tasks/done/todo-run-items.md`.
 
 ## Statement of intent
 - **Outcome:** after a run you see every kanji and word you met and how the run moved it; in the progress view you can open any level and see exactly what's in it.

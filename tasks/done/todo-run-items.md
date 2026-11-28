@@ -1,6 +1,6 @@
 # Tasks: items met after a run, what's in a level (v1.9.0)
 
-Spec: `docs/specs/SPEC-run-items.md` (2026-11-28). Intent: `docs/intent/run-items.md`. Idea: `docs/ideas/run-items.md`.
+Spec: `docs/specs/done/SPEC-run-items.md` (2026-11-28). Intent: `docs/intent/run-items.md`. Idea: `docs/ideas/done/run-items.md`.
 Review: https://claude.ai/artifact/D5iiauMNbxjQCLhMtxswQU
 Checkpoint R: https://claude.ai/artifact/Pn8ysGJ3MqvKN57tywJkEX
 Started while Checkpoint P (`tasks/todo-overall-progress.md`) waits on the owner's days of play; this is the active list for "implement the next round".
@@ -37,7 +37,7 @@ Spec §5 (owner feedback at Checkpoint R). Missing → learned → also this run
 - [x] `npm run check` passes; deploy green.
 
 ### Checkpoint R: owner plays
-- [ ] After a few runs: the list shows your level's 15, missing and learned at a glance, plus what this run moved; the row wording reads well.
-- [ ] Tapping an end-screen row opens its study card.
-- [ ] Start screen → level block → Kanji 1 shows its 15 items; an item opens its study card.
-- [ ] Nothing missed from the old end screen (stat tiles, session line).
+- [x] After a few runs: the list shows your level's 15, missing and learned at a glance, plus what this run moved; the row wording reads well.
+- [x] Tapping an end-screen row opens its study card.
+- [x] Start screen → level block → Kanji 1 shows its 15 items; an item opens its study card.
+- [x] Nothing missed from the old end screen (stat tiles, session line).

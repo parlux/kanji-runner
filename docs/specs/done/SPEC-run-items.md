@@ -1,6 +1,6 @@
 # Spec: items met after a run, what's in a level
 
-Intent: `docs/intent/run-items.md` (2026-11-28). Tasks: `tasks/todo-run-items.md`. Extends `docs/specs/SPEC-overall-progress.md` (1.8.0: stages, 15-item levels, groups, the progress view); where they disagree, this spec wins. Version: **1.9.0** (a round).
+Intent: `docs/intent/run-items.md` (2026-11-28). Tasks: `tasks/done/todo-run-items.md`. Extends `docs/specs/SPEC-overall-progress.md` (1.8.0: stages, 15-item levels, groups, the progress view); where they disagree, this spec wins. Version: **1.9.0** (a round).
 
 ## Objective
 After a run, show every kanji and word met and how the run moved its stage; in the progress view, open any level to see its items and their stages, and open an item's study card. Success:

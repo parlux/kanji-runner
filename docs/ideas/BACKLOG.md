@@ -7,7 +7,6 @@ Epic: [Useful Japanese, then drop WaniKani](useful-japanese.md). Its rounds come
 
 ## In progress
 - [Show overall progress](overall-progress.md): epic round 4, plus 15-item levels finished in full (kanji and words, meaning and reading, box 3), grouped by 25. Spec `docs/specs/SPEC-overall-progress.md`, tasks `tasks/todo-overall-progress.md`.
-- [Items met after a run, what's in a level](run-items.md): from Checkpoint P; end screen lists items and stage changes, progress view opens a level. Spec `docs/specs/SPEC-run-items.md`, tasks `tasks/todo-run-items.md`.
 - [A scheduler that makes things stick](scheduler.md): time-based due items, current level's learning first. Spec `docs/specs/SPEC-scheduler.md`, tasks `tasks/todo-scheduler.md`.
 
 ## Next
