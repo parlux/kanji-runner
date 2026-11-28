@@ -1,7 +1,7 @@
 # Tasks: arcade sound, and every gate says its reading (v1.12.0–1.15.0)
 
 Spec: `docs/specs/SPEC-sound-effects.md` (2026-11-28). Intent: `docs/intent/sound-effects.md`. Ideas: `docs/ideas/sound-effects.md`, `docs/ideas/soundtrack.md`.
-Review: (spec page link added on publish)
+Review: https://claude.ai/artifact/3JXQ6DPMb442Perp7cFZu7
 Runs while Checkpoints P, R and S wait on the owner's play; this is the active list for "implement the next round".
 Every task: `npm run check` passes before it is checked off. Each task is one commit series on the session branch, pushed.
 
