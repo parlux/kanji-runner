@@ -29,8 +29,19 @@ import { loadMeaningMode, saveMeaningMode } from "./storage/meaning";
 import { persistence } from "./game/mode";
 import { createSyncFromEnv } from "./sync/sync";
 import { createStage } from "./game/stage";
+import { createEngine, unlockOnGesture } from "./audio/engine";
+import { createVoice } from "./audio/voice";
+import { speakStep } from "./game/speak";
 
 const stage = createStage();
+
+// sound starts on the first tap or key (iOS needs a gesture)
+const engine = createEngine();
+const voice = createVoice();
+unlockOnGesture(window, () => {
+  engine.unlock();
+  voice.unlock();
+});
 
 // drop the old tuned camera, gear and horde values saved on this device
 removeLegacyKeys(localStorage);
@@ -82,6 +93,7 @@ const act = (action: Action): void => {
   const keys = persistence(session);
   if (next.session !== session && keys)
     saveProgress(localStorage, next.session.progress, keys.progress);
+  speakStep(voice, scene, next.scene, session);
   scene = next.scene;
   session = next.session;
 };
@@ -166,6 +178,7 @@ startLoop(
       takeDrag(),
       SPEED_PRESETS[panels.speed()],
     );
+    speakStep(voice, scene, next, session);
 
     const settled = afterStep(session, scene, next, Date.now());
     // save (under this mode's keys), then sync if this mode syncs, after every run
