@@ -9,6 +9,7 @@ import { buildTrack, isCharge } from "../../src/core/track";
 import { ROWS_PER_RUN, WARM_UPS } from "../../src/core/tuning";
 import type { GateRow, Progress } from "../../src/core/types";
 import { forSeeds } from "../sweep";
+import { NOW } from "../now";
 
 const rec = (box: number, seen = 1) => ({
   box,
@@ -29,7 +30,7 @@ const hira = KANA.filter((k) => k.script === "hiragana");
 
 describe("buildRun selection", () => {
   it("a fresh player gets 14 rows from only the first 4 hiragana", () => {
-    const rows = buildRun(1, defaultProgress(), KANA, KANJI);
+    const rows = buildRun(1, defaultProgress(), NOW, KANA, KANJI);
     expect(rows).toHaveLength(ROWS_PER_RUN);
     expect(new Set(rows.map((r) => r.prompt))).toEqual(
       new Set(["あ", "い", "う", "え"]),
@@ -44,7 +45,7 @@ describe("buildRun selection", () => {
       for (const k of KANA)
         if (rng() < 0.4) boxes[itemKey(k.char, "kana")] = Math.floor(rng() * 6);
       const p = withItems(boxes, 1);
-      const rows = buildRun(seed, p, KANA, KANJI);
+      const rows = buildRun(seed, p, NOW, KANA, KANJI);
       expect(rows).toHaveLength(ROWS_PER_RUN);
       const fresh = new Set(rows.map(keyOf).filter((k) => !(k in p.items)));
       expect(fresh.size).toBeLessThanOrEqual(4);
@@ -61,7 +62,7 @@ describe("buildRun selection", () => {
       Object.fromEntries(hira.slice(0, 20).map((k) => [`${k.char}:kana`, 1])),
     );
     for (const seed of forSeeds(50)) {
-      const keys = buildRun(seed, p, KANA, KANJI).map(keyOf);
+      const keys = buildRun(seed, p, NOW, KANA, KANJI).map(keyOf);
       expect(new Set(keys).size).toBe(ROWS_PER_RUN);
     }
   });
@@ -78,7 +79,7 @@ describe("buildRun selection", () => {
     });
     const oldest = hira.slice(3, 6).map((k) => `${k.char}:kana`);
     for (const seed of forSeeds(50)) {
-      const rows = buildRun(seed, p, KANA, KANJI);
+      const rows = buildRun(seed, p, NOW, KANA, KANJI);
       expect(rows.slice(0, WARM_UPS).map(keyOf).sort()).toEqual(
         [...oldest].sort(),
       );
@@ -97,7 +98,7 @@ describe("buildRun selection", () => {
       let p = withItems(boxes);
       const turns: string[][] = [];
       for (let run = 0; run < 4; run++) {
-        const rows = buildRun(seed + run, p, KANA, KANJI);
+        const rows = buildRun(seed + run, p, NOW, KANA, KANJI);
         turns.push(rows.slice(0, WARM_UPS).map(keyOf));
         p = recordRun(
           p,
@@ -120,7 +121,7 @@ describe("buildRun selection", () => {
     });
     const p = withItems(boxes);
     for (const seed of forSeeds(50)) {
-      const warm = buildRun(seed, p, KANA, KANJI).slice(0, WARM_UPS);
+      const warm = buildRun(seed, p, NOW, KANA, KANJI).slice(0, WARM_UPS);
       expect(warm.map(keyOf)).toContain(`${hira[0]?.char}:kana`);
       expect(warm.map(keyOf)).toContain(`${hira[1]?.char}:kana`);
       expect(p.items[keyOf(warm[2] as GateRow)]?.box).toBe(2);
@@ -132,11 +133,12 @@ describe("buildRun selection", () => {
       { "あ:kana": 1, "い:kana": 1, "う:kana": 1, "一:meaning": 5 },
       2,
     );
-    const warm = buildRun(3, p, KANA, KANJI).slice(0, WARM_UPS).map(keyOf);
+    const warm = buildRun(3, p, NOW, KANA, KANJI).slice(0, WARM_UPS).map(keyOf);
     expect(warm).toContain("一:meaning");
     const kanaOnly = buildRun(
       3,
       withItems({ "あ:kana": 5, "一:meaning": 5 }, 1),
+      NOW,
       KANA,
       KANJI,
     );
@@ -157,7 +159,7 @@ describe("buildRun selection", () => {
       );
     const types = (p: Progress) =>
       new Set(
-        Array.from({ length: 30 }, (_, s) => buildRun(s, p, KANA, KANJI))
+        Array.from({ length: 30 }, (_, s) => buildRun(s, p, NOW, KANA, KANJI))
           .flat()
           .map((r) => r.type),
       );
@@ -173,7 +175,7 @@ describe("buildRun selection", () => {
     const runs = 2000;
     const counts = new Map<string, number>();
     for (let s = 0; s < runs; s++)
-      for (const e of new Set(selectEntries(createRng(s), pool, p)))
+      for (const e of new Set(selectEntries(createRng(s), pool, p, NOW)))
         counts.set(e.key, (counts.get(e.key) ?? 0) + 1);
     const missed = (counts.get("ぬ:kana") ?? 0) / runs;
     const others =
@@ -194,7 +196,7 @@ describe("buildRun selection", () => {
       p.items[`${k.char}:reading`] = rec(0, seen);
       // enough runs that the reading gets asked
       for (let s = 0; s < 200; s++) {
-        const r = buildRun(s, p, KANA, KANJI).find(
+        const r = buildRun(s, p, NOW, KANA, KANJI).find(
           (x) => x.type === "reading" && x.prompt === k.char,
         );
         if (r) return r.answer;
@@ -208,9 +210,11 @@ describe("buildRun selection", () => {
 
   it("is identical for the same seed and progress, and options stay valid", () => {
     const p = withItems({ "あ:kana": 2, "一:meaning": 4 }, 3);
-    expect(buildRun(9, p, KANA, KANJI)).toEqual(buildRun(9, p, KANA, KANJI));
+    expect(buildRun(9, p, NOW, KANA, KANJI)).toEqual(
+      buildRun(9, p, NOW, KANA, KANJI),
+    );
     for (let s = 0; s < 100; s++)
-      for (const r of buildRun(s, p, KANA, KANJI)) {
+      for (const r of buildRun(s, p, NOW, KANA, KANJI)) {
         expect(new Set(r.options).size).toBe(r.options.length);
         expect(r.options[r.answerIndex]).toBe(r.answer);
       }

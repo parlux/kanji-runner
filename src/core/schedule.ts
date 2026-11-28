@@ -38,17 +38,8 @@ export function nearness(box: number, lastSeen: number, now: number): number {
   return g === 0 ? Infinity : (now - lastSeen) / g;
 }
 
-/**
- * What the scheduler reads per item: a Built-in or Meaning mode `Selection`
- * (no weight needed) plus how often the item has been answered.
- */
-export type ScheduleInput = Pick<
-  Selection,
-  "entries" | "box" | "known" | "current" | "lastSeen"
-> & {
-  /** Times answered (its record's `seen`), else 0. Placement records have 0. */
-  seen: (e: Entry) => number;
-};
+/** What the scheduler reads per item: a Built-in or Meaning mode `Selection`. */
+export type ScheduleInput = Selection;
 
 const isWord = (e: Entry) => e.type === "word" || e.type === "wordreading";
 

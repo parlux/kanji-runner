@@ -5,13 +5,15 @@ import { KANJI } from "../../src/core/kanji";
 import { builtInPool, meaningPool, unlockedPool } from "../../src/core/pool";
 import { place } from "../../src/core/progression";
 import { createRng } from "../../src/core/rng";
-import { buildRun, missedItems, select } from "../../src/core/run";
+import { buildRun, missedItems } from "../../src/core/run";
 import { defaultProgress, itemKey } from "../../src/core/srs";
 import { MAX_NEW_PER_RUN, MAX_NEW_WORDS_PER_RUN } from "../../src/core/tuning";
 import type { Progress, WordItem } from "../../src/core/types";
 import { lastAnswer, runKanji, studyCards } from "../../src/core/study";
 import { isWordEligible, kanjiNeeded, WORDS } from "../../src/core/words";
 import { forSeeds } from "../sweep";
+import { NOW } from "../now";
+import { schedule } from "../../src/core/schedule";
 
 const rec = (box: number, seen = 1) => ({
   box,
@@ -142,7 +144,9 @@ describe("new words per run", () => {
     const pool = builtInPool(p, KANA, KANJI, WORDS);
     expect(MAX_NEW_WORDS_PER_RUN).toBe(2);
     for (const seed of forSeeds(200, 200)) {
-      const fresh = select(createRng(seed), pool).filter((e) => !pool.known(e));
+      const fresh = schedule(createRng(seed), pool, NOW).filter(
+        (e) => !pool.known(e),
+      );
       const nw = fresh.filter(
         (e) => e.type === "word" || e.type === "wordreading",
       );
@@ -158,7 +162,7 @@ describe("new words per run", () => {
     p.items[itemKey(w.word, "wordreading")] = rec(5);
     const rows = [];
     for (const seed of forSeeds(400, 400))
-      rows.push(...buildRun(seed, p, KANA, KANJI, WORDS));
+      rows.push(...buildRun(seed, p, NOW, KANA, KANJI, WORDS));
     const r = rows.filter((x) => x.type === "wordreading");
     expect(r.length).toBeGreaterThan(0);
     for (const row of r)

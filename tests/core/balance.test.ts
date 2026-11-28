@@ -8,6 +8,7 @@ import { WORDS } from "../../src/core/words";
 import { botBossRun, botRun } from "./bot";
 import { SLOW, forSeeds, itSlow } from "../sweep";
 import { wkRun } from "./wk-run";
+import { NOW } from "../now";
 
 /** Died before answering the last question. */
 const diedEarly = (s: RunState): boolean =>
@@ -42,7 +43,7 @@ describe("balance bot with words in the pool (perfect steering)", () => {
       progress.items[itemKey(k.char, "reading")] = known;
     }
   const build = (seed: number) => ({
-    rows: buildRun(seed, progress, KANA, KANJI, WORDS),
+    rows: buildRun(seed, progress, NOW, KANA, KANJI, WORDS),
   });
 
   it("100% accuracy never dies before the last question", () => {
@@ -68,7 +69,7 @@ describe("balance bot with word readings in the pool (perfect steering)", () => 
     if (w.level <= 8)
       progress.items[itemKey(w.word, "word")] = { ...known, box: 3 };
   const build = (seed: number) => ({
-    rows: buildRun(seed, progress, KANA, KANJI, WORDS),
+    rows: buildRun(seed, progress, NOW, KANA, KANJI, WORDS),
   });
 
   it("100% accuracy never dies before the last question", () => {

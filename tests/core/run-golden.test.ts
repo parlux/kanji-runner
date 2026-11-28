@@ -5,10 +5,12 @@ import { place } from "../../src/core/progression";
 import { buildRun } from "../../src/core/run";
 import { defaultProgress, itemKey } from "../../src/core/srs";
 import type { Progress } from "../../src/core/types";
+import { NOW } from "../now";
 
 /**
- * Built-in runs captured before the mode-aware pool (Task W4): the same seed
- * and progress must keep giving the same run, option for option.
+ * Built-in runs, re-captured for the scheduler (SPEC-scheduler, Task S2; first
+ * captured before the mode-aware pool, Task W4): the same seed, now and
+ * progress must keep giving the same run, option for option.
  */
 function mixed(): Progress {
   const p = place(defaultProgress(), 3, KANA, KANJI);
@@ -34,7 +36,7 @@ describe("buildRun golden (Built-in)", () => {
   for (const [name, progress] of STATES)
     it(`same seed, same run: ${name}`, () => {
       const runs = [1, 42, 999].map((seed) =>
-        buildRun(seed, progress, KANA, KANJI).map(
+        buildRun(seed, progress, NOW, KANA, KANJI).map(
           (r) =>
             `${r.type} ${r.prompt} [${r.options.join(" / ")}] ${r.answerIndex}`,
         ),

@@ -26,11 +26,12 @@ import type {
   Progress,
   WordItem,
 } from "../../src/core/types";
+import { NOW } from "../now";
 
 const progress: Progress = { ...defaultProgress(), unlockedLevel: 3 };
 const rows = [
-  ...buildRun(7, defaultProgress(), KANA, KANJI),
-  ...buildRun(8, progress, [], KANJI),
+  ...buildRun(7, defaultProgress(), NOW, KANA, KANJI),
+  ...buildRun(8, progress, NOW, [], KANJI),
 ];
 const results = rows.map((_, i) => i % 3 !== 0);
 const missed = missedItems(rows, results, [], KANJI);

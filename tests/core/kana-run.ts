@@ -3,6 +3,7 @@ import { KANJI } from "../../src/core/kanji";
 import { buildRun } from "../../src/core/run";
 import { defaultProgress } from "../../src/core/srs";
 import type { GateRow, Progress } from "../../src/core/types";
+import { NOW } from "../now";
 
 /** Every kana known at box 0: an even, repeat-free kana run, as a sim fixture. */
 const progress: Progress = { ...defaultProgress(), unlockedLevel: 1 };
@@ -16,4 +17,4 @@ for (const k of KANA)
   };
 
 export const kanaRun = (seed: number): GateRow[] =>
-  buildRun(seed, progress, KANA, KANJI);
+  buildRun(seed, progress, NOW, KANA, KANJI);

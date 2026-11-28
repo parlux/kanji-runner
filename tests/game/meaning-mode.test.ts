@@ -21,13 +21,14 @@ import {
 } from "../../src/game/start";
 import type { Action } from "../../src/game/input";
 import { MEANING_STORAGE_KEY, STORAGE_KEY } from "../../src/storage/storage";
+import { NOW } from "../now";
 
 const act = (
   scene: Scene,
   session: Session,
   ...actions: Action[]
 ): { scene: Scene; session: Session } =>
-  actions.reduce((r, a) => handleAction(r.scene, a, () => 7, r.session), {
+  actions.reduce((r, a) => handleAction(r.scene, a, () => 7, r.session, NOW), {
     scene,
     session,
   });

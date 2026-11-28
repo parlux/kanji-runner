@@ -29,6 +29,7 @@ import {
 import { STEP } from "../../src/game/loop";
 import { buildTrack } from "../../src/core/track";
 import { AIM, cameraFor } from "../../src/game/three/view";
+import { NOW } from "../now";
 
 describe("the giant boss", () => {
   const track = buildTrack(7, ROWS_PER_RUN);
@@ -65,6 +66,7 @@ describe("the giant boss", () => {
         "confirm",
         () => seed,
         session,
+        NOW,
       );
       if (start.scene.kind !== "run") throw new Error("no run");
       const run = start.scene.run;

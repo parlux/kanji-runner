@@ -15,8 +15,9 @@ import {
   builtInSelection,
   type Entry,
   type Pool,
-  type Selection,
+  type WeightedSelection,
 } from "./pool";
+import { schedule } from "./schedule";
 import {
   MAX_NEW_PER_RUN,
   MAX_NEW_WORDS_PER_RUN,
@@ -32,23 +33,26 @@ const optionCount = (i: number): number => (i < TWO_OPTION_ROWS ? 2 : 3);
 export { kanaLevel, unlockedPool, type Entry } from "./pool";
 
 /**
- * The run's 14 prompts. Warm-ups first: of the current level's known items at
- * box 3 or higher (all known items while it has fewer than 3), the 3 seen
- * longest ago, ties at random; with fewer than 3 strong items, the highest
- * boxes. Then up to 4 new items in progression order, shuffled in among
- * known items drawn by weight 2^(5 − box), no repeats. Only while the pool is
- * too small to fill a run (early on) does a further weighted pass repeat items.
+ * The run's 14 prompts for a Built-in pool, by the scheduler (`schedule.ts`):
+ * same seed, `now` and progress → same entries.
  */
 export function selectEntries(
   rng: Rng,
   pool: readonly Entry[],
   progress: Progress,
+  now: number,
 ): Entry[] {
-  return select(rng, builtInSelection(progress, pool));
+  return schedule(rng, builtInSelection(progress, pool), now);
 }
 
-/** `selectEntries` for any mode's selection rules. */
-export function select(rng: Rng, sel: Selection): Entry[] {
+/**
+ * WaniKani mode's selection: warm-ups first (of the current level's known
+ * items at box 3 or higher, else all known, the 3 seen longest ago; with fewer
+ * strong items, the highest boxes), then up to 4 new items in progression
+ * order shuffled in among known items drawn by weight, no repeats. Only while
+ * the pool is too small to fill a run does a weighted pass repeat items.
+ */
+export function select(rng: Rng, sel: WeightedSelection): Entry[] {
   const { box, weight: weightOf } = sel;
   const known = sel.entries.filter(sel.known);
   // new items in progression order; at most MAX_NEW_WORDS_PER_RUN of them words
@@ -93,12 +97,14 @@ export function select(rng: Rng, sel: Selection): Entry[] {
 }
 
 /**
- * A Built-in run from the seed and SRS state: same seed and progress, same run.
+ * A Built-in run from the seed, `now` (epoch ms) and SRS state: same seed, now
+ * and progress, same run.
  * Distractors draw on unlocked items plus the next level.
  */
 export function buildRun(
   seed: number,
   progress: Progress,
+  now: number,
   kana: readonly KanaItem[],
   kanji: readonly KanjiItem[],
   words: readonly WordItem[] = [],
@@ -106,6 +112,7 @@ export function buildRun(
   return buildPoolRun(
     seed,
     progress,
+    now,
     builtInPool(progress, kana, kanji, words),
   );
 }
@@ -134,26 +141,33 @@ export function entryRow(
 }
 
 /**
- * A run from the seed, SRS state and a mode's pool (`pool.ts`). A reading
+ * A run from the seed, `now` (epoch ms), SRS state and a mode's pool
+ * (`pool.ts`): WaniKani pools (with `weight`) by `select`, the others by the
+ * scheduler. A reading
  * gate shows the kanji's main readings in turn, by how often it has been asked.
  */
 export function buildPoolRun(
   seed: number,
   progress: Progress,
+  now: number,
   pool: Pool,
 ): GateRow[] {
-  return poolRun(seed, progress, pool).rows;
+  return poolRun(seed, progress, now, pool).rows;
 }
 
 /** `buildPoolRun` plus the entry each row asks, in row order. */
 export function poolRun(
   seed: number,
   progress: Progress,
+  now: number,
   pool: Pool,
 ): { rows: GateRow[]; entries: Entry[] } {
   const rng = createRng(seed);
   const asked = new Map<string, number>();
-  const entries = select(rng, pool);
+  const { weight } = pool;
+  const entries = weight
+    ? select(rng, { ...pool, weight })
+    : schedule(rng, pool, now);
   const rows = entries.map((e, i) => {
     const shown =
       e.type === "reading"

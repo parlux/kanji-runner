@@ -58,23 +58,34 @@ export function unlockedPool(
   return out;
 }
 
-/** How a run picks its prompts from a pool. */
+/** What a run's selection reads per item (the scheduler, `schedule.ts`; WaniKani mode adds `weight`). */
 export type Selection = {
   /** Askable items in progression order; new items are introduced in this order. */
   entries: readonly Entry[];
   /** The item's box for selection: its record's, else a seeded box, else 0. */
   box: (e: Entry) => number;
-  /** Known items are drawn by weight; the rest are new (at most 4 per run). */
+  /** Known items have a record (or a seeded box); the rest are new (at most 4 per run). */
   known: (e: Entry) => boolean;
-  weight: (e: Entry) => number;
-  /** Warm-ups prefer these, once there are enough of them. */
+  /** The current level's items: warm-ups and in-progress slots prefer them. */
   current: (e: Entry) => boolean;
   /** When the item was last answered (its record's `lastSeen`), else 0: no record counts as oldest. */
   lastSeen: (e: Entry) => number;
+  /** Times answered (its record's `seen`), else 0. Placement records have 0. */
+  seen: (e: Entry) => number;
 };
 
-/** Everything a run is built from: selection plus the distractor sources. */
+/** WaniKani mode's selection: known items drawn by weight (`select` in `run.ts`). */
+export type WeightedSelection = Selection & {
+  weight: (e: Entry) => number;
+};
+
+/**
+ * Everything a run is built from: selection plus the distractor sources. With
+ * `weight` (WaniKani mode) runs are drawn by weight; without (Built-in and
+ * Meaning modes), by the scheduler.
+ */
 export type Pool = Selection & {
+  weight?: (e: Entry) => number;
   /** Kana and kanji that distractors are drawn from. */
   kana: readonly KanaItem[];
   kanji: readonly KanjiItem[];
@@ -88,7 +99,7 @@ export type Pool = Selection & {
 const NONE: readonly string[] = [];
 const NONE_WORDS: readonly WordItem[] = [];
 
-/** Built-in selection rules for a list of entries: the v1 SRS. */
+/** Built-in selection rules for a list of entries (Built-in and Meaning modes). */
 export function builtInSelection(
   progress: Progress,
   entries: readonly Entry[],
@@ -99,8 +110,8 @@ export function builtInSelection(
     entries,
     box,
     known: (e) => record(e) !== undefined,
-    weight: (e) => weight(box(e)),
     lastSeen: (e) => record(e)?.lastSeen ?? 0,
+    seen: (e) => record(e)?.seen ?? 0,
     current: (e) =>
       (e.type === "kana" ? kanaLevel(e.item) : e.item.level) ===
       progress.unlockedLevel,
@@ -192,7 +203,7 @@ export function wanikaniPool(
   progress: Progress,
   kana: readonly KanaItem[],
   list: WkPoolInput,
-): Pool {
+): Pool & WeightedSelection {
   const record = (e: Entry) => progress.items[e.key];
   const extras = (e: Entry) =>
     e.type === "kana" || e.type === "word" || e.type === "wordreading"
@@ -228,6 +239,7 @@ export function wanikaniPool(
     // warm-ups: the highest-box known items of the whole pool
     current: () => true,
     lastSeen: (e) => record(e)?.lastSeen ?? 0,
+    seen: (e) => record(e)?.seen ?? 0,
     kana: kana.filter((k) => kanaLevel(k) <= next),
     kanji: list.kanji,
     words: NONE_WORDS,

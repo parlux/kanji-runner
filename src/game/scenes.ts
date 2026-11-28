@@ -157,20 +157,20 @@ export const levelWords = (session: Session): readonly WordItem[] =>
  * A new run. WaniKani runs have re-asks on (built with `reaskRun`, same rows
  * as `buildPoolRun`); Built-in runs have none and are unchanged.
  */
-function newRun(seed: number, session: Session): Scene {
+function newRun(seed: number, session: Session, now: number): Scene {
   const track = buildTrack(seed, ROWS_PER_RUN);
   const { progress, kana, wk } = session;
   let run: RunState;
   if (session.meaning) {
     const pool = meaningPool(progress, KANJI);
-    run = createRunState(buildPoolRun(seed, progress, pool), track, null);
+    run = createRunState(buildPoolRun(seed, progress, now, pool), track, null);
   } else if (wk) {
     const pool = wanikaniPool(progress, kana, wk);
-    const { rows, reask } = reaskRun(seed, progress, pool);
+    const { rows, reask } = reaskRun(seed, progress, now, pool);
     run = createRunState(rows, track, reask);
   } else {
     const pool = builtInPool(progress, kana, KANJI, WORDS);
-    run = createRunState(buildPoolRun(seed, progress, pool), track, null);
+    run = createRunState(buildPoolRun(seed, progress, now, pool), track, null);
   }
   return { kind: "run", seed, run, paused: false };
 }
@@ -346,12 +346,13 @@ function startAction(
   action: Action,
   newSeed: () => number,
   session: Session,
+  now: number,
 ): { scene: Scene; session: Session } {
   const { pick } = scene;
   if (pick === undefined) {
     if (action === "confirm") {
       const next = { ...session, unlocked: null, before: null };
-      return { scene: newRun(newSeed(), next), session: next };
+      return { scene: newRun(newSeed(), next, now), session: next };
     }
     if (action === "progress") return { scene: openProgress(session), session };
     // placement is off in WaniKani mode: WaniKani's level gates the pool
@@ -509,10 +510,11 @@ export function handleAction(
   action: Action,
   newSeed: () => number,
   session: Session,
+  now: number,
 ): { scene: Scene; session: Session } {
   switch (scene.kind) {
     case "start":
-      return startAction(scene, action, newSeed, session);
+      return startAction(scene, action, newSeed, session, now);
     // Back (Esc) closes the level page, else returns to the start screen
     case "progress":
       return {
@@ -532,7 +534,7 @@ export function handleAction(
     // Play again starts the next run as the start screen's Play does; Home goes back
     case "end":
       if (action === "confirm")
-        return startAction({ kind: "start" }, action, newSeed, session);
+        return startAction({ kind: "start" }, action, newSeed, session, now);
       return {
         scene: action === "back" ? { kind: "start" } : scene,
         session,

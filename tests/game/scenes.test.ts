@@ -47,6 +47,7 @@ import {
   syncTap,
 } from "../../src/game/start";
 import { forSeeds } from "../sweep";
+import { NOW } from "../now";
 
 describe("sessions", () => {
   it("a WaniKani session asks only its taught kanji and has no placement", () => {
@@ -54,13 +55,15 @@ describe("sessions", () => {
     const wk = syntheticList(30) as unknown as NonNullable<Session["wk"]>;
     const session = { ...createSession(defaultProgress()), wk };
     const chars = new Set(wk.kanji.map((k) => k.char));
-    const run = handleAction(start, "confirm", () => 5, session).scene;
+    const run = handleAction(start, "confirm", () => 5, session, NOW).scene;
     if (run.kind !== "run") throw new Error("no run");
     const kanjiRows = run.run.rows.filter((r) => r.type !== "kana");
     expect(kanjiRows.length).toBeGreaterThan(0);
     expect(kanjiRows.every((r) => chars.has(r.prompt))).toBe(true);
     for (const a of ["place", "left", "right"] as const)
-      expect(handleAction(start, a, () => 1, session).scene).toEqual(start);
+      expect(handleAction(start, a, () => 1, session, NOW).scene).toEqual(
+        start,
+      );
   });
 
   it("starts a kana run for a fresh player", () => {
@@ -70,6 +73,7 @@ describe("sessions", () => {
       "confirm",
       () => 1,
       createSession(defaultProgress()),
+      NOW,
     ).scene;
     if (kana.kind !== "run") throw new Error("no run");
     expect(kana.run.rows.every((r) => r.type === "kana")).toBe(true);
@@ -83,6 +87,7 @@ describe("afterStep", () => {
     "confirm",
     () => 7,
     session,
+    NOW,
   ).scene;
   if (run.kind !== "run") throw new Error("no run");
 
@@ -145,7 +150,13 @@ describe("afterStep", () => {
     // the next step on the same session reports no new unlock
     expect(afterStep(after, run, ended, 6).unlocked).toBeNull();
     // starting the next run clears the message
-    const start = handleAction({ kind: "start" }, "confirm", () => 1, after);
+    const start = handleAction(
+      { kind: "start" },
+      "confirm",
+      () => 1,
+      after,
+      NOW,
+    );
     expect(start.session.unlocked).toBeNull();
   });
 
@@ -159,7 +170,13 @@ describe("afterStep", () => {
     expect(session.before).toBeNull();
     const after = afterStep(session, run, ended, 1);
     expect(after.before).toBe(session.progress);
-    const start = handleAction({ kind: "start" }, "confirm", () => 1, after);
+    const start = handleAction(
+      { kind: "start" },
+      "confirm",
+      () => 1,
+      after,
+      NOW,
+    );
     expect(start.session.before).toBeNull();
   });
 
@@ -205,25 +222,26 @@ describe("end screen", () => {
       "confirm",
       () => 7,
       session,
+      NOW,
     ).scene;
     if (run.kind !== "run") throw new Error("no run");
     return { kind: "end", seed: 7, run: run.run, boss: null };
   };
 
   it("Play again (Enter, Space or the button) starts a new run straight away", () => {
-    const r = handleAction(end(), "confirm", () => 1, session);
+    const r = handleAction(end(), "confirm", () => 1, session, NOW);
     expect(r.scene.kind).toBe("run");
     if (r.scene.kind === "run") expect(r.scene.seed).toBe(1);
   });
 
   it("Play again clears the last run's unlock and level-card baseline", () => {
     const shown = { ...session, unlocked: 3, before: session.progress };
-    const r = handleAction(end(), "confirm", () => 1, shown);
+    const r = handleAction(end(), "confirm", () => 1, shown, NOW);
     expect(r.session).toMatchObject({ unlocked: null, before: null });
   });
 
   it("Home (Escape or the button) goes to the start screen", () => {
-    const r = handleAction(end(), "back", () => 1, session);
+    const r = handleAction(end(), "back", () => 1, session, NOW);
     expect(r.scene).toEqual({ kind: "start" });
     expect(r.session).toBe(session);
   });
@@ -240,8 +258,8 @@ describe("end screen", () => {
 
   it("other actions leave the end screen alone", () => {
     const e = end();
-    expect(handleAction(e, "left", () => 1, session).scene).toBe(e);
-    expect(handleAction(e, "pause", () => 1, session).scene).toBe(e);
+    expect(handleAction(e, "left", () => 1, session, NOW).scene).toBe(e);
+    expect(handleAction(e, "pause", () => 1, session, NOW).scene).toBe(e);
   });
 });
 
@@ -284,10 +302,13 @@ describe("placement picker", () => {
     session: Session,
     ...actions: Action[]
   ): { scene: Scene; session: Session } =>
-    actions.reduce((r, a) => handleAction(r.scene, a, () => 1, r.session), {
-      scene,
-      session,
-    });
+    actions.reduce(
+      (r, a) => handleAction(r.scene, a, () => 1, r.session, NOW),
+      {
+        scene,
+        session,
+      },
+    );
 
   it("opens at the current placement, moves, and applies on confirm", () => {
     const opened = act({ kind: "start" }, fresh, "place");
@@ -348,15 +369,21 @@ describe("start screen taps", () => {
     expect(startTap(false, W, H, ...mid(l.progress))).toBe("progress");
     expect(startTap(true, W, H, ...mid(l.progress))).toBeNull();
     const session = createSession(defaultProgress());
-    const r = handleAction({ kind: "start" }, "progress", () => 1, session);
+    const r = handleAction(
+      { kind: "start" },
+      "progress",
+      () => 1,
+      session,
+      NOW,
+    );
     expect(r.scene).toMatchObject({ kind: "progress", scroll: null });
     expect(r.session).toBe(session);
     if (r.scene.kind !== "progress") throw new Error("not opened");
     expect(r.scene.view.title).toBe("Hiragana · Kana");
-    expect(handleAction(r.scene, "confirm", () => 1, session).scene).toBe(
+    expect(handleAction(r.scene, "confirm", () => 1, session, NOW).scene).toBe(
       r.scene,
     );
-    const back = handleAction(r.scene, "back", () => 1, session);
+    const back = handleAction(r.scene, "back", () => 1, session, NOW);
     expect(back.scene).toEqual({ kind: "start" });
     expect(back.session).toBe(session);
   });
@@ -375,7 +402,13 @@ describe("start screen taps", () => {
 
 describe("boss", () => {
   const session = createSession(defaultProgress());
-  const start = handleAction({ kind: "start" }, "confirm", () => 7, session);
+  const start = handleAction(
+    { kind: "start" },
+    "confirm",
+    () => 7,
+    session,
+    NOW,
+  );
   if (start.scene.kind !== "run") throw new Error("no run");
   const run = start.scene;
   const rows = run.run.rows;
@@ -418,15 +451,17 @@ describe("boss", () => {
 
   it("ignores input other than pause during the clash", () => {
     const boss: Scene = { kind: "boss", seed: 7, run: run.run, boss: 3, t: 0 };
-    expect(handleAction(boss, "confirm", () => 1, session).scene).toBe(boss);
+    expect(handleAction(boss, "confirm", () => 1, session, NOW).scene).toBe(
+      boss,
+    );
   });
 
   it("pauses and resumes the clash: time and steering stand still while paused", () => {
     const boss: Scene = { kind: "boss", seed: 7, run: run.run, boss: 3, t: 1 };
-    const paused = handleAction(boss, "pause", () => 1, session).scene;
+    const paused = handleAction(boss, "pause", () => 1, session, NOW).scene;
     expect(paused).toMatchObject({ kind: "boss", paused: true, t: 1 });
     expect(updateScene(paused, STEP, -1, -1)).toBe(paused);
-    const resumed = handleAction(paused, "pause", () => 1, session).scene;
+    const resumed = handleAction(paused, "pause", () => 1, session, NOW).scene;
     expect(resumed).toMatchObject({ kind: "boss", paused: false });
     const next = updateScene(resumed, STEP, 0);
     if (next.kind !== "boss") throw new Error(`got ${next.kind}`);
@@ -564,7 +599,13 @@ describe("re-asks in runs", () => {
   const wkSession = { ...createSession(defaultProgress()), wk };
   const start = { kind: "start" } as const;
   const startRun = (seed: number, session: Session) => {
-    const scene = handleAction(start, "confirm", () => seed, session).scene;
+    const scene = handleAction(
+      start,
+      "confirm",
+      () => seed,
+      session,
+      NOW,
+    ).scene;
     if (scene.kind !== "run") throw new Error("no run");
     return scene;
   };
@@ -599,7 +640,7 @@ describe("re-asks in runs", () => {
         const { run } = startRun(seed, session);
         const { progress, kana } = session;
         const pool = builtInPool(progress, kana, KANJI);
-        expect(run.rows).toEqual(buildPoolRun(seed, progress, pool));
+        expect(run.rows).toEqual(buildPoolRun(seed, progress, NOW, pool));
         expect(run.reask).toBeNull();
       }
   });
@@ -609,7 +650,7 @@ describe("re-asks in runs", () => {
       const { run } = startRun(seed, wkSession);
       const { progress, kana } = wkSession;
       const pool = wanikaniPool(progress, kana, wk);
-      expect(run.rows).toEqual(buildPoolRun(seed, progress, pool));
+      expect(run.rows).toEqual(buildPoolRun(seed, progress, NOW, pool));
       expect(run.reask).not.toBeNull();
     }
   });

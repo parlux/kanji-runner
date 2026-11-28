@@ -77,7 +77,7 @@ const act = (action: Action): void => {
   if (stage.webgl() !== "ok" && scene.kind === "start" && action === "confirm")
     return;
   if (action === "study") return panels.openStudy();
-  const next = handleAction(scene, action, newSeed, session);
+  const next = handleAction(scene, action, newSeed, session, Date.now());
   // placement changes progress: save it right away, under this mode's key
   const keys = persistence(session);
   if (next.session !== session && keys)

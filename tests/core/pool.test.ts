@@ -31,6 +31,8 @@ import type { GateRow, KanjiItem, Progress } from "../../src/core/types";
 import type { WkList } from "../../src/wanikani/parse";
 import { syntheticList } from "./wk-fixture";
 import { forSeeds } from "../sweep";
+import { NOW } from "../now";
+import { schedule } from "../../src/core/schedule";
 
 const list = syntheticList();
 const byChar = new Map(list.kanji.map((k) => [k.char, k]));
@@ -257,6 +259,7 @@ describe("WaniKani pool", () => {
       const rows = buildPoolRun(
         seed,
         kanaDone(),
+        NOW,
         wanikaniPool(kanaDone(), KANA, list),
       );
       expect(rows).toHaveLength(ROWS_PER_RUN);
@@ -275,6 +278,7 @@ describe("WaniKani pool", () => {
       const rows = buildPoolRun(
         seed,
         defaultProgress(),
+        NOW,
         wanikaniPool(defaultProgress(), KANA, list),
       );
       const kana = new Set(
@@ -301,6 +305,7 @@ describe("WaniKani pool", () => {
       const rows = buildPoolRun(
         seed,
         kanaDone(),
+        NOW,
         wanikaniPool(kanaDone(), KANA, list),
       );
       // the strong kana have a record (lastSeen 1); the seeded-9 kanji's
@@ -383,7 +388,7 @@ describe("words in the Built-in pool", () => {
       pool.entries.filter((e) => e.type === "word").length,
     ).toBeGreaterThan(1);
     for (let seed = 0; seed < 300; seed++) {
-      const run = select(createRng(seed), pool);
+      const run = schedule(createRng(seed), pool, NOW);
       const fresh = run.filter((e) => !pool.known(e));
       expect(fresh.filter((e) => e.type === "word").length).toBeLessThanOrEqual(
         MAX_NEW_WORDS_PER_RUN,
@@ -395,8 +400,8 @@ describe("words in the Built-in pool", () => {
   it("runs with no eligible words are identical with or without the list", () => {
     const p = { ...defaultProgress(), unlockedLevel: 3 }; // katakana unlearned
     for (let seed = 0; seed < 20; seed++)
-      expect(buildRun(seed, p, KANA, KANJI, WORDS)).toEqual(
-        buildRun(seed, p, KANA, KANJI),
+      expect(buildRun(seed, p, NOW, KANA, KANJI, WORDS)).toEqual(
+        buildRun(seed, p, NOW, KANA, KANJI),
       );
   });
 
@@ -409,7 +414,7 @@ describe("words in the Built-in pool", () => {
       }
     const rows = [];
     for (let seed = 0; seed < 50; seed++)
-      rows.push(...buildRun(seed, p, KANA, KANJI, WORDS));
+      rows.push(...buildRun(seed, p, NOW, KANA, KANJI, WORDS));
     const w = rows.filter((r) => r.type === "word");
     expect(w.length).toBeGreaterThan(0);
     for (const r of w) {

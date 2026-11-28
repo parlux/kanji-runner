@@ -16,6 +16,7 @@ import {
   scrollProgress,
   type Scene,
 } from "../../src/game/scenes";
+import { NOW } from "../now";
 
 const W = 390;
 const H = 844;
@@ -25,7 +26,13 @@ const session = createSession(place(defaultProgress(), 30, KANA, KANJI, WORDS));
 type ProgressScene = Extract<Scene, { kind: "progress" }>;
 
 function opened(): ProgressScene {
-  const s = handleAction({ kind: "start" }, "progress", () => 1, session).scene;
+  const s = handleAction(
+    { kind: "start" },
+    "progress",
+    () => 1,
+    session,
+    NOW,
+  ).scene;
   if (s.kind !== "progress") throw new Error("not opened");
   return s;
 }
@@ -103,13 +110,15 @@ describe("progress view taps", () => {
     // the page scrolls on its own; the view's scroll is kept
     s = asProgress(scrollProgress(s, 40, W, H));
     expect(s.scroll).toBe(before.scroll);
-    const esc = asProgress(handleAction(s, "back", () => 1, session).scene);
+    const esc = asProgress(
+      handleAction(s, "back", () => 1, session, NOW).scene,
+    );
     expect(esc).toEqual(before);
     const { back } = levelPageLayout(W, H, s.page?.view ?? fail());
     const tapped = progressTap(s, W, H, back.x + 5, back.y + 5, session);
     expect(tapped.scene).toEqual(before);
     // Back on the view itself goes to the start screen
-    expect(handleAction(before, "back", () => 1, session).scene).toEqual({
+    expect(handleAction(before, "back", () => 1, session, NOW).scene).toEqual({
       kind: "start",
     });
   });

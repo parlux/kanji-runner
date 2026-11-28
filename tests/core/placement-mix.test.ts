@@ -6,13 +6,14 @@ import { createRng } from "../../src/core/rng";
 import { buildRun } from "../../src/core/run";
 import { defaultProgress, recordRun } from "../../src/core/srs";
 import type { Progress } from "../../src/core/types";
+import { NOW } from "../now";
 
 const share = (progress: Progress, seeds = 200) => {
   let kanji = 0;
   let kana = 0;
   let runsWithKana = 0;
   for (let seed = 1; seed <= seeds; seed++) {
-    const rows = buildRun(seed, progress, KANA, KANJI);
+    const rows = buildRun(seed, progress, NOW, KANA, KANJI);
     const k = rows.filter((r) => r.type !== "kana").length;
     kanji += k;
     kana += rows.length - k;
@@ -31,7 +32,7 @@ const introduced = (): Progress => {
   const isNew = () =>
     KANJI.filter((k) => k.level === 2 && !p.items[`${k.char}:meaning`]);
   for (let i = 1; isNew().length > 0 && i < 100; i++) {
-    const rows = buildRun(1000 + i, p, KANA, KANJI);
+    const rows = buildRun(1000 + i, p, NOW, KANA, KANJI);
     p = recordRun(
       p,
       rows,

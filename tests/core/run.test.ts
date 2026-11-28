@@ -7,6 +7,7 @@ import { defaultProgress } from "../../src/core/srs";
 import { ROWS_PER_RUN, TWO_OPTION_ROWS } from "../../src/core/tuning";
 import type { GateRow, KanjiItem, Progress } from "../../src/core/types";
 import { forSeeds } from "../sweep";
+import { NOW } from "../now";
 
 describe("kana data", () => {
   it("has 71 hiragana and 71 katakana with romaji", () => {
@@ -28,7 +29,8 @@ KANA.forEach((k, i) => {
       lastSeen: 1,
     };
 });
-const kanaRun = (seed: number) => buildRun(seed, kanaProgress, KANA, KANJI);
+const kanaRun = (seed: number) =>
+  buildRun(seed, kanaProgress, NOW, KANA, KANJI);
 
 describe("buildRun rows", () => {
   it("builds 14 rows with 2 options then 3", () => {
@@ -76,7 +78,7 @@ describe("buildRun rows", () => {
     );
     const types = new Set<string>();
     for (const seed of [1, 2, 3])
-      for (const row of buildRun(seed, p, [], KANJI)) {
+      for (const row of buildRun(seed, p, NOW, [], KANJI)) {
         expect(unlocked.has(row.prompt)).toBe(true);
         types.add(row.type);
       }

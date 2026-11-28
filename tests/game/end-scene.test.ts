@@ -19,6 +19,7 @@ import {
   type Scene,
   type Session,
 } from "../../src/game/scenes";
+import { NOW } from "../now";
 
 const W = 390;
 const H = 844;
@@ -39,7 +40,7 @@ function ended(
   results = rows.map(() => true),
 ): { scene: EndScene; session: Session } {
   const session = { ...createSession(progress), progress };
-  const run = handleAction({ kind: "start" }, "confirm", () => 7, session);
+  const run = handleAction({ kind: "start" }, "confirm", () => 7, session, NOW);
   if (run.scene.kind !== "run") throw new Error("no run");
   const scene: EndScene = {
     kind: "end",

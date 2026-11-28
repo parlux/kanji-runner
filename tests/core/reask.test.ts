@@ -29,6 +29,7 @@ import {
 import { SHAPE_DISTANCE } from "../../src/game/three/world";
 import { syntheticList } from "./wk-fixture";
 import { forSeeds, itSlow } from "../sweep";
+import { NOW } from "../now";
 
 const list = syntheticList(60);
 const progress = defaultProgress();
@@ -115,7 +116,7 @@ describe("reaskRow", () => {
     let readings = 0;
     for (const seed of forSeeds(300)) {
       const entries = entriesOf(seed);
-      const rows = buildPoolRun(seed, progress, pool);
+      const rows = buildPoolRun(seed, progress, NOW, pool);
       entries.forEach((e, i) => {
         const first = rows[i] as (typeof rows)[number];
         const r = reaskRow(createRng(seed * 31 + i), e, first, pool);
@@ -145,7 +146,7 @@ describe("reaskRow", () => {
   it("prefers similar kanji as distractors (WaniKani rules)", () => {
     const e = entriesOf(1).find((x) => x.type === "meaning") as Entry;
     if (e.type !== "meaning") throw new Error("no meaning entry");
-    const first = buildPoolRun(1, progress, pool)[
+    const first = buildPoolRun(1, progress, NOW, pool)[
       entriesOf(1).indexOf(e)
     ] as GateRow;
     const similar = new Set(
@@ -162,7 +163,7 @@ describe("reaskRow", () => {
 
   it("puts the answer in each opening evenly, independent of the first ask", () => {
     const e = entriesOf(0)[0] as Entry;
-    const first = buildPoolRun(0, progress, pool)[0] as GateRow;
+    const first = buildPoolRun(0, progress, NOW, pool)[0] as GateRow;
     const joint = Array.from({ length: 2 }, () => [0, 0, 0]);
     const N = 6000;
     for (let s = 0; s < N; s++) {
@@ -183,7 +184,7 @@ describe("reaskRow", () => {
       const N = 6000;
       for (let s = 0; s < N; s++) {
         const e = entriesOf(s)[8] as Entry;
-        const first = buildPoolRun(s, progress, pool)[8] as GateRow;
+        const first = buildPoolRun(s, progress, NOW, pool)[8] as GateRow;
         const r = reaskRow(createRng(s + 77777), e, first, pool);
         const row = counts[first.answerIndex] as number[];
         row[r.answerIndex] = (row[r.answerIndex] as number) + 1;

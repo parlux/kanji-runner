@@ -4,6 +4,7 @@ import { reaskRun, type ReaskConfig } from "../../src/core/reask";
 import { defaultProgress } from "../../src/core/srs";
 import type { GateRow } from "../../src/core/types";
 import { syntheticList } from "./wk-fixture";
+import { NOW } from "../now";
 
 /** A fresh WaniKani-mode player on the synthetic list: every kanji at its seeded box. */
 export const wkProgress = defaultProgress();
@@ -14,6 +15,6 @@ export function wkRun(
   seed: number,
   reask = true,
 ): { rows: GateRow[]; reask: ReaskConfig | null } {
-  const run = reaskRun(seed, wkProgress, wkPool);
+  const run = reaskRun(seed, wkProgress, NOW, wkPool);
   return { rows: run.rows, reask: reask ? run.reask : null };
 }

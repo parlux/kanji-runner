@@ -97,9 +97,10 @@ export type ReaskConfig = {
 export function reaskRun(
   seed: number,
   progress: Progress,
+  now: number,
   pool: Pool,
 ): { rows: GateRow[]; reask: ReaskConfig } {
-  const { rows, entries } = poolRun(seed, progress, pool);
+  const { rows, entries } = poolRun(seed, progress, now, pool);
   return {
     rows,
     reask: { pool, seed, entries, startBoxes: entries.map((e) => pool.box(e)) },

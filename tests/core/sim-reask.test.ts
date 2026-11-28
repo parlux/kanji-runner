@@ -30,6 +30,7 @@ import { botRun } from "./bot";
 import { kanaRun } from "./kana-run";
 import { wkPool, wkProgress, wkRun } from "./wk-run";
 import { forSeeds } from "../sweep";
+import { NOW } from "../now";
 
 const DT = 1 / 60;
 const SEEDS = forSeeds(100, 6);
@@ -74,8 +75,8 @@ function atBox(seed: number, box: number): RunState {
 describe("reaskRun", () => {
   it("gives buildPoolRun's rows, with matching entries and start boxes", () => {
     for (const seed of SEEDS.slice(0, 20)) {
-      const { rows, reask } = reaskRun(seed, wkProgress, wkPool);
-      expect(rows).toEqual(buildPoolRun(seed, wkProgress, wkPool));
+      const { rows, reask } = reaskRun(seed, wkProgress, NOW, wkPool);
+      expect(rows).toEqual(buildPoolRun(seed, wkProgress, NOW, wkPool));
       const entries = select(createRng(seed), wkPool);
       expect(reask.entries).toEqual(entries);
       expect(reask.startBoxes).toEqual(entries.map((e) => wkPool.box(e)));
