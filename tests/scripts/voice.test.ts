@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   clipFile,
   formatIndex,
+  gainDb,
   moraKana,
   pick,
 } from "../../scripts/voice/build";
@@ -40,5 +41,13 @@ describe("voice build helpers (SPEC-sound-effects §3)", () => {
       { text: "テレビ", reading: "テレビ" },
     ];
     expect(pick(all, ["日本", "テレビ|テレビ"])).toEqual([all[0], all[2]]);
+  });
+});
+
+describe("gainDb", () => {
+  it("brings the mean to -16 dB unless the peak would pass -1 dB", () => {
+    expect(gainDb(-30, -16)).toBe(14);
+    expect(gainDb(-30, -5)).toBe(4);
+    expect(gainDb(-11, -2)).toBe(-5);
   });
 });

@@ -4,9 +4,9 @@
  *
  * Renders every line in `allSpoken` through a running VOICEVOX engine (HTTP
  * API at `VOICEVOX_URL`, default `http://127.0.0.1:50021`) in the character
- * of `voice.config.json`, trims the silence and encodes mono AAC `.m4a` with
- * `ffmpeg`. Writes `public/voice/<id>/<hash8>.m4a` and `index.json`
- * (`{ key: [file, ms] }`). Incremental: clips already in the index are kept;
+ * of `voice.config.json`, trims the silence, evens out loudness and encodes
+ * mono AAC `.m4a` with `ffmpeg`. Writes `public/voice/<id>/<hash8>.m4a` and
+ * `index.json` (`{ key: [file, ms] }`). Incremental: clips already in the index are kept;
  * keys no longer in `allSpoken` are deleted.
  *
  * A word's `audio_query` on its written form keeps the dictionary's pitch
@@ -18,7 +18,7 @@
  * `--config <file>` and `--out <dir>` (another character or output folder,
  * e.g. for sample pages).
  */
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import {
   existsSync,
@@ -124,17 +124,42 @@ async function bestQuery(
   return ok ? { q: byText, fellBack: false } : { q: byReading, fellBack: true };
 }
 
-/** Trim leading and trailing silence; mono AAC at ~40 kbps. Returns the clip's length in ms. */
+/** Loudness target: mean level, with the peak kept under `PEAK_DB`. */
+const MEAN_DB = -16;
+const PEAK_DB = -1;
+
+/** The gain (dB) that brings a clip to `MEAN_DB`, capped so its peak stays under `PEAK_DB`. */
+export function gainDb(meanDb: number, maxDb: number): number {
+  return Math.min(MEAN_DB - meanDb, PEAK_DB - maxDb);
+}
+
+/** Runs ffmpeg; returns its log (stderr), where `volumedetect` reports. */
+function ffmpeg(...args: string[]): string {
+  const r = spawnSync("ffmpeg", ["-hide_banner", "-y", ...args], {
+    encoding: "utf8",
+  });
+  if (r.status !== 0) throw new Error(`ffmpeg: ${r.stderr}`);
+  return r.stderr;
+}
+
+/**
+ * Trim leading and trailing silence (with 5–10 ms fades, no clicks), even
+ * out loudness, encode mono AAC at ~40 kbps. Returns the clip's length in ms.
+ */
 function encode(wav: string, out: string): number {
   const trim = "silenceremove=start_periods=1:start_threshold=-50dB";
-  execFileSync("ffmpeg", [
-    "-v",
-    "error",
-    "-y",
+  const trimmed = wav.replace(/\.wav$/, ".trim.wav");
+  const fades = "afade=t=in:d=0.01,areverse,afade=t=in:d=0.005";
+  ffmpeg("-i", wav, "-af", `${trim},areverse,${trim},${fades}`, trimmed);
+  const log = ffmpeg("-i", trimmed, "-af", "volumedetect", "-f", "null", "-");
+  const db = (name: string): number =>
+    Number(new RegExp(`${name}: (-?[\\d.]+) dB`).exec(log)?.[1] ?? 0);
+  const gain = gainDb(db("mean_volume"), db("max_volume"));
+  ffmpeg(
     "-i",
-    wav,
+    trimmed,
     "-af",
-    `${trim},areverse,${trim},areverse`,
+    `volume=${gain.toFixed(1)}dB`,
     "-ac",
     "1",
     "-c:a",
@@ -144,7 +169,7 @@ function encode(wav: string, out: string): number {
     "-movflags",
     "+faststart",
     out,
-  ]);
+  );
   const s = execFileSync("ffprobe", [
     "-v",
     "error",
