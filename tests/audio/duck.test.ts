@@ -6,6 +6,8 @@ import {
   DUCK_MAX_LINE_MS,
   DUCK_RELEASE_MS,
   duckStep,
+  SPEECH_DIP_DB,
+  speechDipDb,
   voiceDuck,
 } from "../../src/audio/duck";
 
@@ -110,5 +112,14 @@ describe("duck", () => {
     expect(duck.ducking(now)).toBe(true);
     close();
     expect(duck.ducking(now)).toBe(false);
+  });
+});
+
+describe("speechDipDb", () => {
+  it("is 0 with no duck and SPEECH_DIP_DB at full duck, linear between", () => {
+    expect(speechDipDb(1)).toBe(0);
+    expect(speechDipDb(DUCK_LEVEL)).toBeCloseTo(SPEECH_DIP_DB);
+    expect(speechDipDb((1 + DUCK_LEVEL) / 2)).toBeCloseTo(SPEECH_DIP_DB / 2);
+    expect(speechDipDb(0)).toBeCloseTo(SPEECH_DIP_DB);
   });
 });

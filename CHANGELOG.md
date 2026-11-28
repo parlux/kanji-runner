@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.15.1 (2026-11-28)
+
+- Fix: the gate voice is clearer over the music. Music plays at half volume and effects a little lower; while a gate speaks they drop further and clear the speech range; the voice gets a clarity lift for phone speakers.
+
 ## 1.15.0 (2026-11-28)
 
 - Music: a calm loop on the start, study and end screens, and a brighter chiptune loop in runs. They crossfade, and the run loop lifts (a little faster and higher) for the boss.

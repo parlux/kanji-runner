@@ -1,5 +1,21 @@
+import { speechDipDb } from "./duck";
+
 /** The three buses, each a gain into the master. */
 type Bus = "voice" | "sfx" | "music";
+
+/** Each open bus's gain before the duck: music sits under the voice and effects. */
+export const BUS_LEVEL: Record<Bus, number> = {
+  voice: 1,
+  sfx: 0.8,
+  music: 0.5,
+};
+/** The sfx and music speech-range dip (peaking filter, see `speechDipDb`). */
+const DIP_HZ = 2500;
+const DIP_Q = 0.7;
+/** Voice EQ for phone speakers: cut rumble they can't play, lift the consonants. */
+const VOICE_LOWCUT_HZ = 120;
+const VOICE_PRESENCE_HZ = 3000;
+const VOICE_PRESENCE_DB = 4;
 
 /** What the engine needs from the page; absent pieces mean no sound, never an error. */
 export type EngineEnv = {
@@ -18,7 +34,7 @@ export type AudioEngine = {
   context(): AudioContext | null;
   /** A bus's gain node (into the master), or null without a context. */
   bus(name: Bus): GainNode | null;
-  /** Opens or closes a bus (gain 1 or 0); kept for buses made later. */
+  /** Opens or closes a bus (its `BUS_LEVEL` or 0); kept for buses made later. */
   setOn(name: Bus, on: boolean): void;
   /** The duck's gain on the sfx and music buses (1 = none; see `duck.ts`). */
   setDuck(level: number): void;
@@ -35,7 +51,9 @@ export function createEngine(
   let failed = false;
   const open: Record<Bus, boolean> = { voice: true, sfx: true, music: true };
   let duck = 1;
-  const gainOf = (b: Bus): number => (!open[b] ? 0 : b === "voice" ? 1 : duck);
+  let dips: BiquadFilterNode[] = [];
+  const gainOf = (b: Bus): number =>
+    !open[b] ? 0 : BUS_LEVEL[b] * (b === "voice" ? 1 : duck);
   // a switch is at once; the duck's steps are smoothed over ~10 ms
   const apply = (b: Bus, smooth: boolean): void => {
     const g = buses?.[b];
@@ -53,22 +71,58 @@ export function createEngine(
           env.navigator.audioSession.type = "playback";
         if (!ctx && !failed && env.AudioContext) {
           ctx = new env.AudioContext();
-          const master = ctx.createGain();
-          master.connect(ctx.destination);
+          const c = ctx;
+          // a soft limiter catches peaks the voice lift adds
+          const master = c.createDynamicsCompressor();
+          master.threshold.value = -3;
+          master.knee.value = 3;
+          master.ratio.value = 12;
+          master.attack.value = 0.003;
+          master.release.value = 0.15;
+          master.connect(c.destination);
+          const filter = (
+            type: BiquadFilterType,
+            hz: number,
+            q: number,
+            db = 0,
+          ): BiquadFilterNode => {
+            const f = c.createBiquadFilter();
+            f.type = type;
+            f.frequency.value = hz;
+            f.Q.value = q;
+            f.gain.value = db;
+            return f;
+          };
           const made = {} as Record<Bus, GainNode>;
+          const madeDips: BiquadFilterNode[] = [];
           for (const b of BUSES) {
-            const g = ctx.createGain();
+            const g = c.createGain();
             g.gain.value = gainOf(b);
-            g.connect(master);
+            if (b === "voice") {
+              const low = filter("highpass", VOICE_LOWCUT_HZ, 0.7);
+              const lift = filter(
+                "peaking",
+                VOICE_PRESENCE_HZ,
+                1,
+                VOICE_PRESENCE_DB,
+              );
+              g.connect(low).connect(lift).connect(master);
+            } else {
+              const dip = filter("peaking", DIP_HZ, DIP_Q, speechDipDb(duck));
+              g.connect(dip).connect(master);
+              madeDips.push(dip);
+            }
             made[b] = g;
           }
           buses = made;
+          dips = madeDips;
         }
         if (ctx && ctx.state !== "running") void ctx.resume().catch(() => {});
       } catch {
         failed = true;
         ctx = null;
         buses = null;
+        dips = [];
       }
     },
     context: () => ctx,
@@ -87,6 +141,9 @@ export function createEngine(
       try {
         apply("sfx", true);
         apply("music", true);
+        if (ctx)
+          for (const d of dips)
+            d.gain.setTargetAtTime(speechDipDb(level), ctx.currentTime, 0.01);
       } catch {
         // audio failures are silent
       }

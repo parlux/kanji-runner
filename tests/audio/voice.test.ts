@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createDuck, voiceDuck } from "../../src/audio/duck";
-import { createEngine } from "../../src/audio/engine";
+import { BUS_LEVEL, createEngine } from "../../src/audio/engine";
 import {
   createVoice,
   type ClipEnv,
@@ -168,12 +168,28 @@ describe("engine", () => {
     const connects: string[] = [];
     let resumed = 0;
     let made = 0;
-    const node = (name: string) => ({
-      connect: (to: { name: string }) => connects.push(`${name}>${to.name}`),
-      name,
-      gain: { value: 1 },
-    });
+    const param = () => ({ value: 0 });
+    const node = (name: string) => {
+      const n = {
+        connect: (to: { name: string }) => {
+          connects.push(`${name}>${to.name}`);
+          return to;
+        },
+        name,
+        type: "",
+        gain: param(),
+        frequency: param(),
+        Q: param(),
+        threshold: param(),
+        knee: param(),
+        ratio: param(),
+        attack: param(),
+        release: param(),
+      };
+      return n;
+    };
     let gains = 0;
+    let filters = 0;
     class Ctx {
       state = "suspended";
       destination = { name: "out" };
@@ -182,6 +198,12 @@ describe("engine", () => {
       }
       createGain() {
         return node(`g${gains++}`);
+      }
+      createBiquadFilter() {
+        return node(`f${filters++}`);
+      }
+      createDynamicsCompressor() {
+        return node("master");
       }
       resume() {
         resumed++;
@@ -198,7 +220,17 @@ describe("engine", () => {
     expect(navigator.audioSession.type).toBe("playback");
     expect(made).toBe(1);
     expect(resumed).toBe(2);
-    expect(connects).toEqual(["g0>out", "g1>g0", "g2>g0", "g3>g0"]);
+    // voice: low cut, then presence lift; sfx and music: the speech dip
+    expect(connects).toEqual([
+      "master>out",
+      "g0>f0",
+      "f0>f1",
+      "f1>master",
+      "g1>f2",
+      "f2>master",
+      "g2>f3",
+      "f3>master",
+    ]);
     expect(e.bus("music")).not.toBeNull();
   });
 
@@ -208,15 +240,38 @@ describe("engine", () => {
       currentTime = 0;
       destination = {};
       createGain() {
-        const gain = {
+        return node();
+      }
+      createBiquadFilter() {
+        return node();
+      }
+      createDynamicsCompressor() {
+        return node();
+      }
+    }
+    function node() {
+      const p = () => {
+        const a = {
           value: 1,
           cancelScheduledValues() {},
           setTargetAtTime(v: number) {
-            gain.value = v;
+            a.value = v;
           },
         };
-        return { connect: () => {}, gain };
-      }
+        return a;
+      };
+      const n = {
+        connect: (to: unknown) => to,
+        gain: p(),
+        frequency: p(),
+        Q: p(),
+        threshold: p(),
+        knee: p(),
+        ratio: p(),
+        attack: p(),
+        release: p(),
+      };
+      return n;
     }
     const e = createEngine({
       AudioContext: Ctx as unknown as typeof AudioContext,
@@ -224,20 +279,21 @@ describe("engine", () => {
     e.setOn("sfx", false);
     e.unlock();
     expect(e.bus("sfx")?.gain.value).toBe(0);
-    expect(e.bus("voice")?.gain.value).toBe(1);
+    expect(e.bus("voice")?.gain.value).toBe(BUS_LEVEL.voice);
+    expect(e.bus("music")?.gain.value).toBe(BUS_LEVEL.music);
     e.setOn("voice", false);
     e.setOn("sfx", true);
     expect(e.bus("voice")?.gain.value).toBe(0);
-    expect(e.bus("sfx")?.gain.value).toBe(1);
+    expect(e.bus("sfx")?.gain.value).toBe(BUS_LEVEL.sfx);
     // the duck dips sfx and music, never the voice, and not a closed bus
     e.setOn("voice", true);
     e.setOn("music", false);
     e.setDuck(0.35);
-    expect(e.bus("sfx")?.gain.value).toBe(0.35);
-    expect(e.bus("voice")?.gain.value).toBe(1);
+    expect(e.bus("sfx")?.gain.value).toBeCloseTo(BUS_LEVEL.sfx * 0.35);
+    expect(e.bus("voice")?.gain.value).toBe(BUS_LEVEL.voice);
     expect(e.bus("music")?.gain.value).toBe(0);
     e.setOn("music", true);
-    expect(e.bus("music")?.gain.value).toBe(0.35);
+    expect(e.bus("music")?.gain.value).toBeCloseTo(BUS_LEVEL.music * 0.35);
   });
 
   it("stays silent when the context cannot be made", () => {

@@ -1,9 +1,22 @@
 /** While a voice line plays, the sfx and music buses drop to this gain. */
-export const DUCK_LEVEL = 0.35;
+export const DUCK_LEVEL = 0.2;
 /** Milliseconds from full gain down to `DUCK_LEVEL` when a line starts. */
 export const DUCK_ATTACK_MS = 60;
 /** Milliseconds from `DUCK_LEVEL` back up to full gain after the last line ends. */
 export const DUCK_RELEASE_MS = 250;
+/** How deep (dB) the speech-range dip on the sfx and music buses goes at full duck. */
+export const SPEECH_DIP_DB = -9;
+
+/**
+ * The speech-range dip (dB) for a duck level: 0 at no duck, `SPEECH_DIP_DB`
+ * at `DUCK_LEVEL`, linear between. Clears room for the voice's consonants,
+ * which turning the music down alone doesn't.
+ */
+export function speechDipDb(level: number): number {
+  const t = (1 - level) / (1 - DUCK_LEVEL);
+  return t <= 0 ? 0 : SPEECH_DIP_DB * Math.min(1, t);
+}
+
 /** A line whose end is never reported stops ducking after this long. */
 export const DUCK_MAX_LINE_MS = 6000;
 
