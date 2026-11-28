@@ -13,10 +13,14 @@ overrides the engine (default `http://127.0.0.1:50021`). Needs `ffmpeg` and
 `ffprobe` on the PATH. A full build is ~3,900 clips at ~0.6 s each (~40 min).
 
 What it does per key: `audio_query` on the written form; if its moras read
-like the reading (compared with the engine's own query of the kana), that
-query is used (dictionary pitch accent), else the kana is queried (e.g. 日本
-reads にっぽん, so にほん is queried). Then `synthesis`, silence trimmed with
-short fades, loudness evened (mean −16 dB, peak ≤ −1 dB), mono AAC 40 kbps.
+like the reading (long おう/えい/ー heard as the engine writes them), that
+query is used (dictionary pitch accent), else the reading is queried (e.g.
+日本 reads にっぽん, so にほん is queried). A reading the engine reads wrong or
+in pieces is tried in the other kana (hiragana はち reads ワチ, ぜい reads
+ゼ・イ; katakana ハチ, ゼイ read right); one still in pieces is joined into one
+accent phrase. The build reports the fallbacks, joins and any misreads. Then
+`synthesis`, silence trimmed with short fades, loudness evened (mean −16 dB,
+peak ≤ −1 dB), mono AAC 40 kbps.
 
 ## Running the engine in a cloud session (Linux)
 
@@ -65,7 +69,7 @@ The Docker image (`voicevox/voicevox_engine:cpu-0.26.2`) also works, but on an
 8 GB Mac its VM pushes the engine into swap (~7 s a clip instead of ~2 s).
 
 Then, in the repo: `npm run voice:build` (try `-- --limit 20` first; the full
-build took ~2.5 h on a 2015 dual-core i5), `npm run voice:coverage`, commit
+build took ~80 min on a 2015 dual-core i5), `npm run voice:coverage`, commit
 `public/voice/` and push.
 
 ## Style ids (from the VOICEVOX model table)

@@ -32,6 +32,9 @@ describe("voice build helpers (SPEC-sound-effects §3)", () => {
     expect(heard("きょう")).toBe("きょお");
     expect(heard("かいしゃ")).toBe("かいしゃ");
     expect(heard("ふうけい")).toBe("ふうけえ");
+    expect(heard("けーき")).toBe("けえき");
+    expect(heard("じゅーす")).toBe("じゅうす");
+    expect(heard("はなぢ")).toBe("はなじ");
   });
 
   it("names a clip by 8 hex digits of its key", () => {

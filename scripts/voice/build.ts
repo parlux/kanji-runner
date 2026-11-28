@@ -50,8 +50,9 @@ export type VoiceConfig = {
 export type ClipIndex = Record<string, [file: string, ms: number]>;
 
 type Mora = { text: string };
+type AccentPhrase = { moras: Mora[]; pause_mora: Mora | null; accent?: number };
 type AudioQuery = {
-  accent_phrases: { moras: Mora[]; pause_mora: Mora | null }[];
+  accent_phrases: AccentPhrase[];
   speedScale: number;
 };
 
@@ -113,31 +114,88 @@ const query = async (text: string, speaker: number): Promise<AudioQuery> =>
 
 const O_ROW = "おこごそぞとどのほぼぽもよろをょぉ";
 const E_ROW = "えけげせぜてでねへべぺめれぇ";
+const ROWS: Record<string, string> = {
+  あ: "あかがさざただなはばぱまやらわぁゃ",
+  い: "いきぎしじちぢにひびぴみりぃ",
+  う: "うくぐすずつづぬふぶぷむゆるぅゅゔ",
+  え: E_ROW,
+  お: O_ROW,
+};
+const vowel = (kana: string): string | undefined =>
+  Object.keys(ROWS).find((v) => ROWS[v]?.includes(kana));
 
 /**
  * Hiragana as it is said: a long o or e written おう / えい is said おお / ええ
- * (the engine's moras write it that way), so 平日 へいじつ ≈ へえじつ.
+ * (the engine's moras write it that way), so 平日 へいじつ ≈ へえじつ; a
+ * long-vowel mark ー is its vowel (ケーキ ≈ けえき); ぢ, づ and を sound like
+ * じ, ず and お.
  */
 export const heard = (kana: string): string =>
-  kana.replace(/(.)([うい])/g, (m, a: string, b: string) =>
-    (b === "う" && O_ROW.includes(a)) || (b === "い" && E_ROW.includes(a))
-      ? a + (b === "う" ? "お" : "え")
-      : m,
-  );
+  kana
+    .replace(/(.)ー/g, (_, a: string) => a + (vowel(a) ?? "ー"))
+    .replace(/(.)([うい])/g, (m, a: string, b: string) =>
+      (b === "う" && O_ROW.includes(a)) || (b === "い" && E_ROW.includes(a))
+        ? a + (b === "う" ? "お" : "え")
+        : m,
+    )
+    .replace(/ぢ/g, "じ")
+    .replace(/づ/g, "ず")
+    .replace(/を/g, "お");
 
-/** The query to synthesize: the written form's when it reads right, else the reading's. */
+const toKatakana = (s: string): string =>
+  s.replace(/[ぁ-ゖ]/g, (c) => String.fromCharCode(c.charCodeAt(0) + 0x60));
+
+/** How a query was picked (see `bestQuery`). */
+type Chosen = "text" | "reading" | "merged" | "misread";
+
+/**
+ * The query to synthesize. A word's written form when its moras read like
+ * the reading (dictionary pitch accent). Else the reading as written, or in
+ * the other kana when that reads wrong or in pieces: the engine reads a bare
+ * syllable in hiragana as words (ぜい → ゼ・イ) or particles (はち → ワチ).
+ * A reading only read right in pieces is joined into one phrase ("merged");
+ * one never read right keeps the reading's own query ("misread").
+ */
 async function bestQuery(
   s: Spoken,
   speaker: number,
-): Promise<{ q: AudioQuery; fellBack: boolean }> {
+): Promise<{ q: AudioQuery; how: Chosen }> {
+  const want = heard(toHiragana(s.reading));
+  const readsRight = (q: AudioQuery): boolean => heard(moraKana(q)) === want;
   const byReading = await query(s.reading, speaker);
-  if (s.text === s.reading) return { q: byReading, fellBack: false };
-  const byText = await query(s.text, speaker);
-  const reads = heard(moraKana(byText));
-  const ok =
-    reads === heard(toHiragana(s.reading)) ||
-    reads === heard(moraKana(byReading));
-  return ok ? { q: byText, fellBack: false } : { q: byReading, fellBack: true };
+  if (s.text !== s.reading) {
+    const byText = await query(s.text, speaker);
+    const reads = heard(moraKana(byText));
+    if (reads === want || reads === heard(moraKana(byReading)))
+      return { q: byText, how: "text" };
+  }
+  const tries = [byReading];
+  if (!readsRight(byReading) || byReading.accent_phrases.length > 1)
+    tries.push(
+      await query(
+        s.reading === toHiragana(s.reading)
+          ? toKatakana(s.reading)
+          : toHiragana(s.reading),
+        speaker,
+      ),
+    );
+  const right = tries.filter(readsRight);
+  const one = right.find((q) => q.accent_phrases.length === 1);
+  if (one) return { q: one, how: "reading" };
+  const q = right[0];
+  if (!q) return { q: byReading, how: "misread" };
+  const [first] = q.accent_phrases;
+  const joined = [
+    {
+      ...first,
+      moras: q.accent_phrases.flatMap((p) => p.moras),
+      pause_mora: null,
+    },
+  ];
+  q.accent_phrases = (await (
+    await post(`/mora_data?speaker=${speaker}`, joined)
+  ).json()) as AccentPhrase[];
+  return { q, how: "merged" };
 }
 
 /** Loudness target: mean level, with the peak kept under `PEAK_DB`. */
@@ -238,6 +296,8 @@ async function main(): Promise<void> {
 
   const tmp = mkdtempSync(join(tmpdir(), "voice-"));
   const fellBack: string[] = [];
+  const merged: string[] = [];
+  const misread: string[] = [];
   const failed: string[] = [];
   let rendered = 0;
   let bytes = 0;
@@ -249,7 +309,7 @@ async function main(): Promise<void> {
       const file = clipFile(key);
       if (!force && index[key] && existsSync(join(dir, file))) continue;
       try {
-        const { q, fellBack: fb } = await bestQuery(s, config.speaker);
+        const { q, how } = await bestQuery(s, config.speaker);
         q.speedScale = config.speed;
         const wav = join(tmp, "clip.wav");
         writeFileSync(
@@ -263,7 +323,9 @@ async function main(): Promise<void> {
         index[key] = [file, encode(wav, join(dir, file))];
         bytes += readFileSync(join(dir, file)).length;
         rendered++;
-        if (fb) fellBack.push(key);
+        if (how !== "text" && s.text !== s.reading) fellBack.push(key);
+        if (how === "merged") merged.push(key);
+        if (how === "misread") misread.push(key);
         if (rendered % 50 === 0) {
           writeFileSync(indexFile, formatIndex(index));
           console.log(`${rendered} rendered…`);
@@ -283,12 +345,14 @@ async function main(): Promise<void> {
       (rendered
         ? ` (avg ${(bytes / rendered / 1024).toFixed(1)} KB, ${(secs / rendered).toFixed(2)} s each)`
         : "") +
-      `, ${Object.keys(index).length} in index, ${deleted} deleted, ${fellBack.length} fell back to the reading, ${failed.length} failed`,
+      `, ${Object.keys(index).length} in index, ${deleted} deleted, ${fellBack.length} fell back to the reading, ${merged.length} merged into one phrase, ${misread.length} misread, ${failed.length} failed`,
   );
   if (fellBack.length)
     console.log(
       `fell back: ${fellBack.slice(0, 30).join(" ")}${fellBack.length > 30 ? " …" : ""}`,
     );
+  if (merged.length) console.log(`merged: ${merged.join(" ")}`);
+  if (misread.length) console.log(`misread: ${misread.join(" ")}`);
   for (const f of failed.slice(0, 20)) console.log(`failed: ${f}`);
 }
 
