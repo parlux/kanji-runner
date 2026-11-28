@@ -66,3 +66,4 @@ One row per owner request, written by the `triage` skill (`.claude/skills/triage
 | 2026-11-28 | Voice not clear over the music (Checkpoint A) | fix | Spec leaves loudness and duck tuning to the checkpoint; audio layer only | |
 | 2026-11-28 | Music keeps playing with the tab hidden or screen off | fix | Suspend the AudioContext on visibilitychange; audio layer and main | |
 | 2026-11-28 | Menu music loop janks at the loop point | fix | Source file had 0.27 s silence at its end; trimmed to 40 s, loopEnd set | |
+| 2026-11-28 | Shooting sounds keep going while paused | fix | Shot cue is state-based; no cues from a paused scene | |

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.15.3 (2026-11-28)
+
+- Fix: the shooting sounds stop while the game is paused.
+
 ## 1.15.2 (2026-11-28)
 
 - Fix: music and voice stop when you switch tabs or turn the screen off, and come back when you return.

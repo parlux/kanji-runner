@@ -7,9 +7,12 @@ const frame = (s: Scene): ClashFrame | null =>
 
 /**
  * Every cue from one update step, the scene before and after it: the run's
- * (the step that ends it included) and the boss clash's.
+ * (the step that ends it included) and the boss clash's. None while paused:
+ * a shot cue means "something is in the line of fire", which stays true
+ * through a pause.
  */
 export function sceneCues(prev: Scene, next: Scene): Cue[] {
+  if ("paused" in next && next.paused) return [];
   const run =
     prev.kind === "run" && "run" in next ? cues(prev.run, next.run) : [];
   return [...run, ...bossCues(frame(prev), frame(next))];

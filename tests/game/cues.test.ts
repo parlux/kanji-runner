@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Cue } from "../../src/core/cues";
 import { defaultProgress } from "../../src/core/srs";
-import { playCues, unlockSound } from "../../src/game/cues";
+import { playCues, sceneCues, unlockSound } from "../../src/game/cues";
 import { createSession, handleAction, type Scene } from "../../src/game/scenes";
 import { NOW } from "../now";
 
@@ -34,5 +34,26 @@ describe("unlockSound", () => {
     expect(unlockSound(end, end, unlocked)).toBe(false);
     expect(unlockSound(run, end, session)).toBe(false);
     expect(unlockSound(run, run, unlocked)).toBe(false);
+  });
+});
+
+describe("sceneCues", () => {
+  it("gives nothing while paused, though a target stays in the line of fire", () => {
+    const run = handleAction(
+      { kind: "start" },
+      "confirm",
+      () => 1,
+      createSession(defaultProgress()),
+      NOW,
+    ).scene;
+    if (run.kind !== "run") throw new Error("no run");
+    const firing: Scene = {
+      ...run,
+      run: { ...run.run, targets: [{}] as unknown as typeof run.run.targets },
+    };
+    expect(sceneCues(firing, firing).map((c) => c.kind)).toContain("shot");
+    const paused: Scene = { ...firing, paused: true };
+    expect(sceneCues(paused, paused)).toEqual([]);
+    expect(sceneCues(firing, paused)).toEqual([]);
   });
 });
