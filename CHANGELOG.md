@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.15.0 (2026-11-28)
+
+- Music: a calm loop on the start, study and end screens, and a brighter chiptune loop in runs. They crossfade, and the run loop lifts (a little faster and higher) for the boss.
+- The Music switch works (and the mute button covers it); the music dips while a gate speaks.
+- Fix: if the phone suspended its sound, a gate could go silent; it now falls back to the phone voice.
+
 ## 1.14.0 (2026-11-28)
 
 - Gates now speak in a real character voice, 青山龍星 (VOICEVOX, 熱血 style), instead of your phone's voice. A run fetches its clips when it starts, so lines play on time.

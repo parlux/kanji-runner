@@ -49,9 +49,9 @@ Spec §2 timing, §5 ducking, §8. Synthesized sounds; Sound toggle wired; unloc
 
 ### Task A7: Music; ship 1.15.0 (sonnet) — cut first if the round runs long
 Spec §9. Pick two loops (candidates with links and licences in the report), boss lift, crossfades, Music toggle wired, credits.
-- [ ] `public/music/CREDITS.md` and README Attribution list each track's licence and author.
-- [ ] `package.json` 1.15.0; `CHANGELOG.md` has the 1.15.0 section.
-- [ ] `npm run check` passes; deploy green.
+- [x] `public/music/CREDITS.md` and README Attribution list each track's licence and author.
+- [x] `package.json` 1.15.0; `CHANGELOG.md` has the 1.15.0 section.
+- [x] `npm run check` passes; deploy green.
 
 ### Checkpoint A: owner plays with sound
 - [ ] Every gate says its reading, right or wrong, in the picked voice; it's clear over music and effects.

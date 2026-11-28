@@ -1,13 +1,13 @@
 import type { AudioEngine } from "./engine";
 
 /** The two loops under `public/music/`: `menu.m4a` and `run.m4a`. */
-export type Track = "menu" | "run";
+type Track = "menu" | "run";
 
 /** What should play: a loop, and whether the boss lift is on. */
 export type Mood = { track: Track; lift: boolean };
 
 /** Seconds of crossfade between the loops (spec §9: 400 ms). */
-export const FADE_S = 0.4;
+const FADE_S = 0.4;
 /** The run loop plays this much faster, and higher, at the boss. */
 export const BOSS_RATE = 1.06;
 /** Seconds the boss lift takes to ease in or out. */
