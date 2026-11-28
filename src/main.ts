@@ -41,6 +41,7 @@ import { createStage } from "./game/stage";
 import { createEngine, unlockOnGesture } from "./audio/engine";
 import { createVoice, VOICE_ID } from "./audio/voice";
 import { createSfx } from "./audio/sfx";
+import { createMusic, moodFor } from "./audio/music";
 import { createDuck, voiceDuck } from "./audio/duck";
 import {
   audible,
@@ -65,6 +66,8 @@ const voice = createVoice(
   { engine, base: `${import.meta.env.BASE_URL}voice/${VOICE_ID}/` },
 );
 const sfx = createSfx(engine);
+// a calm loop on the menus, the run loop in runs (lifted at the boss)
+const music = createMusic(engine, `${import.meta.env.BASE_URL}music/`);
 unlockOnGesture(window, () => {
   engine.unlock();
   voice.unlock();
@@ -256,6 +259,7 @@ startLoop(
     shotWait = limited.wait;
     playCues(sfx, limited.cues);
     engine.setDuck(duck.level(performance.now()));
+    music.set(moodFor(next.kind));
 
     const settled = afterStep(session, scene, next, Date.now());
     if (unlockSound(scene, next, settled)) sfx(["unlock"]);
