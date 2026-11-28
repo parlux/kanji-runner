@@ -12,9 +12,9 @@ Spec §1–2. `src/core/schedule.ts`: due/overdue/nearness, `schedule(rng, sel, 
 
 ### Task S2: Wire it into runs; simulated days (opus: simulation)
 Spec §2–3, "Testing". Built-in and Meaning modes use `schedule` with `now` from the scene; WaniKani mode unchanged; `Selection` loses `weight` where unused; golden and selection tests updated; simulated-days slow test with its report.
-- [ ] Simulated-days test passes; report (per-box median gaps, current-level share per run, slip return, levels finished in 30 days) in the task report.
-- [ ] `npm run test:slow` passes (changed expectations listed with reasons).
-- [ ] `npm run check` passes.
+- [x] Simulated-days test passes; report (per-box median gaps, current-level share per run, slip return, levels finished in 30 days) in the task report.
+- [x] `npm run test:slow` passes (changed expectations listed with reasons).
+- [x] `npm run check` passes.
 
 ### Task S3: Ship 1.11.0 (sonnet)
 Bump `package.json` to 1.11.0 and add `## 1.11.0 (<date>)` to `CHANGELOG.md` (owner words: what changes in a run).

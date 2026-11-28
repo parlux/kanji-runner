@@ -47,7 +47,7 @@ Pick a run's gates by when each item is **due** (real time since last answered, 
 
 ## Testing
 - `schedule.test.ts`: due/overdue/nearness per box; placement records rank after answered due gates; warm-ups prefer current level and due; in-progress gets up to 8, least recent first; due older gets ≥ 3 when due exist; new only while in-progress < 8, ≤ 2 words; rest ordered by overdue then nearness; no duplicates; same seed + now → same run; tiny pool fallback.
-- **Simulated days** (slow test): a bot answers right with probability by box (e.g. 0.6 at box 0 rising to 0.95 at box 5), plays 5 runs in a session, one session a day, for 30 days from a placed save. Report and assert: a slipped item returns within 2 runs; ≥ 6 of 14 gates on the current level in a session's later runs; median gap per box within ×0.5–×3 of `GAP_BY_BOX` for boxes 3–5; levels finished over the 30 days (reported, not asserted).
+- **Simulated days** (slow test): a bot answers right with probability by box (e.g. 0.6 at box 0 rising to 0.95 at box 5), plays 5 runs in a session, one session a day, for 30 days from a placed save. Report and assert: a slipped item returns within 2 runs (if still in the pool: a reading leaves it when its meaning slips); ≥ 6 of 14 gates on the current level in a session's later runs, or all its open gates (known below box 3, plus new up to the cap) when it has fewer (amended in S2: a level's last few items can't fill 6); median gap per box within ×0.5–×3 of `GAP_BY_BOX` for boxes 3–5; levels finished over the 30 days (reported, not asserted).
 - Existing `test:slow` simulations still pass or are updated with a stated reason.
 
 ## Boundaries
