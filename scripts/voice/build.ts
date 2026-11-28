@@ -111,6 +111,20 @@ const query = async (text: string, speaker: number): Promise<AudioQuery> =>
     )
   ).json()) as AudioQuery;
 
+const O_ROW = "おこごそぞとどのほぼぽもよろをょぉ";
+const E_ROW = "えけげせぜてでねへべぺめれぇ";
+
+/**
+ * Hiragana as it is said: a long o or e written おう / えい is said おお / ええ
+ * (the engine's moras write it that way), so 平日 へいじつ ≈ へえじつ.
+ */
+export const heard = (kana: string): string =>
+  kana.replace(/(.)([うい])/g, (m, a: string, b: string) =>
+    (b === "う" && O_ROW.includes(a)) || (b === "い" && E_ROW.includes(a))
+      ? a + (b === "う" ? "お" : "え")
+      : m,
+  );
+
 /** The query to synthesize: the written form's when it reads right, else the reading's. */
 async function bestQuery(
   s: Spoken,
@@ -119,8 +133,10 @@ async function bestQuery(
   const byReading = await query(s.reading, speaker);
   if (s.text === s.reading) return { q: byReading, fellBack: false };
   const byText = await query(s.text, speaker);
-  const reads = moraKana(byText);
-  const ok = reads === toHiragana(s.reading) || reads === moraKana(byReading);
+  const reads = heard(moraKana(byText));
+  const ok =
+    reads === heard(toHiragana(s.reading)) ||
+    reads === heard(moraKana(byReading));
   return ok ? { q: byText, fellBack: false } : { q: byReading, fellBack: true };
 }
 

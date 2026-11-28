@@ -7,6 +7,7 @@ import {
   clipFile,
   formatIndex,
   gainDb,
+  heard,
   moraKana,
   pick,
 } from "../../scripts/voice/build";
@@ -23,6 +24,14 @@ describe("voice build helpers (SPEC-sound-effects §3)", () => {
   it("reads a query's moras in hiragana", () => {
     expect(moraKana(q(["マ", "イ", "ト", "シ"]))).toBe("まいとし");
     expect(moraKana(q(["キョ", "オ"], ["ア"]))).toBe("きょおあ");
+  });
+
+  it("hears a long o or e as the engine writes it", () => {
+    expect(heard("へいじつ")).toBe("へえじつ");
+    expect(heard("しっこうゆうよ")).toBe("しっこおゆうよ");
+    expect(heard("きょう")).toBe("きょお");
+    expect(heard("かいしゃ")).toBe("かいしゃ");
+    expect(heard("ふうけい")).toBe("ふうけえ");
   });
 
   it("names a clip by 8 hex digits of its key", () => {

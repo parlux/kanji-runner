@@ -43,11 +43,30 @@ needed. Character terms ship with the engine:
 
 ## Running it on a Mac
 
-1. Install the VOICEVOX app from https://voicevox.hiroshiba.jp/ and open it
-   (it serves the engine on `http://127.0.0.1:50021` while open).
-2. In the repo: `npm run voice:build` (try `-- --limit 20` first), then
-   `npm run voice:coverage`.
-3. Commit `public/voice/` and push.
+Either open the VOICEVOX app (https://voicevox.hiroshiba.jp/; it serves the
+engine on `http://127.0.0.1:50021` while open), or run the engine release
+alone, as Task A4 did on the owner's Mac (Intel, macOS 12):
+
+```sh
+SP=<scratchpad>; mkdir -p $SP/vv && cd $SP/vv
+# 0.25+ needs macOS 15 (its ONNX Runtime links a newer libc++); 0.24.1 runs on 12.
+# On Apple silicon use macos-arm64 instead of macos-x64.
+gh release download 0.24.1 --repo VOICEVOX/voicevox_engine -p 'voicevox_engine-macos-x64-0.24.1.7z.001'
+7za x voicevox_engine-macos-x64-0.24.1.7z.001 && rm voicevox_engine-macos-x64-0.24.1.7z.001
+cd macos-x64 && chmod +x run
+nohup ./run --host 127.0.0.1 --port 50021 > $SP/vv/engine.log 2>&1 &
+curl -s http://127.0.0.1:50021/version   # "0.24.1"
+```
+
+No `7z` or `ffmpeg` from Homebrew on macOS 12 (no bottles); the npm packages
+`7zip-bin`, `ffmpeg-static` and `ffprobe-static`, installed in the scratchpad
+(never the repo), give working binaries: put them on the PATH for the build.
+The Docker image (`voicevox/voicevox_engine:cpu-0.26.2`) also works, but on an
+8 GB Mac its VM pushes the engine into swap (~7 s a clip instead of ~2 s).
+
+Then, in the repo: `npm run voice:build` (try `-- --limit 20` first; the full
+build took ~2.5 h on a 2015 dual-core i5), `npm run voice:coverage`, commit
+`public/voice/` and push.
 
 ## Style ids (from the VOICEVOX model table)
 
