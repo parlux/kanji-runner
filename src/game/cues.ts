@@ -1,5 +1,6 @@
 import { bossCues, cues, type ClashFrame, type Cue } from "../core/cues";
 import type { Scene } from "./scenes";
+import type { SoundName } from "../audio/sfx";
 
 const frame = (s: Scene): ClashFrame | null =>
   s.kind === "boss" ? { t: s.t, army: s.run.army, boss: s.boss } : null;
@@ -15,9 +16,12 @@ export function sceneCues(prev: Scene, next: Scene): Cue[] {
 }
 
 /**
- * Where the non-gate cues go (the gate cues go to the voice, in `speakStep`).
- * Task A6 plugs the sound effects player in here; until then they go nowhere.
+ * Plays a step's cues as sound effects, gate cues included (the chime or
+ * buzz; the voice follows in `speakStep`).
  */
-export function playCues(list: readonly Cue[]): void {
-  void list;
+export function playCues(
+  play: (names: readonly SoundName[]) => void,
+  list: readonly Cue[],
+): void {
+  if (list.length > 0) play(list.map((c) => c.kind));
 }

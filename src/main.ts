@@ -40,6 +40,7 @@ import { createSyncFromEnv } from "./sync/sync";
 import { createStage } from "./game/stage";
 import { createEngine, unlockOnGesture } from "./audio/engine";
 import { createVoice } from "./audio/voice";
+import { createSfx } from "./audio/sfx";
 import {
   audible,
   loadAudioSettings,
@@ -55,6 +56,7 @@ const stage = createStage();
 // sound starts on the first tap or key (iOS needs a gesture)
 const engine = createEngine();
 const voice = createVoice();
+const sfx = createSfx(engine);
 unlockOnGesture(window, () => {
   engine.unlock();
   voice.unlock();
@@ -221,7 +223,7 @@ startLoop(
     speakStep(voice, scene, next, session, stepCues);
     const limited = limitShots(stepCues, dt * 1000, shotWait);
     shotWait = limited.wait;
-    playCues(limited.cues);
+    playCues(sfx, limited.cues);
 
     const settled = afterStep(session, scene, next, Date.now());
     // save (under this mode's keys), then sync if this mode syncs, after every run
