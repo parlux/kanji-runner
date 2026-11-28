@@ -26,7 +26,7 @@ Spec §3, §4. `scripts/voice/build.ts` and `coverage.ts`; get a VOICEVOX engine
 - [x] `npm run check` passes.
 
 ### Checkpoint V: owner picks the voice
-- [ ] Listen on the sample page; pick one character (and style, if it has several).
+- [x] Listen on the sample page; pick one character (and style, if it has several). Owner, 2026-11-28, from round 2 (https://claude.ai/artifact/WQytA51gqU15Mrnd7Mn6ft): **青山龍星 熱血** (hot-blooded hero, style 81), with the round-2 lilt (intonation ×1.35, speed ×1.05); set in `scripts/voice/voice.config.json`.
 
 ### Task A4: All clips; the game plays them; ship 1.14.0 (opus: data, ~4,000 items)
 Spec §2, §3, §4. Full build for the picked character; prefetch per run; clip first, phone voice fallback; credit on the start screen and in the README.

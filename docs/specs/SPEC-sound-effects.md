@@ -100,6 +100,6 @@ Each can be turned off; a mute button in runs. Success: on the owner's phone a r
 Choosing the voice in settings (`docs/ideas/voice-choice.md`); human recordings; volume sliders; speaking English meanings; offline play or install-as-app; voice on the study card.
 
 ## Open questions
-- The character: owner's pick at Checkpoint V.
+- ~~The character~~: owner picked 青山龍星 熱血 (style 81) at Checkpoint V, intonation ×1.35, speed ×1.05 (round 1 sounded too alike and calm; round 2 offered game/anime styles). Credit `VOICEVOX:青山龍星`; terms ask a check only if a company is involved.
 - ~~Where clips get generated~~: settled in A3: the VOICEVOX engine's Linux CPU release runs in a cloud session (`scripts/voice/README.md`); the Mac steps stay as a fallback.
 - Timing (voice delay after the chime), `DUCK_LEVEL` and loudness: tuned at the checkpoint.

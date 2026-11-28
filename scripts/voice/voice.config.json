@@ -1,6 +1,7 @@
 {
-  "id": "zundamon",
-  "speaker": 3,
-  "name": "ずんだもん",
-  "speed": 1
+  "id": "ryusei-nekketsu",
+  "speaker": 81,
+  "name": "青山龍星",
+  "speed": 1.05,
+  "intonation": 1.35
 }

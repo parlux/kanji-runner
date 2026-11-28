@@ -45,6 +45,8 @@ export type VoiceConfig = {
   /** Character name, for the credit `VOICEVOX:<name>`. */
   name: string;
   speed: number;
+  /** Pitch movement (VOICEVOX `intonationScale`); 1 is the engine's default. */
+  intonation?: number;
 };
 
 export type ClipIndex = Record<string, [file: string, ms: number]>;
@@ -53,6 +55,7 @@ type Mora = { text: string };
 type AudioQuery = {
   accent_phrases: { moras: Mora[]; pause_mora: Mora | null }[];
   speedScale: number;
+  intonationScale?: number;
 };
 
 export const CONFIG = "scripts/voice/voice.config.json";
@@ -235,6 +238,8 @@ async function main(): Promise<void> {
       try {
         const { q, fellBack: fb } = await bestQuery(s, config.speaker);
         q.speedScale = config.speed;
+        if (config.intonation !== undefined)
+          q.intonationScale = config.intonation;
         const wav = join(tmp, "clip.wav");
         writeFileSync(
           wav,
