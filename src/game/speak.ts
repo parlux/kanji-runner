@@ -1,4 +1,8 @@
-import type { Voice } from "../audio/voice";
+import {
+  VOICE_AFTER_BUZZ_MS,
+  VOICE_AFTER_CHIME_MS,
+  type Voice,
+} from "../audio/voice";
 import type { Cue } from "../core/cues";
 import { KANJI } from "../core/kanji";
 import { spoken, type SpeechContext, type Spoken } from "../core/speech";
@@ -27,7 +31,8 @@ const isGate = (c: Cue): c is Cue & { row: number } =>
  * The gate voice's one hook, called once per update step with the scene
  * before and after it and the session the run was built from (before the run
  * is recorded): a new run hands its lines to the voice; every gate cue of the
- * step (`cues`, defaulting to the step's own), right or wrong, is said. Pausing or leaving the run
+ * step (`cues`, defaulting to the step's own), right or wrong, is said, just
+ * after its chime or buzz. Pausing or leaving the run
  * stops the voice.
  */
 export function speakStep(
@@ -49,7 +54,12 @@ export function speakStep(
         cue.row + 1,
         context(session),
       )) {
-        voice.say(line);
+        voice.say(
+          line,
+          cue.kind === "gate-right"
+            ? VOICE_AFTER_CHIME_MS
+            : VOICE_AFTER_BUZZ_MS,
+        );
         said++;
       }
   // pausing or leaving the run cuts the line; a run ending on a gate lets that

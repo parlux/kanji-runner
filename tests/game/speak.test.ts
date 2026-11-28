@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import type { Voice } from "../../src/audio/voice";
+import {
+  VOICE_AFTER_BUZZ_MS,
+  VOICE_AFTER_CHIME_MS,
+  type Voice,
+} from "../../src/audio/voice";
 import { KANA } from "../../src/core/kana";
 import { KANJI } from "../../src/core/kanji";
 import { meaningProgress } from "../../src/core/progression";
@@ -20,16 +24,26 @@ import { NOW } from "../now";
 /** A voice that logs what it is asked to say. */
 function logVoice() {
   const said: Spoken[] = [];
+  const delays: (number | undefined)[] = [];
   let prepared = 0;
   let stops = 0;
   const voice: Voice = {
-    say: (l) => said.push(l),
+    say: (l, delay) => {
+      said.push(l);
+      delays.push(delay);
+    },
     prepare: () => prepared++,
     stop: () => void stops++,
     setEnabled: () => {},
     unlock: () => {},
   };
-  return { voice, said, prepared: () => prepared, stops: () => stops };
+  return {
+    voice,
+    said,
+    delays,
+    prepared: () => prepared,
+    stops: () => stops,
+  };
 }
 
 /** Plays a whole run (steering wiggling, so some gates go wrong) through the hook. */
@@ -82,11 +96,17 @@ describe("speakStep", () => {
     it(`${name}: says each resolved gate once, right or wrong`, () => {
       const results: boolean[] = [];
       for (const seed of [1, 2, 3]) {
-        const { said, prepared, run } = play(session, seed);
+        const { said, delays, prepared, run } = play(session, seed);
         results.push(...run.results);
         expect(prepared()).toBe(1);
         expect(run.results.length).toBeGreaterThan(0);
         expect(said).toHaveLength(run.results.length);
+        // after the chime (right) or the buzz (wrong)
+        expect(delays).toEqual(
+          run.results.map((r) =>
+            r ? VOICE_AFTER_CHIME_MS : VOICE_AFTER_BUZZ_MS,
+          ),
+        );
       }
       expect(results).toContain(true);
       expect(results).toContain(false);

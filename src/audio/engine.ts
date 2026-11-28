@@ -20,6 +20,8 @@ export type AudioEngine = {
   bus(name: Bus): GainNode | null;
   /** Opens or closes a bus (gain 1 or 0); kept for buses made later. */
   setOn(name: Bus, on: boolean): void;
+  /** The duck's gain on the sfx and music buses (1 = none; see `duck.ts`). */
+  setDuck(level: number): void;
 };
 
 const BUSES: readonly Bus[] = ["voice", "sfx", "music"];
@@ -32,6 +34,17 @@ export function createEngine(
   let buses: Record<Bus, GainNode> | null = null;
   let failed = false;
   const open: Record<Bus, boolean> = { voice: true, sfx: true, music: true };
+  let duck = 1;
+  const gainOf = (b: Bus): number => (!open[b] ? 0 : b === "voice" ? 1 : duck);
+  // a switch is at once; the duck's steps are smoothed over ~10 ms
+  const apply = (b: Bus, smooth: boolean): void => {
+    const g = buses?.[b];
+    if (!g || !ctx) return;
+    g.gain.cancelScheduledValues(ctx.currentTime);
+    if (smooth && open[b])
+      g.gain.setTargetAtTime(gainOf(b), ctx.currentTime, 0.01);
+    else g.gain.value = gainOf(b);
+  };
   return {
     unlock() {
       try {
@@ -45,7 +58,7 @@ export function createEngine(
           const made = {} as Record<Bus, GainNode>;
           for (const b of BUSES) {
             const g = ctx.createGain();
-            g.gain.value = open[b] ? 1 : 0;
+            g.gain.value = gainOf(b);
             g.connect(master);
             made[b] = g;
           }
@@ -62,7 +75,21 @@ export function createEngine(
     bus: (name) => buses?.[name] ?? null,
     setOn(name, on) {
       open[name] = on;
-      if (buses) buses[name].gain.value = on ? 1 : 0;
+      try {
+        apply(name, false);
+      } catch {
+        // audio failures are silent
+      }
+    },
+    setDuck(level) {
+      if (level === duck) return;
+      duck = level;
+      try {
+        apply("sfx", true);
+        apply("music", true);
+      } catch {
+        // audio failures are silent
+      }
     },
   };
 }

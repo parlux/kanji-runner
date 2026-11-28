@@ -41,6 +41,7 @@ import { createStage } from "./game/stage";
 import { createEngine, unlockOnGesture } from "./audio/engine";
 import { createVoice } from "./audio/voice";
 import { createSfx } from "./audio/sfx";
+import { createDuck, voiceDuck } from "./audio/duck";
 import {
   audible,
   loadAudioSettings,
@@ -55,7 +56,12 @@ const stage = createStage();
 
 // sound starts on the first tap or key (iOS needs a gesture)
 const engine = createEngine();
-const voice = createVoice();
+// the other sounds dip while the voice speaks
+const duck = createDuck();
+const voice = createVoice(
+  globalThis,
+  voiceDuck(duck, () => performance.now()),
+);
 const sfx = createSfx(engine);
 unlockOnGesture(window, () => {
   engine.unlock();
@@ -224,6 +230,7 @@ startLoop(
     const limited = limitShots(stepCues, dt * 1000, shotWait);
     shotWait = limited.wait;
     playCues(sfx, limited.cues);
+    engine.setDuck(duck.level(performance.now()));
 
     const settled = afterStep(session, scene, next, Date.now());
     // save (under this mode's keys), then sync if this mode syncs, after every run
