@@ -3,6 +3,7 @@
 Spec: `docs/specs/SPEC-sound-effects.md` (2026-11-28). Intent: `docs/intent/sound-effects.md`. Ideas: `docs/ideas/sound-effects.md`, `docs/ideas/soundtrack.md`.
 Review: https://claude.ai/artifact/3JXQ6DPMb442Perp7cFZu7
 Voice samples (Checkpoint V): https://claude.ai/artifact/CR5Q6CpsxNeeWepGt8mU6G
+Checkpoint A: https://claude.ai/artifact/9j3g69wmBZNY9fDtUQXVrU
 Order: A5–A6 (effects, 1.13.0) run while the owner picks the voice, then A4 (clips, 1.14.0), then A7. Runs while Checkpoints P, R and S wait on the owner's play; this is the active list for "implement the next round".
 Every task: `npm run check` passes before it is checked off. Each task is one commit series on the session branch, pushed.
 
@@ -35,6 +36,8 @@ Spec §2, §3, §4. Full build for the picked character; prefetch per run; clip 
 - [x] `package.json` 1.14.0; `CHANGELOG.md` has the 1.14.0 section.
 - [x] `npm run check` passes; deploy green.
 
+Logged (A4 report): 3,860/3,860 keys clipped, 14.2 MB; 29 kana-reading fallbacks; 10 split readings joined; spot check 20/20 after fixes, 66 clips re-rendered; engine 0.24.1 (macOS 12 can't run 0.26.2).
+
 ### Task A5: Sound cues from the run (sonnet, core)
 Spec §7. `src/core/cues.ts`; the loop gathers cues per step and hands gate cues to the voice (replacing A1's direct hook).
 - [x] `cues.test.ts` from the spec passes.
@@ -52,6 +55,8 @@ Spec §9. Pick two loops (candidates with links and licences in the report), bos
 - [x] `public/music/CREDITS.md` and README Attribution list each track's licence and author.
 - [x] `package.json` 1.15.0; `CHANGELOG.md` has the 1.15.0 section.
 - [x] `npm run check` passes; deploy green.
+
+Logged (A7 report): run loop Flowerbed Fields (Zane Little Music, CC0) 106 s, 1.12 MB; menu loop forgotten path (johndekale, CC0) 40 s, 0.33 MB; boss lift playbackRate 1.06; crossfade 400 ms.
 
 ### Checkpoint A: owner plays with sound
 - [ ] Every gate says its reading, right or wrong, in the picked voice; it's clear over music and effects.
