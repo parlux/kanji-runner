@@ -59,6 +59,7 @@ Each can be turned off; a mute button in runs. Success: on the owner's phone a r
 ## 7. Sound cues (core, pure; `src/core/cues.ts`, new)
 `cues(prev, next): Cue[]` from two run states one step apart, so the sim stays free of sound:
 `gate-right` / `gate-wrong` (with the row, for the voice), `shot` (at most one per `SHOT_CUE_MS` 90 ms of fire), `hazard-broken` (crate or wall), `pack-wiped`, `boss-clash`, `boss-won`, `boss-lost`. End-screen `unlock` and menu `tap` come from the scenes, not the sim.
+(Amended in A5: `cues(prev, next)` reports a `shot` on every step with fire (a target or a wall being shot); `limitShots(cues, dtMs, wait)` rate-limits them with a carried wait in ms. `hazard-broken` is a block shattered (crates are blocks; saws can't break); `pack-wiped` is a pack's enemies all dead. The boss clash lives in the scene, so `bossCues(prevFrame, nextFrame)` gives `boss-clash` when the approach ends and `boss-won`/`boss-lost` when the clash is done; `src/game/cues.ts` joins both, and the loop is in `src/main.ts`.)
 
 ## 8. Sound effects (1.13.0; `src/audio/sfx.ts`)
 - Each sound is a small parameter set (wave, start/end frequency, envelope, optional noise and arpeggio), sfxr style, played through the sfx bus. No files.

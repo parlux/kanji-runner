@@ -37,8 +37,8 @@ Spec §2, §3, §4. Full build for the picked character; prefetch per run; clip 
 
 ### Task A5: Sound cues from the run (sonnet, core)
 Spec §7. `src/core/cues.ts`; the loop gathers cues per step and hands gate cues to the voice (replacing A1's direct hook).
-- [ ] `cues.test.ts` from the spec passes.
-- [ ] `npm run check` passes (knip: cue kinds without sounds yet marked or wired).
+- [x] `cues.test.ts` from the spec passes.
+- [x] `npm run check` passes (knip: cue kinds without sounds yet marked or wired).
 
 ### Task A6: Sound effects and ducking; ship 1.13.0 (opus: feel)
 Spec §2 timing, §5 ducking, §8. Synthesized sounds; Sound toggle wired; unlock jingle and menu taps.

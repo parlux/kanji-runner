@@ -46,6 +46,8 @@ import {
   saveAudioSettings,
   type AudioSettings,
 } from "./audio/settings";
+import { playCues, sceneCues } from "./game/cues";
+import { limitShots } from "./core/cues";
 import { speakStep } from "./game/speak";
 
 const stage = createStage();
@@ -193,6 +195,7 @@ bindScroll(stage.canvas, (dy) => {
 });
 
 let lastKind: Scene["kind"] = "start";
+let shotWait = 0;
 startLoop(
   (dt) => {
     // back on the start screen: refresh WaniKani (the client throttles)
@@ -214,7 +217,11 @@ startLoop(
       takeDrag(),
       SPEED_PRESETS[panels.speed()],
     );
-    speakStep(voice, scene, next, session);
+    const stepCues = sceneCues(scene, next);
+    speakStep(voice, scene, next, session, stepCues);
+    const limited = limitShots(stepCues, dt * 1000, shotWait);
+    shotWait = limited.wait;
+    playCues(limited.cues);
 
     const settled = afterStep(session, scene, next, Date.now());
     // save (under this mode's keys), then sync if this mode syncs, after every run

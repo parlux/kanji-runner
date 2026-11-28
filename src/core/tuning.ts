@@ -353,3 +353,6 @@ export const REASK_MAX_BOX = 2;
 export const REASK_GAP_MIN = 3;
 /** ... and at most this many rows after it. */
 export const REASK_GAP_MAX = 5;
+
+/** Sound cues: at most one shot cue per this many milliseconds of fire. */
+export const SHOT_CUE_MS = 90;
