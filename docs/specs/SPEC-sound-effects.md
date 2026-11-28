@@ -1,6 +1,6 @@
 # Spec: arcade sound, and every gate says its reading
 
-Intent: `docs/intent/sound-effects.md` (2026-11-28). Tasks: `tasks/todo-sound-effects.md`. Ideas: `docs/ideas/sound-effects.md`, `docs/ideas/soundtrack.md` (folded in). Later idea: `docs/ideas/voice-choice.md`. Versions: **1.12.0** (voice, phone fallback), **1.13.0** (character clips), **1.14.0** (sound effects), **1.15.0** (music). Music is cut first if the round runs long.
+Intent: `docs/intent/sound-effects.md` (2026-11-28). Tasks: `tasks/todo-sound-effects.md`. Ideas: `docs/ideas/sound-effects.md`, `docs/ideas/soundtrack.md` (folded in). Later idea: `docs/ideas/voice-choice.md`. Versions: **1.12.0** (voice, phone fallback), **1.13.0** (sound effects), **1.14.0** (character clips; swapped 2026-11-28 so effects don't wait on the voice pick), **1.15.0** (music). Music is cut first if the round runs long.
 
 ## Objective
 The game has no sound today. Add, in priority order:
@@ -25,7 +25,7 @@ Each can be turned off; a mute button in runs. Success: on the owner's phone a r
 - `allSpoken(data)`: every key the game can ask for (all kana, every kanji's main readings, every word and loanword). Used by the clip build and the coverage report.
 
 ## 2. When it's said (game)
-- When a gate row resolves (its result is recorded): right → chime, then the voice ~120 ms later; wrong → buzz, then the voice ~300 ms later (before 1.14.0, with no sound effects, the voice starts at once).
+- When a gate row resolves (its result is recorded): right → chime, then the voice ~120 ms later; wrong → buzz, then the voice ~300 ms later (before 1.13.0, with no sound effects, the voice starts at once).
 - One voice line at a time; a new gate's line cuts the previous one.
 - The run's clips are fetched and decoded when the run is built (its 14 gates plus re-asks), so a gate never waits on the network. A clip not ready in time → phone voice.
 
@@ -60,7 +60,7 @@ Each can be turned off; a mute button in runs. Success: on the owner's phone a r
 `cues(prev, next): Cue[]` from two run states one step apart, so the sim stays free of sound:
 `gate-right` / `gate-wrong` (with the row, for the voice), `shot` (at most one per `SHOT_CUE_MS` 90 ms of fire), `hazard-broken` (crate or wall), `pack-wiped`, `boss-clash`, `boss-won`, `boss-lost`. End-screen `unlock` and menu `tap` come from the scenes, not the sim.
 
-## 8. Sound effects (1.14.0; `src/audio/sfx.ts`)
+## 8. Sound effects (1.13.0; `src/audio/sfx.ts`)
 - Each sound is a small parameter set (wave, start/end frequency, envelope, optional noise and arpeggio), sfxr style, played through the sfx bus. No files.
 - Sounds: right gate (bright rising two-note chime), wrong gate (short low square buzz), shot (very short, quiet tick, random pitch ±5%), hazard broken (noise crunch), pack wiped (falling sweep), boss clash (low rumble while clashing), boss won (4-note fanfare), boss lost (descending sting), unlock (5-note jingle), tap (tiny blip).
 - Shots sit well under the voice: peak ≤ 0.15 of the right-gate chime.

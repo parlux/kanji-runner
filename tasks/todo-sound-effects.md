@@ -3,7 +3,7 @@
 Spec: `docs/specs/SPEC-sound-effects.md` (2026-11-28). Intent: `docs/intent/sound-effects.md`. Ideas: `docs/ideas/sound-effects.md`, `docs/ideas/soundtrack.md`.
 Review: https://claude.ai/artifact/3JXQ6DPMb442Perp7cFZu7
 Voice samples (Checkpoint V): https://claude.ai/artifact/CR5Q6CpsxNeeWepGt8mU6G
-Runs while Checkpoints P, R and S wait on the owner's play; this is the active list for "implement the next round".
+Order: A5–A6 (effects, 1.13.0) run while the owner picks the voice, then A4 (clips, 1.14.0), then A7. Runs while Checkpoints P, R and S wait on the owner's play; this is the active list for "implement the next round".
 Every task: `npm run check` passes before it is checked off. Each task is one commit series on the session branch, pushed.
 
 ### Task A1: What a gate says; the voice with the phone's voice (opus: new layer)
@@ -28,11 +28,11 @@ Spec §3, §4. `scripts/voice/build.ts` and `coverage.ts`; get a VOICEVOX engine
 ### Checkpoint V: owner picks the voice
 - [ ] Listen on the sample page; pick one character (and style, if it has several).
 
-### Task A4: All clips; the game plays them; ship 1.13.0 (opus: data, ~4,000 items)
+### Task A4: All clips; the game plays them; ship 1.14.0 (opus: data, ~4,000 items)
 Spec §2, §3, §4. Full build for the picked character; prefetch per run; clip first, phone voice fallback; credit on the start screen and in the README.
 - [ ] Coverage report: ≥ 99% of keys have a clip; total size and word-query fallback count in the report.
 - [ ] Spot check of 20 random clips (list in the report) for wrong readings; fixes noted.
-- [ ] `package.json` 1.13.0; `CHANGELOG.md` has the 1.13.0 section.
+- [ ] `package.json` 1.14.0; `CHANGELOG.md` has the 1.14.0 section.
 - [ ] `npm run check` passes; deploy green.
 
 ### Task A5: Sound cues from the run (sonnet, core)
@@ -40,11 +40,11 @@ Spec §7. `src/core/cues.ts`; the loop gathers cues per step and hands gate cues
 - [ ] `cues.test.ts` from the spec passes.
 - [ ] `npm run check` passes (knip: cue kinds without sounds yet marked or wired).
 
-### Task A6: Sound effects and ducking; ship 1.14.0 (opus: feel)
+### Task A6: Sound effects and ducking; ship 1.13.0 (opus: feel)
 Spec §2 timing, §5 ducking, §8. Synthesized sounds; Sound toggle wired; unlock jingle and menu taps.
 - [ ] `duck.test.ts` passes.
 - [ ] A short recording or per-sound description in the report (each sound's parameters); voice clearly over effects in a dev run.
-- [ ] `package.json` 1.14.0; `CHANGELOG.md` has the 1.14.0 section.
+- [ ] `package.json` 1.13.0; `CHANGELOG.md` has the 1.13.0 section.
 - [ ] `npm run check` passes; deploy green.
 
 ### Task A7: Music; ship 1.15.0 (sonnet) — cut first if the round runs long
