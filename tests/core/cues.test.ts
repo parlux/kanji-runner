@@ -5,6 +5,7 @@ import {
   CLASH_APPROACH_SECONDS,
   CLASH_SECONDS,
   SHOT_CUE_MS,
+  WALL_SHOT_CUE_MS,
 } from "../../src/core/tuning";
 import { DT, fresh } from "./sim-helpers";
 
@@ -49,10 +50,19 @@ describe("cues from run states", () => {
 
   it("fire gives shots", () => {
     const s = fresh(1);
-    expect(kinds(cues(s, { ...s, gateTarget: 0 }))).toEqual(["shot"]);
+    expect(cues(s, { ...s, gateTarget: 0 })).toEqual([
+      { kind: "shot", wall: true },
+    ]);
     expect(
       kinds(cues(s, { ...s, targets: [{ index: 0, share: 1 }] as never })),
     ).toEqual(["shot"]);
+    expect(
+      cues(s, {
+        ...s,
+        gateTarget: 0,
+        targets: [{ index: 0, share: 1 }] as never,
+      }),
+    ).toEqual([{ kind: "shot" }]);
   });
 
   it("a whole run gives exactly one gate cue per row", () => {
@@ -90,6 +100,23 @@ describe("limitShots", () => {
       Math.floor(1000 / (SHOT_CUE_MS + 17)),
     );
     expect(passed).toBeLessThanOrEqual(Math.ceil(1000 / SHOT_CUE_MS));
+  });
+});
+
+describe("limitShots on a gate wall", () => {
+  it("lets one wall shot per WALL_SHOT_CUE_MS through", () => {
+    const shot: Cue = { kind: "shot", wall: true };
+    let wait = 0;
+    let passed = 0;
+    for (let i = 0; i < 120; i++) {
+      const r = limitShots([shot], 1000 / 60, wait);
+      wait = r.wait;
+      passed += r.cues.length;
+    }
+    expect(passed).toBeGreaterThanOrEqual(
+      Math.floor(2000 / (WALL_SHOT_CUE_MS + 17)),
+    );
+    expect(passed).toBeLessThanOrEqual(Math.ceil(2000 / WALL_SHOT_CUE_MS));
   });
 });
 

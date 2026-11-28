@@ -356,3 +356,5 @@ export const REASK_GAP_MAX = 5;
 
 /** Sound cues: at most one shot cue per this many milliseconds of fire. */
 export const SHOT_CUE_MS = 90;
+/** ... and one per this many while only a gate wall is being shot (it goes on for long stretches). */
+export const WALL_SHOT_CUE_MS = 270;

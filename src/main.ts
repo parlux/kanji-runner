@@ -48,7 +48,7 @@ import {
   saveAudioSettings,
   type AudioSettings,
 } from "./audio/settings";
-import { playCues, sceneCues } from "./game/cues";
+import { playCues, sceneCues, unlockSound } from "./game/cues";
 import { limitShots } from "./core/cues";
 import { speakStep } from "./game/speak";
 
@@ -140,28 +140,39 @@ const steerAxis = bindKeys(act);
 // a tap pauses or resumes a run or the boss clash, hits the end
 // screen's buttons (Play again, Study, Home) or its item rows, and on the start
 // screen hits the placement controls or else starts a run
+// a tiny blip on every menu and button tap that hits something
+const tap = (): void => sfx(["tap"]);
 const takeDrag = bindDrag(stage.canvas, (x, y) => {
   if (panels.anyOpen()) return;
   if (scene.kind === "run" || scene.kind === "boss") {
     // the mute button is not a pause tap
-    if (muteTap(window.innerWidth, x, y))
-      return setAudio({ ...audio, muted: !audio.muted });
+    if (muteTap(window.innerWidth, x, y)) {
+      setAudio({ ...audio, muted: !audio.muted });
+      return tap();
+    }
     return act("pause");
   }
   if (scene.kind === "end") {
     const w = window.innerWidth;
     const h = window.innerHeight;
     const action = endTap(panels.studyAvailable(), w, h, x, y);
-    if (action) return act(action);
+    if (action) {
+      tap();
+      return act(action);
+    }
     // a row of the item list opens that item's study card
     const item = endItemTap(w, h, scene, session, x, y);
-    if (item) panels.openItemStudy(item);
+    if (item) {
+      tap();
+      panels.openItemStudy(item);
+    }
     return;
   }
   const w = window.innerWidth;
   const h = window.innerHeight;
   if (scene.kind === "progress") {
     const hit = progressTap(scene, w, h, x, y, session);
+    if (hit.scene !== scene || hit.study) tap();
     scene = hit.scene;
     // an item row on the level page opens its study card; Back closes it
     if (hit.study) panels.openItemStudy(hit.study);
@@ -169,10 +180,17 @@ const takeDrag = bindDrag(stage.canvas, (x, y) => {
   }
   const picking = scene.pick !== undefined;
   const sw = !picking ? toggleTap(w, h, x, y) : null;
-  if (sw) return setAudio(toggled(audio, sw));
-  if (!picking && settingsTap(w, h, x, y)) return panels.openSettings();
+  if (sw) {
+    setAudio(toggled(audio, sw));
+    return tap();
+  }
+  if (!picking && settingsTap(w, h, x, y)) {
+    tap();
+    return panels.openSettings();
+  }
   const mode = !picking ? modeTap(w, h, x, y) : null;
   if (mode && (mode === "meaning") !== session.meaning) {
+    tap();
     // switch modes: load the other save; nothing carries over
     const on = mode === "meaning";
     saveMeaningMode(localStorage, on);
@@ -181,10 +199,15 @@ const takeDrag = bindDrag(stage.canvas, (x, y) => {
     if (syncs()) void sync.pull().then(adopt);
     return;
   }
-  if (!picking && !session.meaning && syncTap(sync.status(), w, h, x, y))
+  if (!picking && !session.meaning && syncTap(sync.status(), w, h, x, y)) {
+    tap();
     return panels.openSync();
+  }
   const action = startTap(scene.pick !== undefined, w, h, x, y, !session.wk);
-  if (action) act(action);
+  if (action) {
+    tap();
+    act(action);
+  }
 });
 // the overall view's list and the end screen's item list scroll by drag and wheel
 bindScroll(stage.canvas, (dy) => {
@@ -233,6 +256,7 @@ startLoop(
     engine.setDuck(duck.level(performance.now()));
 
     const settled = afterStep(session, scene, next, Date.now());
+    if (unlockSound(scene, next, settled)) sfx(["unlock"]);
     // save (under this mode's keys), then sync if this mode syncs, after every run
     const keys = settled !== session ? persistence(session) : null;
     if (keys) saveProgress(localStorage, settled.progress, keys.progress);

@@ -1,5 +1,5 @@
 import { bossCues, cues, type ClashFrame, type Cue } from "../core/cues";
-import type { Scene } from "./scenes";
+import type { Scene, Session } from "./scenes";
 import type { SoundName } from "../audio/sfx";
 
 const frame = (s: Scene): ClashFrame | null =>
@@ -25,3 +25,14 @@ export function playCues(
 ): void {
   if (list.length > 0) play(list.map((c) => c.kind));
 }
+
+/**
+ * Whether the step brings up the end screen of a run that unlocked a level
+ * (`session` is the one after the step), for the unlock jingle.
+ */
+export const unlockSound = (
+  prev: Scene,
+  next: Scene,
+  session: Session,
+): boolean =>
+  prev.kind !== "end" && next.kind === "end" && session.unlocked !== null;
