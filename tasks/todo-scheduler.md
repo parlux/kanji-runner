@@ -2,6 +2,7 @@
 
 Spec: `docs/specs/SPEC-scheduler.md` (2026-11-28). Intent: `docs/intent/scheduler.md`. Idea: `docs/ideas/scheduler.md`.
 Review: https://claude.ai/artifact/RcZHffPYzfHUvpyATnFz3E
+Checkpoint S: https://claude.ai/artifact/TMEq6PeD2vtLp6FjCo2VsR
 Runs while Checkpoints P and R wait on the owner's play; this is the active list for "implement the next round".
 Every task: `npm run check` passes before it is checked off. Each task is one commit series on the session branch, pushed.
 
