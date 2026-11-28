@@ -42,10 +42,10 @@ Spec §7. `src/core/cues.ts`; the loop gathers cues per step and hands gate cues
 
 ### Task A6: Sound effects and ducking; ship 1.13.0 (opus: feel)
 Spec §2 timing, §5 ducking, §8. Synthesized sounds; Sound toggle wired; unlock jingle and menu taps.
-- [ ] `duck.test.ts` passes.
-- [ ] A short recording or per-sound description in the report (each sound's parameters); voice clearly over effects in a dev run.
-- [ ] `package.json` 1.13.0; `CHANGELOG.md` has the 1.13.0 section.
-- [ ] `npm run check` passes; deploy green.
+- [x] `duck.test.ts` passes.
+- [x] A short recording or per-sound description in the report (each sound's parameters); voice clearly over effects in a dev run.
+- [x] `package.json` 1.13.0; `CHANGELOG.md` has the 1.13.0 section.
+- [x] `npm run check` passes; deploy green (deploy by orchestrator).
 
 ### Task A7: Music; ship 1.15.0 (sonnet) — cut first if the round runs long
 Spec §9. Pick two loops (candidates with links and licences in the report), boss lift, crossfades, Music toggle wired, credits.

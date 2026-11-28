@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.13.0 (2026-11-28)
+
+- Arcade sound effects: a chime for a right gate, a buzz for a wrong one, quiet ticks while shooting, crates breaking, packs wiped out, the boss clash with a fanfare or a sting, a jingle when a level unlocks, and a blip on taps.
+- The voice now comes just after the chime or buzz, and the rest of the sound dips while it speaks.
+- The Sound switch works (and the mute button covers it).
+
 ## 1.12.0 (2026-11-28)
 
 - Every gate now says its reading in your phone's Japanese voice, right or wrong.
