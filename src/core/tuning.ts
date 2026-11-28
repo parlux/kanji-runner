@@ -42,6 +42,28 @@ export const WARM_UP_MIN_BOX = 3;
 export const MAX_NEW_PER_RUN = 4;
 /** Of those, at most this many may be words, meaning or reading (kanji keep priority). */
 export const MAX_NEW_WORDS_PER_RUN = 2;
+// Scheduler (SPEC-scheduler §1–2). See schedule.ts. First guesses from the
+// research's shape (not its numbers); tune at the checkpoint.
+const HOUR = 60 * 60 * 1000;
+const DAY = 24 * HOUR;
+/**
+ * How long after its last answer an item is due, by box (ms): New and Met
+ * always (next run), Recalled 1 h, Learned 1 day, Strong 4 days, Solid 14 days.
+ */
+export const GAP_BY_BOX: readonly number[] = [
+  0,
+  0,
+  HOUR,
+  DAY,
+  4 * DAY,
+  14 * DAY,
+];
+/** Most current-level in-progress gates (answered, below Learned) per run. */
+export const LEARNING_SLOTS = 8;
+/** When any gate outside the current level is due, at least this many of them per run. */
+export const DUE_MIN_SLOTS = 3;
+/** New items join a run only while the current level has fewer gates in progress than this. */
+export const NEW_WHEN_LEARNING_UNDER = 8;
 /** WaniKani mode: a kanji due for review on WaniKani is drawn this many times as often. */
 export const WK_DUE_BOOST = 4;
 /** The story library is refetched when older than this. */
