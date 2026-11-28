@@ -18,8 +18,8 @@ Spec §2–3, "Testing". Built-in and Meaning modes use `schedule` with `now` fr
 
 ### Task S3: Ship 1.11.0 (sonnet)
 Bump `package.json` to 1.11.0 and add `## 1.11.0 (<date>)` to `CHANGELOG.md` (owner words: what changes in a run).
-- [ ] `package.json` 1.11.0; `CHANGELOG.md` has the 1.11.0 section.
-- [ ] `npm run check` passes; deploy green.
+- [x] `package.json` 1.11.0; `CHANGELOG.md` has the 1.11.0 section.
+- [x] `npm run check` passes; deploy green.
 
 ### Checkpoint S: owner plays a few days
 - [ ] In one session: runs are mostly your level; a missed item comes back next run.

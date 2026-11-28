@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.11.0 (2026-11-28)
+
+- New scheduler: each item comes back when it's due, by the real time since you last answered it and its stage (Met: next run, Recalled: ~1 h, Learned: ~1 day, Strong: ~4 days, Solid: ~2 weeks). A miss still sends it back to New.
+- A run puts your level's in-progress items first (up to 8), then due items from older levels (at least 3 when any are due; slips first), then new items, only while fewer than 8 of your level's gates are in progress.
+- Warm-ups are strong items that are due, your level first among them.
+- WaniKani mode keeps its old selection.
+
 ## 1.10.1 (2026-11-28)
 
 - More runway before the first gate: it now sits 5 track units in (was 3), so a run starts on a clear track and the gate rolls into view.
