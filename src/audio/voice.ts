@@ -7,7 +7,7 @@ export const VOICE_ID = "ryusei-nekketsu";
 export const VOICE_CREDIT = "VOICEVOX:青山龍星";
 
 /** A clip folder's `index.json`: clip key → [file, length in ms]. */
-export type ClipIndex = Record<string, [file: string, ms: number]>;
+type ClipIndex = Record<string, [file: string, ms: number]>;
 
 /** Where the clips come from and where they play; absent, every line is the phone voice. */
 export type ClipEnv = {

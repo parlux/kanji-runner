@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.14.0 (2026-11-28)
+
+- Gates now speak in a real character voice, 青山龍星 (VOICEVOX, 熱血 style), instead of your phone's voice. A run fetches its clips when it starts, so lines play on time.
+- If a clip isn't ready (or is missing), the phone voice still says the line.
+- The voice credit, VOICEVOX:青山龍星, is on the start screen.
+
 ## 1.13.0 (2026-11-28)
 
 - Arcade sound effects: a chime for a right gate, a buzz for a wrong one, quiet ticks while shooting, crates breaking, packs wiped out, the boss clash with a fanfare or a sting, a jingle when a level unlocks, and a blip on taps.

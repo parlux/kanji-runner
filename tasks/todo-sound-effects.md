@@ -30,10 +30,10 @@ Spec §3, §4. `scripts/voice/build.ts` and `coverage.ts`; get a VOICEVOX engine
 
 ### Task A4: All clips; the game plays them; ship 1.14.0 (opus: data, ~4,000 items)
 Spec §2, §3, §4. Full build for the picked character; prefetch per run; clip first, phone voice fallback; credit on the start screen and in the README.
-- [ ] Coverage report: ≥ 99% of keys have a clip; total size and word-query fallback count in the report.
-- [ ] Spot check of 20 random clips (list in the report) for wrong readings; fixes noted.
-- [ ] `package.json` 1.14.0; `CHANGELOG.md` has the 1.14.0 section.
-- [ ] `npm run check` passes; deploy green.
+- [x] Coverage report: ≥ 99% of keys have a clip; total size and word-query fallback count in the report.
+- [x] Spot check of 20 random clips (list in the report) for wrong readings; fixes noted.
+- [x] `package.json` 1.14.0; `CHANGELOG.md` has the 1.14.0 section.
+- [x] `npm run check` passes; deploy green.
 
 ### Task A5: Sound cues from the run (sonnet, core)
 Spec §7. `src/core/cues.ts`; the loop gathers cues per step and hands gate cues to the voice (replacing A1's direct hook).
