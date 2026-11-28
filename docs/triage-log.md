@@ -60,3 +60,4 @@ One row per owner request, written by the `triage` skill (`.claude/skills/triage
 | 2026-11-28 | Checkpoint R: end rows don't open study cards; "10 of 15 learned" but which? | sdd (amend round) | Changes the end list's content and order; spec §5, task R5 | |
 | 2026-11-28 | First gate too close: add runway | sdd → fix | One core tuning constant (FIRST_QUESTION_DISTANCE 5.0); owner said "just add a bit more runway" | just fix it |
 | 2026-11-28 | More reinforcement of the current level vs older levels | sdd | Changes SRS selection; owner chose a time-based scheduler after a research check | |
+| 2026-11-28 | File an idea: explain grammar (～り, お～, verb endings, adjective types) | idea | Owner said "file an idea" | |
