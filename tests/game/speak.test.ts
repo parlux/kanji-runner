@@ -21,14 +21,15 @@ import { NOW } from "../now";
 function logVoice() {
   const said: Spoken[] = [];
   let prepared = 0;
+  let stops = 0;
   const voice: Voice = {
     say: (l) => said.push(l),
     prepare: () => prepared++,
-    stop: () => {},
+    stop: () => void stops++,
     setEnabled: () => {},
     unlock: () => {},
   };
-  return { voice, said, prepared: () => prepared };
+  return { voice, said, prepared: () => prepared, stops: () => stops };
 }
 
 /** Plays a whole run (steering wiggling, so some gates go wrong) through the hook. */
@@ -90,4 +91,45 @@ describe("speakStep", () => {
       expect(results).toContain(true);
       expect(results).toContain(false);
     });
+});
+
+describe("speakStep stopping", () => {
+  const session = createSession(defaultProgress());
+  const running = handleAction(
+    { kind: "start" },
+    "confirm",
+    () => 1,
+    session,
+    NOW,
+  ).scene;
+  if (running.kind !== "run") throw new Error("no run");
+
+  it("stops the voice when the run is paused, not when it resumes", () => {
+    const v = logVoice();
+    const paused = { ...running, paused: true };
+    speakStep(v.voice, running, paused, session);
+    expect(v.stops()).toBe(1);
+    speakStep(v.voice, paused, running, session);
+    speakStep(v.voice, running, running, session);
+    expect(v.stops()).toBe(1);
+  });
+
+  it("stops the voice when the run is left", () => {
+    const v = logVoice();
+    speakStep(v.voice, running, { kind: "start" }, session);
+    expect(v.stops()).toBe(1);
+    speakStep(v.voice, { kind: "start" }, { kind: "start" }, session);
+    expect(v.stops()).toBe(1);
+  });
+
+  it("stops the voice when a run ends with nothing new said", () => {
+    const v = logVoice();
+    speakStep(
+      v.voice,
+      running,
+      { kind: "end", seed: 1, run: running.run, boss: null },
+      session,
+    );
+    expect(v.stops()).toBe(1);
+  });
 });
