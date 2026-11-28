@@ -22,10 +22,10 @@ Pick a run's gates by when each item is **due** (real time since last answered, 
 
 ## 2. Picking a run (Built-in and Meaning modes)
 `schedule(rng, sel, now)` replaces `select` for Built-in and Meaning modes (WaniKani mode keeps today's selection with `WK_DUE_BOOST`). The `Selection` interface gains what it needs (box, lastSeen, seen, current, known) — no more `weight`. Rows, in order, 14 in all (`ROWS_PER_RUN`):
-1. **Warm-ups** (`WARM_UPS` 3, wall gates as today): gates at box ≥ `WARM_UP_MIN_BOX` (3) that are due or nearest to due, current level first; with fewer, the highest boxes (as today).
+1. **Warm-ups** (`WARM_UPS` 3, wall gates as today): gates at box ≥ `WARM_UP_MIN_BOX` (3), due first, current level first among the due and among the not due, then most overdue / nearest to due; with fewer, the highest boxes (as today). (Amended in S2: current-first ahead of due re-asked the current level's strong gates every run, so the simulated box 4 and 5 gaps were 1 and 2 days instead of 4 and 14.)
 2. Then, shuffled together:
    - **In progress** (`LEARNING_SLOTS` 8): current-level gates that have been answered (`seen > 0`) and are below box 3, least recently seen first.
-   - **Due older** (`DUE_MIN_SLOTS` 3): when any gate outside the current level is due, at least this many (or all of them, if fewer), most overdue first; placement records after answered ones.
+   - **Due older** (`DUE_MIN_SLOTS` 3): when any gate outside the current level is due, at least this many (or all of them, if fewer), most overdue first; placement records after answered ones; slips (answered, box 0) before other answered gates (amended in S2: a slip is only minutes overdue, so "most overdue" alone let older-level slips wait a day).
    - **New** (up to `MAX_NEW_PER_RUN` 4, at most `MAX_NEW_WORDS_PER_RUN` 2 words, progression order as today): only while the current level has fewer than `NEW_WHEN_LEARNING_UNDER` 8 gates in progress (all of the level's in-progress gates in the pool, not only those picked; amended in S1).
    - **The rest:** remaining due gates, most overdue first (current level and older alike), then gates nearest to due (highest nearness), then anything known by lowest box.
 - No gate twice in a run, except the early-game fallback when the pool is smaller than a run (as today, weighted by box).

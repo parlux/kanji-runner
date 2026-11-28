@@ -64,7 +64,8 @@ export function schedule(rng: Rng, sel: ScheduleInput, now: number): Entry[] {
     current(e) && answered(e) && box(e) < LEARNED_BOX;
   /**
    * Most urgent first: due before not due; among due, answered before
-   * placement records (seen 0), then most overdue; among not due, nearest.
+   * placement records (seen 0), slips (answered, box 0) first, then most
+   * overdue; among not due, nearest.
    */
   const urgency = (a: Entry, b: Entry): number => {
     const da = due(a);
@@ -76,6 +77,8 @@ export function schedule(rng: Rng, sel: ScheduleInput, now: number): Entry[] {
       );
     const aa = answered(a);
     if (aa !== answered(b)) return aa ? -1 : 1;
+    const sa = box(a) === 0;
+    if (sa !== (box(b) === 0)) return sa ? -1 : 1;
     return over(b) - over(a);
   };
 
@@ -90,12 +93,17 @@ export function schedule(rng: Rng, sel: ScheduleInput, now: number): Entry[] {
     fresh.push(e);
   }
 
-  // 1. Warm-ups: box >= WARM_UP_MIN_BOX, current level first, then most
-  // urgent. With fewer strong items, the highest boxes fill in.
+  // 1. Warm-ups: box >= WARM_UP_MIN_BOX, due first, current level first
+  // among due and among not due, then most urgent (strong current items are
+  // not re-asked before their gap). With fewer strong items, the highest
+  // boxes fill in.
   const strong = sorted(
     rng,
     known.filter((e) => box(e) >= WARM_UP_MIN_BOX),
-    (a, b) => Number(current(b)) - Number(current(a)) || urgency(a, b),
+    (a, b) =>
+      Number(due(b)) - Number(due(a)) ||
+      Number(current(b)) - Number(current(a)) ||
+      urgency(a, b),
   );
   const weak = sorted(
     rng,

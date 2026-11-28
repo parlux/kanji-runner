@@ -128,17 +128,40 @@ describe("schedule", () => {
     }
   });
 
-  it("warm-ups: current level first, then most urgent", () => {
+  it("warm-ups: due first, current level first among them", () => {
     const f = fixture([
       { box: 3, ago: HOUR, cur: true }, // current, not due
-      { box: 5, ago: 20 * DAY }, // older, due
-      { box: 4, ago: 5 * DAY }, // older, due (less)
-      { box: 3, ago: 1.5 * DAY }, // older, due (least)
+      { box: 3, ago: 1.2 * DAY, cur: true }, // current, due (least)
+      { box: 5, ago: 20 * DAY }, // older, due (most)
+      { box: 4, ago: 5 * DAY }, // older, due
+      { box: 3, ago: 1.5 * DAY }, // older, due
       { box: 3, ago: HOUR }, // older, not due
       ...rep(20, { box: 1, ago: HOUR }),
     ]);
     for (const seed of forSeeds(20))
-      expect(run(f, seed).slice(0, WARM_UPS)).toEqual(["i0", "i1", "i2"]);
+      expect(run(f, seed).slice(0, WARM_UPS)).toEqual(["i1", "i2", "i3"]);
+  });
+
+  it("warm-ups: with none due, current level first, then nearest", () => {
+    const f = fixture([
+      { box: 3, ago: HOUR }, // older, nearness 1/24
+      { box: 4, ago: 3 * DAY, cur: true }, // current, nearness 3/4
+      { box: 5, ago: 10 * DAY }, // older, nearness 10/14
+      { box: 5, ago: DAY }, // older, nearness 1/14
+      ...rep(20, { box: 1, ago: HOUR }),
+    ]);
+    for (const seed of forSeeds(20))
+      expect(run(f, seed).slice(0, WARM_UPS)).toEqual(["i1", "i2", "i3"]);
+  });
+
+  it("a slip (answered, box 0) comes before more overdue gates", () => {
+    const MIN = 60 * 1000;
+    const f = fixture([
+      ...warmers,
+      ...rep(20, { box: 2, ago: 5 * HOUR }), // older, 4 h overdue
+      { box: 0, ago: 3 * MIN }, // older, just missed
+    ]);
+    for (const seed of forSeeds(20)) expect(run(f, seed)).toContain("i23");
   });
 
   it("warm-ups: with fewer than 3 strong items, the highest boxes", () => {
