@@ -15,8 +15,8 @@ Each can be turned off; a mute button in runs. Success: on the owner's phone a r
 | Gate | Says | Example |
 |---|---|---|
 | `kana` | the kana's sound | あ → あ, ア → あ |
-| `meaning` (kanji) | the run's shown reading (`shownReading(k, turn)`), so it matches reading gates that run | 日 → にち |
-| `reading` | the answer, okurigana included, brackets dropped (`plainReading`) | 上 → あげる |
+| `meaning` (kanji) | the run's shown reading (`shownReading(k, turn)`), so it matches reading gates that run (amended in A1: `turn` is the kanji's reading `seen` count in the progress the run was built from, the same turn the run's first reading gate for it uses; `ctx` is `{ kanji, words, progress }`) | 日 → にち |
+| `reading` | the answer, okurigana included, brackets dropped (`plainReading`) | 上 → あげる (amended in A1: 上's main kun'yomi in the data is うえ, so the test crafts an あ(げる) row and also checks 休 → やすむ) |
 | `word`, `wordreading` | the word's `reading` | 毎年 → まいとし |
 | loanword `word` | the word itself | テレビ |
 

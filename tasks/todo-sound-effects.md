@@ -7,9 +7,9 @@ Every task: `npm run check` passes before it is checked off. Each task is one co
 
 ### Task A1: What a gate says; the voice with the phone's voice (opus: new layer)
 Spec §1, §2, §5 (voice bus, fallback, no ducking yet). `src/core/speech.ts`; `src/audio/` with engine and voice; gates speak through `speechSynthesis` while no clips exist; depcruise rule for `audio/`.
-- [ ] `speech.test.ts` from the spec passes.
-- [ ] A crafted run in the dev server speaks each gate once, right or wrong (checked with a stubbed `speechSynthesis` log in the report).
-- [ ] `npm run check` passes (including the new layer rule).
+- [x] `speech.test.ts` from the spec passes.
+- [x] A crafted run in the dev server speaks each gate once, right or wrong (checked with a stubbed `speechSynthesis` log in the report).
+- [x] `npm run check` passes (including the new layer rule).
 
 ### Task A2: Toggles, mute, settings; ship 1.12.0 (sonnet)
 Spec §6. Start-screen toggles (Voice now; Sound and Music shown, wired as their slices land, or hidden until then), run mute button, saved settings.
