@@ -7,8 +7,8 @@ Every task: `npm run check` passes before it is checked off. Each task is one co
 
 ### Task S1: Due and the schedule (opus: core design)
 Spec §1–2. `src/core/schedule.ts`: due/overdue/nearness, `schedule(rng, sel, now)`; tuning constants. Not wired into runs yet.
-- [ ] `schedule.test.ts` from the spec passes.
-- [ ] `npm run check` passes (knip: used by tests only until S2; mark or wire accordingly).
+- [x] `schedule.test.ts` from the spec passes.
+- [x] `npm run check` passes (knip: used by tests only until S2; mark or wire accordingly).
 
 ### Task S2: Wire it into runs; simulated days (opus: simulation)
 Spec §2–3, "Testing". Built-in and Meaning modes use `schedule` with `now` from the scene; WaniKani mode unchanged; `Selection` loses `weight` where unused; golden and selection tests updated; simulated-days slow test with its report.
