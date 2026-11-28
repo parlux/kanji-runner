@@ -39,7 +39,7 @@ import { persistence } from "./game/mode";
 import { createSyncFromEnv } from "./sync/sync";
 import { createStage } from "./game/stage";
 import { createEngine, unlockOnGesture } from "./audio/engine";
-import { createVoice } from "./audio/voice";
+import { createVoice, VOICE_ID } from "./audio/voice";
 import { createSfx } from "./audio/sfx";
 import { createDuck, voiceDuck } from "./audio/duck";
 import {
@@ -58,9 +58,11 @@ const stage = createStage();
 const engine = createEngine();
 // the other sounds dip while the voice speaks
 const duck = createDuck();
+// gates play their VOICEVOX clip, the phone voice when it isn't ready
 const voice = createVoice(
   globalThis,
   voiceDuck(duck, () => performance.now()),
+  { engine, base: `${import.meta.env.BASE_URL}voice/${VOICE_ID}/` },
 );
 const sfx = createSfx(engine);
 unlockOnGesture(window, () => {

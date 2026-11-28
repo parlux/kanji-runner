@@ -1,5 +1,9 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import { VOICE_CREDIT, VOICE_ID } from "../../src/audio/voice";
 import {
+  CONFIG,
+  type VoiceConfig,
   clipFile,
   formatIndex,
   gainDb,
@@ -49,5 +53,13 @@ describe("gainDb", () => {
     expect(gainDb(-30, -16)).toBe(14);
     expect(gainDb(-30, -5)).toBe(4);
     expect(gainDb(-11, -2)).toBe(-5);
+  });
+});
+
+describe("the game's voice matches voice.config.json", () => {
+  it("plays the configured character's folder and credits it", () => {
+    const config = JSON.parse(readFileSync(CONFIG, "utf8")) as VoiceConfig;
+    expect(VOICE_ID).toBe(config.id);
+    expect(VOICE_CREDIT).toBe(`VOICEVOX:${config.name}`);
   });
 });

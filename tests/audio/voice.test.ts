@@ -1,7 +1,11 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createDuck, voiceDuck } from "../../src/audio/duck";
 import { createEngine } from "../../src/audio/engine";
-import { createVoice, type SpeechEnv } from "../../src/audio/voice";
+import {
+  createVoice,
+  type ClipEnv,
+  type SpeechEnv,
+} from "../../src/audio/voice";
 
 /** A stub `speechSynthesis` that logs what it is asked to do. */
 function stubSpeech(voices: { lang: string; name: string }[]) {
@@ -245,5 +249,124 @@ describe("engine", () => {
     });
     expect(() => e.unlock()).not.toThrow();
     expect(e.context()).toBeNull();
+  });
+});
+
+describe("voice clips", () => {
+  /** A stub engine whose context decodes any bytes and logs what plays. */
+  function stubClips(index: Record<string, [string, number]>) {
+    const log: string[] = [];
+    const sources: { onended: (() => void) | null }[] = [];
+    const ctx = {
+      decodeAudioData: (b: ArrayBuffer) =>
+        Promise.resolve({ duration: 0.5, tag: new TextDecoder().decode(b) }),
+      createBufferSource() {
+        const s = {
+          buffer: null as { tag: string } | null,
+          onended: null as (() => void) | null,
+          connect: () => {},
+          start: () => log.push(`play ${s.buffer?.tag}`),
+          stop: () => {
+            log.push(`stop ${s.buffer?.tag}`);
+            s.onended?.();
+          },
+        };
+        sources.push(s);
+        return s;
+      },
+    };
+    let ready = false;
+    const engine = {
+      context: () => (ready ? (ctx as unknown as AudioContext) : null),
+      bus: () => (ready ? ({} as GainNode) : null),
+    };
+    const fetch = (url: string) => {
+      log.push(`fetch ${url}`);
+      const file = url.split("/").pop() ?? "";
+      const ok =
+        file === "index.json" || Object.values(index).some(([f]) => f === file);
+      return Promise.resolve({
+        ok,
+        json: () => Promise.resolve(index),
+        arrayBuffer: () =>
+          Promise.resolve(new TextEncoder().encode(file).buffer),
+      });
+    };
+    const clips = { engine, base: "/voice/x/", fetch } as unknown as ClipEnv;
+    return { clips, log, sources, unlock: () => (ready = true) };
+  }
+  const flush = () => new Promise((r) => setTimeout(r, 0));
+  const nichi = { text: "にち", reading: "にち" };
+  const mai = { text: "毎年", reading: "まいとし" };
+
+  it("plays a prepared clip on the voice bus, and the phone voice for a key without one", async () => {
+    const speech = stubSpeech([]);
+    const c = stubClips({ "にち|にち": ["a1.m4a", 400] });
+    c.unlock();
+    const v = createVoice(speech.env, null, c.clips);
+    v.prepare([nichi, mai]);
+    await flush();
+    v.say(nichi);
+    v.say(mai);
+    expect(c.log).toEqual([
+      "fetch /voice/x/index.json",
+      "fetch /voice/x/a1.m4a",
+      "play a1.m4a",
+      "stop a1.m4a",
+    ]);
+    expect(speech.log).toEqual(["cancel", "cancel", "speak まいとし ja-JP -"]);
+  });
+
+  it("falls back to the phone voice until the clip is decoded, then plays it", async () => {
+    const speech = stubSpeech([]);
+    const c = stubClips({ "にち|にち": ["a1.m4a", 400] });
+    const v = createVoice(speech.env, null, c.clips);
+    // the run was built before the AudioContext existed
+    v.prepare([nichi]);
+    v.say(nichi);
+    expect(speech.log).toEqual(["cancel", "speak にち ja-JP -"]);
+    c.unlock();
+    v.unlock();
+    await flush();
+    v.say(nichi);
+    expect(c.log.at(-1)).toBe("play a1.m4a");
+  });
+
+  it("ducks while a clip plays and stops ducking when it is cut", async () => {
+    const speech = stubSpeech([]);
+    const c = stubClips({ "にち|にち": ["a1.m4a", 400] });
+    c.unlock();
+    const duck = createDuck();
+    const v = createVoice(
+      speech.env,
+      voiceDuck(duck, () => 0),
+      c.clips,
+    );
+    v.prepare([nichi]);
+    await flush();
+    v.say(nichi);
+    expect(duck.ducking(0)).toBe(true);
+    v.stop();
+    expect(duck.ducking(0)).toBe(false);
+    v.say(nichi);
+    c.sources.at(-1)?.onended?.();
+    expect(duck.ducking(0)).toBe(false);
+  });
+
+  it("falls back to the phone voice when the index or clip fails to load", async () => {
+    const speech = stubSpeech([]);
+    const engine = {
+      context: () => ({}) as AudioContext,
+      bus: () => ({}) as GainNode,
+    };
+    const v = createVoice(speech.env, null, {
+      engine,
+      base: "/v/",
+      fetch: () => Promise.reject(new Error("offline")),
+    });
+    v.prepare([nichi]);
+    await flush();
+    v.say(nichi);
+    expect(speech.log).toEqual(["cancel", "speak にち ja-JP -"]);
   });
 });
