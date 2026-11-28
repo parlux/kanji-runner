@@ -62,3 +62,4 @@ One row per owner request, written by the `triage` skill (`.claude/skills/triage
 | 2026-11-28 | More reinforcement of the current level vs older levels | sdd | Changes SRS selection; owner chose a time-based scheduler after a research check | |
 | 2026-11-28 | File an idea: explain grammar (～り, お～, verb endings, adjective types) | idea | Owner said "file an idea" | |
 | 2026-11-28 | Sound effects round, plus spoken word readings at gates | sdd | New audio system, data source and look-and-feel calls; owner said yes to the interview | |
+| 2026-11-28 | File an idea: setting to choose the gate voice (character, female, male) | idea | Owner said "add a backlog task… can decide later" | |

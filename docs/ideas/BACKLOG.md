@@ -22,3 +22,4 @@ Epic: [Useful Japanese, then drop WaniKani](useful-japanese.md). Its rounds come
 9. [Part notes on the study card](part-notes-on-card.md): game; show the "why it fits" part note on the card, left out of round 3.
 10. [Guessing on 2- and 3-option gates](guessing.md): game/learning; "right 3 running" can be luck on 2-option gates; couples with the scheduler's early rows.
 11. [Grammar notes for words](grammar-notes.md): learning; explain patterns like ～り counts, お～ prefix, verb endings, い/な adjectives.
+12. [Choose the gate voice](voice-choice.md): game/settings; pick character, female or male voice for spoken readings, after sound effects.
