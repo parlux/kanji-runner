@@ -26,3 +26,23 @@ export function shuffle<T>(rng: Rng, items: readonly T[]): T[] {
   }
   return out;
 }
+
+/** Up to `n` items by weighted random choice, without repeats. */
+export function weightedDraw<T>(
+  rng: Rng,
+  items: readonly T[],
+  n: number,
+  weightOf: (item: T) => number,
+): T[] {
+  const left = [...items];
+  const out: T[] = [];
+  while (out.length < n && left.length > 0) {
+    let total = 0;
+    for (const e of left) total += weightOf(e);
+    let r = rng() * total;
+    let i = 0;
+    while (i < left.length - 1 && (r -= weightOf(left[i] as T)) >= 0) i++;
+    out.push(...left.splice(i, 1));
+  }
+  return out;
+}

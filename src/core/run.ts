@@ -9,7 +9,7 @@ import {
   type Reading,
   showReading,
 } from "./distractors";
-import { createRng, shuffle, type Rng } from "./rng";
+import { createRng, shuffle, weightedDraw, type Rng } from "./rng";
 import {
   builtInPool,
   builtInSelection,
@@ -30,26 +30,6 @@ import type { GateRow, KanaItem, KanjiItem, Progress, WordItem } from "./types";
 const optionCount = (i: number): number => (i < TWO_OPTION_ROWS ? 2 : 3);
 
 export { kanaLevel, unlockedPool, type Entry } from "./pool";
-
-/** Up to `n` entries by weighted random choice, without repeats. */
-function weightedDraw(
-  rng: Rng,
-  entries: readonly Entry[],
-  n: number,
-  weightOf: (e: Entry) => number,
-): Entry[] {
-  const left = [...entries];
-  const out: Entry[] = [];
-  while (out.length < n && left.length > 0) {
-    let total = 0;
-    for (const e of left) total += weightOf(e);
-    let r = rng() * total;
-    let i = 0;
-    while (i < left.length - 1 && (r -= weightOf(left[i] as Entry)) >= 0) i++;
-    out.push(...left.splice(i, 1));
-  }
-  return out;
-}
 
 /**
  * The run's 14 prompts. Warm-ups first: of the current level's known items at
