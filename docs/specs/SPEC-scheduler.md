@@ -26,7 +26,7 @@ Pick a run's gates by when each item is **due** (real time since last answered, 
 2. Then, shuffled together:
    - **In progress** (`LEARNING_SLOTS` 8): current-level gates that have been answered (`seen > 0`) and are below box 3, least recently seen first.
    - **Due older** (`DUE_MIN_SLOTS` 3): when any gate outside the current level is due, at least this many (or all of them, if fewer), most overdue first; placement records after answered ones.
-   - **New** (up to `MAX_NEW_PER_RUN` 4, at most `MAX_NEW_WORDS_PER_RUN` 2 words, progression order as today): only while the current level has fewer than `NEW_WHEN_LEARNING_UNDER` 8 gates in progress (counting those picked above).
+   - **New** (up to `MAX_NEW_PER_RUN` 4, at most `MAX_NEW_WORDS_PER_RUN` 2 words, progression order as today): only while the current level has fewer than `NEW_WHEN_LEARNING_UNDER` 8 gates in progress (all of the level's in-progress gates in the pool, not only those picked; amended in S1).
    - **The rest:** remaining due gates, most overdue first (current level and older alike), then gates nearest to due (highest nearness), then anything known by lowest box.
 - No gate twice in a run, except the early-game fallback when the pool is smaller than a run (as today, weighted by box).
 - Reading gates still open at meaning box ≥ 3, words at their kanji learned (unchanged pool rules).
