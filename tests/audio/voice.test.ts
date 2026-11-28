@@ -258,6 +258,11 @@ describe("voice clips", () => {
     const log: string[] = [];
     const sources: { onended: (() => void) | null }[] = [];
     const ctx = {
+      state: "running",
+      resume: () => {
+        log.push("resume");
+        return Promise.resolve();
+      },
       decodeAudioData: (b: ArrayBuffer) =>
         Promise.resolve({ duration: 0.5, tag: new TextDecoder().decode(b) }),
       createBufferSource() {
@@ -293,7 +298,7 @@ describe("voice clips", () => {
       });
     };
     const clips = { engine, base: "/voice/x/", fetch } as unknown as ClipEnv;
-    return { clips, log, sources, unlock: () => (ready = true) };
+    return { clips, log, sources, ctx, unlock: () => (ready = true) };
   }
   const flush = () => new Promise((r) => setTimeout(r, 0));
   const nichi = { text: "にち", reading: "にち" };
@@ -328,6 +333,22 @@ describe("voice clips", () => {
     c.unlock();
     v.unlock();
     await flush();
+    v.say(nichi);
+    expect(c.log.at(-1)).toBe("play a1.m4a");
+  });
+
+  it("says a line with the phone voice, and wakes the context, when it is suspended", async () => {
+    const speech = stubSpeech([]);
+    const c = stubClips({ "にち|にち": ["a1.m4a", 400] });
+    c.unlock();
+    const v = createVoice(speech.env, null, c.clips);
+    v.prepare([nichi]);
+    await flush();
+    c.ctx.state = "suspended";
+    v.say(nichi);
+    expect(c.log.at(-1)).toBe("resume");
+    expect(speech.log).toEqual(["cancel", "speak にち ja-JP -"]);
+    c.ctx.state = "running";
     v.say(nichi);
     expect(c.log.at(-1)).toBe("play a1.m4a");
   });

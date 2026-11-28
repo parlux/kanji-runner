@@ -132,6 +132,12 @@ export function createVoice(
       decode(key);
       return false;
     }
+    // a suspended context (iOS after a call, a locked screen) would play nothing:
+    // wake it and let the phone voice say this line
+    if ((ctx.state as string) !== "running" && ctx.state !== undefined) {
+      void ctx.resume?.().catch?.(() => {});
+      return false;
+    }
     try {
       synth?.cancel();
       endLine();
